@@ -8,15 +8,15 @@ module.exports = function(grunt) {
             },
             engine: {
                 src: [
-                    'codeBase/runtime/**/*.js',
-                    'codeBase/static/**/*.js'
+                    'src/runtime/**/*.js',
+                    'src/static/**/*.js'
                 ],
                 dest: 'dist/engine.js'
             },
             project: {
                 src: [
-                    'codeBase/runtime/**/*.js',
-                    'codeBase/static/**/*.js',
+                    'src/runtime/**/*.js',
+                    'src/static/**/*.js',
                     '<%= grunt.config("projectPath") %>code/**/*.js'],
                 dest: '<%= grunt.config("projectPath") %>dist/static.js'//'dist/<%= pkg.name %>.js'
             }
@@ -129,7 +129,7 @@ module.exports = function(grunt) {
                     t: true
                 }
             },
-            engine: ['Gruntfile.js', 'codeBase/editor/**/*.js', 'codeBase/runtime/**/*.js', 'codeBase/static/**/*.js'],
+            engine: ['Gruntfile.js', 'src/editor/**/*.js', 'src/runtime/**/*.js', 'src/static/**/*.js'],
             project: ['<%= grunt.config("projectPath") %>code/**/*.js']
         },
         watch: {
@@ -138,13 +138,12 @@ module.exports = function(grunt) {
             },
             engine: {
                 files: ['<%= jshint.engine %>'],
-                tasks: ['jshint:engine', 'concat:engine']//, 'uglify']
+                tasks: ['jshint:engine', 'concat:engine']
             },
             project: {
-                files: ['<%= jshint.project.files %>', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
+                files: ['<%= jshint.project %>', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
                 tasks: [
                     'jshint:project',
-                    // 'qunit',
                     'injector',
                     'concat:project'
                 ]

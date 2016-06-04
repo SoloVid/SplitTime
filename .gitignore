@@ -9,8 +9,8 @@
 !*.html
 
 #Include engine source
-!codeBase/
-!codeBase/**
+!src/
+!src/**
 
 #Include demo project
 !projects/
