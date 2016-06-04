@@ -1,0 +1,19 @@
+#Ignore everything
+*
+
+#Include specific top-level files
+!.gitignore
+!Gruntfile.js
+!package.json
+!README.md
+!*.html
+
+#Include engine source
+!codeBase/
+!codeBase/**
+
+#Include demo project
+!projects/
+projects/*
+!projects/demo/
+!projects/demo/**
