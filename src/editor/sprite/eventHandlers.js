@@ -64,18 +64,20 @@ var indexSelected;
 
 $("#XMLEditor").hide();
 
-t = new SLVDE.Sprite();
+$(document).on("load", "#staticScript", function() {
+	t = new SLVDE.Sprite();
+	ctx.fillStyle = "#CD96CD";
+	ctx.fillRect(5, 5, t.xres - 10, t.yres - 10);
+	subImg = subImg.toDataURL();
+	ctx = subImg2.getContext("2d");
+	ctx.fillStyle = "rgba(0, 0, 0, 0)";
+	ctx.fillRect(0, 0, 320, 320);
+	subImg2 = subImg2.toDataURL();
+});
 
 var subImg = document.getElementById("subImg");
 var ctx = subImg.getContext("2d");
-ctx.fillStyle = "#CD96CD";
-ctx.fillRect(5, 5, t.xres - 10, t.yres - 10);
-subImg = subImg.toDataURL();
 var subImg2 = document.getElementById("subImg2");
-ctx = subImg2.getContext("2d");
-ctx.fillStyle = "rgba(0, 0, 0, 0)";
-ctx.fillRect(0, 0, 320, 320);
-subImg2 = subImg2.toDataURL();
 
 var color = "rgb(255, 0, 0)";
 

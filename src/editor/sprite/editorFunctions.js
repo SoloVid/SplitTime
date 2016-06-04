@@ -1,7 +1,5 @@
 var BASE_BORDER_WIDTH = 5; //display only
 
-var projectPath = "projects/" + (window.location.hash.substring(1) || prompt("project folder name:")) + "/";
-
 function toPolygon() { console.log("polygon mode"); mode = "polygon"; }
 function toNPC() { mode = "NPC"; }
 function toBoardObj() { mode = "boardObj"; }
