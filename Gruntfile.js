@@ -15,8 +15,7 @@ module.exports = function(grunt) {
             },
             project: {
                 src: [
-                    'src/runtime/**/*.js',
-                    'src/static/**/*.js',
+                    'dist/engine.js',
                     '<%= grunt.config("projectPath") %>code/**/*.js'],
                 dest: '<%= grunt.config("projectPath") %>dist/static.js'//'dist/<%= pkg.name %>.js'
             }
@@ -141,11 +140,9 @@ module.exports = function(grunt) {
                 tasks: ['jshint:engine', 'concat:engine']
             },
             project: {
-                files: ['<%= jshint.project %>', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
+                files: ['dist/engine.js', '<%= grunt.config("projectPath") %>code/**/*.js', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
                 tasks: [
-                    'jshint:project',
-                    'injector',
-                    'concat:project'
+                    'project:<%= grunt.config("project") %>'
                 ]
             },
             tscripts: {
@@ -178,12 +175,21 @@ module.exports = function(grunt) {
     //     grunt.task.run(['jshint:engine', 'concat:engine', 'uglify', 'watch:engine']);
     // });
 
-    grunt.registerTask('project', 'Handle Grunt for a project', function(projectName) {
+    grunt.registerTask('spin', 'Handle Grunt tasks for a project with watch', function(projectName) {
         if(!projectName) {
             return;
         }
         grunt.config("project", projectName);
         grunt.config("projectPath", "projects/" + projectName + "/");
-        grunt.task.run(['jshint:project', 'concat:project', 'injector', 'watch:project']);
+        grunt.task.run(['project:' + projectName, 'watch:project']);
+    });
+
+    grunt.registerTask('project', 'Handle Grunt tasks for a project without watch', function(projectName) {
+        if(!projectName) {
+            return;
+        }
+        grunt.config("project", projectName);
+        grunt.config("projectPath", "projects/" + projectName + "/");
+        grunt.task.run(['jshint:project', 'concat:project', 'injector']);
     });
 };
