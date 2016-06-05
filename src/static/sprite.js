@@ -622,6 +622,8 @@ SLVDE.Sprite.prototype.zeldaBump = function(distance, direction) {
 	this.dir = tDir;
 };
 SLVDE.Sprite.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
+	var refinedNearbyBodies = [];
+
 	var pixel, i;
 	var coords = {};
 
@@ -650,31 +652,37 @@ SLVDE.Sprite.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
 	}
 
 	//Check for collision with people
-	for(i = 0; i < SLVDE.boardAgent.length; i++)
+	for(i = 0; i < this.nearbyBodies.length; i++)
 	{
-		var currentAgent = SLVDE.boardAgent[i];
+		var currentAgent = this.nearbyBodies[i];
 		if(this.team != currentAgent.team && currentAgent.baseLength > 0)
 		{
 			var collisionDist = (this.baseLength + currentAgent.baseLength)/2;
 //			if(Math.abs(this.y - currentAgent.y) < collisionDist)
-			if(SLVDE.distanceTrue(this.x, this.y, currentAgent.x, currentAgent.y) < collisionDist)
-			{
-				var dDir = Math.abs(SLVDE.dirFromTo(this.x, this.y, currentAgent.x, currentAgent.y) - this.dir);
-				if(dDir < 1 || dDir > 3)
-//				if(Math.abs(this.x - currentAgent.x) < collisionDist)
+			var distTrue = SLVDE.distanceTrue(this.x, this.y, currentAgent.x, currentAgent.y);
+			if(distTrue < this.stepDistanceRemaining) {
+				refinedNearbyBodies.push(currentAgent);
+				if(distTrue < collisionDist)
 				{
-					//The .pushing here ensures that there is no infinite loop of pushing back and forth
-					if(this.pushy && currentAgent.pushy && currentAgent.pushing != this)
+					var dDir = Math.abs(SLVDE.dirFromTo(this.x, this.y, currentAgent.x, currentAgent.y) - this.dir);
+					if(dDir < 1 || dDir > 3)
+	//				if(Math.abs(this.x - currentAgent.x) < collisionDist)
 					{
-						this.pushing = currentAgent;
-						currentAgent.zeldaBump(this.spd/2, this.dir);
-						delete this.pushing;
+						//The .pushing here ensures that there is no infinite loop of pushing back and forth
+						if(this.pushy && currentAgent.pushy && currentAgent.pushing != this)
+						{
+							this.pushing = currentAgent;
+							currentAgent.zeldaBump(this.spd/2, this.dir);
+							delete this.pushing;
+						}
+						return true;
 					}
-					return true;
 				}
 			}
 		}
 	}
+
+	this.nearbyBodies = refinedNearbyBodies;
 
 	return false;
 };
@@ -705,6 +713,8 @@ SLVDE.Sprite.prototype.zeldaStep = function(distance) {
 	var ret = 1; //value to return at end
 	var dy = -(Math.round(distance*Math.sin((this.dir)*(Math.PI/2)))); //Total y distance to travel
 	var dx = Math.round(distance*Math.cos((this.dir)*(Math.PI/2))); //Total x distance to travel
+	this.stepDistanceRemaining = dx + dy;
+	this.nearbyBodies = SLVDE.boardAgent;
 	var i, j, k;
 	//Handle y movement
 	for(i = 0; i < Math.abs(dy); i++)
@@ -725,6 +735,7 @@ SLVDE.Sprite.prototype.zeldaStep = function(distance) {
 			this.y -= (dy/Math.abs(dy));
 			break;
 		}
+		this.stepDistanceRemaining--;
 	}
 	stopped = stoppedTemp;
 	//Handle x movement;
@@ -745,6 +756,7 @@ SLVDE.Sprite.prototype.zeldaStep = function(distance) {
 			this.x -= (dx/Math.abs(dx));
 			i = Math.abs(dx);
 		}
+		this.stepDistanceRemaining--;
 	}
 	stopped = stoppedTemp || stopped;
 	var dir = this.dir;
@@ -793,5 +805,9 @@ SLVDE.Sprite.prototype.zeldaStep = function(distance) {
 	}
 	stopped = false;
 	out = false;
+
+	delete this.nearbyBodies;
+	delete this.stepDistanceRemaining;
+
 	return ret;
 };
