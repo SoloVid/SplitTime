@@ -25,7 +25,6 @@ SLVDE.launch = function(callback, width, height, parentId) {
 	SLVDE.see.font="20px Arial";
 	SLVDE.see.fillText("If this message persists for more than a few seconds,", 10, 30);
 	SLVDE.see.fillText("this game will not run on your browser.", 10, 60);
-	SLVDE.see.font="30px Arial";
 
 	SLVDE.buffer = document.createElement("canvas");
 	SLVDE.buffer.setAttribute("width", SLVDE.SCREENX);
@@ -123,7 +122,7 @@ SLVDE.launch = function(callback, width, height, parentId) {
 			}
 
 			//Begin main loop
-			setInterval(SLVDE.main, 1000/SLVDE.FPS);
+			SLVDE.main();
 		});
 	});
 
@@ -135,6 +134,9 @@ SLVDE.launch = function(callback, width, height, parentId) {
 		{
 			//If done SLVDE.loading, startup (in the initialize.js file)
 			SLVDE.startUp();
+
+			SLVDE.msPerFrame = (1/SLVDE.FPS)*1000;
+
 			return;
 		}
 		if((SLVDE.loading < SLVDE.image.length && SLVDE.image[SLVDE.loading].complete) || SLVDE.loading >= SLVDE.image.length) { SLVDE.loadCheck[0] = 1; } //SLVDE.image[SLVDE.loading] corresponds fo SLVDE.loadCheck[0]
@@ -162,6 +164,7 @@ SLVDE.launch = function(callback, width, height, parentId) {
 		//Display load "percentage"
 		SLVDE.see.fillStyle = "#000000";
 		SLVDE.see.fillRect(0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+		SLVDE.see.font="30px Arial";
 		SLVDE.see.fillStyle = "#FFFFFF";
 		SLVDE.see.fillText("Loading: " + Math.round(((SLVDE.loading + 0)/SLVDE.image.length)*100) + "%", 250, 230);
 

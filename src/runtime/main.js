@@ -1,6 +1,7 @@
 //*-*-*-*-*-*-*-*-*-*-*-*Main Loop
 SLVDE.main = function() {
 //console.log(SLVDE.counter);
+	var startTime = new Date().getTime();
 	var a = new Date(); //for speed checking
 	switch(SLVDE.process)
 	{
@@ -107,6 +108,26 @@ SLVDE.main = function() {
 	else
 	{
 		SLVDE.frameClock = 0;
+	}
+
+	var endTime = new Date().getTime();
+	var msElapsed = endTime - startTime;
+
+	var displayFPS = SLVDE.FPS;
+	if(msElapsed < SLVDE.msPerFrame) {
+		setTimeout(SLVDE.main, SLVDE.msPerFrame - msElapsed);
+		SLVDE.see.fillStyle="#00FF00";
+	}
+	else {
+		setTimeout(SLVDE.main, 2); //give browser a quick breath
+		var secondsElapsed = msElapsed/1000;
+		displayFPS = Math.round(1/secondsElapsed);
+		SLVDE.see.fillStyle="#FF0000";
+	}
+
+	if(SLVDE.showFPS) {
+		SLVDE.see.font="18px Verdana";
+		SLVDE.see.fillText("FPS: " + displayFPS, SLVDE.SCREENX/2, SLVDE.SCREENY - 20);
 	}
 };
 
