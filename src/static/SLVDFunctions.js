@@ -1,6 +1,6 @@
 var SLVD = {};
 
-//Promises for SLVDE
+//Promises for SplitTime
 SLVD.promise = function() {
 //	console.log(this);
 };

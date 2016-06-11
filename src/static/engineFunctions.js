@@ -1,30 +1,30 @@
-SLVDE.setupMainPromise = function() {
-	SLVDE.mainPromise = new SLVD.promise();
-	return SLVDE.mainPromise;
+SplitTime.setupMainPromise = function() {
+	SplitTime.mainPromise = new SLVD.promise();
+	return SplitTime.mainPromise;
 };
 
-SLVDE.delay = function(seconds) {
-	SLVDE.process = "delay";
-	SLVDE.countdown = Math.round(seconds*SLVDE.FPS);
+SplitTime.delay = function(seconds) {
+	SplitTime.process = "delay";
+	SplitTime.countdown = Math.round(seconds*SplitTime.FPS);
 
-	SLVDE.mainPromise = new SLVD.promise();
-	return SLVDE.mainPromise;
+	SplitTime.mainPromise = new SLVD.promise();
+	return SplitTime.mainPromise;
 };
 
-SLVDE.waitForKeyPress = function() {
-	SLVDE.mainPromise = new SLVD.promise();
+SplitTime.waitForKeyPress = function() {
+	SplitTime.mainPromise = new SLVD.promise();
 
-	SLVDE.countdown = 0;
-	SLVDE.process = "wait";
+	SplitTime.countdown = 0;
+	SplitTime.process = "wait";
 
-	return SLVDE.mainPromise;
+	return SplitTime.mainPromise;
 };
 
-SLVDE.waitForEnterOrSpace = function() {
-	SLVDE.mainPromise = new SLVD.promise();
+SplitTime.waitForEnterOrSpace = function() {
+	SplitTime.mainPromise = new SLVD.promise();
 
-	SLVDE.countdown = 0;
-	SLVDE.process = "waitForEnterOrSpace";
+	SplitTime.countdown = 0;
+	SplitTime.process = "waitForEnterOrSpace";
 
-	return SLVDE.mainPromise;
+	return SplitTime.mainPromise;
 };

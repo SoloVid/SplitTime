@@ -1,4 +1,4 @@
-SLVDE.drawVector = function(traceStr, ctx, color, offsetPos)
+SplitTime.drawVector = function(traceStr, ctx, color, offsetPos)
 {
 	if(!offsetPos)
 	{

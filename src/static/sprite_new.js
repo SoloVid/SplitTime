@@ -1,4 +1,4 @@
-SLVDE.NewSprte = function(src, xres, yres, offX, offY) {
+SplitTime.NewSprte = function(src, xres, yres, offX, offY) {
     this.src = src;
     this.xres = xres;
     this.yres = yres;
@@ -9,20 +9,20 @@ SLVDE.NewSprte = function(src, xres, yres, offX, offY) {
     }
 };
 
-// SLVDE.NewSprte.prototype.src;
-SLVDE.NewSprte.prototype.dir = "S";
-SLVDE.NewSprte.prototype.xres = 32;
-SLVDE.NewSprte.prototype.yres = 64;
-SLVDE.NewSprte.prototype.offX = 0;
-SLVDE.NewSprte.prototype.offY = 0;
-SLVDE.NewSprte.prototype.sx = 0;
-SLVDE.NewSprte.prototype.sy = 0;
-SLVDE.NewSprte.prototype.stance = "default";
-SLVDE.NewSprte.prototype.requestedStance = "default";
-SLVDE.NewSprte.prototype.requestedFrameReset = false;
-SLVDE.NewSprte.prototype.frame = 0;
+// SplitTime.NewSprte.prototype.src;
+SplitTime.NewSprte.prototype.dir = "S";
+SplitTime.NewSprte.prototype.xres = 32;
+SplitTime.NewSprte.prototype.yres = 64;
+SplitTime.NewSprte.prototype.offX = 0;
+SplitTime.NewSprte.prototype.offY = 0;
+SplitTime.NewSprte.prototype.sx = 0;
+SplitTime.NewSprte.prototype.sy = 0;
+SplitTime.NewSprte.prototype.stance = "default";
+SplitTime.NewSprte.prototype.requestedStance = "default";
+SplitTime.NewSprte.prototype.requestedFrameReset = false;
+SplitTime.NewSprte.prototype.frame = 0;
 
-SLVDE.NewSprte.prototype.stances = {
+SplitTime.NewSprte.prototype.stances = {
     "default": {
         "S": 0,
         "N": 1,
@@ -32,10 +32,10 @@ SLVDE.NewSprte.prototype.stances = {
 };
 
 
-SLVDE.NewSprte.prototype.draw = function(ctx) {
+SplitTime.NewSprte.prototype.draw = function(ctx) {
     if(!ctx)
     {
-        ctx = SLVDE.see;
+        ctx = SplitTime.see;
     }
 
     this.finalizeStance();
@@ -46,13 +46,13 @@ SLVDE.NewSprte.prototype.draw = function(ctx) {
     ctx.drawImage(tImg, this.sx, this.sy, this.xres, this.yres, x, y, this.xres, this.yres);
 };
 
-SLVDE.NewSprte.prototype.finalizeFrame = function() {
+SplitTime.NewSprte.prototype.finalizeFrame = function() {
     if(this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
     }
     else {
         //Only update on frame tick
-        if(SLVDE.frameClock == 1)
+        if(SplitTime.frameClock == 1)
         {
             this.frame++;
             if(this.getImage().height <= this.frame*this.yres)
@@ -63,7 +63,7 @@ SLVDE.NewSprte.prototype.finalizeFrame = function() {
     }
 };
 
-SLVDE.NewSprte.prototype.finalizeStance = function() {
+SplitTime.NewSprte.prototype.finalizeStance = function() {
     //Allow for non-complicated spritesheets with one column
     if(!this.stances) {
         this.column = 0;
@@ -99,15 +99,15 @@ SLVDE.NewSprte.prototype.finalizeStance = function() {
     this.sy = this.yres*this.frame;
 };
 
-SLVDE.NewSprte.prototype.getImage = function() {
-    return SLVDE.getImage(this.src);
+SplitTime.NewSprte.prototype.getImage = function() {
+    return SplitTime.getImage(this.src);
 };
 
-SLVDE.NewSprte.prototype.requestStance = function(stance, forceReset) {
+SplitTime.NewSprte.prototype.requestStance = function(stance, forceReset) {
     this.requestedStance = stance;
     this.requestedFrameReset = forceReset;
 };
 
-SLVDE.NewSprte.prototype.setDirection = function(dir) {
+SplitTime.NewSprte.prototype.setDirection = function(dir) {
     this.dir = dir;
 };

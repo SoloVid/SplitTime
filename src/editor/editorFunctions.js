@@ -582,7 +582,7 @@ function updateObject(type, index)
 
 	HTMLImg.src = img;
 
-	//(boardC[second].x - (((boardC[second].xres)/2) - 8)) - SLVDE.wX, (boardC[second].y - (boardC[second].yres - 8)) - SLVDE.wY + tSqueeze
+	//(boardC[second].x - (((boardC[second].xres)/2) - 8)) - SplitTime.wX, (boardC[second].y - (boardC[second].yres - 8)) - SplitTime.wY + tSqueeze
 
 	x = x - xres/2 - t.baseOffX - t.offX;
 	y = y - yres + t.baseLength/2 - t.baseOffY - t.offY;
@@ -593,7 +593,7 @@ function updateObject(type, index)
 	HTMLNode.style.width = xres + "px";
 	HTMLNode.style.height = yres + "px";
 
-	HTMLImg.style.left = (-(xres*SLVDE.determineColumn(dir))) + "px";
+	HTMLImg.style.left = (-(xres*SplitTime.determineColumn(dir))) + "px";
 
 	//generateLayerMenu();
 	//drawTraces();
@@ -763,13 +763,13 @@ function exportLevel(XML)
 
 function loadBodyFromTemplate(templateName) {
 	if(!templateName) {
-		return new SLVDE.Body();
+		return new SplitTime.Body();
 	}
-	else if(!(templateName in SLVDE.BodyTemplate)) {
+	else if(!(templateName in SplitTime.BodyTemplate)) {
 		alert("Invalid sprite template!");
-		return new SLVDE.Body();
+		return new SplitTime.Body();
 	}
 	else {
-		return new SLVDE.BodyTemplate[templateName]();
+		return new SplitTime.BodyTemplate[templateName]();
 	}
 }

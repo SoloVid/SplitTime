@@ -1,75 +1,75 @@
-//Load from localStorage save "file" of fileName, returns SLVDE.level name to be passed to SLVDE.enterLevelByName()
-SLVDE.fileLoad = function(fileName) {
+//Load from localStorage save "file" of fileName, returns SplitTime.level name to be passed to SplitTime.enterLevelByName()
+SplitTime.fileLoad = function(fileName) {
 	var keyList = { level: "", x: "", y: "", layer: "", mvmt: "", speech: "", dmnr: "", dir: "", steps: "", pushy: "", hp: "", maxHp: "", strg: "", spd: "" };
 	var index, key, item;
-	for(index = 0; index < SLVDE.NPC.length; index++)
+	for(index = 0; index < SplitTime.NPC.length; index++)
 	{
 		for(key in keyList)
 		{
 			item = localStorage.getItem(GAMEID + "_" + fileName + "_NPC" + index + "_" + key);
 			if(item)
 			{
-				if(key != "SLVDE.level" && key != "speech") SLVDE.NPC[index][key] = Number(item);
-				else SLVDE.NPC[index][key] = item;
+				if(key != "SplitTime.level" && key != "speech") SplitTime.NPC[index][key] = Number(item);
+				else SplitTime.NPC[index][key] = item;
 			}
 			else { console.log(item + "=null"); }
 		}
 	}
-	for(index = 0; index < SLVDE.player.length; index++)
+	for(index = 0; index < SplitTime.player.length; index++)
 	{
 		for(key in keyList)
 		{
 			item = localStorage.getItem(GAMEID + "_" + fileName + "_player" + index + "_" + key);
 			if(item)
 			{
-				if(key != "SLVDE.level" && key != "speech") SLVDE.player[index][key] = Number(item);
-				else SLVDE.player[index][key] = item;
+				if(key != "SplitTime.level" && key != "speech") SplitTime.player[index][key] = Number(item);
+				else SplitTime.player[index][key] = item;
 			}
 			else { console.log(index + key + "=null"); }
 		}
 	}
 
-	//localStorage.getItem(GAMEID + "_" + fileName + "_SLVDE.currentLevelName");
-	SLVDE.currentPlayer = eval(localStorage.getItem(GAMEID + "_" + fileName + "_currentPlayer"));
+	//localStorage.getItem(GAMEID + "_" + fileName + "_SplitTime.currentLevelName");
+	SplitTime.currentPlayer = eval(localStorage.getItem(GAMEID + "_" + fileName + "_currentPlayer"));
 	item = localStorage.getItem(GAMEID + "_" + fileName + "_SAVE");
-	SLVDE.SAVE = JSON.parse(item);
+	SplitTime.SAVE = JSON.parse(item);
 
-	//Return SLVDE.level name
-	return localStorage.getItem(GAMEID + "_" + fileName + "_SLVDE.currentLevelName");
+	//Return SplitTime.level name
+	return localStorage.getItem(GAMEID + "_" + fileName + "_SplitTime.currentLevelName");
 };
 
 //Save current game to localStorage "file" of fileName
-SLVDE.fileSave = function(fileName) {
+SplitTime.fileSave = function(fileName) {
 	console.log("starting save...");
 	var keyList = { level: "", x: "", y: "", layer: "", mvmt: "", speech: "", dmnr: "", dir: "", steps: "", pushy: "", hp: "", maxHp: "", strg: "", spd: "" };
 	console.log("listed keys");
 	var index, key;
-	for(index in SLVDE.NPC)
+	for(index in SplitTime.NPC)
 	{
-		//console.log("saving SLVDE.NPC" + index);
+		//console.log("saving SplitTime.NPC" + index);
 		for(key in keyList)
 		{
 			//console.log("saving" + key);
 			try {
-			localStorage.setItem(GAMEID + "_" + fileName + "_NPC" + index + "_" + key, SLVDE.NPC[index][key]); }
-			catch(e) { console.log("failed on SLVDE.NPC " + index + " " + key); }
+			localStorage.setItem(GAMEID + "_" + fileName + "_NPC" + index + "_" + key, SplitTime.NPC[index][key]); }
+			catch(e) { console.log("failed on SplitTime.NPC " + index + " " + key); }
 		}
 	}
 	console.log("between loops");
-	for(index in SLVDE.player)
+	for(index in SplitTime.player)
 	{
 		for(key in keyList)
 		{
 			try {
-			localStorage.setItem(GAMEID + "_" + fileName + "_player" + index + "_" + key, SLVDE.player[index][key]); }
-			catch(e) { console.log("failed on SLVDE.player " + index + " " + key); }
+			localStorage.setItem(GAMEID + "_" + fileName + "_player" + index + "_" + key, SplitTime.player[index][key]); }
+			catch(e) { console.log("failed on SplitTime.player " + index + " " + key); }
 		}
 	}
 	console.log("through loops");
 
-	localStorage.setItem(GAMEID + "_" + fileName + "_SLVDE.currentLevelName", SLVDE.currentLevel.name);
-	console.log("saved SLVDE.level name as " + SLVDE.currentLevel.name);
-	localStorage.setItem(GAMEID + "_" + fileName + "_currentPlayer", SLVDE.currentPlayer);
-	localStorage.setItem(GAMEID + "_" + fileName + "_SAVE", JSON.stringify(SLVDE.SAVE));
+	localStorage.setItem(GAMEID + "_" + fileName + "_SplitTime.currentLevelName", SplitTime.currentLevel.name);
+	console.log("saved SplitTime.level name as " + SplitTime.currentLevel.name);
+	localStorage.setItem(GAMEID + "_" + fileName + "_currentPlayer", SplitTime.currentPlayer);
+	localStorage.setItem(GAMEID + "_" + fileName + "_SAVE", JSON.stringify(SplitTime.SAVE));
 	console.log("done");
 };

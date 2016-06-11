@@ -1,140 +1,140 @@
 //*-*-*-*-*-*-*-*-*-*-*-*Main Loop
-SLVDE.main = function() {
-//console.log(SLVDE.counter);
+SplitTime.main = function() {
+//console.log(SplitTime.counter);
 	var startTime = new Date().getTime();
 	var a = new Date(); //for speed checking
-	switch(SLVDE.process)
+	switch(SplitTime.process)
 	{
 		case "loading":
 		{
-			SLVDE.loadUpdate(); //in load.js
+			SplitTime.loadUpdate(); //in load.js
 			break;
 		}
 		case "zelda":
 		{
-			//Advance one second per second (given 20ms SLVDE.main interval)
-			if(SLVDE.counter%SLVDE.FPS === 0) SLVDE.Time.advance(1); //in time.js
-			var b = new SLVD.speedCheck("SLVDE.Time.advance", a);
+			//Advance one second per second (given 20ms SplitTime.main interval)
+			if(SplitTime.counter%SplitTime.FPS === 0) SplitTime.Time.advance(1); //in time.js
+			var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
 			b.logUnusual();
 
-			SLVDE.zeldaPlayerMotion();
-			var c = new SLVD.speedCheck("SLVDE.zeldaPlayerMotion", b.date);
+			SplitTime.zeldaPlayerMotion();
+			var c = new SLVD.speedCheck("SplitTime.zeldaPlayerMotion", b.date);
 			c.logUnusual();
 
-			SLVDE.zeldaNPCMotion();
-			var d = new SLVD.speedCheck("SLVDE.zeldaNPCMotion", c.date);
+			SplitTime.zeldaNPCMotion();
+			var d = new SLVD.speedCheck("SplitTime.zeldaNPCMotion", c.date);
 			d.logUnusual();
 
-			if(SLVDE.boardBody.length === 0) SLVDE.restartBoardC();
-			else SLVDE.sortBoardC();
-			var e = new SLVD.speedCheck("SLVDE.sortBoardC", d.date);
+			if(SplitTime.boardBody.length === 0) SplitTime.restartBoardC();
+			else SplitTime.sortBoardC();
+			var e = new SLVD.speedCheck("SplitTime.sortBoardC", d.date);
 			e.logUnusual();
 
-			if(SLVDE.process != "zelda") break;
+			if(SplitTime.process != "zelda") break;
 
-			//Render board, SLVDE.see below
-			SLVDE.renderBoardState(true);
-			var f = new SLVD.speedCheck("SLVDE.renderBoardState", e.date);
+			//Render board, SplitTime.see below
+			SplitTime.renderBoardState(true);
+			var f = new SLVD.speedCheck("SplitTime.renderBoardState", e.date);
 			f.logUnusual(5);
 
 			break;
 		}
 		case "TRPG":
 		{
-			if(SLVDE.cTeam == SLVDE.player)
+			if(SplitTime.cTeam == SplitTime.player)
 			{
-				SLVDE.TRPGPlayerMotion();
+				SplitTime.TRPGPlayerMotion();
 			}
-			else if(SLVDE.cTeam == boardNPC)
+			else if(SplitTime.cTeam == boardNPC)
 			{
-				SLVDE.TRPGNPCMotion();
+				SplitTime.TRPGNPCMotion();
 			}
-			SLVDE.sortBoardC();
+			SplitTime.sortBoardC();
 
-			SLVDE.renderBoardState(true);
+			SplitTime.renderBoardState(true);
 			break;
 		}
 		case "menu":
 		{
-			//alert("start SLVDE.menu");
-			SLVDE.currentMenu.handleMenu(); //in menuFunctions.js
-			//alert("handled SLVDE.menu");
-			SLVDE.currentMenu.update(); //in SLVDE.menu object declaration
+			//alert("start SplitTime.menu");
+			SplitTime.currentMenu.handleMenu(); //in menuFunctions.js
+			//alert("handled SplitTime.menu");
+			SplitTime.currentMenu.update(); //in SplitTime.menu object declaration
 			//alert("ran update check");
-			//Draw SLVDE.menu background
-			SLVDE.see.drawImage(SLVDE.currentMenu.background, 0, 0);
+			//Draw SplitTime.menu background
+			SplitTime.see.drawImage(SplitTime.currentMenu.background, 0, 0);
 			//Draw cursor
-			SLVDE.see.drawImage(SLVDE.currentMenu.cursor, SLVDE.currentMenu.point[SLVDE.currentMenu.currentPoint].x, SLVDE.currentMenu.point[SLVDE.currentMenu.currentPoint].y);
-			if(SLVDE.keyFirstDown == "enter" || SLVDE.keyFirstDown == "space") //Select
+			SplitTime.see.drawImage(SplitTime.currentMenu.cursor, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].x, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].y);
+			if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space") //Select
 			{
-				SLVDE.currentMenu.chosenPoint = SLVDE.currentMenu.currentPoint;
-				if(SLVDE.currentLevel)
+				SplitTime.currentMenu.chosenPoint = SplitTime.currentMenu.currentPoint;
+				if(SplitTime.currentLevel)
 				{
-					SLVDE.process = SLVDE.currentLevel.type;
+					SplitTime.process = SplitTime.currentLevel.type;
 				}
-				SLVDE.mainPromise.resolve(SLVDE.currentMenu.chosenPoint);
+				SplitTime.mainPromise.resolve(SplitTime.currentMenu.chosenPoint);
 			}
-			delete SLVDE.keyFirstDown;
+			delete SplitTime.keyFirstDown;
 			break;
 		}
 		case "delay":
 		{
-			if(SLVDE.countdown <= 0)
+			if(SplitTime.countdown <= 0)
 			{
-				if(SLVDE.currentLevel)
+				if(SplitTime.currentLevel)
 				{
-					SLVDE.process = SLVDE.currentLevel.type;
+					SplitTime.process = SplitTime.currentLevel.type;
 				}
-				if(SLVDE.mainPromise)
+				if(SplitTime.mainPromise)
 				{
-					SLVDE.mainPromise.resolve();
+					SplitTime.mainPromise.resolve();
 				}
 			}
-			else SLVDE.countdown--;
+			else SplitTime.countdown--;
 			break;
 		}
 		default: { }
 	}
-	SLVDE.counter++;
-	if(SLVDE.counter == 25600)
+	SplitTime.counter++;
+	if(SplitTime.counter == 25600)
 	{
-		SLVDE.counter = 0;
+		SplitTime.counter = 0;
 	}
-//	document.getElementById("timey").innerHTML = SLVDE.counter;
-	if((SLVDE.counter%8) === 0)
+//	document.getElementById("timey").innerHTML = SplitTime.counter;
+	if((SplitTime.counter%8) === 0)
 	{
-		SLVDE.frameClock = 1;
+		SplitTime.frameClock = 1;
 	}
 	else
 	{
-		SLVDE.frameClock = 0;
+		SplitTime.frameClock = 0;
 	}
 
 	var endTime = new Date().getTime();
 	var msElapsed = endTime - startTime;
 
-	var displayFPS = SLVDE.FPS;
-	if(msElapsed < SLVDE.msPerFrame) {
-		setTimeout(SLVDE.main, SLVDE.msPerFrame - msElapsed);
-		SLVDE.see.fillStyle="#00FF00";
+	var displayFPS = SplitTime.FPS;
+	if(msElapsed < SplitTime.msPerFrame) {
+		setTimeout(SplitTime.main, SplitTime.msPerFrame - msElapsed);
+		SplitTime.see.fillStyle="#00FF00";
 	}
 	else {
-		setTimeout(SLVDE.main, 2); //give browser a quick breath
+		setTimeout(SplitTime.main, 2); //give browser a quick breath
 		var secondsElapsed = msElapsed/1000;
 		displayFPS = Math.round(1/secondsElapsed);
-		SLVDE.see.fillStyle="#FF0000";
+		SplitTime.see.fillStyle="#FF0000";
 	}
 
-	if(SLVDE.showFPS) {
-		SLVDE.see.font="18px Verdana";
-		SLVDE.see.fillText("FPS: " + displayFPS, SLVDE.SCREENX/2, SLVDE.SCREENY - 20);
+	if(SplitTime.showFPS) {
+		SplitTime.see.font="18px Verdana";
+		SplitTime.see.fillText("FPS: " + displayFPS, SplitTime.SCREENX/2, SplitTime.SCREENY - 20);
 	}
 };
 
 //*-*-*-*-*-*-*-*-*-*-*-*End Main Loop
 
 
-SLVDE.keyCodeKey = {
+SplitTime.keyCodeKey = {
 	65: 'a',
 	83: 's',
 	68: 'd',
@@ -159,7 +159,7 @@ document.onkeydown = function(e) {
         e.preventDefault();
     }
 
-	var key = SLVDE.keyCodeKey[e.which || e.keyCode];//e.key.toLowerCase();
+	var key = SplitTime.keyCodeKey[e.which || e.keyCode];//e.key.toLowerCase();
 
 	if(key == " ")
 	{
@@ -171,253 +171,253 @@ document.onkeydown = function(e) {
 	{
 		alert("saving...");
 		//alert("test second alert");
-		SLVDE.fileSave("testFile");
+		SplitTime.fileSave("testFile");
 		alert("saved!");
 	}
 	else if(key == "y")
 	{
 	/*	var seen = [];
 
-		var alerter = JSON.stringify(SLVDE.player[SLVDE.currentPlayer], function(key, val) {
+		var alerter = JSON.stringify(SplitTime.player[SplitTime.currentPlayer], function(key, val) {
 			if(val != null && typeof val == "object") {
 				if(seen.indexOf(val) >= 0) return seen.push(val); }
 				return val; });
 		alert(alerter);*/
-		alert(SLVDE.player[SLVDE.currentPlayer].x + ", " + SLVDE.player[SLVDE.currentPlayer].y + ", " + SLVDE.player[SLVDE.currentPlayer].layer);
+		alert(SplitTime.player[SplitTime.currentPlayer].x + ", " + SplitTime.player[SplitTime.currentPlayer].y + ", " + SplitTime.player[SplitTime.currentPlayer].layer);
 	}
 
-	if(SLVDE.keyDown[key] === undefined)
+	if(SplitTime.keyDown[key] === undefined)
 	{
-		SLVDE.keyFirstDown = key;
+		SplitTime.keyFirstDown = key;
 	}
-	SLVDE.keyDown[key] = true;
+	SplitTime.keyDown[key] = true;
 
-	if(SLVDE.process == "wait" && SLVDE.mainPromise)
+	if(SplitTime.process == "wait" && SplitTime.mainPromise)
 	{
-		if(SLVDE.currentLevel)
+		if(SplitTime.currentLevel)
 		{
-			SLVDE.process = SLVDE.currentLevel.type;
+			SplitTime.process = SplitTime.currentLevel.type;
 		}
-		SLVDE.mainPromise.resolve(key);
+		SplitTime.mainPromise.resolve(key);
 	}
-	else if(SLVDE.process == "waitForEnterOrSpace" && (SLVDE.keyFirstDown == "enter" || SLVDE.keyFirstDown == "space"))
+	else if(SplitTime.process == "waitForEnterOrSpace" && (SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space"))
 	{
-		delete SLVDE.keyFirstDown;
+		delete SplitTime.keyFirstDown;
 
-		if(SLVDE.currentLevel)
+		if(SplitTime.currentLevel)
 		{
-			SLVDE.process = SLVDE.currentLevel.type;
+			SplitTime.process = SplitTime.currentLevel.type;
 		}
-		SLVDE.mainPromise.resolve(key);
+		SplitTime.mainPromise.resolve(key);
 	}
 };
 
 //The clean-up of the above function.
 document.onkeyup = function(e) {
-	var key = SLVDE.keyCodeKey[e.keyCode];//e.key.toLowerCase();
+	var key = SplitTime.keyCodeKey[e.keyCode];//e.key.toLowerCase();
 
-	if(key == SLVDE.keyFirstDown)
+	if(key == SplitTime.keyFirstDown)
 	{
-		delete SLVDE.keyFirstDown;
+		delete SplitTime.keyFirstDown;
 	}
 
-	delete SLVDE.keyDown[key];
+	delete SplitTime.keyDown[key];
 };
 
-//Set SLVDE.wX and SLVDE.wY (references for relative SLVDE.image drawing) based on current SLVDE.player's (or in some cases SLVDE.NPC's) position.
-SLVDE.orientScreen = function() {
-	var person = SLVDE.cTeam[SLVDE.currentPlayer];
+//Set SplitTime.wX and SplitTime.wY (references for relative SplitTime.image drawing) based on current SplitTime.player's (or in some cases SplitTime.NPC's) position.
+SplitTime.orientScreen = function() {
+	var person = SplitTime.cTeam[SplitTime.currentPlayer];
 	var x = person.x + person.offX;
 	var y = person.y + person.offY;
-  if(SLVDE.currentLevel.width <= SLVDE.SCREENX) {
-	SLVDE.wX = (SLVDE.currentLevel.width - SLVDE.SCREENX)/2;
+  if(SplitTime.currentLevel.width <= SplitTime.SCREENX) {
+	SplitTime.wX = (SplitTime.currentLevel.width - SplitTime.SCREENX)/2;
   }
-  else if (x + SLVDE.SCREENX/2 >= SLVDE.currentLevel.width) {
-    SLVDE.wX = SLVDE.currentLevel.width - SLVDE.SCREENX;
+  else if (x + SplitTime.SCREENX/2 >= SplitTime.currentLevel.width) {
+    SplitTime.wX = SplitTime.currentLevel.width - SplitTime.SCREENX;
   }
-  else if (x >= SLVDE.SCREENX/2) {
-    SLVDE.wX = x - (SLVDE.SCREENX/2);
+  else if (x >= SplitTime.SCREENX/2) {
+    SplitTime.wX = x - (SplitTime.SCREENX/2);
   }
   else {
-    SLVDE.wX = 0;
+    SplitTime.wX = 0;
   }
 
-  if(SLVDE.currentLevel.height <= SLVDE.SCREENY) {
-	SLVDE.wY = (SLVDE.currentLevel.height - SLVDE.SCREENY)/2;
+  if(SplitTime.currentLevel.height <= SplitTime.SCREENY) {
+	SplitTime.wY = (SplitTime.currentLevel.height - SplitTime.SCREENY)/2;
   }
-  else if (y + SLVDE.SCREENY/2 >= SLVDE.currentLevel.height) {
-    SLVDE.wY = SLVDE.currentLevel.height - SLVDE.SCREENY;
+  else if (y + SplitTime.SCREENY/2 >= SplitTime.currentLevel.height) {
+    SplitTime.wY = SplitTime.currentLevel.height - SplitTime.SCREENY;
   }
-  else if (y >= SLVDE.SCREENY/2) {
-    SLVDE.wY = y - (SLVDE.SCREENY/2);
+  else if (y >= SplitTime.SCREENY/2) {
+    SplitTime.wY = y - (SplitTime.SCREENY/2);
   }
   else {
-    SLVDE.wY = 0;
+    SplitTime.wY = 0;
   }
 };
 
-//Sort all board characters into the array SLVDE.boardBody in order of y location (in order to properly render sprite overlap).
-SLVDE.restartBoardC = function() {
-	SLVDE.boardBody.length = 0;
+//Sort all board characters into the array SplitTime.boardBody in order of y location (in order to properly render sprite overlap).
+SplitTime.restartBoardC = function() {
+	SplitTime.boardBody.length = 0;
 	var index;
 	//Figure out which NPCs are onboard
-	for(index = 0; index < SLVDE.NPC.length; index++)
+	for(index = 0; index < SplitTime.NPC.length; index++)
 	{
-		if(SLVDE.NPC[index].lvl == SLVDE.currentLevel.name)
+		if(SplitTime.NPC[index].lvl == SplitTime.currentLevel.name)
 		{
-			SLVDE.insertBoardC(SLVDE.NPC[index]);
+			SplitTime.insertBoardC(SplitTime.NPC[index]);
 		}
 	}
 
 	//Pull board objects from file
-	for(index = 0; index < SLVDE.currentLevel.filedata.getElementsByTagName("prop").length; index++)
+	for(index = 0; index < SplitTime.currentLevel.filedata.getElementsByTagName("prop").length; index++)
 	{
-		var template = SLVDE.currentLevel.filedata.getElementsByTagName("prop")[index].getAttribute("template");
-		var objCode = SLVDE.currentLevel.filedata.getElementsByTagName("prop")[index].textContent;
+		var template = SplitTime.currentLevel.filedata.getElementsByTagName("prop")[index].getAttribute("template");
+		var objCode = SplitTime.currentLevel.filedata.getElementsByTagName("prop")[index].textContent;
 
-		SLVDE.insertBoardC(SLVDE.evalObj(template, objCode));
-		//prop[current].lvl = SLVDE.currentLevel.name;
+		SplitTime.insertBoardC(SplitTime.evalObj(template, objCode));
+		//prop[current].lvl = SplitTime.currentLevel.name;
 	}
 
-	for(index = 0; index < SLVDE.player.length; index++)
+	for(index = 0; index < SplitTime.player.length; index++)
 	{
-		if(index == SLVDE.currentPlayer || SLVDE.currentLevel.type == "TRPG") SLVDE.insertBoardC(SLVDE.player[index]);
+		if(index == SplitTime.currentPlayer || SplitTime.currentLevel.type == "TRPG") SplitTime.insertBoardC(SplitTime.player[index]);
 	}
 };
 
-//Sort the array SLVDE.boardBody in order of y location (in order to properly render sprite overlap).
-SLVDE.sortBoardC = function() {
-	if(SLVDE.boardBody.length === 0) SLVDE.restartBoardC();
+//Sort the array SplitTime.boardBody in order of y location (in order to properly render sprite overlap).
+SplitTime.sortBoardC = function() {
+	if(SplitTime.boardBody.length === 0) SplitTime.restartBoardC();
 	else
 	{
-		for(var index = 1; index < SLVDE.boardBody.length; index++)
+		for(var index = 1; index < SplitTime.boardBody.length; index++)
 		{
 			var second = index;
-			while(second > 0 && SLVDE.boardBody[second].y < SLVDE.boardBody[second - 1].y)
+			while(second > 0 && SplitTime.boardBody[second].y < SplitTime.boardBody[second - 1].y)
 			{
-				var tempC = SLVDE.boardBody[second];
-				SLVDE.boardBody[second] = SLVDE.boardBody[second - 1];
-				SLVDE.boardBody[second - 1] = tempC;
+				var tempC = SplitTime.boardBody[second];
+				SplitTime.boardBody[second] = SplitTime.boardBody[second - 1];
+				SplitTime.boardBody[second - 1] = tempC;
 				second--;
 			}
 		}
 	}
 };
 
-SLVDE.insertBoardC = function(element) {
+SplitTime.insertBoardC = function(element) {
 	var index = 0;
-	while(index < SLVDE.boardBody.length && element.y > SLVDE.boardBody[index].y)
+	while(index < SplitTime.boardBody.length && element.y > SplitTime.boardBody[index].y)
 	{
 		index++;
 	}
-	SLVDE.boardBody.splice(index, 0, element);
-/*	var second = SLVDE.boardBody.length;
-	SLVDE.boardBody[second] = element;
+	SplitTime.boardBody.splice(index, 0, element);
+/*	var second = SplitTime.boardBody.length;
+	SplitTime.boardBody[second] = element;
 	while(second > 0)
 	{
-		if(SLVDE.boardBody[second].y < SLVDE.boardBody[second - 1].y)
+		if(SplitTime.boardBody[second].y < SplitTime.boardBody[second - 1].y)
 		{
-			var tempC = SLVDE.boardBody[second];
-			SLVDE.boardBody[second] = SLVDE.boardBody[second - 1];
-			SLVDE.boardBody[second - 1] = tempC;
+			var tempC = SplitTime.boardBody[second];
+			SplitTime.boardBody[second] = SplitTime.boardBody[second - 1];
+			SplitTime.boardBody[second - 1] = tempC;
 		}
 		second--;
 	}*/
 };
 
-SLVDE.deleteBoardC = function(element) {
-	for(var index = 0; index < SLVDE.boardBody.length; index++)
+SplitTime.deleteBoardC = function(element) {
+	for(var index = 0; index < SplitTime.boardBody.length; index++)
 	{
-		if(element == SLVDE.boardBody[index])
+		if(element == SplitTime.boardBody[index])
 		{
-			SLVDE.boardBody.splice(index, 1);
-			index = SLVDE.boardBody.length;
+			SplitTime.boardBody.splice(index, 1);
+			index = SplitTime.boardBody.length;
 		}
 	}
 };
 
-//Based on keys down (ASDW and arrows), set current SLVDE.player's direction. Used in SLVDE.zeldaPlayerMotion().
-SLVDE.figurePlayerDirection = function() {
+//Based on keys down (ASDW and arrows), set current SplitTime.player's direction. Used in SplitTime.zeldaPlayerMotion().
+SplitTime.figurePlayerDirection = function() {
 	var dKeys = 0;
 	var dir = 0;
-	if(SLVDE.keyDown['a'] || SLVDE.keyDown['left']) //West
+	if(SplitTime.keyDown['a'] || SplitTime.keyDown['left']) //West
 	{
 		//How many directional keys down
 		dKeys++;
 		//Average in the new direction to the current direction
 		dir = ((dir*(dKeys - 1)) + 2)/dKeys;
 	}
-	if(SLVDE.keyDown['w'] || SLVDE.keyDown['up']) //North
+	if(SplitTime.keyDown['w'] || SplitTime.keyDown['up']) //North
 	{
 		dKeys++;
 		dir = ((dir*(dKeys - 1)) + 1)/dKeys;
 	}
-	if(SLVDE.keyDown['d'] || SLVDE.keyDown['right']) //East
+	if(SplitTime.keyDown['d'] || SplitTime.keyDown['right']) //East
 	{
 		dKeys++;
 		dir = ((dir*(dKeys - 1)) + 0)/dKeys;
 	}
-	if(SLVDE.keyDown['s'] || SLVDE.keyDown['down']) //South
+	if(SplitTime.keyDown['s'] || SplitTime.keyDown['down']) //South
 	{
 		dKeys++;
 		dir = ((dir*(dKeys - 1)) + 3)/dKeys;
 	}
-	if((SLVDE.keyDown['s'] || SLVDE.keyDown['down']) && (SLVDE.keyDown['d'] || SLVDE.keyDown['right'])) //Southeast
+	if((SplitTime.keyDown['s'] || SplitTime.keyDown['down']) && (SplitTime.keyDown['d'] || SplitTime.keyDown['right'])) //Southeast
 	{
 		dir += 2;
 	}
 
 	if(dKeys)
 	{
-		SLVDE.player[SLVDE.currentPlayer].dir = dir % 4;
+		SplitTime.player[SplitTime.currentPlayer].dir = dir % 4;
 		return true;
 	}
 	return false;
 };
 
-SLVDE.renderBoardState = function(forceCalculate) {
+SplitTime.renderBoardState = function(forceCalculate) {
 	if(!forceCalculate)
 	{
-		SLVDE.see.drawImage(SLVDE.snapShot, 0, 0);
+		SplitTime.see.drawImage(SplitTime.snapShot, 0, 0);
 		return;
 	}
 
-	SLVDE.orientScreen();
+	SplitTime.orientScreen();
 	var lightedThing = [];
 	var index, second;
 	//Black out screen (mainly for the case of board being smaller than the screen)
-	SLVDE.see.fillStyle="#000000";
-	SLVDE.see.fillRect(0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+	SplitTime.see.fillStyle="#000000";
+	SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 
 	//Rendering sequence
-	for(index = 0; index < SLVDE.currentLevel.layerImg.length; index++)
+	for(index = 0; index < SplitTime.currentLevel.layerImg.length; index++)
 	{
-		SLVDE.snapShotCtx.clearRect(0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+		SplitTime.snapShotCtx.clearRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 
-		if(SLVDE.process == "TRPG")
+		if(SplitTime.process == "TRPG")
 		{
 			//Draw blue range squares
-			if(index == SLVDE.cTeam[SLVDE.currentPlayer].layer && SLVDE.cTeam[SLVDE.currentPlayer].squares)
+			if(index == SplitTime.cTeam[SplitTime.currentPlayer].layer && SplitTime.cTeam[SplitTime.currentPlayer].squares)
 			{
-				for(second = 0; second < SLVDE.cTeam[SLVDE.currentPlayer].squares.length; second++)
+				for(second = 0; second < SplitTime.cTeam[SplitTime.currentPlayer].squares.length; second++)
 				{
-					SLVDE.see.fillStyle = "rgba(0, 100, 255, .5)";
-					SLVDE.see.fillRect(SLVDE.cTeam[SLVDE.currentPlayer].squares[second].x*32 - SLVDE.wX, SLVDE.cTeam[SLVDE.currentPlayer].squares[second].y*32 - SLVDE.wY, 32, 32);
-					//SLVDE.see.drawImage(SLVDE.image["blueSquare.png"], 0, 0, 32, 32, SLVDE.cTeam[SLVDE.currentPlayer].squares[second].x*32 - SLVDE.wX, SLVDE.cTeam[SLVDE.currentPlayer].squares[second].y*32 - SLVDE.wY, 32, 32);
+					SplitTime.see.fillStyle = "rgba(0, 100, 255, .5)";
+					SplitTime.see.fillRect(SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
+					//SplitTime.see.drawImage(SplitTime.image["blueSquare.png"], 0, 0, 32, 32, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
 				}
 			}
 		}
 
-		//Loop through SLVDE.boardBody (to render)
-		for(second = 0; second < SLVDE.boardBody.length; second++)
+		//Loop through SplitTime.boardBody (to render)
+		for(second = 0; second < SplitTime.boardBody.length; second++)
 		{
-			var cBody = SLVDE.boardBody[second];
+			var cBody = SplitTime.boardBody[second];
 			if(cBody.layer == index) //ensure proper layering
 			{
-				cBody.see(SLVDE.snapShotCtx);
-				//BodyF.see.call(cBody, SLVDE.snapShotCtx);
+				cBody.see(SplitTime.snapShotCtx);
+				//BodyF.see.call(cBody, SplitTime.snapShotCtx);
 
-				//Determine if SLVDE.boardBody is lighted
+				//Determine if SplitTime.boardBody is lighted
 				if(cBody.isLight)
 				{
 					lightedThing[lightedThing.length] = cBody;
@@ -427,90 +427,90 @@ SLVDE.renderBoardState = function(forceCalculate) {
 				cBody.resetCans();
 			}
 		}
-		SLVDE.snapShotCtx.globalAlpha = 1;
+		SplitTime.snapShotCtx.globalAlpha = 1;
 
 		//Work out details of smaller-than-screen dimensions
 		var xDif, yDif;
-		if(SLVDE.wX < 0) xDif = Math.abs(SLVDE.wX);
+		if(SplitTime.wX < 0) xDif = Math.abs(SplitTime.wX);
 		else xDif = 0;
-		if(SLVDE.wY < 0) yDif = Math.abs(SLVDE.wY);
+		if(SplitTime.wY < 0) yDif = Math.abs(SplitTime.wY);
 		else yDif = 0;
 
-		SLVDE.snapShotCtx.globalCompositeOperation = "destination-over";
+		SplitTime.snapShotCtx.globalCompositeOperation = "destination-over";
 
-		//Draw layer based on values found in SLVDE.orientScreen() and altered above
-		var tImg = SLVDE.getImage(SLVDE.currentLevel.layerImg[index]);
+		//Draw layer based on values found in SplitTime.orientScreen() and altered above
+		var tImg = SplitTime.getImage(SplitTime.currentLevel.layerImg[index]);
 		//Note: this single call on a perform test is a huge percentage of CPU usage.
-		SLVDE.snapShotCtx.drawImage(tImg, SLVDE.wX + xDif, SLVDE.wY + yDif, SLVDE.SCREENX - 2*xDif, SLVDE.SCREENY - 2*yDif, xDif, yDif, SLVDE.SCREENX - 2*xDif, SLVDE.SCREENY - 2*yDif);
+		SplitTime.snapShotCtx.drawImage(tImg, SplitTime.wX + xDif, SplitTime.wY + yDif, SplitTime.SCREENX - 2*xDif, SplitTime.SCREENY - 2*yDif, xDif, yDif, SplitTime.SCREENX - 2*xDif, SplitTime.SCREENY - 2*yDif);
 
-		SLVDE.snapShotCtx.globalCompositeOperation = "source-over";
+		SplitTime.snapShotCtx.globalCompositeOperation = "source-over";
 
-		SLVDE.see.drawImage(SLVDE.snapShot, 0, 0);
+		SplitTime.see.drawImage(SplitTime.snapShot, 0, 0);
 	}
 
-	SLVDE.renderWeather(lightedThing);
+	SplitTime.renderWeather(lightedThing);
 
-	//Display current SLVDE.player stats
-	SLVDE.see.fillStyle="#FFFFFF";
-	SLVDE.see.font="12px Verdana";
-	SLVDE.see.fillText(SLVDE.player[SLVDE.currentPlayer].name + ": " + SLVDE.player[SLVDE.currentPlayer].hp + " HP | " + SLVDE.player[SLVDE.currentPlayer].strg + " Strength | " + SLVDE.player[SLVDE.currentPlayer].spd + " Agility", 10, 20);
+	//Display current SplitTime.player stats
+	SplitTime.see.fillStyle="#FFFFFF";
+	SplitTime.see.font="12px Verdana";
+	SplitTime.see.fillText(SplitTime.player[SplitTime.currentPlayer].name + ": " + SplitTime.player[SplitTime.currentPlayer].hp + " HP | " + SplitTime.player[SplitTime.currentPlayer].strg + " Strength | " + SplitTime.player[SplitTime.currentPlayer].spd + " Agility", 10, 20);
 
-	SLVDE.Time.renderClock(SLVDE.see); //in time.js
+	SplitTime.Time.renderClock(SplitTime.see); //in time.js
 
-	//Save screen into SLVDE.snapShot
-	SLVDE.snapShotCtx.drawImage(SLVDE.seeB, 0, 0);
+	//Save screen into SplitTime.snapShot
+	SplitTime.snapShotCtx.drawImage(SplitTime.seeB, 0, 0);
 };
 
-SLVDE.renderWeather = function(lightedThing) {
+SplitTime.renderWeather = function(lightedThing) {
 	//Weather
-	if(SLVDE.weather.rain)
+	if(SplitTime.weather.rain)
 	{
-		SLVDE.see.drawImage(SLVDE.image["rain.png"], -((SLVDE.counter%100)/100)*SLVDE.SCREENX, ((SLVDE.counter%25)/25)*SLVDE.SCREENY - SLVDE.SCREENY);
+		SplitTime.see.drawImage(SplitTime.image["rain.png"], -((SplitTime.counter%100)/100)*SplitTime.SCREENX, ((SplitTime.counter%25)/25)*SplitTime.SCREENY - SplitTime.SCREENY);
 	}
-	if(SLVDE.weather.clouds)
+	if(SplitTime.weather.clouds)
 	{
-		SLVDE.see.drawImage(SLVDE.image["stormClouds.png"], 2560 - SLVDE.counter%2560, 0, SLVDE.SCREENX, SLVDE.SCREENY, 0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
-		SLVDE.see.drawImage(SLVDE.image["stormClouds.png"], 0 - SLVDE.counter%2560, 0, SLVDE.SCREENX, SLVDE.SCREENY, 0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+		SplitTime.see.drawImage(SplitTime.image["stormClouds.png"], 2560 - SplitTime.counter%2560, 0, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+		SplitTime.see.drawImage(SplitTime.image["stormClouds.png"], 0 - SplitTime.counter%2560, 0, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 	}
-	if(SLVDE.weather.lightning > 0)
+	if(SplitTime.weather.lightning > 0)
 	{
-		//SLVDE.weather.lightning is the number of lightning strikes per minute
-		if(SLVD.randomInt(SLVDE.FPS*60) <= SLVDE.weather.lightning)
+		//SplitTime.weather.lightning is the number of lightning strikes per minute
+		if(SLVD.randomInt(SplitTime.FPS*60) <= SplitTime.weather.lightning)
 		{
-			SLVDE.see.fillStyle = "rgba(255, 255, 255, .75)";
-			SLVDE.see.fillRect(0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+			SplitTime.see.fillStyle = "rgba(255, 255, 255, .75)";
+			SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 		}
 	}
 	//Light in dark
-	if(SLVDE.weather.dark > 0)
+	if(SplitTime.weather.dark > 0)
 	{
-		//Transparentize SLVDE.buffer
-		SLVDE.bufferCtx.clearRect(0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+		//Transparentize SplitTime.buffer
+		SplitTime.bufferCtx.clearRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 
-		//Put lighted things on the SLVDE.buffer as white radial gradients with opaque centers and transparent edges
+		//Put lighted things on the SplitTime.buffer as white radial gradients with opaque centers and transparent edges
 		for(index = 0; index < lightedThing.length; index++)
 		{
-			var xCoord = (lightedThing[index].x) - SLVDE.wX;
-			var yCoord = (lightedThing[index].y) - SLVDE.wY;
-			var grd = SLVDE.bufferCtx.createRadialGradient(xCoord, yCoord, 1, xCoord, yCoord, 150);
-			grd.addColorStop(0, "rgba(255, 255, 255, " + SLVDE.weather.dark + ")");
+			var xCoord = (lightedThing[index].x) - SplitTime.wX;
+			var yCoord = (lightedThing[index].y) - SplitTime.wY;
+			var grd = SplitTime.bufferCtx.createRadialGradient(xCoord, yCoord, 1, xCoord, yCoord, 150);
+			grd.addColorStop(0, "rgba(255, 255, 255, " + SplitTime.weather.dark + ")");
 			grd.addColorStop(1, "rgba(255, 255, 255, 0)");
-			SLVDE.bufferCtx.fillStyle = grd;
-			SLVDE.bufferCtx.beginPath();
-			SLVDE.bufferCtx.arc(xCoord, yCoord, 150, 2*Math.PI, false);
-			SLVDE.bufferCtx.closePath();
-			SLVDE.bufferCtx.fill();
+			SplitTime.bufferCtx.fillStyle = grd;
+			SplitTime.bufferCtx.beginPath();
+			SplitTime.bufferCtx.arc(xCoord, yCoord, 150, 2*Math.PI, false);
+			SplitTime.bufferCtx.closePath();
+			SplitTime.bufferCtx.fill();
 		}
 
 		//XOR lights placed with black overlay (the result being holes in the black)
-		SLVDE.bufferCtx.globalCompositeOperation = "xor";
-		SLVDE.bufferCtx.fillStyle = "rgba(0, 0, 0, " + SLVDE.weather.dark + ")";//"#000000";
-		SLVDE.bufferCtx.fillRect(0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+		SplitTime.bufferCtx.globalCompositeOperation = "xor";
+		SplitTime.bufferCtx.fillStyle = "rgba(0, 0, 0, " + SplitTime.weather.dark + ")";//"#000000";
+		SplitTime.bufferCtx.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 
-		//Render SLVDE.buffer
-		SLVDE.see.drawImage(SLVDE.buffer, 0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+		//Render SplitTime.buffer
+		SplitTime.see.drawImage(SplitTime.buffer, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 
-		//Return to default SLVDE.image layering
-		SLVDE.bufferCtx.globalCompositeOperation = "source-over";
+		//Return to default SplitTime.image layering
+		SplitTime.bufferCtx.globalCompositeOperation = "source-over";
 	}
 };

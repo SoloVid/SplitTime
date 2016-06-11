@@ -1,10 +1,10 @@
-SLVDE.showImage = function(file, duration, waitForEnterSpace) {
-	//SLVDE.process = "wait";
-	SLVDE.see.drawImage(file, 0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
-	return SLVDE.delay(duration).then(function() {
+SplitTime.showImage = function(file, duration, waitForEnterSpace) {
+	//SplitTime.process = "wait";
+	SplitTime.see.drawImage(file, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+	return SplitTime.delay(duration).then(function() {
 		if(waitForEnterSpace)
 		{
-			return SLVDE.waitForEnterOrSpace();
+			return SplitTime.waitForEnterOrSpace();
 		}
 		else
 		{
@@ -16,41 +16,41 @@ SLVDE.showImage = function(file, duration, waitForEnterSpace) {
 	});
 };
 
-SLVDE.menu = function() {
+SplitTime.menu = function() {
 	this.point = [];
 };
 
-SLVDE.menu.prototype.cursor = undefined;
-SLVDE.menu.prototype.point = [];
+SplitTime.menu.prototype.cursor = undefined;
+SplitTime.menu.prototype.point = [];
 
-SLVDE.menu.prototype.addPoint = function(x, y) {
+SplitTime.menu.prototype.addPoint = function(x, y) {
 	var index = this.point.length;
 	this.point[index] = { x: x, y: y };
 };
 
-SLVDE.menu.prototype.runMenu = function() {
+SplitTime.menu.prototype.runMenu = function() {
 	this.currentPoint = 0;
 	delete this.chosenPoint;
-	SLVDE.process = "menu";
-	SLVDE.currentMenu = this;
-	return SLVDE.setupMainPromise();
+	SplitTime.process = "menu";
+	SplitTime.currentMenu = this;
+	return SplitTime.setupMainPromise();
 };
 
-SLVDE.menu.prototype.killPoints = function() {
+SplitTime.menu.prototype.killPoints = function() {
 	this.point.length = 0;
 	delete this.update;
 };
 
-SLVDE.menu.prototype.update = function() {}; //Customizable function; run every frame
+SplitTime.menu.prototype.update = function() {}; //Customizable function; run every frame
 
-SLVDE.menu.prototype.handleMenu = function() {
+SplitTime.menu.prototype.handleMenu = function() {
 	/*This menu system navigates on a grid even though points are listed linearly.
 	/*Basically, the code finds the closest point (in the direction of the key press
 	to the current point that is within a 90 degree viewing angle from the point in that direction.*/
 	//Draw menu background
-//	SLVDE.see.drawImage(this.background, 0, 0);
+//	SplitTime.see.drawImage(this.background, 0, 0);
 	//Draw cursor
-//	SLVDE.see.drawImage(this.cursor, this.point[this.currentPoint].x, this.point[this.currentPoint].y);
+//	SplitTime.see.drawImage(this.cursor, this.point[this.currentPoint].x, this.point[this.currentPoint].y);
 	var prevPoint = this.currentPoint;
 	var iPoint = prevPoint;
 	var bestPoint = iPoint;
@@ -58,7 +58,7 @@ SLVDE.menu.prototype.handleMenu = function() {
 	var bestdy = 1000;
 	var isUnderUpperBound, isAboveLowerBound;
 	var testdx, testdy, setNewBest;
-	if(SLVDE.keyFirstDown == "a" || SLVDE.keyFirstDown == "left") //Left
+	if(SplitTime.keyFirstDown == "a" || SplitTime.keyFirstDown == "left") //Left
 	{
 		do //While index point does not equal original point
 		{
@@ -70,13 +70,13 @@ SLVDE.menu.prototype.handleMenu = function() {
 			}
 			else
 			{
-				isUnderUpperBound = this.point[iPoint].y <= -this.point[iPoint].x + (this.point[prevPoint].x + SLVDE.SCREENX) + this.point[prevPoint].y;
-				isAboveLowerBound = this.point[iPoint].y >= this.point[iPoint].x - (this.point[prevPoint].x + SLVDE.SCREENX) + this.point[prevPoint].y;
+				isUnderUpperBound = this.point[iPoint].y <= -this.point[iPoint].x + (this.point[prevPoint].x + SplitTime.SCREENX) + this.point[prevPoint].y;
+				isAboveLowerBound = this.point[iPoint].y >= this.point[iPoint].x - (this.point[prevPoint].x + SplitTime.SCREENX) + this.point[prevPoint].y;
 			}
 			if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 			{
 				testdx = this.point[prevPoint].x - this.point[iPoint].x;
-				if(!isLeft) testdx += SLVDE.SCREENX;
+				if(!isLeft) testdx += SplitTime.SCREENX;
 				testdy = Math.abs(this.point[prevPoint].y - this.point[iPoint].y);
 				if(testdx <= bestdx)
 				{
@@ -94,7 +94,7 @@ SLVDE.menu.prototype.handleMenu = function() {
 		} while(iPoint != prevPoint);
 		this.currentPoint = bestPoint;
 	}
-	else if(SLVDE.keyFirstDown == "w" || SLVDE.keyFirstDown == "up") //Up
+	else if(SplitTime.keyFirstDown == "w" || SplitTime.keyFirstDown == "up") //Up
 	{
 		do //While index point does not equal original point
 		{
@@ -106,13 +106,13 @@ SLVDE.menu.prototype.handleMenu = function() {
 			}
 			else
 			{
-				isAboveLowerBound = this.point[iPoint].x <= -this.point[iPoint].y + (this.point[prevPoint].y + SLVDE.SCREENY) + this.point[prevPoint].x;
-				isUnderUpperBound = this.point[iPoint].x >= this.point[iPoint].y - (this.point[prevPoint].y + SLVDE.SCREENY) + this.point[prevPoint].x;
+				isAboveLowerBound = this.point[iPoint].x <= -this.point[iPoint].y + (this.point[prevPoint].y + SplitTime.SCREENY) + this.point[prevPoint].x;
+				isUnderUpperBound = this.point[iPoint].x >= this.point[iPoint].y - (this.point[prevPoint].y + SplitTime.SCREENY) + this.point[prevPoint].x;
 			}
 			if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 			{
 				testdy = this.point[prevPoint].y - this.point[iPoint].y;
-				if(!isUp) testdy += SLVDE.SCREENY;
+				if(!isUp) testdy += SplitTime.SCREENY;
 				testdx = Math.abs(this.point[prevPoint].x - this.point[iPoint].x);
 				if(testdy <= bestdy)
 				{
@@ -131,7 +131,7 @@ SLVDE.menu.prototype.handleMenu = function() {
 		this.currentPoint = bestPoint;
 		//		this.currentPoint = (this.point.length + this.currentPoint - 1)%this.point.length;
 	}
-	else if(SLVDE.keyFirstDown == "d" || SLVDE.keyFirstDown == "right") //Right
+	else if(SplitTime.keyFirstDown == "d" || SplitTime.keyFirstDown == "right") //Right
 	{
 		do //While index point does not equal original point
 		{
@@ -143,13 +143,13 @@ SLVDE.menu.prototype.handleMenu = function() {
 			}
 			else
 			{
-				isUnderUpperBound = this.point[iPoint].y >= -this.point[iPoint].x + (this.point[prevPoint].x - SLVDE.SCREENX) + this.point[prevPoint].y;
-				isAboveLowerBound = this.point[iPoint].y <= this.point[iPoint].x - (this.point[prevPoint].x - SLVDE.SCREENX) + this.point[prevPoint].y;
+				isUnderUpperBound = this.point[iPoint].y >= -this.point[iPoint].x + (this.point[prevPoint].x - SplitTime.SCREENX) + this.point[prevPoint].y;
+				isAboveLowerBound = this.point[iPoint].y <= this.point[iPoint].x - (this.point[prevPoint].x - SplitTime.SCREENX) + this.point[prevPoint].y;
 			}
 			if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 			{
 				testdx =  this.point[iPoint].x - this.point[prevPoint].x;
-				if(!isRight) testdx += SLVDE.SCREENX;
+				if(!isRight) testdx += SplitTime.SCREENX;
 				testdy = Math.abs(this.point[prevPoint].y - this.point[iPoint].y);
 				if(testdx <= bestdx)
 				{
@@ -168,7 +168,7 @@ SLVDE.menu.prototype.handleMenu = function() {
 		this.currentPoint = bestPoint;
 		//this.currentPoint = (this.currentPoint + 1)%this.point.length;
 	}
-	else if(SLVDE.keyFirstDown == "s" || SLVDE.keyFirstDown == "down") //Down
+	else if(SplitTime.keyFirstDown == "s" || SplitTime.keyFirstDown == "down") //Down
 	{
 		do //While index point does not equal original point
 		{
@@ -180,13 +180,13 @@ SLVDE.menu.prototype.handleMenu = function() {
 			}
 			else
 			{
-				isUnderUpperBound = this.point[iPoint].x >= -this.point[iPoint].y + (this.point[prevPoint].y - SLVDE.SCREENY) + this.point[prevPoint].x;
-				isAboveLowerBound = this.point[iPoint].x <= this.point[iPoint].y - (this.point[prevPoint].y - SLVDE.SCREENY) + this.point[prevPoint].x;
+				isUnderUpperBound = this.point[iPoint].x >= -this.point[iPoint].y + (this.point[prevPoint].y - SplitTime.SCREENY) + this.point[prevPoint].x;
+				isAboveLowerBound = this.point[iPoint].x <= this.point[iPoint].y - (this.point[prevPoint].y - SplitTime.SCREENY) + this.point[prevPoint].x;
 			}
 			if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 			{
 				testdy = this.point[iPoint].y - this.point[prevPoint].y;
-				if(!isDown) testdy += SLVDE.SCREENY;
+				if(!isDown) testdy += SplitTime.SCREENY;
 				testdx = Math.abs(this.point[prevPoint].x - this.point[iPoint].x);
 				if(testdy <= bestdy)
 				{
@@ -207,68 +207,68 @@ SLVDE.menu.prototype.handleMenu = function() {
 	}
 };
 
-//File selection SLVDE.menu
-SLVDE.setupFileSelect = function() {
+//File selection SplitTime.menu
+SplitTime.setupFileSelect = function() {
 	opMenu.killPoints();
-	opMenu.cursor = SLVDE.image["torchCursor.png"];
-	opMenu.background = SLVDE.buffer;
+	opMenu.cursor = SplitTime.image["torchCursor.png"];
+	opMenu.background = SplitTime.buffer;
 
-	SLVDE.canvasBlackout(SLVDE.bufferCtx);
-	SLVDE.bufferCtx.fillStyle = "#FFFFFF";
-	SLVDE.bufferCtx.font = "20px Arial";
-	SLVDE.bufferCtx.fillText("Select a file.", 10, 30);
+	SplitTime.canvasBlackout(SplitTime.bufferCtx);
+	SplitTime.bufferCtx.fillStyle = "#FFFFFF";
+	SplitTime.bufferCtx.font = "20px Arial";
+	SplitTime.bufferCtx.fillText("Select a file.", 10, 30);
 	for(var col = 0; col < 3; col++)
 	{
 		for(var index = 1; index <= 7; index++)
 		{
 			var fileName = (index + col*7);
-			SLVDE.bufferCtx.fillText(fileName, 40 + 200*col, 10 + 60*index);
+			SplitTime.bufferCtx.fillText(fileName, 40 + 200*col, 10 + 60*index);
 			opMenu.addPoint(10 + 200*col, 60*index);
 			try
 			{
 				var item = localStorage.getItem(GAMEID + "_" + fileName + "_SAVE");
 				var tSAVE = JSON.parse(item);
-				SLVDE.bufferCtx.fillText(tSAVE.timeDays + "." + tSAVE.timeHours + "." + tSAVE.timeMinutes + "." + tSAVE.timeSeconds, 40 + 200*col, 35 + 60*index);
+				SplitTime.bufferCtx.fillText(tSAVE.timeDays + "." + tSAVE.timeHours + "." + tSAVE.timeMinutes + "." + tSAVE.timeSeconds, 40 + 200*col, 35 + 60*index);
 			}
 			catch(e)
 			{
-				SLVDE.bufferCtx.fillText("No Save Data", 40 + 200*col, 35 + 60*index);
+				SplitTime.bufferCtx.fillText("No Save Data", 40 + 200*col, 35 + 60*index);
 			}
 		}
 	}
 };
 
-SLVDE.setupActionMenu = function() {
+SplitTime.setupActionMenu = function() {
 	opMenu.killPoints();
-	opMenu.cursor = SLVDE.image["blueSquare.png"];
-	opMenu.background = SLVDE.buffer;
+	opMenu.cursor = SplitTime.image["blueSquare.png"];
+	opMenu.background = SplitTime.buffer;
 
-	SLVDE.canvasBlackout(SLVDE.bufferCtx);
-	SLVDE.bufferCtx.fillStyle = "#FFFFFF";
-	SLVDE.bufferCtx.font = "20px Arial";
-	SLVDE.bufferCtx.fillText("Select a file.", 10, 30);
+	SplitTime.canvasBlackout(SplitTime.bufferCtx);
+	SplitTime.bufferCtx.fillStyle = "#FFFFFF";
+	SplitTime.bufferCtx.font = "20px Arial";
+	SplitTime.bufferCtx.fillText("Select a file.", 10, 30);
 	for(var col = 0; col < 3; col++)
 	{
 		for(var index = 1; index <= 7; index++)
 		{
 			var fileName = "File " + (index + col*7);
-			SLVDE.bufferCtx.fillText(fileName, 40 + 200*col, 10 + 60*index);
+			SplitTime.bufferCtx.fillText(fileName, 40 + 200*col, 10 + 60*index);
 			opMenu.addPoint(10 + 200*col, 60*index);
 			try
 			{
 				var item = localStorage.getItem("FULLMAVEN_" + fileName + "_SAVE");
 				var tSAVE = JSON.parse(item);
-				SLVDE.bufferCtx.fillText(tSAVE.timeDays + "." + tSAVE.timeHours + "." + tSAVE.timeMinutes + "." + tSAVE.timeSeconds, 40 + 200*col, 35 + 60*index);
+				SplitTime.bufferCtx.fillText(tSAVE.timeDays + "." + tSAVE.timeHours + "." + tSAVE.timeMinutes + "." + tSAVE.timeSeconds, 40 + 200*col, 35 + 60*index);
 			}
 			catch(e)
 			{
-				SLVDE.bufferCtx.fillText("No Save Data", 40 + 200*col, 35 + 60*index);
+				SplitTime.bufferCtx.fillText("No Save Data", 40 + 200*col, 35 + 60*index);
 			}
 		}
 	}
 };
 
-SLVDE.drawAwesomeRect = function(sx, sy, ex, ey, context, px, py, down) {
+SplitTime.drawAwesomeRect = function(sx, sy, ex, ey, context, px, py, down) {
 	context.beginPath();
 	context.moveTo(sx + 10, sy);
 	if(px && py && down)
@@ -305,40 +305,40 @@ SLVDE.drawAwesomeRect = function(sx, sy, ex, ey, context, px, py, down) {
 	context.fill();
 };
 
-SLVDE.personSays = function(persOb, message, overrideName) {
-	SLVDE.renderBoardState(); //in SLVDE.main.js
+SplitTime.personSays = function(persOb, message, overrideName) {
+	SplitTime.renderBoardState(); //in SplitTime.main.js
 
 	var tSpkr = overrideName || persOb.name;
 
-	var px = persOb.x - SLVDE.wX;
-	var py = persOb.y - SLVDE.wY - persOb.yres + persOb.baseY - 5;
-	//if(persOb.y - SLVDE.wY < 220) py = persOb.y - SLVDE.wY - persOb.yres + 40;
+	var px = persOb.x - SplitTime.wX;
+	var py = persOb.y - SplitTime.wY - persOb.yres + persOb.baseY - 5;
+	//if(persOb.y - SplitTime.wY < 220) py = persOb.y - SplitTime.wY - persOb.yres + 40;
 
-	SLVDE.speechBubble(message, tSpkr, px, py);
+	SplitTime.speechBubble(message, tSpkr, px, py);
 };
 
-SLVDE.say = function(message) {
-	SLVDE.renderBoardState();
-	SLVDE.speechBubble(message);
+SplitTime.say = function(message) {
+	SplitTime.renderBoardState();
+	SplitTime.speechBubble(message);
 };
 
-SLVDE.speechBubble = function(msg, spkr, px, py) {
+SplitTime.speechBubble = function(msg, spkr, px, py) {
 	//Used in message case of engine to grab single line of text
 	function getLine(str, leng) {
-		SLVDE.see.font = "18px Verdana";
+		SplitTime.see.font = "18px Verdana";
 		if(!str)
 		{
 			return null;
 		}
 		var word = str.split(" ");
 		var lin = "";
-		var wid = SLVDE.see.measureText(lin).width;
+		var wid = SplitTime.see.measureText(lin).width;
 		for(var index = 0; wid < leng; index++)
 		{
 			if(word[index])
 			{
 				lin += word[index] + " ";
-				wid = SLVDE.see.measureText(lin).width;
+				wid = SplitTime.see.measureText(lin).width;
 			}
 			else
 			{
@@ -371,25 +371,25 @@ SLVDE.speechBubble = function(msg, spkr, px, py) {
 	if(!py) yShift = 0;
 
 	//Text box
-	SLVDE.drawAwesomeRect(SLVDE.SCREENX/2 - 300, yShift + 30, SLVDE.SCREENX/2 + 300, yShift + (line.length)*20 + 40, SLVDE.see, px, py, (line.length)*20 + 50 > py);
+	SplitTime.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift + 30, SplitTime.SCREENX/2 + 300, yShift + (line.length)*20 + 40, SplitTime.see, px, py, (line.length)*20 + 50 > py);
 
-	SLVDE.see.fillStyle="#FFFFFF";
-	SLVDE.see.font="18px Verdana";
+	SplitTime.see.fillStyle="#FFFFFF";
+	SplitTime.see.font="18px Verdana";
 	//Lines
 	for(var index = 0; index < line.length; index++)
 	{
-		SLVDE.see.fillText(line[index], SLVDE.SCREENX/2 - 290, yShift + 20*index + 50);
+		SplitTime.see.fillText(line[index], SplitTime.SCREENX/2 - 290, yShift + 20*index + 50);
 	}
 
 	if(spkr)
 	{
 		//Name box
-		SLVDE.drawAwesomeRect(SLVDE.SCREENX/2 - 300, yShift, SLVDE.see.measureText(spkr).width + SLVDE.SCREENX/2 - 260, yShift + 30, SLVDE.see);
+		SplitTime.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift, SplitTime.see.measureText(spkr).width + SplitTime.SCREENX/2 - 260, yShift + 30, SplitTime.see);
 
-		SLVDE.see.fillStyle="#FFFFFF";
-		SLVDE.see.font="18px Verdana";
+		SplitTime.see.fillStyle="#FFFFFF";
+		SplitTime.see.font="18px Verdana";
 
 		//Name
-		SLVDE.see.fillText(spkr, SLVDE.SCREENX/2 - 280, yShift + 20);
+		SplitTime.see.fillText(spkr, SplitTime.SCREENX/2 - 280, yShift + 20);
 	}
 };

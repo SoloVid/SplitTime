@@ -1,36 +1,36 @@
-SLVDE.images = {};
-SLVDE.images.preloaded = {};
-SLVDE.images.other = {};
-SLVDE.images.blank = document.createElement("canvas");
-SLVDE.images.blank.complete = true; //for loaded check
+SplitTime.images = {};
+SplitTime.images.preloaded = {};
+SplitTime.images.other = {};
+SplitTime.images.blank = document.createElement("canvas");
+SplitTime.images.blank.complete = true; //for loaded check
 
-SLVDE.storeImage = function(relativePath, alias) {
-	if(relativePath in SLVDE.images.preloaded || alias in SLVDE.images.preloaded)
+SplitTime.storeImage = function(relativePath, alias) {
+	if(relativePath in SplitTime.images.preloaded || alias in SplitTime.images.preloaded)
 	{
 		console.log("You've already preloaded this image!!!");
 		return;
 	}
 
-	SLVDE.images.preloaded[alias] = new Image();
-	SLVDE.images.preloaded[alias].src = "images/" + relativePath;
+	SplitTime.images.preloaded[alias] = new Image();
+	SplitTime.images.preloaded[alias].src = "images/" + relativePath;
 };
 
-SLVDE.getImage = function(relativePath) {
+SplitTime.getImage = function(relativePath) {
 	if(!relativePath)
 	{
-		return SLVDE.images.blank;
+		return SplitTime.images.blank;
 	}
 
-	if(relativePath in SLVDE.images.preloaded)
+	if(relativePath in SplitTime.images.preloaded)
 	{
-		return SLVDE.images.preloaded[relativePath];
+		return SplitTime.images.preloaded[relativePath];
 	}
 
-	if(!(relativePath in SLVDE.images.other))
+	if(!(relativePath in SplitTime.images.other))
 	{
-		SLVDE.images.other[relativePath] = new Image();
-		SLVDE.images.other[relativePath].src = "images/" + relativePath;
+		SplitTime.images.other[relativePath] = new Image();
+		SplitTime.images.other[relativePath].src = "images/" + relativePath;
 	}
 
-	return SLVDE.images.other[relativePath];
+	return SplitTime.images.other[relativePath];
 };

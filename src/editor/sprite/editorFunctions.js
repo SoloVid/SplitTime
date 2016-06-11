@@ -115,7 +115,7 @@ function drawTraces(highlightIndex, drawTo)
 			traceColor = "#0000FF";
 		}
 
-		SLVDE.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
+		SplitTime.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
 
 	}
 	ctx.translate(-0.5, -0.5);
@@ -207,7 +207,7 @@ function findTrace(x, y) {
 		var traceStr = traceLineParts[1];
 		var traceColor = traceLineParts[2];
 
-		SLVDE.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
+		SplitTime.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
 
 		var imgData = ctx.getImageData(x, y, 1, 1);
 
@@ -292,12 +292,12 @@ function getChildObjectBlock(index)
 
 function getChildObjectTemplateFromBlock(block)
 {
-	var newDeclRegex = /child = new SLVDE\.BodyTemplate\["[^"]*"\]/;
+	var newDeclRegex = /child = new SplitTime\.BodyTemplate\["[^"]*"\]/;
 	var newDecl = block.match(newDeclRegex)[0];
 
 	var template = /"([^"]*)"/.exec(newDecl)[1];
 
-	return new SLVDE.BodyTemplate[template]();
+	return new SplitTime.BodyTemplate[template]();
 }
 
 function updateObject(index)
@@ -305,7 +305,7 @@ function updateObject(index)
 	var childBlock = getChildObjectBlock(index);
 
 	//Get Body object
-	// var newDeclRegex = /child = new SLVDE\.BodyTemplate\["[^"]*"\]/;
+	// var newDeclRegex = /child = new SplitTime\.BodyTemplate\["[^"]*"\]/;
 	// var newDecl = childBlock.match(newDeclRegex)[0];
 	//
 	// var template = /"([^"]*)"/.exec(newDecl)[1];
@@ -376,7 +376,7 @@ function updateObject(index)
 	HTMLNode.style.width = xres + "px";
 	HTMLNode.style.height = yres + "px";
 
-	HTMLImg.style.left = (-(xres*SLVDE.determineColumn(dir))) + "px";
+	HTMLImg.style.left = (-(xres*SplitTime.determineColumn(dir))) + "px";
 }
 
 function createBody(name)
@@ -394,9 +394,9 @@ function createBody(name)
 	spriteCode += "\n";
 	spriteCode += "t = InheritableBodyTemplate" + spriteName + ";\n";
 	spriteCode += "\n";
-	spriteCode += "SLVDE.BodyTemplate[\"" + spriteName + "\"] = t;\n";
+	spriteCode += "SplitTime.BodyTemplate[\"" + spriteName + "\"] = t;\n";
 	spriteCode += "\n";
-	spriteCode += "t.prototype = new SLVDE.Body();\n";
+	spriteCode += "t.prototype = new SplitTime.Body();\n";
 	spriteCode += "t.prototype.constructor = t;\n";
 	spriteCode += "\n";
 	spriteCode += "t.prototype.img = \"\";\n";
@@ -447,18 +447,18 @@ function getBodyImg()
 function getBodyPrototype()
 {
 	//Get Body object
-	var newDeclRegex = /t\.prototype = new SLVDE\.BodyTemplate\["[^"]*"\]/;
+	var newDeclRegex = /t\.prototype = new SplitTime\.BodyTemplate\["[^"]*"\]/;
 	try
 	{
 		var newDecl = spriteCode.match(newDeclRegex)[index];
 
 		var template = /"([^"]*)"/.exec(newDecl)[1];
 
-		return new SLVDE.BodyTemplate[template]();
+		return new SplitTime.BodyTemplate[template]();
 	}
 	catch(e)
 	{
-		return new SLVDE.Body();
+		return new SplitTime.Body();
 	}
 }
 function getBodyProperty(prop)
@@ -522,7 +522,7 @@ function createBodyImg()
 	NPCContainer.style.width = getBodyXRes() + "px";
 	NPCContainer.style.height = getBodyYRes() + "px";
 
-	displayNPC.style.left = (-(getBodyXRes()*SLVDE.determineColumn(getBodyDir()))) + "px";
+	displayNPC.style.left = (-(getBodyXRes()*SplitTime.determineColumn(getBodyDir()))) + "px";
 
 	layerDisplay.appendChild(NPCContainer);
 
@@ -578,7 +578,7 @@ function createObject(skipCode, index)
 
 	if(!skipCode)
 	{
-		spriteCode = spriteCode.replace("var child;", "var child;\n\tchild = new SLVDE.BodyTemplate[\"\"]();\n\tchild.setX(" + x + ");\n\tchild.setY(" + y + ");\n\tchild.setLayer(0);\n\tthis.addChild(child);");
+		spriteCode = spriteCode.replace("var child;", "var child;\n\tchild = new SplitTime.BodyTemplate[\"\"]();\n\tchild.setX(" + x + ");\n\tchild.setY(" + y + ");\n\tchild.setLayer(0);\n\tthis.addChild(child);");
 
 		reset(spriteCode);
 
@@ -596,13 +596,13 @@ function exportLevel(XML)
 
 function loadBodyFromTemplate(templateName) {
 	if(!templateName) {
-		return new SLVDE.Body();
+		return new SplitTime.Body();
 	}
-	else if(!(templateName in SLVDE.BodyTemplate)) {
+	else if(!(templateName in SplitTime.BodyTemplate)) {
 		alert("Invalid sprite template!");
-		return new SLVDE.Body();
+		return new SplitTime.Body();
 	}
 	else {
-		return new SLVDE.BodyTemplate[templateName]();
+		return new SplitTime.BodyTemplate[templateName]();
 	}
 }

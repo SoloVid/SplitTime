@@ -1,11 +1,11 @@
-//SLVDE.Team is a class that will be used to separate out different Bodys in the game
+//SplitTime.Team is a class that will be used to separate out different Bodys in the game
 
-SLVDE.Team = function(name) {
+SplitTime.Team = function(name) {
 	this.name = name;
 	this.alliances = [];
 };
 
-SLVDE.Team.prototype.isAllied = function(otherTeam) {
+SplitTime.Team.prototype.isAllied = function(otherTeam) {
 	//Self is ally
 	if(otherTeam == this) 
 	{
@@ -24,7 +24,7 @@ SLVDE.Team.prototype.isAllied = function(otherTeam) {
 	}
 };
 
-SLVDE.Team.prototype.removeAlly = function(otherTeam) {
+SplitTime.Team.prototype.removeAlly = function(otherTeam) {
 	for(var i = 0; i < this.alliances.length; i++)
 	{
 		if(this.alliances[i] == otherTeam) {
@@ -34,40 +34,40 @@ SLVDE.Team.prototype.removeAlly = function(otherTeam) {
 	}
 };
 
-SLVDE.allyTeams = function(team1, team2) {
+SplitTime.allyTeams = function(team1, team2) {
 	team1.alliances.push(team2);
 	team2.alliances.push(team1);
 };
 
-SLVDE.unallyTeams = function(team1, team2) {
+SplitTime.unallyTeams = function(team1, team2) {
 	team1.removeAlly(team2);
 	team2.removeAlly(team1);
 };
 
-SLVDE.loopThroughAllies = function(person, callback) {
-	for(var i = 0; i < SLVDE.boardAgent.length; i++)
+SplitTime.loopThroughAllies = function(person, callback) {
+	for(var i = 0; i < SplitTime.boardAgent.length; i++)
 	{
-		var currentAgent = SLVDE.boardAgent[i];
+		var currentAgent = SplitTime.boardAgent[i];
 		if(currentAgent.getTeam().isAllied(person.getTeam()))
 		{
 			callback(currentAgent);
 		}
 	}
 };
-SLVDE.loopThroughEnemies = function(person, callback) {
-	for(var i = 0; i < SLVDE.boardAgent.length; i++)
+SplitTime.loopThroughEnemies = function(person, callback) {
+	for(var i = 0; i < SplitTime.boardAgent.length; i++)
 	{
-		var currentAgent = SLVDE.boardAgent[i];
-		if(currentAgent.getTeam() != SLVDE.Teams["neutral"] && !currentAgent.getTeam().isAllied(person.getTeam()))
+		var currentAgent = SplitTime.boardAgent[i];
+		if(currentAgent.getTeam() != SplitTime.Teams["neutral"] && !currentAgent.getTeam().isAllied(person.getTeam()))
 		{
 			callback(currentAgent);
 		}
 	}
 };
-SLVDE.loopThroughTeam = function(person, callback) {
-	for(var i = 0; i < SLVDE.boardAgent.length; i++)
+SplitTime.loopThroughTeam = function(person, callback) {
+	for(var i = 0; i < SplitTime.boardAgent.length; i++)
 	{
-		var currentAgent = SLVDE.boardAgent[i];
+		var currentAgent = SplitTime.boardAgent[i];
 		if(currentAgent.getTeam() == person.getTeam())
 		{
 			callback(currentAgent);
@@ -75,6 +75,6 @@ SLVDE.loopThroughTeam = function(person, callback) {
 	}
 };
 
-SLVDE.Teams["neutral"] = new SLVDE.Team("neutral");
-SLVDE.Teams["heroParty"] = new SLVDE.Team("heroParty");
-SLVDE.Teams["empire"] = new SLVDE.Team("empire");
+SplitTime.Teams["neutral"] = new SplitTime.Team("neutral");
+SplitTime.Teams["heroParty"] = new SplitTime.Team("heroParty");
+SplitTime.Teams["empire"] = new SplitTime.Team("empire");

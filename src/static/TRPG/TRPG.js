@@ -1,369 +1,369 @@
-			/*SLVDE.orientScreen();
-			for(var index = 0; index < SLVDE.currentLevel.layerImg.length; index++)
+			/*SplitTime.orientScreen();
+			for(var index = 0; index < SplitTime.currentLevel.layerImg.length; index++)
 			{
 				//Draw layer
-				SLVDE.see.drawImage(SLVDE.currentLevel.layerImg[index], SLVDE.wX, SLVDE.wY, SLVDE.SCREENX, SLVDE.SCREENY, 0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+				SplitTime.see.drawImage(SplitTime.currentLevel.layerImg[index], SplitTime.wX, SplitTime.wY, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 				//Draw blue range squares
-				if(index == SLVDE.cTeam[SLVDE.currentPlayer].layer && SLVDE.cTeam[SLVDE.currentPlayer].squares != null)
+				if(index == SplitTime.cTeam[SplitTime.currentPlayer].layer && SplitTime.cTeam[SplitTime.currentPlayer].squares != null)
 				{
-					for(var second = 0; second < SLVDE.cTeam[SLVDE.currentPlayer].squares.length; second++)
+					for(var second = 0; second < SplitTime.cTeam[SplitTime.currentPlayer].squares.length; second++)
 					{
-						SLVDE.see.drawImage(SLVDE.image["blueSquare.png"], 0, 0, 32, 32, SLVDE.cTeam[SLVDE.currentPlayer].squares[second].x*32 - SLVDE.wX, SLVDE.cTeam[SLVDE.currentPlayer].squares[second].y*32 - SLVDE.wY, 32, 32);
+						SplitTime.see.drawImage(SplitTime.image["blueSquare.png"], 0, 0, 32, 32, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
 					}
 				}
-				for(var second = 0; second < SLVDE.boardBody.length; second++)
+				for(var second = 0; second < SplitTime.boardBody.length; second++)
 				{
-					if(SLVDE.boardBody[second].act == "slash")
+					if(SplitTime.boardBody[second].act == "slash")
 					{
 						//If done slashing, move on.
-						if(SLVDE.boardBody[second].SLVDE.countdown <= 0)
+						if(SplitTime.boardBody[second].SplitTime.countdown <= 0)
 						{
-							SLVDE.boardBody[second].act = null;
-							SLVDE.TRPGNextTurn();
+							SplitTime.boardBody[second].act = null;
+							SplitTime.TRPGNextTurn();
 						}
 						else
 						{
 							//Cycle through opponents
-							for(var third = 0; third < SLVDE.boardBody[second].oppTeam.length; third++)
+							for(var third = 0; third < SplitTime.boardBody[second].oppTeam.length; third++)
 							{
 								//If distance < 40
-								//if(Math.sqrt(Math.pow(SLVDE.boardBody[second].oppTeam[third].x - SLVDE.boardBody[second].x, 2) + Math.pow(SLVDE.boardBody[second].oppTeam[third].y - SLVDE.boardBody[second].y, 2)) <= 36)
+								//if(Math.sqrt(Math.pow(SplitTime.boardBody[second].oppTeam[third].x - SplitTime.boardBody[second].x, 2) + Math.pow(SplitTime.boardBody[second].oppTeam[third].y - SplitTime.boardBody[second].y, 2)) <= 36)
 								//If one tile away
-								if(Math.pow(SLVDE.xPixToTile(SLVDE.boardBody[second].oppTeam[third].x) - SLVDE.xPixToTile(SLVDE.boardBody[second].x), 2) + Math.pow(SLVDE.yPixToTile(SLVDE.boardBody[second].oppTeam[third].y) - SLVDE.yPixToTile(SLVDE.boardBody[second].y), 2) == 1)
+								if(Math.pow(SplitTime.xPixToTile(SplitTime.boardBody[second].oppTeam[third].x) - SplitTime.xPixToTile(SplitTime.boardBody[second].x), 2) + Math.pow(SplitTime.yPixToTile(SplitTime.boardBody[second].oppTeam[third].y) - SplitTime.yPixToTile(SplitTime.boardBody[second].y), 2) == 1)
 								{
 									//Determine angle between slasher and opponent (in terms of PI/2)
-									var angle = Math.atan(-(SLVDE.boardBody[second].oppTeam[third].y - SLVDE.boardBody[second].y)/(SLVDE.boardBody[second].oppTeam[third].x - SLVDE.boardBody[second].x))/(Math.PI/2);
+									var angle = Math.atan(-(SplitTime.boardBody[second].oppTeam[third].y - SplitTime.boardBody[second].y)/(SplitTime.boardBody[second].oppTeam[third].x - SplitTime.boardBody[second].x))/(Math.PI/2);
 
-									if(SLVDE.boardBody[second].oppTeam[third].x > SLVDE.boardBody[second].x && SLVDE.boardBody[second].oppTeam[third].y > SLVDE.boardBody[second].y)
+									if(SplitTime.boardBody[second].oppTeam[third].x > SplitTime.boardBody[second].x && SplitTime.boardBody[second].oppTeam[third].y > SplitTime.boardBody[second].y)
 									{
 										angle += 4;
 									}
-									else if(SLVDE.boardBody[second].oppTeam[third].x < SLVDE.boardBody[second].x)
+									else if(SplitTime.boardBody[second].oppTeam[third].x < SplitTime.boardBody[second].x)
 									{
 										angle += 2;
 									}
 									//Compare angle to direction of slasher. If in range of PI...
-									if((Math.abs(angle - SLVDE.boardBody[second].dir) <= .5 || Math.abs(angle - SLVDE.boardBody[second].dir) >= 3.5) && SLVDE.boardBody[second].oppTeam[third].status != "hurt")
+									if((Math.abs(angle - SplitTime.boardBody[second].dir) <= .5 || Math.abs(angle - SplitTime.boardBody[second].dir) >= 3.5) && SplitTime.boardBody[second].oppTeam[third].status != "hurt")
 									{
-										SLVDE.damage(SLVDE.boardBody[second], SLVDE.boardBody[second].oppTeam[third]);
-										SLVDE.boardBody[second].oppTeam[third].status = "hurt";
-										SLVDE.boardBody[second].oppTeam[third].SLVDE.countdown = 4;
+										SplitTime.damage(SplitTime.boardBody[second], SplitTime.boardBody[second].oppTeam[third]);
+										SplitTime.boardBody[second].oppTeam[third].status = "hurt";
+										SplitTime.boardBody[second].oppTeam[third].SplitTime.countdown = 4;
 									}
 								}
 							}
-							SLVDE.see.lineWidth = 8;
-							SLVDE.see.beginPath();
-							SLVDE.see.arc((SLVDE.boardBody[second].x - ((SLVDE.boardBody[second].xres)/2)) - SLVDE.wX + 24, (SLVDE.boardBody[second].y - (SLVDE.boardBody[second].yres)) - SLVDE.wY + 56, 32, .5*((3 - SLVDE.boardBody[second].dir) - .5 + (SLVDE.boardBody[second].SLVDE.countdown/8))*Math.PI, .5*((3 - SLVDE.boardBody[second].dir) + .5 + (SLVDE.boardBody[second].SLVDE.countdown/8))*Math.PI);
-							SLVDE.see.strokeStyle = "white";
-							SLVDE.see.stroke();
-							SLVDE.boardBody[second].SLVDE.countdown--;
-							if(SLVDE.boardBody[second].SLVDE.countdown < 0)
+							SplitTime.see.lineWidth = 8;
+							SplitTime.see.beginPath();
+							SplitTime.see.arc((SplitTime.boardBody[second].x - ((SplitTime.boardBody[second].xres)/2)) - SplitTime.wX + 24, (SplitTime.boardBody[second].y - (SplitTime.boardBody[second].yres)) - SplitTime.wY + 56, 32, .5*((3 - SplitTime.boardBody[second].dir) - .5 + (SplitTime.boardBody[second].SplitTime.countdown/8))*Math.PI, .5*((3 - SplitTime.boardBody[second].dir) + .5 + (SplitTime.boardBody[second].SplitTime.countdown/8))*Math.PI);
+							SplitTime.see.strokeStyle = "white";
+							SplitTime.see.stroke();
+							SplitTime.boardBody[second].SplitTime.countdown--;
+							if(SplitTime.boardBody[second].SplitTime.countdown < 0)
 							{
-								SLVDE.boardBody[second].SLVDE.countdown = 0;
+								SplitTime.boardBody[second].SplitTime.countdown = 0;
 							}
 						}
 					}
-					if(SLVDE.boardBody[second].layer == index)
+					if(SplitTime.boardBody[second].layer == index)
 					{
-						if((SLVDE.boardBody[second].status == "hurt" && SLVDE.frameClock != 1) || SLVDE.boardBody[second].status != "hurt")
+						if((SplitTime.boardBody[second].status == "hurt" && SplitTime.frameClock != 1) || SplitTime.boardBody[second].status != "hurt")
 						{
-							var col = SLVDE.determineColumn(SLVDE.boardBody[second].dir);
-							SLVDE.see.drawImage(SLVDE.boardBody[second].img, 32*col, 64*SLVDE.boardBody[second].frame, SLVDE.boardBody[second].xres, SLVDE.boardBody[second].yres, (SLVDE.boardBody[second].x - (((SLVDE.boardBody[second].xres)/2) - 8)) - SLVDE.wX, (SLVDE.boardBody[second].y - (SLVDE.boardBody[second].yres - 8)) - SLVDE.wY, SLVDE.boardBody[second].xres, SLVDE.boardBody[second].yres);
-							if(SLVDE.boardBody[second].holding != null && Math.round(SLVDE.boardBody[second].dir) != 1)
+							var col = SplitTime.determineColumn(SplitTime.boardBody[second].dir);
+							SplitTime.see.drawImage(SplitTime.boardBody[second].img, 32*col, 64*SplitTime.boardBody[second].frame, SplitTime.boardBody[second].xres, SplitTime.boardBody[second].yres, (SplitTime.boardBody[second].x - (((SplitTime.boardBody[second].xres)/2) - 8)) - SplitTime.wX, (SplitTime.boardBody[second].y - (SplitTime.boardBody[second].yres - 8)) - SplitTime.wY, SplitTime.boardBody[second].xres, SplitTime.boardBody[second].yres);
+							if(SplitTime.boardBody[second].holding != null && Math.round(SplitTime.boardBody[second].dir) != 1)
 							{
-								SLVDE.see.drawImage(SLVDE.boardBody[second].holding, (SLVDE.boardBody[second].holding.width/4)*col, 0, (SLVDE.boardBody[second].holding.width/4), 32, (SLVDE.boardBody[second].x - (((SLVDE.boardBody[second].xres)/2) - 8)) - SLVDE.wX + 16*Math.round(Math.cos(SLVDE.boardBody[second].dir*Math.PI/2)), (SLVDE.boardBody[second].y - (SLVDE.boardBody[second].yres - 18)) - SLVDE.wY - 5*Math.round(Math.sin(SLVDE.boardBody[second].dir*Math.PI/2)), 32, 32);
+								SplitTime.see.drawImage(SplitTime.boardBody[second].holding, (SplitTime.boardBody[second].holding.width/4)*col, 0, (SplitTime.boardBody[second].holding.width/4), 32, (SplitTime.boardBody[second].x - (((SplitTime.boardBody[second].xres)/2) - 8)) - SplitTime.wX + 16*Math.round(Math.cos(SplitTime.boardBody[second].dir*Math.PI/2)), (SplitTime.boardBody[second].y - (SplitTime.boardBody[second].yres - 18)) - SplitTime.wY - 5*Math.round(Math.sin(SplitTime.boardBody[second].dir*Math.PI/2)), 32, 32);
 							}
 						}
-						if(SLVDE.boardBody[second].status == "hurt" && SLVDE.frameClock == 1)
+						if(SplitTime.boardBody[second].status == "hurt" && SplitTime.frameClock == 1)
 						{
-								SLVDE.boardBody[second].SLVDE.countdown--;
-								if(SLVDE.boardBody[second].SLVDE.countdown <= 0)
+								SplitTime.boardBody[second].SplitTime.countdown--;
+								if(SplitTime.boardBody[second].SplitTime.countdown <= 0)
 								{
-									SLVDE.boardBody[second].status = null;
+									SplitTime.boardBody[second].status = null;
 								}
 						}
 					}
-					if(SLVDE.boardBody[second].dart.layer == index)
+					if(SplitTime.boardBody[second].dart.layer == index)
 					{
-						var col = SLVDE.determineColumn(SLVDE.boardBody[second].dart.dir);
-						SLVDE.see.drawImage(SLVDE.boardBody[second].dart.img, SLVDE.boardBody[second].dart.xres*col, SLVDE.boardBody[second].dart.yres*SLVDE.boardBody[second].dart.frame, SLVDE.boardBody[second].dart.xres, SLVDE.boardBody[second].dart.yres, SLVDE.boardBody[second].dart.x - SLVDE.wX, SLVDE.boardBody[second].dart.y - SLVDE.wY, SLVDE.boardBody[second].dart.xres, SLVDE.boardBody[second].dart.yres);
+						var col = SplitTime.determineColumn(SplitTime.boardBody[second].dart.dir);
+						SplitTime.see.drawImage(SplitTime.boardBody[second].dart.img, SplitTime.boardBody[second].dart.xres*col, SplitTime.boardBody[second].dart.yres*SplitTime.boardBody[second].dart.frame, SplitTime.boardBody[second].dart.xres, SplitTime.boardBody[second].dart.yres, SplitTime.boardBody[second].dart.x - SplitTime.wX, SplitTime.boardBody[second].dart.y - SplitTime.wY, SplitTime.boardBody[second].dart.xres, SplitTime.boardBody[second].dart.yres);
 					}
 				}
 			}
 			//Weather
-			SLVDE.see.fillStyle = "rgba(0, 0, 0, " + shade + ")";
-			SLVDE.see.fillRect(0, 0, SLVDE.SCREENX, SLVDE.SCREENY);
+			SplitTime.see.fillStyle = "rgba(0, 0, 0, " + shade + ")";
+			SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 			if(rainy)
 			{
-				SLVDE.see.drawImage(SLVDE.image["rain.png"], -((SLVDE.counter%100)/100)*SLVDE.SCREENX, ((SLVDE.counter%25)/25)*SLVDE.SCREENY - SLVDE.SCREENY);
-				if(SLVDE.counter%8 == SLVD.randomInt(12))
+				SplitTime.see.drawImage(SplitTime.image["rain.png"], -((SplitTime.counter%100)/100)*SplitTime.SCREENX, ((SplitTime.counter%25)/25)*SplitTime.SCREENY - SplitTime.SCREENY);
+				if(SplitTime.counter%8 == SLVD.randomInt(12))
 				{
 					for(var index = 0; index < SLVD.randomInt(3); index++)
 					{
-						SLVDE.see.drawImage(SLVDE.image["lightning.png"], 0, 0);
+						SplitTime.see.drawImage(SplitTime.image["lightning.png"], 0, 0);
 					}
 				}
 			}
-			if(cloudy) SLVDE.see.drawImage(SLVDE.image["stormClouds.png"], SLVDE.counter%1280 - 1280, 0);
-			//document.getElementById("info").innerHTML = SLVDE.player[0].dir + ", " + SLVDE.player[0].x + ", " + SLVDE.player[0].y + ", " + dKeys
-			SLVDE.see.fillStyle="#FFFFFF";
-			SLVDE.see.font="12px Verdana";
-			SLVDE.see.fillText(SLVDE.cTeam[SLVDE.currentPlayer].name + ": " + SLVDE.cTeam[SLVDE.currentPlayer].hp + " HP | " + SLVDE.cTeam[SLVDE.currentPlayer].strg + " Strength | " + SLVDE.cTeam[SLVDE.currentPlayer].spd + " Speed", 10, 20);
+			if(cloudy) SplitTime.see.drawImage(SplitTime.image["stormClouds.png"], SplitTime.counter%1280 - 1280, 0);
+			//document.getElementById("info").innerHTML = SplitTime.player[0].dir + ", " + SplitTime.player[0].x + ", " + SplitTime.player[0].y + ", " + dKeys
+			SplitTime.see.fillStyle="#FFFFFF";
+			SplitTime.see.font="12px Verdana";
+			SplitTime.see.fillText(SplitTime.cTeam[SplitTime.currentPlayer].name + ": " + SplitTime.cTeam[SplitTime.currentPlayer].hp + " HP | " + SplitTime.cTeam[SplitTime.currentPlayer].strg + " Strength | " + SplitTime.cTeam[SplitTime.currentPlayer].spd + " Speed", 10, 20);
 			*/
 
-SLVDE.TRPGNextTurn = function() //Function run at the end of a character's turn in TRPG mode. Most notably sets SLVDE.cTeam and SLVDE.currentPlayer.
+SplitTime.TRPGNextTurn = function() //Function run at the end of a character's turn in TRPG mode. Most notably sets SplitTime.cTeam and SplitTime.currentPlayer.
 {
-	if(SLVDE.currentPlayer >= 0)
+	if(SplitTime.currentPlayer >= 0)
 	{
-		SLVDE.cTeam[SLVDE.currentPlayer].dir = 3;
-		SLVDE.PF.reformUnitsOnSquareWithout(SLVDE.xPixToTile(SLVDE.cTeam[SLVDE.currentPlayer].x), SLVDE.yPixToTile(SLVDE.cTeam[SLVDE.currentPlayer].y), SLVDE.cTeam, 0);
+		SplitTime.cTeam[SplitTime.currentPlayer].dir = 3;
+		SplitTime.PF.reformUnitsOnSquareWithout(SplitTime.xPixToTile(SplitTime.cTeam[SplitTime.currentPlayer].x), SplitTime.yPixToTile(SplitTime.cTeam[SplitTime.currentPlayer].y), SplitTime.cTeam, 0);
 	}
-	if(SLVDE.cTeam[SLVDE.currentPlayer])
+	if(SplitTime.cTeam[SplitTime.currentPlayer])
 	{
-		delete SLVDE.cTeam[SLVDE.currentPlayer].squares;
-		delete SLVDE.cTeam[SLVDE.currentPlayer].target;
+		delete SplitTime.cTeam[SplitTime.currentPlayer].squares;
+		delete SplitTime.cTeam[SplitTime.currentPlayer].target;
 	}
-	if(SLVDE.currentPlayer < SLVDE.cTeam.length - 1)
+	if(SplitTime.currentPlayer < SplitTime.cTeam.length - 1)
 	{
-		SLVDE.currentPlayer++;
+		SplitTime.currentPlayer++;
 	}
-	else if(SLVDE.cTeam[SLVDE.currentPlayer].oppTeam.length !== 0)
+	else if(SplitTime.cTeam[SplitTime.currentPlayer].oppTeam.length !== 0)
 	{
-		SLVDE.cTeam = SLVDE.cTeam[SLVDE.currentPlayer].oppTeam;
-		SLVDE.currentPlayer = 0;
+		SplitTime.cTeam = SplitTime.cTeam[SplitTime.currentPlayer].oppTeam;
+		SplitTime.currentPlayer = 0;
 
-		if(SLVDE.cTeam == SLVDE.player)
+		if(SplitTime.cTeam == SplitTime.player)
 		{
-			SLVDE.Time.advance(12*60*60); //in time.js
+			SplitTime.Time.advance(12*60*60); //in time.js
 		}
 	}
 	else
 	{
 		resumeFunc = die;
 		resumeCue = resumeFunc(2);
-		SLVDE.currentPlayer = 0;
+		SplitTime.currentPlayer = 0;
 	}
-	//alert(SLVDE.cTeam[SLVDE.currentPlayer].name + SLVDE.currentPlayer);
-	SLVDE.cTeam[SLVDE.currentPlayer].ix = SLVDE.cTeam[SLVDE.currentPlayer].x;
-	SLVDE.cTeam[SLVDE.currentPlayer].iy = SLVDE.cTeam[SLVDE.currentPlayer].y;
+	//alert(SplitTime.cTeam[SplitTime.currentPlayer].name + SplitTime.currentPlayer);
+	SplitTime.cTeam[SplitTime.currentPlayer].ix = SplitTime.cTeam[SplitTime.currentPlayer].x;
+	SplitTime.cTeam[SplitTime.currentPlayer].iy = SplitTime.cTeam[SplitTime.currentPlayer].y;
 
-	SLVDE.PF.reformUnitsOnSquareWithout(SLVDE.xPixToTile(SLVDE.cTeam[SLVDE.currentPlayer].x), SLVDE.yPixToTile(SLVDE.cTeam[SLVDE.currentPlayer].y), SLVDE.cTeam, SLVDE.cTeam[SLVDE.currentPlayer]);
-	SLVDE.cTeam[SLVDE.currentPlayer].x = SLVDE.xTileToPix(SLVDE.xPixToTile(SLVDE.cTeam[SLVDE.currentPlayer].x));
-	SLVDE.cTeam[SLVDE.currentPlayer].y = SLVDE.yTileToPix(SLVDE.yPixToTile(SLVDE.cTeam[SLVDE.currentPlayer].y));
-/*	SLVDE.process = "wait";
-	SLVDE.countdown = 8;*/
+	SplitTime.PF.reformUnitsOnSquareWithout(SplitTime.xPixToTile(SplitTime.cTeam[SplitTime.currentPlayer].x), SplitTime.yPixToTile(SplitTime.cTeam[SplitTime.currentPlayer].y), SplitTime.cTeam, SplitTime.cTeam[SplitTime.currentPlayer]);
+	SplitTime.cTeam[SplitTime.currentPlayer].x = SplitTime.xTileToPix(SplitTime.xPixToTile(SplitTime.cTeam[SplitTime.currentPlayer].x));
+	SplitTime.cTeam[SplitTime.currentPlayer].y = SplitTime.yTileToPix(SplitTime.yPixToTile(SplitTime.cTeam[SplitTime.currentPlayer].y));
+/*	SplitTime.process = "wait";
+	SplitTime.countdown = 8;*/
 };
 
-SLVDE.TRPGNPCMotion = function() //Function for a single SLVDE.NPC whose turn it is in TRPG mode.
+SplitTime.TRPGNPCMotion = function() //Function for a single SplitTime.NPC whose turn it is in TRPG mode.
 {
-	if(boardNPC[SLVDE.currentPlayer].dmnr != 2) //If SLVDE.NPC is non-aggressive (such as one for talking to), just move on to next SLVDE.NPC without moving.
+	if(boardNPC[SplitTime.currentPlayer].dmnr != 2) //If SplitTime.NPC is non-aggressive (such as one for talking to), just move on to next SplitTime.NPC without moving.
 	{
-		SLVDE.TRPGNextTurn();
+		SplitTime.TRPGNextTurn();
 	}
 	else
 	{
-		if(boardNPC[SLVDE.currentPlayer].target == -1) //If no path could be found to a target, end turn.
+		if(boardNPC[SplitTime.currentPlayer].target == -1) //If no path could be found to a target, end turn.
 		{
-			SLVDE.TRPGNextTurn();
+			SplitTime.TRPGNextTurn();
 		}
-		else if(boardNPC[SLVDE.currentPlayer].path.x.length > 0) //If path is set up, follow path. TODO: check modification of this if for JSHint
+		else if(boardNPC[SplitTime.currentPlayer].path.x.length > 0) //If path is set up, follow path. TODO: check modification of this if for JSHint
 		{
-			if(SLVDE.counter%4 === 0) { boardNPC[SLVDE.currentPlayer].frame = (boardNPC[SLVDE.currentPlayer].frame + 1)%4; }
-			pathMotion(boardNPC[SLVDE.currentPlayer], 8);
+			if(SplitTime.counter%4 === 0) { boardNPC[SplitTime.currentPlayer].frame = (boardNPC[SplitTime.currentPlayer].frame + 1)%4; }
+			pathMotion(boardNPC[SplitTime.currentPlayer], 8);
 		}
-		else if(!boardNPC[SLVDE.currentPlayer].target) //If no target (or -1 as "target"), pathfind (the pathfind function returns a target).
+		else if(!boardNPC[SplitTime.currentPlayer].target) //If no target (or -1 as "target"), pathfind (the pathfind function returns a target).
 		{
-			boardNPC[SLVDE.currentPlayer].target = SLVDE.pathToTeam(boardNPC[SLVDE.currentPlayer], boardNPC[SLVDE.currentPlayer].oppTeam);
+			boardNPC[SplitTime.currentPlayer].target = SplitTime.pathToTeam(boardNPC[SplitTime.currentPlayer], boardNPC[SplitTime.currentPlayer].oppTeam);
 		}
 		else
 		{
-			//Turn SLVDE.NPC based on simple relativity. Since N and S are more picturesque for TRPG, those are preferred directions.
-			if(boardNPC[SLVDE.currentPlayer].target.y > boardNPC[SLVDE.currentPlayer].y)
+			//Turn SplitTime.NPC based on simple relativity. Since N and S are more picturesque for TRPG, those are preferred directions.
+			if(boardNPC[SplitTime.currentPlayer].target.y > boardNPC[SplitTime.currentPlayer].y)
 			{
-				boardNPC[SLVDE.currentPlayer].dir = 3;
+				boardNPC[SplitTime.currentPlayer].dir = 3;
 			}
-			else if(boardNPC[SLVDE.currentPlayer].target.y < boardNPC[SLVDE.currentPlayer].y)
+			else if(boardNPC[SplitTime.currentPlayer].target.y < boardNPC[SplitTime.currentPlayer].y)
 			{
-				boardNPC[SLVDE.currentPlayer].dir = 1;
+				boardNPC[SplitTime.currentPlayer].dir = 1;
 			}
-			else if(boardNPC[SLVDE.currentPlayer].target.x > boardNPC[SLVDE.currentPlayer].x)
+			else if(boardNPC[SplitTime.currentPlayer].target.x > boardNPC[SplitTime.currentPlayer].x)
 			{
-				boardNPC[SLVDE.currentPlayer].dir = 0;
+				boardNPC[SplitTime.currentPlayer].dir = 0;
 			}
-			else if(boardNPC[SLVDE.currentPlayer].target.x < boardNPC[SLVDE.currentPlayer].x)
+			else if(boardNPC[SplitTime.currentPlayer].target.x < boardNPC[SplitTime.currentPlayer].x)
 			{
-				boardNPC[SLVDE.currentPlayer].dir = 2;
+				boardNPC[SplitTime.currentPlayer].dir = 2;
 			}
 			//If in range, attack
-			if(Math.sqrt(Math.pow(boardNPC[SLVDE.currentPlayer].target.x - boardNPC[SLVDE.currentPlayer].x, 2) + Math.pow(boardNPC[SLVDE.currentPlayer].target.y - boardNPC[SLVDE.currentPlayer].y, 2)) <= 36 && boardNPC[SLVDE.currentPlayer].act != "slash")
+			if(Math.sqrt(Math.pow(boardNPC[SplitTime.currentPlayer].target.x - boardNPC[SplitTime.currentPlayer].x, 2) + Math.pow(boardNPC[SplitTime.currentPlayer].target.y - boardNPC[SplitTime.currentPlayer].y, 2)) <= 36 && boardNPC[SplitTime.currentPlayer].act != "slash")
 			{
-				SLVDE.Action.act.slash(boardNPC[SLVDE.currentPlayer]);
-/*				boardNPC[SLVDE.currentPlayer].act = "slash";
-				boardNPC[SLVDE.currentPlayer].SLVDE.countdown = 16;*/
+				SplitTime.Action.act.slash(boardNPC[SplitTime.currentPlayer]);
+/*				boardNPC[SplitTime.currentPlayer].act = "slash";
+				boardNPC[SplitTime.currentPlayer].SplitTime.countdown = 16;*/
 			}
-			else if(boardNPC[SLVDE.currentPlayer].act != "slash") //If not worth slashing or already slashing (end turn gets handled after slash), end turn
+			else if(boardNPC[SplitTime.currentPlayer].act != "slash") //If not worth slashing or already slashing (end turn gets handled after slash), end turn
 			{
-				SLVDE.TRPGNextTurn();
+				SplitTime.TRPGNextTurn();
 			}
 		}
 	}
 };
 
-SLVDE.TRPGPlayerMotion = function() //Function for current SLVDE.player's motion and other key handlings in TRPG mode.
+SplitTime.TRPGPlayerMotion = function() //Function for current SplitTime.player's motion and other key handlings in TRPG mode.
 {
 	var index;
-	if(!SLVDE.player[SLVDE.currentPlayer].squares)
+	if(!SplitTime.player[SplitTime.currentPlayer].squares)
 	{
-		SLVDE.player[SLVDE.currentPlayer].squares = [];
-		SLVDE.PF.getSquares(SLVDE.player[SLVDE.currentPlayer]);
-		SLVDE.PF.reformUnitsOnSquareWithout(SLVDE.xPixToTile(SLVDE.player[SLVDE.currentPlayer].x), SLVDE.yPixToTile(SLVDE.player[SLVDE.currentPlayer].y), SLVDE.player, SLVDE.player[SLVDE.currentPlayer]);
+		SplitTime.player[SplitTime.currentPlayer].squares = [];
+		SplitTime.PF.getSquares(SplitTime.player[SplitTime.currentPlayer]);
+		SplitTime.PF.reformUnitsOnSquareWithout(SplitTime.xPixToTile(SplitTime.player[SplitTime.currentPlayer].x), SplitTime.yPixToTile(SplitTime.player[SplitTime.currentPlayer].y), SplitTime.player, SplitTime.player[SplitTime.currentPlayer]);
 	}
-	if(SLVDE.player[SLVDE.currentPlayer].path.x.length > 0) //TODO: check JSHint-prompted modification 
+	if(SplitTime.player[SplitTime.currentPlayer].path.x.length > 0) //TODO: check JSHint-prompted modification 
 	{
-		if(SLVDE.counter%4 === 0) { SLVDE.player[SLVDE.currentPlayer].frame = (SLVDE.player[SLVDE.currentPlayer].frame + 1)%4; }
-		pathMotion(SLVDE.player[SLVDE.currentPlayer], 8);
+		if(SplitTime.counter%4 === 0) { SplitTime.player[SplitTime.currentPlayer].frame = (SplitTime.player[SplitTime.currentPlayer].frame + 1)%4; }
+		pathMotion(SplitTime.player[SplitTime.currentPlayer], 8);
 	}
 	else
 	{
-		if(SLVDE.PF.onSquare(SLVDE.player[SLVDE.currentPlayer]))
+		if(SplitTime.PF.onSquare(SplitTime.player[SplitTime.currentPlayer]))
 		{
 		//alert("on square");
-			if(SLVDE.keyFirstDown == "enter" || SLVDE.keyFirstDown == "space") //ENTER and SPACE
+			if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space") //ENTER and SPACE
 			{
-/*				alert(SLVDE.NPC[30].x)
+/*				alert(SplitTime.NPC[30].x)
 				alert(boardNPC[30].x);*/
 				for(index = 0; index < boardNPC.length; index++)
 				{
-					if(Math.abs(SLVDE.player[SLVDE.currentPlayer].x - boardNPC[index].x) < 20 && Math.abs(SLVDE.player[SLVDE.currentPlayer].y - boardNPC[index].y) < 12 && boardNPC[index].program)
+					if(Math.abs(SplitTime.player[SplitTime.currentPlayer].x - boardNPC[index].x) < 20 && Math.abs(SplitTime.player[SplitTime.currentPlayer].y - boardNPC[index].y) < 12 && boardNPC[index].program)
 					{
 						resumeFunc = boardNPC[index].program;
 						resumeCue = boardNPC[index].program(0);
 					}
 				}
 			}
-			if(SLVDE.keyFirstDown == "k" && !SLVDE.player[SLVDE.currentPlayer].act && !SLVDE.player[SLVDE.currentPlayer].inAir) //K
+			if(SplitTime.keyFirstDown == "k" && !SplitTime.player[SplitTime.currentPlayer].act && !SplitTime.player[SplitTime.currentPlayer].inAir) //K
 			{
 				//alert("prepare for next turn");
-				SLVDE.TRPGNextTurn();
-				delete SLVDE.keyFirstDown;
+				SplitTime.TRPGNextTurn();
+				delete SplitTime.keyFirstDown;
 				return;
 			}
-			if(SLVDE.keyFirstDown == "i") //I
+			if(SplitTime.keyFirstDown == "i") //I
 			{
-//				SLVDE.player[SLVDE.currentPlayer].iFunction();
-				delete SLVDE.keyFirstDown;
+//				SplitTime.player[SplitTime.currentPlayer].iFunction();
+				delete SplitTime.keyFirstDown;
 			}
-			if(SLVDE.keyFirstDown == "j") //J
+			if(SplitTime.keyFirstDown == "j") //J
 			{
-				SLVDE.Action.act.slash(SLVDE.player[SLVDE.currentPlayer]);
-/*				SLVDE.player[SLVDE.currentPlayer].act = "slash";
-				SLVDE.player[SLVDE.currentPlayer].SLVDE.countdown = 16;*/
-				delete SLVDE.keyFirstDown;
-//				SLVDE.TRPGNextTurn();
+				SplitTime.Action.act.slash(SplitTime.player[SplitTime.currentPlayer]);
+/*				SplitTime.player[SplitTime.currentPlayer].act = "slash";
+				SplitTime.player[SplitTime.currentPlayer].SplitTime.countdown = 16;*/
+				delete SplitTime.keyFirstDown;
+//				SplitTime.TRPGNextTurn();
 			}
-			if(SLVDE.keyFirstDown == "l") //L
+			if(SplitTime.keyFirstDown == "l") //L
 			{
-				SLVDE.player[SLVDE.currentPlayer].lFunction();
-				delete SLVDE.keyFirstDown;
+				SplitTime.player[SplitTime.currentPlayer].lFunction();
+				delete SplitTime.keyFirstDown;
 			}
 		}
 		var dx = 0;
 		var dy = 0;
-/*		alert(SLVDE.player[SLVDE.currentPlayer].ix);
-		alert(SLVDE.player[SLVDE.currentPlayer].x);
-		alert(SLVDE.player[SLVDE.currentPlayer].ix - SLVDE.player[SLVDE.currentPlayer].x);
-		alert(SLVDE.player[SLVDE.currentPlayer].iy - SLVDE.player[SLVDE.currentPlayer].y);
-		alert(Math.abs(SLVDE.player[SLVDE.currentPlayer].ix - SLVDE.player[SLVDE.currentPlayer].x) + Math.abs(SLVDE.player[SLVDE.currentPlayer].iy - SLVDE.player[SLVDE.currentPlayer].y));*/
+/*		alert(SplitTime.player[SplitTime.currentPlayer].ix);
+		alert(SplitTime.player[SplitTime.currentPlayer].x);
+		alert(SplitTime.player[SplitTime.currentPlayer].ix - SplitTime.player[SplitTime.currentPlayer].x);
+		alert(SplitTime.player[SplitTime.currentPlayer].iy - SplitTime.player[SplitTime.currentPlayer].y);
+		alert(Math.abs(SplitTime.player[SplitTime.currentPlayer].ix - SplitTime.player[SplitTime.currentPlayer].x) + Math.abs(SplitTime.player[SplitTime.currentPlayer].iy - SplitTime.player[SplitTime.currentPlayer].y));*/
 
 		//alert("still in range");
-		if(SLVDE.keyDown[37] == 1 || SLVDE.keyDown[65] == 1) //West
+		if(SplitTime.keyDown[37] == 1 || SplitTime.keyDown[65] == 1) //West
 		{
 			dx = -32;
-			SLVDE.player[SLVDE.currentPlayer].dir = 2;
+			SplitTime.player[SplitTime.currentPlayer].dir = 2;
 		}
-		else if(SLVDE.keyDown[38] == 1 || SLVDE.keyDown[87] == 1) //North
+		else if(SplitTime.keyDown[38] == 1 || SplitTime.keyDown[87] == 1) //North
 		{
 			dy = -32;
-			SLVDE.player[SLVDE.currentPlayer].dir = 1;
+			SplitTime.player[SplitTime.currentPlayer].dir = 1;
 		}
-		else if(SLVDE.keyDown[39] == 1 || SLVDE.keyDown[68] == 1) //East
+		else if(SplitTime.keyDown[39] == 1 || SplitTime.keyDown[68] == 1) //East
 		{
 			dx = 32;
-			SLVDE.player[SLVDE.currentPlayer].dir = 0;
+			SplitTime.player[SplitTime.currentPlayer].dir = 0;
 		}
-		else if(SLVDE.keyDown[40] == 1 || SLVDE.keyDown[83] == 1) //South
+		else if(SplitTime.keyDown[40] == 1 || SplitTime.keyDown[83] == 1) //South
 		{
 			dy = 32;
-			SLVDE.player[SLVDE.currentPlayer].dir = 3;
+			SplitTime.player[SplitTime.currentPlayer].dir = 3;
 		}
 		////If not traveling too far and not traveling out of bounds.
 		//If target square is one of predetermined squares
-//		if(/*Math.abs(SLVDE.player[SLVDE.currentPlayer].ix - (SLVDE.player[SLVDE.currentPlayer].x + dx)) + Math.abs(SLVDE.player[SLVDE.currentPlayer].iy - (SLVDE.player[SLVDE.currentPlayer].y + dy)) <= 32*SLVDE.player[SLVDE.currentPlayer].spd && SLVDE.player[SLVDE.currentPlayer].x + dx >= 0 && SLVDE.player[SLVDE.currentPlayer].y + dy >= 0 && SLVDE.player[SLVDE.currentPlayer].x + dx < SLVDE.currentLevel.layerImg[SLVDE.player[SLVDE.currentPlayer].layer].width && SLVDE.player[SLVDE.currentPlayer].y + dy < SLVDE.currentLevel.layerImg[SLVDE.player[SLVDE.currentPlayer].layer].height*/)
-		if(SLVDE.PF.isSquare(SLVDE.player[SLVDE.currentPlayer].x + dx, SLVDE.player[SLVDE.currentPlayer].y + dy, SLVDE.player[SLVDE.currentPlayer]))
+//		if(/*Math.abs(SplitTime.player[SplitTime.currentPlayer].ix - (SplitTime.player[SplitTime.currentPlayer].x + dx)) + Math.abs(SplitTime.player[SplitTime.currentPlayer].iy - (SplitTime.player[SplitTime.currentPlayer].y + dy)) <= 32*SplitTime.player[SplitTime.currentPlayer].spd && SplitTime.player[SplitTime.currentPlayer].x + dx >= 0 && SplitTime.player[SplitTime.currentPlayer].y + dy >= 0 && SplitTime.player[SplitTime.currentPlayer].x + dx < SplitTime.currentLevel.layerImg[SplitTime.player[SplitTime.currentPlayer].layer].width && SplitTime.player[SplitTime.currentPlayer].y + dy < SplitTime.currentLevel.layerImg[SplitTime.player[SplitTime.currentPlayer].layer].height*/)
+		if(SplitTime.PF.isSquare(SplitTime.player[SplitTime.currentPlayer].x + dx, SplitTime.player[SplitTime.currentPlayer].y + dy, SplitTime.player[SplitTime.currentPlayer]))
 		{
 			//alert("ds done");
 			if(dx !== 0 || dy !== 0)
 			{
-				var toIndex = SLVDE.pixCoordToIndex(SLVDE.xPixToTile(SLVDE.player[SLVDE.currentPlayer].x + dx), SLVDE.yPixToTile(SLVDE.player[SLVDE.currentPlayer].y + dy), SLVDE.currentLevel.layerFuncData[SLVDE.player[SLVDE.currentPlayer].layer]);
-				var squareType = SLVDE.currentLevel.layerFuncData[SLVDE.player[SLVDE.currentPlayer].layer].data[toIndex];
+				var toIndex = SplitTime.pixCoordToIndex(SplitTime.xPixToTile(SplitTime.player[SplitTime.currentPlayer].x + dx), SplitTime.yPixToTile(SplitTime.player[SplitTime.currentPlayer].y + dy), SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer]);
+				var squareType = SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[toIndex];
 //				var blocked = 0;
 				if(squareType != 255)
 				{
 /*					for(var second = 0; second < boardNPC.length; second++)
 					{
-						if(boardNPC[second].x == SLVDE.player[SLVDE.currentPlayer].x + dx && boardNPC[second].y == SLVDE.player[SLVDE.currentPlayer].y + dy)
+						if(boardNPC[second].x == SplitTime.player[SplitTime.currentPlayer].x + dx && boardNPC[second].y == SplitTime.player[SplitTime.currentPlayer].y + dy)
 						{
 							blocked = 1;
 						}
 					}
 					if(blocked != 1)
 					{*/
-						if(SLVDE.player[SLVDE.currentPlayer].frame === 0) { SLVDE.player[SLVDE.currentPlayer].frame = 1; }
-						SLVDE.player[SLVDE.currentPlayer].path.x[0] = SLVDE.player[SLVDE.currentPlayer].x + dx;
-						SLVDE.player[SLVDE.currentPlayer].path.y[0] = SLVDE.player[SLVDE.currentPlayer].y + dy;
+						if(SplitTime.player[SplitTime.currentPlayer].frame === 0) { SplitTime.player[SplitTime.currentPlayer].frame = 1; }
+						SplitTime.player[SplitTime.currentPlayer].path.x[0] = SplitTime.player[SplitTime.currentPlayer].x + dx;
+						SplitTime.player[SplitTime.currentPlayer].path.y[0] = SplitTime.player[SplitTime.currentPlayer].y + dy;
 						if(squareType == 100)
 						{
-							resumeFunc = SLVDE.currentLevel.boardProgram[SLVDE.currentLevel.layerFuncData[SLVDE.player[SLVDE.currentPlayer].layer].data[toIndex + 2]];
+							resumeFunc = SplitTime.currentLevel.boardProgram[SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[toIndex + 2]];
 							resumeCue = 1;
 						}
 //					}
 				}
 			}
-			else { SLVDE.player[SLVDE.currentPlayer].frame = 0; }
+			else { SplitTime.player[SplitTime.currentPlayer].frame = 0; }
 		}
 		//else alert("out of range");
 		//Projectile motion
-		var dartLayer = SLVDE.player[SLVDE.currentPlayer].dart.layer;
-		if(SLVDE.player[SLVDE.currentPlayer].dart.img && dartLayer !== null && dartLayer !== undefined)
+		var dartLayer = SplitTime.player[SplitTime.currentPlayer].dart.layer;
+		if(SplitTime.player[SplitTime.currentPlayer].dart.img && dartLayer !== null && dartLayer !== undefined)
 		{
 			//Move projectile
-			var moved = zeldaStep(SLVDE.player[SLVDE.currentPlayer].dart, SLVDE.player[SLVDE.currentPlayer].dart.spd);
+			var moved = zeldaStep(SplitTime.player[SplitTime.currentPlayer].dart, SplitTime.player[SplitTime.currentPlayer].dart.spd);
 			for(index = 0; index < boardNPC.length; index++)
 			{
-				if((Math.abs(SLVDE.player[SLVDE.currentPlayer].dart.y - (boardNPC[index].y - 24)) < 32) && (Math.abs(SLVDE.player[SLVDE.currentPlayer].dart.x - boardNPC[index].x) < 16))
+				if((Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.y - (boardNPC[index].y - 24)) < 32) && (Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.x - boardNPC[index].x) < 16))
 				{
-					SLVDE.damage(SLVDE.player[SLVDE.currentPlayer].dart, boardNPC[index]); //damage hit opponent
-					SLVDE.player[SLVDE.currentPlayer].dart.layer = null; //remove SLVDE.image
-					SLVDE.player[SLVDE.currentPlayer].dart.frame = 0; //reset frame
+					SplitTime.damage(SplitTime.player[SplitTime.currentPlayer].dart, boardNPC[index]); //damage hit opponent
+					SplitTime.player[SplitTime.currentPlayer].dart.layer = null; //remove SplitTime.image
+					SplitTime.player[SplitTime.currentPlayer].dart.frame = 0; //reset frame
 					boardNPC[index].status = "hurt"; //"hurt" opponent
-					boardNPC[index].SLVDE.countdown = 4; //"hurt" blinks
+					boardNPC[index].SplitTime.countdown = 4; //"hurt" blinks
 					index = boardNPC.length; //break out of loop
-					SLVDE.TRPGNextTurn();
+					SplitTime.TRPGNextTurn();
 				}
 			}
 			//If hit terrain
-			dartLayer = SLVDE.player[SLVDE.currentPlayer].dart.layer;
+			dartLayer = SplitTime.player[SplitTime.currentPlayer].dart.layer;
 			if(dartLayer !== null && dartLayer !== undefined && moved == -1)
 			{
-				SLVDE.player[SLVDE.currentPlayer].dart.layer = null;
-				SLVDE.player[SLVDE.currentPlayer].dart.frame = 0;
-				SLVDE.TRPGNextTurn();
+				SplitTime.player[SplitTime.currentPlayer].dart.layer = null;
+				SplitTime.player[SplitTime.currentPlayer].dart.frame = 0;
+				SplitTime.TRPGNextTurn();
 
 			}
 			//Update frame
-			if(SLVDE.frameClock == 1)
+			if(SplitTime.frameClock == 1)
 			{
-				SLVDE.player[SLVDE.currentPlayer].dart.frame = (SLVDE.player[SLVDE.currentPlayer].dart.frame + 1)%4;
+				SplitTime.player[SplitTime.currentPlayer].dart.frame = (SplitTime.player[SplitTime.currentPlayer].dart.frame + 1)%4;
 			}
 		}
 	}

@@ -48,7 +48,7 @@ $("#TextEditorDlg").hide();
 $("#XMLEditor").hide();
 
 $(document).on("load", "#staticScript", function() {
-	t = new SLVDE.Body();
+	t = new SplitTime.Body();
 	ctx.fillStyle = "#CD96CD";
 	ctx.fillRect(5, 5, t.xres - 10, t.yres - 10);
 	subImg = subImg.toDataURL();

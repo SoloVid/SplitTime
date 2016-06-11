@@ -124,7 +124,7 @@ module.exports = function(grunt) {
                     module: true,
                     document: true,
                     SLVD: true,
-                    SLVDE: true,
+                    SplitTime: true,
                     t: true
                 }
             },

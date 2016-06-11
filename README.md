@@ -1,5 +1,7 @@
-# SLVDE
+# SplitTime Engine
 JavaScript Engine for SoloVid's [Maven](http://solovid.net/maven)
+
+What makes this engine unique is the way it handles time... (TODO: fill in details)
 
 ## Quick Start
 To get a project running, download the project files. Make sure you have [Nodejs](http://nodejs.org/download/).
@@ -17,9 +19,9 @@ Grunt watch is an ongoing command which "compiles" your updated code and levels 
 Open the distMain.htm file to run the engine.
 
 ## Project Directory Structure
-All of the files specific to your game are to be located in the files folder. 
+All of the files specific to your game are to be located in the files folder.
 In that folder, there is a very important file found at files/main/initialize.js. This file has a function called startUp which is the entry point of the game.
-Also in the main folder is an XML file called master.xml which tells the engine what levels, music, sound effects (not looping), and system images to grab. 
+Also in the main folder is an XML file called master.xml which tells the engine what levels, music, sound effects (not looping), and system images to grab.
 This file should be managed by grunt.
 
 Be sure to put all of the files in their respective folders:
