@@ -68,10 +68,10 @@ SLVDE.Sprite.prototype.setLayer = function(layer) {
 //SLVDE.Sprite.prototype.inAir = null;
 //SLVDE.Sprite.prototype.mvmt = 1; //0 - still; 1 - random moving; 2 - back and forth; 4 - square
 //SLVDE.Sprite.prototype.speech; //0/"" or message
-SLVDE.Sprite.prototype.dmnr = 1; //0 - peaceful; 1 - excitable; 2 - aggressive
+// SLVDE.Sprite.prototype.dmnr = 1; //0 - peaceful; 1 - excitable; 2 - aggressive
 SLVDE.Sprite.prototype.dir = 3;
-SLVDE.Sprite.prototype.steps = 0;// = 5;
-SLVDE.Sprite.prototype.wait = undefined;// = 0;
+// SLVDE.Sprite.prototype.steps = 0;// = 5;
+// SLVDE.Sprite.prototype.wait = undefined;// = 0;
 
 SLVDE.Sprite.prototype.act = [];
 SLVDE.Sprite.prototype.pushAct = function(item) {
@@ -438,7 +438,7 @@ SLVDE.Sprite.prototype.pathMotion = function(spd) {
 	{
 		this.zeldaLockOnPoint(this.path[0].x, this.path[0].y);
 		var jump;
-//		if(Math.round(dist) < spd) { jump = Math.round(dist); }
+		// if(Math.round(dist) < spd) { jump = Math.round(dist); }
 		if(dist < spd) { jump = dist; }
 		else { jump = spd; }
 		this.y -= Math.round(jump*Math.sin((this.dir)*(Math.PI/2)));
@@ -447,90 +447,90 @@ SLVDE.Sprite.prototype.pathMotion = function(spd) {
 };
 
 //Based in time.js, this SLVDE.provides = function simple interface for setting a timed sequence of movement events for Sprites
-SLVDE.Sprite.prototype.registerWalkEvent = function(eventA, isDaily, day, hour, minute, second) {
-	/*eventA should be an array with specific sequences of "arguments". Acceptable forms:
-		coordinates: x, y
-		abrupt relocation: "put", x, y, z
-		move to new board: "send", [board name], x, y, z
-		call function: "function", [function object] (this is intended for simple things like sound effects)
-	*/
-	if(isDaily)
-	{
-		day = 0;
-	}
-	var cTime = SLVDE.Time.componentToAbsolute(day, hour, minute, second);
-	var nTime = cTime;
-
-	var i = 0;
-	var ptA = [];
-
-	var cx, cy;
-	var nx = this.x;
-	var ny = this.y;
-
-	while(i < eventA.length)
-	{
-		if(typeof eventA[i] == "number")
-		{
-			cx = nx;
-			cy = ny;
-			nx = eventA[i];
-			ny = eventA[i + 1];
-			ptA.push(nx);
-			ptA.push(ny);
-			i += 2;
-			var tDir = SLVDE.dirFromTo(cx, cy, nx, ny); //in functions.js
-
-			//Single step component distances
-			var dy = Math.round(this.spd*Math.sin((tDir)*(Math.PI/2)));
-			var dx = Math.round(this.spd*Math.cos((tDir)*(Math.PI/2)));
-
-			//Frames used to travel between points
-			var f = Math.ceil(Math.abs(nx - cx)/dx) || Math.ceil(Math.abs(ny - cy)/dy);
-
-			//Expect next event's time to be f frames farther
-			nTime += f;
-			if(isDaily)
-			{
-				nTime = nTime%(60*60*24);
-			}
-		}
-		else
-		{
-			var event;
-			if(ptA.length > 0)
-			{
-				event = new Function("var tNPC = SLVDE.getNPCByName(\"" + this.name + "\"); tNPC.walkPath(" + ptA.toString() + ");");
-				SLVDE.Time.registerEvent(event, isDaily, cTime);
-				ptA.length = 0;
-				cTime = nTime + 8; //tack on a few extra frames to be safe
-			}
-
-			if(eventA[i] == "put")
-			{
-				event = new Function("var tNPC = SLVDE.getNPCByName(\"" + this.name + "\"); tNPC.x = " + eventA[i + 1] + "; tNPC.y = " + eventA[i + 2] + "; tNPC.layer = " + eventA[i + 3] + ";");
-				SLVDE.Time.registerEvent(event, isDaily, cTime);
-				i += 4;
-
-				nx = eventA[i + 1];
-				ny = eventA[i + 2];
-			}
-			else if(eventA[i] == "send")
-			{
-				event = new Function("var tNPC = SLVDE.getNPCByName(\"" + this.name + "\"); tNPC.lvl = " + eventA[i + 1] + "; tNPC.x = " + eventA[i + 2] + "; tNPC.y = " + eventA[i + 3] + "; tNPC.layer = " + eventA[i + 4] + ";");
-				SLVDE.Time.registerEvent(event, isDaily, cTime);
-				i += 5;
-
-				nx = eventA[i + 2];
-				ny = eventA[i + 3];
-			}
-			else if(eventA[i] == "function")
-			{
-				SLVDE.Time.registerEvent(eventA[i + 1], isDaily, cTime);
-			}
-		}
-	}
-};
+// SLVDE.Sprite.prototype.registerWalkEvent = function(eventA, isDaily, day, hour, minute, second) {
+// 	/*eventA should be an array with specific sequences of "arguments". Acceptable forms:
+// 		coordinates: x, y
+// 		abrupt relocation: "put", x, y, z
+// 		move to new board: "send", [board name], x, y, z
+// 		call function: "function", [function object] (this is intended for simple things like sound effects)
+// 	*/
+// 	if(isDaily)
+// 	{
+// 		day = 0;
+// 	}
+// 	var cTime = SLVDE.Time.componentToAbsolute(day, hour, minute, second);
+// 	var nTime = cTime;
+//
+// 	var i = 0;
+// 	var ptA = [];
+//
+// 	var cx, cy;
+// 	var nx = this.x;
+// 	var ny = this.y;
+//
+// 	while(i < eventA.length)
+// 	{
+// 		if(typeof eventA[i] == "number")
+// 		{
+// 			cx = nx;
+// 			cy = ny;
+// 			nx = eventA[i];
+// 			ny = eventA[i + 1];
+// 			ptA.push(nx);
+// 			ptA.push(ny);
+// 			i += 2;
+// 			var tDir = SLVDE.dirFromTo(cx, cy, nx, ny); //in functions.js
+//
+// 			//Single step component distances
+// 			var dy = Math.round(this.spd*Math.sin((tDir)*(Math.PI/2)));
+// 			var dx = Math.round(this.spd*Math.cos((tDir)*(Math.PI/2)));
+//
+// 			//Frames used to travel between points
+// 			var f = Math.ceil(Math.abs(nx - cx)/dx) || Math.ceil(Math.abs(ny - cy)/dy);
+//
+// 			//Expect next event's time to be f frames farther
+// 			nTime += f;
+// 			if(isDaily)
+// 			{
+// 				nTime = nTime%(60*60*24);
+// 			}
+// 		}
+// 		else
+// 		{
+// 			var event;
+// 			if(ptA.length > 0)
+// 			{
+// 				event = new Function("var tNPC = SLVDE.getNPCByName(\"" + this.name + "\"); tNPC.walkPath(" + ptA.toString() + ");");
+// 				SLVDE.Time.registerEvent(event, isDaily, cTime);
+// 				ptA.length = 0;
+// 				cTime = nTime + 8; //tack on a few extra frames to be safe
+// 			}
+//
+// 			if(eventA[i] == "put")
+// 			{
+// 				event = new Function("var tNPC = SLVDE.getNPCByName(\"" + this.name + "\"); tNPC.x = " + eventA[i + 1] + "; tNPC.y = " + eventA[i + 2] + "; tNPC.layer = " + eventA[i + 3] + ";");
+// 				SLVDE.Time.registerEvent(event, isDaily, cTime);
+// 				i += 4;
+//
+// 				nx = eventA[i + 1];
+// 				ny = eventA[i + 2];
+// 			}
+// 			else if(eventA[i] == "send")
+// 			{
+// 				event = new Function("var tNPC = SLVDE.getNPCByName(\"" + this.name + "\"); tNPC.lvl = " + eventA[i + 1] + "; tNPC.x = " + eventA[i + 2] + "; tNPC.y = " + eventA[i + 3] + "; tNPC.layer = " + eventA[i + 4] + ";");
+// 				SLVDE.Time.registerEvent(event, isDaily, cTime);
+// 				i += 5;
+//
+// 				nx = eventA[i + 2];
+// 				ny = eventA[i + 3];
+// 			}
+// 			else if(eventA[i] == "function")
+// 			{
+// 				SLVDE.Time.registerEvent(eventA[i + 1], isDaily, cTime);
+// 			}
+// 		}
+// 	}
+// };
 
 SLVDE.Sprite.prototype.say = function(message, overrideName) {
 	SLVDE.personSays(this, message, overrideName);
@@ -551,7 +551,7 @@ SLVDE.Sprite.prototype.see = function(ctx) {
 		return;
 	}
 
-//	ctx.setTransform(1, 0, 0, 1, 0, 0);
+	// ctx.setTransform(1, 0, 0, 1, 0, 0);
 
 	ctx.translate(this.x - SLVDE.wX + this.offX - SLVDE.player[SLVDE.currentPlayer].offX, this.y - SLVDE.wY + this.offY - SLVDE.player[SLVDE.currentPlayer].offY);
 
@@ -658,7 +658,7 @@ SLVDE.Sprite.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
 		if(this.team != currentAgent.team && currentAgent.baseLength > 0)
 		{
 			var collisionDist = (this.baseLength + currentAgent.baseLength)/2;
-//			if(Math.abs(this.y - currentAgent.y) < collisionDist)
+			// if(Math.abs(this.y - currentAgent.y) < collisionDist)
 			var distTrue = SLVDE.distanceTrue(this.x, this.y, currentAgent.x, currentAgent.y);
 			if(distTrue < this.stepDistanceRemaining) {
 				refinedNearbyBodies.push(currentAgent);
@@ -666,7 +666,7 @@ SLVDE.Sprite.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
 				{
 					var dDir = Math.abs(SLVDE.dirFromTo(this.x, this.y, currentAgent.x, currentAgent.y) - this.dir);
 					if(dDir < 1 || dDir > 3)
-	//				if(Math.abs(this.x - currentAgent.x) < collisionDist)
+					// if(Math.abs(this.x - currentAgent.x) < collisionDist)
 					{
 						//The .pushing here ensures that there is no infinite loop of pushing back and forth
 						if(this.pushy && currentAgent.pushy && currentAgent.pushing != this)
@@ -691,19 +691,6 @@ SLVDE.Sprite.prototype.zeldaLockOnPlayer = function() {
 };
 SLVDE.Sprite.prototype.zeldaLockOnPoint = function(qx, qy) {
 	this.dir = SLVDE.dirFromTo(this.x, this.y, qx, qy);
-/*	this.dir = Math.atan(-(this.y - qy)/(this.x - qx))/(Math.PI/2);
-	if(this.x > qx)
-	{
-		this.dir += 2;
-	}
-	if(this.x == qx)
-	{
-		this.dir -= 2;
-	}
-	if(this.dir < 0)
-	{
-		this.dir += 4;
-	}*/
 };
 //*********Advances SLVDE.Sprite person up to distance distance as far as is legal. Includes pushing other Sprites out of the way? Returns -1 if stopped before distance?
 SLVDE.Sprite.prototype.zeldaStep = function(distance) {
