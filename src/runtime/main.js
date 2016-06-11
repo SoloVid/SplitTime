@@ -25,7 +25,7 @@ SLVDE.main = function() {
 			var d = new SLVD.speedCheck("SLVDE.zeldaNPCMotion", c.date);
 			d.logUnusual();
 
-			if(SLVDE.boardSprite.length === 0) SLVDE.restartBoardC();
+			if(SLVDE.boardBody.length === 0) SLVDE.restartBoardC();
 			else SLVDE.sortBoardC();
 			var e = new SLVD.speedCheck("SLVDE.sortBoardC", d.date);
 			e.logUnusual();
@@ -256,9 +256,9 @@ SLVDE.orientScreen = function() {
   }
 };
 
-//Sort all board characters into the array SLVDE.boardSprite in order of y location (in order to properly render sprite overlap).
+//Sort all board characters into the array SLVDE.boardBody in order of y location (in order to properly render sprite overlap).
 SLVDE.restartBoardC = function() {
-	SLVDE.boardSprite.length = 0;
+	SLVDE.boardBody.length = 0;
 	var index;
 	//Figure out which NPCs are onboard
 	for(index = 0; index < SLVDE.NPC.length; index++)
@@ -285,19 +285,19 @@ SLVDE.restartBoardC = function() {
 	}
 };
 
-//Sort the array SLVDE.boardSprite in order of y location (in order to properly render sprite overlap).
+//Sort the array SLVDE.boardBody in order of y location (in order to properly render sprite overlap).
 SLVDE.sortBoardC = function() {
-	if(SLVDE.boardSprite.length === 0) SLVDE.restartBoardC();
+	if(SLVDE.boardBody.length === 0) SLVDE.restartBoardC();
 	else
 	{
-		for(var index = 1; index < SLVDE.boardSprite.length; index++)
+		for(var index = 1; index < SLVDE.boardBody.length; index++)
 		{
 			var second = index;
-			while(second > 0 && SLVDE.boardSprite[second].y < SLVDE.boardSprite[second - 1].y)
+			while(second > 0 && SLVDE.boardBody[second].y < SLVDE.boardBody[second - 1].y)
 			{
-				var tempC = SLVDE.boardSprite[second];
-				SLVDE.boardSprite[second] = SLVDE.boardSprite[second - 1];
-				SLVDE.boardSprite[second - 1] = tempC;
+				var tempC = SLVDE.boardBody[second];
+				SLVDE.boardBody[second] = SLVDE.boardBody[second - 1];
+				SLVDE.boardBody[second - 1] = tempC;
 				second--;
 			}
 		}
@@ -306,32 +306,32 @@ SLVDE.sortBoardC = function() {
 
 SLVDE.insertBoardC = function(element) {
 	var index = 0;
-	while(index < SLVDE.boardSprite.length && element.y > SLVDE.boardSprite[index].y)
+	while(index < SLVDE.boardBody.length && element.y > SLVDE.boardBody[index].y)
 	{
 		index++;
 	}
-	SLVDE.boardSprite.splice(index, 0, element);
-/*	var second = SLVDE.boardSprite.length;
-	SLVDE.boardSprite[second] = element;
+	SLVDE.boardBody.splice(index, 0, element);
+/*	var second = SLVDE.boardBody.length;
+	SLVDE.boardBody[second] = element;
 	while(second > 0)
 	{
-		if(SLVDE.boardSprite[second].y < SLVDE.boardSprite[second - 1].y)
+		if(SLVDE.boardBody[second].y < SLVDE.boardBody[second - 1].y)
 		{
-			var tempC = SLVDE.boardSprite[second];
-			SLVDE.boardSprite[second] = SLVDE.boardSprite[second - 1];
-			SLVDE.boardSprite[second - 1] = tempC;
+			var tempC = SLVDE.boardBody[second];
+			SLVDE.boardBody[second] = SLVDE.boardBody[second - 1];
+			SLVDE.boardBody[second - 1] = tempC;
 		}
 		second--;
 	}*/
 };
 
 SLVDE.deleteBoardC = function(element) {
-	for(var index = 0; index < SLVDE.boardSprite.length; index++)
+	for(var index = 0; index < SLVDE.boardBody.length; index++)
 	{
-		if(element == SLVDE.boardSprite[index])
+		if(element == SLVDE.boardBody[index])
 		{
-			SLVDE.boardSprite.splice(index, 1);
-			index = SLVDE.boardSprite.length;
+			SLVDE.boardBody.splice(index, 1);
+			index = SLVDE.boardBody.length;
 		}
 	}
 };
@@ -408,23 +408,23 @@ SLVDE.renderBoardState = function(forceCalculate) {
 			}
 		}
 
-		//Loop through SLVDE.boardSprite (to render)
-		for(second = 0; second < SLVDE.boardSprite.length; second++)
+		//Loop through SLVDE.boardBody (to render)
+		for(second = 0; second < SLVDE.boardBody.length; second++)
 		{
-			var cSprite = SLVDE.boardSprite[second];
-			if(cSprite.layer == index) //ensure proper layering
+			var cBody = SLVDE.boardBody[second];
+			if(cBody.layer == index) //ensure proper layering
 			{
-				cSprite.see(SLVDE.snapShotCtx);
-				//SpriteF.see.call(cSprite, SLVDE.snapShotCtx);
+				cBody.see(SLVDE.snapShotCtx);
+				//BodyF.see.call(cBody, SLVDE.snapShotCtx);
 
-				//Determine if SLVDE.boardSprite is lighted
-				if(cSprite.isLight)
+				//Determine if SLVDE.boardBody is lighted
+				if(cBody.isLight)
 				{
-					lightedThing[lightedThing.length] = cSprite;
+					lightedThing[lightedThing.length] = cBody;
 				}
 
-				cSprite.resetStance();
-				cSprite.resetCans();
+				cBody.resetStance();
+				cBody.resetCans();
 			}
 		}
 		SLVDE.snapShotCtx.globalAlpha = 1;
@@ -440,6 +440,7 @@ SLVDE.renderBoardState = function(forceCalculate) {
 
 		//Draw layer based on values found in SLVDE.orientScreen() and altered above
 		var tImg = SLVDE.getImage(SLVDE.currentLevel.layerImg[index]);
+		//Note: this single call on a perform test is a huge percentage of CPU usage.
 		SLVDE.snapShotCtx.drawImage(tImg, SLVDE.wX + xDif, SLVDE.wY + yDif, SLVDE.SCREENX - 2*xDif, SLVDE.SCREENY - 2*yDif, xDif, yDif, SLVDE.SCREENX - 2*xDif, SLVDE.SCREENY - 2*yDif);
 
 		SLVDE.snapShotCtx.globalCompositeOperation = "source-over";
@@ -447,6 +448,20 @@ SLVDE.renderBoardState = function(forceCalculate) {
 		SLVDE.see.drawImage(SLVDE.snapShot, 0, 0);
 	}
 
+	SLVDE.renderWeather(lightedThing);
+
+	//Display current SLVDE.player stats
+	SLVDE.see.fillStyle="#FFFFFF";
+	SLVDE.see.font="12px Verdana";
+	SLVDE.see.fillText(SLVDE.player[SLVDE.currentPlayer].name + ": " + SLVDE.player[SLVDE.currentPlayer].hp + " HP | " + SLVDE.player[SLVDE.currentPlayer].strg + " Strength | " + SLVDE.player[SLVDE.currentPlayer].spd + " Agility", 10, 20);
+
+	SLVDE.Time.renderClock(SLVDE.see); //in time.js
+
+	//Save screen into SLVDE.snapShot
+	SLVDE.snapShotCtx.drawImage(SLVDE.seeB, 0, 0);
+};
+
+SLVDE.renderWeather = function(lightedThing) {
 	//Weather
 	if(SLVDE.weather.rain)
 	{
@@ -498,14 +513,4 @@ SLVDE.renderBoardState = function(forceCalculate) {
 		//Return to default SLVDE.image layering
 		SLVDE.bufferCtx.globalCompositeOperation = "source-over";
 	}
-
-	//Display current SLVDE.player stats
-	SLVDE.see.fillStyle="#FFFFFF";
-	SLVDE.see.font="12px Verdana";
-	SLVDE.see.fillText(SLVDE.player[SLVDE.currentPlayer].name + ": " + SLVDE.player[SLVDE.currentPlayer].hp + " HP | " + SLVDE.player[SLVDE.currentPlayer].strg + " Strength | " + SLVDE.player[SLVDE.currentPlayer].spd + " Agility", 10, 20);
-
-	SLVDE.Time.renderClock(SLVDE.see); //in time.js
-
-	//Save screen into SLVDE.snapShot
-	SLVDE.snapShotCtx.drawImage(SLVDE.seeB, 0, 0);
 };

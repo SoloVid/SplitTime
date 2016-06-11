@@ -530,7 +530,7 @@ function updateObject(type, index)
 	HTMLImg = HTMLNode.getElementsByTagName("img")[0];
 
 	var template = XMLNode.getAttribute("template");
-	var t = loadSpriteFromTemplate(template);//new SpriteTemplate[template]() || new Sprite();
+	var t = loadBodyFromTemplate(template);//new BodyTemplate[template]() || new Body();
 
 	var code = XMLNode.textContent;
 
@@ -761,15 +761,15 @@ function exportLevel(XML)
 	return prettyXML;
 }
 
-function loadSpriteFromTemplate(templateName) {
+function loadBodyFromTemplate(templateName) {
 	if(!templateName) {
-		return new SLVDE.Sprite();
+		return new SLVDE.Body();
 	}
-	else if(!(templateName in SLVDE.SpriteTemplate)) {
+	else if(!(templateName in SLVDE.BodyTemplate)) {
 		alert("Invalid sprite template!");
-		return new SLVDE.Sprite();
+		return new SLVDE.Body();
 	}
 	else {
-		return new SLVDE.SpriteTemplate[templateName]();
+		return new SLVDE.BodyTemplate[templateName]();
 	}
 }

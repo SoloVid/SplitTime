@@ -43,8 +43,8 @@ SLVDE.damage = function(attacker, victim) {
 	{
 		if(attacker.hp)
 		{
-/*			var atk = (attacker.hp/attacker.maxHp)*(attacker.strg - attacker.weight) + attacker.atk;
-			var def = (attacker.hp/attacker.maxHp)*(attacker.strg - attacker.weight) + attacker.def;*/
+			// var atk = (attacker.hp/attacker.maxHp)*(attacker.strg - attacker.weight) + attacker.atk;
+			// var def = (attacker.hp/attacker.maxHp)*(attacker.strg - attacker.weight) + attacker.def;
 			var atk = (attacker.hp/attacker.strg)*(attacker.strg/* - attacker.weight*/) + 20;//attacker.atk;
 			var def = (victim.hp/victim.strg)*(victim.strg/* - attacker.weight*/) + 20;//attacker.def;
 			victim.hp -= atk - ((atk/(Math.PI/2))*Math.atan(Math.pow(def,0.7)/(atk/10)));//(attacker.hp/100)*(attacker.strg/victim.strg)*40;
@@ -68,6 +68,33 @@ SLVDE.determineColumn = function(direction) {
 	else if(dir == 3) { return 0; }
 	else if(direction < 4 && direction > 3) { return 2; }
 	else { return dir; }
+};
+
+SLVDE.directionFromString = function(stringDir) {
+	switch(stringDir) {
+		case "E": return 0;
+		case "NE": return 0.5;
+		case "N": return 1;
+		case "NW": return 1.5;
+		case "W": return 2;
+		case "SW": return 2.5;
+		case "S": return 3;
+		case "SE": return 3.5;
+		default: console.log("Invalid direction: " + stringDir); return -1;
+	}
+};
+SLVDE.directionToString = function(numDir) {
+	switch(numDir) {
+		case 0: return "E";
+		case 1: return "N";
+		case 2: return "W";
+		case 3: return "S";
+		default:
+			if(numDir < 1) return "NE";
+			else if(numDir < 2) return "NW";
+			else if(numDir < 3) return "SW";
+			else return "SE";
+	}
 };
 
 //Get direction from one point to another (both in Maven orientation)
@@ -98,7 +125,7 @@ SLVDE.distanceTrue = function(x1, y1, x2, y2) {
 	return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 };
 
-//Change SLVDE.level (Sprites and map) by name of SLVDE.level (in SLVDE.level's xml)
+//Change SLVDE.level (Bodys and map) by name of SLVDE.level (in SLVDE.level's xml)
 SLVDE.enterLevelByName = function(nam) {
 	var index, i, j;
 
@@ -108,12 +135,12 @@ SLVDE.enterLevelByName = function(nam) {
 	//********Leave current board
 
 	//Finish all paths
-	for(i = 0; i < SLVDE.boardSprite.length; i++)
+	for(i = 0; i < SLVDE.boardBody.length; i++)
 	{
-		if(SLVDE.boardSprite.path.x.length > 0)
+		if(SLVDE.boardBody.path.x.length > 0)
 		{
-			SLVDE.boardSprite.setX(SLVDE.boardSprite.path.x[SLVDE.boardSprite.path.x.length - 1]);
-			SLVDE.boardSprite.setY(SLVDE.boardSprite.path.y[SLVDE.boardSprite.path.y.length - 1]);
+			SLVDE.boardBody.setX(SLVDE.boardBody.path.x[SLVDE.boardBody.path.x.length - 1]);
+			SLVDE.boardBody.setY(SLVDE.boardBody.path.y[SLVDE.boardBody.path.y.length - 1]);
 		}
 	}
 
@@ -241,14 +268,14 @@ SLVDE.enterLevelByName = function(nam) {
 			// 	}
 			// }
 		}
-		for(j = 0; j < SLVDE.boardSprite.length; j++)
+		for(j = 0; j < SLVDE.boardBody.length; j++)
 		{
-			var cSprite = SLVDE.boardSprite[j];
-			if(cSprite.layer == index)
+			var cBody = SLVDE.boardBody[j];
+			if(cBody.layer == index)
 			{
-				for(var k = 0; k < cSprite.staticTrace.length; k++)
+				for(var k = 0; k < cBody.staticTrace.length; k++)
 				{
-					SLVDE.drawVector(cSprite.staticTrace[k].traceStr, holderCtx, cSprite.staticTrace[k].color, cSprite);
+					SLVDE.drawVector(cBody.staticTrace[k].traceStr, holderCtx, cBody.staticTrace[k].color, cBody);
 				}
 			}
 		}
@@ -265,11 +292,11 @@ SLVDE.evalObj = function(template, code) {
 	var obj;
 	if(template)
 	{
-		obj = new SLVDE.SpriteTemplate[template]();
+		obj = new SLVDE.BodyTemplate[template]();
 	}
 	else
 	{
-		obj = new SLVDE.Sprite(null, null);
+		obj = new SLVDE.Body(null, null);
 	}
 
 	eval(code);

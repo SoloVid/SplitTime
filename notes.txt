@@ -1,6 +1,6 @@
-I've been thinking about how events ought to work out, and I realized that I first needed to rethink the way "Sprites" (as they are currently called) are handled.
+I've been thinking about how events ought to work out, and I realized that I first needed to rethink the way "Bodys" (as they are currently called) are handled.
 
-Let's call "Sprites" NPCs in this doc.
+Let's call "Bodys" NPCs in this doc.
 
 - The majority of the code for NPCs ought to be outside of the editors and in an actual coding environment.
 - Events, particularly paths, ought to be easy to set up.
@@ -61,3 +61,12 @@ Let's call "Sprites" NPCs in this doc.
     - Items might provide an opportunity for somewhat more dynamic actions.
     - Actions could have conditions for use based on some character stats or flags.
     - Items should probably be stored in the character object as an array of strings (or some kind of simple object array with quantities).
+
+
+Positions have
+    Board reference
+    NPC reference (largely for graphical purposes in editor)
+    IDs
+        Board
+        NPC
+        Absolute

@@ -48,7 +48,7 @@ $("#TextEditorDlg").hide();
 $("#XMLEditor").hide();
 
 $(document).on("load", "#staticScript", function() {
-	t = new SLVDE.Sprite();
+	t = new SLVDE.Body();
 	ctx.fillStyle = "#CD96CD";
 	ctx.fillRect(5, 5, t.xres - 10, t.yres - 10);
 	subImg = subImg.toDataURL();
@@ -165,7 +165,7 @@ $(document).mousemove(function(event) {
 
 			var template = XMLNode.getAttribute("template");
 
-			var t = loadSpriteFromTemplate(template);
+			var t = loadBodyFromTemplate(template);
 
 			engineX = x + t.xres/2 + t.baseOffX + t.offX;
 			engineY = y + t.yres - t.baseLength/2 + t.baseOffY + t.offY;
@@ -206,7 +206,7 @@ $(document.body).on("mousedown", ".draggable", function(event) {
 
 			var template = XMLNode.getAttribute("template");
 
-			var t = loadSpriteFromTemplate(template);
+			var t = loadBodyFromTemplate(template);
 
 			var HTMLClone = this.cloneNode(true);
 			HTMLClone.id = thisType + cloneIndex;

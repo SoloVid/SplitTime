@@ -1,23 +1,23 @@
-SLVDE.zeldaNPCMotion = function() //Function for all non-SLVDE.player SLVDE.boardSprite's movement in Zelda mode.
+SLVDE.zeldaNPCMotion = function() //Function for all non-SLVDE.player SLVDE.boardBody's movement in Zelda mode.
 {
 	if(SLVDE.process != "zelda")
 	{
 		return -1;
 	}
-	for(var index = 0; index < SLVDE.boardSprite.length; index++)
+	for(var index = 0; index < SLVDE.boardBody.length; index++)
 	{
 		//Facilitate death
-		while(index < SLVDE.boardSprite.length && SLVDE.boardSprite[index].hp <= 0)
+		while(index < SLVDE.boardBody.length && SLVDE.boardBody[index].hp <= 0)
 		{
-			SLVDE.boardSprite[index].lvl = null;
-			//SLVDE.deleteBoardC(SLVDE.boardSprite[index]);
-			SLVDE.boardSprite.splice(index, 1);
+			SLVDE.boardBody[index].lvl = null;
+			//SLVDE.deleteBoardC(SLVDE.boardBody[index]);
+			SLVDE.boardBody.splice(index, 1);
 		}
-		//If at invalid index (bc death ran to end of SLVDE.boardSprite array), don't continue
-		if(index >= SLVDE.boardSprite.length) return;
-		if(SLVDE.boardSprite[index] != SLVDE.player[SLVDE.currentPlayer])
+		//If at invalid index (bc death ran to end of SLVDE.boardBody array), don't continue
+		if(index >= SLVDE.boardBody.length) return;
+		if(SLVDE.boardBody[index] != SLVDE.player[SLVDE.currentPlayer])
 		{
-			var cNPC = SLVDE.boardSprite[index];
+			var cNPC = SLVDE.boardBody[index];
 
 			if(cNPC.path.length > 0) //Handle path motion
 			{
@@ -185,10 +185,17 @@ SLVDE.zeldaPlayerMotion = function() //Function for current SLVDE.player's motio
 			// if(SLVDE.player[SLVDE.currentPlayer].act == "jumping" && SLVDE.player[SLVDE.currentPlayer].inAir == 1 && SLVDE.player[SLVDE.currentPlayer].actCountdown < 0) SLVDE.player[SLVDE.currentPlayer].y += 2*(SLVDE.player[SLVDE.currentPlayer].actCountdown + 32);
 			if(person.zeldaStep(person.spd) < 0) {}//console.log("stopped");
 			// if(SLVDE.player[SLVDE.currentPlayer].act == "jumping" && SLVDE.player[SLVDE.currentPlayer].inAir == 1 && SLVDE.player[SLVDE.currentPlayer].actCountdown < 0) SLVDE.player[SLVDE.currentPlayer].y -= 2*(SLVDE.player[SLVDE.currentPlayer].actCountdown + 32);
+			if(person.sprite) {
+				person.sprite.setDirection(SLVDE.directionToString(person.dir));
+				person.sprite.requestStance("walk");
+			}
 		}
 		else
 		{
 			person.frame = 0;
+			if(person.sprite) {
+				person.sprite.requestStance("default", true);
+			}
 		}
 		var limit = person.baseLength/2;
 		for(var ind = -limit; ind < limit; ind++)

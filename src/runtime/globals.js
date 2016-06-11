@@ -13,7 +13,7 @@ SLVDE.level = [];
 SLVDE.player = [];
 SLVDE.NPC = []; //Universal, absolute list of SLVDE.NPC objects (on all boards)
 SLVDE.boardAgent = []; //NPCs and players, for functional interaction
-SLVDE.boardSprite = []; //NPCs, players, and boardObjs, for drawing purposes
+SLVDE.boardBody = []; //NPCs, players, and boardObjs, for drawing purposes
 SLVDE.Teams = {};
 
 SLVDE.process = "loading"; //Input of master setInterval switch-case

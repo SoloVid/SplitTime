@@ -29,7 +29,7 @@ Be sure to put all of the files in their respective folders:
     - Sound effect files (non-looping) should be placed in files/audio/soundeffects and referred to in-game by their path relative to that directory.
 - Image files must be placed in files/images.
     - Images that are to be used in custom code or that should otherwise be loaded before the game starts should be placed in files/images/preloaded and referred to in-game by their path relative to that directory.
-    - Images used in sprites can be put into the preloaded folder, but the engine may at some point incorporate optimizations which would be inhibited by such. Sprite images generally should be placed in files/images and referred to in-game by their path relative to that directory.
+    - Images used in sprites can be put into the preloaded folder, but the engine may at some point incorporate optimizations which would be inhibited by such. Body images generally should be placed in files/images and referred to in-game by their path relative to that directory.
 - Levels must must be placed in files/levels and referred to in-game by their name (not filename).
 - Any custom code (events, sprite templates, actions, etc.) must be placed in files/code. N.B. All code in this folder will be concatenated by grunt into a single file dist/static.js along with some engine code. Therefore, all code files may be considered as a single, flattened file but not guaranteed to be in a specific folder. Function hoisting should be available across these files.
 

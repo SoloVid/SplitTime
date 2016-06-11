@@ -11,82 +11,82 @@
 						SLVDE.see.drawImage(SLVDE.image["blueSquare.png"], 0, 0, 32, 32, SLVDE.cTeam[SLVDE.currentPlayer].squares[second].x*32 - SLVDE.wX, SLVDE.cTeam[SLVDE.currentPlayer].squares[second].y*32 - SLVDE.wY, 32, 32);
 					}
 				}
-				for(var second = 0; second < SLVDE.boardSprite.length; second++)
+				for(var second = 0; second < SLVDE.boardBody.length; second++)
 				{
-					if(SLVDE.boardSprite[second].act == "slash")
+					if(SLVDE.boardBody[second].act == "slash")
 					{
 						//If done slashing, move on.
-						if(SLVDE.boardSprite[second].SLVDE.countdown <= 0)
+						if(SLVDE.boardBody[second].SLVDE.countdown <= 0)
 						{
-							SLVDE.boardSprite[second].act = null;
+							SLVDE.boardBody[second].act = null;
 							SLVDE.TRPGNextTurn();
 						}
 						else
 						{
 							//Cycle through opponents
-							for(var third = 0; third < SLVDE.boardSprite[second].oppTeam.length; third++)
+							for(var third = 0; third < SLVDE.boardBody[second].oppTeam.length; third++)
 							{
 								//If distance < 40
-								//if(Math.sqrt(Math.pow(SLVDE.boardSprite[second].oppTeam[third].x - SLVDE.boardSprite[second].x, 2) + Math.pow(SLVDE.boardSprite[second].oppTeam[third].y - SLVDE.boardSprite[second].y, 2)) <= 36)
+								//if(Math.sqrt(Math.pow(SLVDE.boardBody[second].oppTeam[third].x - SLVDE.boardBody[second].x, 2) + Math.pow(SLVDE.boardBody[second].oppTeam[third].y - SLVDE.boardBody[second].y, 2)) <= 36)
 								//If one tile away
-								if(Math.pow(SLVDE.xPixToTile(SLVDE.boardSprite[second].oppTeam[third].x) - SLVDE.xPixToTile(SLVDE.boardSprite[second].x), 2) + Math.pow(SLVDE.yPixToTile(SLVDE.boardSprite[second].oppTeam[third].y) - SLVDE.yPixToTile(SLVDE.boardSprite[second].y), 2) == 1)
+								if(Math.pow(SLVDE.xPixToTile(SLVDE.boardBody[second].oppTeam[third].x) - SLVDE.xPixToTile(SLVDE.boardBody[second].x), 2) + Math.pow(SLVDE.yPixToTile(SLVDE.boardBody[second].oppTeam[third].y) - SLVDE.yPixToTile(SLVDE.boardBody[second].y), 2) == 1)
 								{
 									//Determine angle between slasher and opponent (in terms of PI/2)
-									var angle = Math.atan(-(SLVDE.boardSprite[second].oppTeam[third].y - SLVDE.boardSprite[second].y)/(SLVDE.boardSprite[second].oppTeam[third].x - SLVDE.boardSprite[second].x))/(Math.PI/2);
+									var angle = Math.atan(-(SLVDE.boardBody[second].oppTeam[third].y - SLVDE.boardBody[second].y)/(SLVDE.boardBody[second].oppTeam[third].x - SLVDE.boardBody[second].x))/(Math.PI/2);
 
-									if(SLVDE.boardSprite[second].oppTeam[third].x > SLVDE.boardSprite[second].x && SLVDE.boardSprite[second].oppTeam[third].y > SLVDE.boardSprite[second].y)
+									if(SLVDE.boardBody[second].oppTeam[third].x > SLVDE.boardBody[second].x && SLVDE.boardBody[second].oppTeam[third].y > SLVDE.boardBody[second].y)
 									{
 										angle += 4;
 									}
-									else if(SLVDE.boardSprite[second].oppTeam[third].x < SLVDE.boardSprite[second].x)
+									else if(SLVDE.boardBody[second].oppTeam[third].x < SLVDE.boardBody[second].x)
 									{
 										angle += 2;
 									}
 									//Compare angle to direction of slasher. If in range of PI...
-									if((Math.abs(angle - SLVDE.boardSprite[second].dir) <= .5 || Math.abs(angle - SLVDE.boardSprite[second].dir) >= 3.5) && SLVDE.boardSprite[second].oppTeam[third].status != "hurt")
+									if((Math.abs(angle - SLVDE.boardBody[second].dir) <= .5 || Math.abs(angle - SLVDE.boardBody[second].dir) >= 3.5) && SLVDE.boardBody[second].oppTeam[third].status != "hurt")
 									{
-										SLVDE.damage(SLVDE.boardSprite[second], SLVDE.boardSprite[second].oppTeam[third]);
-										SLVDE.boardSprite[second].oppTeam[third].status = "hurt";
-										SLVDE.boardSprite[second].oppTeam[third].SLVDE.countdown = 4;
+										SLVDE.damage(SLVDE.boardBody[second], SLVDE.boardBody[second].oppTeam[third]);
+										SLVDE.boardBody[second].oppTeam[third].status = "hurt";
+										SLVDE.boardBody[second].oppTeam[third].SLVDE.countdown = 4;
 									}
 								}
 							}
 							SLVDE.see.lineWidth = 8;
 							SLVDE.see.beginPath();
-							SLVDE.see.arc((SLVDE.boardSprite[second].x - ((SLVDE.boardSprite[second].xres)/2)) - SLVDE.wX + 24, (SLVDE.boardSprite[second].y - (SLVDE.boardSprite[second].yres)) - SLVDE.wY + 56, 32, .5*((3 - SLVDE.boardSprite[second].dir) - .5 + (SLVDE.boardSprite[second].SLVDE.countdown/8))*Math.PI, .5*((3 - SLVDE.boardSprite[second].dir) + .5 + (SLVDE.boardSprite[second].SLVDE.countdown/8))*Math.PI);
+							SLVDE.see.arc((SLVDE.boardBody[second].x - ((SLVDE.boardBody[second].xres)/2)) - SLVDE.wX + 24, (SLVDE.boardBody[second].y - (SLVDE.boardBody[second].yres)) - SLVDE.wY + 56, 32, .5*((3 - SLVDE.boardBody[second].dir) - .5 + (SLVDE.boardBody[second].SLVDE.countdown/8))*Math.PI, .5*((3 - SLVDE.boardBody[second].dir) + .5 + (SLVDE.boardBody[second].SLVDE.countdown/8))*Math.PI);
 							SLVDE.see.strokeStyle = "white";
 							SLVDE.see.stroke();
-							SLVDE.boardSprite[second].SLVDE.countdown--;
-							if(SLVDE.boardSprite[second].SLVDE.countdown < 0)
+							SLVDE.boardBody[second].SLVDE.countdown--;
+							if(SLVDE.boardBody[second].SLVDE.countdown < 0)
 							{
-								SLVDE.boardSprite[second].SLVDE.countdown = 0;
+								SLVDE.boardBody[second].SLVDE.countdown = 0;
 							}
 						}
 					}
-					if(SLVDE.boardSprite[second].layer == index)
+					if(SLVDE.boardBody[second].layer == index)
 					{
-						if((SLVDE.boardSprite[second].status == "hurt" && SLVDE.frameClock != 1) || SLVDE.boardSprite[second].status != "hurt")
+						if((SLVDE.boardBody[second].status == "hurt" && SLVDE.frameClock != 1) || SLVDE.boardBody[second].status != "hurt")
 						{
-							var col = SLVDE.determineColumn(SLVDE.boardSprite[second].dir);
-							SLVDE.see.drawImage(SLVDE.boardSprite[second].img, 32*col, 64*SLVDE.boardSprite[second].frame, SLVDE.boardSprite[second].xres, SLVDE.boardSprite[second].yres, (SLVDE.boardSprite[second].x - (((SLVDE.boardSprite[second].xres)/2) - 8)) - SLVDE.wX, (SLVDE.boardSprite[second].y - (SLVDE.boardSprite[second].yres - 8)) - SLVDE.wY, SLVDE.boardSprite[second].xres, SLVDE.boardSprite[second].yres);
-							if(SLVDE.boardSprite[second].holding != null && Math.round(SLVDE.boardSprite[second].dir) != 1)
+							var col = SLVDE.determineColumn(SLVDE.boardBody[second].dir);
+							SLVDE.see.drawImage(SLVDE.boardBody[second].img, 32*col, 64*SLVDE.boardBody[second].frame, SLVDE.boardBody[second].xres, SLVDE.boardBody[second].yres, (SLVDE.boardBody[second].x - (((SLVDE.boardBody[second].xres)/2) - 8)) - SLVDE.wX, (SLVDE.boardBody[second].y - (SLVDE.boardBody[second].yres - 8)) - SLVDE.wY, SLVDE.boardBody[second].xres, SLVDE.boardBody[second].yres);
+							if(SLVDE.boardBody[second].holding != null && Math.round(SLVDE.boardBody[second].dir) != 1)
 							{
-								SLVDE.see.drawImage(SLVDE.boardSprite[second].holding, (SLVDE.boardSprite[second].holding.width/4)*col, 0, (SLVDE.boardSprite[second].holding.width/4), 32, (SLVDE.boardSprite[second].x - (((SLVDE.boardSprite[second].xres)/2) - 8)) - SLVDE.wX + 16*Math.round(Math.cos(SLVDE.boardSprite[second].dir*Math.PI/2)), (SLVDE.boardSprite[second].y - (SLVDE.boardSprite[second].yres - 18)) - SLVDE.wY - 5*Math.round(Math.sin(SLVDE.boardSprite[second].dir*Math.PI/2)), 32, 32);
+								SLVDE.see.drawImage(SLVDE.boardBody[second].holding, (SLVDE.boardBody[second].holding.width/4)*col, 0, (SLVDE.boardBody[second].holding.width/4), 32, (SLVDE.boardBody[second].x - (((SLVDE.boardBody[second].xres)/2) - 8)) - SLVDE.wX + 16*Math.round(Math.cos(SLVDE.boardBody[second].dir*Math.PI/2)), (SLVDE.boardBody[second].y - (SLVDE.boardBody[second].yres - 18)) - SLVDE.wY - 5*Math.round(Math.sin(SLVDE.boardBody[second].dir*Math.PI/2)), 32, 32);
 							}
 						}
-						if(SLVDE.boardSprite[second].status == "hurt" && SLVDE.frameClock == 1)
+						if(SLVDE.boardBody[second].status == "hurt" && SLVDE.frameClock == 1)
 						{
-								SLVDE.boardSprite[second].SLVDE.countdown--;
-								if(SLVDE.boardSprite[second].SLVDE.countdown <= 0)
+								SLVDE.boardBody[second].SLVDE.countdown--;
+								if(SLVDE.boardBody[second].SLVDE.countdown <= 0)
 								{
-									SLVDE.boardSprite[second].status = null;
+									SLVDE.boardBody[second].status = null;
 								}
 						}
 					}
-					if(SLVDE.boardSprite[second].dart.layer == index)
+					if(SLVDE.boardBody[second].dart.layer == index)
 					{
-						var col = SLVDE.determineColumn(SLVDE.boardSprite[second].dart.dir);
-						SLVDE.see.drawImage(SLVDE.boardSprite[second].dart.img, SLVDE.boardSprite[second].dart.xres*col, SLVDE.boardSprite[second].dart.yres*SLVDE.boardSprite[second].dart.frame, SLVDE.boardSprite[second].dart.xres, SLVDE.boardSprite[second].dart.yres, SLVDE.boardSprite[second].dart.x - SLVDE.wX, SLVDE.boardSprite[second].dart.y - SLVDE.wY, SLVDE.boardSprite[second].dart.xres, SLVDE.boardSprite[second].dart.yres);
+						var col = SLVDE.determineColumn(SLVDE.boardBody[second].dart.dir);
+						SLVDE.see.drawImage(SLVDE.boardBody[second].dart.img, SLVDE.boardBody[second].dart.xres*col, SLVDE.boardBody[second].dart.yres*SLVDE.boardBody[second].dart.frame, SLVDE.boardBody[second].dart.xres, SLVDE.boardBody[second].dart.yres, SLVDE.boardBody[second].dart.x - SLVDE.wX, SLVDE.boardBody[second].dart.y - SLVDE.wY, SLVDE.boardBody[second].dart.xres, SLVDE.boardBody[second].dart.yres);
 					}
 				}
 			}

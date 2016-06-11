@@ -1,40 +1,40 @@
-SLVDE.Sprite = function() {};
-SLVDE.SpriteTemplate = {};
-SLVDE.SpriteTemplate[""] = SLVDE.Sprite;
+SLVDE.Body = function() {};
+SLVDE.BodyTemplate = {};
+SLVDE.BodyTemplate[""] = new SLVDE.Body();
 
-SLVDE.Sprite.prototype.children = [];
-SLVDE.Sprite.prototype.addChild = function(child) {
+SLVDE.Body.prototype.children = [];
+SLVDE.Body.prototype.addChild = function(child) {
 	if(this.children.length === 0)
 		this.children = [];
 
 	this.children.push(child);
 };
 
-SLVDE.Sprite.prototype.staticTrace = [];
-SLVDE.Sprite.prototype.addStaticTrace = function(traceStr, color) {
+SLVDE.Body.prototype.staticTrace = [];
+SLVDE.Body.prototype.addStaticTrace = function(traceStr, color) {
 	if(this.staticTrace.length === 0)
 		this.staticTrace = [];
 	this.staticTrace.push({traceStr: traceStr, color: color});
 };
 
-SLVDE.Sprite.prototype.xres = 32;
-SLVDE.Sprite.prototype.yres = 64;
+SLVDE.Body.prototype.xres = 32;
+SLVDE.Body.prototype.yres = 64;
 
-//The SLVDE.Sprite's base is the collision area of the SLVDE.Sprite
-SLVDE.Sprite.prototype.baseLength = 16;
-SLVDE.Sprite.prototype.baseX = 16;
-SLVDE.Sprite.prototype.baseY = 8;
+//The SLVDE.Body's base is the collision area of the SLVDE.Body
+SLVDE.Body.prototype.baseLength = 16;
+SLVDE.Body.prototype.baseX = 16;
+SLVDE.Body.prototype.baseY = 8;
 //Standard offset of the base is 0--that is, x=0 is centered and y=0 is at bottom
-SLVDE.Sprite.prototype.baseOffX = 0;
-SLVDE.Sprite.prototype.baseOffY = 0;
+SLVDE.Body.prototype.baseOffX = 0;
+SLVDE.Body.prototype.baseOffY = 0;
 
-SLVDE.Sprite.prototype.omniDir = false;
-SLVDE.Sprite.prototype.rotate = 0;
+SLVDE.Body.prototype.omniDir = false;
+SLVDE.Body.prototype.rotate = 0;
 
-SLVDE.Sprite.prototype.lvl = undefined;
-SLVDE.Sprite.prototype.team = "neutral";
-SLVDE.Sprite.prototype.x = 0;
-SLVDE.Sprite.prototype.setX = function(x) {
+SLVDE.Body.prototype.lvl = undefined;
+SLVDE.Body.prototype.team = "neutral";
+SLVDE.Body.prototype.x = 0;
+SLVDE.Body.prototype.setX = function(x) {
 	for(var i = 0; i < this.children.length; i++)
 	{
 		var currentChild = this.children[i];
@@ -43,8 +43,8 @@ SLVDE.Sprite.prototype.setX = function(x) {
 	}
 	this.x = x;
 };
-SLVDE.Sprite.prototype.y = 0;
-SLVDE.Sprite.prototype.setY = function(y) {
+SLVDE.Body.prototype.y = 0;
+SLVDE.Body.prototype.setY = function(y) {
 	for(var i = 0; i < this.children.length; i++)
 	{
 		var currentChild = this.children[i];
@@ -53,10 +53,10 @@ SLVDE.Sprite.prototype.setY = function(y) {
 	}
 	this.y = y;
 };
-SLVDE.Sprite.prototype.offX = 0;
-SLVDE.Sprite.prototype.offY = 0;
-SLVDE.Sprite.prototype.layer = 0;
-SLVDE.Sprite.prototype.setLayer = function(layer) {
+SLVDE.Body.prototype.offX = 0;
+SLVDE.Body.prototype.offY = 0;
+SLVDE.Body.prototype.layer = 0;
+SLVDE.Body.prototype.setLayer = function(layer) {
 	for(var i = 0; i < this.children.length; i++)
 	{
 		var currentChild = this.children[i];
@@ -65,43 +65,43 @@ SLVDE.Sprite.prototype.setLayer = function(layer) {
 	}
 	this.layer = layer;
 };
-//SLVDE.Sprite.prototype.inAir = null;
-//SLVDE.Sprite.prototype.mvmt = 1; //0 - still; 1 - random moving; 2 - back and forth; 4 - square
-//SLVDE.Sprite.prototype.speech; //0/"" or message
-// SLVDE.Sprite.prototype.dmnr = 1; //0 - peaceful; 1 - excitable; 2 - aggressive
-SLVDE.Sprite.prototype.dir = 3;
-// SLVDE.Sprite.prototype.steps = 0;// = 5;
-// SLVDE.Sprite.prototype.wait = undefined;// = 0;
+//SLVDE.Body.prototype.inAir = null;
+//SLVDE.Body.prototype.mvmt = 1; //0 - still; 1 - random moving; 2 - back and forth; 4 - square
+//SLVDE.Body.prototype.speech; //0/"" or message
+// SLVDE.Body.prototype.dmnr = 1; //0 - peaceful; 1 - excitable; 2 - aggressive
+SLVDE.Body.prototype.dir = 3;
+// SLVDE.Body.prototype.steps = 0;// = 5;
+// SLVDE.Body.prototype.wait = undefined;// = 0;
 
-SLVDE.Sprite.prototype.act = [];
-SLVDE.Sprite.prototype.pushAct = function(item) {
+SLVDE.Body.prototype.act = [];
+SLVDE.Body.prototype.pushAct = function(item) {
 	if(this.act.length === 0) {
 		this.act = [];
 	}
 	this.act.push(item);
 };
-SLVDE.Sprite.prototype.spliceAct = function(index, length) {
+SLVDE.Body.prototype.spliceAct = function(index, length) {
 	this.act.splice(index, length);
 	if(this.act.length <= 0)
 	{
 		delete this.act;
 	}
 };
-SLVDE.Sprite.prototype.actSet = [];
-SLVDE.Sprite.prototype.rcvr = 0;
-SLVDE.Sprite.prototype.getAct = function(index) {
+SLVDE.Body.prototype.actSet = [];
+SLVDE.Body.prototype.rcvr = 0;
+SLVDE.Body.prototype.getAct = function(index) {
 	return this.act[index];
 };
-SLVDE.Sprite.prototype.getActTime = function(index) {
+SLVDE.Body.prototype.getActTime = function(index) {
 	return this.act[index][1];
 };
-SLVDE.Sprite.prototype.getActOpt = function(index) {
+SLVDE.Body.prototype.getActOpt = function(index) {
 	return this.actSet[index];
 };
-SLVDE.Sprite.prototype.getActOptProb = function(index) {
+SLVDE.Body.prototype.getActOptProb = function(index) {
 	return this.actSet[index].prob;
 };
-SLVDE.Sprite.prototype.handleAction = function() {
+SLVDE.Body.prototype.handleAction = function() {
 	if(this.canAct)
 	{
 		//Start new action
@@ -128,7 +128,7 @@ SLVDE.Sprite.prototype.handleAction = function() {
 		}
 	}
 };
-SLVDE.Sprite.prototype.pickAction = function() {
+SLVDE.Body.prototype.pickAction = function() {
 	var actSet = [];
 	var rand, i;
 	var totProb = 0;
@@ -174,7 +174,7 @@ SLVDE.Sprite.prototype.pickAction = function() {
 	}
 	return null;
 };
-SLVDE.Sprite.prototype.requestAction = function(action) {
+SLVDE.Body.prototype.requestAction = function(action) {
 	if(this.canAct)
 	{
 		var typeTaken = false;
@@ -193,15 +193,15 @@ SLVDE.Sprite.prototype.requestAction = function(action) {
 		}
 	}
 };
-SLVDE.Sprite.prototype.seeAction = function() {
+SLVDE.Body.prototype.seeAction = function() {
 	for(var i = 0; i < this.act.length; i++)
 	{
 		this.act[i].see(this);
 	}
 };
 
-SLVDE.Sprite.prototype.status = [];
-SLVDE.Sprite.prototype.handleStatus = function() {
+SLVDE.Body.prototype.status = [];
+SLVDE.Body.prototype.handleStatus = function() {
 	if(this.status.length > 0)
 	{
 		for(var i = 0; i < this.status.length; i++)
@@ -216,25 +216,30 @@ SLVDE.Sprite.prototype.handleStatus = function() {
 		}
 	}
 };
-SLVDE.Sprite.prototype.seeStatus = function() {
+SLVDE.Body.prototype.seeStatus = function() {
 	for(var i = 0; i < this.status.length; i++)
 	{
 		this.status[i].see(this);
 	}
 };
 
-//SLVDE.Sprite.prototype.moveSet = [];
+//SLVDE.Body.prototype.moveSet = [];
 
-SLVDE.Sprite.prototype.keyFunc = {};
+SLVDE.Body.prototype.keyFunc = {};
 //Function run on ENTER or SPACE
-SLVDE.Sprite.prototype.interact = function() {};
+SLVDE.Body.prototype.interact = function() {};
 
-SLVDE.Sprite.prototype.pushy = true;
+SLVDE.Body.prototype.pushy = true;
 
-SLVDE.Sprite.prototype.frame = 0;
+SLVDE.Body.prototype.frame = 0;
 
-SLVDE.Sprite.prototype.stance = 0;
-SLVDE.Sprite.prototype.defaultStance = function() {
+SLVDE.Body.prototype.stance = 0;
+SLVDE.Body.prototype.defaultStance = function() {
+	if(this.sprite) {
+		this.sprite.requestStance("default");
+		return;
+	}
+
 	if(!this.omniDir)
 	{
 		this.stance = SLVDE.determineColumn(this.dir);
@@ -244,22 +249,32 @@ SLVDE.Sprite.prototype.defaultStance = function() {
 		this.stance = 0;
 	}
 };
-SLVDE.Sprite.prototype.getStance = function() {
+SLVDE.Body.prototype.getStance = function() {
 	return this.stance;
 };
-SLVDE.Sprite.prototype.requestStance = function(col) {
-	this.stance = col;
+SLVDE.Body.prototype.requestStance = function(stance, forceReset) {
+	if(this.sprite) {
+		this.sprite.requestStance(stance, forceReset);
+	}
+	else {
+		this.stance = stance;
+	}
 };
-SLVDE.Sprite.prototype.resetStance = function() {
+SLVDE.Body.prototype.resetStance = function() {
 	delete this.stance;
 };
+SLVDE.Body.prototype.setBody = function(sprite) {
+	this.sprite = sprite;
+	this.sprite.offX = this.baseOffX;
+	this.sprite.offY = this.baseOffY;
+};
 
-SLVDE.Sprite.prototype.hp = 100;
-SLVDE.Sprite.prototype.strg = 5;
-SLVDE.Sprite.prototype.spd = 2;
+SLVDE.Body.prototype.hp = 100;
+SLVDE.Body.prototype.strg = 5;
+SLVDE.Body.prototype.spd = 2;
 
-SLVDE.Sprite.prototype.path = [];
-SLVDE.Sprite.prototype.addPointToPath = function(x, y) {
+SLVDE.Body.prototype.path = [];
+SLVDE.Body.prototype.addPointToPath = function(x, y) {
 	if(this.path.x.length === 0)
 	{
 		this.path = [];
@@ -267,17 +282,17 @@ SLVDE.Sprite.prototype.addPointToPath = function(x, y) {
 	this.path.unshift({x: x, y: y});
 };
 
-SLVDE.Sprite.prototype.canAct = true;
-//SLVDE.Sprite.prototype.canMove = true;
-SLVDE.Sprite.prototype.canSeeAct = true;
-//SLVDE.Sprite.prototype.canSeeMove = true;
-SLVDE.Sprite.prototype.canSeeStatus = true;
-SLVDE.Sprite.prototype.canSee = true;
+SLVDE.Body.prototype.canAct = true;
+//SLVDE.Body.prototype.canMove = true;
+SLVDE.Body.prototype.canSeeAct = true;
+//SLVDE.Body.prototype.canSeeMove = true;
+SLVDE.Body.prototype.canSeeStatus = true;
+SLVDE.Body.prototype.canSee = true;
 
-SLVDE.Sprite.prototype.getHp = function() {
+SLVDE.Body.prototype.getHp = function() {
 	return this.hp;
 };
-SLVDE.Sprite.prototype.getImage = function() {
+SLVDE.Body.prototype.getImage = function() {
 	if(this.img)
 	{
 		if(!(this.img in SLVDE.image))
@@ -289,49 +304,49 @@ SLVDE.Sprite.prototype.getImage = function() {
 	}
 	return SLVDE.image[this.img];
 };
-SLVDE.Sprite.prototype.getMaxHp = function() {
+SLVDE.Body.prototype.getMaxHp = function() {
 	return 100;
 };
-SLVDE.Sprite.prototype.getPosition = function() {
+SLVDE.Body.prototype.getPosition = function() {
 	var pos = {};
 	pos.x = this.x;
 	pos.y = this.y;
 	pos.layer = this.layer;
 	return pos;
 };
-SLVDE.Sprite.prototype.getShownPosition = function() {
+SLVDE.Body.prototype.getShownPosition = function() {
 	var pos = {};
 	pos.x = this.x;
 	pos.y = this.y;
 	pos.layer = this.layer;
 	return pos;
 };
-SLVDE.Sprite.prototype.getShownX = function() {
+SLVDE.Body.prototype.getShownX = function() {
 	return this.x;
 };
-SLVDE.Sprite.prototype.getShownY = function() {
+SLVDE.Body.prototype.getShownY = function() {
 	return this.y;
 };
-SLVDE.Sprite.prototype.getSpeed = function() {
+SLVDE.Body.prototype.getSpeed = function() {
 	return this.spd;
 };
-SLVDE.Sprite.prototype.getStrength = function() {
+SLVDE.Body.prototype.getStrength = function() {
 	return this.strg;
 };
-SLVDE.Sprite.prototype.getTeam = function() {
+SLVDE.Body.prototype.getTeam = function() {
 	return SLVDE.Teams[this.team];
 };
 
-SLVDE.Sprite.prototype.preventAction = function() { this.canAct = false; };
-SLVDE.Sprite.prototype.preventActionSee = function() { this.canSeeAct = false; };
-SLVDE.Sprite.prototype.preventStatusSee = function() { this.canSeeStatus = false; };
-SLVDE.Sprite.prototype.preventRender = function() { this.canSee = false; };
-SLVDE.Sprite.prototype.resetCans = function() { delete this.canSee; delete this.canAct; delete this.canSeeAct; delete this.canSeeStatus; };
+SLVDE.Body.prototype.preventAction = function() { this.canAct = false; };
+SLVDE.Body.prototype.preventActionSee = function() { this.canSeeAct = false; };
+SLVDE.Body.prototype.preventStatusSee = function() { this.canSeeStatus = false; };
+SLVDE.Body.prototype.preventRender = function() { this.canSee = false; };
+SLVDE.Body.prototype.resetCans = function() { delete this.canSee; delete this.canAct; delete this.canSeeAct; delete this.canSeeStatus; };
 
-SLVDE.Sprite.prototype.dart = {};
+SLVDE.Body.prototype.dart = {};
 
-//Checks if the a SLVDE.Sprite's location is valid (based on current location and layer func data)
-SLVDE.Sprite.prototype.canBeHere = function(allowInAir) {
+//Checks if the a SLVDE.Body's location is valid (based on current location and layer func data)
+SLVDE.Body.prototype.canBeHere = function(allowInAir) {
 	for(var ind = 0; ind < 8; ind++)
 	{
 		for(var sec = 0; sec < 16; sec++)
@@ -347,17 +362,17 @@ SLVDE.Sprite.prototype.canBeHere = function(allowInAir) {
 	return 1;
 };
 
-SLVDE.Sprite.prototype.canSeePlayer = function() {
+SLVDE.Body.prototype.canSeePlayer = function() {
 	var tDir = SLVDE.dirFromTo(this.x, this.y, SLVDE.player[SLVDE.currentPlayer].x, SLVDE.player[SLVDE.currentPlayer].y);
 	return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
 };
 
-SLVDE.Sprite.prototype.damage = function(amount) {
+SLVDE.Body.prototype.damage = function(amount) {
 	this.hp -= amount;
 };
 
 //All of the "give" functions are intended to be passed a "new" object
-SLVDE.Sprite.prototype.giveAction = function(action, keyFuncHandle) {
+SLVDE.Body.prototype.giveAction = function(action, keyFuncHandle) {
 	if(this.actSet.length === 0)
 	{
 		this.actSet = [];
@@ -391,7 +406,7 @@ SLVDE.Sprite.prototype.giveAction = function(action, keyFuncHandle) {
 		this.keyFunc = tempKeyFunc;
 	}
 };
-SLVDE.Sprite.prototype.giveStatus = function(status) {
+SLVDE.Body.prototype.giveStatus = function(status) {
 	if(this.status.length === 0)
 	{
 		this.status = [];
@@ -405,7 +420,7 @@ SLVDE.Sprite.prototype.giveStatus = function(status) {
 	this.status.push(status);
 };
 
-SLVDE.Sprite.prototype.hasStatus = function(status) {
+SLVDE.Body.prototype.hasStatus = function(status) {
 	if((typeof status) == "string")
 	{
 		status = SLVDE.Status[status];
@@ -422,7 +437,7 @@ SLVDE.Sprite.prototype.hasStatus = function(status) {
 };
 
 //Move a person along their set path at given speed.
-SLVDE.Sprite.prototype.pathMotion = function(spd) {
+SLVDE.Body.prototype.pathMotion = function(spd) {
 	var dist = Math.sqrt(Math.pow(this.x - this.path[0].x, 2) + Math.pow(this.y - this.path[0].y, 2));
 	if(dist === 0)
 	{
@@ -446,8 +461,8 @@ SLVDE.Sprite.prototype.pathMotion = function(spd) {
 	}
 };
 
-//Based in time.js, this SLVDE.provides = function simple interface for setting a timed sequence of movement events for Sprites
-// SLVDE.Sprite.prototype.registerWalkEvent = function(eventA, isDaily, day, hour, minute, second) {
+//Based in time.js, this SLVDE.provides = function simple interface for setting a timed sequence of movement events for Bodys
+// SLVDE.Body.prototype.registerWalkEvent = function(eventA, isDaily, day, hour, minute, second) {
 // 	/*eventA should be an array with specific sequences of "arguments". Acceptable forms:
 // 		coordinates: x, y
 // 		abrupt relocation: "put", x, y, z
@@ -532,10 +547,10 @@ SLVDE.Sprite.prototype.pathMotion = function(spd) {
 // 	}
 // };
 
-SLVDE.Sprite.prototype.say = function(message, overrideName) {
+SLVDE.Body.prototype.say = function(message, overrideName) {
 	SLVDE.personSays(this, message, overrideName);
 };
-SLVDE.Sprite.prototype.see = function(ctx) {
+SLVDE.Body.prototype.see = function(ctx) {
 	if(!ctx)
 	{
 		ctx = SLVDE.see;
@@ -557,18 +572,22 @@ SLVDE.Sprite.prototype.see = function(ctx) {
 
 	ctx.rotate(this.rotate);
 
-	//SLVDE.boardSprite is displayed partially transparent depending on health (<= 50% transparent)
+	//SLVDE.boardBody is displayed partially transparent depending on health (<= 50% transparent)
 	//ctx.globalAlpha = (this.hp + this.strg)/(2*this.strg);
 
-	var col = this.getStance(); //in functions.js
-	var tImg = this.getImage();
-	var sx = this.xres*col;
-	var sy = this.yres*this.frame;
-	var pos = this.getShownPosition();
-	var x = -Math.round(this.xres/2) - this.baseOffX;
-	var y = -this.yres + Math.round(this.baseLength/2) - this.baseOffY;
-	ctx.drawImage(tImg, sx, sy, this.xres, this.yres, x, y, this.xres, this.yres);
-
+	if(this.sprite) {
+		this.sprite.draw(ctx);
+	}
+	else { //TODO: remove legacy code
+		var col = this.getStance(); //in functions.js
+		var tImg = this.getImage();
+		var sx = this.xres*col;
+		var sy = this.yres*this.frame;
+		var pos = this.getShownPosition();
+		var x = -Math.round(this.xres/2) - this.baseOffX;
+		var y = -this.yres + Math.round(this.baseLength/2) - this.baseOffY;
+		ctx.drawImage(tImg, sx, sy, this.xres, this.yres, x, y, this.xres, this.yres);
+	}
 	//ctx.globalAlpha = 1;
 
 	this.seeAction();
@@ -581,7 +600,9 @@ SLVDE.Sprite.prototype.see = function(ctx) {
 	delete this.rotate;
 };
 
-SLVDE.Sprite.prototype.updateFrame = function() {
+SLVDE.Body.prototype.updateFrame = function() {
+	if(this.sprite) return;
+
 	//Only update on frame tick
 	if(SLVDE.frameClock == 1)
 	{
@@ -594,7 +615,7 @@ SLVDE.Sprite.prototype.updateFrame = function() {
 };
 
 //(x1, y1, x2, y2, ...)
-SLVDE.Sprite.prototype.walkPath = function() {
+SLVDE.Body.prototype.walkPath = function() {
 	if(SLVDE.currentLevel == this.level)
 	{
 		var spd = this.spd;
@@ -611,7 +632,7 @@ SLVDE.Sprite.prototype.walkPath = function() {
 };
 
 //zeldaStep but with input direction
-SLVDE.Sprite.prototype.zeldaBump = function(distance, direction) {
+SLVDE.Body.prototype.zeldaBump = function(distance, direction) {
 	//Save direction
 	var tDir = this.dir;
 	//Set direction
@@ -621,7 +642,7 @@ SLVDE.Sprite.prototype.zeldaBump = function(distance, direction) {
 	//Revert direction;
 	this.dir = tDir;
 };
-SLVDE.Sprite.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
+SLVDE.Body.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
 	var refinedNearbyBodies = [];
 
 	var pixel, i;
@@ -686,14 +707,14 @@ SLVDE.Sprite.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
 
 	return false;
 };
-SLVDE.Sprite.prototype.zeldaLockOnPlayer = function() {
+SLVDE.Body.prototype.zeldaLockOnPlayer = function() {
 	this.zeldaLockOnPoint(SLVDE.player[SLVDE.currentPlayer].x, SLVDE.player[SLVDE.currentPlayer].y);
 };
-SLVDE.Sprite.prototype.zeldaLockOnPoint = function(qx, qy) {
+SLVDE.Body.prototype.zeldaLockOnPoint = function(qx, qy) {
 	this.dir = SLVDE.dirFromTo(this.x, this.y, qx, qy);
 };
-//*********Advances SLVDE.Sprite person up to distance distance as far as is legal. Includes pushing other Sprites out of the way? Returns -1 if stopped before distance?
-SLVDE.Sprite.prototype.zeldaStep = function(distance) {
+//*********Advances SLVDE.Body person up to distance distance as far as is legal. Includes pushing other Bodys out of the way? Returns -1 if stopped before distance?
+SLVDE.Body.prototype.zeldaStep = function(distance) {
 	var stopped = false;
 	var stoppedTemp = false;
 	var out = false;

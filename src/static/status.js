@@ -3,7 +3,7 @@ See the "hurt" status below for an example.
 It is important to note that Statuses are somewhat different from both Actions and Motions by definition.
 	Statuses are often dependent on the attacker instead of the person who "has" the SLVDE.Status.
 	For this reason, we utilize JS prototypal inheritance in Statuses 
-	in order to hold more information in the SLVDE.Status than just the SLVDE.Sprite.*/
+	in order to hold more information in the SLVDE.Status than just the SLVDE.Body.*/
 
 SLVDE.Status = {};
 

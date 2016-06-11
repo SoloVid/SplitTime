@@ -1,4 +1,4 @@
-//SLVDE.Team is a class that will be used to separate out different Sprites in the game
+//SLVDE.Team is a class that will be used to separate out different Bodys in the game
 
 SLVDE.Team = function(name) {
 	this.name = name;
