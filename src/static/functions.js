@@ -198,17 +198,17 @@ SLVDE.enterLevelByName = function(nam) {
 	}
 
 	//Pull board objects from file
-	for(index = 0; index < SLVDE.currentLevel.filedata.getElementsByTagName("boardObj").length; index++)
+	for(index = 0; index < SLVDE.currentLevel.filedata.getElementsByTagName("prop").length; index++)
 	{
 
-		var template = SLVDE.currentLevel.filedata.getElementsByTagName("boardObj")[index].getAttribute("template");
-		var objCode = SLVDE.currentLevel.filedata.getElementsByTagName("boardObj")[index].textContent;
+		var template = SLVDE.currentLevel.filedata.getElementsByTagName("prop")[index].getAttribute("template");
+		var objCode = SLVDE.currentLevel.filedata.getElementsByTagName("prop")[index].textContent;
 
 		var iObj = SLVDE.evalObj(template, objCode);
 
 		putObjOnBoard(iObj);
 		//SLVDE.insertBoardC(SLVDE.evalObj(template, objCode));
-		//boardObj[current].lvl = SLVDE.currentLevel.name;
+		//prop[current].lvl = SLVDE.currentLevel.name;
 	}
 
 	//Initialize functional map

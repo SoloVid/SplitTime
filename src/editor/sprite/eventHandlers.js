@@ -402,7 +402,7 @@ $("#saveChanges").click(function(event)
 	$("#XMLEditor").hide();
 
 	//Update graphics
-	// if(typeSelected == "NPC" || typeSelected == "boardObj")
+	// if(typeSelected == "NPC" || typeSelected == "prop")
 	// {
 	// 	updateObject(typeSelected, indexSelected);
 	// 	generateLayerMenu();

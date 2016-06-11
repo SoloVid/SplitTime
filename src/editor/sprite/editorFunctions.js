@@ -2,7 +2,7 @@ var BASE_BORDER_WIDTH = 5; //display only
 
 function toPolygon() { console.log("polygon mode"); mode = "polygon"; }
 function toNPC() { mode = "NPC"; }
-function toBoardObj() { mode = "boardObj"; }
+function toBoardObj() { mode = "prop"; }
 
 function setMode(name) { mode = name; }
 

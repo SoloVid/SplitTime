@@ -314,7 +314,7 @@ $(document.body).on("mousedown", "#layers", function(event) {
 
 		//drawTraces();
 	}
-	else if(mode == "NPC" || mode == "boardObj")
+	else if(mode == "NPC" || mode == "prop")
 	{
 		if(event.which == 1)
 		{
@@ -432,22 +432,22 @@ $("#layerMenu").mouseleave(function(event) {
 	drawTraces();
 });
 
-$("#layerMenu").on("mouseenter", ".boardObj", function(event) {
-	typeSelected = "boardObj";
+$("#layerMenu").on("mouseenter", ".prop", function(event) {
+	typeSelected = "prop";
 
 	var i = /[\d]+/.exec(this.id)[0];
 
-	$("#boardObj" + i).css("background-color", "rgba(255, 255, 0, 1)");//.effect( "highlight", {color:"rgba(255, 255, 0)"}, 3000 );
+	$("#prop" + i).css("background-color", "rgba(255, 255, 0, 1)");//.effect( "highlight", {color:"rgba(255, 255, 0)"}, 3000 );
 });
-$("#layerMenu").on("mouseleave", ".boardObj", function(event) {
-	typeSelected = "boardObj";
+$("#layerMenu").on("mouseleave", ".prop", function(event) {
+	typeSelected = "prop";
 
 	var i = /[\d]+/.exec(this.id)[0];
 
-	$("#boardObj" + i).css("background-color", "rgba(255, 255, 0, 0)");//.effect( "highlight", {color:"rgba(255, 255, 0)"}, 3000 );
+	$("#prop" + i).css("background-color", "rgba(255, 255, 0, 0)");//.effect( "highlight", {color:"rgba(255, 255, 0)"}, 3000 );
 });
-$("#layerMenu").on("click", ".boardObj", function(event) {
-	typeSelected = "boardObj";
+$("#layerMenu").on("click", ".prop", function(event) {
+	typeSelected = "prop";
 
 	var i = /[\d]+/.exec(this.id)[0];
 
@@ -524,7 +524,7 @@ $("#saveChanges").click(function(event)
 	$("#XMLEditor").hide();
 
 	//Update graphics
-	if(typeSelected == "NPC" || typeSelected == "boardObj")
+	if(typeSelected == "NPC" || typeSelected == "prop")
 	{
 		updateObject(typeSelected, indexSelected);
 		generateLayerMenu();

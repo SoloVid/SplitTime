@@ -1,6 +1,6 @@
 function toPolygon() { console.log("polygon mode"); mode = "polygon"; }
 function toNPC() { mode = "NPC"; }
-function toBoardObj() { mode = "boardObj"; }
+function toBoardObj() { mode = "prop"; }
 
 function setMode(name) { mode = name; }
 
@@ -269,11 +269,11 @@ function loadFile2(data)
 //console.log("a to b: " + (b.getTime() - a.getTime()));
 //console.log("b to c: " + (c.getTime() - b.getTime()));
 	}
-	var BO = levelXML.getElementsByTagName("boardObj");
+	var BO = levelXML.getElementsByTagName("prop");
 	for(i = 0; i < BO.length; i++)
 	{
-		createObject("boardObj", true, i);
-		updateObject("boardObj", i);
+		createObject("prop", true, i);
+		updateObject("prop", i);
 	}
 
 	generateLayerMenu();
@@ -415,14 +415,14 @@ function generateLayerMenu()
 		}
 	}
 
-	var boardObj = levelXML.getElementsByTagName("boardObj");
+	var prop = levelXML.getElementsByTagName("prop");
 
-	for(i = 0; i < boardObj.length; i++)
+	for(i = 0; i < prop.length; i++)
 	{
-		node = implantMenuItem(boardObj[i]);
-		node.setAttribute("class", "boardObj");
+		node = implantMenuItem(prop[i]);
+		node.setAttribute("class", "prop");
 		node.innerHTML = "Object " + i;
-		node.id = "boardObj" + i + "Handle";
+		node.id = "prop" + i + "Handle";
 	}
 
 	var NPC = levelXML.getElementsByTagName("NPC");
@@ -624,7 +624,7 @@ function createLevel(name, type)
 	XML.documentElement.appendChild(XML.createElement("exitPrg"));
 	XML.documentElement.appendChild(XML.createElement("layers"));
 	XML.documentElement.appendChild(XML.createElement("NPCs"));
-	XML.documentElement.appendChild(XML.createElement("boardObjs"));
+	XML.documentElement.appendChild(XML.createElement("props"));
 	XML.documentElement.appendChild(XML.createElement("boardPrgs"));
 
 	return XML;
