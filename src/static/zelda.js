@@ -21,7 +21,8 @@ SplitTime.zeldaNPCMotion = function() //Function for all non-SplitTime.player Sp
 
 			if(cNPC.path.length > 0) //Handle path motion
 			{
-				cNPC.updateFrame();
+				cNPC.requestStance("walk");
+
 				cNPC.pathMotion(cNPC.spd);
 			}
 			else
@@ -181,21 +182,14 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	{
 		if(SplitTime.figurePlayerDirection()) //If pressing direction(s), step
 		{
-			person.updateFrame();
+			person.requestStance("walk");
 			// if(SplitTime.player[SplitTime.currentPlayer].act == "jumping" && SplitTime.player[SplitTime.currentPlayer].inAir == 1 && SplitTime.player[SplitTime.currentPlayer].actCountdown < 0) SplitTime.player[SplitTime.currentPlayer].y += 2*(SplitTime.player[SplitTime.currentPlayer].actCountdown + 32);
 			if(person.zeldaStep(person.spd) < 0) {}//console.log("stopped");
 			// if(SplitTime.player[SplitTime.currentPlayer].act == "jumping" && SplitTime.player[SplitTime.currentPlayer].inAir == 1 && SplitTime.player[SplitTime.currentPlayer].actCountdown < 0) SplitTime.player[SplitTime.currentPlayer].y -= 2*(SplitTime.player[SplitTime.currentPlayer].actCountdown + 32);
-			if(person.sprite) {
-				person.sprite.setDirection(SplitTime.directionToString(person.dir));
-				person.sprite.requestStance("walk");
-			}
 		}
 		else
 		{
-			person.frame = 0;
-			if(person.sprite) {
-				person.sprite.requestStance("default", true);
-			}
+			person.defaultStance();
 		}
 		var limit = person.baseLength/2;
 		for(var ind = -limit; ind < limit; ind++)

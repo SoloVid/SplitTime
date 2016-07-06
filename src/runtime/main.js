@@ -1,6 +1,6 @@
 //*-*-*-*-*-*-*-*-*-*-*-*Main Loop
 SplitTime.main = function() {
-//console.log(SplitTime.counter);
+	//console.log(SplitTime.counter);
 	var startTime = new Date().getTime();
 	var a = new Date(); //for speed checking
 	switch(SplitTime.process)
@@ -100,7 +100,7 @@ SplitTime.main = function() {
 	{
 		SplitTime.counter = 0;
 	}
-//	document.getElementById("timey").innerHTML = SplitTime.counter;
+	//	document.getElementById("timey").innerHTML = SplitTime.counter;
 	if((SplitTime.counter%8) === 0)
 	{
 		SplitTime.frameClock = 1;
