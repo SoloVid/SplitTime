@@ -133,11 +133,12 @@ function showEditorTrace(trace) {
             id: "type"
         },
         {
-            value: prop.attr("reference"),
+            value: trace.attr("reference"),
             id: "reference"
         },
         {
-            value: prop.text(),
+            type: "textarea",
+            value: trace.text(),
             id: "definition"
         }
     ]);

@@ -47,12 +47,22 @@ SplitTime.Trace.draw = function(traceStr, ctx, color, offsetPos)
 	}
 };
 
-SplitTime.Trace.getColor = function(type) {
-	switch(type) {
-		case "solid": return "rgba(0, 0, 255, 1)";
-		case "void": return "rgba(0, 255, 255, 1)";
-		case "function": return "rgba(255, 0, 0, 1)";
-		case "path": return "rgba(0, 0, 0, 1)";
-		case "stairDown": case "stairUp": return "rgba(0, 255, 0, 1)";
+SplitTime.Trace.editorColors = {
+	"solid": "rgba(0, 0, 255, 1)",
+	"void": "rgba(255, 0, 255, 1)",
+	"function": "rgba(255, 0, 0, 1)",
+	"path": "rgba(0, 0, 0, 1)",
+	"stairDown": "rgba(0, 255, 0, 1)",
+	"stairUp": "rgba(0, 255, 0, 1)"
+};
+
+SplitTime.Trace.getEditorColor = function(type) {
+	return SplitTime.Trace.editorColors[type];
+};
+SplitTime.Trace.getType = function(editorColor) {
+	for(var type in SplitTime.Trace.editorColors) {
+		if(SplitTime.Trace.editorColors[type] == editorColor) {
+			return type;
+		}
 	}
 };

@@ -5,7 +5,7 @@ var mode = "position";
 
 var typeSelected;
 var indexSelected;
-var color = "rgb(255, 0, 0)";
+var color;
 
 var mouseX = 0;
 var mouseY = 0;
@@ -37,9 +37,14 @@ var editorOpen = null;
 // 	ctx.fillRect(0, 0, 320, 320);
 // 	subImg2 = subImg2.toDataURL();
 // });
+var projectName = window.location.hash.substring(1);
+while(!projectName) {
+	projectName = prompt("project folder name:");
+}
+window.location.hash = "#" + projectName;
+var projectPath = "projects/" + projectName + "/";
 
 $(document).ready(function() {
-	var projectPath = "projects/" + (window.location.hash.substring(1) || prompt("project folder name:")) + "/";
 	$.getScript(projectPath + "dist/static.js", function() {
 		subImg = $("#subImg").get(0);
 		ctx = subImg.getContext("2d");
@@ -53,6 +58,10 @@ $(document).ready(function() {
 		ctx.fillStyle = "rgba(0, 0, 0, 0)";
 		ctx.fillRect(0, 0, 320, 320);
 		subImg2 = subImg2.toDataURL();
+
+		for(var traceType in SplitTime.Trace.editorColors) {
+			$("#traceOptions").append('<div class="option" style="background-color: ' + SplitTime.Trace.editorColors[traceType] + '">' + traceType + '</div>');
+		}
 	});
 
 	$(document).on('dragstart', 'img', function(event) {
@@ -114,11 +123,12 @@ $(document).ready(function() {
 		}
 	});
 
-	$(".option").click(function() {
+	$(document.body).on("click", ".option", function() {
 		pathInProgress = false;
 	});
 
-	$(".color").click(function() {
+	$("#traceOptions").on("click", ".option", function() {
+		typeSelected = $(this).text();
 		color = this.style.backgroundColor;
 		setMode("trace");
 	});
@@ -156,7 +166,7 @@ $(document).ready(function() {
 
 	$(document).mousemove(function(event) {
 		var regex;
-		if(follower)
+		if(follower || follower === 0)
 		{
 			if(mode == "trace")
 			{
@@ -257,7 +267,7 @@ $(document).ready(function() {
 		var i = /[\d]+/.exec(this.id)[0];
 		indexSelected = i;
 
-		showEditorProp($levelXML.find("position:eq(" + indexSelected + ")"));
+		showEditorPosition($levelXML.find("position:eq(" + indexSelected + ")"));
 	});
 	$(document.body).on("dblclick", ".draggable.prop", function(event) {
 		//Locate index of element
@@ -282,7 +292,7 @@ $(document).ready(function() {
 				if(!pathInProgress)
 				{
 					var traceIndexClicked = findTrace(mouseX - pos.left, mouseY - pos.top);
-					//console.log("clicked trace: " + traceIndexClicked);
+					console.log("clicked trace: " + traceIndexClicked);
 
 					if(traceIndexClicked < 0) return;
 
@@ -304,7 +314,8 @@ $(document).ready(function() {
 				}
 				else
 				{
-					pathInProgress.textContent += " (" + Math.floor((mouseX - pos.left)/getPixelsPerPixel()) + ", " + Math.floor((mouseY - pos.top)/getPixelsPerPixel()) + ")";
+					var oldDef = pathInProgress.text();
+					pathInProgress.text(oldDef + " (" + Math.floor((mouseX - pos.left)/getPixelsPerPixel()) + ", " + Math.floor((mouseY - pos.top)/getPixelsPerPixel()) + ")");
 					drawTraces();
 				}
 			}
@@ -312,9 +323,9 @@ $(document).ready(function() {
 			{
 				if(!pathInProgress)
 				{
-					var trace = $("<trace></trace>");
+					var trace = $("<trace/>", $levelXML);
 
-					trace.attr("template", color);
+					trace.attr("type", typeSelected);
 
 					trace.text("(" + Math.floor((mouseX - pos.left)/getPixelsPerPixel()) + ", " + Math.floor((mouseY - pos.top)/getPixelsPerPixel()) + ")");
 					pathInProgress = trace;
@@ -404,16 +415,12 @@ $(document).ready(function() {
 	});
 
 	$("#layerMenu").on("mouseenter", ".trace", function(event) {
-		typeSelected = "trace";
-		var traceList = $("#layerMenu").find("." + typeSelected);
-		var i = $(this).index(traceList);
-		indexSelected = i;
-		drawTraces(indexSelected);
+		var i = $(this).index("#layerMenu .trace");
+		drawTraces(i);
 	});
 	$("#layerMenu").on("click", ".trace", function(event) {
 		typeSelected = "trace";
-		var traceList = $("#layerMenu").find("." + typeSelected);
-		var i = $(this).index(traceList);
+		var i = $(this).index("#layerMenu .trace");
 		indexSelected = i;
 
 		showEditorTrace($levelXML.find("trace:eq(" + indexSelected + ")"));
@@ -424,20 +431,12 @@ $(document).ready(function() {
 	});
 
 	$("#layerMenu").on("mouseenter", ".prop", function(event) {
-		typeSelected = "prop";
-		$(this).css("background-color", "rgba(255, 255, 0, 1)");
-
-		// var i = /[\d]+/.exec(this.id)[0];
-		//
-		// $("#prop" + i).css("background-color", "rgba(255, 255, 0, 1)");
+		var i = /[\d]+/.exec(this.id)[0];
+		$("#prop" + i).css("background-color", "rgba(255, 255, 0, 1)");
 	});
 	$("#layerMenu").on("mouseleave", ".prop", function(event) {
-		typeSelected = "prop";
-		$(this).css("background-color", "rgba(255, 255, 0, 0)");
-
-		// var i = /[\d]+/.exec(this.id)[0];
-		//
-		// $("#prop" + i).css("background-color", "rgba(255, 255, 0, 0)");
+		var i = /[\d]+/.exec(this.id)[0];
+		$("#prop" + i).css("background-color", "");
 	});
 	$("#layerMenu").on("click", ".prop", function(event) {
 		typeSelected = "prop";
@@ -451,12 +450,12 @@ $(document).ready(function() {
 	});
 
 	$("#layerMenu").on("mouseenter", ".position", function(event) {
-		typeSelected = "position";
-		$(this).css("background-color", "rgba(255, 255, 0, 1)");
+		var i = /[\d]+/.exec(this.id)[0];
+		$("#position" + i).css("background-color", "rgba(255, 255, 0, 1)");
 	});
 	$("#layerMenu").on("mouseleave", ".position", function(event) {
-		typeSelected = "position";
-		$(this).css("background-color", "rgba(255, 255, 0, 0)");
+		var i = /[\d]+/.exec(this.id)[0];
+		$("#position" + i).css("background-color", "");
 	});
 	$("#layerMenu").on("click", ".position", function(event) {
 		typeSelected = "position";

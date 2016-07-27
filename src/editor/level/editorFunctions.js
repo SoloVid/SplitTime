@@ -38,7 +38,8 @@ function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
 		// {
 		layerTraces.each(function() {
 			// var color = layerTraces[j].getAttribute("template");
-			var color = $(this).attr("template");
+			var traceType = $(this).attr("type");
+			var color = SplitTime.Trace.getEditorColor(traceType);
 			if(highlightIndex !== undefined && highlightIndex == absoluteTraceIndex)
 			{
 				if(ignoreHighlighted)
@@ -46,7 +47,7 @@ function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
 					absoluteTraceIndex++;
 					return true;
 				}
-				color = "#FFFFFF";
+				color = "#FFFF00";
 			}
 
 			SplitTime.Trace.draw($(this).text(), ctx, color);
@@ -55,10 +56,8 @@ function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
 				var imgData = ctx.getImageData(findX, findY, 1, 1);
 				if(imgData.data[3] !== 0)
 				{
-					ctx.translate(-0.5, -0.5);
 					retVal = absoluteTraceIndex;
 					return false;
-					// return absoluteTraceIndex;
 				}
 			}
 
@@ -67,7 +66,7 @@ function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
 		ctx.translate(-0.5, -0.5);
 	});
 	if(findX && findY) {
-		return -1;
+		return retVal;
 	}
 }
 
@@ -102,7 +101,7 @@ function drawTracesFromBackup(highlightIndex) {
 
 	ctx.translate(0.5, 0.5);
 
-	SplitTime.Trace.draw($(this).text(), ctx, "#FFFFFF");
+	SplitTime.Trace.draw(highlightTrace.text(), ctx, "#FFFF00");
 
 	ctx.translate(-0.5, -0.5);
 }
@@ -131,11 +130,9 @@ function loadFile2(data) {
 
 	$levelXML.find("position").each(function(i) {
 		createObject("position", true, i);
-		updateObject("position", i);
 	});
 	$levelXML.find("prop").each(function(i) {
 		createObject("prop", true, i);
-		updateObject("prop", i);
 	});
 
 	generateLayerMenu();
@@ -176,7 +173,7 @@ function resizeBoard(x, y) {
 		ctx.canvas.width = BOARDX/getPixelsPerPixel();
 		ctx.canvas.height = BOARDY/getPixelsPerPixel();
 		$(this).width(BOARDX);
-		$(this).height(BOARDX);
+		$(this).height(BOARDY);
 	});
 
 	$(".backupCanv").each(function() {
@@ -327,7 +324,7 @@ function updateObject(type, index) {
 	}
 
 	var layer = XMLNode.attr("layer");
-	var img = t.img;
+	var img = t.img ? projectPath + SplitTime.location.images + t.img : subImg;
 
 	$("#layers").find(".layerDisplay:eq(" + layer + ")").append(HTMLNode);
 
@@ -449,7 +446,7 @@ function createObject(type, skipXML, index)  {
 
 	if(!skipXML)
 	{
-		var XMLNPC = $("<" + type + ">");
+		var XMLNPC = $("<" + type + ">", $levelXML);
 		XMLNPC.attr({
 			id: "",
 			x: x,
@@ -471,6 +468,8 @@ function createObject(type, skipXML, index)  {
 			showEditorProp(XMLNPC);
 		}
 	}
+
+	updateObject(type, index);
 }
 
 function exportLevel(XML) {
@@ -484,7 +483,7 @@ function loadBodyFromTemplate(templateName) {
 		return new SplitTime.Body();
 	}
 	else if(!(templateName in SplitTime.BodyTemplate)) {
-		alert("Invalid sprite template: " + templateName);
+		//alert("Invalid sprite template: " + templateName);
 		return new SplitTime.Body();
 	}
 	else {

@@ -40,6 +40,78 @@ SplitTime.launch = function(callback, width, height, parentId) {
 	SplitTime.snapShot.setAttribute("height", SplitTime.SCREENY);
 	SplitTime.snapShotCtx = SplitTime.snapShot.getContext("2d");
 
+	//Sets variables useful for determining what keys are down at any time.
+	document.onkeydown = function(e) {
+		//Prevent scrolling with arrows
+	    if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+	        e.preventDefault();
+	    }
+
+		var key = SplitTime.keyCodeKey[e.which || e.keyCode];//e.key.toLowerCase();
+
+		if(key == " ")
+		{
+			key = "space";
+		}
+		//alert(key);
+
+		if(key == "t")
+		{
+			alert("saving...");
+			//alert("test second alert");
+			SplitTime.fileSave("testFile");
+			alert("saved!");
+		}
+		else if(key == "y")
+		{
+		/*	var seen = [];
+
+			var alerter = JSON.stringify(SplitTime.player[SplitTime.currentPlayer], function(key, val) {
+				if(val != null && typeof val == "object") {
+					if(seen.indexOf(val) >= 0) return seen.push(val); }
+					return val; });
+			alert(alerter);*/
+			alert(SplitTime.player[SplitTime.currentPlayer].x + ", " + SplitTime.player[SplitTime.currentPlayer].y + ", " + SplitTime.player[SplitTime.currentPlayer].layer);
+		}
+
+		if(SplitTime.keyDown[key] === undefined)
+		{
+			SplitTime.keyFirstDown = key;
+		}
+		SplitTime.keyDown[key] = true;
+
+		if(SplitTime.process == "wait" && SplitTime.mainPromise)
+		{
+			if(SplitTime.currentLevel)
+			{
+				SplitTime.process = SplitTime.currentLevel.type;
+			}
+			SplitTime.mainPromise.resolve(key);
+		}
+		else if(SplitTime.process == "waitForEnterOrSpace" && (SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space"))
+		{
+			delete SplitTime.keyFirstDown;
+
+			if(SplitTime.currentLevel)
+			{
+				SplitTime.process = SplitTime.currentLevel.type;
+			}
+			SplitTime.mainPromise.resolve(key);
+		}
+	};
+
+	//The clean-up of the above function.
+	document.onkeyup = function(e) {
+		var key = SplitTime.keyCodeKey[e.keyCode];//e.key.toLowerCase();
+
+		if(key == SplitTime.keyFirstDown)
+		{
+			delete SplitTime.keyFirstDown;
+		}
+
+		delete SplitTime.keyDown[key];
+	};
+
 	//Initialize
 	SLVD.getXML("master.xml").then(function(master) {
 		var index, second, filename;

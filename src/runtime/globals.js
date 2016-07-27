@@ -10,6 +10,11 @@ SplitTime.image = [];
 SplitTime.audio = [];
 SplitTime.level = [];
 
+SplitTime.location = {};
+SplitTime.location.images = "images/";
+SplitTime.location.audio = "audio/";
+SplitTime.location.levels = "levels/";
+
 SplitTime.player = [];
 SplitTime.Actor = [];
 SplitTime.NPC = []; //Universal, absolute list of SplitTime.NPC objects (on all boards)

@@ -15,32 +15,28 @@ canvas {
     width: 100%;
     z-index: 200;
 }
-#navmenu ul {margin: 0; padding: 0; /*position: relative; top: -5px; */
-    border-top: thin solid darkslategray;
-    border-bottom: thin solid darkslategray;
+#navmenu ul {
+    margin: 0;
+    padding: 0;
+    border-top: thin solid black;
+    border-bottom: thin solid black;
     list-style-type: none; list-style-image: none;
     padding: 5px 0px 5px 0px;
-    background: -webkit-linear-gradient(white, gainsboro, white); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(white, gainsboro, white); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(white, gainsboro, white); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(white, gainsboro, white); /* Standard syntax */
+    background-color: white;
 }
 #navmenu li {display: inline; }
 #navmenu ul li a {
     text-decoration:none;
     margin: 0px;
     padding: 5px 10px 5px 10px;
-    color: darkslategray;
+    color: black;
     font-family: Verdana, sans-serif;
     font-size: 12px;
     font-weight: bold;
 }
 #navmenu ul li a:hover {
     color: white;
-    background: -webkit-linear-gradient(slategray, darkslategray, slategray); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(slategray, darkslategray, slategray); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(slategray, darkslategray, slategray); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(slategray, darkslategray, slategray); /* Standard syntax */
+    background-color: lightgreen;
 }
 .background
 {
@@ -94,7 +90,7 @@ canvas {
     background-color: white;
 }
 
-.menu > .option
+.menu .option
 {
     /*width:32px;
     height:32px;*/
@@ -115,6 +111,7 @@ canvas {
 }
 
 .backdrop {
+    display: none;
     position: absolute;
     z-index: 10;
     top: 0;
@@ -135,4 +132,13 @@ canvas {
     margin: 0;
     background-color: white;
     padding: 15px;
+}
+
+.draggable.position img {
+    opacity: .5;
+    background-color: #CD96CD;
+}
+
+.backupCanv {
+    display: none;
 }

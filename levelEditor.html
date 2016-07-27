@@ -33,20 +33,17 @@
 				title="Props are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Props are generally static (or animated) graphical elements Bodys can walk behind or in front of.
 				&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone&#013;Double-click to open properties."
 				>Board Object</div>
-			<div class="option" onclick="setMode('trace')"
-				title="Traces define Bodys' (actually just NPCs and players) interaction with the board.&#013;Traces come in three primary colors as shown below.&#013;Red is used for completely inpenetrable areas/objects.&#013;Yellow is used for areas where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;The last color is used for board events.
-				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
-			>Trace</div>
 			<br>
 			Active Layer:
 			<select id="activeLayer"></select>
 			<br><br>
-			<div class="option color" style="background-color:rgb(255, 0, 0);">Solid</div>
-			<div class="option color" style="background-color:rgb(255, 255, 0);">Void</div>
-			<div class="option color" style="background-color:rgb(100, 0, 0);">Function</div>
+			<div id="traceOptions" title="Traces define Bodys' (actually just NPCs and players) interaction with the board.&#013;Traces come in three primary colors as shown below.&#013;Red is used for completely inpenetrable areas/objects.&#013;Yellow is used for areas where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;The last color is used for board events.
+			&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
+				<h4>Traces</h4>
+			</div>
 			<br>
-			<div class="option" id="btnEnterFunc" title="Program to run on entrance to board">Level Enter Function</div>
-			<div class="option" id="btnExitFunc" title="Program to run on exit from board">Level Exit Function</div>
+			<div class="option" id="btnEnterFunc" title="Function to run on entrance to board">Level Enter Function</div>
+			<div class="option" id="btnExitFunc" title="Function to run on exit from board">Level Exit Function</div>
 		</div>
 		<div id="layerMenu" class="menu" style="right:0px;">
 			<br id="layerMenuBreak" />
