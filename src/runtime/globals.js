@@ -11,6 +11,7 @@ SplitTime.audio = [];
 SplitTime.level = [];
 
 SplitTime.player = [];
+SplitTime.Actor = [];
 SplitTime.NPC = []; //Universal, absolute list of SplitTime.NPC objects (on all boards)
 SplitTime.boardAgent = []; //NPCs and players, for functional interaction
 SplitTime.boardBody = []; //NPCs, players, and props, for drawing purposes

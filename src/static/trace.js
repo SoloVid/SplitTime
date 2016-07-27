@@ -1,4 +1,6 @@
-SplitTime.drawVector = function(traceStr, ctx, color, offsetPos)
+SplitTime.Trace = {};
+
+SplitTime.Trace.draw = function(traceStr, ctx, color, offsetPos)
 {
 	if(!offsetPos)
 	{
@@ -42,5 +44,15 @@ SplitTime.drawVector = function(traceStr, ctx, color, offsetPos)
 			ctx.stroke();
 			ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
 		}
+	}
+};
+
+SplitTime.Trace.getColor = function(type) {
+	switch(type) {
+		case "solid": return "rgba(0, 0, 255, 1)";
+		case "void": return "rgba(0, 255, 255, 1)";
+		case "function": return "rgba(255, 0, 0, 1)";
+		case "path": return "rgba(0, 0, 0, 1)";
+		case "stairDown": case "stairUp": return "rgba(0, 255, 0, 1)";
 	}
 };

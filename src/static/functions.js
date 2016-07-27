@@ -73,13 +73,13 @@ SplitTime.determineColumn = function(direction) {
 SplitTime.directionFromString = function(stringDir) {
 	switch(stringDir) {
 		case "E": return 0;
-		case "NE": return 0.5;
+		case "NE": case "EN": return 0.5;
 		case "N": return 1;
-		case "NW": return 1.5;
+		case "NW": case "WN": return 1.5;
 		case "W": return 2;
-		case "SW": return 2.5;
+		case "SW": case "WS": return 2.5;
 		case "S": return 3;
-		case "SE": return 3.5;
+		case "SE": case "ES": return 3.5;
 		default: console.log("Invalid direction: " + stringDir); return -1;
 	}
 };
@@ -227,7 +227,7 @@ SplitTime.enterLevelByName = function(nam) {
 
 		for(j = 0; j < layerTraces.length; j++)
 		{
-			SplitTime.drawVector(layerTraces[j].textContent, holderCtx, layerTraces[j].getAttribute("template"));
+			SplitTime.Trace.draw(layerTraces[j].textContent, holderCtx, layerTraces[j].getAttribute("template"));
 			// holderCtx.strokeStyle = layerTraces[j].getAttribute("template");//.getElementsByTagName("color")[0].textContent;
 			// holderCtx.fillStyle = holderCtx.strokeStyle;
 			//
@@ -275,7 +275,7 @@ SplitTime.enterLevelByName = function(nam) {
 			{
 				for(var k = 0; k < cBody.staticTrace.length; k++)
 				{
-					SplitTime.drawVector(cBody.staticTrace[k].traceStr, holderCtx, cBody.staticTrace[k].color, cBody);
+					SplitTime.Trace.draw(cBody.staticTrace[k].traceStr, holderCtx, cBody.staticTrace[k].color, cBody);
 				}
 			}
 		}
