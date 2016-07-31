@@ -34,7 +34,7 @@ canvas {
     font-size: 12px;
     font-weight: bold;
 }
-#navmenu ul li a:hover {
+.menu .option:hover, #navmenu ul li a:hover {
     color: white;
     background-color: lightgreen;
 }
@@ -96,7 +96,7 @@ canvas {
     height:32px;*/
     border: 1px solid black;
     margin: 4px;
-
+    padding: 2px;
     cursor: pointer;
 }
 
@@ -141,4 +141,14 @@ canvas {
 
 .backupCanv {
     display: none;
+}
+
+textarea {
+    width: 100%;
+}
+
+#editorTools {
+    display: none;
+    padding: 0;
+    margin: 0;
 }

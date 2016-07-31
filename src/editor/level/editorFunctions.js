@@ -1,6 +1,22 @@
 function setMode(name) { mode = name; }
 
+function normalizeTraceStr(traceStr) {
+	return traceStr.replace(/\(pos:(.+?)\)/g, function(match, posId) {
+		var position = $levelXML.find("position[id='" + posId + "']");
+
+		if(position.length === 0) {
+			console.warn("Position (" + posId + ") undefined in trace string \"" + traceStr + "\"");
+			return "";
+		}
+
+		var x = position.attr("x");
+		var y = position.attr("y");
+		return "(" + x + ", " + y + ")";
+	});
+}
+
 function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
+	if(!$levelXML) return;
 	var ignoreHighlighted = false;
 	if(!drawTo)
 	{
@@ -39,7 +55,7 @@ function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
 		layerTraces.each(function() {
 			// var color = layerTraces[j].getAttribute("template");
 			var traceType = $(this).attr("type");
-			var color = SplitTime.Trace.getEditorColor(traceType);
+			var color = traceEditorColors[traceType];
 			if(highlightIndex !== undefined && highlightIndex == absoluteTraceIndex)
 			{
 				if(ignoreHighlighted)
@@ -50,7 +66,8 @@ function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
 				color = "#FFFF00";
 			}
 
-			SplitTime.Trace.draw($(this).text(), ctx, color);
+			var traceStr = normalizeTraceStr($(this).text());
+			SplitTime.Trace.draw(traceStr, ctx, color);
 
 			if(findX && findY) {
 				var imgData = ctx.getImageData(findX, findY, 1, 1);
@@ -101,13 +118,33 @@ function drawTracesFromBackup(highlightIndex) {
 
 	ctx.translate(0.5, 0.5);
 
-	SplitTime.Trace.draw(highlightTrace.text(), ctx, "#FFFF00");
+	var traceStr = normalizeTraceStr(highlightTrace.text());
+	SplitTime.Trace.draw(traceStr, ctx, "#FFFF00");
 
 	ctx.translate(-0.5, -0.5);
 }
 
 function findTrace(x, y) {
 	return drawTraces(-1, "whiteboard", false, x, y);
+}
+
+function findClosestPosition(x, y) {
+	var closestDistance = Number.MAX_SAFE_INTEGER;
+	var closestPosition = null;
+
+	$levelXML.find("position").each(function() {
+		var posX = $(this).attr("x");
+		var posY = $(this).attr("y");
+		var dx = posX - x;
+		var dy = posY - y;
+		var dist = Math.sqrt((dx * dx) + (dy * dy));
+		if(dist < closestDistance) {
+			closestDistance = dist;
+			closestPosition = $(this).attr("id");
+		}
+	});
+
+	return closestPosition;
 }
 
 function clickFileChooser() {
@@ -137,6 +174,8 @@ function loadFile2(data) {
 
 	generateLayerMenu();
 	drawTraces();
+
+	$("#editorTools").show();
 }
 
 function downloadFile() {
@@ -353,19 +392,23 @@ function createLevel(name, type) {
 		type = prompt("Type: (action/overworld)");
 	}
 
-	var XML = $.parseXML('<?xml version="1.0" encoding="UTF-8"?><level xmlns="http://www.solovid.com/SplitTime/"></level>', "text/xml");
-	var $xml = $(XML);
+	levelXML = $.parseXML('<?xml version="1.0" encoding="UTF-8"?><level xmlns="http://www.solovid.com/SplitTime/"></level>', "text/xml");
+	$levelXML = $(levelXML);
 
-	$xml.find("level").append("<name>" + name + "</name>");
-	$xml.find("level").append("<type>" + type + "</type>");
+	$levelXML.find("level").append("<name>" + name + "</name>");
+	$levelXML.find("level").append("<type>" + type + "</type>");
 
-	$xml.find("level").append("<enterFunction/>");
-	$xml.find("level").append("<exitFunction/>");
-	$xml.find("level").append("<layers/>");
-	$xml.find("level").append("<positions/>");
-	$xml.find("level").append("<props/>");
+	$levelXML.find("level").append("<enterFunction/>");
+	$levelXML.find("level").append("<exitFunction/>");
+	$levelXML.find("level").append("<layers/>");
+	$levelXML.find("level").append("<positions/>");
+	$levelXML.find("level").append("<props/>");
 
-	return XML;
+	createLayer();
+
+	$("#editorTools").show();
+
+	return levelXML;
 }
 
 function createLayer(back, skipXML) {
@@ -373,16 +416,16 @@ function createLayer(back, skipXML) {
 
 	if(!skipXML)
 	{
-		var layerNode = levelXML.createElement("layer");
+		var layerNode = $("<layer>", $levelXML);
 
-		var background = levelXML.createElement("background");
-		layerNode.appendChild(background);
+		var background = $("<background>", $levelXML);
+		layerNode.append(background);
 
-		var traces = levelXML.createElement("traces");
+		var traces = $("<traces>", $levelXML);
 
-		layerNode.appendChild(traces);
+		layerNode.append(traces);
 
-		levelXML.getElementsByTagName("layers")[0].appendChild(layerNode);
+		$levelXML.find("layers").append(layerNode);
 	}
 
 	var layerDisplay = $("<div/>");
@@ -414,7 +457,7 @@ function createLayer(back, skipXML) {
 function createObject(type, skipXML, index)  {
 	if(!index)
 	{
-		index = $("." + type).length;
+		index = $("#layers").find("." + type).length;
 	}
 
 
@@ -429,8 +472,8 @@ function createObject(type, skipXML, index)  {
 	positionContainer.append(displayNPC);
 
 	var pos = $("#layers").position();
-	var x = mouseX - pos.left;
-	var y = mouseY - pos.top;
+	var x = mouseLevelX;
+	var y = mouseLevelY;
 	var layer = $("#activeLayer").val();
 	var xres = 32;
 	var yres = 64;

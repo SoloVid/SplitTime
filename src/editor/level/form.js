@@ -1,3 +1,11 @@
+$(document).ready(function() {
+    $("#XMLEditorFields").on("keyup", "input", function(event) {
+        if(event.which == 13) {
+            $("#saveChanges").click();
+        }
+    });
+});
+
 function showEditor(fields) {
     $("#XMLEditorFields").empty();
 
@@ -27,7 +35,7 @@ function showEditor(fields) {
                 element = $("<h2>" + field.value + "</h2>");
                 break;
             default:
-                console.log("unrecognized type: " + field.type);
+                console.warn("unrecognized type: " + field.type);
         }
 
         if(field.id) {
@@ -43,6 +51,9 @@ function showEditor(fields) {
     }
 
     $("#XMLEditorBack").show();
+    var inputs = $("#XMLEditorFields").find("input, textarea");
+    var firstInput = inputs.first();
+    firstInput.focus();
 }
 
 function getEditorValue(id) {
@@ -139,7 +150,7 @@ function showEditorTrace(trace) {
         {
             type: "textarea",
             value: trace.text(),
-            id: "definition"
+            id: "vertices"
         }
     ]);
 }

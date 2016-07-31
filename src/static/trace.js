@@ -16,12 +16,24 @@ SplitTime.Trace.draw = function(traceStr, ctx, color, offsetPos)
 
 	var pointStr = traceStr;
 	var points = pointStr.match(regex);
-//	console.log(points.length + "|" + points + "|");
+	//console.log(points.length + "|" + points + "|");
+
+	if(points.length === 0) {
+		log.warn("Empty trace string: " + traceStr);
+		return;
+	}
 
 	ctx.beginPath();
 
-	newX = +(points[0].match(xRegex)[1]) + offsetPos.x;
-	newY = +(points[0].match(yRegex)[1]) + offsetPos.y;
+	var xMatch = points[0].match(xRegex);
+	var yMatch = points[0].match(yRegex);
+	if(!xMatch || !yMatch) {
+		console.warn("Invalid trace point " + points[0] + " in trace string \"" + traceStr + "\"");
+		return;
+	}
+
+	newX = +(xMatch[1]) + offsetPos.x;
+	newY = +(yMatch[1]) + offsetPos.y;
 
 	ctx.moveTo(newX, newY);
 
@@ -37,32 +49,19 @@ SplitTime.Trace.draw = function(traceStr, ctx, color, offsetPos)
 		}
 		else
 		{
-			newX = +(points[k].match(xRegex)[1]) + offsetPos.x;
-			newY = +(points[k].match(yRegex)[1]) + offsetPos.y;
+			xMatch = points[k].match(xRegex);
+			yMatch = points[k].match(yRegex);
+			if(!xMatch || !yMatch) {
+				console.warn("Invalid trace point " + points[k] + " in trace string \"" + traceStr + "\"");
+				continue;
+			}
+
+			newX = +(xMatch[1]) + offsetPos.x;
+			newY = +(yMatch[1]) + offsetPos.y;
 
 			ctx.lineTo(newX, newY);
-			ctx.stroke();
 			ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
 		}
 	}
-};
-
-SplitTime.Trace.editorColors = {
-	"solid": "rgba(0, 0, 255, 1)",
-	"void": "rgba(255, 0, 255, 1)",
-	"function": "rgba(255, 0, 0, 1)",
-	"path": "rgba(0, 0, 0, 1)",
-	"stairDown": "rgba(0, 255, 0, 1)",
-	"stairUp": "rgba(0, 255, 0, 1)"
-};
-
-SplitTime.Trace.getEditorColor = function(type) {
-	return SplitTime.Trace.editorColors[type];
-};
-SplitTime.Trace.getType = function(editorColor) {
-	for(var type in SplitTime.Trace.editorColors) {
-		if(SplitTime.Trace.editorColors[type] == editorColor) {
-			return type;
-		}
-	}
+	ctx.stroke();
 };

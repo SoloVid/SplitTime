@@ -1,3 +1,6 @@
+var levelXML;
+var $levelXML;
+
 var BOARDX = 100, BOARDY = 100;
 var PPP = 1; //pixels per pixel
 
@@ -9,6 +12,8 @@ var color;
 
 var mouseX = 0;
 var mouseY = 0;
+var mouseLevelX = 0;
+var mouseLevelY = 0;
 var mouseDown = false;
 var ctrlDown = false;
 
@@ -44,7 +49,20 @@ while(!projectName) {
 window.location.hash = "#" + projectName;
 var projectPath = "projects/" + projectName + "/";
 
+var traceEditorColors = {
+	"solid": "rgba(0, 0, 255, 1)",
+	"void": "rgba(255, 0, 255, 1)",
+	"function": "rgba(255, 0, 0, 1)",
+	"path": "rgba(0, 0, 0, 1)",
+	"stairDown": "rgba(0, 255, 0, 1)",
+	"stairUp": "rgba(0, 255, 0, 1)"
+};
+
 $(document).ready(function() {
+	for(var traceType in traceEditorColors) {
+		$("#traceOptions").append('<div class="option" style="color: white; background-color: ' + traceEditorColors[traceType] + '">' + traceType + '</div>');
+	}
+
 	$.getScript(projectPath + "dist/static.js", function() {
 		subImg = $("#subImg").get(0);
 		ctx = subImg.getContext("2d");
@@ -58,10 +76,6 @@ $(document).ready(function() {
 		ctx.fillStyle = "rgba(0, 0, 0, 0)";
 		ctx.fillRect(0, 0, 320, 320);
 		subImg2 = subImg2.toDataURL();
-
-		for(var traceType in SplitTime.Trace.editorColors) {
-			$("#traceOptions").append('<div class="option" style="background-color: ' + SplitTime.Trace.editorColors[traceType] + '">' + traceType + '</div>');
-		}
 	});
 
 	$(document).on('dragstart', 'img', function(event) {
@@ -220,6 +234,9 @@ $(document).ready(function() {
 
 		mouseX = event.pageX;
 		mouseY = event.pageY;
+		var levelContainerPos = $("#layers").position();
+		mouseLevelX = mouseX - levelContainerPos.left;
+		mouseLevelY = mouseY - levelContainerPos.top;
 	});
 
 	$(document.body).on("mousedown", ".draggable", function(event) {
@@ -280,13 +297,14 @@ $(document).ready(function() {
 		follower = null;
 	});
 
-	$(document.body).on("mousedown", "#layers", function(event) {
+	$(document.body).on("mouseup", "#layers", function(event) {
 		mouseDown = true;
 
 		var pos = $(this).position();
 
 		if(mode == "trace")
 		{
+			var closestPosition = null;
 			if(event.which == 1)
 			{
 				if(!pathInProgress)
@@ -315,7 +333,7 @@ $(document).ready(function() {
 				else
 				{
 					var oldDef = pathInProgress.text();
-					pathInProgress.text(oldDef + " (" + Math.floor((mouseX - pos.left)/getPixelsPerPixel()) + ", " + Math.floor((mouseY - pos.top)/getPixelsPerPixel()) + ")");
+					pathInProgress.text(oldDef + " (" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")");
 					drawTraces();
 				}
 			}
@@ -327,7 +345,16 @@ $(document).ready(function() {
 
 					trace.attr("type", typeSelected);
 
-					trace.text("(" + Math.floor((mouseX - pos.left)/getPixelsPerPixel()) + ", " + Math.floor((mouseY - pos.top)/getPixelsPerPixel()) + ")");
+					if(typeSelected == "path" && !ctrlDown) {
+						closestPosition = findClosestPosition(mouseLevelX, mouseLevelY);
+					}
+
+					if(closestPosition) {
+						trace.text("(pos:" + closestPosition + ")");
+					}
+					else {
+						trace.text("(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")");
+					}
 					pathInProgress = trace;
 
 					var activeLayer = $("#activeLayer").val();
@@ -341,7 +368,15 @@ $(document).ready(function() {
 				{
 					if(!ctrlDown)
 					{
-						pathInProgress.text(pathInProgress.text() + " (close)");
+						if(pathInProgress.attr("type") == "path") {
+							closestPosition = findClosestPosition(mouseLevelX, mouseLevelY);
+							if(closestPosition) {
+								pathInProgress.text(pathInProgress.text() + " (pos:" + closestPosition + ")");
+							}
+						}
+						else {
+							pathInProgress.text(pathInProgress.text() + " (close)");
+						}
 					}
 					pathInProgress = false;
 					drawTraces();
@@ -376,7 +411,7 @@ $(document).ready(function() {
 		event.preventDefault();
 	});
 
-	$(document).mouseup(function() { follower = null; mouseDown = false; });
+	$(document).mouseup(function() { follower = null; mouseDown = false; drawTraces(); });
 
 
 	$("#layerMenu").on("dblclick", ".layerLabel", function(event) {
@@ -512,7 +547,7 @@ $(document).ready(function() {
 				node.attr("id", getEditorValue("id"));
 				node.attr("type", getEditorValue("type"));
 				node.attr("reference", getEditorValue("reference"));
-				node.attr("vertices", getEditorValue("vertices"));
+				node.text(getEditorValue("vertices"));
 
 				generateLayerMenu();
 				drawTraces();

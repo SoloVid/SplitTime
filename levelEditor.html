@@ -12,6 +12,7 @@
 	<body>
 		<div id="navmenu">
 			<ul>
+				<li><a href="javascript:createLevel();">New Level</a></li>
 				<li><a href="javascript:clickFileChooser();">Load Level</a>
 					<input id="fileChooser" type="file" style="display:none">
 				</li>
@@ -20,59 +21,42 @@
 				<li><a href="javascript:resizeBoard();" title="This function is a manual resize if the editor fails to auto-size the board.&#013;Resizing the board here will have no effect on the level in the engine.">Resize Board</a></li>
 			</ul>
 		</div>
+		<div id="editorTools">
+			<div id="layers"></div>
 
-		<div id="layers"></div>
-
-		<div class="menu" style="left:0px;width:100px">
-			Tools:
-			<div class="option" onclick="setMode('position')"
-				title="NPCs are generally people or things that have dynamic properties.&#013;NPCs are loaded at game start and transcend the board (i.e. they are not in any way actually tied to the board and may be moved to other boards).
-				&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
-				>Positions</div>
-			<div class="option" onclick="setMode('prop')"
-				title="Props are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Props are generally static (or animated) graphical elements Bodys can walk behind or in front of.
-				&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone&#013;Double-click to open properties."
-				>Board Object</div>
-			<br>
-			Active Layer:
-			<select id="activeLayer"></select>
-			<br><br>
-			<div id="traceOptions" title="Traces define Bodys' (actually just NPCs and players) interaction with the board.&#013;Traces come in three primary colors as shown below.&#013;Red is used for completely inpenetrable areas/objects.&#013;Yellow is used for areas where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;The last color is used for board events.
-			&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
-				<h4>Traces</h4>
-			</div>
-			<br>
-			<div class="option" id="btnEnterFunc" title="Function to run on entrance to board">Level Enter Function</div>
-			<div class="option" id="btnExitFunc" title="Function to run on exit from board">Level Exit Function</div>
-		</div>
-		<div id="layerMenu" class="menu" style="right:0px;">
-			<br id="layerMenuBreak" />
-			<div class="option" onclick="createLayer()">Add Layer</div>
-		</div>
-
-		<div id="XMLEditorBack" class="backdrop">
-			<div id="XMLEditor">
-				<div id="XMLEditorFields">
-					<!-- Type: <input id="type"></input>
-					<br />
-					Function Name: <input id="function"></input>
-					<br />
-					Trace Code:<br>
-					<textarea id="hardCode" style="width:100%; height:40%;"></textarea>
-					<br>
-					Template: <input id="template"></input> <a href="javascript: helpXML();">(Help)</a>
-					<br />
-					X: <input id="XMLX"></input>
-					<br />
-					Y: <input id="XMLY"></input>
-					<br />
-					Layer: <input id="XMLLayer"></input>
-					<br />
-					Direction: <input id="XMLDirection"></input>
-					<br /> -->
+			<div class="menu" style="left:0px;width:100px">
+				Tools:
+				<div class="option" onclick="setMode('position')"
+					title="Positions are handles for locations that Actors may occupy or paths may lead to and from.&#013;&#013;NPCs are generally people or things that have dynamic properties.&#013;NPCs are loaded at game start and transcend the board (i.e. they are not in any way actually tied to the board and may be moved to other boards).
+					&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
+					>Position</div>
+				<div class="option" onclick="setMode('prop')"
+					title="Props are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Props are generally static (or animated) graphical elements Bodys can walk behind or in front of.
+					&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone&#013;Double-click to open properties."
+					>Prop</div>
+				<br>
+				Active Layer:
+				<select id="activeLayer"></select>
+				<br><br>
+				<div id="traceOptions" title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;Solid traces represent completely inpenetrable areas.&#013;Void traces are used for areas of open air where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;Function traces indicate areas of the level which will trigger a function call when a body moves into the area.&#013;Paths link positions together for walking purposes.&#013;Stairs move Bodys to different layers.
+				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
+					<h4>Traces</h4>
 				</div>
-				<button id="saveChanges" style="right:0;">Save Changes</button>
-				<button id="deleteThing">Delete This</button>
+				<br>
+				<div class="option" id="btnEnterFunc" title="Function to run on entrance to board">Level Enter Function</div>
+				<div class="option" id="btnExitFunc" title="Function to run on exit from board">Level Exit Function</div>
+			</div>
+			<div id="layerMenu" class="menu" style="right:0px;">
+				<br id="layerMenuBreak" />
+				<div class="option" onclick="createLayer()">Add Layer</div>
+			</div>
+
+			<div id="XMLEditorBack" class="backdrop">
+				<div id="XMLEditor">
+					<div id="XMLEditorFields"></div>
+					<button id="saveChanges" style="right:0;">Save Changes</button>
+					<button id="deleteThing">Delete This</button>
+				</div>
 			</div>
 		</div>
 
@@ -82,12 +66,5 @@
 		<script src="src/editor/level/eventHandlers.js"></script>
 		<script src="src/editor/level/form.js"></script>
 		<script src="src/editor/level/editorFunctions.js"></script>
-
-		<!--<script src="src/editor/getStaticScript.js"></script>-->
-
-		<script>
-			var levelXML = createLevel();
-			var $levelXML = $(levelXML);
-		</script>
 	</body>
 </html>
