@@ -70,3 +70,5 @@ Positions have
         Board
         NPC
         Absolute
+
+Parallax weather?
