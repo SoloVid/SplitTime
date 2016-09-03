@@ -1,4 +1,4 @@
-var t;
+var t; //Used in various places; declared here to avoid multiple declarations
 
 var SplitTime = { counter: 0 };
 
