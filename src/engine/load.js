@@ -137,38 +137,32 @@ SplitTime.launch = function(callback, width, height, parentId) {
 			SplitTime.audio[filename] = SplitTime.audio[second];
 		}
 
-		function loadOneLevel(index) {
-			if(index >= master.getElementsByTagName("level").length) {
-				return SLVD.promise.as();
-			}
+		var iLevel = 0;
+		var promiseCollection = new SLVD.Promise.collection();
 
-			//Create SplitTime.level holder
-			SplitTime.level[index] = {};
-			//Get file name
-			SplitTime.level[index].file = master.getElementsByTagName("level")[index].childNodes[0].nodeValue;
-			//Save accessible xml
-			return SLVD.getXML("levels/" + SplitTime.level[index].file).then(function(data) {
+		function makeLevelXMLHandler(iLevelLocal) {
+			return function(data) {
 				var second;
 
-				SplitTime.level[index].filedata = data;
+				SplitTime.level[iLevelLocal].filedata = data;
 				//Get the name of SplitTime.level
-				SplitTime.level[index].name = data.getElementsByTagName("name")[0].childNodes[0].nodeValue;
+				SplitTime.level[iLevelLocal].name = data.getElementsByTagName("name")[0].childNodes[0].nodeValue;
 				//Get the images for SplitTime.level
-				SplitTime.level[index].layerImg = [];
-				SplitTime.level[index].layerFuncData = [];
-				SplitTime.level[index].type = data.getElementsByTagName("type")[0].textContent; //SplitTime.level type
-				SplitTime.level[index].width = 0;
-				SplitTime.level[index].height = 0;
+				SplitTime.level[iLevelLocal].layerImg = [];
+				SplitTime.level[iLevelLocal].layerFuncData = [];
+				SplitTime.level[iLevelLocal].type = data.getElementsByTagName("type")[0].textContent; //SplitTime.level type
+				SplitTime.level[iLevelLocal].width = 0;
+				SplitTime.level[iLevelLocal].height = 0;
 				for(second = 0; second < data.getElementsByTagName("background").length; second++)
 				{
-					SplitTime.level[index].layerImg[second] = data.getElementsByTagName("background")[second].textContent;
+					SplitTime.level[iLevelLocal].layerImg[second] = data.getElementsByTagName("background")[second].textContent;
 				}
 				//Initialize board programs. These programs are stored in <boardProgram> nodes which are placed into a generated script to declare functions for the SplitTime.level objects.
-				SplitTime.level[index].boardProgram = [];
+				SplitTime.level[iLevelLocal].boardProgram = [];
 				for(second = 0; second < data.getElementsByTagName("boardProgram").length; second++)
 				{
 					var content = data.getElementsByTagName("boardProgram")[second].textContent;
-					SplitTime.level[index].boardProgram[second] = new Function(content);
+					SplitTime.level[iLevelLocal].boardProgram[second] = new Function(content);
 				}
 				for(second = 0; second < data.getElementsByTagName("NPC").length; second++)
 				{
@@ -178,15 +172,34 @@ SplitTime.launch = function(callback, width, height, parentId) {
 					var NPCCode = data.getElementsByTagName("NPC")[second].textContent;
 
 					SplitTime.NPC[current] = SplitTime.evalObj(template, NPCCode);
-					SplitTime.NPC[current].lvl = SplitTime.level[index].name;
+					SplitTime.NPC[current].lvl = SplitTime.level[iLevelLocal].name;
 				}
 
-				return loadOneLevel(index + 1);
-			});
+				return loadOneLevel();
+			};
+		}
+
+		function loadOneLevel() {
+			var iLevelLocal = iLevel++;
+
+			if(iLevelLocal >= master.getElementsByTagName("level").length) {
+				return SLVD.Promise.as();
+			}
+
+			//Create SplitTime.level holder
+			SplitTime.level[iLevelLocal] = {};
+			//Get file name
+			SplitTime.level[iLevelLocal].file = master.getElementsByTagName("level")[iLevelLocal].childNodes[0].nodeValue;
+			//Save accessible xml
+			return SLVD.getXML("levels/" + SplitTime.level[iLevelLocal].file).then(makeLevelXMLHandler(iLevelLocal));
+		}
+
+		for(var iLevelLane = 0; iLevelLane < 10; iLevelLane++) {
+			promiseCollection.add(loadOneLevel());
 		}
 
 		//Begin recursion
-		loadOneLevel(0).then(function(data) {
+		promiseCollection.then(function(data) {
 			//Generate lookup for SplitTime.NPC
 			for(var i = 0; i < SplitTime.NPC.length; i++)
 			{

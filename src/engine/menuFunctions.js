@@ -8,10 +8,10 @@ SplitTime.showImage = function(file, duration, waitForEnterSpace) {
 		}
 		else
 		{
-			//var oneTimePromise = new SLVD.promise();
+			//var oneTimePromise = new SLVD.Promise();
 			//oneTimePromise.resolve();
 			//return oneTimePromise;
-			return SLVD.promise.as();
+			return SLVD.Promise.as();
 		}
 	});
 };
