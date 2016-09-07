@@ -29,9 +29,9 @@ SplitTime.pathToEnemy = function(finder)
 		//if(SplitTime.PF.SplitTime.counter > 1000) alert("way too many while loopings");
 		//alert(SplitTime.PF.pointC.x + ", " + SplitTime.PF.pointC.y);
 		//Cycle through opposing team positions
-		for(var index = 0; index < SplitTime.boardAgent.length; index++)
+		for(var index = 0; index < SplitTime.onBoard.agents.length; index++)
 		{
-			var currentAgent = SplitTime.boardAgent[index];
+			var currentAgent = SplitTime.onBoard.agents[index];
 			if(!currentAgent.getTeam().isAllied(SplitTime.PF.finder.getTeam()))
 			{
 				//if(index > 100) alert("something is wrong");

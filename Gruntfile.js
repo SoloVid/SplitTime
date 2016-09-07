@@ -7,6 +7,9 @@ module.exports = function(grunt) {
                 separator: ';\n'
             },
             engine: {
+                options: {
+                    root: 'src/engine'
+                },
                 src: [
                     'src/globals.js', //first in file to avoid null pointers
                     'src/engine/**/*.js'
@@ -14,6 +17,9 @@ module.exports = function(grunt) {
                 dest: 'dist/engine.js'
             },
             project: {
+                options: {
+                    root: '<%= grunt.config("projectPath") %>src'
+                },
                 src: [
                     'dist/engine.js',
                     '<%= grunt.config("projectPath") %>src/**/*.js'],

@@ -210,7 +210,7 @@ SplitTime.menu.prototype.handleMenu = function() {
 //File selection SplitTime.menu
 SplitTime.setupFileSelect = function() {
 	opMenu.killPoints();
-	opMenu.cursor = SplitTime.image["torchCursor.png"];
+	opMenu.cursor = SplitTime.Image.get("torchCursor.png");
 	opMenu.background = SplitTime.buffer;
 
 	SplitTime.canvasBlackout(SplitTime.bufferCtx);
@@ -240,7 +240,7 @@ SplitTime.setupFileSelect = function() {
 
 SplitTime.setupActionMenu = function() {
 	opMenu.killPoints();
-	opMenu.cursor = SplitTime.image["blueSquare.png"];
+	opMenu.cursor = SplitTime.Image.get("blueSquare.png");
 	opMenu.background = SplitTime.buffer;
 
 	SplitTime.canvasBlackout(SplitTime.bufferCtx);

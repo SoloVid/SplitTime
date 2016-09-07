@@ -19,9 +19,9 @@ SplitTime.Action["propelProjectile"].prototype.use = function(dart) {
 SplitTime.Action["propelProjectile"].prototype.update = function(dart) {
 	//Move projectile
 	var moved = dart.zeldaStep(dart.spd);
-	for(var index = 0; index < SplitTime.boardAgent.length; index++)
+	for(var index = 0; index < SplitTime.onBoard.agents.length; index++)
 	{
-		var potOpp = SplitTime.boardAgent[index];
+		var potOpp = SplitTime.onBoard.agents[index];
 		if(!dart.getTeam().isAllied(potOpp.getTeam()))
 		{
 			if(SplitTime.distanceTrue(dart.x, dart.y, potOpp.x, potOpp.y) <= dart.baseLength + potOpp.baseLength + 2)
@@ -30,7 +30,7 @@ SplitTime.Action["propelProjectile"].prototype.update = function(dart) {
 				this.time = 0;
 				dart.hp = 0;
 				potOpp.giveStatus(new SplitTime.Status["hurt"](1)); //"hurt" opponent
-				index = SplitTime.boardAgent.length; //break out of loop
+				index = SplitTime.onBoard.agents.length; //break out of loop
 			}
 		}
 	}

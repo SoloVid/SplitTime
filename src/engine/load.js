@@ -1,9 +1,6 @@
-SplitTime.launch = function(callback, width, height, parentId) {
-	var parent = document.body;
-	if(parentId) {
-		parent = document.getElementById(parentId);
-	}
+dependsOn("/SLVD/Promise.js");
 
+SplitTime.launch = function(callback, width, height, parentId) {
 	SplitTime.startUp = callback || function() {};
 	if(width && height) {
 		SplitTime.SCREENX = width;
@@ -12,33 +9,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 
 	SLVD.randomSeed();
 
-	SplitTime.seeB = document.createElement("canvas");
-	SplitTime.seeB.innerHTML = "Your browser does not support the canvas element this engine relies on. Please get a more modern browser to use this.";
-	SplitTime.seeB.setAttribute("id", "game-window");
-	SplitTime.seeB.setAttribute("class", "center");
-	SplitTime.seeB.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.seeB.setAttribute("height", SplitTime.SCREENY);
-	SplitTime.seeB.setAttribute("style", "display: block; margin: auto; border:1px solid #d3d3d3;");
-	parent.appendChild(SplitTime.seeB);
-	SplitTime.see = SplitTime.seeB.getContext("2d");
-
-	SplitTime.see.font="20px Arial";
-	SplitTime.see.fillText("If this message persists for more than a few seconds,", 10, 30);
-	SplitTime.see.fillText("this game will not run on your browser.", 10, 60);
-
-	SplitTime.buffer = document.createElement("canvas");
-	SplitTime.buffer.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.buffer.setAttribute("height", SplitTime.SCREENY);
-	SplitTime.bufferCtx = SplitTime.buffer.getContext("2d");
-
-	SplitTime.holderCanvas = document.createElement("canvas");
-	SplitTime.holderCanvas.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.holderCanvas.setAttribute("height", SplitTime.SCREENY);
-
-	SplitTime.snapShot = document.createElement("canvas");
-	SplitTime.snapShot.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.snapShot.setAttribute("height", SplitTime.SCREENY);
-	SplitTime.snapShotCtx = SplitTime.snapShot.getContext("2d");
+	SplitTime.launch.createCanvases(width, height, parentId);
 
 	//Sets variables useful for determining what keys are down at any time.
 	document.onkeydown = function(e) {
@@ -114,12 +85,31 @@ SplitTime.launch = function(callback, width, height, parentId) {
 
 	//Initialize
 	SLVD.getXML("master.xml").then(function(master) {
+		var itemsToLoad = master.getElementsByTagName("level").length + master.getElementsByTagName("image").length;
+		var itemsLoaded = 0;
+		var promiseCollection = new SLVD.Promise.collection();
+
+		function incrementAndUpdateLoading() {
+			itemsLoaded++;
+			updateLoading();
+		}
+
+		function updateLoading() {
+			//Display load "percentage"
+			SplitTime.see.fillStyle = "#000000";
+			SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+			SplitTime.see.font="30px Arial";
+			SplitTime.see.fillStyle = "#FFFFFF";
+			SplitTime.see.fillText("Loading: " + Math.round((itemsLoaded/itemsToLoad)*100) + "%", 250, 230);
+		}
+
+		updateLoading();
+
 		var index, second, filename;
 		for(index = 0; index < master.getElementsByTagName("image").length; index++) //Load all images referenced in master.xml outside of levels
 		{
-			SplitTime.image[index] = new Image();
-			SplitTime.image[index].src = "images/preloaded/" + master.getElementsByTagName("image")[index].childNodes[0].nodeValue;
-			SplitTime.image[master.getElementsByTagName("image")[index].childNodes[0].nodeValue] = SplitTime.image[index];
+			filename = master.getElementsByTagName("image")[index].childNodes[0].nodeValue;
+			promiseCollection.add(SplitTime.Image.load("preloaded/" + filename, filename, true).then(incrementAndUpdateLoading));
 		}
 
 		for(index = 0; index < master.getElementsByTagName("music").length; index++) //Load all SplitTime.audio
@@ -138,42 +128,64 @@ SplitTime.launch = function(callback, width, height, parentId) {
 		}
 
 		var iLevel = 0;
-		var promiseCollection = new SLVD.Promise.collection();
 
-		function makeLevelXMLHandler(iLevelLocal) {
+		function makeLevelXMLHandler(filename) {
 			return function(data) {
-				var second;
+				var level = SplitTime.Level.get(filename);
 
-				SplitTime.level[iLevelLocal].filedata = data;
-				//Get the name of SplitTime.level
-				SplitTime.level[iLevelLocal].name = data.getElementsByTagName("name")[0].childNodes[0].nodeValue;
-				//Get the images for SplitTime.level
-				SplitTime.level[iLevelLocal].layerImg = [];
-				SplitTime.level[iLevelLocal].layerFuncData = [];
-				SplitTime.level[iLevelLocal].type = data.getElementsByTagName("type")[0].textContent; //SplitTime.level type
-				SplitTime.level[iLevelLocal].width = 0;
-				SplitTime.level[iLevelLocal].height = 0;
-				for(second = 0; second < data.getElementsByTagName("background").length; second++)
-				{
-					SplitTime.level[iLevelLocal].layerImg[second] = data.getElementsByTagName("background")[second].textContent;
-				}
-				//Initialize board programs. These programs are stored in <boardProgram> nodes which are placed into a generated script to declare functions for the SplitTime.level objects.
-				SplitTime.level[iLevelLocal].boardProgram = [];
-				for(second = 0; second < data.getElementsByTagName("boardProgram").length; second++)
-				{
-					var content = data.getElementsByTagName("boardProgram")[second].textContent;
-					SplitTime.level[iLevelLocal].boardProgram[second] = new Function(content);
-				}
-				for(second = 0; second < data.getElementsByTagName("NPC").length; second++)
-				{
-					var current = SplitTime.NPC.length;
+				level.filedata = data;
+				level.layerImg = [];
+				level.layerFuncData = [];
+				level.type = data.getElementsByTagName("type")[0].textContent;
+				level.width = 0;
+				level.height = 0;
 
-					var template = data.getElementsByTagName("NPC")[second].getAttribute("template");
-					var NPCCode = data.getElementsByTagName("NPC")[second].textContent;
-
-					SplitTime.NPC[current] = SplitTime.evalObj(template, NPCCode);
-					SplitTime.NPC[current].lvl = SplitTime.level[iLevelLocal].name;
+				function onloadImage(layerImg) {
+					if(layerImg.height > level.height)
+					{
+						level.height = layerImg.height;
+					}
+					if(layerImg.width > level.width)
+					{
+						level.width = layerImg.width;
+					}
 				}
+
+				for(var iLayerImg = 0; iLayerImg < data.getElementsByTagName("background").length; iLayerImg++) {
+					t = data.getElementsByTagName("background")[iLayerImg].textContent;
+					level.layerImg[iLayerImg] = t;
+					SplitTime.Image.load(t).then(onloadImage);
+				}
+
+				//Pull positions from file
+				for(index = 0; index < data.getElementsByTagName("position").length; index++) {
+					var position = data.getElementsByTagName("position")[index];
+
+					var obj = {};
+					obj.levelId = filename;
+					obj.x = +position.getAttribute("x");
+					obj.y = +position.getAttribute("y");
+					obj.layer = +position.getAttribute("layer");
+					obj.dir = +position.getAttribute("dir");
+					obj.stance = position.getAttribute("stance");
+
+					var id = position.getAttribute("id");
+					if(id) {
+						level.registerPosition(id, obj);
+					}
+					else {
+						console.warn("position missing id in level XML: " + filename);
+					}
+
+					var actor = position.getElementsByTagName("alias")[0].getAttribute("actor");
+					var alias = position.getElementsByTagName("alias")[0].textContent;
+
+					if(actor && alias) {
+						SplitTime.Actor[actor].registerPosition(alias, obj);
+					}
+				}
+
+				incrementAndUpdateLoading();
 
 				return loadOneLevel();
 			};
@@ -186,12 +198,9 @@ SplitTime.launch = function(callback, width, height, parentId) {
 				return SLVD.Promise.as();
 			}
 
-			//Create SplitTime.level holder
-			SplitTime.level[iLevelLocal] = {};
-			//Get file name
-			SplitTime.level[iLevelLocal].file = master.getElementsByTagName("level")[iLevelLocal].childNodes[0].nodeValue;
-			//Save accessible xml
-			return SLVD.getXML("levels/" + SplitTime.level[iLevelLocal].file).then(makeLevelXMLHandler(iLevelLocal));
+			var filename = master.getElementsByTagName("level")[iLevelLocal].childNodes[0].nodeValue;
+			SplitTime.Level.get(filename);
+			return SLVD.getXML("levels/" + filename).then(makeLevelXMLHandler(filename));
 		}
 
 		for(var iLevelLane = 0; iLevelLane < 10; iLevelLane++) {
@@ -200,78 +209,50 @@ SplitTime.launch = function(callback, width, height, parentId) {
 
 		//Begin recursion
 		promiseCollection.then(function(data) {
-			//Generate lookup for SplitTime.NPC
-			for(var i = 0; i < SplitTime.NPC.length; i++)
-			{
-				SplitTime.NPC[SplitTime.NPC[i].name] = SplitTime.NPC[i];
-			}
+			SplitTime.launch.load.resolve();
 
 			//Begin main loop
 			SplitTime.main();
-		});
-	});
 
-	SplitTime.loadUpdate = function() { //Used in main interval of engine
-		var holder = SplitTime.holderCanvas;
-		var index;
-		//var SplitTime.loading is the index of both SplitTime.image and SplitTime.level being checked
-		if(SplitTime.loading >= SplitTime.image.length && SplitTime.loading >= SplitTime.level.length)
-		{
 			//If done SplitTime.loading, startup (in the initialize.js file)
 			SplitTime.startUp();
+		});
+	});
+};
 
-			SplitTime.msPerFrame = (1/SplitTime.FPS)*1000;
+SplitTime.launch.load = new SLVD.Promise();
 
-			return;
-		}
-		if((SplitTime.loading < SplitTime.image.length && SplitTime.image[SplitTime.loading].complete) || SplitTime.loading >= SplitTime.image.length) { SplitTime.loadCheck[0] = 1; } //SplitTime.image[SplitTime.loading] corresponds fo SplitTime.loadCheck[0]
-		if(SplitTime.loading < SplitTime.level.length)
-		{
-			for(index = 0; index < SplitTime.level[SplitTime.loading].layerImg.length; index++)
-			{
-				var layerImg = SplitTime.getImage(SplitTime.level[SplitTime.loading].layerImg[index]);
-				//If SplitTime.level's layer's images have loaded, get the functional layer SplitTime.image data and mark load check as done
-				if(layerImg.complete /*&& SplitTime.level[SplitTime.loading].layerFunc[index].complete == true*/ && !SplitTime.loadCheck[index + 1])
-				{
-					if(layerImg.height > SplitTime.level[SplitTime.loading].height)
-					{
-						SplitTime.level[SplitTime.loading].height = layerImg.height;
-					}
-					if(layerImg.width > SplitTime.level[SplitTime.loading].width)
-					{
-						SplitTime.level[SplitTime.loading].width = layerImg.width;
-					}
+SplitTime.launch.createCanvases = function(width, height, parentId) {
+	var parent = document.body;
+	if(parentId) {
+		parent = document.getElementById(parentId);
+	}
 
-					SplitTime.loadCheck[index + 1] = 1;
-				}
-			}
-		}
-		//Display load "percentage"
-		SplitTime.see.fillStyle = "#000000";
-		SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-		SplitTime.see.font="30px Arial";
-		SplitTime.see.fillStyle = "#FFFFFF";
-		SplitTime.see.fillText("Loading: " + Math.round(((SplitTime.loading + 0)/SplitTime.image.length)*100) + "%", 250, 230);
+	SplitTime.seeB = document.createElement("canvas");
+	SplitTime.seeB.innerHTML = "Your browser does not support the canvas element this engine relies on. Please get a more modern browser to use this.";
+	SplitTime.seeB.setAttribute("id", "game-window");
+	SplitTime.seeB.setAttribute("class", "center");
+	SplitTime.seeB.setAttribute("width", SplitTime.SCREENX);
+	SplitTime.seeB.setAttribute("height", SplitTime.SCREENY);
+	SplitTime.seeB.setAttribute("style", "display: block; margin: auto; border:1px solid #d3d3d3;");
+	parent.appendChild(SplitTime.seeB);
+	SplitTime.see = SplitTime.seeB.getContext("2d");
 
-		if(SplitTime.level[SplitTime.loading])
-		{
-			for(index = 0; index <= SplitTime.level[SplitTime.loading].layerImg.length; index++)
-			{
-				if(SplitTime.loadCheck[index] != 1)
-				{
-					index = SplitTime.level[SplitTime.loading].layerImg.length + 2;
-				}
-			}
-			if(index == SplitTime.level[SplitTime.loading].layerImg.length + 1)
-			{
-				SplitTime.loading++;
-				SplitTime.loadCheck.length = 0;
-			}
-		}
-		else if(SplitTime.loadCheck[0] == 1)
-		{
-			SplitTime.loading++;
-			SplitTime.loadCheck.length = 0;
-		}
-	};
+	SplitTime.see.font="20px Arial";
+	SplitTime.see.fillText("If this message persists for more than a few seconds,", 10, 30);
+	SplitTime.see.fillText("this game will not run on your browser.", 10, 60);
+
+	SplitTime.buffer = document.createElement("canvas");
+	SplitTime.buffer.setAttribute("width", SplitTime.SCREENX);
+	SplitTime.buffer.setAttribute("height", SplitTime.SCREENY);
+	SplitTime.bufferCtx = SplitTime.buffer.getContext("2d");
+
+	SplitTime.holderCanvas = document.createElement("canvas");
+	SplitTime.holderCanvas.setAttribute("width", SplitTime.SCREENX);
+	SplitTime.holderCanvas.setAttribute("height", SplitTime.SCREENY);
+
+	SplitTime.snapShot = document.createElement("canvas");
+	SplitTime.snapShot.setAttribute("width", SplitTime.SCREENX);
+	SplitTime.snapShot.setAttribute("height", SplitTime.SCREENY);
+	SplitTime.snapShotCtx = SplitTime.snapShot.getContext("2d");
 };

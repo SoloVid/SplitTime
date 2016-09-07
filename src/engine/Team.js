@@ -45,9 +45,9 @@ SplitTime.unallyTeams = function(team1, team2) {
 };
 
 SplitTime.loopThroughAllies = function(person, callback) {
-	for(var i = 0; i < SplitTime.boardAgent.length; i++)
+	for(var i = 0; i < SplitTime.onBoard.agents.length; i++)
 	{
-		var currentAgent = SplitTime.boardAgent[i];
+		var currentAgent = SplitTime.onBoard.agents[i];
 		if(currentAgent.getTeam().isAllied(person.getTeam()))
 		{
 			callback(currentAgent);
@@ -55,9 +55,9 @@ SplitTime.loopThroughAllies = function(person, callback) {
 	}
 };
 SplitTime.loopThroughEnemies = function(person, callback) {
-	for(var i = 0; i < SplitTime.boardAgent.length; i++)
+	for(var i = 0; i < SplitTime.onBoard.agents.length; i++)
 	{
-		var currentAgent = SplitTime.boardAgent[i];
+		var currentAgent = SplitTime.onBoard.agents[i];
 		if(currentAgent.getTeam() != SplitTime.Teams["neutral"] && !currentAgent.getTeam().isAllied(person.getTeam()))
 		{
 			callback(currentAgent);
@@ -65,9 +65,9 @@ SplitTime.loopThroughEnemies = function(person, callback) {
 	}
 };
 SplitTime.loopThroughTeam = function(person, callback) {
-	for(var i = 0; i < SplitTime.boardAgent.length; i++)
+	for(var i = 0; i < SplitTime.onBoard.agents.length; i++)
 	{
-		var currentAgent = SplitTime.boardAgent[i];
+		var currentAgent = SplitTime.onBoard.agents[i];
 		if(currentAgent.getTeam() == person.getTeam())
 		{
 			callback(currentAgent);

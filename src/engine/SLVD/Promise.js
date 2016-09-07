@@ -1,42 +1,63 @@
 dependsOn("SLVD.js");
 
 //Promises for SplitTime
-SLVD.Promise = function() {};
+SLVD.Promise = function() {
+	this.callBacks = [];
+	this.babyPromises = [];
+};
 SLVD.Promise.prototype.then = function(callBack) {
-	if("data" in this) {
+	if(!(callBack instanceof Function)) {
+		console.warn("callBack is not a function");
+		return;
+	}
+
+	if(this.isResolved()) {
 		return callBack(this.data);
 	}
 	else {
-		this.callBack = callBack;
+		this.callBacks.push(callBack);
 
-		this.babyPromise = new SLVD.Promise();
-
-		return this.babyPromise;
+		var baby = new SLVD.Promise();
+		this.babyPromises.push(baby);
+		return baby;
 	}
 };
 SLVD.Promise.prototype.resolve = function(data) {
-	if(this.callBack) {
-		var tPromise = this.callBack(data);
+	if(this.resolved) {
+		console.warn("Promise already resolved");
+		return;
+	}
 
-		if(this.babyPromise) {
-			if(!(tPromise instanceof SLVD.Promise)) {
-				this.babyPromise.resolve(tPromise);
+	this.resolved = true;
+	this.data = data;
+
+	while(this.callBacks.length > 0) {
+		var callBack = this.callBacks.shift();
+		var babyPromise = this.babyPromises.shift();
+
+		var result = callBack(data);
+
+		if((result instanceof SLVD.Promise)) { //callback returned promise
+			var tPromise = result;
+			if(tPromise.isResolved()) { //callback returned resolved promise
+				babyPromise.resolve(tPromise.data);
 			}
-			else if("data" in tPromise) {
-				this.babyPromise.resolve(tPromise.data);
-			}
-			else {
-				tPromise.callBack = this.babyPromise.callBack;
-				if(this.babyPromise.babyPromise) {
-					tPromise.babyPromise = this.babyPromise.babyPromise;
+			else { //callback returned unresolved promise
+				while(babyPromise.callBacks.length > 0) {
+					tPromise.callBacks.push(babyPromise.callBacks.shift());
+					tPromise.babyPromises.push(babyPromise.babyPromises.shift());
 				}
 			}
 		}
-	}
-	else {
-		this.data = data;
+		else { //callback returned other data (or no data)
+			babyPromise.resolve(result);
+		}
 	}
 };
+SLVD.Promise.prototype.isResolved = function() {
+	return this.resolved;
+};
+
 SLVD.Promise.as = function(data) {
 	var prom = new SLVD.Promise();
 	prom.resolve(data);

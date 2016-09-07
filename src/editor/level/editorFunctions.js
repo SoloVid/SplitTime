@@ -181,7 +181,10 @@ function loadFile2(data) {
 function downloadFile() {
 	var xmltext = exportLevel(levelXML);
 
-	var filename = "level_" + $levelXML.find("name").text() + ".xml";
+	var filename = prompt("File name?");
+	if(!filename.endsWith(".xml")) {
+		filename += ".xml";
+	}
 
 	var pom = $('<a></a>');
 	pom.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xmltext));
@@ -382,11 +385,7 @@ function updateObject(type, index) {
 	HTMLImg.css("left", (-(t.xres*SplitTime.determineColumn(XMLNode.attr("dir")))) + "px");
 }
 
-function createLevel(name, type) {
-	if(!name)
-	{
-		name = prompt("Level name:");
-	}
+function createLevel(type) {
 	if(!type)
 	{
 		type = prompt("Type: (action/overworld)");
@@ -395,7 +394,6 @@ function createLevel(name, type) {
 	levelXML = $.parseXML('<?xml version="1.0" encoding="UTF-8"?><level xmlns="http://www.solovid.com/SplitTime/"></level>', "text/xml");
 	$levelXML = $(levelXML);
 
-	$levelXML.find("level").append("<name>" + name + "</name>");
 	$levelXML.find("level").append("<type>" + type + "</type>");
 
 	$levelXML.find("level").append("<enterFunction/>");

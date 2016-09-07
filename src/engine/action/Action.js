@@ -45,26 +45,26 @@ SplitTime.Action["slash"].prototype.canUse = function(person) {
 };
 SplitTime.Action["slash"].prototype.use = function(person) {
 	this.time = 4;
-	for(var third = 0; third < SplitTime.boardAgent.length; third++)
+	for(var third = 0; third < SplitTime.onBoard.agents.length; third++)
 	{
-		if(SplitTime.boardAgent[third].team != person.team)
+		if(SplitTime.onBoard.agents[third].team != person.team)
 		{
 			//One tile away
-			var caseTRPG = Math.pow(SplitTime.xPixToTile(SplitTime.boardAgent[third].x) - SplitTime.xPixToTile(person.x), 2) + Math.pow(SplitTime.yPixToTile(SplitTime.boardAgent[third].y) - SplitTime.yPixToTile(person.y), 2) == 1;
+			var caseTRPG = Math.pow(SplitTime.xPixToTile(SplitTime.onBoard.agents[third].x) - SplitTime.xPixToTile(person.x), 2) + Math.pow(SplitTime.yPixToTile(SplitTime.onBoard.agents[third].y) - SplitTime.yPixToTile(person.y), 2) == 1;
 			//Distance < 40
-			var caseZelda = Math.sqrt(Math.pow(SplitTime.boardAgent[third].x - person.x, 2) + Math.pow(SplitTime.boardAgent[third].y - person.y, 2)) < 40;
+			var caseZelda = Math.sqrt(Math.pow(SplitTime.onBoard.agents[third].x - person.x, 2) + Math.pow(SplitTime.onBoard.agents[third].y - person.y, 2)) < 40;
 
-			if((SplitTime.process == "TRPG" && caseTRPG) || (SplitTime.process == "zelda" && caseZelda))
+			if((SplitTime.process == "TRPG" && caseTRPG) || (SplitTime.process == "action" && caseZelda))
 			{
 				//Determine angle between slasher and opponent (in terms of PI/2)
-				var angle = SplitTime.dirFromTo(person.x, person.y, SplitTime.boardAgent[third].x, SplitTime.boardAgent[third].y);
+				var angle = SplitTime.dirFromTo(person.x, person.y, SplitTime.onBoard.agents[third].x, SplitTime.onBoard.agents[third].y);
 
 				//Compare angle to direction of slasher. If in range of PI... and if not already hurt and not invincible
-				if((Math.abs(angle - person.dir) < 1 || Math.abs(angle - person.dir) > 3) && SplitTime.boardAgent[third].status != "hurt" && SplitTime.boardAgent[third].status != "invincible")
+				if((Math.abs(angle - person.dir) < 1 || Math.abs(angle - person.dir) > 3) && SplitTime.onBoard.agents[third].status != "hurt" && SplitTime.onBoard.agents[third].status != "invincible")
 				{
-					SplitTime.boardAgent[third].zeldaBump(16, angle);
-					SplitTime.boardAgent[third].damage(5);
-					SplitTime.boardAgent[third].giveStatus(new SplitTime.Status["hurt"](1));
+					SplitTime.onBoard.agents[third].zeldaBump(16, angle);
+					SplitTime.onBoard.agents[third].damage(5);
+					SplitTime.onBoard.agents[third].giveStatus(new SplitTime.Status["hurt"](1));
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-//Load from localStorage save "file" of fileName, returns SplitTime.level name to be passed to SplitTime.enterLevelByName()
+//Load from localStorage save "file" of fileName, returns SplitTime.level name to be passed to SplitTime.enterLevelById()
 SplitTime.fileLoad = function(fileName) {
 	var keyList = { level: "", x: "", y: "", layer: "", mvmt: "", speech: "", dmnr: "", dir: "", steps: "", pushy: "", hp: "", maxHp: "", strg: "", spd: "" };
 	var index, key, item;

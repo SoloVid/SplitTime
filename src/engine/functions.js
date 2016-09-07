@@ -59,17 +59,6 @@ SplitTime.damage = function(attacker, victim) {
 	if(victim.dmnr == 1) victim.dmnr = 2;
 };
 
-//Determine column in spritesheet to use based on direction
-SplitTime.determineColumn = function(direction) {
-	var dir = Math.round(direction);//%4;
-	if(dir === 0) { return 2; }
-	else if(dir == 1) { return 1; }
-	else if(dir == 2) { return 3; }
-	else if(dir == 3) { return 0; }
-	else if(direction < 4 && direction > 3) { return 2; }
-	else { return dir; }
-};
-
 SplitTime.directionFromString = function(stringDir) {
 	switch(stringDir) {
 		case "E": return 0;
@@ -126,7 +115,7 @@ SplitTime.distanceTrue = function(x1, y1, x2, y2) {
 };
 
 //Change SplitTime.level (Bodys and map) by name of SplitTime.level (in SplitTime.level's xml)
-SplitTime.enterLevelByName = function(nam) {
+SplitTime.enterLevelById = function(id) {
 	var index, i, j;
 
 	// console.log(SplitTime.currentPlayer);
@@ -135,20 +124,16 @@ SplitTime.enterLevelByName = function(nam) {
 	//********Leave current board
 
 	//Finish all paths
-	for(i = 0; i < SplitTime.boardBody.length; i++)
-	{
-		if(SplitTime.boardBody.path.x.length > 0)
-		{
-			SplitTime.boardBody.setX(SplitTime.boardBody.path.x[SplitTime.boardBody.path.x.length - 1]);
-			SplitTime.boardBody.setY(SplitTime.boardBody.path.y[SplitTime.boardBody.path.y.length - 1]);
+	for(i = 0; i < SplitTime.onBoard.bodies.length; i++) {
+		if(SplitTime.onBoard.bodies.path.x.length > 0) {
+			SplitTime.onBoard.bodies.setX(SplitTime.onBoard.bodies.path.x[SplitTime.onBoard.bodies.path.x.length - 1]);
+			SplitTime.onBoard.bodies.setY(SplitTime.onBoard.bodies.path.y[SplitTime.onBoard.bodies.path.y.length - 1]);
 		}
 	}
 
-	SplitTime.boardAgent.length = 0;
-
-	if(SplitTime.currentLevel)
-	{
-		eval(SplitTime.currentLevel.filedata.getElementsByTagName("exitPrg")[0].textContent);
+	if(SplitTime.currentLevel) {
+		var exitFunctionId = SplitTime.currentLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
+		SplitTime.currentLevel.runFunction(exitFunctionId);
 
 		//Clear out all functional maps
 		SplitTime.currentLevel.layerFuncData.length = 0;
@@ -156,67 +141,28 @@ SplitTime.enterLevelByName = function(nam) {
 
 	//********Enter new board
 
-	//Find board
-	for(index = 0; index < SplitTime.level.length; index++)
-	{
-		if(SplitTime.level[index].name == nam)
-		{
-			SplitTime.currentLevel = SplitTime.level[index];
-			index = SplitTime.level.length + 1;
-		}
-	}
+	SplitTime.currentLevel = SplitTime.Level.get(id);
+
 	SplitTime.process = SplitTime.currentLevel.type;
-	if(SplitTime.process == "zelda")
+	if(SplitTime.process == "action")
 	{
 		SplitTime.cTeam = SplitTime.player;
-		SplitTime.boardAgent.push(SplitTime.player[SplitTime.currentPlayer]);
-		SplitTime.insertBoardC(SplitTime.player[SplitTime.currentPlayer]);
 	}
-	else if(SplitTime.process == "TRPG")
+	else if(SplitTime.process == "overworld")
 	{
 		SplitTime.cTeam = SplitTime.player;
 		SplitTime.currentPlayer = -1;
 		SplitTime.TRPGNextTurn();
 	}
 
-	//Figure out which NPCs are onboard
-	for(index = 0; index < SplitTime.NPC.length; index++)
-	{
-		if(SplitTime.NPC[index].lvl == SplitTime.currentLevel.name)
-		{
-			SplitTime.boardAgent.push(SplitTime.NPC[index]);
-			SplitTime.insertBoardC(SplitTime.NPC[index]);
-		}
-	}
-
-	function putObjOnBoard(obj) {
-		SplitTime.insertBoardC(obj);
-		for(i = 0; i < obj.children.length; i++)
-		{
-			putObjOnBoard(obj.children[i]);
-		}
-	}
-
-	//Pull board objects from file
-	for(index = 0; index < SplitTime.currentLevel.filedata.getElementsByTagName("prop").length; index++)
-	{
-
-		var template = SplitTime.currentLevel.filedata.getElementsByTagName("prop")[index].getAttribute("template");
-		var objCode = SplitTime.currentLevel.filedata.getElementsByTagName("prop")[index].textContent;
-
-		var iObj = SplitTime.evalObj(template, objCode);
-
-		putObjOnBoard(iObj);
-		//SplitTime.insertBoardC(SplitTime.evalObj(template, objCode));
-		//prop[current].lvl = SplitTime.currentLevel.name;
-	}
+	SplitTime.onBoard.refetchBodies();
 
 	//Initialize functional map
 	for(index = 0; index < SplitTime.currentLevel.filedata.getElementsByTagName("layer").length; index++)
 	{
 		var holder = SplitTime.holderCanvas;
-		holder.width = SplitTime.currentLevel.width/(SplitTime.currentLevel.type == "TRPG" ? 32 : 1);
-		holder.height = SplitTime.currentLevel.height/(SplitTime.currentLevel.type == "TRPG" ? 32 : 1);
+		holder.width = SplitTime.currentLevel.width/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
+		holder.height = SplitTime.currentLevel.height/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
 		var holderCtx = holder.getContext("2d");
 		holderCtx.clearRect(0, 0, holder.width, holder.height);
 
@@ -227,7 +173,7 @@ SplitTime.enterLevelByName = function(nam) {
 
 		for(j = 0; j < layerTraces.length; j++)
 		{
-			SplitTime.Trace.draw(layerTraces[j].textContent, holderCtx, layerTraces[j].getAttribute("template"));
+			SplitTime.Trace.draw(layerTraces[j].textContent, holderCtx, layerTraces[j].getAttribute("type"));
 			// holderCtx.strokeStyle = layerTraces[j].getAttribute("template");//.getElementsByTagName("color")[0].textContent;
 			// holderCtx.fillStyle = holderCtx.strokeStyle;
 			//
@@ -268,14 +214,14 @@ SplitTime.enterLevelByName = function(nam) {
 			// 	}
 			// }
 		}
-		for(j = 0; j < SplitTime.boardBody.length; j++)
+		for(j = 0; j < SplitTime.onBoard.bodies.length; j++)
 		{
-			var cBody = SplitTime.boardBody[j];
+			var cBody = SplitTime.onBoard.bodies[j];
 			if(cBody.layer == index)
 			{
 				for(var k = 0; k < cBody.staticTrace.length; k++)
 				{
-					SplitTime.Trace.draw(cBody.staticTrace[k].traceStr, holderCtx, cBody.staticTrace[k].color, cBody);
+					SplitTime.Trace.draw(cBody.staticTrace[k].traceStr, holderCtx, cBody.staticTrace[k].type, cBody);
 				}
 			}
 		}
@@ -285,48 +231,8 @@ SplitTime.enterLevelByName = function(nam) {
 		SplitTime.currentLevel.layerFuncData[index] = holderCtx.getImageData(0, 0, SplitTime.currentLevel.width, SplitTime.currentLevel.height);
 	}
 
-	eval(SplitTime.currentLevel.filedata.getElementsByTagName("enterPrg")[0].textContent);
-};
-
-SplitTime.evalObj = function(template, code) {
-	var obj;
-	if(template)
-	{
-		obj = new SplitTime.BodyTemplate[template]();
-	}
-	else
-	{
-		obj = new SplitTime.Body(null, null);
-	}
-
-	eval(code);
-
-	if(obj.img)
-	{
-		if(!(obj.img in SplitTime.image))
-		{
-			SplitTime.image[obj.img] = new Image();
-			SplitTime.image[obj.img].src = "images/" + obj.img.replace(/\"/g, "");
-		}
-		//obj.img = SplitTime.image[obj.img];
-	}
-	return obj;
-};
-
-//Make a valid switch-case resumeFunc out of function. "waitForEngine();" will signal a return from a case.
-SplitTime.evalFunc = function(code) {
-	var returnCode = "switch(cue) { case 0: {";
-
-	var caseNum = 0;
-
-	returnCode += code.replace(/waitForEngine\(\);/gi, function(n){
-		caseNum++;
-		return "return " + caseNum + ";}; case " + caseNum + ": {";
-	});
-
-	returnCode += "} default: { }; }";
-
-	return returnCode;
+	var enterFunctionId = SplitTime.currentLevel.filedata.getElementsByTagName("enterFunction")[0].textContent;
+	SplitTime.currentLevel.runFunction(enterFunctionId);
 };
 
 SplitTime.getNPCByName = function(name) {
@@ -346,45 +252,17 @@ SplitTime.getPixel = function(x, y, data) {
 	return pixArray;//data.data.slice(i, i + 4);
 };
 
-SplitTime.getScriptAlt = function(url, callback) {
-	var head = document.getElementsByTagName("head")[0];
-	var script = document.createElement("script");
-	script.src = url;
-
-	// Handle Script SplitTime.loading
-	{
-	 var done = false;
-
-	 // Attach handlers for all browsers
-	 script.onload = script.onreadystatechange = function(){
-		if ( !done && (!this.readyState ||
-			  this.readyState == "loaded" || this.readyState == "complete") ) {
-		   done = true;
-		   if (callback)
-			  callback();
-
-		   // Handle memory leak in IE
-		   script.onload = script.onreadystatechange = null;
-		}
-	 };
-	}
-	head.appendChild(script);
-
-	// We handle everything using the script element injection
-	return undefined;
-};
-
 //Gets the index on canvas data of given coordinates
 SplitTime.pixCoordToIndex = function(x,y,dat) {
  return (y*dat.width + x)*4;
 };
 
-//Like SplitTime.enterLevelByName() with coordinates
+//Like SplitTime.enterLevelById() with coordinates
 SplitTime.send = function(board, x, y, z) {
 	SplitTime.player[SplitTime.currentPlayer].setX(x);
 	SplitTime.player[SplitTime.currentPlayer].setY(y);
 	SplitTime.player[SplitTime.currentPlayer].layer = z;
-	SplitTime.enterLevelByName(board);
+	SplitTime.enterLevelById(board);
 };
 
 //Functions to convert between actual pixel locations and tile-based locations. All begin with 0, 0 as top left. Rounding is employed to ensure all return values are integers

@@ -8,85 +8,85 @@
 				{
 					for(var second = 0; second < SplitTime.cTeam[SplitTime.currentPlayer].squares.length; second++)
 					{
-						SplitTime.see.drawImage(SplitTime.image["blueSquare.png"], 0, 0, 32, 32, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
+						SplitTime.see.drawImage(SplitTime.Image.get("blueSquare.png"), 0, 0, 32, 32, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
 					}
 				}
-				for(var second = 0; second < SplitTime.boardBody.length; second++)
+				for(var second = 0; second < SplitTime.onBoard.bodies.length; second++)
 				{
-					if(SplitTime.boardBody[second].act == "slash")
+					if(SplitTime.onBoard.bodies[second].act == "slash")
 					{
 						//If done slashing, move on.
-						if(SplitTime.boardBody[second].SplitTime.countdown <= 0)
+						if(SplitTime.onBoard.bodies[second].SplitTime.countdown <= 0)
 						{
-							SplitTime.boardBody[second].act = null;
+							SplitTime.onBoard.bodies[second].act = null;
 							SplitTime.TRPGNextTurn();
 						}
 						else
 						{
 							//Cycle through opponents
-							for(var third = 0; third < SplitTime.boardBody[second].oppTeam.length; third++)
+							for(var third = 0; third < SplitTime.onBoard.bodies[second].oppTeam.length; third++)
 							{
 								//If distance < 40
-								//if(Math.sqrt(Math.pow(SplitTime.boardBody[second].oppTeam[third].x - SplitTime.boardBody[second].x, 2) + Math.pow(SplitTime.boardBody[second].oppTeam[third].y - SplitTime.boardBody[second].y, 2)) <= 36)
+								//if(Math.sqrt(Math.pow(SplitTime.onBoard.bodies[second].oppTeam[third].x - SplitTime.onBoard.bodies[second].x, 2) + Math.pow(SplitTime.onBoard.bodies[second].oppTeam[third].y - SplitTime.onBoard.bodies[second].y, 2)) <= 36)
 								//If one tile away
-								if(Math.pow(SplitTime.xPixToTile(SplitTime.boardBody[second].oppTeam[third].x) - SplitTime.xPixToTile(SplitTime.boardBody[second].x), 2) + Math.pow(SplitTime.yPixToTile(SplitTime.boardBody[second].oppTeam[third].y) - SplitTime.yPixToTile(SplitTime.boardBody[second].y), 2) == 1)
+								if(Math.pow(SplitTime.xPixToTile(SplitTime.onBoard.bodies[second].oppTeam[third].x) - SplitTime.xPixToTile(SplitTime.onBoard.bodies[second].x), 2) + Math.pow(SplitTime.yPixToTile(SplitTime.onBoard.bodies[second].oppTeam[third].y) - SplitTime.yPixToTile(SplitTime.onBoard.bodies[second].y), 2) == 1)
 								{
 									//Determine angle between slasher and opponent (in terms of PI/2)
-									var angle = Math.atan(-(SplitTime.boardBody[second].oppTeam[third].y - SplitTime.boardBody[second].y)/(SplitTime.boardBody[second].oppTeam[third].x - SplitTime.boardBody[second].x))/(Math.PI/2);
+									var angle = Math.atan(-(SplitTime.onBoard.bodies[second].oppTeam[third].y - SplitTime.onBoard.bodies[second].y)/(SplitTime.onBoard.bodies[second].oppTeam[third].x - SplitTime.onBoard.bodies[second].x))/(Math.PI/2);
 
-									if(SplitTime.boardBody[second].oppTeam[third].x > SplitTime.boardBody[second].x && SplitTime.boardBody[second].oppTeam[third].y > SplitTime.boardBody[second].y)
+									if(SplitTime.onBoard.bodies[second].oppTeam[third].x > SplitTime.onBoard.bodies[second].x && SplitTime.onBoard.bodies[second].oppTeam[third].y > SplitTime.onBoard.bodies[second].y)
 									{
 										angle += 4;
 									}
-									else if(SplitTime.boardBody[second].oppTeam[third].x < SplitTime.boardBody[second].x)
+									else if(SplitTime.onBoard.bodies[second].oppTeam[third].x < SplitTime.onBoard.bodies[second].x)
 									{
 										angle += 2;
 									}
 									//Compare angle to direction of slasher. If in range of PI...
-									if((Math.abs(angle - SplitTime.boardBody[second].dir) <= .5 || Math.abs(angle - SplitTime.boardBody[second].dir) >= 3.5) && SplitTime.boardBody[second].oppTeam[third].status != "hurt")
+									if((Math.abs(angle - SplitTime.onBoard.bodies[second].dir) <= .5 || Math.abs(angle - SplitTime.onBoard.bodies[second].dir) >= 3.5) && SplitTime.onBoard.bodies[second].oppTeam[third].status != "hurt")
 									{
-										SplitTime.damage(SplitTime.boardBody[second], SplitTime.boardBody[second].oppTeam[third]);
-										SplitTime.boardBody[second].oppTeam[third].status = "hurt";
-										SplitTime.boardBody[second].oppTeam[third].SplitTime.countdown = 4;
+										SplitTime.damage(SplitTime.onBoard.bodies[second], SplitTime.onBoard.bodies[second].oppTeam[third]);
+										SplitTime.onBoard.bodies[second].oppTeam[third].status = "hurt";
+										SplitTime.onBoard.bodies[second].oppTeam[third].SplitTime.countdown = 4;
 									}
 								}
 							}
 							SplitTime.see.lineWidth = 8;
 							SplitTime.see.beginPath();
-							SplitTime.see.arc((SplitTime.boardBody[second].x - ((SplitTime.boardBody[second].xres)/2)) - SplitTime.wX + 24, (SplitTime.boardBody[second].y - (SplitTime.boardBody[second].yres)) - SplitTime.wY + 56, 32, .5*((3 - SplitTime.boardBody[second].dir) - .5 + (SplitTime.boardBody[second].SplitTime.countdown/8))*Math.PI, .5*((3 - SplitTime.boardBody[second].dir) + .5 + (SplitTime.boardBody[second].SplitTime.countdown/8))*Math.PI);
+							SplitTime.see.arc((SplitTime.onBoard.bodies[second].x - ((SplitTime.onBoard.bodies[second].xres)/2)) - SplitTime.wX + 24, (SplitTime.onBoard.bodies[second].y - (SplitTime.onBoard.bodies[second].yres)) - SplitTime.wY + 56, 32, .5*((3 - SplitTime.onBoard.bodies[second].dir) - .5 + (SplitTime.onBoard.bodies[second].SplitTime.countdown/8))*Math.PI, .5*((3 - SplitTime.onBoard.bodies[second].dir) + .5 + (SplitTime.onBoard.bodies[second].SplitTime.countdown/8))*Math.PI);
 							SplitTime.see.strokeStyle = "white";
 							SplitTime.see.stroke();
-							SplitTime.boardBody[second].SplitTime.countdown--;
-							if(SplitTime.boardBody[second].SplitTime.countdown < 0)
+							SplitTime.onBoard.bodies[second].SplitTime.countdown--;
+							if(SplitTime.onBoard.bodies[second].SplitTime.countdown < 0)
 							{
-								SplitTime.boardBody[second].SplitTime.countdown = 0;
+								SplitTime.onBoard.bodies[second].SplitTime.countdown = 0;
 							}
 						}
 					}
-					if(SplitTime.boardBody[second].layer == index)
+					if(SplitTime.onBoard.bodies[second].layer == index)
 					{
-						if((SplitTime.boardBody[second].status == "hurt" && SplitTime.frameClock != 1) || SplitTime.boardBody[second].status != "hurt")
+						if((SplitTime.onBoard.bodies[second].status == "hurt" && SplitTime.frameClock != 1) || SplitTime.onBoard.bodies[second].status != "hurt")
 						{
-							var col = SplitTime.determineColumn(SplitTime.boardBody[second].dir);
-							SplitTime.see.drawImage(SplitTime.boardBody[second].img, 32*col, 64*SplitTime.boardBody[second].frame, SplitTime.boardBody[second].xres, SplitTime.boardBody[second].yres, (SplitTime.boardBody[second].x - (((SplitTime.boardBody[second].xres)/2) - 8)) - SplitTime.wX, (SplitTime.boardBody[second].y - (SplitTime.boardBody[second].yres - 8)) - SplitTime.wY, SplitTime.boardBody[second].xres, SplitTime.boardBody[second].yres);
-							if(SplitTime.boardBody[second].holding != null && Math.round(SplitTime.boardBody[second].dir) != 1)
+							var col = SplitTime.determineColumn(SplitTime.onBoard.bodies[second].dir);
+							SplitTime.see.drawImage(SplitTime.onBoard.bodies[second].img, 32*col, 64*SplitTime.onBoard.bodies[second].frame, SplitTime.onBoard.bodies[second].xres, SplitTime.onBoard.bodies[second].yres, (SplitTime.onBoard.bodies[second].x - (((SplitTime.onBoard.bodies[second].xres)/2) - 8)) - SplitTime.wX, (SplitTime.onBoard.bodies[second].y - (SplitTime.onBoard.bodies[second].yres - 8)) - SplitTime.wY, SplitTime.onBoard.bodies[second].xres, SplitTime.onBoard.bodies[second].yres);
+							if(SplitTime.onBoard.bodies[second].holding != null && Math.round(SplitTime.onBoard.bodies[second].dir) != 1)
 							{
-								SplitTime.see.drawImage(SplitTime.boardBody[second].holding, (SplitTime.boardBody[second].holding.width/4)*col, 0, (SplitTime.boardBody[second].holding.width/4), 32, (SplitTime.boardBody[second].x - (((SplitTime.boardBody[second].xres)/2) - 8)) - SplitTime.wX + 16*Math.round(Math.cos(SplitTime.boardBody[second].dir*Math.PI/2)), (SplitTime.boardBody[second].y - (SplitTime.boardBody[second].yres - 18)) - SplitTime.wY - 5*Math.round(Math.sin(SplitTime.boardBody[second].dir*Math.PI/2)), 32, 32);
+								SplitTime.see.drawImage(SplitTime.onBoard.bodies[second].holding, (SplitTime.onBoard.bodies[second].holding.width/4)*col, 0, (SplitTime.onBoard.bodies[second].holding.width/4), 32, (SplitTime.onBoard.bodies[second].x - (((SplitTime.onBoard.bodies[second].xres)/2) - 8)) - SplitTime.wX + 16*Math.round(Math.cos(SplitTime.onBoard.bodies[second].dir*Math.PI/2)), (SplitTime.onBoard.bodies[second].y - (SplitTime.onBoard.bodies[second].yres - 18)) - SplitTime.wY - 5*Math.round(Math.sin(SplitTime.onBoard.bodies[second].dir*Math.PI/2)), 32, 32);
 							}
 						}
-						if(SplitTime.boardBody[second].status == "hurt" && SplitTime.frameClock == 1)
+						if(SplitTime.onBoard.bodies[second].status == "hurt" && SplitTime.frameClock == 1)
 						{
-								SplitTime.boardBody[second].SplitTime.countdown--;
-								if(SplitTime.boardBody[second].SplitTime.countdown <= 0)
+								SplitTime.onBoard.bodies[second].SplitTime.countdown--;
+								if(SplitTime.onBoard.bodies[second].SplitTime.countdown <= 0)
 								{
-									SplitTime.boardBody[second].status = null;
+									SplitTime.onBoard.bodies[second].status = null;
 								}
 						}
 					}
-					if(SplitTime.boardBody[second].dart.layer == index)
+					if(SplitTime.onBoard.bodies[second].dart.layer == index)
 					{
-						var col = SplitTime.determineColumn(SplitTime.boardBody[second].dart.dir);
-						SplitTime.see.drawImage(SplitTime.boardBody[second].dart.img, SplitTime.boardBody[second].dart.xres*col, SplitTime.boardBody[second].dart.yres*SplitTime.boardBody[second].dart.frame, SplitTime.boardBody[second].dart.xres, SplitTime.boardBody[second].dart.yres, SplitTime.boardBody[second].dart.x - SplitTime.wX, SplitTime.boardBody[second].dart.y - SplitTime.wY, SplitTime.boardBody[second].dart.xres, SplitTime.boardBody[second].dart.yres);
+						var col = SplitTime.determineColumn(SplitTime.onBoard.bodies[second].dart.dir);
+						SplitTime.see.drawImage(SplitTime.onBoard.bodies[second].dart.img, SplitTime.onBoard.bodies[second].dart.xres*col, SplitTime.onBoard.bodies[second].dart.yres*SplitTime.onBoard.bodies[second].dart.frame, SplitTime.onBoard.bodies[second].dart.xres, SplitTime.onBoard.bodies[second].dart.yres, SplitTime.onBoard.bodies[second].dart.x - SplitTime.wX, SplitTime.onBoard.bodies[second].dart.y - SplitTime.wY, SplitTime.onBoard.bodies[second].dart.xres, SplitTime.onBoard.bodies[second].dart.yres);
 					}
 				}
 			}
@@ -95,16 +95,16 @@
 			SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 			if(rainy)
 			{
-				SplitTime.see.drawImage(SplitTime.image["rain.png"], -((SplitTime.counter%100)/100)*SplitTime.SCREENX, ((SplitTime.counter%25)/25)*SplitTime.SCREENY - SplitTime.SCREENY);
+				SplitTime.see.drawImage(SplitTime.Image.get("rain.png"), -((SplitTime.counter%100)/100)*SplitTime.SCREENX, ((SplitTime.counter%25)/25)*SplitTime.SCREENY - SplitTime.SCREENY);
 				if(SplitTime.counter%8 == SLVD.randomInt(12))
 				{
 					for(var index = 0; index < SLVD.randomInt(3); index++)
 					{
-						SplitTime.see.drawImage(SplitTime.image["lightning.png"], 0, 0);
+						SplitTime.see.drawImage(SplitTime.Image.get("lightning.png"), 0, 0);
 					}
 				}
 			}
-			if(cloudy) SplitTime.see.drawImage(SplitTime.image["stormClouds.png"], SplitTime.counter%1280 - 1280, 0);
+			if(cloudy) SplitTime.see.drawImage(SplitTime.Image.get("stormClouds.png"), SplitTime.counter%1280 - 1280, 0);
 			//document.getElementById("info").innerHTML = SplitTime.player[0].dir + ", " + SplitTime.player[0].x + ", " + SplitTime.player[0].y + ", " + dKeys
 			SplitTime.see.fillStyle="#FFFFFF";
 			SplitTime.see.font="12px Verdana";
@@ -218,7 +218,7 @@ SplitTime.TRPGPlayerMotion = function() //Function for current SplitTime.player'
 		SplitTime.PF.getSquares(SplitTime.player[SplitTime.currentPlayer]);
 		SplitTime.PF.reformUnitsOnSquareWithout(SplitTime.xPixToTile(SplitTime.player[SplitTime.currentPlayer].x), SplitTime.yPixToTile(SplitTime.player[SplitTime.currentPlayer].y), SplitTime.player, SplitTime.player[SplitTime.currentPlayer]);
 	}
-	if(SplitTime.player[SplitTime.currentPlayer].path.x.length > 0) //TODO: check JSHint-prompted modification 
+	if(SplitTime.player[SplitTime.currentPlayer].path.x.length > 0) //TODO: check JSHint-prompted modification
 	{
 		if(SplitTime.counter%4 === 0) { SplitTime.player[SplitTime.currentPlayer].frame = (SplitTime.player[SplitTime.currentPlayer].frame + 1)%4; }
 		pathMotion(SplitTime.player[SplitTime.currentPlayer], 8);

@@ -5,12 +5,8 @@ SplitTime.main = function() {
 	var a = new Date(); //for speed checking
 	switch(SplitTime.process)
 	{
-		case "loading":
-		{
-			SplitTime.loadUpdate(); //in load.js
-			break;
-		}
-		case "zelda":
+		case "hold": break;
+		case "action":
 		{
 			//Advance one second per second (given 20ms SplitTime.main interval)
 			if(SplitTime.counter%SplitTime.FPS === 0) SplitTime.Time.advance(1); //in time.js
@@ -25,12 +21,12 @@ SplitTime.main = function() {
 			var d = new SLVD.speedCheck("SplitTime.zeldaNPCMotion", c.date);
 			d.logUnusual();
 
-			if(SplitTime.boardBody.length === 0) SplitTime.restartBoardC();
-			else SplitTime.sortBoardC();
-			var e = new SLVD.speedCheck("SplitTime.sortBoardC", d.date);
+			if(SplitTime.onBoard.bodies.length === 0) SplitTime.onBoard.refetchBodies();
+			else SplitTime.onBoard.sortBodies();
+			var e = new SLVD.speedCheck("SplitTime sort board bodies", d.date);
 			e.logUnusual();
 
-			if(SplitTime.process != "zelda") break;
+			if(SplitTime.process != "action") break;
 
 			//Render board, SplitTime.see below
 			SplitTime.renderBoardState(true);
@@ -49,7 +45,7 @@ SplitTime.main = function() {
 			{
 				SplitTime.TRPGNPCMotion();
 			}
-			SplitTime.sortBoardC();
+			SplitTime.onBoard.sortBodies();
 
 			SplitTime.renderBoardState(true);
 			break;
@@ -93,7 +89,7 @@ SplitTime.main = function() {
 			else SplitTime.countdown--;
 			break;
 		}
-		default: { }
+		default: {}
 	}
 	SplitTime.counter++;
 	if(SplitTime.counter == 25600)
@@ -185,86 +181,6 @@ SplitTime.orientScreen = function() {
   }
 };
 
-//Sort all board characters into the array SplitTime.boardBody in order of y location (in order to properly render sprite overlap).
-SplitTime.restartBoardC = function() {
-	SplitTime.boardBody.length = 0;
-	var index;
-	//Figure out which NPCs are onboard
-	for(index = 0; index < SplitTime.NPC.length; index++)
-	{
-		if(SplitTime.NPC[index].lvl == SplitTime.currentLevel.name)
-		{
-			SplitTime.insertBoardC(SplitTime.NPC[index]);
-		}
-	}
-
-	//Pull board objects from file
-	for(index = 0; index < SplitTime.currentLevel.filedata.getElementsByTagName("prop").length; index++)
-	{
-		var template = SplitTime.currentLevel.filedata.getElementsByTagName("prop")[index].getAttribute("template");
-		var objCode = SplitTime.currentLevel.filedata.getElementsByTagName("prop")[index].textContent;
-
-		SplitTime.insertBoardC(SplitTime.evalObj(template, objCode));
-		//prop[current].lvl = SplitTime.currentLevel.name;
-	}
-
-	for(index = 0; index < SplitTime.player.length; index++)
-	{
-		if(index == SplitTime.currentPlayer || SplitTime.currentLevel.type == "TRPG") SplitTime.insertBoardC(SplitTime.player[index]);
-	}
-};
-
-//Sort the array SplitTime.boardBody in order of y location (in order to properly render sprite overlap).
-SplitTime.sortBoardC = function() {
-	if(SplitTime.boardBody.length === 0) SplitTime.restartBoardC();
-	else
-	{
-		for(var index = 1; index < SplitTime.boardBody.length; index++)
-		{
-			var second = index;
-			while(second > 0 && SplitTime.boardBody[second].y < SplitTime.boardBody[second - 1].y)
-			{
-				var tempC = SplitTime.boardBody[second];
-				SplitTime.boardBody[second] = SplitTime.boardBody[second - 1];
-				SplitTime.boardBody[second - 1] = tempC;
-				second--;
-			}
-		}
-	}
-};
-
-SplitTime.insertBoardC = function(element) {
-	var index = 0;
-	while(index < SplitTime.boardBody.length && element.y > SplitTime.boardBody[index].y)
-	{
-		index++;
-	}
-	SplitTime.boardBody.splice(index, 0, element);
-/*	var second = SplitTime.boardBody.length;
-	SplitTime.boardBody[second] = element;
-	while(second > 0)
-	{
-		if(SplitTime.boardBody[second].y < SplitTime.boardBody[second - 1].y)
-		{
-			var tempC = SplitTime.boardBody[second];
-			SplitTime.boardBody[second] = SplitTime.boardBody[second - 1];
-			SplitTime.boardBody[second - 1] = tempC;
-		}
-		second--;
-	}*/
-};
-
-SplitTime.deleteBoardC = function(element) {
-	for(var index = 0; index < SplitTime.boardBody.length; index++)
-	{
-		if(element == SplitTime.boardBody[index])
-		{
-			SplitTime.boardBody.splice(index, 1);
-			index = SplitTime.boardBody.length;
-		}
-	}
-};
-
 //Based on keys down (ASDW and arrows), set current SplitTime.player's direction. Used in SplitTime.zeldaPlayerMotion().
 SplitTime.figurePlayerDirection = function() {
 	var dKeys = 0;
@@ -332,21 +248,21 @@ SplitTime.renderBoardState = function(forceCalculate) {
 				{
 					SplitTime.see.fillStyle = "rgba(0, 100, 255, .5)";
 					SplitTime.see.fillRect(SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
-					//SplitTime.see.drawImage(SplitTime.image["blueSquare.png"], 0, 0, 32, 32, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
+					//SplitTime.see.drawImage(SplitTime.Image.get("blueSquare.png"), 0, 0, 32, 32, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
 				}
 			}
 		}
 
-		//Loop through SplitTime.boardBody (to render)
-		for(second = 0; second < SplitTime.boardBody.length; second++)
+		//Loop through SplitTime.onBoard.bodies (to render)
+		for(second = 0; second < SplitTime.onBoard.bodies.length; second++)
 		{
-			var cBody = SplitTime.boardBody[second];
+			var cBody = SplitTime.onBoard.bodies[second];
 			if(cBody.layer == index) //ensure proper layering
 			{
 				cBody.see(SplitTime.snapShotCtx);
 				//BodyF.see.call(cBody, SplitTime.snapShotCtx);
 
-				//Determine if SplitTime.boardBody is lighted
+				//Determine if SplitTime.onBoard.bodies is lighted
 				if(cBody.isLight)
 				{
 					lightedThing[lightedThing.length] = cBody;
@@ -368,7 +284,7 @@ SplitTime.renderBoardState = function(forceCalculate) {
 		SplitTime.snapShotCtx.globalCompositeOperation = "destination-over";
 
 		//Draw layer based on values found in SplitTime.orientScreen() and altered above
-		var tImg = SplitTime.getImage(SplitTime.currentLevel.layerImg[index]);
+		var tImg = SplitTime.Image.get(SplitTime.currentLevel.layerImg[index]);
 		//Note: this single call on a perform test is a huge percentage of CPU usage.
 		SplitTime.snapShotCtx.drawImage(tImg, SplitTime.wX + xDif, SplitTime.wY + yDif, SplitTime.SCREENX - 2*xDif, SplitTime.SCREENY - 2*yDif, xDif, yDif, SplitTime.SCREENX - 2*xDif, SplitTime.SCREENY - 2*yDif);
 
@@ -394,12 +310,12 @@ SplitTime.renderWeather = function(lightedThing) {
 	//Weather
 	if(SplitTime.weather.rain)
 	{
-		SplitTime.see.drawImage(SplitTime.image["rain.png"], -((SplitTime.counter%100)/100)*SplitTime.SCREENX, ((SplitTime.counter%25)/25)*SplitTime.SCREENY - SplitTime.SCREENY);
+		SplitTime.see.drawImage(SplitTime.Image.get("rain.png"), -((SplitTime.counter%100)/100)*SplitTime.SCREENX, ((SplitTime.counter%25)/25)*SplitTime.SCREENY - SplitTime.SCREENY);
 	}
 	if(SplitTime.weather.clouds)
 	{
-		SplitTime.see.drawImage(SplitTime.image["stormClouds.png"], 2560 - SplitTime.counter%2560, 0, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-		SplitTime.see.drawImage(SplitTime.image["stormClouds.png"], 0 - SplitTime.counter%2560, 0, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+		SplitTime.see.drawImage(SplitTime.Image.get("stormClouds.png"), 2560 - SplitTime.counter%2560, 0, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+		SplitTime.see.drawImage(SplitTime.Image.get("stormClouds.png"), 0 - SplitTime.counter%2560, 0, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 	}
 	if(SplitTime.weather.lightning > 0)
 	{

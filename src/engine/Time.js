@@ -59,7 +59,7 @@ SplitTime.Time.advance = function(seconds) {
 };
 
 SplitTime.Time.renderClock = function(context) {
-	context.drawImage(SplitTime.image["clock.png"], SplitTime.SCREENX - 140, 0);
+	context.drawImage(SplitTime.Image.get("clock.png"), SplitTime.SCREENX - 140, 0);
 	context.lineWidth = 1;
 	context.strokeStyle="#DDDDDD";
 	var hand = Math.PI/2 - (2*(SplitTime.SAVE.timeSeconds/60)*Math.PI);

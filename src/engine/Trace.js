@@ -1,12 +1,11 @@
 SplitTime.Trace = {};
 
-SplitTime.Trace.draw = function(traceStr, ctx, color, offsetPos)
-{
+SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
 	if(!offsetPos)
 	{
 		offsetPos = {x: 0, y: 0};
 	}
-	ctx.strokeStyle = color;
+	ctx.strokeStyle = SplitTime.getColor(type);
 	ctx.fillStyle = ctx.strokeStyle;
 
 	var regex = /\([^\)]+\)/g;
@@ -64,4 +63,28 @@ SplitTime.Trace.draw = function(traceStr, ctx, color, offsetPos)
 		}
 	}
 	ctx.stroke();
+};
+
+SplitTime.Trace.typeToColor = {
+	"solid": [0, 0, 255, 1],
+	"void": [255, 0, 255, 1],
+	"function": [254, 0, 0, 1],
+	"path": [0, 0, 0, 1],
+	"stairDown": [0, 255, 0, 1],
+	"stairUp": [0, 255, 0, 1]
+};
+SplitTime.Trace.colorToType = {};
+
+for(var color in SplitTime.Trace.typeToColor) {
+	SplitTime.Trace.colorToType[SplitTime.Trace.typeToColor[color].join(",")] = color;
+}
+
+SplitTime.Trace.getColor = function(type) {
+	return "rgba(" + SplitTime.Trace.typeToColor[type].join(", ") + ")";
+};
+SplitTime.Trace.getType = function(r, g, b, a) {
+	if(a === undefined) {
+		a = 1;
+	}
+	return SplitTime.Trace.colorToType[r + "," + g + "," + b + "," + a];
 };

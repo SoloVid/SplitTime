@@ -49,7 +49,7 @@ $(document).ready(function() {
 		$("#traceOptions").append('<div class="option" style="color: white; background-color: ' + traceEditorColors[traceType] + '">' + traceType + '</div>');
 	}
 
-	$.getScript(projectPath + "dist/static.js", function() {
+	$.getScript(projectPath + "dist/game.js", function() {
 		subImg = $("#subImg").get(0);
 		ctx = subImg.getContext("2d");
 		subImg2 = $("#subImg2").get(0);

@@ -1,23 +1,23 @@
-SplitTime.zeldaNPCMotion = function() //Function for all non-SplitTime.player SplitTime.boardBody's movement in Zelda mode.
+SplitTime.zeldaNPCMotion = function() //Function for all non-SplitTime.player SplitTime.onBoard.bodies's movement in Zelda mode.
 {
-	if(SplitTime.process != "zelda")
+	if(SplitTime.process != "action")
 	{
 		return -1;
 	}
-	for(var index = 0; index < SplitTime.boardBody.length; index++)
+	for(var index = 0; index < SplitTime.onBoard.bodies.length; index++)
 	{
 		//Facilitate death
-		while(index < SplitTime.boardBody.length && SplitTime.boardBody[index].hp <= 0)
+		while(index < SplitTime.onBoard.bodies.length && SplitTime.onBoard.bodies[index].hp <= 0)
 		{
-			SplitTime.boardBody[index].lvl = null;
-			//SplitTime.deleteBoardC(SplitTime.boardBody[index]);
-			SplitTime.boardBody.splice(index, 1);
+			SplitTime.onBoard.bodies[index].lvl = null;
+			//SplitTime.onBoard.removeBody(SplitTime.onBoard.bodies[index]);
+			SplitTime.onBoard.bodies.splice(index, 1);
 		}
-		//If at invalid index (bc death ran to end of SplitTime.boardBody array), don't continue
-		if(index >= SplitTime.boardBody.length) return;
-		if(SplitTime.boardBody[index] != SplitTime.player[SplitTime.currentPlayer])
+		//If at invalid index (bc death ran to end of SplitTime.onBoard.bodies array), don't continue
+		if(index >= SplitTime.onBoard.bodies.length) return;
+		if(SplitTime.onBoard.bodies[index] != SplitTime.player[SplitTime.currentPlayer])
 		{
-			var cNPC = SplitTime.boardBody[index];
+			var cNPC = SplitTime.onBoard.bodies[index];
 
 			if(cNPC.path.length > 0) //Handle path motion
 			{
@@ -43,9 +43,9 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	var i;
 	if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space")
 	{
-		for(var index = 0; index < SplitTime.boardAgent.length; index++)
+		for(var index = 0; index < SplitTime.onBoard.agents.length; index++)
 		{
-			var otherAgent = SplitTime.boardAgent[index];
+			var otherAgent = SplitTime.onBoard.agents[index];
 			if(Math.abs(person.x - otherAgent.x) < 32 && Math.abs(person.y - otherAgent.y) < 32)
 			{
 				otherAgent.interact();
@@ -67,8 +67,8 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 		person.setY(SplitTime.player[prevPlayer].y);
 		person.setLayer(SplitTime.player[prevPlayer].layer);
 		person.dir = SplitTime.player[prevPlayer].dir;
-		SplitTime.deleteBoardC(SplitTime.player[prevPlayer]);
-		SplitTime.insertBoardC(person);
+		SplitTime.onBoard.removeBody(SplitTime.player[prevPlayer]);
+		SplitTime.onBoard.insertBody(person);
 		delete SplitTime.keyFirstDown;
 	}
 
@@ -301,7 +301,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// 		SplitTime.player[SplitTime.currentPlayer].pet.statusCountdown--;
 	// 		if(SplitTime.player[SplitTime.currentPlayer].pet.statusCountdown <= 0)
 	// 		{
-	// 			SplitTime.deleteBoardC(SplitTime.player[SplitTime.currentPlayer].pet);
+	// 			SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].pet);
 	// 			delete SplitTime.player[SplitTime.currentPlayer].pet;
 	// 		}
 	// 	}
@@ -319,7 +319,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// 			SplitTime.damage(SplitTime.player[SplitTime.currentPlayer].dart, boardNPC[index]); //damage hit opponent
 	// 			SplitTime.player[SplitTime.currentPlayer].dart.setLayer(null); //remove SplitTime.image
 	// 			SplitTime.player[SplitTime.currentPlayer].dart.frame = 0; //reset frame
-	// 			SplitTime.deleteBoardC(SplitTime.player[SplitTime.currentPlayer].dart);
+	// 			SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].dart);
 	// 			boardNPC[index].status = "hurt"; //"hurt" opponent
 	// 			boardNPC[index].statusCountdown = 4; //"hurt" blinks
 	// 			index = boardNPC.length; //break out of loop
@@ -330,7 +330,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// 	{
 	// 		SplitTime.player[SplitTime.currentPlayer].dart.setLayer(null);
 	// 		SplitTime.player[SplitTime.currentPlayer].dart.frame = 0;
-	// 		SplitTime.deleteBoardC(SplitTime.player[SplitTime.currentPlayer].dart);
+	// 		SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].dart);
 	// 	}
 	// 	//Update frame
 	// 	if(SplitTime.frameClock == 1)

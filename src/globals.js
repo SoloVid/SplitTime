@@ -18,11 +18,9 @@ SplitTime.location.levels = "levels/";
 SplitTime.player = [];
 SplitTime.Actor = [];
 SplitTime.NPC = []; //Universal, absolute list of SplitTime.NPC objects (on all boards)
-SplitTime.boardAgent = []; //NPCs and players, for functional interaction
-SplitTime.boardBody = []; //NPCs, players, and props, for drawing purposes
 SplitTime.Teams = {};
 
-SplitTime.process = "loading"; //Input of master setInterval switch-case
+SplitTime.process = "hold"; //Input of master setInterval switch-case
 
 SplitTime.currentAudio = undefined;
 SplitTime.volume = 1;
@@ -51,4 +49,5 @@ SplitTime.SCREENX = 640;
 SplitTime.SCREENY = 480;
 
 SplitTime.FPS = 50;
+SplitTime.msPerFrame = (1/SplitTime.FPS)*1000;
 SplitTime.showFPS = false;
