@@ -5,7 +5,7 @@ SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
 	{
 		offsetPos = {x: 0, y: 0};
 	}
-	ctx.strokeStyle = SplitTime.getColor(type);
+	ctx.strokeStyle = SplitTime.Trace.getColor(type);
 	ctx.fillStyle = ctx.strokeStyle;
 
 	var regex = /\([^\)]+\)/g;
@@ -66,9 +66,9 @@ SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
 };
 
 SplitTime.Trace.typeToColor = {
-	"solid": [0, 0, 255, 1],
+	"solid": [255, 0, 0, 1],
 	"void": [255, 0, 255, 1],
-	"function": [254, 0, 0, 1],
+	"function": [100, 0, 0, 1],
 	"path": [0, 0, 0, 1],
 	"stairDown": [0, 255, 0, 1],
 	"stairUp": [0, 255, 0, 1]
