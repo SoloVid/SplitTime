@@ -172,6 +172,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test', ['jshint'/*, 'qunit'*/]);
     grunt.registerTask('rename', ['copy:renamer', 'clean:renamer']);
+    grunt.registerTask('build', ['jshint:engine', 'oconcat:engine']);
     grunt.registerTask('default', ['jshint:engine', 'oconcat:engine', 'watch:engine']);
     // grunt.registerTask('default', 'Default', function(param) {
     //     if(param) {
