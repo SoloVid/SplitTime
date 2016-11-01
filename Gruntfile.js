@@ -132,7 +132,8 @@ module.exports = function(grunt) {
                     SLVD: true,
                     SplitTime: true,
                     t: true
-                }
+                },
+                reporterOutput: ""
             },
             engine: ['Gruntfile.js', 'src/editor/**/*.js', 'src/globals.js', 'src/engine/**/*.js'],
             project: ['<%= grunt.config("projectPath") %>src/**/*.js']
