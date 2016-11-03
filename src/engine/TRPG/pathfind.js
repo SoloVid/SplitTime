@@ -1,13 +1,13 @@
-var SplitTime.PF = new Object();
+SplitTime.PF = {};
 
-SplitTime.pathToTeam = function(finder, opTeam)
+SplitTime.pathToEnemy = function(finder)
 {
 	//alert("start pf");
 	SplitTime.PF.finder = finder;
 	SplitTime.PF.opTeam = opTeam;
-	SplitTime.PF.point = new Array();
-	SplitTime.PF.binHeap = new Array();
-	SplitTime.PF.pointC = new Object;
+	SplitTime.PF.point = [];
+	SplitTime.PF.binHeap = [];
+	SplitTime.PF.pointC = {};
 	SplitTime.PF.SplitTime.counter = 0;
 	//Start with finder's point
 	//Convert to tile coordinates
@@ -23,8 +23,143 @@ SplitTime.pathToTeam = function(finder, opTeam)
 	SplitTime.PF.point[SplitTime.PF.pointC.index] = SplitTime.PF.pointC;
 	//Add point to the "closed list" (location -1)
 	SplitTime.PF.pointC.location = -1;
-	var cont = 1;
-	while(cont == 1)
+	var cont = true;
+	while(cont)
+	{
+		//if(SplitTime.PF.SplitTime.counter > 1000) alert("way too many while loopings");
+		//alert(SplitTime.PF.pointC.x + ", " + SplitTime.PF.pointC.y);
+		//Cycle through opposing team positions
+		for(var index = 0; index < SplitTime.onBoard.agents.length; index++)
+		{
+			var currentAgent = SplitTime.onBoard.agents[index];
+			if(!currentAgent.getTeam().isAllied(SplitTime.PF.finder.getTeam()))
+			{
+				//if(index > 100) alert("something is wrong");
+				//If reached one opponent's position, set path to troop
+				if(SplitTime.PF.pointC.x == SplitTime.xPixToTile(currentAgent.x) && SplitTime.PF.pointC.y == SplitTime.yPixToTile(currentAgent.y))
+				{
+					//alert("found target");
+					//Check if spot next to target is already occupied by team member
+	/*				for(var second = 0; second < SplitTime.PF.opTeam[0].oppTeam.length; second++)
+					{
+						//If found a team member, but it is the finder
+						if(SplitTime.PF.opTeam[0].oppTeam[second] == SplitTime.PF.finder) { }
+						else if(SplitTime.PF.pointC.parent.x == SplitTime.xPixToTile(SplitTime.PF.opTeam[0].oppTeam[second].x) && SplitTime.PF.pointC.parent.y == SplitTime.yPixToTile(SplitTime.PF.opTeam[0].oppTeam[second].y))
+						{
+							//Pretend the target's point has not been touched
+							//SplitTime.PF.removeOb(SplitTime.PF.pointC.location); //Point is already out of the heap since it was grabbed.
+							delete SplitTime.PF.point[SplitTime.PF.pointC.index];
+							//Skip everything else to grab a new point
+							SplitTime.PF.skip = 1;
+							second = SplitTime.PF.opTeam[0].oppTeam.length;
+						}
+					}*/
+	//				if(SplitTime.PF.skip != 1)
+		//			{
+						//Go backward from target troop's point to finder's point, setting the path along the way
+						while(SplitTime.PF.pointC.parent != -1)
+						{
+							for(var second = SplitTime.PF.finder.path.x.length; second > 0; second--)
+							{
+								SplitTime.PF.finder.path.x[second] = SplitTime.PF.finder.path.x[second - 1];
+								SplitTime.PF.finder.path.y[second] = SplitTime.PF.finder.path.y[second - 1];
+							}
+							SplitTime.PF.finder.path.x[0] = SplitTime.xTileToPix(SplitTime.PF.pointC.x);
+							SplitTime.PF.finder.path.y[0] = SplitTime.yTileToPix(SplitTime.PF.pointC.y);
+							SplitTime.PF.pointC = SplitTime.PF.pointC.parent;
+						}
+						//Because the last child point is the point of the target, we delete it off to keep from going there
+						SplitTime.PF.finder.path.x.length--;
+						SplitTime.PF.finder.path.y.length--;
+						//If the path is longer than the finder's speed, shorten it to the speed/* + 1 (account for the fact that the first point is its current point)*/
+						if(SplitTime.PF.finder.path.x.length > SplitTime.PF.finder.spd)
+						{
+							SplitTime.PF.finder.path.x.length = SplitTime.PF.finder.spd;
+							SplitTime.PF.finder.path.y.length = SplitTime.PF.finder.spd;
+						}
+						//index = SplitTime.PF.opTeam.length;
+						cont = false;
+						delete SplitTime.PF.point;
+						delete SplitTime.PF.pointC;
+						delete SplitTime.PF.binHeap;
+						delete SplitTime.PF.skip;
+						return SplitTime.PF.opTeam[index];
+	//				}
+	/*				else
+					{
+						index = SplitTime.PF.opTeam.length;
+					}*/
+				}
+			}
+		}
+		//alert("through for for opponents");
+		if(SplitTime.PF.skip != 1)
+		{
+			SplitTime.PF.evaluatePoint(SplitTime.PF.pointC.x, SplitTime.PF.pointC.y - 1); //North of current point
+			SplitTime.PF.evaluatePoint(SplitTime.PF.pointC.x, SplitTime.PF.pointC.y + 1); //South
+			SplitTime.PF.evaluatePoint(SplitTime.PF.pointC.x + 1, SplitTime.PF.pointC.y); //East
+			SplitTime.PF.evaluatePoint(SplitTime.PF.pointC.x - 1, SplitTime.PF.pointC.y); //West
+		}
+		else
+		{
+			//alert("skipped");
+		}
+		if(!SplitTime.PF.binHeap[1])
+		{
+			//alert("no path");
+			//No path
+			cont = false;
+		}
+		else if(SplitTime.PF.binHeap[1].GCost > (5*SplitTime.PF.finder.spd + 1)) //Too far
+		{
+			//alert("out of range");
+			cont = false;
+		}
+		else
+		{
+		//alert("to grab");
+			SplitTime.PF.pointC = SplitTime.PF.grabOb(); //grab from binary heap SplitTime.PF.binHeap
+			//alert("from grab");
+			SplitTime.PF.pointC.location = -1; //Add to "closed list"
+		}
+		delete SplitTime.PF.skip;
+	}
+	delete SplitTime.PF.point;
+	delete SplitTime.PF.pointC;
+	delete SplitTime.PF.binHeap;
+	return -1;
+//alert("through pf");
+	//select lowest G cost
+	//add to closed list, use as reference point
+	//add surroundings to open list (if not already) (and if not blocked)
+	//if surrounding already added, check for if lower G cost
+};
+
+SplitTime.pathToTeam = function(finder, opTeam)
+{
+	//alert("start pf");
+	SplitTime.PF.finder = finder;
+	SplitTime.PF.opTeam = opTeam;
+	SplitTime.PF.point = [];
+	SplitTime.PF.binHeap = [];
+	SplitTime.PF.pointC = {};
+	SplitTime.PF.SplitTime.counter = 0;
+	//Start with finder's point
+	//Convert to tile coordinates
+	SplitTime.PF.pointC.x = SplitTime.xPixToTile(SplitTime.PF.finder.x);
+	SplitTime.PF.pointC.y = SplitTime.yPixToTile(SplitTime.PF.finder.y);
+	//Get index (based on SplitTime.level's function SplitTime.map data) of the point
+	SplitTime.PF.pointC.index = SplitTime.pixCoordToIndex(SplitTime.PF.pointC.x, SplitTime.PF.pointC.y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer]);
+	//No parent
+	SplitTime.PF.pointC.parent = -1;
+	//Initial point costs nothing
+	SplitTime.PF.pointC.GCost = 0;
+	//Set this point in a more concrete variable
+	SplitTime.PF.point[SplitTime.PF.pointC.index] = SplitTime.PF.pointC;
+	//Add point to the "closed list" (location -1)
+	SplitTime.PF.pointC.location = -1;
+	var cont = true;
+	while(cont)
 	{
 		//if(SplitTime.PF.SplitTime.counter > 1000) alert("way too many while loopings");
 		//alert(SplitTime.PF.pointC.x + ", " + SplitTime.PF.pointC.y);
@@ -75,7 +210,7 @@ SplitTime.pathToTeam = function(finder, opTeam)
 						SplitTime.PF.finder.path.y.length = SplitTime.PF.finder.spd;
 					}
 					//index = SplitTime.PF.opTeam.length;
-					cont = null;
+					cont = false;
 					delete SplitTime.PF.point;
 					delete SplitTime.PF.pointC;
 					delete SplitTime.PF.binHeap;
@@ -100,16 +235,16 @@ SplitTime.pathToTeam = function(finder, opTeam)
 		{
 			//alert("skipped");
 		}
-		if(SplitTime.PF.binHeap[1] == null)
+		if(!SplitTime.PF.binHeap[1])
 		{
 			//alert("no path");
 			//No path
-			cont = null;
+			cont = false;
 		}
 		else if(SplitTime.PF.binHeap[1].GCost > (5*SplitTime.PF.finder.spd + 1)) //Too far
 		{
 			//alert("out of range");
-			cont = null;
+			cont = false;
 		}
 		else
 		{
@@ -137,12 +272,12 @@ SplitTime.PF.evaluatePoint = function(x, y)
 	//Get point's index
 	var i = SplitTime.pixCoordToIndex(x, y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer]);
 	//If the point has not yet been analyzed and spot on SplitTime.map = function is not blocked
-	if(SplitTime.PF.point[i] == null && SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer].data[i] != 255 && x >= 0 && y >= 0 && x < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].width && y < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].height)
+	if(!SplitTime.PF.point[i] && SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer].data[i] != 255 && x >= 0 && y >= 0 && x < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].width && y < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].height)
 	{
 		//alert("initializing point " + i);
 	//alert("setup point");
 		//Set up point (as with first point)
-		SplitTime.PF.point[i] = new Object;
+		SplitTime.PF.point[i] = {};
 		SplitTime.PF.point[i].x = x;
 		SplitTime.PF.point[i].y = y;
 		SplitTime.PF.point[i].index = i;
@@ -157,11 +292,11 @@ SplitTime.PF.evaluatePoint = function(x, y)
 		//alert("point to heap done");
 	}
 	else if(SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer].data[i] == 255 || x < 0 || y < 0 || x >= SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].width || y >= SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].height) //If point is on closed list or is blocked by terrain
-	{ 
+	{
 	//alert("blocked");
-	} 
-	else if(SplitTime.PF.point[i].location == -1) 
-	{ 
+	}
+	else if(SplitTime.PF.point[i].location == -1)
+	{
 	//	alert("closed");
 	}
 	else
@@ -188,18 +323,19 @@ SplitTime.PF.addOb = function(ob)
 	//Set point as cChild at end of heap
 	//cChild is an index of the point
 	var cChild = SplitTime.PF.binHeap.length;
-	if(cChild == 0) cChild = 1;
+	if(cChild === 0) cChild = 1;
 	SplitTime.PF.binHeap[cChild] = ob;
-	var cont2 = 1;
-	while(cont2 == 1)
+	var cont2 = true;
+	var parent;
+	while(cont2)
 	{
 		//alert("in addOb while");
 		//Determine parent index
-		var parent = (cChild - cChild%2)/2;
+		parent = (cChild - cChild%2)/2;
 		//If the parent has a higher GCost than the child
-		if(SplitTime.PF.binHeap[parent] == null) 
+		if(!SplitTime.PF.binHeap[parent])
 		{
-			cont2 = null;
+			cont2 = false;
 		}
 		else if(SplitTime.PF.binHeap[parent].GCost > SplitTime.PF.binHeap[cChild].GCost)
 		{
@@ -212,20 +348,20 @@ SplitTime.PF.addOb = function(ob)
 			//If at top of heap, stop
 			if(parent == 1)
 			{
-				cont2 = null;
+				cont2 = false;
 			}
 			//cChild is now where parent had been
 			cChild = parent;
 		}
-		else { cont2 = null; }; //If heap is valid, stop
+		else { cont2 = false; } //If heap is valid, stop
 	}
 	//Save last two points' locations for easy access
-	if(SplitTime.PF.binHeap[parent] != null)
+	if(SplitTime.PF.binHeap[parent])
 	{
 		SplitTime.PF.binHeap[parent].location = parent;
 	}
 	SplitTime.PF.binHeap[cChild].location = cChild;
-}
+};
 
 //Grab the top object (lowest GCost) off of SplitTime.PF.binHeap
 SplitTime.PF.grabOb = function()
@@ -239,15 +375,15 @@ SplitTime.PF.grabOb = function()
 	//Set first parent for comparison
 	var parent = 1;
 	//Initiate while loop
-	var cont2 = 1;
-	while(cont2 == 1)
+	var cont2 = true;
+	while(cont2)
 	{
 		//Determine first child of parent
 		cChild = parent*2;
-		if(SplitTime.PF.binHeap[cChild] != null)
+		if(SplitTime.PF.binHeap[cChild])
 		{
 			//If second child has lower GCost than first child, make second child the one in consideration; but first make sure there is a second child
-			if(SplitTime.PF.binHeap[cChild + 1] != null)
+			if(SplitTime.PF.binHeap[cChild + 1])
 			{
 				if(SplitTime.PF.binHeap[cChild].GCost > SplitTime.PF.binHeap[cChild + 1].GCost)
 				{
@@ -256,7 +392,7 @@ SplitTime.PF.grabOb = function()
 			}
 			//If the parent's GCost is greater than the child's GCost, reverse relationship
 			if(SplitTime.PF.binHeap[parent].GCost > SplitTime.PF.binHeap[cChild].GCost)
-			{	
+			{
 				var temp = SplitTime.PF.binHeap[parent];
 				SplitTime.PF.binHeap[parent] = SplitTime.PF.binHeap[cChild];
 				SplitTime.PF.binHeap[cChild] = temp;
@@ -265,7 +401,7 @@ SplitTime.PF.grabOb = function()
 				//If at end of heap (cChild has no children), stop loop
 				if((cChild*2) >= SplitTime.PF.binHeap.length)
 				{
-					cont2 = null;
+					cont2 = false;
 				}
 /*				else
 				{*/
@@ -278,12 +414,12 @@ SplitTime.PF.grabOb = function()
 				//Save location
 				SplitTime.PF.binHeap[parent].location = parent;
 				//End loop
-				cont2 = null; 
+				cont2 = false;
 			}
 		}
 		else
 		{
-			cont2 = null;
+			cont2 = false;
 		}
 	}
 	//Save location for backwards finding
@@ -291,7 +427,7 @@ SplitTime.PF.grabOb = function()
 	//SplitTime.PF.binHeap[cChild].location = cChild;
 	//Return grabbed top object
 	return ret;
-}
+};
 
 //Occasionally, an object must be removed from the heap (right now just when a path is found to the target but the spot next to the target already has a teammate).
 SplitTime.PF.removeOb = function(index)
@@ -309,18 +445,18 @@ SplitTime.PF.removeOb = function(index)
 	//Set first parent for comparison
 	var parent = index;
 	//Initiate while loop
-	var cont2 = 1;
+	var cont2 = true;
 	var times = 0;
-	while(cont2 == 1)
+	while(cont2)
 	{
 		//alert(times);
 		//Determine first child of parent
 		cChild = parent*2;
 		//If child exists
-		if(SplitTime.PF.binHeap[cChild] != null)
+		if(SplitTime.PF.binHeap[cChild])
 		{
 			//If second child has lower GCost than first child, make second child the one in consideration; but first make sure there is a second child
-			if(SplitTime.PF.binHeap[cChild + 1] != null)
+			if(SplitTime.PF.binHeap[cChild + 1])
 			{
 				if(SplitTime.PF.binHeap[cChild].GCost > SplitTime.PF.binHeap[cChild + 1].GCost)
 				{
@@ -329,7 +465,7 @@ SplitTime.PF.removeOb = function(index)
 			}
 			//If the parent's GCost is greater than the child's GCost, reverse relationship
 			if(SplitTime.PF.binHeap[parent].GCost > SplitTime.PF.binHeap[cChild].GCost)
-			{	
+			{
 				var temp = SplitTime.PF.binHeap[parent];
 				SplitTime.PF.binHeap[parent] = SplitTime.PF.binHeap[cChild];
 				SplitTime.PF.binHeap[cChild] = temp;
@@ -338,7 +474,7 @@ SplitTime.PF.removeOb = function(index)
 				//If at end of heap (cChild has no children), stop loop
 				if((cChild*2) >= SplitTime.PF.binHeap.length)
 				{
-					cont2 = null;
+					cont2 = false;
 				}
 /*				else
 				{*/
@@ -351,12 +487,12 @@ SplitTime.PF.removeOb = function(index)
 				//Save location
 				SplitTime.PF.binHeap[parent].location = parent;
 				//End loop
-				cont2 = null; 
+				cont2 = false;
 			}
 		}
 		else
 		{
-			cont2 = null;
+			cont2 = false;
 		}
 		times++;
 	}
@@ -364,7 +500,7 @@ SplitTime.PF.removeOb = function(index)
 	SplitTime.PF.binHeap[parent].location = parent;
 	//SplitTime.PF.binHeap[cChild].location = cChild;
 	//alert(SplitTime.PF.binHeap[parent].location);
-}
+};
 
 //Because of a changed GCost of a point, check and correct the heap's validity starting at that point's known location
 SplitTime.PF.relocateOb = function(index)
@@ -376,8 +512,8 @@ SplitTime.PF.relocateOb = function(index)
 	}
 	//GCost of a point is only ever going to be decreased; thus we only need to check it going upward in the heap. Hence, the point is our first child
 	var cChild = index;
-	var cont2 = 1;
-	while(cont2 == 1)
+	var cont2 = true;
+	while(cont2)
 	{
 		//Determine parent
 		var parent = (cChild - cChild%2)/2;
@@ -392,7 +528,7 @@ SplitTime.PF.relocateOb = function(index)
 			//If at top of heap, stop
 			if(parent == 1)
 			{
-				cont2 = null;
+				cont2 = false;
 			}
 			else
 			{
@@ -404,10 +540,10 @@ SplitTime.PF.relocateOb = function(index)
 		{
 			//Final child stays (and so does final parent)
 			SplitTime.PF.binHeap[cChild].location = cChild;
-			cont2 = null;
+			cont2 = false;
 		}
 	}
-}
+};
 
 
 //Get squares SplitTime.player can move to
@@ -416,7 +552,7 @@ SplitTime.PF.getSquares = function(person)
 	//Make person accessible across functions
 	SplitTime.PF.person = person;
 	//Since person.squares is deleted every turn, re-setup the first square
-	person.squares[0] = new Object;
+	person.squares[0] = {};
 	person.squares[0].x = SplitTime.xPixToTile(person.ix);
 	person.squares[0].y = SplitTime.yPixToTile(person.iy);
 	person.squares[0].GCost = 0;
@@ -424,7 +560,7 @@ SplitTime.PF.getSquares = function(person)
 	for(var index = 0; index < person.squares.length; index++)
 	{
 		//Square in question is...
-		SplitTime.PF.cSquare = person.squares[index]
+		SplitTime.PF.cSquare = person.squares[index];
 		SplitTime.PF.evaluateSquare(person.squares[index].x, person.squares[index].y - 1); //N
 		SplitTime.PF.evaluateSquare(person.squares[index].x, person.squares[index].y + 1); //S
 		SplitTime.PF.evaluateSquare(person.squares[index].x + 1, person.squares[index].y); //E
@@ -442,7 +578,7 @@ SplitTime.PF.getSquares = function(person)
 			SplitTime.PF.person.squares.length--;
 		}
 	}*/
-}
+};
 
 SplitTime.PF.evaluateSquare = function(x, y)
 {
@@ -450,8 +586,9 @@ SplitTime.PF.evaluateSquare = function(x, y)
 	var done = 0;
 	var blocked = 0;
 	var forRemoval = 0;
+	var second;
 	//Determine if square has already been analyzed.
-	for(var second = 0; second < SplitTime.PF.person.squares.length; second++)
+	for(second = 0; second < SplitTime.PF.person.squares.length; second++)
 	{
 		if(x == SplitTime.PF.person.squares[second].x && y == SplitTime.PF.person.squares[second].y)
 		{
@@ -463,7 +600,7 @@ SplitTime.PF.evaluateSquare = function(x, y)
 	if(done != 1)
 	{
 		//Determine if opponent is on the square.
-		for(var second = 0; second < SplitTime.PF.person.oppTeam.length; second++)
+		for(second = 0; second < SplitTime.PF.person.oppTeam.length; second++)
 		{
 			if(SplitTime.xPixToTile(SplitTime.PF.person.oppTeam[second].x) == x && SplitTime.yPixToTile(SplitTime.PF.person.oppTeam[second].y) == y)
 			{
@@ -471,7 +608,7 @@ SplitTime.PF.evaluateSquare = function(x, y)
 			}
 		}
 		//Determine if a teammate is on the square.
-		for(var second = 0; second < SplitTime.PF.person.oppTeam[0].oppTeam.length; second++)
+		for(second = 0; second < SplitTime.PF.person.oppTeam[0].oppTeam.length; second++)
 		{
 			if(SplitTime.PF.person.oppTeam[0].oppTeam[second] == SplitTime.PF.person) { } //Exception: teammate is self.
 			else if(SplitTime.xPixToTile(SplitTime.PF.person.oppTeam[0].oppTeam[second].x) == x && SplitTime.yPixToTile(SplitTime.PF.person.oppTeam[0].oppTeam[second].y) == y)
@@ -485,7 +622,7 @@ SplitTime.PF.evaluateSquare = function(x, y)
 			if(SplitTime.PF.cSquare.GCost + 1 <= SplitTime.PF.person.spd)
 			{
 				var ref = SplitTime.PF.person.squares.length;
-				SplitTime.PF.person.squares[ref] = new Object;
+				SplitTime.PF.person.squares[ref] = {};
 				SplitTime.PF.person.squares[ref].x = x;
 				SplitTime.PF.person.squares[ref].y = y;
 				SplitTime.PF.person.squares[ref].GCost = SplitTime.PF.cSquare.GCost + 1;
@@ -496,7 +633,7 @@ SplitTime.PF.evaluateSquare = function(x, y)
 			}
 		}
 	}
-}
+};
 
 SplitTime.PF.onSquare = function(person)
 {
@@ -508,7 +645,7 @@ SplitTime.PF.onSquare = function(person)
 		}
 	}
 	return 0;
-}
+};
  //Check if a coordinate is a square
 SplitTime.PF.isSquare = function(x, y, person)
 {
@@ -520,11 +657,11 @@ SplitTime.PF.isSquare = function(x, y, person)
 		}
 	}
 	return 0;
-}
+};
 
 SplitTime.PF.reformUnitsOnSquareWithout = function(x, y, team, exMember)
 {
-	var unit = new Array;
+	var unit = [];
 	unit.length = 0;
 	for(var index = 0; index < team.length; index++)
 	{
@@ -555,4 +692,4 @@ SplitTime.PF.reformUnitsOnSquareWithout = function(x, y, team, exMember)
 			return 0;
 		}
 	}
-}
+};

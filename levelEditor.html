@@ -2,210 +2,69 @@
 <html>
 	<head>
 		<script src="src/libs/jquery-1.11.1.min.js"></script>
-
-		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-<!--		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>-->
-<!--		<script src="angular.min.js"></script>-->
 		<script src="src/libs/vkbeautify.js"></script>
 
-		<style>
-			canvas {
-			  image-rendering: optimizeSpeed;             /* Older versions of FF          */
-			  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
-			  image-rendering: -webkit-optimize-contrast; /* Safari                        */
-			  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
-			  image-rendering: pixelated;                 /* Awesome future-browsers       */
-			  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
-			}
-			#navmenu
-			{
-				position: fixed;
-				margin: 0;
-				left: 0;
-				top: 0;
-				width: 100%;
-				z-index: 200;
-			}
-			#navmenu ul {margin: 0; padding: 0; /*position: relative; top: -5px; */
-				border-top: thin solid darkslategray;
-				border-bottom: thin solid darkslategray;
-				list-style-type: none; list-style-image: none;
-				padding: 5px 0px 5px 0px;
-				background: -webkit-linear-gradient(white, gainsboro, white); /* For Safari 5.1 to 6.0 */
-				background: -o-linear-gradient(white, gainsboro, white); /* For Opera 11.1 to 12.0 */
-				background: -moz-linear-gradient(white, gainsboro, white); /* For Firefox 3.6 to 15 */
-				background: linear-gradient(white, gainsboro, white); /* Standard syntax */
-			}
-			#navmenu li {display: inline; }
-			#navmenu ul li a {text-decoration:none;  margin: 0px;
-				padding: 5px 10px 5px 10px; color: darkslategray; font-family: Verdana, sans-serif; font-size: 12px; font-weight: bold;}
-			#navmenu ul li a:hover {color: white;
-				background: -webkit-linear-gradient(slategray, darkslategray, slategray); /* For Safari 5.1 to 6.0 */
-				background: -o-linear-gradient(slategray, darkslategray, slategray); /* For Opera 11.1 to 12.0 */
-				background: -moz-linear-gradient(slategray, darkslategray, slategray); /* For Firefox 3.6 to 15 */
-				background: linear-gradient(slategray, darkslategray, slategray); /* Standard syntax */
-			}
-			.background
-			{
-				position: absolute;
-				margin: 0px;
-				left: 0px;
-				top: 0;
-				cursor: crosshair;
-				padding-right: 300px;
-			}
-			.whiteboard
-			{
-				position: absolute;
-				margin: 0px;
-				padding: -0px;
-				left: 0px;
-				top: 0;
-				cursor:crosshair;
-				/*border: 1px solid black;*/
-			}
-			#layers
-			{
-				position: absolute;
-				left: 110px;
-				top: 40px;
-				right: 250px;
-				/*width: 100%;
-				height: 100%;*/
-				padding: 0;
-				margin: 0px;
-				cursor: crosshair;
-			}
+		<!-- TODO: re-evaluate use of jQuery UI -->
+		<!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>-->
 
-			.layerDisplay
-			{
-				position: absolute;
-				overflow: hidden;
-				border: 1px solid black;
-			}
-
-			.menu
-			{
-				position: fixed;
-				top: 40px;
-				/*right: 0;*/
-				width: 200px;
-				max-height: 90%;
-				overflow-y: auto;
-				border: 1px solid black;
-				padding: 4px;
-				background-color: white;
-			}
-
-			.menu > .option
-			{
-				/*width:32px;
-				height:32px;*/
-				border: 1px solid black;
-				margin: 4px;
-
-				cursor: pointer;
-			}
-
-			#layerMenu > div
-			{
-				cursor: pointer;
-			}
-
-			.draggable
-			{
-				cursor: all-scroll;
-			}
-		</style>
+		<link rel="stylesheet" href="src/editor/level/style.css">
 	</head>
 	<body>
 		<div id="navmenu">
-		<ul>
-			<li><a href="javascript:clickFileChooser();">Load Level</a>
-				<input name="fileChooser" id="fileChooser" type="file" style="display:none">
-			</li>
-			<li><a href="javascript:downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
-			</li>
-			<li><a href="javascript:resizeBoard();" title="This function is a manual resize if the editor fails to auto-size the board.&#013;Resizing the board here will have no effect on the level in the engine.">Resize Board</a></li>
-		</ul>
-		<script>
-		$("li").hover(function() {
-			//alert("enter");
-			$(this).children("ul").clearQueue();
-			$(this).children("ul").slideDown("fast"); },
-			function() {
-			$(this).children("ul").clearQueue();
-			$(this).children("ul").slideUp("fast"); });
-		</script>
+			<ul>
+				<li><a href="javascript:createLevel();">New Level</a></li>
+				<li><a href="javascript:clickFileChooser();">Load Level</a>
+					<input id="fileChooser" type="file" style="display:none">
+				</li>
+				<li><a href="javascript:downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
+				</li>
+				<li><a href="javascript:resizeBoard();" title="This function is a manual resize if the editor fails to auto-size the board.&#013;Resizing the board here will have no effect on the level in the engine.">Resize Board</a></li>
+			</ul>
 		</div>
+		<div id="editorTools">
+			<div id="layers"></div>
 
-		<div id="layers"></div>
+			<div class="menu" style="left:0px;width:100px">
+				Tools:
+				<div class="option" onclick="setMode('position')"
+					title="Positions are handles for locations that Actors may occupy or paths may lead to and from.&#013;&#013;NPCs are generally people or things that have dynamic properties.&#013;NPCs are loaded at game start and transcend the board (i.e. they are not in any way actually tied to the board and may be moved to other boards).
+					&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
+					>Position</div>
+				<div class="option" onclick="setMode('prop')"
+					title="Props are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Props are generally static (or animated) graphical elements Bodys can walk behind or in front of.
+					&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone&#013;Double-click to open properties."
+					>Prop</div>
+				<br>
+				Active Layer:
+				<select id="activeLayer"></select>
+				<br><br>
+				<div id="traceOptions" title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;Solid traces represent completely inpenetrable areas.&#013;Void traces are used for areas of open air where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;Function traces indicate areas of the level which will trigger a function call when a body moves into the area.&#013;Paths link positions together for walking purposes.&#013;Stairs move Bodys to different layers.
+				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
+					<h4>Traces</h4>
+				</div>
+				<br>
+				<div class="option" id="btnEnterFunc" title="Function to run on entrance to board">Level Enter Function</div>
+				<div class="option" id="btnExitFunc" title="Function to run on exit from board">Level Exit Function</div>
+			</div>
+			<div id="layerMenu" class="menu" style="right:0px;">
+				<br id="layerMenuBreak" />
+				<div class="option" onclick="createLayer()">Add Layer</div>
+			</div>
 
-		<div class="menu" style="left:0px;width:100px">
-			Tools:
-			<div class="option" onclick="setMode('NPC')"
-				title="NPCs are generally people or things that have dynamic properties.&#013;NPCs are loaded at game start and transcend the board (i.e. they are not in any way actually tied to the board and may be moved to other boards).
-				&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
-				>NPC</div>
-			<div class="option" onclick="setMode('boardObj')"
-				title="Board Objects are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Board Objects are generally static (or animated) graphical elements Sprites can walk behind or in front of.
-				&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone&#013;Double-click to open properties."
-				>Board Object</div>
-<!--			<div class="option" onclick="setMode('copySprite')">Copy Sprite</div>
-			<div class="option" onclick="setMode('editSprite')">Edit Sprite</div>-->
-			<div class="option" onclick="setMode('trace')"
-				title="Traces define Sprites' (actually just NPCs and players) interaction with the board.&#013;Traces come in three primary colors as shown below.&#013;Red is used for completely inpenetrable areas/objects.&#013;Yellow is used for areas where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;The last color is used for board events.
-				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
-			>Trace</div>
-			<br>
-			Active Layer:
-			<select id="activeLayer"></select>
-			<br><br>
-			<div class="option color" style="background-color:rgb(255, 0, 0);">Solid</div>
-			<div class="option color" style="background-color:rgb(255, 255, 0);">Open Air</div>
-			<div class="option color" style="background-color:rgb(100, 0, 0);">Board Program</div>
-			<br>
-			<div class="option" id="btnEnterPrg" title="Program to run on entrance to board">Board Enter Program</div>
-			<div class="option" id="btnExitPrg" title="Program to run on exit from board">Board Exit Program</div>
-		</div>
-		<div id="layerMenu" class="menu" style="right:0px;">
-			<br>
-			<div class="option" onclick="createLayer()">Add Layer</div>
-			<div class="option" onclick="createProgram()">Add Program</div>
-		</div>
-
-		<div id="TextEditorDlg" style="background-color:rgb(255, 255, 255); border:1px solid black; left: 150px; top:50px; right:150px; bottom: 50px; padding: 10px; position:fixed;">
-			<h3 id="TEDTitle"></h3>
-			<br>
-			<textarea id="TEDCode" style="width:100%; height:80%;"></textarea>
-			<br>
-			<button id="TEDSaveChanges" style="right:0;">Save Changes</button>
-		</div>
-
-		<div id="XMLEditor" style="background-color:rgb(255, 255, 255); border:1px solid black; left: 150px; top:50px; right:150px; bottom: 50px; padding: 10px; position:fixed;">
-			Template: <input id="template"></input> <a href="javascript: helpXML();">(Help)</a>
-			<br>
-			Hard Code:<br>
-			<textarea id="hardCode" style="width:100%; height:80%;"></textarea>
-			<br>
-			<button id="saveChanges" style="right:0;">Save Changes</button>
-			<button id="deleteThing">Delete This</button>
-			<div id="closeXMLEditor" style="position: absolute; top: 5px; right: 5px; border: 1px solid black; padding: 2px; cursor:pointer;">X</div>
+			<div id="XMLEditorBack" class="backdrop">
+				<div id="XMLEditor">
+					<div id="XMLEditorFields"></div>
+					<button id="saveChanges" style="right:0;">Save Changes</button>
+					<button id="deleteThing">Delete This</button>
+				</div>
+			</div>
 		</div>
 
 		<canvas id="subImg" width="256" height="256" style="display:none"></canvas>
 		<canvas id="subImg2" width="320" height="320" style="display:none"></canvas>
 
-		<script src="src/editor/getStaticScript.js"></script>
-
-		<script src="src/editor/eventHandlers.js"></script>
-
-		<script src="src/editor/editorFunctions.js"></script>
-
-		<!--<script src="src/editor/instantiateObjects.js"></script>-->
-
-		<script>
-			levelXML = createLevel();
-		</script>
+		<script src="src/editor/level/eventHandlers.js"></script>
+		<script src="src/editor/level/form.js"></script>
+		<script src="src/editor/level/editorFunctions.js"></script>
 	</body>
 </html>

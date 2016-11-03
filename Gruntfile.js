@@ -2,27 +2,33 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        concat: {
+        oconcat: {
             options: {
                 separator: ';\n'
             },
             engine: {
+                options: {
+                    root: 'src/engine'
+                },
                 src: [
-                    'src/runtime/**/*.js',
-                    'src/static/**/*.js'
+                    'src/globals.js', //first in file to avoid null pointers
+                    'src/engine/**/*.js'
                 ],
                 dest: 'dist/engine.js'
             },
             project: {
+                options: {
+                    root: '<%= grunt.config("projectPath") %>src'
+                },
                 src: [
                     'dist/engine.js',
-                    '<%= grunt.config("projectPath") %>code/**/*.js'],
-                dest: '<%= grunt.config("projectPath") %>dist/static.js'//'dist/<%= pkg.name %>.js'
+                    '<%= grunt.config("projectPath") %>src/**/*.js'],
+                dest: '<%= grunt.config("projectPath") %>dist/game.js'//'dist/<%= pkg.name %>.js'
             }
         },
         clean: {
             renamer: {
-                src: ['**/code/**/*.tjs']
+                src: ['**/src/**/*.tjs']
             }
         },
         copy: {
@@ -32,7 +38,7 @@ module.exports = function(grunt) {
                     dot: true,
                     //dest: 'dist/',
                     src: [
-                        '**/code/**/*.tjs'
+                        '**/src/**/*.tjs'
                     ],
                     rename: function(dest, src) {
                         return src.replace('.tjs','.js');
@@ -100,12 +106,12 @@ module.exports = function(grunt) {
         },
         uglify: {
             options: {
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n;(function() {\n',
-                footer: '\n} ());'
+                banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n;var SplitTime = (function() {\n',
+                footer: '\nreturn SplitTime;\n} ());'
             },
-            dist: {
+            project: {
                 files: {
-                    'dist/<%= pkg.name %>.min.js': ['dist/static.js', 'dist/load.js', 'dist/initialize.js', 'dist/main.js']//<%= concat.dist.dest %>']
+                    '<%= grunt.config("projectPath") %>dist/game.min.js': ['<%= grunt.config("projectPath") %>dist/game.js']
                 }
             }
         },
@@ -124,12 +130,13 @@ module.exports = function(grunt) {
                     module: true,
                     document: true,
                     SLVD: true,
-                    SLVDE: true,
+                    SplitTime: true,
                     t: true
-                }
+                },
+                reporterOutput: ""
             },
-            engine: ['Gruntfile.js', 'src/editor/**/*.js', 'src/runtime/**/*.js', 'src/static/**/*.js'],
-            project: ['<%= grunt.config("projectPath") %>code/**/*.js']
+            engine: ['Gruntfile.js', 'src/editor/**/*.js', 'src/globals.js', 'src/engine/**/*.js'],
+            project: ['<%= grunt.config("projectPath") %>src/**/*.js']
         },
         watch: {
             options: {
@@ -137,10 +144,10 @@ module.exports = function(grunt) {
             },
             engine: {
                 files: ['<%= jshint.engine %>'],
-                tasks: ['jshint:engine', 'concat:engine']
+                tasks: ['jshint:engine', 'oconcat:engine']
             },
             project: {
-                files: ['dist/engine.js', '<%= grunt.config("projectPath") %>code/**/*.js', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
+                files: ['dist/engine.js', '<%= grunt.config("projectPath") %>src/**/*.js', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
                 tasks: [
                     'project:<%= grunt.config("project") %>'
                 ]
@@ -149,7 +156,7 @@ module.exports = function(grunt) {
                 options: {
                     event: ['added']
                 },
-                files: ['**/code/**/*.tjs'],
+                files: ['**/src/**/*.tjs'],
                 tasks: 'rename'
             }
         }
@@ -160,19 +167,20 @@ module.exports = function(grunt) {
     //grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-ordered-concat');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-injector');
 
     grunt.registerTask('test', ['jshint'/*, 'qunit'*/]);
     grunt.registerTask('rename', ['copy:renamer', 'clean:renamer']);
-    grunt.registerTask('default', ['jshint:engine', 'concat:engine', 'watch:engine']);
+    grunt.registerTask('build', ['jshint:engine', 'oconcat:engine']);
+    grunt.registerTask('default', ['jshint:engine', 'oconcat:engine', 'watch:engine']);
     // grunt.registerTask('default', 'Default', function(param) {
     //     if(param) {
     //         grunt.task.run('project:' + param);
     //         return;
     //     }
-    //     grunt.task.run(['jshint:engine', 'concat:engine', 'uglify', 'watch:engine']);
+    //     grunt.task.run(['jshint:engine', 'oconcat:engine', 'uglify', 'watch:engine']);
     // });
 
     grunt.registerTask('spin', 'Handle Grunt tasks for a project with watch', function(projectName) {
@@ -190,6 +198,9 @@ module.exports = function(grunt) {
         }
         grunt.config("project", projectName);
         grunt.config("projectPath", "projects/" + projectName + "/");
-        grunt.task.run(['jshint:project', 'concat:project', 'injector']);
+        grunt.task.run(['jshint:project', 'oconcat:project', 'injector']);
+        if(grunt.option('min')) {
+            grunt.task.run('uglify:project');
+        }
     });
 };

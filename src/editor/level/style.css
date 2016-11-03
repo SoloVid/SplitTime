@@ -1,0 +1,154 @@
+canvas {
+    image-rendering: optimizeSpeed;             /* Older versions of FF          */
+    image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+    image-rendering: -webkit-optimize-contrast; /* Safari                        */
+    image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+    image-rendering: pixelated;                 /* Awesome future-browsers       */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+}
+#navmenu
+{
+    position: fixed;
+    margin: 0;
+    left: 0;
+    top: 0;
+    width: 100%;
+    z-index: 200;
+}
+#navmenu ul {
+    margin: 0;
+    padding: 0;
+    border-top: thin solid black;
+    border-bottom: thin solid black;
+    list-style-type: none; list-style-image: none;
+    padding: 5px 0px 5px 0px;
+    background-color: white;
+}
+#navmenu li {display: inline; }
+#navmenu ul li a {
+    text-decoration:none;
+    margin: 0px;
+    padding: 5px 10px 5px 10px;
+    color: black;
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+}
+.menu .option:hover, #navmenu ul li a:hover {
+    color: white;
+    background-color: lightgreen;
+}
+.background
+{
+    position: absolute;
+    margin: 0px;
+    left: 0px;
+    top: 0;
+    cursor: crosshair;
+    padding-right: 300px;
+}
+.whiteboard
+{
+    position: absolute;
+    margin: 0px;
+    padding: -0px;
+    left: 0px;
+    top: 0;
+    cursor:crosshair;
+    /*border: 1px solid black;*/
+}
+#layers
+{
+    position: absolute;
+    left: 110px;
+    top: 40px;
+    right: 250px;
+    /*width: 100%;
+    height: 100%;*/
+    padding: 0;
+    margin: 0px;
+    cursor: crosshair;
+}
+
+.layerDisplay
+{
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid black;
+}
+
+.menu
+{
+    position: fixed;
+    top: 40px;
+    /*right: 0;*/
+    width: 200px;
+    max-height: 90%;
+    overflow-y: auto;
+    border: 1px solid black;
+    padding: 4px;
+    background-color: white;
+}
+
+.menu .option
+{
+    /*width:32px;
+    height:32px;*/
+    border: 1px solid black;
+    margin: 4px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+#layerMenu > div
+{
+    cursor: pointer;
+}
+
+.draggable
+{
+    cursor: all-scroll;
+}
+
+.backdrop {
+    display: none;
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(50, 50, 50, .5)
+}
+
+#XMLEditor {
+    display: block;
+    overflow: auto;
+    position: relative;
+    top: 5%;
+    left: 10%;
+    width: 80%;
+    height: 90%;
+    margin: 0;
+    background-color: white;
+    padding: 15px;
+}
+
+.draggable.position img {
+    opacity: .5;
+    background-color: #CD96CD;
+}
+
+.backupCanv {
+    display: none;
+}
+
+textarea {
+    width: 100%;
+}
+
+#editorTools {
+    display: none;
+    padding: 0;
+    margin: 0;
+}

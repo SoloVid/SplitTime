@@ -2,7 +2,7 @@ var BASE_BORDER_WIDTH = 5; //display only
 
 function toPolygon() { console.log("polygon mode"); mode = "polygon"; }
 function toNPC() { mode = "NPC"; }
-function toBoardObj() { mode = "boardObj"; }
+function toBoardObj() { mode = "prop"; }
 
 function setMode(name) { mode = name; }
 
@@ -115,7 +115,7 @@ function drawTraces(highlightIndex, drawTo)
 			traceColor = "#0000FF";
 		}
 
-		SLVDE.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
+		SplitTime.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
 
 	}
 	ctx.translate(-0.5, -0.5);
@@ -207,7 +207,7 @@ function findTrace(x, y) {
 		var traceStr = traceLineParts[1];
 		var traceColor = traceLineParts[2];
 
-		SLVDE.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
+		SplitTime.drawVector(traceStr, ctx, traceColor, {x: getOriginX(), y: getOriginY()});
 
 		var imgData = ctx.getImageData(x, y, 1, 1);
 
@@ -237,7 +237,7 @@ function loadFile2(data)
 	console.log(data);
 	spriteCode = data;
 
-	createSpriteImg();
+	createBodyImg();
 
 	var childMatches = spriteCode.match(/this\.addChild/g);
 	var childCount = childMatches ? childMatches.length : 0;
@@ -255,11 +255,11 @@ function loadFile2(data)
 	base.id = "spriteBase";
 	base.style.position = "absolute";
 	base.style.border = BASE_BORDER_WIDTH + "px solid purple";
-	base.style.width = getSpriteProperty("baseLength") + "px";
+	base.style.width = getBodyProperty("baseLength") + "px";
 	base.style.height = base.style.width;
 	base.style.lineHeight = base.style.height;
-	base.style.left = -BASE_BORDER_WIDTH + (Math.round(getSpriteXRes()/2) - Math.round(getSpriteProperty("baseLength")/2) + getSpriteProperty("baseOffX")) + "px";
-	base.style.top = -BASE_BORDER_WIDTH + (getSpriteYRes() - getSpriteProperty("baseLength")/2 + getSpriteProperty("baseOffY")) + "px";
+	base.style.left = -BASE_BORDER_WIDTH + (Math.round(getBodyXRes()/2) - Math.round(getBodyProperty("baseLength")/2) + getBodyProperty("baseOffX")) + "px";
+	base.style.top = -BASE_BORDER_WIDTH + (getBodyYRes() - getBodyProperty("baseLength")/2 + getBodyProperty("baseOffY")) + "px";
 	document.getElementById("spriteEverything").appendChild(base);
 }
 
@@ -292,27 +292,27 @@ function getChildObjectBlock(index)
 
 function getChildObjectTemplateFromBlock(block)
 {
-	var newDeclRegex = /child = new SLVDE\.SpriteTemplate\["[^"]*"\]/;
+	var newDeclRegex = /child = new SplitTime\.BodyTemplate\["[^"]*"\]/;
 	var newDecl = block.match(newDeclRegex)[0];
 
 	var template = /"([^"]*)"/.exec(newDecl)[1];
 
-	return new SLVDE.SpriteTemplate[template]();
+	return new SplitTime.BodyTemplate[template]();
 }
 
 function updateObject(index)
 {
 	var childBlock = getChildObjectBlock(index);
 
-	//Get Sprite object
-	// var newDeclRegex = /child = new SLVDE\.SpriteTemplate\["[^"]*"\]/;
+	//Get Body object
+	// var newDeclRegex = /child = new SplitTime\.BodyTemplate\["[^"]*"\]/;
 	// var newDecl = childBlock.match(newDeclRegex)[0];
 	//
 	// var template = /"([^"]*)"/.exec(newDecl)[1];
 
 	var childTemplate = getChildObjectTemplateFromBlock(childBlock);
 
-	var HTMLNode = document.getElementById("childSprite" + index);
+	var HTMLNode = document.getElementById("childBody" + index);
 	var HTMLImg = HTMLNode.getElementsByTagName("img")[0];
 
 	var dRegex = /-?[\d]+/;
@@ -376,27 +376,27 @@ function updateObject(index)
 	HTMLNode.style.width = xres + "px";
 	HTMLNode.style.height = yres + "px";
 
-	HTMLImg.style.left = (-(xres*SLVDE.determineColumn(dir))) + "px";
+	HTMLImg.style.left = (-(xres*SplitTime.determineColumn(dir))) + "px";
 }
 
-function createSprite(name)
+function createBody(name)
 {
 	if(!name)
 	{
-		spriteName = prompt("Sprite name:");
+		spriteName = prompt("Body name:");
 		spriteFile = spriteName + ".tjs";
 	}
 
 	spriteCode = "";
-	spriteCode += "function InheritableSpriteTemplate" + spriteName + "() {\n";
+	spriteCode += "function InheritableBodyTemplate" + spriteName + "() {\n";
 	spriteCode += "	var child;\n";
 	spriteCode += "}\n";
 	spriteCode += "\n";
-	spriteCode += "t = InheritableSpriteTemplate" + spriteName + ";\n";
+	spriteCode += "t = InheritableBodyTemplate" + spriteName + ";\n";
 	spriteCode += "\n";
-	spriteCode += "SLVDE.SpriteTemplate[\"" + spriteName + "\"] = t;\n";
+	spriteCode += "SplitTime.BodyTemplate[\"" + spriteName + "\"] = t;\n";
 	spriteCode += "\n";
-	spriteCode += "t.prototype = new SLVDE.Sprite();\n";
+	spriteCode += "t.prototype = new SplitTime.Body();\n";
 	spriteCode += "t.prototype.constructor = t;\n";
 	spriteCode += "\n";
 	spriteCode += "t.prototype.img = \"\";\n";
@@ -411,21 +411,21 @@ function createSprite(name)
 
 function getOriginX()
 {
-	return Math.round(getSpriteXRes()/2) + getSpriteProperty("baseOffX");
+	return Math.round(getBodyXRes()/2) + getBodyProperty("baseOffX");
 }
 function getOriginY()
 {
-	return getSpriteYRes() - Math.round(getSpriteProperty("baseLength")/2) + getSpriteProperty("baseOffY");
+	return getBodyYRes() - Math.round(getBodyProperty("baseLength")/2) + getBodyProperty("baseOffY");
 }
 
-function getSpriteDir()
+function getBodyDir()
 {
 	var lineRegex = /t\.prototype\.dir\s*=\s*([\d]+);/;
 	var matchArray = lineRegex.exec(spriteCode);
 	if(matchArray)
 		return matchArray[1];
 }
-function getSpriteImg()
+function getBodyImg()
 {
 	var back;
 	try {
@@ -435,7 +435,7 @@ function getSpriteImg()
 			back = projectPath + "images/" + matchArray[1];
 	}
 	catch(e) {
-		var temp = getSpritePrototype().img;
+		var temp = getBodyPrototype().img;
 		if(temp)
 			back = projectPath + "images/" + temp;
 	}
@@ -444,24 +444,24 @@ function getSpriteImg()
 
 	return back;
 }
-function getSpritePrototype()
+function getBodyPrototype()
 {
-	//Get Sprite object
-	var newDeclRegex = /t\.prototype = new SLVDE\.SpriteTemplate\["[^"]*"\]/;
+	//Get Body object
+	var newDeclRegex = /t\.prototype = new SplitTime\.BodyTemplate\["[^"]*"\]/;
 	try
 	{
 		var newDecl = spriteCode.match(newDeclRegex)[index];
 
 		var template = /"([^"]*)"/.exec(newDecl)[1];
 
-		return new SLVDE.SpriteTemplate[template]();
+		return new SplitTime.BodyTemplate[template]();
 	}
 	catch(e)
 	{
-		return new SLVDE.Sprite();
+		return new SplitTime.Body();
 	}
 }
-function getSpriteProperty(prop)
+function getBodyProperty(prop)
 {
 	try {
 		var lineRegex = new RegExp("t\\.prototype\\." + prop + "\\s*=\\s*(-?[\\d]+);");
@@ -469,14 +469,14 @@ function getSpriteProperty(prop)
 		if(matchArray)
 			return +(matchArray[1]);
 		else {
-			return getSpritePrototype()[prop];
+			return getBodyPrototype()[prop];
 		}
 	}
 	catch(e) {
-		return getSpritePrototype()[prop];
+		return getBodyPrototype()[prop];
 	}
 }
-function getSpriteXRes()
+function getBodyXRes()
 {
 	try {
 		var lineRegex = /t\.prototype\.xres\s*=\s*([\d]+);/;
@@ -485,10 +485,10 @@ function getSpriteXRes()
 			return matchArray[1];
 	}
 	catch(e) {
-		return getSpritePrototype().xres;
+		return getBodyPrototype().xres;
 	}
 }
-function getSpriteYRes()
+function getBodyYRes()
 {
 	try {
 		var lineRegex = /t\.prototype\.yres\s*=\s*([\d]+);/;
@@ -497,17 +497,17 @@ function getSpriteYRes()
 			return matchArray[1];
 	}
 	catch(e) {
-		return getSpritePrototype().yres;
+		return getBodyPrototype().yres;
 	}
 }
 
-function createSpriteImg()
+function createBodyImg()
 {
-	var back = getSpriteImg();
+	var back = getBodyImg();
 
 	var layerDisplay = document.getElementById("spriteEverything");
-	layerDisplay.style.height = getSpriteYRes() + "px";
-	layerDisplay.style.width = getSpriteXRes() + "px";
+	layerDisplay.style.height = getBodyYRes() + "px";
+	layerDisplay.style.width = getBodyXRes() + "px";
 
 	var NPCContainer = document.createElement("div");
 	NPCContainer.style.position = "absolute";
@@ -519,22 +519,22 @@ function createSpriteImg()
 	displayNPC.src = back;
 	NPCContainer.appendChild(displayNPC);
 
-	NPCContainer.style.width = getSpriteXRes() + "px";
-	NPCContainer.style.height = getSpriteYRes() + "px";
+	NPCContainer.style.width = getBodyXRes() + "px";
+	NPCContainer.style.height = getBodyYRes() + "px";
 
-	displayNPC.style.left = (-(getSpriteXRes()*SLVDE.determineColumn(getSpriteDir()))) + "px";
+	displayNPC.style.left = (-(getBodyXRes()*SplitTime.determineColumn(getBodyDir()))) + "px";
 
 	layerDisplay.appendChild(NPCContainer);
 
 	var whiteboard = document.createElement("canvas");
-	whiteboard.width = getSpriteXRes();
-	whiteboard.height = getSpriteYRes();
+	whiteboard.width = getBodyXRes();
+	whiteboard.height = getBodyYRes();
 	whiteboard.className = "whiteboard";
 	layerDisplay.appendChild(whiteboard);
 
 	var backupCanv = document.createElement("canvas");
-	backupCanv.width = getSpriteXRes();
-	backupCanv.height = getSpriteYRes();
+	backupCanv.width = getBodyXRes();
+	backupCanv.height = getBodyYRes();
 	backupCanv.className = "backupCanv";
 
 	layerDisplay.appendChild(backupCanv);
@@ -548,9 +548,9 @@ function createObject(skipCode, index)
 	}
 
 	var NPCContainer = document.createElement("div");
-	NPCContainer.id = "childSprite" + index;
+	NPCContainer.id = "childBody" + index;
 	$(NPCContainer).addClass("draggable");
-	$(NPCContainer).addClass("childSprite");
+	$(NPCContainer).addClass("childBody");
 	NPCContainer.style.position = "absolute";
 	NPCContainer.style.overflow = "hidden";
 
@@ -578,7 +578,7 @@ function createObject(skipCode, index)
 
 	if(!skipCode)
 	{
-		spriteCode = spriteCode.replace("var child;", "var child;\n\tchild = new SLVDE.SpriteTemplate[\"\"]();\n\tchild.setX(" + x + ");\n\tchild.setY(" + y + ");\n\tchild.setLayer(0);\n\tthis.addChild(child);");
+		spriteCode = spriteCode.replace("var child;", "var child;\n\tchild = new SplitTime.BodyTemplate[\"\"]();\n\tchild.setX(" + x + ");\n\tchild.setY(" + y + ");\n\tchild.setLayer(0);\n\tthis.addChild(child);");
 
 		reset(spriteCode);
 
@@ -594,15 +594,15 @@ function exportLevel(XML)
 	// return prettyXML;
 }
 
-function loadSpriteFromTemplate(templateName) {
+function loadBodyFromTemplate(templateName) {
 	if(!templateName) {
-		return new SLVDE.Sprite();
+		return new SplitTime.Body();
 	}
-	else if(!(templateName in SLVDE.SpriteTemplate)) {
+	else if(!(templateName in SplitTime.BodyTemplate)) {
 		alert("Invalid sprite template!");
-		return new SLVDE.Sprite();
+		return new SplitTime.Body();
 	}
 	else {
-		return new SLVDE.SpriteTemplate[templateName]();
+		return new SplitTime.BodyTemplate[templateName]();
 	}
 }

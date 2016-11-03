@@ -65,7 +65,7 @@ var indexSelected;
 $("#XMLEditor").hide();
 
 $(document).on("load", "#staticScript", function() {
-	t = new SLVDE.Sprite();
+	t = new SplitTime.Body();
 	ctx.fillStyle = "#CD96CD";
 	ctx.fillRect(5, 5, t.xres - 10, t.yres - 10);
 	subImg = subImg.toDataURL();
@@ -157,15 +157,15 @@ function moveFollower(dx, dy) {
 		follower.style.left = x + "px";
 		follower.style.top = y + "px";
 
-		var baseOffX = BASE_BORDER_WIDTH + x - (Math.round(getSpriteXRes()/2) - Math.round(getSpriteProperty("baseLength")/2));
-		var baseOffY = BASE_BORDER_WIDTH + y - (getSpriteYRes() - getSpriteProperty("baseLength")/2);
+		var baseOffX = BASE_BORDER_WIDTH + x - (Math.round(getBodyXRes()/2) - Math.round(getBodyProperty("baseLength")/2));
+		var baseOffY = BASE_BORDER_WIDTH + y - (getBodyYRes() - getBodyProperty("baseLength")/2);
 
 		spriteCode = spriteCode.replace(/t\.prototype\.baseOffX = -?[\d]+;/, "t.prototype.baseOffX = " + baseOffX + ";");
 		spriteCode = spriteCode.replace(/t\.prototype\.baseOffY = -?[\d]+;/, "t.prototype.baseOffY = " + baseOffY + ";");
 
 		for(i = 0; i < getChildCount(); i++)
 		{
-			pos = $("#childSprite" + i).position();
+			pos = $("#childBody" + i).position();
 			matchObjectCodeToPosition(i, pos.left, pos.top);
 		}
 
@@ -261,7 +261,7 @@ $(document.body).on("mousedown", ".draggable", function(event) {
 			//
 			// var template = XMLNode.getAttribute("template");
 			//
-			// var t = loadSpriteFromTemplate(template);
+			// var t = loadBodyFromTemplate(template);
 			//
 			// var HTMLClone = this.cloneNode(true);
 			// HTMLClone.id = thisType + cloneIndex;
@@ -402,7 +402,7 @@ $("#saveChanges").click(function(event)
 	$("#XMLEditor").hide();
 
 	//Update graphics
-	// if(typeSelected == "NPC" || typeSelected == "boardObj")
+	// if(typeSelected == "NPC" || typeSelected == "prop")
 	// {
 	// 	updateObject(typeSelected, indexSelected);
 	// 	generateLayerMenu();
