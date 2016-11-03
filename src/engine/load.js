@@ -84,7 +84,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 	};
 
 	//Initialize
-	SLVD.getXML("master.xml").then(function(master) {
+	SLVD.getXML("dist/master.xml").then(function(master) {
 		var itemsToLoad = master.getElementsByTagName("level").length + master.getElementsByTagName("image").length;
 		var itemsLoaded = 0;
 		var promiseCollection = new SLVD.Promise.collection();

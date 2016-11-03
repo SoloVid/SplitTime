@@ -61,7 +61,7 @@ module.exports = function(grunt) {
                     ignorePath: '<%= grunt.config("projectPath") %>levels/'
                 },
                 files: {
-                    '<%= grunt.config("projectPath") %>master.xml': ['<%= grunt.config("projectPath") %>levels/**/*.xml']
+                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>levels/**/*.xml']
                 }
             },
             music_files: {
@@ -74,7 +74,7 @@ module.exports = function(grunt) {
                     ignorePath: '<%= grunt.config("projectPath") %>audio/music/'
                 },
                 files: {
-                    '<%= grunt.config("projectPath") %>master.xml': ['<%= grunt.config("projectPath") %>audio/music/**/*.mp3']
+                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>audio/music/**/*.mp3']
                 }
             },
             sound_effect_files: {
@@ -87,7 +87,7 @@ module.exports = function(grunt) {
                     ignorePath: '<%= grunt.config("projectPath") %>audio/soundeffects/'
                 },
                 files: {
-                    '<%= grunt.config("projectPath") %>master.xml': ['<%= grunt.config("projectPath") %>audio/soundeffects/**/*.mp3']
+                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>audio/soundeffects/**/*.mp3']
                 }
             },
             preloaded_image_files: {
@@ -100,7 +100,7 @@ module.exports = function(grunt) {
                     ignorePath: '<%= grunt.config("projectPath") %>images/preloaded/'
                 },
                 files: {
-                    '<%= grunt.config("projectPath") %>master.xml': ['<%= grunt.config("projectPath") %>images/preloaded/**/*']
+                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>images/preloaded/**/*']
                 }
             }
         },
@@ -149,7 +149,7 @@ module.exports = function(grunt) {
             project: {
                 files: ['dist/engine.js', '<%= grunt.config("projectPath") %>src/**/*.js', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
                 tasks: [
-                    'project:<%= grunt.config("project") %>'
+                    'build:<%= grunt.config("project") %>'
                 ]
             },
             tscripts: {
@@ -173,34 +173,30 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test', ['jshint'/*, 'qunit'*/]);
     grunt.registerTask('rename', ['copy:renamer', 'clean:renamer']);
-    grunt.registerTask('build', ['jshint:engine', 'oconcat:engine']);
-    grunt.registerTask('default', ['jshint:engine', 'oconcat:engine', 'watch:engine']);
-    // grunt.registerTask('default', 'Default', function(param) {
-    //     if(param) {
-    //         grunt.task.run('project:' + param);
-    //         return;
-    //     }
-    //     grunt.task.run(['jshint:engine', 'oconcat:engine', 'uglify', 'watch:engine']);
-    // });
+    grunt.registerTask('default', 'spin');
 
     grunt.registerTask('spin', 'Handle Grunt tasks for a project with watch', function(projectName) {
         if(!projectName) {
-            return;
+            grunt.task.run(['jshint:engine', 'oconcat:engine', 'watch:engine']);
         }
-        grunt.config("project", projectName);
-        grunt.config("projectPath", "projects/" + projectName + "/");
-        grunt.task.run(['project:' + projectName, 'watch:project']);
+        else {
+            grunt.config("project", projectName);
+            grunt.config("projectPath", "projects/" + projectName + "/");
+            grunt.task.run(['build:' + projectName, 'watch:project']);
+        }
     });
 
-    grunt.registerTask('project', 'Handle Grunt tasks for a project without watch', function(projectName) {
+    grunt.registerTask('build', 'Handle Grunt tasks for a project without watch', function(projectName) {
         if(!projectName) {
-            return;
+            grunt.task.run(['jshint:engine', 'oconcat:engine']);
         }
-        grunt.config("project", projectName);
-        grunt.config("projectPath", "projects/" + projectName + "/");
-        grunt.task.run(['jshint:project', 'oconcat:project', 'injector']);
-        if(grunt.option('min')) {
-            grunt.task.run('uglify:project');
+        else {
+            grunt.config("project", projectName);
+            grunt.config("projectPath", "projects/" + projectName + "/");
+            grunt.task.run(['jshint:project', 'oconcat:project', 'injector']);
+            if(grunt.option('min')) {
+                grunt.task.run('uglify:project');
+            }
         }
     });
 };
