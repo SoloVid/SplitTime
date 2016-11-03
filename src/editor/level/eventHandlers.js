@@ -41,7 +41,8 @@ var traceEditorColors = {
 	"function": "rgba(255, 0, 0, 1)",
 	"path": "rgba(0, 0, 0, 1)",
 	"stairDown": "rgba(0, 255, 0, 1)",
-	"stairUp": "rgba(0, 255, 0, 1)"
+	"stairUp": "rgba(0, 255, 0, 1)",
+	"highlight": "rgba(255, 255, 0, 1)"
 };
 
 $(document).ready(function() {

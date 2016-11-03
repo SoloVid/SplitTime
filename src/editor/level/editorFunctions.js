@@ -63,11 +63,11 @@ function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
 					absoluteTraceIndex++;
 					return true;
 				}
-				color = "#FFFF00";
+				color = traceEditorColors["highlight"];
 			}
 
 			var traceStr = normalizeTraceStr($(this).text());
-			SplitTime.Trace.draw(traceStr, ctx, color);
+			SplitTime.Trace.drawColor(traceStr, ctx, color);
 
 			if(findX && findY) {
 				var imgData = ctx.getImageData(findX, findY, 1, 1);
@@ -119,7 +119,7 @@ function drawTracesFromBackup(highlightIndex) {
 	ctx.translate(0.5, 0.5);
 
 	var traceStr = normalizeTraceStr(highlightTrace.text());
-	SplitTime.Trace.draw(traceStr, ctx, "#FFFF00");
+	SplitTime.Trace.drawColor(traceStr, ctx, traceEditorColors["highlight"]);
 
 	ctx.translate(-0.5, -0.5);
 }
@@ -186,13 +186,16 @@ function downloadFile() {
 		filename += ".xml";
 	}
 
-	var pom = $('<a></a>');
-	pom.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xmltext));
-	pom.attr('download', filename);
-	pom.css('display', 'none');
-	$(document).append(pom);
+	var pom = document.createElement('a');
+	pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xmltext));
+	pom.setAttribute('download', filename);
+
+	pom.style.display = 'none';
+	document.body.appendChild(pom);
+
 	pom.click();
-	pom.remove();
+
+	document.body.removeChild(pom);
 }
 
 function resizeBoard(x, y) {
@@ -382,7 +385,9 @@ function updateObject(type, index) {
 		height: t.yres + "px"
 	});
 
-	HTMLImg.css("left", (-(t.xres*SplitTime.determineColumn(XMLNode.attr("dir")))) + "px");
+	t.dir = XMLNode.attr("dir");
+	t.finalizeStance();
+	HTMLImg.css("left", (-t.sx + "px"));
 }
 
 function createLevel(type) {

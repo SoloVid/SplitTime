@@ -1,11 +1,16 @@
 SplitTime.Trace = {};
 
 SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
+	var color = SplitTime.Trace.getColor(type);
+	return SplitTime.Trace.drawColor(traceStr, ctx, color, offsetPos);
+};
+
+SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
 	if(!offsetPos)
 	{
 		offsetPos = {x: 0, y: 0};
 	}
-	ctx.strokeStyle = SplitTime.Trace.getColor(type);
+	ctx.strokeStyle = color;
 	ctx.fillStyle = ctx.strokeStyle;
 
 	var regex = /\([^\)]+\)/g;

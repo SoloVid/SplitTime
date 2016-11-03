@@ -228,6 +228,7 @@ SplitTime.enterLevelById = function(id) {
 		holderCtx.translate(-0.5, -0.5);
 
 		//holderCtx.drawImage(SplitTime.currentLevel.layerFunc[index], 0, 0);
+
 		SplitTime.currentLevel.layerFuncData[index] = holderCtx.getImageData(0, 0, SplitTime.currentLevel.width, SplitTime.currentLevel.height);
 	}
 
