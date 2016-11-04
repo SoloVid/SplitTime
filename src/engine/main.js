@@ -3,11 +3,17 @@ SplitTime.main = function() {
 	//console.log(SplitTime.counter);
 	var startTime = new Date().getTime();
 	var a = new Date(); //for speed checking
-	switch(SplitTime.process)
-	{
+	switch(SplitTime.process) {
 		case "hold": break;
-		case "action":
-		{
+		case "loading": {
+			SplitTime.see.fillStyle = "#000000";
+			SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+			SplitTime.see.font="30px Arial";
+			SplitTime.see.fillStyle = "#FFFFFF";
+			SplitTime.see.fillText("Loading...", 250, 230);
+			break;
+		}
+		case "action": {
 			//Advance one second per second (given 20ms SplitTime.main interval)
 			if(SplitTime.counter%SplitTime.FPS === 0) SplitTime.Time.advance(1); //in time.js
 			var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
@@ -35,8 +41,7 @@ SplitTime.main = function() {
 
 			break;
 		}
-		case "TRPG":
-		{
+		case "TRPG": {
 			if(SplitTime.cTeam == SplitTime.player)
 			{
 				SplitTime.TRPGPlayerMotion();
@@ -50,8 +55,7 @@ SplitTime.main = function() {
 			SplitTime.renderBoardState(true);
 			break;
 		}
-		case "menu":
-		{
+		case "menu": {
 			//alert("start SplitTime.menu");
 			SplitTime.currentMenu.handleMenu(); //in menuFunctions.js
 			//alert("handled SplitTime.menu");
@@ -73,8 +77,7 @@ SplitTime.main = function() {
 			delete SplitTime.keyFirstDown;
 			break;
 		}
-		case "delay":
-		{
+		case "delay": {
 			if(SplitTime.countdown <= 0)
 			{
 				if(SplitTime.currentLevel)

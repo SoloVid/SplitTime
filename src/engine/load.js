@@ -139,6 +139,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 				level.type = data.getElementsByTagName("type")[0].textContent;
 				level.width = 0;
 				level.height = 0;
+				level.load = new SLVD.Promise.collection();
 
 				function onloadImage(layerImg) {
 					if(layerImg.height > level.height)
@@ -154,7 +155,8 @@ SplitTime.launch = function(callback, width, height, parentId) {
 				for(var iLayerImg = 0; iLayerImg < data.getElementsByTagName("background").length; iLayerImg++) {
 					t = data.getElementsByTagName("background")[iLayerImg].textContent;
 					level.layerImg[iLayerImg] = t;
-					SplitTime.Image.load(t).then(onloadImage);
+					var loadProm = SplitTime.Image.load(t).then(onloadImage);
+					level.load.add(loadProm);
 				}
 
 				//Pull positions from file

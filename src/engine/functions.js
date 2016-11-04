@@ -143,97 +143,99 @@ SplitTime.enterLevelById = function(id) {
 
 	SplitTime.currentLevel = SplitTime.Level.get(id);
 
-	SplitTime.process = SplitTime.currentLevel.type;
-	if(SplitTime.process == "action")
-	{
-		SplitTime.cTeam = SplitTime.player;
-	}
-	else if(SplitTime.process == "overworld")
-	{
-		SplitTime.cTeam = SplitTime.player;
-		SplitTime.currentPlayer = -1;
-		SplitTime.TRPGNextTurn();
-	}
-
-	SplitTime.onBoard.refetchBodies();
-
-	//Initialize functional map
-	for(index = 0; index < SplitTime.currentLevel.filedata.getElementsByTagName("layer").length; index++)
-	{
-		var holder = SplitTime.holderCanvas;
-		holder.width = SplitTime.currentLevel.width/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
-		holder.height = SplitTime.currentLevel.height/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
-		var holderCtx = holder.getContext("2d");
-		holderCtx.clearRect(0, 0, holder.width, holder.height);
-
-		//Draw traces
-		var layerTraces = SplitTime.currentLevel.filedata.getElementsByTagName("layer")[index].getElementsByTagName("trace");
-
-		holderCtx.translate(0.5, 0.5);
-
-		for(j = 0; j < layerTraces.length; j++)
+	SplitTime.currentLevel.load.then(function() {
+		SplitTime.process = SplitTime.currentLevel.type;
+		if(SplitTime.process == "action")
 		{
-			SplitTime.Trace.draw(layerTraces[j].textContent, holderCtx, layerTraces[j].getAttribute("type"));
-			// holderCtx.strokeStyle = layerTraces[j].getAttribute("template");//.getElementsByTagName("color")[0].textContent;
-			// holderCtx.fillStyle = holderCtx.strokeStyle;
-			//
-			// var regex = /\([^\)]+\)/g;
-			// var xRegex = /\(([\d]*),/;
-			// var yRegex = /,[\s]*([\d]*)\)/;
-			// var newX, newY;
-			//
-			// var pointStr = layerTraces[j].textContent;//.getElementsByTagName("path")[0].textContent;
-			// var points = pointStr.match(regex);
-			// console.log(points.length + "|" + points + "|");
-			//
-			// holderCtx.beginPath();
-			//
-			// newX = points[0].match(xRegex)[1];
-			// newY = points[0].match(yRegex)[1];
-			//
-			// holderCtx.moveTo(newX, newY);
-			//
-			// holderCtx.fillRect(newX - .5, newY - .5, 1, 1);
-			//
-			// for(var k = 1; k < points.length; k++)
-			// {
-			// 	if(points[k] == "(close)")
-			// 	{
-			// 		holderCtx.closePath();
-			// 		holderCtx.stroke();
-			// 		holderCtx.fill();
-			// 	}
-			// 	else
-			// 	{
-			// 		newX = points[k].match(xRegex)[1];
-			// 		newY = points[k].match(yRegex)[1];
-			//
-			// 		holderCtx.lineTo(newX, newY);
-			// 		holderCtx.stroke();
-			// 		holderCtx.fillRect(newX - .5, newY - .5, 1, 1);
-			// 	}
-			// }
+			SplitTime.cTeam = SplitTime.player;
 		}
-		for(j = 0; j < SplitTime.onBoard.bodies.length; j++)
+		else if(SplitTime.process == "overworld")
 		{
-			var cBody = SplitTime.onBoard.bodies[j];
-			if(cBody.layer == index)
+			SplitTime.cTeam = SplitTime.player;
+			SplitTime.currentPlayer = -1;
+			SplitTime.TRPGNextTurn();
+		}
+
+		SplitTime.onBoard.refetchBodies();
+
+		//Initialize functional map
+		for(index = 0; index < SplitTime.currentLevel.filedata.getElementsByTagName("layer").length; index++)
+		{
+			var holder = SplitTime.holderCanvas;
+			holder.width = SplitTime.currentLevel.width/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
+			holder.height = SplitTime.currentLevel.height/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
+			var holderCtx = holder.getContext("2d");
+			holderCtx.clearRect(0, 0, holder.width, holder.height);
+
+			//Draw traces
+			var layerTraces = SplitTime.currentLevel.filedata.getElementsByTagName("layer")[index].getElementsByTagName("trace");
+
+			holderCtx.translate(0.5, 0.5);
+
+			for(j = 0; j < layerTraces.length; j++)
 			{
-				for(var k = 0; k < cBody.staticTrace.length; k++)
+				SplitTime.Trace.draw(layerTraces[j].textContent, holderCtx, layerTraces[j].getAttribute("type"));
+				// holderCtx.strokeStyle = layerTraces[j].getAttribute("template");//.getElementsByTagName("color")[0].textContent;
+				// holderCtx.fillStyle = holderCtx.strokeStyle;
+				//
+				// var regex = /\([^\)]+\)/g;
+				// var xRegex = /\(([\d]*),/;
+				// var yRegex = /,[\s]*([\d]*)\)/;
+				// var newX, newY;
+				//
+				// var pointStr = layerTraces[j].textContent;//.getElementsByTagName("path")[0].textContent;
+				// var points = pointStr.match(regex);
+				// console.log(points.length + "|" + points + "|");
+				//
+				// holderCtx.beginPath();
+				//
+				// newX = points[0].match(xRegex)[1];
+				// newY = points[0].match(yRegex)[1];
+				//
+				// holderCtx.moveTo(newX, newY);
+				//
+				// holderCtx.fillRect(newX - .5, newY - .5, 1, 1);
+				//
+				// for(var k = 1; k < points.length; k++)
+				// {
+				// 	if(points[k] == "(close)")
+				// 	{
+				// 		holderCtx.closePath();
+				// 		holderCtx.stroke();
+				// 		holderCtx.fill();
+				// 	}
+				// 	else
+				// 	{
+				// 		newX = points[k].match(xRegex)[1];
+				// 		newY = points[k].match(yRegex)[1];
+				//
+				// 		holderCtx.lineTo(newX, newY);
+				// 		holderCtx.stroke();
+				// 		holderCtx.fillRect(newX - .5, newY - .5, 1, 1);
+				// 	}
+				// }
+			}
+			for(j = 0; j < SplitTime.onBoard.bodies.length; j++)
+			{
+				var cBody = SplitTime.onBoard.bodies[j];
+				if(cBody.layer == index)
 				{
-					SplitTime.Trace.draw(cBody.staticTrace[k].traceStr, holderCtx, cBody.staticTrace[k].type, cBody);
+					for(var k = 0; k < cBody.staticTrace.length; k++)
+					{
+						SplitTime.Trace.draw(cBody.staticTrace[k].traceStr, holderCtx, cBody.staticTrace[k].type, cBody);
+					}
 				}
 			}
+			holderCtx.translate(-0.5, -0.5);
+
+			//holderCtx.drawImage(SplitTime.currentLevel.layerFunc[index], 0, 0);
+
+			SplitTime.currentLevel.layerFuncData[index] = holderCtx.getImageData(0, 0, SplitTime.currentLevel.width, SplitTime.currentLevel.height);
 		}
-		holderCtx.translate(-0.5, -0.5);
 
-		//holderCtx.drawImage(SplitTime.currentLevel.layerFunc[index], 0, 0);
-
-		SplitTime.currentLevel.layerFuncData[index] = holderCtx.getImageData(0, 0, SplitTime.currentLevel.width, SplitTime.currentLevel.height);
-	}
-
-	var enterFunctionId = SplitTime.currentLevel.filedata.getElementsByTagName("enterFunction")[0].textContent;
-	SplitTime.currentLevel.runFunction(enterFunctionId);
+		var enterFunctionId = SplitTime.currentLevel.filedata.getElementsByTagName("enterFunction")[0].textContent;
+		SplitTime.currentLevel.runFunction(enterFunctionId);
+	});
 };
 
 SplitTime.getNPCByName = function(name) {
