@@ -143,6 +143,7 @@ SplitTime.enterLevelById = function(id) {
 
 	SplitTime.currentLevel = SplitTime.Level.get(id);
 
+	SplitTime.process = "loading";
 	SplitTime.currentLevel.load.then(function() {
 		SplitTime.process = SplitTime.currentLevel.type;
 		if(SplitTime.process == "action")
