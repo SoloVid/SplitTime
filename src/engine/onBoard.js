@@ -41,7 +41,7 @@ SplitTime.onBoard.refetchBodies = function() {
 		obj.id = prop.getAttribute("id");
 		obj.setX(+prop.getAttribute("x"));
 		obj.setY(+prop.getAttribute("y"));
-		obj.setLayer(+prop.getAttribute("layer"));
+		obj.setZ(+prop.getAttribute("layer"));
 		obj.dir = +prop.getAttribute("dir");
 		obj.stance = prop.getAttribute("stance");
 

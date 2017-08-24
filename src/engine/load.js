@@ -42,7 +42,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 					if(seen.indexOf(val) >= 0) return seen.push(val); }
 					return val; });
 			alert(alerter);*/
-			alert(SplitTime.player[SplitTime.currentPlayer].x + ", " + SplitTime.player[SplitTime.currentPlayer].y + ", " + SplitTime.player[SplitTime.currentPlayer].layer);
+			alert(SplitTime.player[SplitTime.currentPlayer].x + ", " + SplitTime.player[SplitTime.currentPlayer].y + ", " + SplitTime.player[SplitTime.currentPlayer].z);
 		}
 
 		if(SplitTime.keyDown[key] === undefined)
@@ -167,7 +167,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 					obj.levelId = filename;
 					obj.x = +position.getAttribute("x");
 					obj.y = +position.getAttribute("y");
-					obj.layer = +position.getAttribute("layer");
+					obj.z = +position.getAttribute("layer");
 					obj.dir = +position.getAttribute("dir");
 					obj.stance = position.getAttribute("stance");
 

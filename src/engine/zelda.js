@@ -65,7 +65,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 		person = SplitTime.player[SplitTime.currentPlayer];
 		person.setX(SplitTime.player[prevPlayer].x);
 		person.setY(SplitTime.player[prevPlayer].y);
-		person.setLayer(SplitTime.player[prevPlayer].layer);
+		person.setZ(SplitTime.player[prevPlayer].z);
 		person.dir = SplitTime.player[prevPlayer].dir;
 		SplitTime.onBoard.removeBody(SplitTime.player[prevPlayer]);
 		SplitTime.onBoard.insertBody(person);
@@ -124,7 +124,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 		// 		}
 		// 		else
 		// 		{
-		// 			SplitTime.player[SplitTime.currentPlayer].layer--;
+		// 			SplitTime.player[SplitTime.currentPlayer].z--;
 		// 			SplitTime.player[SplitTime.currentPlayer].y += 64;
 		// //??????????????Compliments of department of redundancy department?
 		// 			if(SplitTime.player[SplitTime.currentPlayer].canBeHere(0)) { }
@@ -196,12 +196,12 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 		{
 			for(var sec = -limit; sec < limit; sec++)
 			{
-				i = SplitTime.pixCoordToIndex(SplitTime.player[SplitTime.currentPlayer].x + sec, SplitTime.player[SplitTime.currentPlayer].y + ind, SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer]);
-				if(SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[i] == 100)
+				i = SplitTime.pixCoordToIndex(SplitTime.player[SplitTime.currentPlayer].x + sec, SplitTime.player[SplitTime.currentPlayer].y + ind, SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z]);
+				if(SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z].data[i] == 100)
 				{
-					SplitTime.player[SplitTime.currentPlayer].onPrg = SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[i + 2];
+					SplitTime.player[SplitTime.currentPlayer].onPrg = SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z].data[i + 2];
 					resumeFunc = SplitTime.currentLevel.boardProgram[SplitTime.player[SplitTime.currentPlayer].onPrg];
-					if(SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[i + 1] == 1)
+					if(SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z].data[i + 1] == 1)
 					{
 						if(SplitTime.player[SplitTime.currentPlayer].wasOnPrg != SplitTime.player[SplitTime.currentPlayer].onPrg) //ensure program is not run twice
 						{
@@ -209,7 +209,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 						}
 						//alert("program");
 					}
-					else if(SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[i + 1] == 2)
+					else if(SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z].data[i + 1] == 2)
 					{
 						if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space") //require ENTER or SPACE to run program
 						{
@@ -245,7 +245,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// 		for(var index = 0; index < boardNPC.length; index++) //Cycle through boardNPC to determine closest one to SplitTime.player within 64 pixels
 	// 		{
 	// 			var dist = Math.sqrt(Math.pow(boardNPC[index].x - SplitTime.player[SplitTime.currentPlayer].x, 2) + Math.pow(boardNPC[index].y - SplitTime.player[SplitTime.currentPlayer].y, 2));
-	// 			if(dist <= 96 && SplitTime.player[SplitTime.currentPlayer].layer == boardNPC[index].layer)
+	// 			if(dist <= 96 && SplitTime.player[SplitTime.currentPlayer].z == boardNPC[index].z)
 	// 			{
 	// 				if(SplitTime.player[SplitTime.currentPlayer].pet.target == null || dist < tDist)
 	// 				{
@@ -308,7 +308,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// }
 
 	//Projectile motion
-	// if(SplitTime.player[SplitTime.currentPlayer].dart.img != null && SplitTime.player[SplitTime.currentPlayer].dart.layer != null)
+	// if(SplitTime.player[SplitTime.currentPlayer].dart.img != null && SplitTime.player[SplitTime.currentPlayer].dart.z != null)
 	// {
 	// 	//Move projectile
 	// 	var moved = zeldaStep(SplitTime.player[SplitTime.currentPlayer].dart, SplitTime.player[SplitTime.currentPlayer].dart.spd);
@@ -317,7 +317,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// 		if((Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.y - (boardNPC[index].y - 24)) < 32) && (Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.x - boardNPC[index].x) < 16))
 	// 		{
 	// 			SplitTime.damage(SplitTime.player[SplitTime.currentPlayer].dart, boardNPC[index]); //damage hit opponent
-	// 			SplitTime.player[SplitTime.currentPlayer].dart.setLayer(null); //remove SplitTime.image
+	// 			SplitTime.player[SplitTime.currentPlayer].dart.setZ(-1); //remove SplitTime.image
 	// 			SplitTime.player[SplitTime.currentPlayer].dart.frame = 0; //reset frame
 	// 			SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].dart);
 	// 			boardNPC[index].status = "hurt"; //"hurt" opponent
@@ -328,7 +328,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// 	//If hit terrain
 	// 	if(moved == -1)
 	// 	{
-	// 		SplitTime.player[SplitTime.currentPlayer].dart.setLayer(null);
+	// 		SplitTime.player[SplitTime.currentPlayer].dart.setZ(-1);
 	// 		SplitTime.player[SplitTime.currentPlayer].dart.frame = 0;
 	// 		SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].dart);
 	// 	}

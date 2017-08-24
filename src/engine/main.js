@@ -245,7 +245,7 @@ SplitTime.renderBoardState = function(forceCalculate) {
 		if(SplitTime.process == "TRPG")
 		{
 			//Draw blue range squares
-			if(index == SplitTime.cTeam[SplitTime.currentPlayer].layer && SplitTime.cTeam[SplitTime.currentPlayer].squares)
+			if(index == SplitTime.cTeam[SplitTime.currentPlayer].z && SplitTime.cTeam[SplitTime.currentPlayer].squares)
 			{
 				for(second = 0; second < SplitTime.cTeam[SplitTime.currentPlayer].squares.length; second++)
 				{
@@ -260,7 +260,7 @@ SplitTime.renderBoardState = function(forceCalculate) {
 		for(second = 0; second < SplitTime.onBoard.bodies.length; second++)
 		{
 			var cBody = SplitTime.onBoard.bodies[second];
-			if(cBody.layer == index) //ensure proper layering
+			if(cBody.z == index) //ensure proper layering
 			{
 				cBody.see(SplitTime.snapShotCtx);
 				//BodyF.see.call(cBody, SplitTime.snapShotCtx);

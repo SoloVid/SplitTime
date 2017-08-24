@@ -24,7 +24,7 @@ SplitTime.Action["launchProjectile"].prototype.use = function(person) {
 
 	launchedProjectile.setX(person.x);
 	launchedProjectile.setY(person.y);
-	launchedProjectile.setLayer(person.layer);
+	launchedProjectile.setZ(person.z);
 	launchedProjectile.dir = person.dir;
 	launchedProjectile.team = person.team;
 
