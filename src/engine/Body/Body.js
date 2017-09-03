@@ -30,10 +30,10 @@ SplitTime.Body.prototype.removeChild = function(child) {
 			i--;
 		}
 	}
-}
+};
 SplitTime.Body.prototype.getChildren = function() {
 	return this.childrenBolted.concat(this.childrenLoose);
-}
+};
 
 SplitTime.Body.prototype.staticTrace = [];
 SplitTime.Body.prototype.addStaticTrace = function(traceStr, type) {
@@ -183,11 +183,11 @@ SplitTime.Body.prototype.resetCans = function() { delete this.canSee; delete thi
 
 //Checks if the a SplitTime.Body's location is valid (based on current location and layer func data)
 SplitTime.Body.prototype.canBeHere = function(allowInAir) {
-	for(var i = 0; i < 8; i++) {
-		for(var j = 0; j < 16; j++) {
-			var i = SplitTime.pixCoordToIndex(person.x + j, person.y + i, SplitTime.currentLevel.layerFuncData[person.z]);
-			if(SplitTime.currentLevel.layerFuncData[person.z].data[i] == 255) {
-				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[person.z].data[i + 1] == 255) { }
+	for(var iX = 0; iX < 8; iX++) {
+		for(var iY = 0; iY < 16; iY++) {
+			var iData = SplitTime.pixCoordToIndex(this.x + iY, this.y + iX, SplitTime.currentLevel.layerFuncData[this.z]);
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[iData] == 255) {
+				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[this.z].data[iData + 1] == 255) { }
 				else return 0;
 			}
 		}
