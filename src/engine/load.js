@@ -130,8 +130,9 @@ SplitTime.launch = function(callback, width, height, parentId) {
 		var iLevel = 0;
 
 		function makeLevelXMLHandler(filename) {
+			var levelName = filename.replace(/\.xml$/, "");
 			return function(data) {
-				var level = SplitTime.Level.get(filename);
+				var level = SplitTime.Level.get(levelName);
 
 				level.filedata = data;
 				level.layerImg = [];
@@ -164,7 +165,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 					var position = data.getElementsByTagName("position")[index];
 
 					var obj = {};
-					obj.levelId = filename;
+					obj.levelId = levelName;
 					obj.x = +position.getAttribute("x");
 					obj.y = +position.getAttribute("y");
 					obj.z = +position.getAttribute("layer");
@@ -176,7 +177,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 						level.registerPosition(id, obj);
 					}
 					else {
-						console.warn("position missing id in level XML: " + filename);
+						console.warn("position missing id in level: " + levelName);
 					}
 
 					var actor = position.getElementsByTagName("alias")[0].getAttribute("actor");
@@ -201,7 +202,8 @@ SplitTime.launch = function(callback, width, height, parentId) {
 			}
 
 			var filename = master.getElementsByTagName("level")[iLevelLocal].childNodes[0].nodeValue;
-			SplitTime.Level.get(filename);
+			//TODO: Why is this needed if we do lazy loading anyway?
+			// SplitTime.Level.get(filename);
 			return SLVD.getXML("levels/" + filename).then(makeLevelXMLHandler(filename));
 		}
 
