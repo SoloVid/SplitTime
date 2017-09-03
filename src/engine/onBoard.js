@@ -19,9 +19,10 @@ SplitTime.onBoard.refetchBodies = function() {
 
 	function putObjOnBoard(obj) {
 		SplitTime.onBoard.insertBody(obj);
-		for(i = 0; i < obj.children.length; i++)
+		var children = obj.getChildren();
+		for(var i = 0; i < children.length; i++)
 		{
-			putObjOnBoard(obj.children[i]);
+			putObjOnBoard(children[i]);
 		}
 	}
 
