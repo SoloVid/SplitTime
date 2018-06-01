@@ -4,7 +4,7 @@
 				//Draw layer
 				SplitTime.see.drawImage(SplitTime.currentLevel.layerImg[index], SplitTime.wX, SplitTime.wY, SplitTime.SCREENX, SplitTime.SCREENY, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 				//Draw blue range squares
-				if(index == SplitTime.cTeam[SplitTime.currentPlayer].layer && SplitTime.cTeam[SplitTime.currentPlayer].squares != null)
+				if(index == SplitTime.cTeam[SplitTime.currentPlayer].z && SplitTime.cTeam[SplitTime.currentPlayer].squares != null)
 				{
 					for(var second = 0; second < SplitTime.cTeam[SplitTime.currentPlayer].squares.length; second++)
 					{
@@ -63,7 +63,7 @@
 							}
 						}
 					}
-					if(SplitTime.onBoard.bodies[second].layer == index)
+					if(SplitTime.onBoard.bodies[second].z == index)
 					{
 						if((SplitTime.onBoard.bodies[second].status == "hurt" && SplitTime.frameClock != 1) || SplitTime.onBoard.bodies[second].status != "hurt")
 						{
@@ -83,7 +83,7 @@
 								}
 						}
 					}
-					if(SplitTime.onBoard.bodies[second].dart.layer == index)
+					if(SplitTime.onBoard.bodies[second].dart.z == index)
 					{
 						var col = SplitTime.determineColumn(SplitTime.onBoard.bodies[second].dart.dir);
 						SplitTime.see.drawImage(SplitTime.onBoard.bodies[second].dart.img, SplitTime.onBoard.bodies[second].dart.xres*col, SplitTime.onBoard.bodies[second].dart.yres*SplitTime.onBoard.bodies[second].dart.frame, SplitTime.onBoard.bodies[second].dart.xres, SplitTime.onBoard.bodies[second].dart.yres, SplitTime.onBoard.bodies[second].dart.x - SplitTime.wX, SplitTime.onBoard.bodies[second].dart.y - SplitTime.wY, SplitTime.onBoard.bodies[second].dart.xres, SplitTime.onBoard.bodies[second].dart.yres);
@@ -298,14 +298,14 @@ SplitTime.TRPGPlayerMotion = function() //Function for current SplitTime.player'
 		}
 		////If not traveling too far and not traveling out of bounds.
 		//If target square is one of predetermined squares
-//		if(/*Math.abs(SplitTime.player[SplitTime.currentPlayer].ix - (SplitTime.player[SplitTime.currentPlayer].x + dx)) + Math.abs(SplitTime.player[SplitTime.currentPlayer].iy - (SplitTime.player[SplitTime.currentPlayer].y + dy)) <= 32*SplitTime.player[SplitTime.currentPlayer].spd && SplitTime.player[SplitTime.currentPlayer].x + dx >= 0 && SplitTime.player[SplitTime.currentPlayer].y + dy >= 0 && SplitTime.player[SplitTime.currentPlayer].x + dx < SplitTime.currentLevel.layerImg[SplitTime.player[SplitTime.currentPlayer].layer].width && SplitTime.player[SplitTime.currentPlayer].y + dy < SplitTime.currentLevel.layerImg[SplitTime.player[SplitTime.currentPlayer].layer].height*/)
+//		if(/*Math.abs(SplitTime.player[SplitTime.currentPlayer].ix - (SplitTime.player[SplitTime.currentPlayer].x + dx)) + Math.abs(SplitTime.player[SplitTime.currentPlayer].iy - (SplitTime.player[SplitTime.currentPlayer].y + dy)) <= 32*SplitTime.player[SplitTime.currentPlayer].spd && SplitTime.player[SplitTime.currentPlayer].x + dx >= 0 && SplitTime.player[SplitTime.currentPlayer].y + dy >= 0 && SplitTime.player[SplitTime.currentPlayer].x + dx < SplitTime.currentLevel.layerImg[SplitTime.player[SplitTime.currentPlayer].z].width && SplitTime.player[SplitTime.currentPlayer].y + dy < SplitTime.currentLevel.layerImg[SplitTime.player[SplitTime.currentPlayer].z].height*/)
 		if(SplitTime.PF.isSquare(SplitTime.player[SplitTime.currentPlayer].x + dx, SplitTime.player[SplitTime.currentPlayer].y + dy, SplitTime.player[SplitTime.currentPlayer]))
 		{
 			//alert("ds done");
 			if(dx !== 0 || dy !== 0)
 			{
-				var toIndex = SplitTime.pixCoordToIndex(SplitTime.xPixToTile(SplitTime.player[SplitTime.currentPlayer].x + dx), SplitTime.yPixToTile(SplitTime.player[SplitTime.currentPlayer].y + dy), SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer]);
-				var squareType = SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[toIndex];
+				var toIndex = SplitTime.pixCoordToIndex(SplitTime.xPixToTile(SplitTime.player[SplitTime.currentPlayer].x + dx), SplitTime.yPixToTile(SplitTime.player[SplitTime.currentPlayer].y + dy), SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z]);
+				var squareType = SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z].data[toIndex];
 //				var blocked = 0;
 				if(squareType != 255)
 				{
@@ -323,7 +323,7 @@ SplitTime.TRPGPlayerMotion = function() //Function for current SplitTime.player'
 						SplitTime.player[SplitTime.currentPlayer].path.y[0] = SplitTime.player[SplitTime.currentPlayer].y + dy;
 						if(squareType == 100)
 						{
-							resumeFunc = SplitTime.currentLevel.boardProgram[SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].layer].data[toIndex + 2]];
+							resumeFunc = SplitTime.currentLevel.boardProgram[SplitTime.currentLevel.layerFuncData[SplitTime.player[SplitTime.currentPlayer].z].data[toIndex + 2]];
 							resumeCue = 1;
 						}
 //					}
@@ -333,7 +333,7 @@ SplitTime.TRPGPlayerMotion = function() //Function for current SplitTime.player'
 		}
 		//else alert("out of range");
 		//Projectile motion
-		var dartLayer = SplitTime.player[SplitTime.currentPlayer].dart.layer;
+		var dartLayer = SplitTime.player[SplitTime.currentPlayer].dart.z;
 		if(SplitTime.player[SplitTime.currentPlayer].dart.img && dartLayer !== null && dartLayer !== undefined)
 		{
 			//Move projectile
@@ -343,7 +343,7 @@ SplitTime.TRPGPlayerMotion = function() //Function for current SplitTime.player'
 				if((Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.y - (boardNPC[index].y - 24)) < 32) && (Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.x - boardNPC[index].x) < 16))
 				{
 					SplitTime.damage(SplitTime.player[SplitTime.currentPlayer].dart, boardNPC[index]); //damage hit opponent
-					SplitTime.player[SplitTime.currentPlayer].dart.layer = null; //remove SplitTime.image
+					SplitTime.player[SplitTime.currentPlayer].dart.z = null; //remove SplitTime.image
 					SplitTime.player[SplitTime.currentPlayer].dart.frame = 0; //reset frame
 					boardNPC[index].status = "hurt"; //"hurt" opponent
 					boardNPC[index].SplitTime.countdown = 4; //"hurt" blinks
@@ -352,10 +352,10 @@ SplitTime.TRPGPlayerMotion = function() //Function for current SplitTime.player'
 				}
 			}
 			//If hit terrain
-			dartLayer = SplitTime.player[SplitTime.currentPlayer].dart.layer;
+			dartLayer = SplitTime.player[SplitTime.currentPlayer].dart.z;
 			if(dartLayer !== null && dartLayer !== undefined && moved == -1)
 			{
-				SplitTime.player[SplitTime.currentPlayer].dart.layer = null;
+				SplitTime.player[SplitTime.currentPlayer].dart.z = null;
 				SplitTime.player[SplitTime.currentPlayer].dart.frame = 0;
 				SplitTime.TRPGNextTurn();
 

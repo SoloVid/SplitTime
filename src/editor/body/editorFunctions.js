@@ -121,74 +121,6 @@ function drawTraces(highlightIndex, drawTo)
 	ctx.translate(-0.5, -0.5);
 }
 
-function drawTracesFromBackup(highlightIndex) {
-	var XMLLayers = levelXML.getElementsByTagName("layer");
-	var ctx;
-	var cnvLayers = document.getElementsByClassName("whiteboard");
-	var backupLayers = document.getElementsByClassName("backupCanv");
-
-	var i;
-
-	for(i = 0; i < XMLLayers.length; i++)
-	{
-		ctx = cnvLayers[i].getContext("2d");
-
-		ctx.clearRect(window.pageXOffset - 120, window.pageYOffset - 10, window.innerWidth + 20, window.innerHeight + 20);
-
-		ctx.drawImage(backupLayers[i], window.pageXOffset - 120, window.pageYOffset - 10, window.innerWidth + 20, window.innerHeight + 20, window.pageXOffset - 120, window.pageYOffset - 10, window.innerWidth + 20, window.innerHeight + 20);
-	}
-
-	i--;
-
-	var highlightTrace = levelXML.getElementsByTagName("trace")[highlightIndex];
-
-	ctx = cnvLayers[i].getContext("2d");
-
-	ctx.translate(0.5, 0.5);
-
-	ctx.strokeStyle = "#0000FF";
-
-	ctx.fillStyle = ctx.strokeStyle;
-
-	var regex = /\([^\)]+\)/g;
-	var xRegex = /\((-?[\d]*),/;
-	var yRegex = /,[\s]*(-?[\d]*)\)/;
-	var newX, newY;
-
-	var pointStr = highlightTrace.textContent;//.getElementsByTagName("path")[0].textContent;
-	var points = pointStr.match(regex);
-	//console.log(points.length + "|" + points + "|");
-
-	ctx.beginPath();
-
-	newX = points[0].match(xRegex)[1];
-	newY = points[0].match(yRegex)[1];
-
-	ctx.moveTo(newX, newY);
-
-	ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
-
-	for(var k = 1; k < points.length; k++)
-	{
-		if(points[k] == "(close)")
-		{
-			ctx.closePath();
-			ctx.stroke();
-			ctx.fill();
-		}
-		else
-		{
-			newX = points[k].match(xRegex)[1];
-			newY = points[k].match(yRegex)[1];
-
-			ctx.lineTo(newX, newY);
-			ctx.stroke();
-			ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
-		}
-	}
-	ctx.translate(-0.5, -0.5);
-}
-
 function findTrace(x, y) {
 	var traceLineRegex = /t\.prototype\.addStaticTrace\("[^"]*", "[^"]*"\);/g;
 	var traceLines = spriteCode.match(traceLineRegex);
@@ -340,10 +272,10 @@ function updateObject(index)
 	catch(e) { alert("You need to have x and y assigned!"); return; }
 
 	try {
-		layer = childBlock.match(/child\.setLayer\(-?[\d]+\);/)[0];
+		layer = childBlock.match(/child\.setZ\(-?[\d]+\);/)[0];
 		layer = Number(layer.match(dRegex)[0]);
 	}
-	catch(e) { layer = childTemplate.layer; }
+	catch(e) { layer = childTemplate.z; }
 
 	try {
 		xres = childBlock.match(/child\.xres[\s]*=[\s]*[\d]+;/)[0];
@@ -505,9 +437,9 @@ function createBodyImg()
 {
 	var back = getBodyImg();
 
-	var layerDisplay = document.getElementById("spriteEverything");
-	layerDisplay.style.height = getBodyYRes() + "px";
-	layerDisplay.style.width = getBodyXRes() + "px";
+	var display = document.getElementById("spriteEverything");
+	display.style.height = getBodyYRes() + "px";
+	display.style.width = getBodyXRes() + "px";
 
 	var NPCContainer = document.createElement("div");
 	NPCContainer.style.position = "absolute";
@@ -524,20 +456,20 @@ function createBodyImg()
 
 	displayNPC.style.left = (-(getBodyXRes()*SplitTime.determineColumn(getBodyDir()))) + "px";
 
-	layerDisplay.appendChild(NPCContainer);
+	display.appendChild(NPCContainer);
 
 	var whiteboard = document.createElement("canvas");
 	whiteboard.width = getBodyXRes();
 	whiteboard.height = getBodyYRes();
 	whiteboard.className = "whiteboard";
-	layerDisplay.appendChild(whiteboard);
+	display.appendChild(whiteboard);
 
 	var backupCanv = document.createElement("canvas");
 	backupCanv.width = getBodyXRes();
 	backupCanv.height = getBodyYRes();
 	backupCanv.className = "backupCanv";
 
-	layerDisplay.appendChild(backupCanv);
+	display.appendChild(backupCanv);
 }
 
 function createObject(skipCode, index)
@@ -578,7 +510,7 @@ function createObject(skipCode, index)
 
 	if(!skipCode)
 	{
-		spriteCode = spriteCode.replace("var child;", "var child;\n\tchild = new SplitTime.BodyTemplate[\"\"]();\n\tchild.setX(" + x + ");\n\tchild.setY(" + y + ");\n\tchild.setLayer(0);\n\tthis.addChild(child);");
+		spriteCode = spriteCode.replace("var child;", "var child;\n\tchild = new SplitTime.BodyTemplate[\"\"]();\n\tchild.setX(" + x + ");\n\tchild.setY(" + y + ");\n\tchild.setZ(0);\n\tthis.addChild(child);");
 
 		reset(spriteCode);
 

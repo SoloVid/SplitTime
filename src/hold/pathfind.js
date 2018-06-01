@@ -14,7 +14,7 @@ SplitTime.pathToTeam = function(finder, opTeam)
 	SplitTime.PF.pointC.x = SplitTime.xPixToTile(SplitTime.PF.finder.x);
 	SplitTime.PF.pointC.y = SplitTime.yPixToTile(SplitTime.PF.finder.y);
 	//Get index (based on SplitTime.level's function SplitTime.map data) of the point
-	SplitTime.PF.pointC.index = SplitTime.pixCoordToIndex(SplitTime.PF.pointC.x, SplitTime.PF.pointC.y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer]);
+	SplitTime.PF.pointC.index = SplitTime.pixCoordToIndex(SplitTime.PF.pointC.x, SplitTime.PF.pointC.y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.z]);
 	//No parent
 	SplitTime.PF.pointC.parent = -1;
 	//Initial point costs nothing
@@ -135,9 +135,9 @@ SplitTime.PF.evaluatePoint = function(x, y)
 {
 	//alert("evaluating" + x + ", " + y);
 	//Get point's index
-	var i = SplitTime.pixCoordToIndex(x, y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer]);
+	var i = SplitTime.pixCoordToIndex(x, y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.z]);
 	//If the point has not yet been analyzed and spot on SplitTime.map = function is not blocked
-	if(SplitTime.PF.point[i] == null && SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer].data[i] != 255 && x >= 0 && y >= 0 && x < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].width && y < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].height)
+	if(SplitTime.PF.point[i] == null && SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.z].data[i] != 255 && x >= 0 && y >= 0 && x < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.z].width && y < SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.z].height)
 	{
 		//alert("initializing point " + i);
 	//alert("setup point");
@@ -156,7 +156,7 @@ SplitTime.PF.evaluatePoint = function(x, y)
 		//alert("add out");
 		//alert("point to heap done");
 	}
-	else if(SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.layer].data[i] == 255 || x < 0 || y < 0 || x >= SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].width || y >= SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.layer].height) //If point is on closed list or is blocked by terrain
+	else if(SplitTime.currentLevel.layerFuncData[SplitTime.PF.finder.z].data[i] == 255 || x < 0 || y < 0 || x >= SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.z].width || y >= SplitTime.currentLevel.layerFunc[SplitTime.PF.finder.z].height) //If point is on closed list or is blocked by terrain
 	{ 
 	//alert("blocked");
 	} 
@@ -480,7 +480,7 @@ SplitTime.PF.evaluateSquare = function(x, y)
 				forRemoval = 1;
 			}
 		}
-		if(SplitTime.currentLevel.layerFuncData[SplitTime.PF.person.layer].data[SplitTime.pixCoordToIndex(x, y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.person.layer])] != 255 && blocked != 1)
+		if(SplitTime.currentLevel.layerFuncData[SplitTime.PF.person.z].data[SplitTime.pixCoordToIndex(x, y, SplitTime.currentLevel.layerFuncData[SplitTime.PF.person.z])] != 255 && blocked != 1)
 		{
 			if(SplitTime.PF.cSquare.GCost + 1 <= SplitTime.PF.person.spd)
 			{

@@ -68,7 +68,7 @@ SplitTime.Motion["chase"].prototype = new SplitTime.baseMotion();
 SplitTime.Motion["chase"].prototype.constructor = SplitTime.Motion["chase"];
 SplitTime.Motion["chase"].prototype.canUse = function(person) {
 	var dist = Math.sqrt(Math.pow(person.x - SplitTime.player[SplitTime.currentPlayer].x, 2) + Math.pow(person.y - SplitTime.player[SplitTime.currentPlayer].y, 2));
-	return (dist < 256 && person.layer == SplitTime.player[SplitTime.currentPlayer].layer && person.canSeePlayer());
+	return (dist < 256 && person.z == SplitTime.player[SplitTime.currentPlayer].z && person.canSeePlayer());
 };
 SplitTime.Motion["chase"].prototype.use = function(person) {
 	person.zeldaLockOnPlayer();

@@ -2,12 +2,37 @@ SplitTime.Body = function() {};
 SplitTime.BodyTemplate = {};
 SplitTime.BodyTemplate[""] = new SplitTime.Body();
 
-SplitTime.Body.prototype.children = [];
-SplitTime.Body.prototype.addChild = function(child) {
-	if(this.children.length === 0)
-		this.children = [];
-
-	this.children.push(child);
+SplitTime.Body.prototype.childrenBolted = [];
+SplitTime.Body.prototype.childrenLoose = [];
+SplitTime.Body.prototype.addChild = function(child, isBolted) {
+	if(isBolted) {
+		if(this.childrenBolted.length === 0)
+			this.childrenBolted = [];
+		this.childrenBolted.push(child);
+	}
+	else {
+		if(this.childrenLoose.length === 0)
+			this.childrenLoose = [];
+		this.childrenLoose.push(child);
+	}
+};
+SplitTime.Body.prototype.removeChild = function(child) {
+	var i;
+	for(i = 0; i < this.childrenBolted.length; i++) {
+		if(this.childrenBolted[i] == child) {
+			this.childrenBolted.splice(i, 1);
+			i--;
+		}
+	}
+	for(i = 0; i < this.childrenLoose.length; i++) {
+		if(this.childrenLoose[i] == child) {
+			this.childrenLoose.splice(i, 1);
+			i--;
+		}
+	}
+};
+SplitTime.Body.prototype.getChildren = function() {
+	return this.childrenBolted.concat(this.childrenLoose);
 };
 
 SplitTime.Body.prototype.staticTrace = [];
@@ -35,9 +60,10 @@ SplitTime.Body.prototype.lvl = undefined;
 SplitTime.Body.prototype.team = "neutral";
 SplitTime.Body.prototype.x = 0;
 SplitTime.Body.prototype.setX = function(x) {
-	for(var i = 0; i < this.children.length; i++)
+	var children = this.getChildren();
+	for(var i = 0; i < children.length; i++)
 	{
-		var currentChild = this.children[i];
+		var currentChild = children[i];
 		var dx = currentChild.x - this.x;
 		currentChild.setX(x + dx);
 	}
@@ -45,9 +71,10 @@ SplitTime.Body.prototype.setX = function(x) {
 };
 SplitTime.Body.prototype.y = 0;
 SplitTime.Body.prototype.setY = function(y) {
-	for(var i = 0; i < this.children.length; i++)
+	var children = this.getChildren();
+	for(var i = 0; i < children.length; i++)
 	{
-		var currentChild = this.children[i];
+		var currentChild = children[i];
 		var dy = currentChild.y - this.y;
 		currentChild.setY(y + dy);
 	}
@@ -55,15 +82,16 @@ SplitTime.Body.prototype.setY = function(y) {
 };
 SplitTime.Body.prototype.offX = 0;
 SplitTime.Body.prototype.offY = 0;
-SplitTime.Body.prototype.layer = 0;
-SplitTime.Body.prototype.setLayer = function(layer) {
-	for(var i = 0; i < this.children.length; i++)
+SplitTime.Body.prototype.z = 0;
+SplitTime.Body.prototype.setZ = function(layer) {
+	var children = this.getChildren();
+	for(var i = 0; i < children.length; i++)
 	{
-		var currentChild = this.children[i];
-		var dLayer = currentChild.layer - this.layer;
-		currentChild.setLayer(layer + dLayer);
+		var currentChild = children[i];
+		var dLayer = currentChild.z - this.z;
+		currentChild.setZ(layer + dLayer);
 	}
-	this.layer = layer;
+	this.z = layer;
 };
 //SplitTime.Body.prototype.inAir = null;
 //SplitTime.Body.prototype.mvmt = 1; //0 - still; 1 - random moving; 2 - back and forth; 4 - square
@@ -77,7 +105,7 @@ SplitTime.Body.prototype.put = function(levelId, x, y, layer) {
 	this.lvl = levelId;
 	this.setX(x);
 	this.setY(y);
-	this.setLayer(layer);
+	this.setZ(layer);
 };
 
 SplitTime.Body.prototype.keyFunc = {};
@@ -119,14 +147,14 @@ SplitTime.Body.prototype.getPosition = function() {
 	var pos = {};
 	pos.x = this.x;
 	pos.y = this.y;
-	pos.layer = this.layer;
+	pos.z = this.z;
 	return pos;
 };
 SplitTime.Body.prototype.getShownPosition = function() {
 	var pos = {};
 	pos.x = this.x;
 	pos.y = this.y;
-	pos.layer = this.layer;
+	pos.z = this.z;
 	return pos;
 };
 SplitTime.Body.prototype.getShownX = function() {
@@ -155,14 +183,11 @@ SplitTime.Body.prototype.resetCans = function() { delete this.canSee; delete thi
 
 //Checks if the a SplitTime.Body's location is valid (based on current location and layer func data)
 SplitTime.Body.prototype.canBeHere = function(allowInAir) {
-	for(var ind = 0; ind < 8; ind++)
-	{
-		for(var sec = 0; sec < 16; sec++)
-		{
-			var i = SplitTime.pixCoordToIndex(person.x + sec, person.y + ind, SplitTime.currentLevel.layerFuncData[person.layer]);
-			if(SplitTime.currentLevel.layerFuncData[person.layer].data[i] == 255)
-			{
-				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[person.layer].data[i + 1] == 255) { }
+	for(var iX = 0; iX < 8; iX++) {
+		for(var iY = 0; iY < 16; iY++) {
+			var iData = SplitTime.pixCoordToIndex(this.x + iY, this.y + iX, SplitTime.currentLevel.layerFuncData[this.z]);
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[iData] == 255) {
+				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[this.z].data[iData + 1] == 255) { }
 				else return 0;
 			}
 		}
@@ -266,7 +291,7 @@ SplitTime.Body.prototype.pathMotion = function(spd) {
 //
 // 			if(eventA[i] == "put")
 // 			{
-// 				event = new Function("var tNPC = SplitTime.getNPCByName(\"" + this.name + "\"); tNPC.x = " + eventA[i + 1] + "; tNPC.y = " + eventA[i + 2] + "; tNPC.layer = " + eventA[i + 3] + ";");
+// 				event = new Function("var tNPC = SplitTime.getNPCByName(\"" + this.name + "\"); tNPC.x = " + eventA[i + 1] + "; tNPC.y = " + eventA[i + 2] + "; tNPC.z = " + eventA[i + 3] + ";");
 // 				SplitTime.Time.registerEvent(event, isDaily, cTime);
 // 				i += 4;
 //
@@ -275,7 +300,7 @@ SplitTime.Body.prototype.pathMotion = function(spd) {
 // 			}
 // 			else if(eventA[i] == "send")
 // 			{
-// 				event = new Function("var tNPC = SplitTime.getNPCByName(\"" + this.name + "\"); tNPC.lvl = " + eventA[i + 1] + "; tNPC.x = " + eventA[i + 2] + "; tNPC.y = " + eventA[i + 3] + "; tNPC.layer = " + eventA[i + 4] + ";");
+// 				event = new Function("var tNPC = SplitTime.getNPCByName(\"" + this.name + "\"); tNPC.lvl = " + eventA[i + 1] + "; tNPC.x = " + eventA[i + 2] + "; tNPC.y = " + eventA[i + 3] + "; tNPC.z = " + eventA[i + 4] + ";");
 // 				SplitTime.Time.registerEvent(event, isDaily, cTime);
 // 				i += 5;
 //

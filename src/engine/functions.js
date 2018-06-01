@@ -219,7 +219,7 @@ SplitTime.enterLevelById = function(id) {
 			for(j = 0; j < SplitTime.onBoard.bodies.length; j++)
 			{
 				var cBody = SplitTime.onBoard.bodies[j];
-				if(cBody.layer == index)
+				if(cBody.z == index)
 				{
 					for(var k = 0; k < cBody.staticTrace.length; k++)
 					{
@@ -265,7 +265,7 @@ SplitTime.pixCoordToIndex = function(x,y,dat) {
 SplitTime.send = function(board, x, y, z) {
 	SplitTime.player[SplitTime.currentPlayer].setX(x);
 	SplitTime.player[SplitTime.currentPlayer].setY(y);
-	SplitTime.player[SplitTime.currentPlayer].layer = z;
+	SplitTime.player[SplitTime.currentPlayer].z = z;
 	SplitTime.enterLevelById(board);
 };
 

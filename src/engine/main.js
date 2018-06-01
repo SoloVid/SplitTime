@@ -2,111 +2,111 @@
 SplitTime.main = function() {
 	//console.log(SplitTime.counter);
 	var startTime = new Date().getTime();
-	var a = new Date(); //for speed checking
-	switch(SplitTime.process) {
-		case "hold": break;
-		case "loading": {
-			SplitTime.see.fillStyle = "#000000";
-			SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-			SplitTime.see.font="30px Arial";
-			SplitTime.see.fillStyle = "#FFFFFF";
-			SplitTime.see.fillText("Loading...", 250, 230);
-			break;
-		}
-		case "action": {
-			//Advance one second per second (given 20ms SplitTime.main interval)
-			if(SplitTime.counter%SplitTime.FPS === 0) SplitTime.Time.advance(1); //in time.js
-			var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
-			b.logUnusual();
 
-			SplitTime.zeldaPlayerMotion();
-			var c = new SLVD.speedCheck("SplitTime.zeldaPlayerMotion", b.date);
-			c.logUnusual();
+	try {
 
-			SplitTime.zeldaNPCMotion();
-			var d = new SLVD.speedCheck("SplitTime.zeldaNPCMotion", c.date);
-			d.logUnusual();
+        var a = new Date(); //for speed checking
+        switch(SplitTime.process) {
+            case "hold":
+                break;
+            case "loading": {
+                SplitTime.see.fillStyle = "#000000";
+                SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+                SplitTime.see.font = "30px Arial";
+                SplitTime.see.fillStyle = "#FFFFFF";
+                SplitTime.see.fillText("Loading...", 250, 230);
+                break;
+            }
+            case "action": {
+                //Advance one second per second (given 20ms SplitTime.main interval)
+                if(SplitTime.counter % SplitTime.FPS === 0) SplitTime.Time.advance(1); //in time.js
+                var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
+                b.logUnusual();
 
-			if(SplitTime.onBoard.bodies.length === 0) SplitTime.onBoard.refetchBodies();
-			else SplitTime.onBoard.sortBodies();
-			var e = new SLVD.speedCheck("SplitTime sort board bodies", d.date);
-			e.logUnusual();
+                SplitTime.zeldaPlayerMotion();
+                var c = new SLVD.speedCheck("SplitTime.zeldaPlayerMotion", b.date);
+                c.logUnusual();
 
-			if(SplitTime.process != "action") break;
+                SplitTime.zeldaNPCMotion();
+                var d = new SLVD.speedCheck("SplitTime.zeldaNPCMotion", c.date);
+                d.logUnusual();
 
-			//Render board, SplitTime.see below
-			SplitTime.renderBoardState(true);
-			var f = new SLVD.speedCheck("SplitTime.renderBoardState", e.date);
-			f.logUnusual(5);
+                if(SplitTime.onBoard.bodies.length === 0) SplitTime.onBoard.refetchBodies();
+                else SplitTime.onBoard.sortBodies();
+                var e = new SLVD.speedCheck("SplitTime sort board bodies", d.date);
+                e.logUnusual();
 
-			break;
-		}
-		case "TRPG": {
-			if(SplitTime.cTeam == SplitTime.player)
-			{
-				SplitTime.TRPGPlayerMotion();
-			}
-			else if(SplitTime.cTeam == boardNPC)
-			{
-				SplitTime.TRPGNPCMotion();
-			}
-			SplitTime.onBoard.sortBodies();
+                if(SplitTime.process != "action") break;
 
-			SplitTime.renderBoardState(true);
-			break;
-		}
-		case "menu": {
-			//alert("start SplitTime.menu");
-			SplitTime.currentMenu.handleMenu(); //in menuFunctions.js
-			//alert("handled SplitTime.menu");
-			SplitTime.currentMenu.update(); //in SplitTime.menu object declaration
-			//alert("ran update check");
-			//Draw SplitTime.menu background
-			SplitTime.see.drawImage(SplitTime.currentMenu.background, 0, 0);
-			//Draw cursor
-			SplitTime.see.drawImage(SplitTime.currentMenu.cursor, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].x, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].y);
-			if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space") //Select
-			{
-				SplitTime.currentMenu.chosenPoint = SplitTime.currentMenu.currentPoint;
-				if(SplitTime.currentLevel)
-				{
-					SplitTime.process = SplitTime.currentLevel.type;
-				}
-				SplitTime.mainPromise.resolve(SplitTime.currentMenu.chosenPoint);
-			}
-			delete SplitTime.keyFirstDown;
-			break;
-		}
-		case "delay": {
-			if(SplitTime.countdown <= 0)
-			{
-				if(SplitTime.currentLevel)
-				{
-					SplitTime.process = SplitTime.currentLevel.type;
-				}
-				if(SplitTime.mainPromise)
-				{
-					SplitTime.mainPromise.resolve();
-				}
-			}
-			else SplitTime.countdown--;
-			break;
-		}
-		default: {}
-	}
-	SplitTime.counter++;
-	if(SplitTime.counter == 25600)
-	{
-		SplitTime.counter = 0;
-	}
-	//	document.getElementById("timey").innerHTML = SplitTime.counter;
-	if((SplitTime.counter%8) === 0)
-	{
-		SplitTime.frameClock = 1;
-	}
-	else
-	{
-		SplitTime.frameClock = 0;
+                //Render board, SplitTime.see below
+                SplitTime.renderBoardState(true);
+                var f = new SLVD.speedCheck("SplitTime.renderBoardState", e.date);
+                f.logUnusual(5);
+
+                break;
+            }
+            case "TRPG": {
+                if(SplitTime.cTeam == SplitTime.player) {
+                    SplitTime.TRPGPlayerMotion();
+                }
+                else if(SplitTime.cTeam == boardNPC) {
+                    SplitTime.TRPGNPCMotion();
+                }
+                SplitTime.onBoard.sortBodies();
+
+                SplitTime.renderBoardState(true);
+                break;
+            }
+            case "menu": {
+                //alert("start SplitTime.menu");
+                SplitTime.currentMenu.handleMenu(); //in menuFunctions.js
+                //alert("handled SplitTime.menu");
+                SplitTime.currentMenu.update(); //in SplitTime.menu object declaration
+                //alert("ran update check");
+                //Draw SplitTime.menu background
+                SplitTime.see.drawImage(SplitTime.currentMenu.background, 0, 0);
+                //Draw cursor
+                SplitTime.see.drawImage(SplitTime.currentMenu.cursor, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].x, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].y);
+                if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space") //Select
+                {
+                    SplitTime.currentMenu.chosenPoint = SplitTime.currentMenu.currentPoint;
+                    if(SplitTime.currentLevel) {
+                        SplitTime.process = SplitTime.currentLevel.type;
+                    }
+                    SplitTime.mainPromise.resolve(SplitTime.currentMenu.chosenPoint);
+                }
+                delete SplitTime.keyFirstDown;
+                break;
+            }
+            case "delay": {
+                if(SplitTime.countdown <= 0) {
+                    if(SplitTime.currentLevel) {
+                        SplitTime.process = SplitTime.currentLevel.type;
+                    }
+                    if(SplitTime.mainPromise) {
+                        SplitTime.mainPromise.resolve();
+                    }
+                }
+                else SplitTime.countdown--;
+                break;
+            }
+            default: {}
+        }
+        SplitTime.counter++;
+        if(SplitTime.counter == 25600) {
+            SplitTime.counter = 0;
+        }
+        //	document.getElementById("timey").innerHTML = SplitTime.counter;
+        if((SplitTime.counter % 8) === 0) {
+            SplitTime.frameClock = 1;
+        }
+        else {
+            SplitTime.frameClock = 0;
+        }
+
+    }
+    catch(ex) {
+		console.error(ex);
 	}
 
 	var endTime = new Date().getTime();
@@ -245,7 +245,7 @@ SplitTime.renderBoardState = function(forceCalculate) {
 		if(SplitTime.process == "TRPG")
 		{
 			//Draw blue range squares
-			if(index == SplitTime.cTeam[SplitTime.currentPlayer].layer && SplitTime.cTeam[SplitTime.currentPlayer].squares)
+			if(index == SplitTime.cTeam[SplitTime.currentPlayer].z && SplitTime.cTeam[SplitTime.currentPlayer].squares)
 			{
 				for(second = 0; second < SplitTime.cTeam[SplitTime.currentPlayer].squares.length; second++)
 				{
@@ -260,7 +260,7 @@ SplitTime.renderBoardState = function(forceCalculate) {
 		for(second = 0; second < SplitTime.onBoard.bodies.length; second++)
 		{
 			var cBody = SplitTime.onBoard.bodies[second];
-			if(cBody.layer == index) //ensure proper layering
+			if(cBody.z == index) //ensure proper layering
 			{
 				cBody.see(SplitTime.snapShotCtx);
 				//BodyF.see.call(cBody, SplitTime.snapShotCtx);

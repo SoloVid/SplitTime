@@ -28,7 +28,7 @@ SplitTime.Body.prototype.zeldaCheckStepTraces = function(axis, altAxis, isPositi
 
 	coords[axis] = isPositive ? this[axis] + Math.round(this.baseLength/2) - 1 : this[axis] - Math.round(this.baseLength/2);
 
-	var data = SplitTime.currentLevel.layerFuncData[this.layer];
+	var data = SplitTime.currentLevel.layerFuncData[this.z];
 
 	//Loop through width of base
 	for(var i = -this.baseLength/2; i < this.baseLength/2; i++)
@@ -173,31 +173,31 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
 
 		if(dir < 1 || dir > 3) //case 0:
 		{
-			j = SplitTime.pixCoordToIndex(this.x + halfBase, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.layer]);
-			k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.layer]);
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[j] != 255) { this.zeldaBump(1, 1); }
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[k] != 255) { this.zeldaBump(1, 3); }
+			j = SplitTime.pixCoordToIndex(this.x + halfBase, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.z]);
+			k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.z]);
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 1); }
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 3); }
 		}
 		if(dir > 0 && dir < 2) //case 1:
 		{
-			j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.layer]);
-			k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.layer]);
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[j] != 255) { this.zeldaBump(1, 2); }
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[k] != 255) { this.zeldaBump(1, 0); }
+			j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.z]);
+			k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.z]);
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 2); }
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 0); }
 		}
 		if(dir > 1 && dir < 3) //case 2:
 		{
-			j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.layer]);
-			k = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.layer]);
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[j] != 255) { this.zeldaBump(1, 1); }
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[k] != 255) { this.zeldaBump(1, 3); }
+			j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y - halfBase - 1, SplitTime.currentLevel.layerFuncData[this.z]);
+			k = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.z]);
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 1); }
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 3); }
 		}
 		if(dir > 2 && dir < 4) //case 3:
 		{
-			j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.layer]);
-			k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.layer]);
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[j] != 255) { this.zeldaBump(1, 2); }
-			if(SplitTime.currentLevel.layerFuncData[this.layer].data[k] != 255) { this.zeldaBump(1, 0); }
+			j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.z]);
+			k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y + halfBase, SplitTime.currentLevel.layerFuncData[this.z]);
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 2); }
+			if(SplitTime.currentLevel.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 0); }
 		}
 		}
 	}
