@@ -7,16 +7,16 @@ SplitTime.Image.map = {};
 SplitTime.Image.load = function(relativePath, alias, isPermanent) {
 	var promise = new SLVD.Promise();
 	var t;
-	function onload() {
+	function onLoad() {
 		if(t.complete) {
-			t.removeEventListener("load", onload);
+			t.removeEventListener("load", onLoad);
 			promise.resolve(t);
 		}
 	}
 
 	if(!(relativePath in SplitTime.Image.map)) {
 		t = new Image();
-		t.addEventListener("load", onload);
+		t.addEventListener("load", onLoad);
 		t.src = SplitTime.Image.root + relativePath;
 		SplitTime.Image.map[relativePath] = t;
 		if(alias) {

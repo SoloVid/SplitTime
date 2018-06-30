@@ -2,7 +2,7 @@
 
 dependsOn("Action.js");
 
-SplitTime.Action["launchProjectile"] = function(projectile, recoveryTime, probability) {
+SplitTime.Action.LaunchProjectile = function(projectile, recoveryTime, probability) {
 	this.dart = projectile;
 	if(probability !== undefined)
 	{
@@ -13,13 +13,13 @@ SplitTime.Action["launchProjectile"] = function(projectile, recoveryTime, probab
 		this.rcvr = recoveryTime;
 	}
 };
-SplitTime.Action["launchProjectile"].prototype = new baseAction();
-SplitTime.Action["launchProjectile"].prototype.constructor = SplitTime.Action["launchProjectile"];
-SplitTime.Action["launchProjectile"].prototype.type = "throw";
+SplitTime.Action.LaunchProjectile.prototype = new BaseAction();
+SplitTime.Action.LaunchProjectile.prototype.constructor = SplitTime.Action.LaunchProjectile;
+SplitTime.Action.LaunchProjectile.prototype.type = "throw";
 
-SplitTime.Action["launchProjectile"].prototype.rcvr = 0;
+SplitTime.Action.LaunchProjectile.prototype.rcvr = 0;
 
-SplitTime.Action["launchProjectile"].prototype.use = function(person) {
+SplitTime.Action.LaunchProjectile.prototype.use = function(person) {
 	var launchedProjectile = new this.dart();
 
 	launchedProjectile.setX(person.x);

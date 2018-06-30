@@ -114,10 +114,6 @@ SplitTime.Body.prototype.interact = function() {};
 
 SplitTime.Body.prototype.pushy = true;
 
-SplitTime.Body.prototype.hp = 100;
-SplitTime.Body.prototype.strg = 5;
-SplitTime.Body.prototype.spd = 2;
-
 SplitTime.Body.prototype.path = [];
 SplitTime.Body.prototype.addPointToPath = function(x, y) {
 	if(this.path.x.length === 0)
@@ -134,14 +130,8 @@ SplitTime.Body.prototype.canSeeAct = true;
 SplitTime.Body.prototype.canSeeStatus = true;
 SplitTime.Body.prototype.canSee = true;
 
-SplitTime.Body.prototype.getHp = function() {
-	return this.hp;
-};
 SplitTime.Body.prototype.getImage = function() {
 	return SplitTime.Image.get(this.img);
-};
-SplitTime.Body.prototype.getMaxHp = function() {
-	return 100;
 };
 SplitTime.Body.prototype.getPosition = function() {
 	var pos = {};
@@ -162,12 +152,6 @@ SplitTime.Body.prototype.getShownX = function() {
 };
 SplitTime.Body.prototype.getShownY = function() {
 	return this.y;
-};
-SplitTime.Body.prototype.getSpeed = function() {
-	return this.spd;
-};
-SplitTime.Body.prototype.getStrength = function() {
-	return this.strg;
 };
 SplitTime.Body.prototype.getTeam = function() {
 	return SplitTime.Teams[this.team];
@@ -198,10 +182,6 @@ SplitTime.Body.prototype.canBeHere = function(allowInAir) {
 SplitTime.Body.prototype.canSeePlayer = function() {
 	var tDir = SplitTime.dirFromTo(this.x, this.y, SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y);
 	return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
-};
-
-SplitTime.Body.prototype.damage = function(amount) {
-	this.hp -= amount;
 };
 
 //Move a person along their set path at given speed.

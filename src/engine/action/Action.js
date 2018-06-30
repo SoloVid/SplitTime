@@ -19,31 +19,31 @@ SplitTime.Action = {};
 
 // console.log("loaded SplitTime.Action");
 
-function baseAction() { }
-baseAction.prototype.time = 0;
-baseAction.prototype.prob = 1;
-baseAction.prototype.type = "attack";
-baseAction.prototype.getProbability = function() { return this.prob; };
-baseAction.prototype.canUse = function(person) { return true; };
-baseAction.prototype.forceEnd = function(person) { return; };
-baseAction.prototype.shouldUse = function(person) { return true; };
-baseAction.prototype.use = function(person) { };
-baseAction.prototype.update = function(person) { this.time--; };
-baseAction.prototype.see = function(person) { };
+function BaseAction() { }
+BaseAction.prototype.time = 0;
+BaseAction.prototype.prob = 1;
+BaseAction.prototype.type = "attack";
+BaseAction.prototype.getProbability = function() { return this.prob; };
+BaseAction.prototype.canUse = function(person) { return true; };
+BaseAction.prototype.forceEnd = function(person) { return; };
+BaseAction.prototype.shouldUse = function(person) { return true; };
+BaseAction.prototype.use = function(person) { };
+BaseAction.prototype.update = function(person) { this.time--; };
+BaseAction.prototype.see = function(person) { };
 
-SplitTime.Action["slash"] = function(prob) {
+SplitTime.Action.Slash = function(prob) {
 	if(prob !== undefined)
 	{
 		this.prob = prob;
 	}
 };
-SplitTime.Action["slash"].prototype = new baseAction();
-SplitTime.Action["slash"].prototype.constructor = SplitTime.Action["slash"];
-SplitTime.Action["slash"].prototype.time = 4;
-SplitTime.Action["slash"].prototype.canUse = function(person) {
+SplitTime.Action.Slash.prototype = new BaseAction();
+SplitTime.Action.Slash.prototype.constructor = SplitTime.Action.Slash;
+SplitTime.Action.Slash.prototype.time = 4;
+SplitTime.Action.Slash.prototype.canUse = function(person) {
 	return SplitTime.distanceTrue(person.x, person.y, SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y) < 36 && person.canSeePlayer();
 };
-SplitTime.Action["slash"].prototype.use = function(person) {
+SplitTime.Action.Slash.prototype.use = function(person) {
 	this.time = 4;
 	for(var third = 0; third < SplitTime.onBoard.agents.length; third++)
 	{
@@ -70,14 +70,14 @@ SplitTime.Action["slash"].prototype.use = function(person) {
 		}
 	}
 };
-SplitTime.Action["slash"].prototype.update = function(person) {
+SplitTime.Action.Slash.prototype.update = function(person) {
 	if(this.time <= 0)
 	{
 		//person.rcvr = 16 - person.spd;
 	}
 	this.time--;
 };
-SplitTime.Action["slash"].prototype.see = function(person) {
+SplitTime.Action.Slash.prototype.see = function(person) {
 	//Blur SplitTime.player
 	SplitTime.snapShotCtx.globalAlpha = 0.10;
 	var tSqueeze = 4;

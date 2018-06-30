@@ -2,21 +2,21 @@
 
 dependsOn("Action.js");
 
-SplitTime.Action["propelProjectile"] = function(acceleration) {
+SplitTime.Action.PropelProjectile = function(acceleration) {
 	if(acceleration !== undefined)
 	{
 		this.accel = acceleration;
 	}
 };
-SplitTime.Action["propelProjectile"].prototype = new baseAction();
-SplitTime.Action["propelProjectile"].prototype.constructor = SplitTime.Action["propelProjectile"];
+SplitTime.Action.PropelProjectile.prototype = new BaseAction();
+SplitTime.Action.PropelProjectile.prototype.constructor = SplitTime.Action.PropelProjectile;
 
-SplitTime.Action["propelProjectile"].prototype.accel = 0;
+SplitTime.Action.PropelProjectile.prototype.accel = 0;
 
-SplitTime.Action["propelProjectile"].prototype.use = function(dart) {
+SplitTime.Action.PropelProjectile.prototype.use = function(dart) {
 	this.time = 1;
 };
-SplitTime.Action["propelProjectile"].prototype.update = function(dart) {
+SplitTime.Action.PropelProjectile.prototype.update = function(dart) {
 	//Move projectile
 	var moved = dart.zeldaStep(dart.spd);
 	for(var index = 0; index < SplitTime.onBoard.agents.length; index++)

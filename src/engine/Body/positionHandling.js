@@ -5,7 +5,7 @@ SplitTime.Body.prototype.positionCount = 0;
 
 SplitTime.Body.prototype.getPosition = function(id) {
     if(id in this.positions) {
-        return this.positions[alias];
+        return this.positions[id];
     }
     else {
         return SplitTime.Level.get(this.lvl).getPosition(id);

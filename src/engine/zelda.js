@@ -97,12 +97,6 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 		}
 	}
 
-	if(person.hp <= 0)
-	{
-		resumeFunc = die;
-		resumeCue = die(1);
-		return;
-	}
 		// if(SplitTime.player[SplitTime.currentPlayer].act == "jumping")
 		// {
 		// 	//actionCountdown goes from 32 to -32 before this is not needed
