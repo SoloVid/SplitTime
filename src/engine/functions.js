@@ -59,53 +59,6 @@ SplitTime.damage = function(attacker, victim) {
 	if(victim.dmnr == 1) victim.dmnr = 2;
 };
 
-SplitTime.directionFromString = function(stringDir) {
-	switch(stringDir) {
-		case "E": return 0;
-		case "NE": case "EN": return 0.5;
-		case "N": return 1;
-		case "NW": case "WN": return 1.5;
-		case "W": return 2;
-		case "SW": case "WS": return 2.5;
-		case "S": return 3;
-		case "SE": case "ES": return 3.5;
-		default: console.log("Invalid direction: " + stringDir); return -1;
-	}
-};
-SplitTime.directionToString = function(numDir) {
-	switch(numDir) {
-		case 0: return "E";
-		case 1: return "N";
-		case 2: return "W";
-		case 3: return "S";
-		default:
-			if(numDir < 1) return "NE";
-			else if(numDir < 2) return "NW";
-			else if(numDir < 3) return "SW";
-			else return "SE";
-	}
-};
-
-//Get direction from one point to another (both in Maven orientation)
-SplitTime.dirFromTo = function(px, py, ox, oy) {
-	//N.B. ENWS = 0123
-
-	if(px == ox)
-	{
-		if(py < oy) return 3;
-		else return 1;
-	}
-
-	var baseDir = -Math.atan((py - oy)/(px - ox))/(Math.PI/2);
-
-	if(px > ox) //not in atan range
-	{
-		baseDir += 2;
-	}
-
-	return (baseDir + 4)%4;
-};
-
 SplitTime.distanceEasy = function(x1, y1, x2, y2) {
 	return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 };

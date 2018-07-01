@@ -29,7 +29,7 @@ SplitTime.Action.PropelProjectile.prototype.update = function(dart) {
 				potOpp.damage(dart.atk); //damage hit opponent
 				this.time = 0;
 				dart.hp = 0;
-				potOpp.giveStatus(new SplitTime.Status["hurt"](1)); //"hurt" opponent
+				potOpp.giveStatus(new SplitTime.Status.Hurt(1)); //"hurt" opponent
 				index = SplitTime.onBoard.agents.length; //break out of loop
 			}
 		}

@@ -98,7 +98,7 @@ SplitTime.Body.prototype.finalizeFrame = function() {
 
 SplitTime.Body.prototype.finalizeStance = function() {
 	var column = 0;
-	var dir = SplitTime.directionToString(this.dir);
+	var dir = SplitTime.Direction.toString(this.dir);
 
     //Allow for non-complicated spritesheets with one column
     if(!this.stances) {
@@ -118,7 +118,7 @@ SplitTime.Body.prototype.finalizeStance = function() {
     else {
         //If shorten intermediate directions to cardinal if they are not specified
         if(!(dir in this.stances[this.stance])) {
-            dir = SplitTime.directionToString(Math.round(this.dir) % 4);
+            dir = SplitTime.Direction.toString(Math.round(this.dir) % 4);
         }
 
         if(dir in this.stances[this.stance]) {

@@ -1,6 +1,5 @@
 //*-*-*-*-*-*-*-*-*-*-*-*Main Loop
 SplitTime.main = function() {
-	//console.log(SplitTime.counter);
 	var startTime = new Date().getTime();
 
 	try {
@@ -23,17 +22,21 @@ SplitTime.main = function() {
                 var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
                 b.logUnusual();
 
-                SplitTime.zeldaPlayerMotion();
-                var c = new SLVD.speedCheck("SplitTime.zeldaPlayerMotion", b.date);
-                c.logUnusual();
+                var agents = SplitTime.Region.current.getAgents();
+                for (var i = 0; i < agents.length; i++) {
+                	try {
+                        agents[i].update();
+                    } catch(ex) {
+                		console.error(ex);
+					}
+				}
 
-                SplitTime.zeldaNPCMotion();
-                var d = new SLVD.speedCheck("SplitTime.zeldaNPCMotion", c.date);
-                d.logUnusual();
+                var c = new SLVD.speedCheck("agents update", b.date);
+                c.logUnusual();
 
                 if(SplitTime.onBoard.bodies.length === 0) SplitTime.onBoard.refetchBodies();
                 else SplitTime.onBoard.sortBodies();
-                var e = new SLVD.speedCheck("SplitTime sort board bodies", d.date);
+                var e = new SLVD.speedCheck("SplitTime sort board bodies", c.date);
                 e.logUnusual();
 
                 if(SplitTime.process != "action") break;
@@ -104,8 +107,7 @@ SplitTime.main = function() {
             SplitTime.frameClock = 0;
         }
 
-    }
-    catch(ex) {
+    } catch(ex) {
 		console.error(ex);
 	}
 

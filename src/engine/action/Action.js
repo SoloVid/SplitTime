@@ -57,14 +57,14 @@ SplitTime.Action.Slash.prototype.use = function(person) {
 			if((SplitTime.process == "TRPG" && caseTRPG) || (SplitTime.process == "action" && caseZelda))
 			{
 				//Determine angle between slasher and opponent (in terms of PI/2)
-				var angle = SplitTime.dirFromTo(person.x, person.y, SplitTime.onBoard.agents[third].x, SplitTime.onBoard.agents[third].y);
+				var angle = SplitTime.Direction.fromTo(person.x, person.y, SplitTime.onBoard.agents[third].x, SplitTime.onBoard.agents[third].y);
 
 				//Compare angle to direction of slasher. If in range of PI... and if not already hurt and not invincible
 				if((Math.abs(angle - person.dir) < 1 || Math.abs(angle - person.dir) > 3) && SplitTime.onBoard.agents[third].status != "hurt" && SplitTime.onBoard.agents[third].status != "invincible")
 				{
 					SplitTime.onBoard.agents[third].zeldaBump(16, angle);
 					SplitTime.onBoard.agents[third].damage(5);
-					SplitTime.onBoard.agents[third].giveStatus(new SplitTime.Status["hurt"](1));
+					SplitTime.onBoard.agents[third].giveStatus(new SplitTime.Status.Hurt(1));
 				}
 			}
 		}
@@ -81,10 +81,10 @@ SplitTime.Action.Slash.prototype.see = function(person) {
 	//Blur SplitTime.player
 	SplitTime.snapShotCtx.globalAlpha = 0.10;
 	var tSqueeze = 4;
-	var col = person.getStance();
+	// var col = person.getStance();
 	for(var third = -12; third < 12; third++)
 	{
-		SplitTime.snapShotCtx.drawImage(person.getImage(), person.xres*col, person.yres*person.frame, person.xres, person.yres, third*Math.cos(Math.PI/2*(4 - Math.round(person.dir))) - person.xres/2 - person.baseOffX, tSqueeze + third*Math.sin(Math.PI/2*(4 - Math.round(person.dir))) - person.yres + person.baseLength/2 - person.baseOffY, person.xres, person.yres - tSqueeze);
+		SplitTime.snapShotCtx.drawImage(person.getImage(), person.sx, person.sy, person.xres, person.yres, third*Math.cos(Math.PI/2*(4 - Math.round(person.dir))) - person.xres/2 - person.baseOffX, tSqueeze + third*Math.sin(Math.PI/2*(4 - Math.round(person.dir))) - person.yres + person.baseLength/2 - person.baseOffY, person.xres, person.yres - tSqueeze);
 	}
 	SplitTime.snapShotCtx.globalAlpha = 1;
 

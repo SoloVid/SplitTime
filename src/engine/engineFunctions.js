@@ -11,15 +11,6 @@ SplitTime.delay = function(seconds) {
 	return SplitTime.mainPromise;
 };
 
-SplitTime.waitForKeyPress = function() {
-	SplitTime.mainPromise = new SLVD.Promise();
-
-	SplitTime.countdown = 0;
-	SplitTime.process = "wait";
-
-	return SplitTime.mainPromise;
-};
-
 SplitTime.waitForEnterOrSpace = function() {
 	SplitTime.mainPromise = new SLVD.Promise();
 

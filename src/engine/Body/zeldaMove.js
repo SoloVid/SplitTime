@@ -67,7 +67,7 @@ SplitTime.Body.prototype.zeldaCheckStepBodies = function() {
 			var dy = Math.abs(this.y - currentAgent.y);
 			if(dx < potentialCollisionDist && dy < potentialCollisionDist) {
 				if(dx < collisionDist && dy < collisionDist) {
-					var dDir = Math.abs(SplitTime.dirFromTo(this.x, this.y, currentAgent.x, currentAgent.y) - this.dir);
+					var dDir = Math.abs(SplitTime.Direction.fromTo(this.x, this.y, currentAgent.x, currentAgent.y) - this.dir);
 					if(dDir < 1 || dDir > 3) {
 						//The .pushing here ensures that there is no infinite loop of pushing back and forth
 						if(this.pushy && currentAgent.pushy && this.pushedBodies.indexOf(currentAgent) < 0) {
@@ -99,7 +99,7 @@ SplitTime.Body.prototype.zeldaLockOnPlayer = function() {
 	this.zeldaLockOnPoint(SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y);
 };
 SplitTime.Body.prototype.zeldaLockOnPoint = function(qx, qy) {
-	this.dir = SplitTime.dirFromTo(this.x, this.y, qx, qy);
+	this.dir = SplitTime.Direction.fromTo(this.x, this.y, qx, qy);
 };
 
 //*********Advances SplitTime.Body person up to distance distance as far as is legal. Includes pushing other Bodys out of the way? Returns -1 if stopped before distance?

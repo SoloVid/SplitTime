@@ -7,21 +7,21 @@ It is important to note that Statuses are somewhat different from both Actions a
 
 SplitTime.Status = {};
 
-SplitTime.baseStatus = function() { };
+SplitTime.BaseStatus = function() { };
 
-SplitTime.baseStatus.prototype.time = 0;
-SplitTime.baseStatus.prototype.apply = function(person) { this.time--; };
-SplitTime.baseStatus.prototype.see = function(person) { };
+SplitTime.BaseStatus.prototype.time = 0;
+SplitTime.BaseStatus.prototype.apply = function(person) { this.time--; };
+SplitTime.BaseStatus.prototype.see = function(person) { };
 
-SplitTime.Status["hurt"] = function(sec) { 
+SplitTime.Status.Hurt = function(sec) {
 	if(sec !== undefined)
 	{
 		this.time = sec*SplitTime.FPS;
 	}
 };
-SplitTime.Status["hurt"].prototype = new SplitTime.baseStatus();
-SplitTime.Status["hurt"].prototype.constructor = SplitTime.Status["hurt"];
-SplitTime.Status["hurt"].prototype.apply = function(person) {
+SplitTime.Status.Hurt.prototype = new SplitTime.BaseStatus();
+SplitTime.Status.Hurt.prototype.constructor = SplitTime.Status.Hurt;
+SplitTime.Status.Hurt.prototype.apply = function(person) {
 	if(SplitTime.frameClock == 1)
 	{
 		person.preventRender();

@@ -114,15 +114,6 @@ SplitTime.Body.prototype.interact = function() {};
 
 SplitTime.Body.prototype.pushy = true;
 
-SplitTime.Body.prototype.path = [];
-SplitTime.Body.prototype.addPointToPath = function(x, y) {
-	if(this.path.x.length === 0)
-	{
-		this.path = [];
-	}
-	this.path.unshift({x: x, y: y});
-};
-
 SplitTime.Body.prototype.canAct = true;
 //SplitTime.Body.prototype.canMove = true;
 SplitTime.Body.prototype.canSeeAct = true;
@@ -180,33 +171,8 @@ SplitTime.Body.prototype.canBeHere = function(allowInAir) {
 };
 
 SplitTime.Body.prototype.canSeePlayer = function() {
-	var tDir = SplitTime.dirFromTo(this.x, this.y, SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y);
+	var tDir = SplitTime.Direction.fromTo(this.x, this.y, SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y);
 	return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
-};
-
-//Move a person along their set path at given speed.
-SplitTime.Body.prototype.pathMotion = function(spd) {
-	var dist = Math.sqrt(Math.pow(this.x - this.path[0].x, 2) + Math.pow(this.y - this.path[0].y, 2));
-	if(dist === 0)
-	{
-		this.path.shift();
-
-		if(this == SplitTime.cTeam[SplitTime.currentPlayer] && this.path.length === 0)
-		{
-			if(!resumeCue)	{ }
-			else { resumeCue = resumeFunc(resumeCue); }
-		}
-	}
-	else
-	{
-		this.zeldaLockOnPoint(this.path[0].x, this.path[0].y);
-		var jump;
-		// if(Math.round(dist) < spd) { jump = Math.round(dist); }
-		if(dist < spd) { jump = dist; }
-		else { jump = spd; }
-		this.y -= Math.round(jump*Math.sin((this.dir)*(Math.PI/2)));
-		this.x += Math.round(jump*Math.cos((this.dir)*(Math.PI/2)));
-	}
 };
 
 //Based in time.js, this SplitTime.provides = function simple interface for setting a timed sequence of movement events for Bodys
@@ -295,19 +261,3 @@ SplitTime.Body.prototype.pathMotion = function(spd) {
 // 	}
 // };
 
-//(x1, y1, x2, y2, ...)
-SplitTime.Body.prototype.walkPath = function() {
-	if(SplitTime.currentLevel == this.level)
-	{
-		var spd = this.spd;
-		for(var i = 0; i < arguments.length; i += 2)
-		{
-			this.addPointToPath(arguments[i], arguments[i + 1]);
-		}
-	}
-	else
-	{
-		this.setX(arguments[arguments.length - 2]);
-		this.setY(arguments[arguments.length - 1]);
-	}
-};

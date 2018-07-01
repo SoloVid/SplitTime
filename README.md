@@ -3,7 +3,7 @@ JavaScript Game Engine for SoloVid's [Maven](http://solovid.net/maven)
 
 What makes this engine unique is the way it handles time. Time is ever moving forward along a fixed-length timeline, but this timeline is segmented into asynchronous regional timelines. The overworld serves as a hub for all of the regions and also has its own timeline. Time is segmented into hour-long periods which represent one move in the overworld and an hour of real time for each region occupied by some subset of the player-controlled party members. A timeline has events which occur at specified points.
 
-#Development Environment
+## Development Environment
 Make sure you have [Nodejs](http://nodejs.org/download/).
 
 From the command line, run the following commands to setup development dependencies (including GruntJS):

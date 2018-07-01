@@ -11,6 +11,7 @@ module.exports = function(grunt) {
                     root: 'src/engine'
                 },
                 src: [
+                    'node_modules/howler/dist/howler.min.js',
                     'src/globals.js', //first in file to avoid null pointers
                     'src/engine/**/*.js'
                 ],

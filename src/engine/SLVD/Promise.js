@@ -64,46 +64,65 @@ SLVD.Promise.as = function(data) {
 	return prom;
 };
 SLVD.Promise.when = function(arr) {
-	if(arguments.length == 1 && Array.isArray(arr)) {
-		return SLVD.Promise.when.apply(this, arr);
-	}
-	var prom = new SLVD.Promise();
-	var promiseCount = arguments.length;
-	var results = [];
+    if(arguments.length == 1 && Array.isArray(arr)) {
+        return SLVD.Promise.when.apply(this, arr);
+    }
+    var prom = new SLVD.Promise();
+    var promiseCount = arguments.length;
+    var results = [];
 
-	function addResult(index, data) {
-		results[index] = data;
-	}
+    function addResult(index, data) {
+        results[index] = data;
+    }
 
-	function checkResolve() {
-		for(var iResult = 0; iResult < promiseCount; iResult++) {
-			if(!(iResult in results)) {
-				return false;
-			}
-		}
-		prom.resolve(results);
-		return true;
-	}
+    function checkResolve() {
+        for(var iResult = 0; iResult < promiseCount; iResult++) {
+            if(!(iResult in results)) {
+                return false;
+            }
+        }
+        prom.resolve(results);
+        return true;
+    }
 
-	function makeSingleResolveHandler(index) {
-		return function(data) {
-			addResult(index, data);
-			checkResolve();
-		};
-	}
+    function makeSingleResolveHandler(index) {
+        return function(data) {
+            addResult(index, data);
+            checkResolve();
+        };
+    }
 
-	for(var iPromise = 0; iPromise < arguments.length; iPromise++) {
-		arguments[iPromise].then(makeSingleResolveHandler(iPromise));
-	}
-	return prom;
+    for(var iPromise = 0; iPromise < arguments.length; iPromise++) {
+        arguments[iPromise].then(makeSingleResolveHandler(iPromise));
+    }
+    return prom;
+};
+SLVD.Promise.whenAny = function(arr) {
+    if(arguments.length == 1 && Array.isArray(arr)) {
+        return SLVD.Promise.whenAny.apply(this, arr);
+    }
+
+    var prom = new SLVD.Promise();
+    var isResolved = false;
+
+    for(var iPromise = 0; iPromise < arguments.length; iPromise++) {
+        arguments[iPromise].then(function(data) {
+            if(!isResolved) {
+                isResolved = true;
+                prom.resolve(data);
+            }
+        });
+    }
+
+    return prom;
 };
 
-SLVD.Promise.collection = function() {
+SLVD.Promise.Collection = function() {
 	this.promises = [];
 };
-SLVD.Promise.collection.prototype.add = function(prom) {
+SLVD.Promise.Collection.prototype.add = function(prom) {
 	this.promises.push(prom);
 };
-SLVD.Promise.collection.prototype.then = function(callBack) {
+SLVD.Promise.Collection.prototype.then = function(callBack) {
 	return SLVD.Promise.when(this.promises).then(callBack);
 };

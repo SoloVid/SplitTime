@@ -1,42 +1,3 @@
-SplitTime.zeldaNPCMotion = function() //Function for all non-SplitTime.player SplitTime.onBoard.bodies's movement in Zelda mode.
-{
-	if(SplitTime.process != "action")
-	{
-		return -1;
-	}
-	for(var index = 0; index < SplitTime.onBoard.bodies.length; index++)
-	{
-		//Facilitate death
-		while(index < SplitTime.onBoard.bodies.length && SplitTime.onBoard.bodies[index].hp <= 0)
-		{
-			SplitTime.onBoard.bodies[index].lvl = null;
-			//SplitTime.onBoard.removeBody(SplitTime.onBoard.bodies[index]);
-			SplitTime.onBoard.bodies.splice(index, 1);
-		}
-		//If at invalid index (bc death ran to end of SplitTime.onBoard.bodies array), don't continue
-		if(index >= SplitTime.onBoard.bodies.length) return;
-		if(SplitTime.onBoard.bodies[index] != SplitTime.player[SplitTime.currentPlayer])
-		{
-			var cNPC = SplitTime.onBoard.bodies[index];
-
-			if(cNPC.path.length > 0) //Handle path motion
-			{
-				cNPC.requestStance("walk");
-
-				cNPC.pathMotion(cNPC.spd);
-			}
-			else
-			{
-				//Set stance to default based on direction
-				cNPC.defaultStance();
-
-				cNPC.handleStatus();
-				cNPC.handleAction();
-			}
-		}
-	}
-};
-
 SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player's motion and other key handlings in Zelda mode.
 {
 	var person = SplitTime.player[SplitTime.currentPlayer];
@@ -298,38 +259,6 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 	// 			SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].pet);
 	// 			delete SplitTime.player[SplitTime.currentPlayer].pet;
 	// 		}
-	// 	}
-	// }
-
-	//Projectile motion
-	// if(SplitTime.player[SplitTime.currentPlayer].dart.img != null && SplitTime.player[SplitTime.currentPlayer].dart.z != null)
-	// {
-	// 	//Move projectile
-	// 	var moved = zeldaStep(SplitTime.player[SplitTime.currentPlayer].dart, SplitTime.player[SplitTime.currentPlayer].dart.spd);
-	// 	for(var index = 0; index < boardNPC.length; index++)
-	// 	{
-	// 		if((Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.y - (boardNPC[index].y - 24)) < 32) && (Math.abs(SplitTime.player[SplitTime.currentPlayer].dart.x - boardNPC[index].x) < 16))
-	// 		{
-	// 			SplitTime.damage(SplitTime.player[SplitTime.currentPlayer].dart, boardNPC[index]); //damage hit opponent
-	// 			SplitTime.player[SplitTime.currentPlayer].dart.setZ(-1); //remove SplitTime.image
-	// 			SplitTime.player[SplitTime.currentPlayer].dart.frame = 0; //reset frame
-	// 			SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].dart);
-	// 			boardNPC[index].status = "hurt"; //"hurt" opponent
-	// 			boardNPC[index].statusCountdown = 4; //"hurt" blinks
-	// 			index = boardNPC.length; //break out of loop
-	// 		}
-	// 	}
-	// 	//If hit terrain
-	// 	if(moved == -1)
-	// 	{
-	// 		SplitTime.player[SplitTime.currentPlayer].dart.setZ(-1);
-	// 		SplitTime.player[SplitTime.currentPlayer].dart.frame = 0;
-	// 		SplitTime.onBoard.removeBody(SplitTime.player[SplitTime.currentPlayer].dart);
-	// 	}
-	// 	//Update frame
-	// 	if(SplitTime.frameClock == 1)
-	// 	{
-	// 		SplitTime.player[SplitTime.currentPlayer].dart.frame = (SplitTime.player[SplitTime.currentPlayer].dart.frame + 1)%4;
 	// 	}
 	// }
 };
