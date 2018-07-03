@@ -28,7 +28,7 @@ SplitTime.Action.LaunchProjectile.prototype.use = function(person) {
 	launchedProjectile.dir = person.dir;
 	launchedProjectile.team = person.team;
 
-	SplitTime.onBoard.insertBody(launchedProjectile);
+	person.getLevel().insertBody(launchedProjectile);
 
 	this.time = this.rcvr + SLVD.randomInt(16) - 8;
 };

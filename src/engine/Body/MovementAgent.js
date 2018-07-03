@@ -1,31 +1,31 @@
 dependsOn("Body.js");
 
-SplitTime.Body.MoveAgent = function(body) {
+SplitTime.Agent.Movement = function(body) {
     this.body = body;
     this.resetTarget();
 };
 
-SplitTime.Body.MoveAgent.prototype.setWalkingTowardBoardLocation = function(x, y) {
+SplitTime.Agent.Movement.prototype.setWalkingTowardBoardLocation = function(x, y) {
     this.targetBoardX = x;
     this.targetBoardY = y;
 };
-SplitTime.Body.MoveAgent.prototype.setWalkingTowardScreenLocation = function(x, y) {
+SplitTime.Agent.Movement.prototype.setWalkingTowardScreenLocation = function(x, y) {
     this.targetScreenX = x;
     this.targetScreenY = y;
 };
-SplitTime.Body.MoveAgent.prototype.setWalkingDirection = function(dir) {
+SplitTime.Agent.Movement.prototype.setWalkingDirection = function(dir) {
     this.targetDirection = dir;
 };
-SplitTime.Body.MoveAgent.prototype.setStopped = function() {
+SplitTime.Agent.Movement.prototype.setStopped = function() {
     this.resetTarget();
 };
-SplitTime.Body.MoveAgent.prototype.update = function() {
+SplitTime.Agent.Movement.prototype.notifyFrameUpdate = function() {
     this.body.dir = this.getWalkingDirection();
     this.body.requestStance("walk");
     this.body.zeldaStep(this.body.spd);
 };
 
-SplitTime.Body.MoveAgent.prototype.resetTarget = function() {
+SplitTime.Agent.Movement.prototype.resetTarget = function() {
     this.targetBoardX = null;
     this.targetBoardY = null;
     this.targetScreenX = null;
@@ -33,7 +33,7 @@ SplitTime.Body.MoveAgent.prototype.resetTarget = function() {
     this.targetDirection = null;
 };
 
-SplitTime.Body.MoveAgent.prototype.getWalkingDirection = function() {
+SplitTime.Agent.Movement.prototype.getWalkingDirection = function() {
     if(this.targetDirection !== null) {
         return this.targetDirection;
     } else if(this.targetBoardX !== null && this.targetBoardY !== null) {

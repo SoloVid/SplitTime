@@ -1,19 +1,19 @@
 dependsOn("Body.js");
 
-SplitTime.Body.PathAgent = function(body) {
+SplitTime.Agent.Path = function(body) {
     this.body = body;
 };
 
-SplitTime.Body.PathAgent.prototype.path = [];
-SplitTime.Body.PathAgent.prototype.addPointToPath = function(x, y) {
-    if(this.path.x.length === 0) {
+SplitTime.Agent.Path.prototype.path = [];
+SplitTime.Agent.Path.prototype.addPointToPath = function(x, y) {
+    if(this.path.length === 0) {
         this.path = [];
     }
     this.path.unshift({x: x, y: y});
 };
 
 //(x1, y1, x2, y2, ...)
-SplitTime.Body.PathAgent.prototype.walkPath = function() {
+SplitTime.Agent.Path.prototype.walkPath = function() {
     if(SplitTime.currentLevel == this.level) {
         var spd = this.spd;
         for(var i = 0; i < arguments.length; i += 2)
@@ -26,7 +26,14 @@ SplitTime.Body.PathAgent.prototype.walkPath = function() {
     }
 };
 
-SplitTime.Body.PathAgent.prototype.update = function() {
+SplitTime.Agent.Path.prototype.fastForward = function() {
+    if(this.path.length > 0) {
+        this.body.setX(this.path[this.path.length - 1].x);
+        this.body.setY(this.path[this.path.length - 1].y);
+    }
+};
+
+SplitTime.Agent.Path.prototype.notifyFrameUpdate = function() {
     if(this.path.length > 0) //Handle path motion
     {
         this.body.requestStance("walk");
@@ -42,7 +49,7 @@ SplitTime.Body.PathAgent.prototype.update = function() {
 };
 
 //Move a person along their set path at given speed.
-SplitTime.Body.PathAgent.prototype.pathMotion = function(spd) {
+SplitTime.Agent.Path.prototype.pathMotion = function(spd) {
     var dist = Math.sqrt(Math.pow(this.body.x - this.path[0].x, 2) + Math.pow(this.body.y - this.path[0].y, 2));
     if(dist === 0) {
         this.path.shift();
