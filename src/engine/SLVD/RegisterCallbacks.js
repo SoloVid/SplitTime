@@ -2,6 +2,8 @@ dependsOn("SLVD.js");
 
 SLVD.RegisterCallbacks = function() {
     this.callbacks = [];
+    this.isRunningCallbacks = false;
+    this.callbacksWaitingRegistration = [];
 };
 
 SLVD.RegisterCallbacks.prototype.clearCallbacks = function() {
@@ -20,12 +22,15 @@ SLVD.RegisterCallbacks.prototype.waitForOnce = function() {
 };
 
 SLVD.RegisterCallbacks.prototype.registerCallback = function(callback) {
-    console.log("adding callback");
-    this.callbacks.unshift(callback);
+    if(this.isRunningCallbacks) {
+        this.callbacksWaitingRegistration.push(callback);
+    } else {
+        this.callbacks.unshift(callback);
+    }
 };
 
 SLVD.RegisterCallbacks.prototype.runCallbacks = function(data) {
-    console.log("running " + this.callbacks.length + " callbacks");
+    this.isRunningCallbacks = true;
     for(var i = this.callbacks.length - 1; i >= 0; i--) {
         var done = true;
         try {
@@ -34,8 +39,12 @@ SLVD.RegisterCallbacks.prototype.runCallbacks = function(data) {
             console.error(ex);
         }
         if(done) {
-            console.log("removing callback");
             this.callbacks.splice(i, 1);
         }
+    }
+    this.isRunningCallbacks = false;
+
+    while(this.callbacksWaitingRegistration.length > 0) {
+        this.registerCallback(this.callbacksWaitingRegistration.shift());
     }
 };
