@@ -4,11 +4,15 @@ SplitTime.setupMainPromise = function() {
 };
 
 SplitTime.delay = function(seconds) {
-	SplitTime.process = "delay";
-	SplitTime.countdown = Math.round(seconds*SplitTime.FPS);
-
-	SplitTime.mainPromise = new SLVD.Promise();
-	return SplitTime.mainPromise;
+	var formerProcess = SplitTime.process;
+	SplitTime.process = SplitTime.main.State.OTHER;
+	return SLVD.Promise.wait(seconds * 1000).then(function() {
+		SplitTime.process = formerProcess;
+	});
+	// SplitTime.countdown = Math.round(seconds*SplitTime.FPS);
+    //
+	// SplitTime.mainPromise = new SLVD.Promise();
+	// return SplitTime.mainPromise;
 };
 
 SplitTime.waitForEnterOrSpace = function() {

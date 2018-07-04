@@ -78,10 +78,11 @@ SplitTime.pixCoordToIndex = function(x,y,dat) {
 
 //Like SplitTime.enterLevelById() with coordinates
 SplitTime.send = function(board, x, y, z) {
-	SplitTime.player[SplitTime.currentPlayer].setX(x);
-	SplitTime.player[SplitTime.currentPlayer].setY(y);
-	SplitTime.player[SplitTime.currentPlayer].z = z;
-	SplitTime.enterLevelById(board);
+	var player = SplitTime.Player.getActiveBody();
+	player.setX(x);
+	player.setY(y);
+	player.z = z;
+	SplitTime.Level.setCurrent(board);
 };
 
 //Functions to convert between actual pixel locations and tile-based locations. All begin with 0, 0 as top left. Rounding is employed to ensure all return values are integers

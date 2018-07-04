@@ -70,7 +70,7 @@ SplitTime.WeatherRenderer = {
         }
     };
 
-    SplitTime.BoardRenderer.createCanvases = function(width, height) {
+    SplitTime.WeatherRenderer.createCanvases = function(width, height) {
         SCREEN_WIDTH = width;
         SCREEN_HEIGHT = height;
 

@@ -20,10 +20,12 @@ SLVD.RegisterCallbacks.prototype.waitForOnce = function() {
 };
 
 SLVD.RegisterCallbacks.prototype.registerCallback = function(callback) {
+    console.log("adding callback");
     this.callbacks.unshift(callback);
 };
 
 SLVD.RegisterCallbacks.prototype.runCallbacks = function(data) {
+    console.log("running " + this.callbacks.length + " callbacks");
     for(var i = this.callbacks.length - 1; i >= 0; i--) {
         var done = true;
         try {
@@ -32,6 +34,7 @@ SLVD.RegisterCallbacks.prototype.runCallbacks = function(data) {
             console.error(ex);
         }
         if(done) {
+            console.log("removing callback");
             this.callbacks.splice(i, 1);
         }
     }

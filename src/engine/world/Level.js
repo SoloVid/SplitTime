@@ -30,15 +30,15 @@ SplitTime.Level.prototype.runFunction = function(functionId) {
 
 SplitTime.Level.prototype.getAgents = function() {
     // TODO: implement
-    return [];
+    return this.agents;
 };
 
 SplitTime.Level.prototype.getBodies = function() {
     // TODO: implement
-    return [];
+    return this.bodies;
 };
 
-//Sort all board characters into the array SplitTime.onBoard.bodies in order of y location (in order to properly render sprite overlap).
+//Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
     this.agents.length = 0;
     this.bodies.length = 0;
@@ -85,24 +85,24 @@ SplitTime.Level.prototype.refetchBodies = function() {
     }
 
     // TODO: better implementation of players
-    for(index = 0; index < SplitTime.player.length; index++) {
-        if(index == SplitTime.currentPlayer || this.type == "TRPG") {
-            this.agents.push(SplitTime.player[index]);
-            this.insertBody(SplitTime.player[index]);
-        }
-    }
+    // for(index = 0; index < SplitTime.player.length; index++) {
+    //     if(index == SplitTime.currentPlayer || this.type == "TRPG") {
+    //         this.agents.push(SplitTime.player[index]);
+    //         this.insertBody(SplitTime.player[index]);
+    //     }
+    // }
 };
 
-//Sort the array SplitTime.onBoard.bodies in order of y location (in order to properly render sprite overlap).
+//Sort the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.sortBodies = function() {
-    if(SplitTime.onBoard.bodies.length === 0) SplitTime.onBoard.refetchBodies();
+    if(this.bodies.length === 0) this.refetchBodies();
     else {
-        for(var index = 1; index < SplitTime.onBoard.bodies.length; index++) {
+        for(var index = 1; index < this.bodies.length; index++) {
             var second = index;
-            while(second > 0 && SplitTime.onBoard.bodies[second].y < SplitTime.onBoard.bodies[second - 1].y) {
-                var tempC = SplitTime.onBoard.bodies[second];
-                SplitTime.onBoard.bodies[second] = SplitTime.onBoard.bodies[second - 1];
-                SplitTime.onBoard.bodies[second - 1] = tempC;
+            while(second > 0 && this.bodies[second].y < this.bodies[second - 1].y) {
+                var tempC = this.bodies[second];
+                this.bodies[second] = this.bodies[second - 1];
+                this.bodies[second - 1] = tempC;
                 second--;
             }
         }
@@ -111,17 +111,17 @@ SplitTime.Level.prototype.sortBodies = function() {
 
 SplitTime.Level.prototype.insertBody = function(element) {
     var index = 0;
-    while(index < SplitTime.onBoard.bodies.length && element.y > SplitTime.onBoard.bodies[index].y) {
+    while(index < this.bodies.length && element.y > this.bodies[index].y) {
         index++;
     }
-    SplitTime.onBoard.bodies.splice(index, 0, element);
+    this.bodies.splice(index, 0, element);
 };
 
 SplitTime.Level.prototype.removeBody = function(element) {
-    for(var index = 0; index < SplitTime.onBoard.bodies.length; index++) {
-        if(element == SplitTime.onBoard.bodies[index]) {
-            SplitTime.onBoard.bodies.splice(index, 1);
-            index = SplitTime.onBoard.bodies.length;
+    for(var index = 0; index < this.bodies.length; index++) {
+        if(element == this.bodies[index]) {
+            this.bodies.splice(index, 1);
+            index = this.bodies.length;
         }
     }
 };
@@ -186,8 +186,8 @@ SplitTime.Level.prototype.removeBody = function(element) {
             //Initialize functional map
             for(var iLayer = 0; iLayer < currentLevel.filedata.getElementsByTagName("layer").length; iLayer++)
             {
-                holderCanvas.width = currentLevel.width/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
-                holderCanvas.height = currentLevel.height/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
+                holderCanvas.width = currentLevel.width/(currentLevel.type == "overworld" ? 32 : 1);
+                holderCanvas.height = currentLevel.height/(currentLevel.type == "overworld" ? 32 : 1);
                 var holderCtx = holderCanvas.getContext("2d");
                 holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
 

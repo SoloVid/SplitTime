@@ -108,6 +108,10 @@ SplitTime.Body.prototype.put = function(levelId, x, y, layer) {
 	this.setZ(layer);
 };
 
+SplitTime.Body.prototype.getLevel = function() {
+	return SplitTime.Level.get(this.lvl);
+};
+
 SplitTime.Body.prototype.keyFunc = {};
 //Function run on ENTER or SPACE
 SplitTime.Body.prototype.interact = function() {};

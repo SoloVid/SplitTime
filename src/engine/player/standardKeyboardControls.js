@@ -8,6 +8,41 @@ dependsOn("Controls.js");
     Button.GUI_CONFIRMATION = Button.createKeyboardBinding(Keyboard.SPACE, Keyboard.ENTER);
     Button.PRIMARY_INTERACT = Button.createKeyboardBinding(Keyboard.SPACE, Keyboard.ENTER);
 
+    var DIRECTIONAL_KEYS = [
+        Keyboard.A,
+        Keyboard.S,
+        Keyboard.D,
+        Keyboard.W,
+        Keyboard.DOWN,
+        Keyboard.UP,
+        Keyboard.LEFT,
+        Keyboard.RIGHT
+    ];
+    var MIN_TIME_BETWEEN_STROKES = 30;
+    SplitTime.Controls.JoyStick.onTilt = function(callback) {
+        var lastTrigger = new Date();
+        var isDone = false;
+
+        var innerCallback = function() {
+            if(isDone) {
+                return true;
+            }
+
+            var newTime = new Date();
+            if(newTime - lastTrigger < MIN_TIME_BETWEEN_STROKES) {
+                return false;
+            }
+            lastTrigger = newTime;
+
+            isDone = callback();
+            return isDone;
+        };
+
+        for(var i = 0; i < DIRECTIONAL_KEYS.length; i++) {
+            Keyboard.onDown(DIRECTIONAL_KEYS[i], innerCallback);
+        }
+    };
+
     // TODO: replace with implementation utilizing x and y calculations
     SplitTime.Controls.JoyStick.getDirection = function() {
         var dKeys = 0;

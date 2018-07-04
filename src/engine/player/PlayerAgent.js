@@ -1,4 +1,4 @@
-dependsOn("Body.js");
+dependsOn("/body/Body.js");
 
 SplitTime.Agent.Player = function(body) {
     this.body = body;

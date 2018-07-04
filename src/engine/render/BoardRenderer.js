@@ -69,7 +69,8 @@ SplitTime.BoardRenderer = {};
 
         //Rendering sequence
         for(var layer = 0; layer < currentLevel.layerImg.length; layer++) {
-            bufferCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            // bufferCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            snapshotCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
             // if(SplitTime.process == "TRPG")
             // {
@@ -139,7 +140,7 @@ SplitTime.BoardRenderer = {};
 
         // TODO: potentially give the body a cleared personal canvas if requested
 
-        ctx.translate(this.x - screen.x, this.y - screen.y);
+        ctx.translate(canvasRequirements.x - screen.x, canvasRequirements.y - screen.y);
         body.see(ctx);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
 

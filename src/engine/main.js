@@ -2,10 +2,6 @@ SplitTime.main = function() {
 	var clock = SplitTime.FrameStabilizer.getSimpleClock(1000);
 	var startTime = new Date().getTime();
 
-	// Black out screen
-    SplitTime.see.fillStyle = "#000000";
-    SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-
     try {
         var a = new Date(); //for speed checking
         switch(SplitTime.process) {

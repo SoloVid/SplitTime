@@ -105,13 +105,15 @@ SLVD.Promise.whenAny = function(arr) {
     var prom = new SLVD.Promise();
     var isResolved = false;
 
+    function callback(data) {
+        if(!isResolved) {
+            isResolved = true;
+            prom.resolve(data);
+        }
+    }
+
     for(var iPromise = 0; iPromise < arguments.length; iPromise++) {
-        arguments[iPromise].then(function(data) {
-            if(!isResolved) {
-                isResolved = true;
-                prom.resolve(data);
-            }
-        });
+        arguments[iPromise].then(callback);
     }
 
     return prom;
@@ -125,4 +127,12 @@ SLVD.Promise.Collection.prototype.add = function(prom) {
 };
 SLVD.Promise.Collection.prototype.then = function(callBack) {
 	return SLVD.Promise.when(this.promises).then(callBack);
+};
+
+SLVD.Promise.wait = function(ms) {
+	var promise = new SLVD.Promise();
+	setTimeout(function() {
+		promise.resolve();
+	}, ms);
+	return promise;
 };

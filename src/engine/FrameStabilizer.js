@@ -22,7 +22,7 @@ SplitTime.FrameStabilizer = function(msPerFrame, maxCounter) {
     };
 
     SplitTime.FrameStabilizer.haveSoManyMsPassed = function(milliseconds) {
-        return SplitTime.FrameStabilizer.get(milliseconds).isClockFrame();
+        return SplitTime.FrameStabilizer.getSimpleClock(milliseconds).isClockFrame();
     };
 
     SplitTime.FrameStabilizer.notifyFrameUpdate = function() {
@@ -31,16 +31,22 @@ SplitTime.FrameStabilizer = function(msPerFrame, maxCounter) {
         timeElapsedSinceLastFrame = recentFrameTime - previousFrameTime;
     };
 
-    SplitTime.FrameStabilizer.prototype.getCounter = function() {
+    SplitTime.FrameStabilizer.prototype.checkUpdate = function() {
         if(this._counterSetAt < recentFrameTime) {
-            this._counter += timeElapsedSinceLastFrame / this.msPerFrame;
-            this._isClockFrame = this.counter >= this.maxCounter;
+            this._counter += (recentFrameTime - this._counterSetAt) / this.msPerFrame;
+            this._isClockFrame = this._counter >= this.maxCounter;
             this._counter %= this.maxCounter;
+            this._counterSetAt = recentFrameTime;
         }
+    };
+
+    SplitTime.FrameStabilizer.prototype.getCounter = function() {
+        this.checkUpdate();
         return Math.round(this._counter);
     };
 
     SplitTime.FrameStabilizer.prototype.isClockFrame = function() {
+        this.checkUpdate();
         return this._isClockFrame;
-    }
+    };
 } ());

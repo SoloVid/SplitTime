@@ -84,5 +84,5 @@ SplitTime.Keyboard.I = 73; // 'i'
         keyDown[keyCode] = false;
 
         getUpCallbacks(keyCode).runCallbacks();
-    }
+    };
 } ());

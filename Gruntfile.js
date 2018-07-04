@@ -200,4 +200,14 @@ module.exports = function(grunt) {
             }
         }
     });
+
+    grunt.registerTask('pbuild', 'Handle Grunt tasks for a project (plus engine) without watch', function(projectName) {
+        grunt.task.run(['build']);
+        grunt.config("project", projectName);
+        grunt.config("projectPath", "projects/" + projectName + "/");
+        grunt.task.run(['jshint:project', 'oconcat:project', 'injector']);
+        if(grunt.option('min')) {
+            grunt.task.run('uglify:project');
+        }
+    });
 };

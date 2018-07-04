@@ -12,16 +12,19 @@ SplitTime.HUD = {};
     var renderCallbacks = [];
 
     SplitTime.HUD.pushRenderer = function(callback) {
+        console.log("Adding renderer");
         renderCallbacks.push(callback);
     };
 
     SplitTime.HUD.unshiftRenderer = function(callback) {
+        console.log("Adding renderer (back)");
         renderCallbacks.unshift(callback);
     };
 
     SplitTime.HUD.removeRenderer = function(callback) {
         for(var i = renderCallbacks.length - 1; i >= 0 ; i--) {
             if(renderCallbacks[i] === callback) {
+                console.log("Removing renderer");
                 renderCallbacks.splice(i, 1);
             }
         }

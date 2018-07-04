@@ -15,7 +15,6 @@ SplitTime.showImage = function(file, duration, waitForEnterSpace) {
 
 SplitTime.Menu = function() {
 	this.point = [];
-	this.isRunning = false;
 };
 
 SplitTime.Menu.prototype.cursor = undefined;
@@ -27,13 +26,24 @@ SplitTime.Menu.prototype.addPoint = function(x, y) {
 
 SplitTime.Menu.prototype.runMenu = function() {
 	this.currentPoint = 0;
-	this.isRunning = true;
-	var promise = new SLVD.Promise();
+	var isRunning = true;
 
+	SplitTime.HUD.pushRenderer(this);
+
+	var promise = new SLVD.Promise();
 	var me = this;
 	SplitTime.Controls.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
-		me.isRunning = false;
+		console.log("confirmation button hit");
+		isRunning = false;
+		SplitTime.HUD.removeRenderer(me);
 		promise.resolve(me.currentPoint);
+	});
+
+	SplitTime.Controls.JoyStick.onTilt(function() {
+		if(!isRunning) {
+			return true;
+		}
+		me.handleMenu();
 	});
 
 	return promise;
@@ -44,11 +54,11 @@ SplitTime.Menu.prototype.resetPoints = function() {
 };
 
 // Customizable function; run every frame
-SplitTime.Menu.prototype.render = function() {};
+SplitTime.Menu.prototype.update = function() {};
 
 // TODO: potentially split up into logic and rendering
 SplitTime.Menu.prototype.render = function() {
-	this.handleMenu();
+	// this.handleMenu();
 	this.update();
 
     //Draw SplitTime.Menu background

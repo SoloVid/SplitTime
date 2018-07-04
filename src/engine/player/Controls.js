@@ -3,7 +3,8 @@ SplitTime.Controls = {};
 SplitTime.Controls.JoyStick = {
     getDirection: function() {
         return null;
-    }
+    },
+    onTilt: function(callback) {}
 };
 
 (function() {
@@ -14,7 +15,7 @@ SplitTime.Controls.JoyStick = {
 
     SplitTime.Controls.Button.createKeyboardBinding = function(/* keyCodes...*/) {
         var keyCodes = [];
-        for(var i = 1; i < arguments.length; i++) {
+        for(var i = 0; i < arguments.length; i++) {
             keyCodes.push(arguments[i]);
         }
         return new ControllerButton(function(callback) {
