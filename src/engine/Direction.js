@@ -51,3 +51,11 @@ SplitTime.Direction.fromTo = function(fromX, fromY, toX, toY) {
 
 	return (baseDir + 4) % 4;
 };
+
+SplitTime.Direction.simplifyToCardinal = function(realDir) {
+	if(realDir === null) {
+		return null;
+	}
+
+	return SLVD.mod(Math.round(realDir), 4);
+};

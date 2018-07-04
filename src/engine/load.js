@@ -178,12 +178,8 @@ SplitTime.launch.createCanvases = function(width, height, parentId) {
 	SplitTime.see.fillText("If this message persists for more than a few seconds,", 10, 30);
 	SplitTime.see.fillText("this game will not run on your browser.", 10, 60);
 
-	SplitTime.buffer = document.createElement("canvas");
-	SplitTime.buffer.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.buffer.setAttribute("height", SplitTime.SCREENY);
-	SplitTime.bufferCtx = SplitTime.buffer.getContext("2d");
-
-	SplitTime.MenuProcessor.createCanvases(width, height);
+    SplitTime.HUD.createCanvases(width, height);
+    SplitTime.MenuProcessor.createCanvases(width, height);
 	SplitTime.Level.createCanvases(width, height);
     SplitTime.BoardRenderer.createCanvases(width, height);
     SplitTime.WeatherRenderer.createCanvases(width, height);

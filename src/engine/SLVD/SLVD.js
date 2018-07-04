@@ -73,6 +73,10 @@ SLVD.randomSeed = function() {
 	}
 };
 
+SLVD.mod = function(n, base) {
+	return ((n % base) + base) % base;
+};
+
 SLVD.strNthIndexOf = function(str, n, pattern) {
 	var i = -1;
 

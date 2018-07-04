@@ -21,6 +21,10 @@ SplitTime.FrameStabilizer = function(msPerFrame, maxCounter) {
         return cache[msPerFrame];
     };
 
+    SplitTime.FrameStabilizer.haveSoManyMsPassed = function(milliseconds) {
+        return SplitTime.FrameStabilizer.get(milliseconds).isClockFrame();
+    };
+
     SplitTime.FrameStabilizer.notifyFrameUpdate = function() {
         previousFrameTime = recentFrameTime;
         recentFrameTime = new Date();

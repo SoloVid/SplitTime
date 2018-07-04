@@ -39,10 +39,8 @@ SplitTime.canvasBlackout = function(canv) {
 
 //Deal damage from, to
 SplitTime.damage = function(attacker, victim) {
-	if(victim.onHit === undefined)
-	{
-		if(attacker.hp)
-		{
+	if(victim.onHit === undefined) {
+		if(attacker.hp) {
 			// var atk = (attacker.hp/attacker.maxHp)*(attacker.strg - attacker.weight) + attacker.atk;
 			// var def = (attacker.hp/attacker.maxHp)*(attacker.strg - attacker.weight) + attacker.def;
 			var atk = (attacker.hp/attacker.strg)*(attacker.strg/* - attacker.weight*/) + 20;//attacker.atk;
@@ -50,13 +48,6 @@ SplitTime.damage = function(attacker, victim) {
 			victim.hp -= atk - ((atk/(Math.PI/2))*Math.atan(Math.pow(def,0.7)/(atk/10)));//(attacker.hp/100)*(attacker.strg/victim.strg)*40;
 		}
 	}
-	else// if(victim.hp != null)
-	{
-		resumeFunc = victim.onHit;
-		resumeCue = victim.onHit(0, attacker);
-	}
-	//Make victim aggressive if excitable
-	if(victim.dmnr == 1) victim.dmnr = 2;
 };
 
 SplitTime.distanceEasy = function(x1, y1, x2, y2) {
@@ -65,10 +56,6 @@ SplitTime.distanceEasy = function(x1, y1, x2, y2) {
 
 SplitTime.distanceTrue = function(x1, y1, x2, y2) {
 	return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-};
-
-SplitTime.getNPCByName = function(name) {
-	return SplitTime.NPC[name];
 };
 
 SplitTime.getPixel = function(x, y, data) {

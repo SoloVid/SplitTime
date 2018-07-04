@@ -1,14 +1,12 @@
 var t, T; //Used in various places; declared here to avoid multiple declarations
 
-var SplitTime = { counter: 0 };
+var SplitTime = {};
 
 //implied SplitTime.SAVE object from load.js
 SplitTime.SAVE = {};
 
-//var SplitTime.seeB, SplitTime.see, SplitTime.buffer, SplitTime.bufferCtx, SplitTime.snapShot, SplitTime.snapShotCtx;
-SplitTime.image = [];
+//var SplitTime.seeB, SplitTime.see;
 SplitTime.audio = [];
-SplitTime.level = [];
 
 SplitTime.location = {};
 SplitTime.location.images = "images/";
@@ -17,7 +15,6 @@ SplitTime.location.levels = "levels/";
 
 SplitTime.player = [];
 SplitTime.Actor = [];
-SplitTime.NPC = []; //Universal, absolute list of SplitTime.NPC objects (on all boards)
 SplitTime.Teams = {};
 
 SplitTime.process = "hold"; //Input of master setInterval switch-case
@@ -25,19 +22,14 @@ SplitTime.process = "hold"; //Input of master setInterval switch-case
 SplitTime.currentAudio = undefined;
 SplitTime.volume = 1;
 
-SplitTime.frameClock = 0; //= 1 every 8 ticks
 SplitTime.SAVE.timeSeconds = 0; //Second hand displayed on clock out of 2560
 SplitTime.SAVE.timeMinutes = 0;
 SplitTime.SAVE.timeHours = 0;
 SplitTime.SAVE.timeDays = 0;
 
-SplitTime.keyDown = {}; //1 if down, null if up
-
+// TODO: remove
 SplitTime.currentPlayer = 0;
 SplitTime.cTeam = undefined; //For TRPG, either SplitTime.player or boardNPC
-
-SplitTime.loading = 0;
-SplitTime.loadCheck = [];
 
 SplitTime.SCREENX = 640;
 SplitTime.SCREENY = 480;

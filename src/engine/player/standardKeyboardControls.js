@@ -17,22 +17,22 @@ dependsOn("Controls.js");
             //How many directional keys down
             dKeys++;
             //Average in the new direction to the current direction
-            dir = ((dir*(dKeys - 1)) + 2)/dKeys;
+            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.W)/dKeys;
         }
         if(Keyboard.isKeyDown(Keyboard.W) || Keyboard.isKeyDown(Keyboard.UP)) //North
         {
             dKeys++;
-            dir = ((dir*(dKeys - 1)) + 1)/dKeys;
+            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.N)/dKeys;
         }
         if(Keyboard.isKeyDown(Keyboard.D) || Keyboard.isKeyDown(Keyboard.RIGHT)) //East
         {
             dKeys++;
-            dir = ((dir*(dKeys - 1)) + 0)/dKeys;
+            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.E)/dKeys;
         }
         if(Keyboard.isKeyDown(Keyboard.S) || Keyboard.isKeyDown(Keyboard.DOWN)) //South
         {
             dKeys++;
-            dir = ((dir*(dKeys - 1)) + 3)/dKeys;
+            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.S)/dKeys;
         }
         if((Keyboard.isKeyDown(Keyboard.S) || Keyboard.isKeyDown(Keyboard.DOWN)) && (Keyboard.isKeyDown(Keyboard.D) || Keyboard.isKeyDown(Keyboard.RIGHT))) //Southeast
         {

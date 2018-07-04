@@ -2,7 +2,11 @@ SplitTime.main = function() {
 	var clock = SplitTime.FrameStabilizer.getSimpleClock(1000);
 	var startTime = new Date().getTime();
 
-	try {
+	// Black out screen
+    SplitTime.see.fillStyle = "#000000";
+    SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+
+    try {
         var a = new Date(); //for speed checking
         switch(SplitTime.process) {
             case SplitTime.main.State.LOADING: {
@@ -68,6 +72,12 @@ SplitTime.main = function() {
 		console.error(ex);
 	}
 
+	try {
+	    SplitTime.HUD.render(SplitTime.see);
+    } catch(ex) {
+	    console.error(ex);
+    }
+
 	var endTime = new Date().getTime();
 	var msElapsed = endTime - startTime;
 
@@ -91,5 +101,6 @@ SplitTime.main = function() {
 
 SplitTime.main.State = {
     LOADING: "loading",
-    ACTION: "action"
+    ACTION: "action",
+    OTHER: "other"
 };
