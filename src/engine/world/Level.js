@@ -130,6 +130,14 @@ SplitTime.Level.prototype.removeBody = function(element) {
     var levelMap = {};
     var currentLevel = null;
 
+    var holderCanvas;
+
+    SplitTime.Level.createCanvases = function(screenWidth, screenHeight) {
+        holderCanvas = document.createElement("canvas");
+        holderCanvas.setAttribute("width", SplitTime.SCREENX);
+        holderCanvas.setAttribute("height", SplitTime.SCREENY);
+    };
+
     SplitTime.Level.get = function(levelId) {
         if(!levelMap[levelId]) {
             levelMap[levelId] = new SplitTime.Level(levelId);
@@ -178,11 +186,10 @@ SplitTime.Level.prototype.removeBody = function(element) {
             //Initialize functional map
             for(var iLayer = 0; iLayer < currentLevel.filedata.getElementsByTagName("layer").length; iLayer++)
             {
-                var holder = SplitTime.holderCanvas;
-                holder.width = currentLevel.width/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
-                holder.height = currentLevel.height/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
-                var holderCtx = holder.getContext("2d");
-                holderCtx.clearRect(0, 0, holder.width, holder.height);
+                holderCanvas.width = currentLevel.width/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
+                holderCanvas.height = currentLevel.height/(SplitTime.currentLevel.type == "overworld" ? 32 : 1);
+                var holderCtx = holderCanvas.getContext("2d");
+                holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
 
                 //Draw traces
                 var layerTraces = currentLevel.filedata.getElementsByTagName("layer")[iLayer].getElementsByTagName("trace");

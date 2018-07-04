@@ -310,8 +310,8 @@ SplitTime.personSays = function(persOb, message, overrideName) {
 
 	var tSpkr = overrideName || persOb.name;
 
-	var px = persOb.x - SplitTime.wX;
-	var py = persOb.y - SplitTime.wY - persOb.yres + persOb.baseY - 5;
+    var px = SplitTime.BoardRenderer.getRelativeToScreen(persOb);
+    var py = SplitTime.BoardRenderer.getRelativeToScreen(persOb) - persOb.yres + persOb.baseY - 5;
 	//if(persOb.y - SplitTime.wY < 220) py = persOb.y - SplitTime.wY - persOb.yres + 40;
 
 	SplitTime.speechBubble(message, tSpkr, px, py);

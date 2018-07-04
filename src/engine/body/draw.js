@@ -16,6 +16,22 @@ SplitTime.Body.prototype.stances = {
     }
 };
 
+SplitTime.Body.prototype.getCanvasRequirements = function(layer) {
+    // TODO: allow multiple layers and decimals
+    if(layer != this.z) {
+        return null;
+    }
+    return {
+        // board location on this layer for center of canvas
+        x: this.x,
+        y: this.y,
+        // TODO: smarter calculations
+        width: this.xres * 4,
+        height: this.yres * 4,
+        isCleared: false
+    };
+};
+
 SplitTime.Body.prototype.defaultStance = function() {
 	this.requestStance("default", true);
 };
@@ -24,24 +40,11 @@ SplitTime.Body.prototype.say = function(message, overrideName) {
 	SplitTime.personSays(this, message, overrideName);
 };
 SplitTime.Body.prototype.see = function(ctx) {
-	if(!ctx)
-	{
+	if(!ctx) {
 		ctx = SplitTime.see;
 	}
 
 	if(!this.canSee) return;
-
-	var canvSeeX = this.x - SplitTime.wX - SplitTime.SCREENX/2 + this.offX - SplitTime.player[SplitTime.currentPlayer].offX;
-	var canvSeeY = this.y - SplitTime.wY - SplitTime.SCREENY/2 + this.offY - SplitTime.player[SplitTime.currentPlayer].offY;
-
-	if(canvSeeX < -SplitTime.SCREENX || canvSeeY < -SplitTime.SCREENY || canvSeeX > SplitTime.SCREENX || canvSeeY > SplitTime.SCREENY)
-	{
-		return;
-	}
-
-	// ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-	ctx.translate(this.x - SplitTime.wX + this.offX - SplitTime.player[SplitTime.currentPlayer].offX, this.y - SplitTime.wY + this.offY - SplitTime.player[SplitTime.currentPlayer].offY);
 
 	ctx.rotate(this.rotate);
 

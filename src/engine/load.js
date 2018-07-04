@@ -183,12 +183,8 @@ SplitTime.launch.createCanvases = function(width, height, parentId) {
 	SplitTime.buffer.setAttribute("height", SplitTime.SCREENY);
 	SplitTime.bufferCtx = SplitTime.buffer.getContext("2d");
 
-	SplitTime.holderCanvas = document.createElement("canvas");
-	SplitTime.holderCanvas.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.holderCanvas.setAttribute("height", SplitTime.SCREENY);
-
-	SplitTime.snapShot = document.createElement("canvas");
-	SplitTime.snapShot.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.snapShot.setAttribute("height", SplitTime.SCREENY);
-	SplitTime.snapShotCtx = SplitTime.snapShot.getContext("2d");
+	SplitTime.MenuProcessor.createCanvases(width, height);
+	SplitTime.Level.createCanvases(width, height);
+    SplitTime.BoardRenderer.createCanvases(width, height);
+    SplitTime.WeatherRenderer.createCanvases(width, height);
 };

@@ -5,7 +5,7 @@ SplitTime.main = function() {
 	try {
         var a = new Date(); //for speed checking
         switch(SplitTime.process) {
-            case "loading": {
+            case SplitTime.main.State.LOADING: {
                 SplitTime.see.fillStyle = "#000000";
                 SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
                 SplitTime.see.font = "30px Arial";
@@ -13,7 +13,7 @@ SplitTime.main = function() {
                 SplitTime.see.fillText("Loading...", 250, 230);
                 break;
             }
-            case "action": {
+            case SplitTime.main.State.ACTION: {
                 //Advance one second per second (given 20ms SplitTime.main interval)
                 if(clock.isClockFrame()) SplitTime.Time.advance(1); //in time.js
                 var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
@@ -60,27 +60,6 @@ SplitTime.main = function() {
             //     SplitTime.renderBoardState(true);
             //     break;
             // }
-            case "menu": {
-                //alert("start SplitTime.menu");
-                SplitTime.currentMenu.handleMenu(); //in menuFunctions.js
-                //alert("handled SplitTime.menu");
-                SplitTime.currentMenu.update(); //in SplitTime.menu object declaration
-                //alert("ran update check");
-                //Draw SplitTime.menu background
-                SplitTime.see.drawImage(SplitTime.currentMenu.background, 0, 0);
-                //Draw cursor
-                SplitTime.see.drawImage(SplitTime.currentMenu.cursor, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].x, SplitTime.currentMenu.point[SplitTime.currentMenu.currentPoint].y);
-                if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space") //Select
-                {
-                    SplitTime.currentMenu.chosenPoint = SplitTime.currentMenu.currentPoint;
-                    if(SplitTime.currentLevel) {
-                        SplitTime.process = SplitTime.currentLevel.type;
-                    }
-                    SplitTime.mainPromise.resolve(SplitTime.currentMenu.chosenPoint);
-                }
-                delete SplitTime.keyFirstDown;
-                break;
-            }
             default: {}
         }
 
@@ -108,4 +87,9 @@ SplitTime.main = function() {
 		SplitTime.see.font="18px Verdana";
 		SplitTime.see.fillText("FPS: " + displayFPS, SplitTime.SCREENX/2, SplitTime.SCREENY - 20);
 	}
+};
+
+SplitTime.main.State = {
+    LOADING: "loading",
+    ACTION: "action"
 };

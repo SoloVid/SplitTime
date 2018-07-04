@@ -39,12 +39,6 @@ SplitTime.cTeam = undefined; //For TRPG, either SplitTime.player or boardNPC
 SplitTime.loading = 0;
 SplitTime.loadCheck = [];
 
-SplitTime.weather = { rain: false, clouds: false, dark: 0};
-
-//Somehow related to relative positioning of board to player
-SplitTime.wX = 0;
-SplitTime.wY = 0;
-
 SplitTime.SCREENX = 640;
 SplitTime.SCREENY = 480;
 
