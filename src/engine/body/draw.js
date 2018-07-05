@@ -74,7 +74,7 @@ SplitTime.Body.prototype.see = function(ctx) {
 };
 
 SplitTime.Body.prototype.draw = function(ctx) {
-    this.finalizeStance();
+    // Potentially build in a blur between frames
 
     var tImg = this.getImage();
     var x = -Math.round(this.xres/2) - this.baseOffX;
@@ -85,11 +85,9 @@ SplitTime.Body.prototype.draw = function(ctx) {
 SplitTime.Body.prototype.finalizeFrame = function() {
     if(this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
-    }
-    else {
+    } else {
         //Only update on frame tick
-        if(SplitTime.frameClock == 1)
-        {
+        if(this.getRegion().hasSoMuchTimePassed(200)) {
             this.frame++;
             if(this.getImage().height <= this.frame*this.yres)
             {
@@ -102,12 +100,12 @@ SplitTime.Body.prototype.finalizeFrame = function() {
 SplitTime.Body.prototype.finalizeStance = function() {
 	var column = 0;
 	var dir = SplitTime.Direction.toString(this.dir);
+	var simpleDir = SplitTime.Direction.simplifyToCardinal(dir);
 
     //Allow for non-complicated spritesheets with one column
     if(!this.stances) {
         return;
     }
-
 
     if(!this.requestedStance || !(this.requestedStance in this.stances)) {
         this.requestedStance = "default";
@@ -115,19 +113,17 @@ SplitTime.Body.prototype.finalizeStance = function() {
     this.finalizeFrame();
     this.stance = this.requestedStance;
 
-    if(!(this.stances[this.stance] instanceof Object)) {
-        column = this.stances[this.stance];
-    }
-    else {
-        //If shorten intermediate directions to cardinal if they are not specified
-        if(!(dir in this.stances[this.stance])) {
-            dir = SplitTime.Direction.toString(Math.round(this.dir) % 4);
-        }
+    var dirMap = this.stances[this.stance];
 
-        if(dir in this.stances[this.stance]) {
-            column = this.stances[this.stance][dir];
-        }
-        else {
+    if(!(dirMap instanceof Object)) {
+        column = this.stances[this.stance];
+    } else {
+        //If shorten intermediate directions to cardinal if they are not specified
+        if(dir in dirMap) {
+            column = dirMap[dir];
+        } else if(simpleDir in dirMap) {
+            column = dirMap[simpleDir];
+        } else {
             console.warn("Stance " + this.stance + " missing direction " + dir);
             column = 0;
         }
@@ -143,6 +139,13 @@ SplitTime.Body.prototype.requestStance = function(stance, forceReset) {
 };
 
 SplitTime.Body.prototype.resetStance = function() {
-    this.requestedStance = "default";
-    this.requestedFrameReset = false;
+    this.requestStance("default", false);
+};
+
+SplitTime.Body.prototype.prepareForRender = function() {
+    this.finalizeStance();
+    // TODO: do things like lights
+};
+SplitTime.Body.prototype.cleanupAfterRender = function() {
+    this.resetStance();
 };

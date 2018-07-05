@@ -1,3 +1,5 @@
+dependsOn("/time/FrameStabilizer.js");
+
 SplitTime.WeatherRenderer = {
     isRaining: false,
     lightningFrequency: 0, // number of lightning strikes per minute

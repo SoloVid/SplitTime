@@ -55,6 +55,22 @@ SplitTime.BoardRenderer = {};
         return screen;
     };
 
+	SplitTime.BoardRenderer.countLayers = function() {
+        var currentLevel = SplitTime.Level.getCurrent();
+        if(!currentLevel) {
+            return 0;
+        }
+        return currentLevel.layerImg.length;
+    };
+
+	SplitTime.BoardRenderer.countBodies = function() {
+        var currentLevel = SplitTime.Level.getCurrent();
+        if(!currentLevel) {
+            return 0;
+        }
+        return currentLevel.getBodies().length;
+    };
+
     SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         if(!forceCalculate) {
             SplitTime.see.drawImage(snapshot, 0, 0);
@@ -66,6 +82,14 @@ SplitTime.BoardRenderer = {};
         //Black out screen (mainly for the case of board being smaller than the screen)
         bufferCtx.fillStyle = "#000000";
         bufferCtx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        var bodies = currentLevel.getBodies();
+
+        for(var iBody = 0; iBody < bodies.length; iBody++) {
+            if(typeof bodies[iBody].prepareForRender === "function") {
+                bodies[iBody].prepareForRender();
+            }
+        }
 
         //Rendering sequence
         for(var layer = 0; layer < currentLevel.layerImg.length; layer++) {
@@ -86,9 +110,7 @@ SplitTime.BoardRenderer = {};
             // 	}
             // }
 
-            var bodies = currentLevel.getBodies();
-
-            for(var iBody = 0; iBody < bodies.length; iBody++) {
+            for(iBody = 0; iBody < bodies.length; iBody++) {
                 drawBodyToForLayer(bodies[iBody], snapshotCtx, layer);
             }
             snapshotCtx.globalAlpha = 1;
@@ -129,6 +151,12 @@ SplitTime.BoardRenderer = {};
         //Save screen into snapshot
         SplitTime.see.drawImage(buffer, 0, 0);
         snapshotCtx.drawImage(buffer, 0, 0);
+
+        for(iBody = 0; iBody < bodies.length; iBody++) {
+            if(typeof bodies[iBody].cleanupAfterRender === "function") {
+                bodies[iBody].cleanupAfterRender();
+            }
+        }
     };
 
     function drawBodyToForLayer(body, ctx, layer) {

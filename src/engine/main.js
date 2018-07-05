@@ -2,6 +2,8 @@ SplitTime.main = function() {
 	var clock = SplitTime.FrameStabilizer.getSimpleClock(1000);
 	var startTime = new Date().getTime();
 
+	var agentCount = 0;
+
     try {
         var a = new Date(); //for speed checking
         switch(SplitTime.process) {
@@ -14,12 +16,17 @@ SplitTime.main = function() {
                 break;
             }
             case SplitTime.main.State.ACTION: {
+                var region = SplitTime.Region.getCurrent();
                 //Advance one second per second (given 20ms SplitTime.main interval)
-                if(clock.isClockFrame()) SplitTime.Time.advance(1); //in time.js
+                // if(clock.isSignaling()) {
+                    region.getTime().advance(SplitTime.msPerFrame);
+                // }
+                region.TimeStabilizer.notifyFrameUpdate();
                 var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
                 b.logUnusual();
 
-                var agents = SplitTime.Region.getCurrent().getAgents();
+                var agents = region.getAgents();
+                agentCount = agents.length;
                 for (var i = 0; i < agents.length; i++) {
                 	try {
                 		if(typeof agents[i].notifyFrameUpdate === "function") {
@@ -89,10 +96,19 @@ SplitTime.main = function() {
 		SplitTime.see.fillStyle="#FF0000";
 	}
 
-	if(SplitTime.showFPS) {
-		SplitTime.see.font="18px Verdana";
-		SplitTime.see.fillText("FPS: " + displayFPS, SplitTime.SCREENX/2, SplitTime.SCREENY - 20);
-	}
+	// if(SplitTime.showFPS) {
+	// 	SplitTime.see.font="18px Verdana";
+	// 	SplitTime.see.fillText("FPS: " + displayFPS, SplitTime.SCREENX/2, SplitTime.SCREENY - 20);
+	// }
+
+    SplitTime.Debug.update({
+        FPS: displayFPS,
+        "Board Layers": SplitTime.BoardRenderer.countLayers(),
+        "Board Bodies": SplitTime.BoardRenderer.countBodies(),
+        "Agents": agentCount,
+        "HUD Layers": SplitTime.HUD.getRendererCount(),
+        "Joystick Direction": SplitTime.Controls.JoyStick.getDirection()
+    });
 };
 
 SplitTime.main.State = {

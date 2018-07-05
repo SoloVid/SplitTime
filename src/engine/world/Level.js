@@ -30,7 +30,14 @@ SplitTime.Level.prototype.runFunction = function(functionId) {
 
 SplitTime.Level.prototype.getAgents = function() {
     // TODO: implement
-    return this.agents;
+    var agents = [];
+    for(var i = 0; i < this.bodies.length; i++) {
+        var agent = this.bodies[i].getAgent();
+        if(agent) {
+            agents.push(agent);
+        }
+    }
+    return agents;
 };
 
 SplitTime.Level.prototype.getBodies = function() {
@@ -75,9 +82,7 @@ SplitTime.Level.prototype.refetchBodies = function() {
         }
 
         obj.id = prop.getAttribute("id");
-        obj.setX(+prop.getAttribute("x"));
-        obj.setY(+prop.getAttribute("y"));
-        obj.setZ(+prop.getAttribute("layer"));
+        obj.put(this, +prop.getAttribute("x"), +prop.getAttribute("y"), +prop.getAttribute("layer"));
         obj.dir = +prop.getAttribute("dir");
         obj.stance = prop.getAttribute("stance");
 

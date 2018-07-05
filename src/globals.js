@@ -22,11 +22,6 @@ SplitTime.process = "hold"; //Input of master setInterval switch-case
 SplitTime.currentAudio = undefined;
 SplitTime.volume = 1;
 
-SplitTime.SAVE.timeSeconds = 0; //Second hand displayed on clock out of 2560
-SplitTime.SAVE.timeMinutes = 0;
-SplitTime.SAVE.timeHours = 0;
-SplitTime.SAVE.timeDays = 0;
-
 // TODO: remove
 SplitTime.currentPlayer = 0;
 SplitTime.cTeam = undefined; //For TRPG, either SplitTime.player or boardNPC

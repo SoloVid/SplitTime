@@ -8,7 +8,7 @@ SplitTime.Body.prototype.getPosition = function(id) {
         return this.positions[id];
     }
     else {
-        return SplitTime.Level.get(this.lvl).getPosition(id);
+        return this.getLevel().getPosition(id);
     }
 };
 

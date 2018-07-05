@@ -79,9 +79,7 @@ SplitTime.pixCoordToIndex = function(x,y,dat) {
 //Like SplitTime.enterLevelById() with coordinates
 SplitTime.send = function(board, x, y, z) {
 	var player = SplitTime.Player.getActiveBody();
-	player.setX(x);
-	player.setY(y);
-	player.z = z;
+	player.put(board, x, y, z);
 	SplitTime.Level.setCurrent(board);
 };
 

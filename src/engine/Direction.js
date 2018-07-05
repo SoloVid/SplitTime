@@ -22,15 +22,16 @@ SplitTime.Direction.fromString = function(stringDir) {
 	}
 };
 SplitTime.Direction.toString = function(numDir) {
-	switch(numDir) {
+	var modDir = SLVD.mod(Math.round(numDir), 4);
+	switch(modDir) {
 		case 0: return "E";
 		case 1: return "N";
 		case 2: return "W";
 		case 3: return "S";
 		default:
-			if(numDir < 1) return "NE";
-			else if(numDir < 2) return "NW";
-			else if(numDir < 3) return "SW";
+			if(modDir < 1) return "NE";
+			else if(modDir < 2) return "NW";
+			else if(modDir < 3) return "SW";
 			else return "SE";
 	}
 };
@@ -55,6 +56,10 @@ SplitTime.Direction.fromTo = function(fromX, fromY, toX, toY) {
 SplitTime.Direction.simplifyToCardinal = function(realDir) {
 	if(realDir === null) {
 		return null;
+	}
+
+	if(typeof realDir === "string") {
+		return realDir.charAt(0);
 	}
 
 	return SLVD.mod(Math.round(realDir), 4);

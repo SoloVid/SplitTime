@@ -56,13 +56,12 @@ SplitTime.Body.prototype.baseOffY = 0;
 SplitTime.Body.prototype.omniDir = false;
 SplitTime.Body.prototype.rotate = 0;
 
-SplitTime.Body.prototype.lvl = undefined;
+SplitTime.Body.prototype._level = undefined;
 SplitTime.Body.prototype.team = "neutral";
 SplitTime.Body.prototype.x = 0;
 SplitTime.Body.prototype.setX = function(x) {
 	var children = this.getChildren();
-	for(var i = 0; i < children.length; i++)
-	{
+	for(var i = 0; i < children.length; i++) {
 		var currentChild = children[i];
 		var dx = currentChild.x - this.x;
 		currentChild.setX(x + dx);
@@ -72,8 +71,7 @@ SplitTime.Body.prototype.setX = function(x) {
 SplitTime.Body.prototype.y = 0;
 SplitTime.Body.prototype.setY = function(y) {
 	var children = this.getChildren();
-	for(var i = 0; i < children.length; i++)
-	{
+	for(var i = 0; i < children.length; i++) {
 		var currentChild = children[i];
 		var dy = currentChild.y - this.y;
 		currentChild.setY(y + dy);
@@ -85,8 +83,7 @@ SplitTime.Body.prototype.offY = 0;
 SplitTime.Body.prototype.z = 0;
 SplitTime.Body.prototype.setZ = function(layer) {
 	var children = this.getChildren();
-	for(var i = 0; i < children.length; i++)
-	{
+	for(var i = 0; i < children.length; i++) {
 		var currentChild = children[i];
 		var dLayer = currentChild.z - this.z;
 		currentChild.setZ(layer + dLayer);
@@ -101,15 +98,39 @@ SplitTime.Body.prototype.dir = 3;
 // SplitTime.Body.prototype.steps = 0;// = 5;
 // SplitTime.Body.prototype.wait = undefined;// = 0;
 
-SplitTime.Body.prototype.put = function(levelId, x, y, layer) {
-	this.lvl = levelId;
+SplitTime.Body.prototype.put = function(level, x, y, layer) {
+	this.setLevel(level);
 	this.setX(x);
 	this.setY(y);
 	this.setZ(layer);
 };
 
+SplitTime.Body.prototype.setLevel = function(level) {
+	if(typeof level === "string") {
+		level = SplitTime.Level.get(level);
+	}
+
+    var children = this.getChildren();
+    for(var i = 0; i < children.length; i++) {
+        children[i].setLevel(level);
+    }
+    this._level = level;
+};
 SplitTime.Body.prototype.getLevel = function() {
-	return SplitTime.Level.get(this.lvl);
+	return this._level;
+};
+SplitTime.Body.prototype.getRegion = function() {
+	return this.getLevel().getRegion();
+};
+
+SplitTime.Body.prototype.getAgent = function() {
+	return this.agent || null;
+};
+SplitTime.Body.prototype.setAgent = function(agent) {
+	this.agent = agent;
+	if(typeof agent.setBody === "function") {
+		agent.setBody(this);
+	}
 };
 
 SplitTime.Body.prototype.keyFunc = {};

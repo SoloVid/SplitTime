@@ -1,6 +1,10 @@
 dependsOn("Body.js");
 
 SplitTime.Agent.Movement = function(body) {
+    this.setBody(body);
+};
+
+SplitTime.Agent.Movement.prototype.setBody = function(body) {
     this.body = body;
     this.resetTarget();
 };
@@ -20,9 +24,14 @@ SplitTime.Agent.Movement.prototype.setStopped = function() {
     this.resetTarget();
 };
 SplitTime.Agent.Movement.prototype.notifyFrameUpdate = function() {
-    this.body.dir = this.getWalkingDirection();
-    this.body.requestStance("walk");
-    this.body.zeldaStep(this.body.spd);
+    var walkingDir = this.getWalkingDirection();
+    if(walkingDir !== null) {
+        this.body.dir = walkingDir;
+        this.body.requestStance("walk");
+        this.body.zeldaStep(this.body.spd);
+    } else {
+        this.body.defaultStance();
+    }
 };
 
 SplitTime.Agent.Movement.prototype.resetTarget = function() {
@@ -43,4 +52,5 @@ SplitTime.Agent.Movement.prototype.getWalkingDirection = function() {
         // TODO: some other calculation
         return 0;
     }
+    return null;
 };

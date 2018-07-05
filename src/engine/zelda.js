@@ -2,8 +2,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 {
 	var person = SplitTime.player[SplitTime.currentPlayer];
 	var i;
-	if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space")
-	{
+	if(SplitTime.keyFirstDown == "enter" || SplitTime.keyFirstDown == "space") {
 		for(var index = 0; index < SplitTime.onBoard.agents.length; index++)
 		{
 			var otherAgent = SplitTime.onBoard.agents[index];
@@ -14,8 +13,7 @@ SplitTime.zeldaPlayerMotion = function() //Function for current SplitTime.player
 		}
 		delete SplitTime.keyFirstDown;
 	}
-	if(SplitTime.keyFirstDown == "k" && person.act.length === 0 && !person.inAir)
-	{
+	if(SplitTime.keyFirstDown == "k" && person.act.length === 0 && !person.inAir) {
 		var prevPlayer = SplitTime.currentPlayer;
 		SplitTime.currentPlayer = (SplitTime.currentPlayer + 1)%SplitTime.player.length;
 		//Only switch between players on this map

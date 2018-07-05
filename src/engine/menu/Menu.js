@@ -33,7 +33,6 @@ SplitTime.Menu.prototype.runMenu = function() {
 	var promise = new SLVD.Promise();
 	var me = this;
 	SplitTime.Controls.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
-		console.log("confirmation button hit");
 		isRunning = false;
 		SplitTime.HUD.removeRenderer(me);
 		promise.resolve(me.currentPoint);

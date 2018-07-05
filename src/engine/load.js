@@ -10,6 +10,7 @@ SplitTime.launch = function(callback, width, height, parentId) {
 	SLVD.randomSeed();
 
 	SplitTime.launch.createCanvases(width, height, parentId);
+    SplitTime.Debug.attachDebug(parentId);
 
 	document.onkeydown = SplitTime.Keyboard.onKeyDown;
 	document.onkeyup = SplitTime.Keyboard.onKeyUp;
@@ -65,11 +66,12 @@ SplitTime.launch = function(callback, width, height, parentId) {
 			return function(data) {
 				var level = SplitTime.Level.get(levelName);
 
+                SplitTime.Region.get(data.getElementsByTagName("type")[0].textContent).addLevel(level);
+
 				level.filedata = data;
 				level.layerImg = [];
 				level.layerFuncData = [];
                 level.type = data.getElementsByTagName("type")[0].textContent;
-                level.region = SplitTime.Region.get(data.getElementsByTagName("type")[0].textContent);
 				level.width = 0;
 				level.height = 0;
 				level.load = new SLVD.Promise.Collection();
@@ -179,7 +181,6 @@ SplitTime.launch.createCanvases = function(width, height, parentId) {
 	SplitTime.see.fillText("this game will not run on your browser.", 10, 60);
 
     SplitTime.HUD.createCanvases(width, height);
-    SplitTime.MenuProcessor.createCanvases(width, height);
 	SplitTime.Level.createCanvases(width, height);
     SplitTime.BoardRenderer.createCanvases(width, height);
     SplitTime.WeatherRenderer.createCanvases(width, height);
