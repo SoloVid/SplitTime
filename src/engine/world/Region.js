@@ -7,6 +7,9 @@ SplitTime.Region = function() {
 SplitTime.Region.prototype.getTime = function() {
     return this.time;
 };
+SplitTime.Region.prototype.getTimeMs = function() {
+    return this.time.getTimeMs();
+};
 SplitTime.Region.prototype.getTimeStabilizer = function(msPerStep, maxCounter) {
     return new this.TimeStabilizer(msPerStep, maxCounter);
 };

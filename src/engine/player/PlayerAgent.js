@@ -1,8 +1,8 @@
-dependsOn("/body/Body.js");
+dependsOn("/action/Agent.js");
 
 SplitTime.Agent.Player = function(body) {
     this.body = body;
-    this.movementAgent = new SplitTime.Agent.Movement(body);
+    this.movementAgent = new SplitTime.Agent.ControlledCollisionMovement(body);
 };
 
 SplitTime.Agent.Player.prototype.setBody = function(body) {

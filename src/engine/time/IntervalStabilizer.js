@@ -12,22 +12,24 @@
         var Stabilizer = function(msPerFrame, maxCounter) {
             this.msPerFrame = msPerFrame;
             this.maxCounter = maxCounter || 1;
-            this._counter = 0;
-            this._counterSetAt = currentTimeGetter();
-            this._isClockFrame = true;
+            this.reset();
         };
 
         var cache = {};
 
         var previousFrameTime = currentTimeGetter();
+        var ticksSameTime = 0;
         var recentFrameTime = currentTimeGetter();
-        var timeElapsedSinceLastFrame = recentFrameTime - previousFrameTime;
 
         Stabilizer.getSimpleClock = function(msPerFrame) {
             if(!cache[msPerFrame]) {
                 cache[msPerFrame] = new Stabilizer(msPerFrame);
             }
             return cache[msPerFrame];
+        };
+
+        Stabilizer.howManyMsSinceLastFrame = function() {
+            return recentFrameTime - previousFrameTime;
         };
 
         Stabilizer.haveSoManyMsPassed = function(milliseconds) {
@@ -37,7 +39,18 @@
         Stabilizer.notifyFrameUpdate = function() {
             previousFrameTime = recentFrameTime;
             recentFrameTime = currentTimeGetter();
-            timeElapsedSinceLastFrame = recentFrameTime - previousFrameTime;
+            var timeElapsedSinceLastFrame = recentFrameTime - previousFrameTime;
+            if(timeElapsedSinceLastFrame <= 0) {
+                ticksSameTime++;
+            } else {
+                ticksSameTime = 0;
+            }
+        };
+
+        Stabilizer.prototype.reset = function() {
+            this._counter = 0;
+            this._counterSetAt = currentTimeGetter();
+            this._isClockFrame = true;
         };
 
         Stabilizer.prototype.checkUpdate = function() {
@@ -46,6 +59,8 @@
                 this._isClockFrame = this._counter >= this.maxCounter;
                 this._counter %= this.maxCounter;
                 this._counterSetAt = recentFrameTime;
+            } else if(ticksSameTime > 0) {
+                this._isClockFrame = false;
             }
         };
 

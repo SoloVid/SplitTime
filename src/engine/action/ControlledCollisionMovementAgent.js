@@ -1,29 +1,29 @@
-dependsOn("Body.js");
+dependsOn("Agent.js");
 
-SplitTime.Agent.Movement = function(body) {
+SplitTime.Agent.ControlledCollisionMovement = function(body) {
     this.setBody(body);
 };
 
-SplitTime.Agent.Movement.prototype.setBody = function(body) {
+SplitTime.Agent.ControlledCollisionMovement.prototype.setBody = function(body) {
     this.body = body;
     this.resetTarget();
 };
 
-SplitTime.Agent.Movement.prototype.setWalkingTowardBoardLocation = function(x, y) {
+SplitTime.Agent.ControlledCollisionMovement.prototype.setWalkingTowardBoardLocation = function(x, y) {
     this.targetBoardX = x;
     this.targetBoardY = y;
 };
-SplitTime.Agent.Movement.prototype.setWalkingTowardScreenLocation = function(x, y) {
+SplitTime.Agent.ControlledCollisionMovement.prototype.setWalkingTowardScreenLocation = function(x, y) {
     this.targetScreenX = x;
     this.targetScreenY = y;
 };
-SplitTime.Agent.Movement.prototype.setWalkingDirection = function(dir) {
+SplitTime.Agent.ControlledCollisionMovement.prototype.setWalkingDirection = function(dir) {
     this.targetDirection = dir;
 };
-SplitTime.Agent.Movement.prototype.setStopped = function() {
+SplitTime.Agent.ControlledCollisionMovement.prototype.setStopped = function() {
     this.resetTarget();
 };
-SplitTime.Agent.Movement.prototype.notifyFrameUpdate = function() {
+SplitTime.Agent.ControlledCollisionMovement.prototype.notifyFrameUpdate = function() {
     var walkingDir = this.getWalkingDirection();
     if(walkingDir !== null) {
         this.body.dir = walkingDir;
@@ -34,7 +34,7 @@ SplitTime.Agent.Movement.prototype.notifyFrameUpdate = function() {
     }
 };
 
-SplitTime.Agent.Movement.prototype.resetTarget = function() {
+SplitTime.Agent.ControlledCollisionMovement.prototype.resetTarget = function() {
     this.targetBoardX = null;
     this.targetBoardY = null;
     this.targetScreenX = null;
@@ -42,7 +42,7 @@ SplitTime.Agent.Movement.prototype.resetTarget = function() {
     this.targetDirection = null;
 };
 
-SplitTime.Agent.Movement.prototype.getWalkingDirection = function() {
+SplitTime.Agent.ControlledCollisionMovement.prototype.getWalkingDirection = function() {
     if(this.targetDirection !== null) {
         return this.targetDirection;
     } else if(this.targetBoardX !== null && this.targetBoardY !== null) {

@@ -64,3 +64,13 @@ SplitTime.Direction.simplifyToCardinal = function(realDir) {
 
 	return SLVD.mod(Math.round(realDir), 4);
 };
+
+SplitTime.Direction.getRandom = function() {
+    return (SLVD.randomInt(16) - 1) / 4;
+};
+SplitTime.Direction.getRandomCardinal = function() {
+    return SLVD.randomInt(4) - 1;
+};
+SplitTime.Direction.getRandomOctal = function() {
+    return (SLVD.randomInt(8) - 1) / 2;
+};

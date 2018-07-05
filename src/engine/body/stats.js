@@ -2,6 +2,7 @@ dependsOn("Body.js");
 
 SplitTime.Body.prototype.hp = 100;
 SplitTime.Body.prototype.strg = 5;
+// Generally equates to pixels per second (game time)
 SplitTime.Body.prototype.spd = 2;
 
 SplitTime.Body.prototype.getHp = function() {
@@ -12,6 +13,10 @@ SplitTime.Body.prototype.getMaxHp = function() {
 };
 SplitTime.Body.prototype.getSpeed = function() {
     return this.spd;
+};
+SplitTime.Body.prototype.getPixelSpeedForFrame = function(speed) {
+    speed = speed || this.spd;
+    return speed * this.getLevel().getRegion().TimeStabilizer.howManyMsSinceLastFrame() / 1000;
 };
 SplitTime.Body.prototype.getStrength = function() {
     return this.strg;

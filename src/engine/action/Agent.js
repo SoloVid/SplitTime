@@ -1,8 +1,1 @@
-
-
-SplitTime.Agent = function() {
-
-};
-
-SplitTime.Agent.prototype.update = function() {
-};
+SplitTime.Agent = {};

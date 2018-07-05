@@ -120,11 +120,16 @@ SplitTime.Body.prototype.getLevel = function() {
 	return this._level;
 };
 SplitTime.Body.prototype.getRegion = function() {
-	return this.getLevel().getRegion();
+	var level = this.getLevel();
+	if(!level) {
+		return null;
+	}
+	return level.getRegion();
 };
 
+SplitTime.Body.prototype.agent = null;
 SplitTime.Body.prototype.getAgent = function() {
-	return this.agent || null;
+	return this.agent;
 };
 SplitTime.Body.prototype.setAgent = function(agent) {
 	this.agent = agent;
@@ -195,9 +200,15 @@ SplitTime.Body.prototype.canBeHere = function(allowInAir) {
 	return 1;
 };
 
+SplitTime.Body.prototype.canSeeBody = function(body) {
+    var tDir = SplitTime.Direction.fromTo(this.x, this.y, body.x, body.y);
+    return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
+};
+
 SplitTime.Body.prototype.canSeePlayer = function() {
-	var tDir = SplitTime.Direction.fromTo(this.x, this.y, SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y);
-	return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
+    var player = SplitTime.Player.getActiveBody();
+    var tDir = SplitTime.Direction.fromTo(this.x, this.y, player.x, player.y);
+    return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
 };
 
 //Based in time.js, this SplitTime.provides = function simple interface for setting a timed sequence of movement events for Bodys
