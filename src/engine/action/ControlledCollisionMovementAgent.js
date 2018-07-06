@@ -28,7 +28,7 @@ SplitTime.Agent.ControlledCollisionMovement.prototype.notifyFrameUpdate = functi
     if(walkingDir !== null) {
         this.body.dir = walkingDir;
         this.body.requestStance("walk");
-        this.body.zeldaStep(this.body.spd);
+        this.body.zeldaStep(this.body.getPixelSpeedForFrame());
     } else {
         this.body.defaultStance();
     }

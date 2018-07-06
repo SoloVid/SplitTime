@@ -40,10 +40,6 @@ SplitTime.Body.prototype.say = function(message, overrideName) {
 	SplitTime.personSays(this, message, overrideName);
 };
 SplitTime.Body.prototype.see = function(ctx) {
-	if(!ctx) {
-		ctx = SplitTime.see;
-	}
-
 	if(!this.canSee) return;
 
 	ctx.rotate(this.rotate);
@@ -68,9 +64,7 @@ SplitTime.Body.prototype.see = function(ctx) {
 
 	//ctx.rotate(-this.rotate);
 
-	ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-	delete this.rotate;
+	this.rotate = 0;
 };
 
 SplitTime.Body.prototype.draw = function(ctx) {
@@ -83,11 +77,12 @@ SplitTime.Body.prototype.draw = function(ctx) {
 };
 
 SplitTime.Body.prototype.finalizeFrame = function() {
-    if(this.stance != this.requestedStance || this.requestedFrameReset) {
+    var region = this.getRegion();
+    if(!region || this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
     } else {
         //Only update on frame tick
-        if(this.getRegion().hasSoMuchTimePassed(200)) {
+        if(region.hasSoMuchTimePassed(200)) {
             this.frame++;
             if(this.getImage().height <= this.frame*this.yres)
             {

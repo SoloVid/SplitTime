@@ -32,8 +32,7 @@ SplitTime.Body.prototype.zeldaCheckStepTraces = function(axis, altAxis, isPositi
 	var data = level.layerFuncData[this.z];
 
 	//Loop through width of base
-	for(var i = -this.baseLength/2; i < this.baseLength/2; i++)
-	{
+	for(var i = -this.baseLength/2; i < this.baseLength/2; i++) {
 		coords[altAxis] = Math.round(this[altAxis] + i);
 		var dataIndex = SplitTime.pixCoordToIndex(coords.x, coords.y, data);
 		var r = data.data[dataIndex++];
@@ -65,8 +64,8 @@ SplitTime.Body.prototype.zeldaCheckStepBodies = function() {
 			var dy = Math.abs(this.y - currentAgent.y);
 			if(dx < potentialCollisionDist && dy < potentialCollisionDist) {
 				if(dx < collisionDist && dy < collisionDist) {
-					var dDir = Math.abs(SplitTime.Direction.fromTo(this.x, this.y, currentAgent.x, currentAgent.y) - this.dir);
-					if(dDir < 1 || dDir > 3) {
+					var dirToOther = SplitTime.Direction.fromTo(this.x, this.y, currentAgent.x, currentAgent.y);
+					if(SplitTime.Direction.areWithin90Degrees(this.dir, dirToOther)) {
 						//The .pushing here ensures that there is no infinite loop of pushing back and forth
 						if(this.pushy && currentAgent.pushy && this.pushedBodies.indexOf(currentAgent) < 0) {
 							this.pushing = true; //prevent counter-push
@@ -104,114 +103,153 @@ SplitTime.Body.prototype.zeldaLockOnPoint = function(qx, qy) {
 //*********Advances SplitTime.Body person up to distance distance as far as is legal. Includes pushing other Bodys out of the way? Returns -1 if stopped before distance?
 SplitTime.Body.prototype.zeldaStep = function(distance) {
 	var level = this.getLevel();
-	var stopped = false;
-	var stoppedTemp = false;
-	var out = false;
-	var ret = true; //value to return at end
+
 	var dy = -distance*Math.sin((this.dir)*(Math.PI/2)); //Total y distance to travel
 	var dyRounded = dy > 0 ? Math.ceil(dy) : Math.floor(dy);
 	var ady = Math.abs(dyRounded);
+
 	var dx = distance*Math.cos((this.dir)*(Math.PI/2)); //Total x distance to travel
 	var dxRounded = dx > 0 ? Math.ceil(dx) : Math.floor(dx);
 	var adx = Math.abs(dxRounded);
+
 	var jhat = dyRounded/ady;
 	var ihat = dxRounded/adx;
+
 	this.stepDistanceRemaining = adx + ady;
 	// TODO: put some logic for nearby agents in Level
 	this.nearbyBodies = level.getAgents();
 	this.pushedBodies = [];
-	var i;
 
 	//Handle y movement
-	for(i = 0; i < ady; i++) {
+	var outY = false;
+	var stoppedY = false;
+    var pixelsMovedY = 0;
+    for(var j = 0; j < ady; j++) {
 		this.y += jhat;
 		//Check if out of bounds
 		if(this.y >= level.height || this.y < 0) {
-			out = true;
+            outY = true;
 		} else {
-			stoppedTemp = this.zeldaCheckStep("y", "x", dy > 0);
+            stoppedY = this.zeldaCheckStep("y", "x", dy > 0);
 		}
 
-		if(stoppedTemp || out) {
+        this.stepDistanceRemaining--;
+
+		if(stoppedY || outY) {
 			this.y -= jhat;
 			break;
 		} else {
-            this.stepDistanceRemaining--;
-        }
+			pixelsMovedY++;
+		}
 	}
-	if(!stoppedTemp && !out && ady > 0) {
+	if(ady > 0 && !stoppedY && !outY) {
 		// Subtract off any overshoot
 		this.y -= (dyRounded - dy);
-	}
-	stopped = stoppedTemp;
+    } else if(pixelsMovedY === 1) {
+        this.y -= 0.9*jhat;
+    }
+
 	//Handle x movement;
-	for(i = 0; i < adx; i++) {
+	var outX = false;
+	var stoppedX = false;
+	var pixelsMovedX = 0;
+	for(var i = 0; i < adx; i++) {
 		this.x += ihat;
 		if(this.x >= level.width || this.x < 0) {
-			out = true;
+			outX = true;
 		} else {
-			stoppedTemp = this.zeldaCheckStep("x", "y", dx > 0);
+			stoppedX = this.zeldaCheckStep("x", "y", dx > 0);
 		}
 
-		if(stoppedTemp || out) {
+        this.stepDistanceRemaining--;
+
+        if(stoppedX || outX) {
 			this.x -= ihat;
 			break;
 		} else {
-            this.stepDistanceRemaining--;
-        }
+        	pixelsMovedX++;
+		}
 	}
-    if(!stoppedTemp && !out && adx > 0) {
+    if(adx > 0 && !stoppedX && !outX) {
         // Subtract off any overshoot
         this.x -= (dxRounded - dx);
-    }
-    stopped = stoppedTemp || stopped;
-	//If stopped, help person out by sliding around corner
-	if(stopped && !out ) {
-		ret = false;
-		this.zeldaSlide();
-	} else if(out == 1) {
-		ret = false;
+    } else if(pixelsMovedX === 1) {
+		this.x -= 0.9*ihat;
 	}
 
-	delete this.nearbyBodies;
-	delete this.stepDistanceRemaining;
+    this.nearbyBodies = null;
+    this.pushedBodies = null;
+    this.stepDistanceRemaining = null;
 
-	return ret;
+    //If stopped, help person out by sliding around corner
+    var stopped = stoppedX || stoppedY;
+    var out = outX || outY;
+	if(stopped && !out) {
+		this.zeldaSlide(distance / 16);
+	}
+
+	return !(stopped || out);
 };
 
-SplitTime.Body.prototype.zeldaSlide = function() {
+SplitTime.Body.prototype.zeldaSlide = function(maxDistance) {
+	if(this._sliding) {
+		return;
+	}
+
+	this._sliding = true;
+
     var level = this.getLevel();
-    var j, k;
-    var dir = this.dir;
+    var dir = SplitTime.Direction.simplifyToCardinal(this.dir);
     var halfBase = Math.round(this.baseLength/2);
-    for(var i = 0; i < 1; i++) {
-        if(dir < 1 || dir > 3) //case 0:
-        {
-            j = SplitTime.pixCoordToIndex(this.x + halfBase, this.y - halfBase - 1, level.layerFuncData[this.z]);
-            k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y + halfBase, level.layerFuncData[this.z]);
-            if(level.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 1); }
-            if(level.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 3); }
+    var x = Math.round(this.x);
+    var y = Math.round(this.y);
+    var z = Math.round(this.z);
+
+    var dist = Math.min(1, maxDistance);
+
+    // for(var i = 0; i < 1; i++) {
+    var iNE = SplitTime.pixCoordToIndex(x + halfBase + 1, y - halfBase - 1, level.layerFuncData[z]);
+    var iNW = SplitTime.pixCoordToIndex(x - halfBase - 1, y - halfBase - 1, level.layerFuncData[z]);
+    var iSW = SplitTime.pixCoordToIndex(x - halfBase - 1, y + halfBase + 1, level.layerFuncData[z]);
+    var iSE = SplitTime.pixCoordToIndex(x + halfBase + 1, y + halfBase + 1, level.layerFuncData[z]);
+    var isNEOpen = level.layerFuncData[z].data[iNE] !== 255;
+    var isNWOpen = level.layerFuncData[z].data[iNW] !== 255;
+    var isSWOpen = level.layerFuncData[z].data[iSW] !== 255;
+    var isSEOpen = level.layerFuncData[z].data[iSE] !== 255;
+        if(dir === SplitTime.Direction.E) {
+        	if(isNEOpen && isSEOpen) {
+        		// Do nothing; tie
+			} else if(isNEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.N, 1.1)) {
+        		this.zeldaBump(dist, SplitTime.Direction.N);
+			} else if(isSEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.S, 1.1)) {
+        		this.zeldaBump(dist, SplitTime.Direction.S);
+			}
+        } else if(dir === SplitTime.Direction.N) {
+            if(isNEOpen && isNWOpen) {
+                // Do nothing; tie
+            } else if(isNEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.E, 1.1)) {
+                this.zeldaBump(dist, SplitTime.Direction.E);
+            } else if(isNWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.W, 1.1)) {
+                this.zeldaBump(dist, SplitTime.Direction.W);
+            }
+        } else if(dir === SplitTime.Direction.W) {
+            if(isNWOpen && isSWOpen) {
+                // Do nothing; tie
+            } else if(isNWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.N, 1.1)) {
+                this.zeldaBump(dist, SplitTime.Direction.N);
+            } else if(isSWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.S, 1.1)) {
+                this.zeldaBump(dist, SplitTime.Direction.S);
+            }
+        } else if(dir === SplitTime.Direction.S) {
+            if(isSEOpen && isSWOpen) {
+                // Do nothing; tie
+            } else if(isSEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.E, 1.1)) {
+                this.zeldaBump(dist, SplitTime.Direction.E);
+            } else if(isSWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.W, 1.1)) {
+                this.zeldaBump(dist, SplitTime.Direction.W);
+            }
         }
-        if(dir > 0 && dir < 2) //case 1:
-        {
-            j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y - halfBase - 1, level.layerFuncData[this.z]);
-            k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y - halfBase - 1, level.layerFuncData[this.z]);
-            if(level.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 2); }
-            if(level.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 0); }
-        }
-        if(dir > 1 && dir < 3) //case 2:
-        {
-            j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y - halfBase - 1, level.layerFuncData[this.z]);
-            k = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y + halfBase, level.layerFuncData[this.z]);
-            if(level.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 1); }
-            if(level.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 3); }
-        }
-        if(dir > 2 && dir < 4) //case 3:
-        {
-            j = SplitTime.pixCoordToIndex(this.x - halfBase - 1, this.y + halfBase, level.layerFuncData[this.z]);
-            k = SplitTime.pixCoordToIndex(this.x + halfBase, this.y + halfBase, level.layerFuncData[this.z]);
-            if(level.layerFuncData[this.z].data[j] != 255) { this.zeldaBump(1, 2); }
-            if(level.layerFuncData[this.z].data[k] != 255) { this.zeldaBump(1, 0); }
-        }
-    }
+    // }
+
+	this._sliding = false;
 };

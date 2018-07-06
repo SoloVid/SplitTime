@@ -74,3 +74,9 @@ SplitTime.Direction.getRandomCardinal = function() {
 SplitTime.Direction.getRandomOctal = function() {
     return (SLVD.randomInt(8) - 1) / 2;
 };
+
+SplitTime.Direction.areWithin90Degrees = function(dir1, dir2, howMany90Degrees) {
+	howMany90Degrees = howMany90Degrees || 1;
+    var dDir = Math.abs(dir1 - dir2);
+    return dDir < howMany90Degrees || dDir > (4 - howMany90Degrees);
+};
