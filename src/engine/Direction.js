@@ -75,6 +75,40 @@ SplitTime.Direction.getRandomOctal = function() {
     return (SLVD.randomInt(8) - 1) / 2;
 };
 
+SplitTime.Direction.getXMagnitude = function(direction) {
+    if(typeof direction === "string") {
+        return SplitTime.Direction.getXMagnitude(SplitTime.Direction.fromString(direction));
+    }
+
+    return Math.cos((direction)*(Math.PI/2));
+};
+SplitTime.Direction.getXSign = function(direction) {
+    var magnitude = SplitTime.Direction.getXMagnitude(direction);
+    if(magnitude > 0.1) {
+        return 1;
+    } else if(magnitude < -0.1) {
+        return -1;
+    }
+    return 0;
+};
+
+SplitTime.Direction.getYMagnitude = function(direction) {
+    if(typeof direction === "string") {
+        return SplitTime.Direction.getYMagnitude(SplitTime.Direction.fromString(direction));
+    }
+
+    return -Math.sin((direction)*(Math.PI/2));
+};
+SplitTime.Direction.getYSign = function(direction) {
+    var magnitude = SplitTime.Direction.getYMagnitude(direction);
+    if(magnitude > 0.1) {
+        return 1;
+    } else if(magnitude < -0.1) {
+        return -1;
+    }
+    return 0;
+};
+
 SplitTime.Direction.areWithin90Degrees = function(dir1, dir2, howMany90Degrees) {
 	howMany90Degrees = howMany90Degrees || 1;
     var dDir = Math.abs(dir1 - dir2);

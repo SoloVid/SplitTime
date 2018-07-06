@@ -120,6 +120,8 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
 	this.nearbyBodies = level.getAgents();
 	this.pushedBodies = [];
 
+	// TODO: intertwine x and y pixel steps
+
 	//Handle y movement
 	var outY = false;
 	var stoppedY = false;
@@ -185,7 +187,7 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
     var stopped = stoppedX || stoppedY;
     var out = outX || outY;
 	if(stopped && !out) {
-		this.zeldaSlide(distance / 16);
+		this.zeldaSlide(distance / 2);
 	}
 
 	return !(stopped || out);
@@ -199,56 +201,45 @@ SplitTime.Body.prototype.zeldaSlide = function(maxDistance) {
 	this._sliding = true;
 
     var level = this.getLevel();
-    var dir = SplitTime.Direction.simplifyToCardinal(this.dir);
     var halfBase = Math.round(this.baseLength/2);
     var x = Math.round(this.x);
     var y = Math.round(this.y);
     var z = Math.round(this.z);
 
-    var dist = Math.min(1, maxDistance);
+    var dist = maxDistance; //Math.min(1, maxDistance);
 
     // for(var i = 0; i < 1; i++) {
-    var iNE = SplitTime.pixCoordToIndex(x + halfBase + 1, y - halfBase - 1, level.layerFuncData[z]);
-    var iNW = SplitTime.pixCoordToIndex(x - halfBase - 1, y - halfBase - 1, level.layerFuncData[z]);
-    var iSW = SplitTime.pixCoordToIndex(x - halfBase - 1, y + halfBase + 1, level.layerFuncData[z]);
-    var iSE = SplitTime.pixCoordToIndex(x + halfBase + 1, y + halfBase + 1, level.layerFuncData[z]);
-    var isNEOpen = level.layerFuncData[z].data[iNE] !== 255;
-    var isNWOpen = level.layerFuncData[z].data[iNW] !== 255;
-    var isSWOpen = level.layerFuncData[z].data[iSW] !== 255;
-    var isSEOpen = level.layerFuncData[z].data[iSE] !== 255;
-        if(dir === SplitTime.Direction.E) {
-        	if(isNEOpen && isSEOpen) {
-        		// Do nothing; tie
-			} else if(isNEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.N, 1.1)) {
-        		this.zeldaBump(dist, SplitTime.Direction.N);
-			} else if(isSEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.S, 1.1)) {
-        		this.zeldaBump(dist, SplitTime.Direction.S);
-			}
-        } else if(dir === SplitTime.Direction.N) {
-            if(isNEOpen && isNWOpen) {
-                // Do nothing; tie
-            } else if(isNEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.E, 1.1)) {
-                this.zeldaBump(dist, SplitTime.Direction.E);
-            } else if(isNWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.W, 1.1)) {
-                this.zeldaBump(dist, SplitTime.Direction.W);
-            }
-        } else if(dir === SplitTime.Direction.W) {
-            if(isNWOpen && isSWOpen) {
-                // Do nothing; tie
-            } else if(isNWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.N, 1.1)) {
-                this.zeldaBump(dist, SplitTime.Direction.N);
-            } else if(isSWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.S, 1.1)) {
-                this.zeldaBump(dist, SplitTime.Direction.S);
-            }
-        } else if(dir === SplitTime.Direction.S) {
-            if(isSEOpen && isSWOpen) {
-                // Do nothing; tie
-            } else if(isSEOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.E, 1.1)) {
-                this.zeldaBump(dist, SplitTime.Direction.E);
-            } else if(isSWOpen && SplitTime.Direction.areWithin90Degrees(this.dir, SplitTime.Direction.W, 1.1)) {
-                this.zeldaBump(dist, SplitTime.Direction.W);
-            }
-        }
+
+	// Closest diagonal direction positive angle from current direction
+    var positiveDiagonal = (Math.round(this.dir + 1.1) - 0.5) % 4;
+    // Closest diagonal direction negative angle from current direction
+    var negativeDiagonal = (Math.round(this.dir + 3.9) - 0.5) % 4;
+
+    var iPositiveCorner = SplitTime.pixCoordToIndex(
+        x + SplitTime.Direction.getXSign(positiveDiagonal) * (halfBase + 1),
+        y + SplitTime.Direction.getYSign(positiveDiagonal) * (halfBase + 1),
+        level.layerFuncData[z]
+    );
+    var iNegativeCorner = SplitTime.pixCoordToIndex(
+        x + SplitTime.Direction.getXSign(negativeDiagonal) * (halfBase + 1),
+        y + SplitTime.Direction.getYSign(negativeDiagonal) * (halfBase + 1),
+        level.layerFuncData[z]
+    );
+
+    var isPositiveCornerOpen = level.layerFuncData[z].data[iPositiveCorner] !== 255;
+    var isNegativeCornerOpen = level.layerFuncData[z].data[iNegativeCorner] !== 255;
+
+    if(SplitTime.FrameStabilizer.haveSoManyMsPassed(200)) {
+        console.log("positive: " + positiveDiagonal + " (" + isPositiveCornerOpen + "), negative: " + negativeDiagonal + " (" + isNegativeCornerOpen + ")");
+    }
+
+    if(isPositiveCornerOpen && isNegativeCornerOpen) {
+    	// Tie; do nothing
+	} else if(isPositiveCornerOpen) {
+    	this.zeldaBump(dist, positiveDiagonal);
+	} else if(isNegativeCornerOpen) {
+    	this.zeldaBump(dist, negativeDiagonal);
+	}
     // }
 
 	this._sliding = false;
