@@ -3,7 +3,6 @@ SplitTime.Level = function(levelId) {
     this.functions = {};
     this.positions = {};
     this.region = null;
-    this.agents = [];
     this.bodies = [];
     this.loadPromise = new SLVD.Promise();
 };
@@ -35,9 +34,17 @@ SplitTime.Level.prototype.registerPosition = function(positionId, position) {
     this.positions[positionId] = position;
 };
 
-SplitTime.Level.prototype.runFunction = function(functionId) {
-    var fun = this.functions[functionId] || function() { };
-    fun();
+SplitTime.Level.prototype.runFunctionFromBodyCrossPixel = function(body, r, g, b, a) {
+    var functionIntId = SplitTime.Trace.getFunctionIdFromColor(r, g, b, a);
+    var functionStringId = this.internalFunctionIdMap[functionIntId];
+    return this.runFunction(functionStringId, body);
+};
+
+SplitTime.Level.prototype.runFunction = function(functionId, param) {
+    var fun = this.functions[functionId] || function() {
+        console.warn("Function \"" + functionId + "\" not found for level " + this.id);
+    };
+    return fun(param);
 };
 
 SplitTime.Level.prototype.getAgents = function() {
@@ -81,14 +88,12 @@ SplitTime.Level.prototype.getBodiesWithin = function(point, distance) {
 
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
-    this.agents.length = 0;
     this.bodies.length = 0;
     var index;
     //Figure out which Actors are on board
     for(var id in SplitTime.Actor) {
         var actor = SplitTime.Actor[id];
         if(actor.getLevel() === this) {
-            this.agents.push(actor);
             this.insertBody(actor);
         }
     }
@@ -110,8 +115,7 @@ SplitTime.Level.prototype.refetchBodies = function() {
         var obj;
         if(template) {
             obj = new SplitTime.BodyTemplate[template]();
-        }
-        else {
+        } else {
             obj = new SplitTime.Body(null, null);
         }
 
@@ -174,6 +178,9 @@ SplitTime.Level.prototype.removeBody = function(element) {
     SplitTime.Level.prototype.loadForPlay = function() {
         this.refetchBodies();
 
+        this.internalFunctionIdMap = {};
+        var nextFunctionId = 1;
+
         //Initialize functional map
         for(var iLayer = 0; iLayer < this.filedata.getElementsByTagName("layer").length; iLayer++) {
             holderCanvas.width = this.width/(this.type == "overworld" ? 32 : 1);
@@ -187,7 +194,16 @@ SplitTime.Level.prototype.removeBody = function(element) {
             holderCtx.translate(0.5, 0.5);
 
             for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
-                SplitTime.Trace.draw(layerTraces[iLayerTrace].textContent, holderCtx, layerTraces[iLayerTrace].getAttribute("type"));
+                var type = layerTraces[iLayerTrace].getAttribute("type");
+                if(type === SplitTime.Trace.Type.FUNCTION) {
+                    var functionStringId = layerTraces[iLayerTrace].getAttribute("reference");
+                    var functionIntId = nextFunctionId++;
+                    this.internalFunctionIdMap[functionIntId] = functionStringId;
+                    var color = SplitTime.Trace.getFunctionColor(functionIntId);
+                    SplitTime.Trace.drawColor(layerTraces[iLayerTrace].textContent, holderCtx, color);
+                } else {
+                    SplitTime.Trace.draw(layerTraces[iLayerTrace].textContent, holderCtx, type);
+                }
             }
             var bodies = this.getBodies();
             for(var iBody = 0; iBody < bodies.length; iBody++) {
@@ -233,13 +249,13 @@ SplitTime.Level.prototype.removeBody = function(element) {
         //TODO: give agents a chance to clean up
 
         // TODO: clear exiting board data; probably in context of region rather than level
-        // if(exitingLevel) {
-        //     var exitFunctionId = exitingLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
-        //     exitingLevel.runFunction(exitFunctionId);
-        //
-        //     //Clear out all functional maps
-        //     exitingLevel.layerFuncData.length = 0;
-        // }
+        if(exitingLevel) {
+            var exitFunctionId = exitingLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
+            exitingLevel.runFunction(exitFunctionId);
+
+            // //Clear out all functional maps
+            // exitingLevel.layerFuncData.length = 0;
+        }
 
         //********Enter new board
 

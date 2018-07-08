@@ -393,3 +393,11 @@ SplitTime.Body.prototype.zeldaSlide = function(maxDistance) {
 
     this._sliding = false;
 };
+
+// Called by zeldaStep() for first time pixel of color is crossed
+SplitTime.Body.prototype.crossPixel = function(r, g, b, a) {
+    if(r === SplitTime.Trace.RColor.FUNCTION) {
+        var level = this.getLevel();
+		return level.runFunctionFromBodyCrossPixel(this, r, g, b, a);
+	}
+};

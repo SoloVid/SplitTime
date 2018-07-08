@@ -6,8 +6,7 @@ SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
 };
 
 SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
-	if(!offsetPos)
-	{
+	if(!offsetPos) {
 		offsetPos = {x: 0, y: 0};
 	}
 	ctx.strokeStyle = color;
@@ -70,6 +69,16 @@ SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
 	ctx.stroke();
 };
 
+SplitTime.Trace.Type = {
+	SOLID: "solid",
+	FUNCTION: "function",
+	VOID: "void"
+};
+
+SplitTime.Trace.RColor = {
+	SOLID: 255,
+	FUNCTION: 100
+};
 SplitTime.Trace.typeToColor = {
 	"solid": [255, 0, 0, 1],
 	"void": [255, 0, 255, 1],
@@ -92,4 +101,14 @@ SplitTime.Trace.getType = function(r, g, b, a) {
 		a = 1;
 	}
 	return SplitTime.Trace.colorToType[r + "," + g + "," + b + "," + a];
+};
+
+SplitTime.Trace.getFunctionColor = function(id) {
+	var b = id % 256;
+	var g = Math.floor(id / 256);
+	return "rgba(" + SplitTime.Trace.RColor.FUNCTION + ", " + g + ", " + b + ", 1)";
+};
+
+SplitTime.Trace.getFunctionIdFromColor = function(r, g, b, a) {
+	return b + 256 * g;
 };

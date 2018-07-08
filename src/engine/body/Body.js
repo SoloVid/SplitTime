@@ -35,16 +35,15 @@ SplitTime.Body.prototype.getChildren = function() {
 	return this.childrenBolted.concat(this.childrenLoose);
 };
 
+SplitTime.Body.prototype.isCurrentPlayer = function() {
+	return this === SplitTime.Player.getActiveBody();
+};
+
 SplitTime.Body.prototype.staticTrace = [];
 SplitTime.Body.prototype.addStaticTrace = function(traceStr, type) {
 	if(this.staticTrace.length === 0)
 		this.staticTrace = [];
 	this.staticTrace.push({traceStr: traceStr, type: type});
-};
-
-// Called by zeldaStep() for first time pixel of color is crossed
-SplitTime.Body.prototype.crossPixel = function(r, g, b, a) {
-
 };
 
 SplitTime.Body.prototype.xres = 32;

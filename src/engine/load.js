@@ -96,30 +96,29 @@ SplitTime.launch = function(callback, width, height, parentId) {
 
 				//Pull positions from file
 				for(index = 0; index < data.getElementsByTagName("position").length; index++) {
-					var position = data.getElementsByTagName("position")[index];
+					var posNode = data.getElementsByTagName("position")[index];
 
-                    // TODO: create Position class
-                    var obj = {};
-					obj.levelId = levelName;
-					obj.x = +position.getAttribute("x");
-					obj.y = +position.getAttribute("y");
-					obj.z = +position.getAttribute("layer");
-					obj.dir = +position.getAttribute("dir");
-					obj.stance = position.getAttribute("stance");
+                    var position = new SplitTime.Position(
+                    	level,
+						+posNode.getAttribute("x"),
+                        +posNode.getAttribute("y"),
+                        +posNode.getAttribute("layer"),
+                        +posNode.getAttribute("dir"),
+                        posNode.getAttribute("stance")
+					);
 
-					var id = position.getAttribute("id");
+					var id = posNode.getAttribute("id");
 					if(id) {
-						level.registerPosition(id, obj);
-					}
-					else {
+						level.registerPosition(id, position);
+					} else {
 						console.warn("position missing id in level: " + levelName);
 					}
 
-					var actor = position.getElementsByTagName("alias")[0].getAttribute("actor");
-					var alias = position.getElementsByTagName("alias")[0].textContent;
+					var actor = posNode.getElementsByTagName("alias")[0].getAttribute("actor");
+					var alias = posNode.getElementsByTagName("alias")[0].textContent;
 
 					if(actor && alias) {
-						SplitTime.Actor[actor].registerPosition(alias, obj);
+						SplitTime.Actor[actor].registerPosition(alias, position);
 					}
 				}
 

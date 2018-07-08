@@ -15,7 +15,7 @@ SplitTime.Body.prototype.getPosition = function(id) {
 SplitTime.Body.prototype.putInPosition = function(position) {
     if(!position) return;
 
-    this.put(position.levelId, position.x, position.y, position.z);
+    this.put(position.level, position.x, position.y, position.z);
     this.dir = position.dir;
     this.requestStance(position.stance);
 };
