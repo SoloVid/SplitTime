@@ -226,12 +226,12 @@ function resizeBoard(x, y) {
 		ctx.canvas.width = BOARDX/getPixelsPerPixel();
 		ctx.canvas.height = BOARDY/getPixelsPerPixel();
 		$(this).width(BOARDX);
-		$(this).height(BOARDX);
+		$(this).height(BOARDY);
 	});
 
 	$(".layerDisplay").each(function() {
 		$(this).width(BOARDX);
-		$(this).height(BOARDX);
+		$(this).height(BOARDY);
 	});
 
 	drawTraces();
@@ -396,8 +396,10 @@ function createLevel(type) {
 		type = prompt("Type: (action/overworld)");
 	}
 
-	levelXML = $.parseXML('<?xml version="1.0" encoding="UTF-8"?><level xmlns="http://www.solovid.com/SplitTime/"></level>', "text/xml");
+	levelXML = $.parseXML('<?xml version="1.0" encoding="UTF-8"?>\n<level xmlns="http://www.solovid.com/SplitTime/">\n</level>', "text/xml");
 	$levelXML = $(levelXML);
+    $levelXML[0].namespaceURI = "http://www.solovid.com/SplitTime/";
+	console.log("namespace: " + $levelXML[0].namespaceURI);
 
 	$levelXML.find("level").append("<type>" + type + "</type>");
 
@@ -519,7 +521,11 @@ function createObject(type, skipXML, index)  {
 }
 
 function exportLevel(XML) {
-	var prettyXML = vkbeautify.xml(/*'<?xml version="1.0" encoding="UTF-8"?>' + */(new XMLSerializer()).serializeToString(XML), "\t");
+	var serialized = /*'<?xml version="1.0" encoding="UTF-8"?>' + */(new XMLSerializer())
+		.serializeToString(XML)
+		.replace(/\s?xmlns=""/g, "");
+    // console.log(serialized);
+	var prettyXML = vkbeautify.xml(serialized, "\t");
 	console.log(prettyXML);
 	return prettyXML;
 }
