@@ -68,37 +68,76 @@ SplitTime.Body.prototype.see = function(ctx) {
 };
 
 SplitTime.Body.prototype.draw = function(ctx) {
-    // Potentially build in a blur between frames
-
     var tImg = this.getImage();
-    var x = -Math.round(this.xres/2) - this.baseOffX;
-    var y = -this.yres - this.baseOffY;
-    ctx.drawImage(tImg, this.sx, this.sy, this.xres, this.yres, x, y, this.xres, this.yres);
+
+    var crop = this.getAnimationFrameCrop(this.dir, this.stance, this.frame);
+    var x = -Math.round(crop.xres/2) - this.baseOffX;
+    var y = -crop.yres - this.baseOffY;
+
+    ctx.drawImage(tImg, crop.sx, crop.sy, crop.xres, crop.yres, x, y, crop.xres, crop.yres);
 };
 
+SplitTime.Body.prototype.getAnimationFrameCrop = function(numDir, stance, frame) {
+    var crop = {
+        xres: this.xres,
+        yres: this.yres,
+        sx: 0,
+        sy: this.yres*frame
+    };
+
+    var column = 0;
+    var dir = SplitTime.Direction.toString(numDir);
+    var simpleDir = SplitTime.Direction.simplifyToCardinal(dir);
+
+    //Allow for non-complicated spritesheets with one column
+    if(!this.stances) {
+        return crop;
+    }
+
+    if(!stance || !(stance in this.stances)) {
+        stance = "default";
+    }
+
+    var dirMap = this.stances[stance];
+    if(!(dirMap instanceof Object)) {
+        column = this.stances[stance];
+    } else {
+        //If shorten intermediate directions to cardinal if they are not specified
+        if(dir in dirMap) {
+            column = dirMap[dir];
+        } else if(simpleDir in dirMap) {
+            column = dirMap[simpleDir];
+        } else {
+            console.warn("Stance " + stance + " missing direction " + dir);
+            column = 0;
+        }
+    }
+
+    crop.sx = this.xres*column;
+    return crop;
+};
+
+// TODO: abstract this?
+SplitTime.Body.prototype.hasIdleAnimation = false;
 SplitTime.Body.prototype.finalizeFrame = function() {
-    var region = this.getRegion();
-    if(!region || this.stance != this.requestedStance || this.requestedFrameReset) {
+    if(this.hasIdleAnimation && this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
     } else {
         //TODO: don't rely on global time passing since we might skip frames at some point
         //i.e. ^^ instantiate a Stabilizer rather than using static method
         //Only update on frame tick
-        if(region.hasSoMuchTimePassed(200)) {
+        if(this.timeStabilizer.isSignaling()) {
             this.frame++;
-            if(this.getImage().height <= this.frame*this.yres)
-            {
-                this.frame = 0;
-            }
+            this.frame %= this.getAnimationFramesAvailable();
         }
     }
 };
 
-SplitTime.Body.prototype.finalizeStance = function() {
-	var column = 0;
-	var dir = SplitTime.Direction.toString(this.dir);
-	var simpleDir = SplitTime.Direction.simplifyToCardinal(dir);
+SplitTime.Body.prototype.getAnimationFramesAvailable = function() {
+    return Math.floor(this.getImage().height / this.yres);
+};
 
+SplitTime.Body.prototype.finalizeStance = function() {
     //Allow for non-complicated spritesheets with one column
     if(!this.stances) {
         return;
@@ -107,27 +146,7 @@ SplitTime.Body.prototype.finalizeStance = function() {
     if(!this.requestedStance || !(this.requestedStance in this.stances)) {
         this.requestedStance = "default";
     }
-    this.finalizeFrame();
     this.stance = this.requestedStance;
-
-    var dirMap = this.stances[this.stance];
-
-    if(!(dirMap instanceof Object)) {
-        column = this.stances[this.stance];
-    } else {
-        //If shorten intermediate directions to cardinal if they are not specified
-        if(dir in dirMap) {
-            column = dirMap[dir];
-        } else if(simpleDir in dirMap) {
-            column = dirMap[simpleDir];
-        } else {
-            console.warn("Stance " + this.stance + " missing direction " + dir);
-            column = 0;
-        }
-    }
-
-    this.sx = this.xres*column;
-    this.sy = this.yres*this.frame;
 };
 
 SplitTime.Body.prototype.requestStance = function(stance, forceReset) {
@@ -141,6 +160,7 @@ SplitTime.Body.prototype.resetStance = function() {
 
 SplitTime.Body.prototype.prepareForRender = function() {
     this.finalizeStance();
+    this.finalizeFrame();
     // TODO: do things like lights
 };
 SplitTime.Body.prototype.cleanupAfterRender = function() {

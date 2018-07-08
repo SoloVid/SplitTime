@@ -120,6 +120,8 @@ SplitTime.Body.prototype.setLevel = function(level) {
         children[i].setLevel(level);
     }
     this._level = level;
+
+    this.timeStabilizer = level.getRegion().getTimeStabilizer(200);
 };
 SplitTime.Body.prototype.getLevel = function() {
 	return this._level;
@@ -127,7 +129,7 @@ SplitTime.Body.prototype.getLevel = function() {
 SplitTime.Body.prototype.getRegion = function() {
 	var level = this.getLevel();
 	if(!level) {
-		return null;
+		return SplitTime.Region.getDefault();
 	}
 	return level.getRegion();
 };

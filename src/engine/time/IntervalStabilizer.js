@@ -70,6 +70,11 @@
             return this._counterSetAt - this._previousCounterSetAt;
         };
 
+        Stabilizer.prototype.getUnroundedCounter = function() {
+            this.checkUpdate();
+            return this._counter;
+        };
+
         Stabilizer.prototype.getCounter = function() {
             this.checkUpdate();
             return Math.round(this._counter);

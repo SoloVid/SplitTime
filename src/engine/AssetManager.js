@@ -1,38 +1,43 @@
 SplitTime.Image = {};
 
-SplitTime.Image.root = "images/";
+(function() {
+	var ROOT = "images/";
+    var map = {};
+    var loadingPromises = {};
 
-SplitTime.Image.map = {};
-
-SplitTime.Image.load = function(relativePath, alias, isPermanent) {
-	var promise = new SLVD.Promise();
-	var t;
-	function onLoad() {
-		if(t.complete) {
-			t.removeEventListener("load", onLoad);
-			promise.resolve(t);
+    SplitTime.Image.load = function(relativePath, alias, isPermanent) {
+    	if(relativePath in loadingPromises) {
+    		return loadingPromises[relativePath];
 		}
-	}
 
-	if(!(relativePath in SplitTime.Image.map)) {
-		t = new Image();
-		t.addEventListener("load", onLoad);
-		t.src = SplitTime.Image.root + relativePath;
-		SplitTime.Image.map[relativePath] = t;
-		if(alias) {
-			SplitTime.Image.map[alias] = t;
-		}
-	}
-	else {
-		promise.resolve(SplitTime.Image.map[relativePath]);
-	}
+        var promise = new SLVD.Promise();
+        var loadingImage;
 
-	return promise;
-};
+        function onLoad() {
+            if(loadingImage.complete) {
+                loadingImage.removeEventListener("load", onLoad);
+                promise.resolve(loadingImage);
+            }
+        }
 
-SplitTime.Image.get = function(name) {
-	if(!SplitTime.Image.map[name]) {
-		SplitTime.Image.load(name);
-	}
-	return SplitTime.Image.map[name];
-};
+        if(!(relativePath in loadingPromises)) {
+            loadingImage = new Image();
+            loadingImage.addEventListener("load", onLoad);
+            loadingImage.src = ROOT + relativePath;
+            loadingPromises[relativePath] = promise;
+            map[relativePath] = loadingImage;
+            if(alias) {
+                map[alias] = loadingImage;
+            }
+        }
+
+        return promise;
+    };
+
+    SplitTime.Image.get = function(name) {
+        if(!map[name]) {
+            SplitTime.Image.load(name);
+        }
+        return map[name];
+    };
+} ());

@@ -1,7 +1,7 @@
 dependsOn("/SLVD/Promise.js");
 
 SplitTime.launch = function(callback, width, height, parentId) {
-	SplitTime.startUp = callback || function() {};
+	var startUpCallback = callback || function() {};
 	if(width && height) {
 		SplitTime.SCREENX = width;
 		SplitTime.SCREENY = height;
@@ -59,25 +59,22 @@ SplitTime.launch = function(callback, width, height, parentId) {
 			SplitTime.audio[filename] = SplitTime.audio[second];
 		}
 
-		var iLevel = 0;
-
 		function makeLevelXMLHandler(filename) {
 			var levelName = filename.replace(/\.xml$/, "");
 			return function(data) {
 				var level = SplitTime.Level.get(levelName);
+				var levelLoadPromise = new SLVD.Promise.Collection();
 
                 SplitTime.Region.get(data.getElementsByTagName("type")[0].textContent).addLevel(level);
 
                 // TODO: move subsequent stuff to other files (like Level.js)
 
-				// TODO: create Position class
 				level.filedata = data;
 				level.layerImg = [];
 				level.layerFuncData = [];
                 level.type = data.getElementsByTagName("type")[0].textContent;
 				level.width = 0;
 				level.height = 0;
-				level.load = new SLVD.Promise.Collection();
 
 				function onloadImage(layerImg) {
 					if(layerImg.height > level.height)
@@ -94,14 +91,15 @@ SplitTime.launch = function(callback, width, height, parentId) {
 					t = data.getElementsByTagName("background")[iLayerImg].textContent;
 					level.layerImg[iLayerImg] = t;
 					var loadProm = SplitTime.Image.load(t).then(onloadImage);
-					level.load.add(loadProm);
+					levelLoadPromise.add(loadProm);
 				}
 
 				//Pull positions from file
 				for(index = 0; index < data.getElementsByTagName("position").length; index++) {
 					var position = data.getElementsByTagName("position")[index];
 
-					var obj = {};
+                    // TODO: create Position class
+                    var obj = {};
 					obj.levelId = levelName;
 					obj.x = +position.getAttribute("x");
 					obj.y = +position.getAttribute("y");
@@ -127,11 +125,14 @@ SplitTime.launch = function(callback, width, height, parentId) {
 
 				incrementAndUpdateLoading();
 
+				level.setLoadPromise(levelLoadPromise);
+
 				return loadOneLevel();
 			};
 		}
 
-		function loadOneLevel() {
+        var iLevel = 0;
+        function loadOneLevel() {
 			var iLevelLocal = iLevel++;
 
 			if(iLevelLocal >= master.getElementsByTagName("level").length) {
@@ -149,19 +150,15 @@ SplitTime.launch = function(callback, width, height, parentId) {
 		}
 
 		//Begin recursion
-		promiseCollection.then(function(data) {
-			SplitTime.launch.load.resolve();
-
+		promiseCollection.then(function() {
 			//Begin main loop
 			SplitTime.main();
 
 			//If done SplitTime.loading, startup (in the initialize.js file)
-			SplitTime.startUp();
+            startUpCallback();
 		});
 	});
 };
-
-SplitTime.launch.load = new SLVD.Promise();
 
 SplitTime.launch.createCanvases = function(width, height, parentId) {
 	var parent = document.body;

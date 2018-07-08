@@ -12,7 +12,12 @@ SLVD.Promise.prototype.then = function(callBack) {
 	}
 
 	if(this.isResolved()) {
-		return callBack(this.data);
+		var result = callBack(this.data);
+		if(result instanceof SLVD.Promise) {
+			return result;
+		} else {
+			return SLVD.Promise.as(result);
+		}
 	}
 	else {
 		this.callBacks.push(callBack);
@@ -37,7 +42,7 @@ SLVD.Promise.prototype.resolve = function(data) {
 
 		var result = callBack(data);
 
-		if((result instanceof SLVD.Promise)) { //callback returned promise
+		if(result instanceof SLVD.Promise) { //callback returned promise
 			var tPromise = result;
 			if(tPromise.isResolved()) { //callback returned resolved promise
 				babyPromise.resolve(tPromise.data);
@@ -64,11 +69,15 @@ SLVD.Promise.as = function(data) {
 	return prom;
 };
 SLVD.Promise.when = function(arr) {
-    if(arguments.length == 1 && Array.isArray(arr)) {
-        return SLVD.Promise.when.apply(this, arr);
-    }
+	if(!Array.isArray(arr)) {
+		var newArr = new Array(arguments.length);
+		for(var i = 0; i < arguments.length; i++) {
+			newArr[i] = arguments[i];
+		}
+		return SLVD.Promise.when(newArr);
+	}
+
     var prom = new SLVD.Promise();
-    var promiseCount = arguments.length;
     var results = [];
 
     function addResult(index, data) {
@@ -76,7 +85,7 @@ SLVD.Promise.when = function(arr) {
     }
 
     function checkResolve() {
-        for(var iResult = 0; iResult < promiseCount; iResult++) {
+        for(var iResult = 0; iResult < arr.length; iResult++) {
             if(!(iResult in results)) {
                 return false;
             }
@@ -92,14 +101,18 @@ SLVD.Promise.when = function(arr) {
         };
     }
 
-    for(var iPromise = 0; iPromise < arguments.length; iPromise++) {
-        arguments[iPromise].then(makeSingleResolveHandler(iPromise));
+    for(var iPromise = 0; iPromise < arr.length; iPromise++) {
+        arr[iPromise].then(makeSingleResolveHandler(iPromise));
     }
     return prom;
 };
 SLVD.Promise.whenAny = function(arr) {
-    if(arguments.length == 1 && Array.isArray(arr)) {
-        return SLVD.Promise.whenAny.apply(this, arr);
+    if(!Array.isArray(arr)) {
+        var newArr = new Array(arguments.length);
+        for(var i = 0; i < arguments.length; i++) {
+            newArr[i] = arguments[i];
+        }
+        return SLVD.Promise.whenAny(newArr);
     }
 
     var prom = new SLVD.Promise();
@@ -112,8 +125,8 @@ SLVD.Promise.whenAny = function(arr) {
         }
     }
 
-    for(var iPromise = 0; iPromise < arguments.length; iPromise++) {
-        arguments[iPromise].then(callback);
+    for(var iPromise = 0; iPromise < arr.length; iPromise++) {
+        arr[iPromise].then(callback);
     }
 
     return prom;

@@ -386,8 +386,8 @@ function updateObject(type, index) {
 	});
 
 	t.dir = XMLNode.attr("dir");
-	t.finalizeStance();
-	HTMLImg.css("left", (-t.sx + "px"));
+	var crop = t.getAnimationFrameCrop(t.dir, t.stance, 0);
+	HTMLImg.css("left", (-crop.sx + "px"));
 }
 
 function createLevel(type) {

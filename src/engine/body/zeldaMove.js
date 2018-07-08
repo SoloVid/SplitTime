@@ -74,7 +74,7 @@ SplitTime.Body.prototype.zeldaCheckStepBodies = function() {
 						//The .pushing here ensures that there is no infinite loop of pushing back and forth
 						if(this.pushy && body.pushy && this.pushedBodies.indexOf(body) < 0) {
 							this.pushing = true; //prevent counter-push
-							var moved = body.zeldaBump(this._totalStepDistance/2, dirToOther);
+							var moved = body.zeldaBump(this._totalStepDistance/2, this.dir);
 							this.pushing = false;
 
 							if(moved) {
@@ -148,8 +148,7 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
             this.x += ihat;
             if(this.x >= level.width || this.x < 0) {
                 outX = true;
-            }
-            else {
+            } else {
                 stoppedX = !this.zeldaCheckStep("x", "y", dx > 0);
             }
 
@@ -168,8 +167,7 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
             //Check if out of bounds
             if(this.y >= level.height || this.y < 0) {
                 outY = true;
-            }
-            else {
+            } else {
                 stoppedY = !this.zeldaCheckStep("y", "x", dy > 0);
             }
 

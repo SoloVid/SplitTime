@@ -5,6 +5,18 @@ SplitTime.Level = function(levelId) {
     this.region = null;
     this.agents = [];
     this.bodies = [];
+    this.loadPromise = new SLVD.Promise();
+};
+
+SplitTime.Level.prototype.setLoadPromise = function(actualLoadPromise) {
+    var me = this;
+    actualLoadPromise.then(function() {
+        me.loadPromise.resolve();
+    });
+};
+
+SplitTime.Level.prototype.waitForLoadAssets = function() {
+    return this.loadPromise;
 };
 
 SplitTime.Level.prototype.getRegion = function() {
@@ -233,14 +245,11 @@ SplitTime.Level.prototype.removeBody = function(element) {
 
         // TODO: This loading should take place at the region level; not the level level
         SplitTime.process = "loading";
-        currentLevel.load.then(function() {
+        currentLevel.waitForLoadAssets().then(function() {
             SplitTime.process = currentLevel.type;
-            if(SplitTime.process == "action")
-            {
+            if(SplitTime.process == "action") {
                 SplitTime.cTeam = SplitTime.player;
-            }
-            else if(SplitTime.process == "overworld")
-            {
+            } else if(SplitTime.process == "overworld") {
                 SplitTime.cTeam = SplitTime.player;
                 SplitTime.currentPlayer = -1;
                 SplitTime.TRPGNextTurn();

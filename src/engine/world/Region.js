@@ -13,9 +13,10 @@ SplitTime.Region.prototype.getTimeMs = function() {
 SplitTime.Region.prototype.getTimeStabilizer = function(msPerStep, maxCounter) {
     return new this.TimeStabilizer(msPerStep, maxCounter);
 };
-SplitTime.Region.prototype.hasSoMuchTimePassed = function(milliseconds) {
-    return this.TimeStabilizer.haveSoManyMsPassed(milliseconds);
-};
+//This method may be dangerous for synchronization across skipped frames
+// SplitTime.Region.prototype.hasSoMuchTimePassed = function(milliseconds) {
+//     return this.TimeStabilizer.haveSoManyMsPassed(milliseconds);
+// };
 
 SplitTime.Region.prototype.addLevel = function(level) {
     this.levels.push(level);
@@ -33,6 +34,7 @@ SplitTime.Region.prototype.getAgents = function() {
 
 (function() {
     var regionMap = {};
+    var defaultRegion = new SplitTime.Region();
 
     SplitTime.Region.get = function(regionId) {
         if(!regionMap[regionId]) {
@@ -47,5 +49,9 @@ SplitTime.Region.prototype.getAgents = function() {
             return null;
         }
         return currentLevel.getRegion();
+    };
+
+    SplitTime.Region.getDefault = function() {
+        return defaultRegion;
     };
 } ());
