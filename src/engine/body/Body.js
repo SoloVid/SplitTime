@@ -42,6 +42,11 @@ SplitTime.Body.prototype.addStaticTrace = function(traceStr, type) {
 	this.staticTrace.push({traceStr: traceStr, type: type});
 };
 
+// Called by zeldaStep() for first time pixel of color is crossed
+SplitTime.Body.prototype.crossPixel = function(r, g, b, a) {
+
+};
+
 SplitTime.Body.prototype.xres = 32;
 SplitTime.Body.prototype.yres = 64;
 

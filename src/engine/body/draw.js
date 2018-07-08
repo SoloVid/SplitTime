@@ -81,6 +81,8 @@ SplitTime.Body.prototype.finalizeFrame = function() {
     if(!region || this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
     } else {
+        //TODO: don't rely on global time passing since we might skip frames at some point
+        //i.e. ^^ instantiate a Stabilizer rather than using static method
         //Only update on frame tick
         if(region.hasSoMuchTimePassed(200)) {
             this.frame++;

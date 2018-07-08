@@ -6,18 +6,11 @@ SplitTime.Player = {};
         return activeBody;
     };
     SplitTime.Player.setActiveBody = function(body) {
-        var updateFocusedBody = false;
-        var focusedBody = SplitTime.Body.getFocused();
-        if(focusedBody === null || focusedBody === activeBody) {
-            updateFocusedBody = true;
-        }
         activeBody = body;
-        if(updateFocusedBody) {
-            SplitTime.Player.focusCameraOnActiveBody();
-        }
+        SplitTime.Player.focusCameraOnActiveBody();
     };
 
     SplitTime.Player.focusCameraOnActiveBody = function() {
-        SplitTime.Body.setFocused(activeBody);
+        SplitTime.BoardRenderer.setFocusPoint(activeBody);
     };
 } ());

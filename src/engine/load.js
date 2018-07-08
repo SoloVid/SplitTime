@@ -68,6 +68,9 @@ SplitTime.launch = function(callback, width, height, parentId) {
 
                 SplitTime.Region.get(data.getElementsByTagName("type")[0].textContent).addLevel(level);
 
+                // TODO: move subsequent stuff to other files (like Level.js)
+
+				// TODO: create Position class
 				level.filedata = data;
 				level.layerImg = [];
 				level.layerFuncData = [];

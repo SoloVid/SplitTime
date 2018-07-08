@@ -21,7 +21,7 @@ SplitTime.Body.prototype.zeldaBump = function(distance, direction) {
 	return moved;
 };
 SplitTime.Body.prototype.zeldaCheckStep = function(axis, altAxis, isPositive) {
-	return this.zeldaCheckStepTraces(axis, altAxis, isPositive);// || this.zeldaCheckStepBodies();
+	return this.zeldaCheckStepTraces(axis, altAxis, isPositive) && this.zeldaCheckStepBodies();
 };
 SplitTime.Body.prototype.zeldaCheckStepTraces = function(axis, altAxis, isPositive) {
 	var coords = {};
@@ -39,42 +39,47 @@ SplitTime.Body.prototype.zeldaCheckStepTraces = function(axis, altAxis, isPositi
 		var g = data.data[dataIndex++];
 		var b = data.data[dataIndex++];
 		var a = data.data[dataIndex++];
-		if(r == 255) {
-			if(this.inAir == 1 && g == 255) { }
-			else //Otherwise, stop person
-			{
-				return true;
-			}
-		} else if(r == 100 && g === 0) {
-			//Prepare function
-			resumeFunc = level.boardProgram[b];
-			resumeCue = resumeFunc(0);
-		}
+		if(r === 255) {
+			return false;
+		} else if(a !== 0) {
+			var colorId = r + "," + g + "," + b + "," + a;
+			if(this._pixelsCrossed[colorId] === undefined) {
+                try {
+                    this._pixelsCrossed[colorId] = this.crossPixel(r, g, b, a) !== false;
+				} catch(ex) {
+                	console.error(ex);
+				}
+            }
+            if(!this._pixelsCrossed[colorId]) {
+                return false;
+            }
+        }
 	}
+	return true;
 };
 SplitTime.Body.prototype.zeldaCheckStepBodies = function() {
-	var refinedNearbyBodies = [];
+	// var refinedNearbyBodies = [];
 	//Check for collision with people
 	for(var i = 0; i < this.nearbyBodies.length; i++) {
-		var currentAgent = this.nearbyBodies[i];
-		if(this.team != currentAgent.team && currentAgent.baseLength > 0) {
-			var collisionDist = (this.baseLength + currentAgent.baseLength)/2;
-			var potentialCollisionDist = this.stepDistanceRemaining + collisionDist;
-			var dx = Math.abs(this.x - currentAgent.x);
-			var dy = Math.abs(this.y - currentAgent.y);
-			if(dx < potentialCollisionDist && dy < potentialCollisionDist) {
+		var body = this.nearbyBodies[i];
+		if(this.team != body.team && body.baseLength > 0) {
+			var collisionDist = (this.baseLength + body.baseLength)/2;
+			// var potentialCollisionDist = this.stepDistanceRemaining + collisionDist;
+			var dx = Math.abs(this.x - body.x);
+			var dy = Math.abs(this.y - body.y);
+			// if(dx < potentialCollisionDist && dy < potentialCollisionDist) {
 				if(dx < collisionDist && dy < collisionDist) {
-					var dirToOther = SplitTime.Direction.fromTo(this.x, this.y, currentAgent.x, currentAgent.y);
+					var dirToOther = SplitTime.Direction.fromTo(this.x, this.y, body.x, body.y);
 					if(SplitTime.Direction.areWithin90Degrees(this.dir, dirToOther)) {
 						//The .pushing here ensures that there is no infinite loop of pushing back and forth
-						if(this.pushy && currentAgent.pushy && this.pushedBodies.indexOf(currentAgent) < 0) {
+						if(this.pushy && body.pushy && this.pushedBodies.indexOf(body) < 0) {
 							this.pushing = true; //prevent counter-push
-							var moved = currentAgent.zeldaBump(this.spd/2, this.dir);
+							var moved = body.zeldaBump(this._totalStepDistance/2, this.dir);
 							this.pushing = false;
 
 							if(moved) {
 								//Don't repush the same body
-								this.pushedBodies.push(currentAgent);
+								this.pushedBodies.push(body);
 
 								//Rerun this iteration of the loop
 								i--;
@@ -82,15 +87,16 @@ SplitTime.Body.prototype.zeldaCheckStepBodies = function() {
 							}
 						}
 						//Hit a body we couldn't push
-						return true;
+						return false;
 					}
 				}
-				refinedNearbyBodies.push(currentAgent);
-			}
+				// refinedNearbyBodies.push(body);
+			// }
 		}
 	}
 
-	this.nearbyBodies = refinedNearbyBodies;
+	// this.nearbyBodies = refinedNearbyBodies;
+	return true;
 };
 SplitTime.Body.prototype.zeldaLockOnPlayer = function() {
 	var player = SplitTime.Player.getActiveBody();
@@ -115,10 +121,13 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
 	var jhat = dyRounded/ady;
 	var ihat = dxRounded/adx;
 
-	this.stepDistanceRemaining = adx + ady;
+	this._totalStepDistance = distance;
+	// this.stepDistanceRemaining = adx + ady;
 	// TODO: put some logic for nearby agents in Level
-	this.nearbyBodies = level.getAgents();
+    // this.nearbyBodies = level.getBodies();
+    this.nearbyBodies = level.getBodiesWithin(this, this.baseLength / 2);
 	this.pushedBodies = [];
+	this._pixelsCrossed = {};
 
 	// TODO: intertwine x and y pixel steps
 
@@ -132,10 +141,10 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
 		if(this.y >= level.height || this.y < 0) {
             outY = true;
 		} else {
-            stoppedY = this.zeldaCheckStep("y", "x", dy > 0);
+            stoppedY = !this.zeldaCheckStep("y", "x", dy > 0);
 		}
 
-        this.stepDistanceRemaining--;
+        // this.stepDistanceRemaining--;
 
 		if(stoppedY || outY) {
 			this.y -= jhat;
@@ -160,10 +169,10 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
 		if(this.x >= level.width || this.x < 0) {
 			outX = true;
 		} else {
-			stoppedX = this.zeldaCheckStep("x", "y", dx > 0);
+			stoppedX = !this.zeldaCheckStep("x", "y", dx > 0);
 		}
 
-        this.stepDistanceRemaining--;
+        // this.stepDistanceRemaining--;
 
         if(stoppedX || outX) {
 			this.x -= ihat;
@@ -181,7 +190,7 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
 
     this.nearbyBodies = null;
     this.pushedBodies = null;
-    this.stepDistanceRemaining = null;
+    // this.stepDistanceRemaining = null;
 
     //If stopped, help person out by sliding around corner
     var stopped = stoppedX || stoppedY;
@@ -229,9 +238,9 @@ SplitTime.Body.prototype.zeldaSlide = function(maxDistance) {
     var isPositiveCornerOpen = level.layerFuncData[z].data[iPositiveCorner] !== 255;
     var isNegativeCornerOpen = level.layerFuncData[z].data[iNegativeCorner] !== 255;
 
-    if(SplitTime.FrameStabilizer.haveSoManyMsPassed(200)) {
-        console.log("positive: " + positiveDiagonal + " (" + isPositiveCornerOpen + "), negative: " + negativeDiagonal + " (" + isNegativeCornerOpen + ")");
-    }
+    // if(SplitTime.FrameStabilizer.haveSoManyMsPassed(200)) {
+    //     console.log("positive: " + positiveDiagonal + " (" + isPositiveCornerOpen + "), negative: " + negativeDiagonal + " (" + isNegativeCornerOpen + ")");
+    // }
 
     if(isPositiveCornerOpen && isNegativeCornerOpen) {
     	// Tie; do nothing

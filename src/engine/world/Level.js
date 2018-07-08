@@ -45,6 +45,28 @@ SplitTime.Level.prototype.getBodies = function() {
     return this.bodies;
 };
 
+// TODO: optimize
+SplitTime.Level.prototype.getBodiesWithin = function(point, distance) {
+    var bodies = this.bodies;
+    var totalBodies = bodies.length;
+    var nearbyBodies = new Array(totalBodies);
+    var length = 0;
+    //Check for collision with people
+    for(var i = 0; i < totalBodies; i++) {
+        var body = bodies[i];
+        var potentialClosestDist = distance + body.baseLength/2;
+        var dx = Math.abs(point.x - body.x);
+        var dy = Math.abs(point.y - body.y);
+        if(dx < potentialClosestDist || dy < potentialClosestDist) {
+            nearbyBodies[length++] = body;
+            // nearbyBodies.push(body);
+        }
+    }
+
+    nearbyBodies.length = length;
+    return nearbyBodies;
+};
+
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
     this.agents.length = 0;
@@ -137,6 +159,42 @@ SplitTime.Level.prototype.removeBody = function(element) {
 
     var holderCanvas;
 
+    SplitTime.Level.prototype.loadForPlay = function() {
+        this.refetchBodies();
+
+        //Initialize functional map
+        for(var iLayer = 0; iLayer < this.filedata.getElementsByTagName("layer").length; iLayer++) {
+            holderCanvas.width = this.width/(this.type == "overworld" ? 32 : 1);
+            holderCanvas.height = this.height/(this.type == "overworld" ? 32 : 1);
+            var holderCtx = holderCanvas.getContext("2d");
+            holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
+
+            //Draw traces
+            var layerTraces = this.filedata.getElementsByTagName("layer")[iLayer].getElementsByTagName("trace");
+
+            holderCtx.translate(0.5, 0.5);
+
+            for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
+                SplitTime.Trace.draw(layerTraces[iLayerTrace].textContent, holderCtx, layerTraces[iLayerTrace].getAttribute("type"));
+            }
+            var bodies = this.getBodies();
+            for(var iBody = 0; iBody < bodies.length; iBody++) {
+                var cBody = bodies[iBody];
+                if(cBody.z == iLayer) {
+                    for(var iStaticTrace = 0; iStaticTrace < cBody.staticTrace.length; iStaticTrace++) {
+                        SplitTime.Trace.draw(cBody.staticTrace[iStaticTrace].traceStr, holderCtx, cBody.staticTrace[iStaticTrace].type, cBody);
+                    }
+                }
+            }
+            holderCtx.translate(-0.5, -0.5);
+
+            this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, this.width, this.height);
+        }
+
+        var enterFunctionId = this.filedata.getElementsByTagName("enterFunction")[0].textContent;
+        this.runFunction(enterFunctionId);
+    };
+
     SplitTime.Level.createCanvases = function(screenWidth, screenHeight) {
         holderCanvas = document.createElement("canvas");
         holderCanvas.setAttribute("width", SplitTime.SCREENX);
@@ -162,16 +220,18 @@ SplitTime.Level.prototype.removeBody = function(element) {
 
         //TODO: give agents a chance to clean up
 
-        if(exitingLevel) {
-            var exitFunctionId = exitingLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
-            exitingLevel.runFunction(exitFunctionId);
-
-            //Clear out all functional maps
-            exitingLevel.layerFuncData.length = 0;
-        }
+        // TODO: clear exiting board data; probably in context of region rather than level
+        // if(exitingLevel) {
+        //     var exitFunctionId = exitingLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
+        //     exitingLevel.runFunction(exitFunctionId);
+        //
+        //     //Clear out all functional maps
+        //     exitingLevel.layerFuncData.length = 0;
+        // }
 
         //********Enter new board
 
+        // TODO: This loading should take place at the region level; not the level level
         SplitTime.process = "loading";
         currentLevel.load.then(function() {
             SplitTime.process = currentLevel.type;
@@ -186,43 +246,7 @@ SplitTime.Level.prototype.removeBody = function(element) {
                 SplitTime.TRPGNextTurn();
             }
 
-            currentLevel.refetchBodies();
-
-            //Initialize functional map
-            for(var iLayer = 0; iLayer < currentLevel.filedata.getElementsByTagName("layer").length; iLayer++)
-            {
-                holderCanvas.width = currentLevel.width/(currentLevel.type == "overworld" ? 32 : 1);
-                holderCanvas.height = currentLevel.height/(currentLevel.type == "overworld" ? 32 : 1);
-                var holderCtx = holderCanvas.getContext("2d");
-                holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
-
-                //Draw traces
-                var layerTraces = currentLevel.filedata.getElementsByTagName("layer")[iLayer].getElementsByTagName("trace");
-
-                holderCtx.translate(0.5, 0.5);
-
-                for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
-                    SplitTime.Trace.draw(layerTraces[iLayerTrace].textContent, holderCtx, layerTraces[iLayerTrace].getAttribute("type"));
-                }
-                var bodies = currentLevel.getBodies();
-                for(var iBody = 0; iBody < bodies.length; iBody++)
-                {
-                    var cBody = bodies[iBody];
-                    if(cBody.z == iLayer)
-                    {
-                        for(var iStaticTrace = 0; iStaticTrace < cBody.staticTrace.length; iStaticTrace++)
-                        {
-                            SplitTime.Trace.draw(cBody.staticTrace[iStaticTrace].traceStr, holderCtx, cBody.staticTrace[iStaticTrace].type, cBody);
-                        }
-                    }
-                }
-                holderCtx.translate(-0.5, -0.5);
-
-                currentLevel.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, currentLevel.width, currentLevel.height);
-            }
-
-            var enterFunctionId = currentLevel.filedata.getElementsByTagName("enterFunction")[0].textContent;
-            currentLevel.runFunction(enterFunctionId);
+            currentLevel.loadForPlay();
         });
     };
 

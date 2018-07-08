@@ -58,10 +58,16 @@
                 this._counter += (recentFrameTime - this._counterSetAt) / this.msPerFrame;
                 this._isClockFrame = this._counter >= this.maxCounter;
                 this._counter %= this.maxCounter;
+                this._previousCounterSetAt = this._counterSetAt;
                 this._counterSetAt = recentFrameTime;
             } else if(ticksSameTime > 0) {
                 this._isClockFrame = false;
             }
+        };
+
+        Stabilizer.prototype.howManyMsSinceLastTick = function() {
+            this.checkUpdate();
+            return this._counterSetAt - this._previousCounterSetAt;
         };
 
         Stabilizer.prototype.getCounter = function() {
