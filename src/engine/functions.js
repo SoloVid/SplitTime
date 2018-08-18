@@ -71,9 +71,15 @@ SplitTime.getPixel = function(x, y, data) {
 	return pixArray;//data.data.slice(i, i + 4);
 };
 
-//Gets the index on canvas data of given coordinates
-SplitTime.pixCoordToIndex = function(x,y,dat) {
- return (y*dat.width + x)*4;
+/**
+ * Gets the index on canvas data of given coordinates
+ * @param {int} x
+ * @param {int} y
+ * @param {ImageData} data Collision canvas data array
+ * @returns {int}
+ */
+SplitTime.pixCoordToIndex = function(x,y,data) {
+	return (y*data.width + x)*4;
 };
 
 //Like SplitTime.enterLevelById() with coordinates

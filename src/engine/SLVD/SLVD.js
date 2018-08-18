@@ -1,4 +1,4 @@
-var SLVD = {};
+window.SLVD = {};
 
 SLVD.speedCheck = function(name, comparison) {
 	this.date = new Date();

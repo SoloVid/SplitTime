@@ -4,7 +4,10 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         oconcat: {
             options: {
-                separator: ';\n'
+                separator: ';\n',
+                process: function(src, filepath) {
+                    return '(function() {\n' + src + '\n} ());';
+                }
             },
             engine: {
                 options: {

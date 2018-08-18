@@ -13,7 +13,7 @@ SplitTime.Action.LaunchProjectile = function(projectile, recoveryTime, probabili
 		this.rcvr = recoveryTime;
 	}
 };
-SplitTime.Action.LaunchProjectile.prototype = new BaseAction();
+SplitTime.Action.LaunchProjectile.prototype = new SplitTime.Action.BaseAction();
 SplitTime.Action.LaunchProjectile.prototype.constructor = SplitTime.Action.LaunchProjectile;
 SplitTime.Action.LaunchProjectile.prototype.type = "throw";
 

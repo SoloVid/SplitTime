@@ -1,5 +1,7 @@
 dependsOn("Body.js");
 
+SplitTime.Body.prototype.lightIntensity = 0;
+SplitTime.Body.prototype.lightRadius = 150;
 SplitTime.Body.prototype.sx = 0;
 SplitTime.Body.prototype.sy = 0;
 SplitTime.Body.prototype.stance = "default";

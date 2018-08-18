@@ -102,6 +102,10 @@ SplitTime.Body.prototype.dir = 3;
 // SplitTime.Body.prototype.steps = 0;// = 5;
 // SplitTime.Body.prototype.wait = undefined;// = 0;
 
+SplitTime.Body.prototype.isInCurrentLevel = function() {
+    return this.getLevel() === SplitTime.Level.getCurrent();
+};
+
 SplitTime.Body.prototype.put = function(level, x, y, layer) {
 	this.setLevel(level);
 	this.setX(x);
@@ -114,11 +118,17 @@ SplitTime.Body.prototype.setLevel = function(level) {
 		level = SplitTime.Level.get(level);
 	}
 
+	if(this._level) {
+		this._level.removeBody(this);
+	}
+
+    this._level = level;
+    this._level.insertBody(this);
+
     var children = this.getChildren();
     for(var i = 0; i < children.length; i++) {
         children[i].setLevel(level);
     }
-    this._level = level;
 
     this.timeStabilizer = level.getRegion().getTimeStabilizer(200);
 };

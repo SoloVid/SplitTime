@@ -1,6 +1,4 @@
-var t, T; //Used in various places; declared here to avoid multiple declarations
-
-var SplitTime = {};
+window.SplitTime = {};
 
 //implied SplitTime.SAVE object from load.js
 SplitTime.SAVE = {};
@@ -33,7 +31,7 @@ SplitTime.FPS = 50;
 SplitTime.msPerFrame = (1/SplitTime.FPS)*1000;
 SplitTime.showFPS = false;
 
-function dependsOn(filename) {
+window.dependsOn = function(filename) {
     // This function should never be called. Ordered concat uses a pretend function of this name.
     console.error("dependsOn() (" + filename + ") should have been removed by ordered concat");
-}
+};

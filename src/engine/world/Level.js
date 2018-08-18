@@ -1,3 +1,8 @@
+/**
+ * @param {string} levelId
+ * @constructor
+ * @property {ImageData[]} layerFuncData
+ */
 SplitTime.Level = function(levelId) {
     this.id = levelId;
     this.functions = {};
@@ -5,6 +10,11 @@ SplitTime.Level = function(levelId) {
     this.region = null;
     this.bodies = [];
     this.loadPromise = new SLVD.Promise();
+    this.layerImg = [];
+    this.layerFuncData = [];
+
+    /** @type {SplitTime.WeatherRenderer} */
+    this.weatherRenderer = new SplitTime.WeatherRenderer();
 };
 
 SplitTime.Level.prototype.setLoadPromise = function(actualLoadPromise) {
@@ -47,6 +57,19 @@ SplitTime.Level.prototype.runFunction = function(functionId, param) {
     return fun(param);
 };
 
+/**
+ *
+ * @param {SplitTime.Agent.Callback} callback
+ */
+SplitTime.Level.prototype.forEachAgent = function(callback) {
+    for(var i = 0; i < this.bodies.length; i++) {
+        var agent = this.bodies[i].getAgent();
+        if(agent) {
+            callback(agent);
+        }
+    }
+};
+
 SplitTime.Level.prototype.getAgents = function() {
     // TODO: implement
     var agents = [];
@@ -59,6 +82,9 @@ SplitTime.Level.prototype.getAgents = function() {
     return agents;
 };
 
+/**
+ * @returns {SplitTime.Body[]}
+ */
 SplitTime.Level.prototype.getBodies = function() {
     // TODO: implement
     return this.bodies;
@@ -152,6 +178,9 @@ SplitTime.Level.prototype.sortBodies = function() {
     }
 };
 
+/**
+ * @param {SplitTime.Body} element
+ */
 SplitTime.Level.prototype.insertBody = function(element) {
     var index = 0;
     while(index < this.bodies.length && element.y > this.bodies[index].y) {
@@ -160,6 +189,9 @@ SplitTime.Level.prototype.insertBody = function(element) {
     this.bodies.splice(index, 0, element);
 };
 
+/**
+ * @param {SplitTime.Body} element
+ */
 SplitTime.Level.prototype.removeBody = function(element) {
     for(var index = 0; index < this.bodies.length; index++) {
         if(element == this.bodies[index]) {
@@ -169,113 +201,118 @@ SplitTime.Level.prototype.removeBody = function(element) {
     }
 };
 
-(function() {
-    var levelMap = {};
-    var currentLevel = null;
+var levelMap = {};
+var currentLevel = null;
 
-    var holderCanvas;
+var holderCanvas;
 
-    SplitTime.Level.prototype.loadForPlay = function() {
-        this.refetchBodies();
+SplitTime.Level.prototype.loadForPlay = function() {
+    this.refetchBodies();
 
-        this.internalFunctionIdMap = {};
-        var nextFunctionId = 1;
+    this.internalFunctionIdMap = {};
+    var nextFunctionId = 1;
 
-        //Initialize functional map
-        for(var iLayer = 0; iLayer < this.filedata.getElementsByTagName("layer").length; iLayer++) {
-            holderCanvas.width = this.width/(this.type == "overworld" ? 32 : 1);
-            holderCanvas.height = this.height/(this.type == "overworld" ? 32 : 1);
-            var holderCtx = holderCanvas.getContext("2d");
-            holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
+    //Initialize functional map
+    for(var iLayer = 0; iLayer < this.filedata.getElementsByTagName("layer").length; iLayer++) {
+        holderCanvas.width = this.width/(this.type == "overworld" ? 32 : 1);
+        holderCanvas.height = this.height/(this.type == "overworld" ? 32 : 1);
+        var holderCtx = holderCanvas.getContext("2d");
+        holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
 
-            //Draw traces
-            var layerTraces = this.filedata.getElementsByTagName("layer")[iLayer].getElementsByTagName("trace");
+        //Draw traces
+        var layerTraces = this.filedata.getElementsByTagName("layer")[iLayer].getElementsByTagName("trace");
 
-            holderCtx.translate(0.5, 0.5);
+        holderCtx.translate(0.5, 0.5);
 
-            for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
-                var type = layerTraces[iLayerTrace].getAttribute("type");
-                if(type === SplitTime.Trace.Type.FUNCTION) {
-                    var functionStringId = layerTraces[iLayerTrace].getAttribute("reference");
-                    var functionIntId = nextFunctionId++;
-                    this.internalFunctionIdMap[functionIntId] = functionStringId;
-                    var color = SplitTime.Trace.getFunctionColor(functionIntId);
-                    SplitTime.Trace.drawColor(layerTraces[iLayerTrace].textContent, holderCtx, color);
-                } else {
-                    SplitTime.Trace.draw(layerTraces[iLayerTrace].textContent, holderCtx, type);
+        for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
+            var type = layerTraces[iLayerTrace].getAttribute("type");
+            if(type === SplitTime.Trace.Type.FUNCTION) {
+                var functionStringId = layerTraces[iLayerTrace].getAttribute("reference");
+                var functionIntId = nextFunctionId++;
+                this.internalFunctionIdMap[functionIntId] = functionStringId;
+                var color = SplitTime.Trace.getFunctionColor(functionIntId);
+                SplitTime.Trace.drawColor(layerTraces[iLayerTrace].textContent, holderCtx, color);
+            } else {
+                SplitTime.Trace.draw(layerTraces[iLayerTrace].textContent, holderCtx, type);
+            }
+        }
+        var bodies = this.getBodies();
+        for(var iBody = 0; iBody < bodies.length; iBody++) {
+            var cBody = bodies[iBody];
+            if(cBody.z == iLayer) {
+                for(var iStaticTrace = 0; iStaticTrace < cBody.staticTrace.length; iStaticTrace++) {
+                    SplitTime.Trace.draw(cBody.staticTrace[iStaticTrace].traceStr, holderCtx, cBody.staticTrace[iStaticTrace].type, cBody);
                 }
             }
-            var bodies = this.getBodies();
-            for(var iBody = 0; iBody < bodies.length; iBody++) {
-                var cBody = bodies[iBody];
-                if(cBody.z == iLayer) {
-                    for(var iStaticTrace = 0; iStaticTrace < cBody.staticTrace.length; iStaticTrace++) {
-                        SplitTime.Trace.draw(cBody.staticTrace[iStaticTrace].traceStr, holderCtx, cBody.staticTrace[iStaticTrace].type, cBody);
-                    }
-                }
-            }
-            holderCtx.translate(-0.5, -0.5);
+        }
+        holderCtx.translate(-0.5, -0.5);
 
-            this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, this.width, this.height);
+        this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, this.width, this.height);
+    }
+
+    var enterFunctionId = this.filedata.getElementsByTagName("enterFunction")[0].textContent;
+    this.runFunction(enterFunctionId);
+};
+
+SplitTime.Level.createCanvases = function(screenWidth, screenHeight) {
+    holderCanvas = document.createElement("canvas");
+    holderCanvas.setAttribute("width", screenWidth);
+    holderCanvas.setAttribute("height", screenHeight);
+};
+
+/**
+ * @param {string} levelId
+ * @returns {SplitTime.Level}
+ */
+SplitTime.Level.get = function(levelId) {
+    if(!levelMap[levelId]) {
+        levelMap[levelId] = new SplitTime.Level(levelId);
+    }
+    return levelMap[levelId];
+};
+
+SplitTime.Level.setCurrent = function(level) {
+    if(typeof level === "string") {
+        level = SplitTime.Level.get(level);
+    }
+
+    var exitingLevel = currentLevel;
+    currentLevel = level;
+
+    //********Leave current board
+
+    //TODO: give agents a chance to clean up
+
+    // TODO: clear exiting board data; probably in context of region rather than level
+    if(exitingLevel) {
+        var exitFunctionId = exitingLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
+        exitingLevel.runFunction(exitFunctionId);
+
+        // //Clear out all functional maps
+        // exitingLevel.layerFuncData.length = 0;
+    }
+
+    //********Enter new board
+
+    // TODO: This loading should take place at the region level; not the level level
+    SplitTime.process = "loading";
+    currentLevel.waitForLoadAssets().then(function() {
+        SplitTime.process = currentLevel.type;
+        if(SplitTime.process == "action") {
+            SplitTime.cTeam = SplitTime.player;
+        } else if(SplitTime.process == "overworld") {
+            SplitTime.cTeam = SplitTime.player;
+            SplitTime.currentPlayer = -1;
+            SplitTime.TRPGNextTurn();
         }
 
-        var enterFunctionId = this.filedata.getElementsByTagName("enterFunction")[0].textContent;
-        this.runFunction(enterFunctionId);
-    };
+        currentLevel.loadForPlay();
+    });
+};
 
-    SplitTime.Level.createCanvases = function(screenWidth, screenHeight) {
-        holderCanvas = document.createElement("canvas");
-        holderCanvas.setAttribute("width", SplitTime.SCREENX);
-        holderCanvas.setAttribute("height", SplitTime.SCREENY);
-    };
-
-    SplitTime.Level.get = function(levelId) {
-        if(!levelMap[levelId]) {
-            levelMap[levelId] = new SplitTime.Level(levelId);
-        }
-        return levelMap[levelId];
-    };
-
-    SplitTime.Level.setCurrent = function(level) {
-        if(typeof level === "string") {
-            level = SplitTime.Level.get(level);
-        }
-
-        var exitingLevel = currentLevel;
-        currentLevel = level;
-
-        //********Leave current board
-
-        //TODO: give agents a chance to clean up
-
-        // TODO: clear exiting board data; probably in context of region rather than level
-        if(exitingLevel) {
-            var exitFunctionId = exitingLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
-            exitingLevel.runFunction(exitFunctionId);
-
-            // //Clear out all functional maps
-            // exitingLevel.layerFuncData.length = 0;
-        }
-
-        //********Enter new board
-
-        // TODO: This loading should take place at the region level; not the level level
-        SplitTime.process = "loading";
-        currentLevel.waitForLoadAssets().then(function() {
-            SplitTime.process = currentLevel.type;
-            if(SplitTime.process == "action") {
-                SplitTime.cTeam = SplitTime.player;
-            } else if(SplitTime.process == "overworld") {
-                SplitTime.cTeam = SplitTime.player;
-                SplitTime.currentPlayer = -1;
-                SplitTime.TRPGNextTurn();
-            }
-
-            currentLevel.loadForPlay();
-        });
-    };
-
-    SplitTime.Level.getCurrent = function() {
-        return currentLevel;
-    };
-} ());
+/**
+ * @returns {SplitTime.Level}
+ */
+SplitTime.Level.getCurrent = function() {
+    return currentLevel;
+};

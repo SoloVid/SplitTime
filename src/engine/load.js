@@ -70,8 +70,6 @@ SplitTime.launch = function(callback, width, height, parentId) {
                 // TODO: move subsequent stuff to other files (like Level.js)
 
 				level.filedata = data;
-				level.layerImg = [];
-				level.layerFuncData = [];
                 level.type = data.getElementsByTagName("type")[0].textContent;
 				level.width = 0;
 				level.height = 0;

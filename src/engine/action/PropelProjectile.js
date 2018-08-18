@@ -8,7 +8,7 @@ SplitTime.Action.PropelProjectile = function(acceleration) {
 		this.accel = acceleration;
 	}
 };
-SplitTime.Action.PropelProjectile.prototype = new BaseAction();
+SplitTime.Action.PropelProjectile.prototype = new SplitTime.Action.BaseAction();
 SplitTime.Action.PropelProjectile.prototype.constructor = SplitTime.Action.PropelProjectile;
 
 SplitTime.Action.PropelProjectile.prototype.accel = 0;

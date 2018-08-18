@@ -25,17 +25,15 @@ SplitTime.main = function() {
                 var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
                 b.logUnusual();
 
-                var agents = region.getAgents();
-                agentCount = agents.length;
-                for (var i = 0; i < agents.length; i++) {
-                	try {
-                		if(typeof agents[i].notifyFrameUpdate === "function") {
-                            agents[i].notifyFrameUpdate();
+                region.forEachAgent(function(agent) {
+                    try {
+                        if(typeof agent.notifyFrameUpdate === "function") {
+                            agent.notifyFrameUpdate();
                         }
                     } catch(ex) {
-                		console.error(ex);
-					}
-				}
+                        console.error(ex);
+                    }
+                });
 
                 var c = new SLVD.speedCheck("agents update", b.date);
                 c.logUnusual();

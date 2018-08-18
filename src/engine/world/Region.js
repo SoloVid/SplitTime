@@ -32,6 +32,16 @@ SplitTime.Region.prototype.getAgents = function() {
     return agents;
 };
 
+/**
+ *
+ * @param {SplitTime.Agent.Callback} callback
+ */
+SplitTime.Region.prototype.forEachAgent = function(callback) {
+    for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
+        this.levels[iLevel].forEachAgent(callback);
+    }
+};
+
 (function() {
     var regionMap = {};
     var defaultRegion = new SplitTime.Region();
@@ -43,6 +53,10 @@ SplitTime.Region.prototype.getAgents = function() {
         return regionMap[regionId];
     };
 
+    /**
+     * Get the region currently in play.
+     * @returns {SplitTime.Region|null}
+     */
     SplitTime.Region.getCurrent = function() {
         var currentLevel = SplitTime.Level.getCurrent();
         if(currentLevel === null) {

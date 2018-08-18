@@ -19,17 +19,17 @@ SplitTime.Action = {};
 
 // console.log("loaded SplitTime.Action");
 
-function BaseAction() { }
-BaseAction.prototype.time = 0;
-BaseAction.prototype.prob = 1;
-BaseAction.prototype.type = "attack";
-BaseAction.prototype.getProbability = function() { return this.prob; };
-BaseAction.prototype.canUse = function(person) { return true; };
-BaseAction.prototype.forceEnd = function(person) { return; };
-BaseAction.prototype.shouldUse = function(person) { return true; };
-BaseAction.prototype.use = function(person) { };
-BaseAction.prototype.update = function(person) { this.time--; };
-BaseAction.prototype.see = function(person) { };
+SplitTime.Action.BaseAction = function() { };
+SplitTime.Action.BaseAction.prototype.time = 0;
+SplitTime.Action.BaseAction.prototype.prob = 1;
+SplitTime.Action.BaseAction.prototype.type = "attack";
+SplitTime.Action.BaseAction.prototype.getProbability = function() { return this.prob; };
+SplitTime.Action.BaseAction.prototype.canUse = function(person) { return true; };
+SplitTime.Action.BaseAction.prototype.forceEnd = function(person) { return; };
+SplitTime.Action.BaseAction.prototype.shouldUse = function(person) { return true; };
+SplitTime.Action.BaseAction.prototype.use = function(person) { };
+SplitTime.Action.BaseAction.prototype.update = function(person) { this.time--; };
+SplitTime.Action.BaseAction.prototype.see = function(person) { };
 
 SplitTime.Action.Slash = function(prob) {
 	if(prob !== undefined)
@@ -37,7 +37,7 @@ SplitTime.Action.Slash = function(prob) {
 		this.prob = prob;
 	}
 };
-SplitTime.Action.Slash.prototype = new BaseAction();
+SplitTime.Action.Slash.prototype = new SplitTime.Action.BaseAction();
 SplitTime.Action.Slash.prototype.constructor = SplitTime.Action.Slash;
 SplitTime.Action.Slash.prototype.time = 4;
 SplitTime.Action.Slash.prototype.canUse = function(person) {
@@ -45,31 +45,32 @@ SplitTime.Action.Slash.prototype.canUse = function(person) {
 };
 SplitTime.Action.Slash.prototype.use = function(person) {
 	this.time = 4;
-	var agents = person.getLevel().getAgents();
-	for(var third = 0; third < agents.length; third++)
-	{
-		if(agents[third].team != person.team)
+	// var agents = person.getLevel().getAgents();
+    // for(var third = 0; third < agents.length; third++)
+    // {
+	person.getLevel().forEachAgent(function(agent) {
+		if(agent.team != person.team)
 		{
 			//One tile away
-			var caseTRPG = Math.pow(SplitTime.xPixToTile(agents[third].x) - SplitTime.xPixToTile(person.x), 2) + Math.pow(SplitTime.yPixToTile(agents[third].y) - SplitTime.yPixToTile(person.y), 2) == 1;
+			var caseTRPG = Math.pow(SplitTime.xPixToTile(agent.x) - SplitTime.xPixToTile(person.x), 2) + Math.pow(SplitTime.yPixToTile(agent.y) - SplitTime.yPixToTile(person.y), 2) == 1;
 			//Distance < 40
-			var caseZelda = Math.sqrt(Math.pow(agents[third].x - person.x, 2) + Math.pow(agents[third].y - person.y, 2)) < 40;
+			var caseZelda = Math.sqrt(Math.pow(agent.x - person.x, 2) + Math.pow(agent.y - person.y, 2)) < 40;
 
 			if((SplitTime.process == "TRPG" && caseTRPG) || (SplitTime.process == "action" && caseZelda))
 			{
 				//Determine angle between slasher and opponent (in terms of PI/2)
-				var angle = SplitTime.Direction.fromTo(person.x, person.y, agents[third].x, agents[third].y);
+				var angle = SplitTime.Direction.fromTo(person.x, person.y, agent.x, agent.y);
 
 				//Compare angle to direction of slasher. If in range of PI... and if not already hurt and not invincible
-				if((Math.abs(angle - person.dir) < 1 || Math.abs(angle - person.dir) > 3) && agents[third].status != "hurt" && agents[third].status != "invincible")
+				if((Math.abs(angle - person.dir) < 1 || Math.abs(angle - person.dir) > 3) && agent.status != "hurt" && agent.status != "invincible")
 				{
-					agents[third].zeldaBump(16, angle);
-					agents[third].damage(5);
-					agents[third].giveStatus(new SplitTime.Status.Hurt(1));
+					agent.zeldaBump(16, angle);
+					agent.damage(5);
+					agent.giveStatus(new SplitTime.Status.Hurt(1));
 				}
 			}
 		}
-	}
+	});
 };
 SplitTime.Action.Slash.prototype.update = function(person) {
 	if(this.time <= 0)
