@@ -20,16 +20,11 @@ SplitTime.process = "hold"; //Input of master setInterval switch-case
 SplitTime.currentAudio = undefined;
 SplitTime.volume = 1;
 
-// TODO: remove
-SplitTime.currentPlayer = 0;
-SplitTime.cTeam = undefined; //For TRPG, either SplitTime.player or boardNPC
-
 SplitTime.SCREENX = 640;
 SplitTime.SCREENY = 480;
 
 SplitTime.FPS = 50;
 SplitTime.msPerFrame = (1/SplitTime.FPS)*1000;
-SplitTime.showFPS = false;
 
 window.dependsOn = function(filename) {
     // This function should never be called. Ordered concat uses a pretend function of this name.

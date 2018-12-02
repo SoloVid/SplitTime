@@ -70,7 +70,7 @@ SplitTime.Keyboard.I = 73; // 'i'
 
         if(key == "t") {
             // Note: This case is just here for quick and dirty testing
-            alert(SplitTime.player[SplitTime.currentPlayer].x + ", " + SplitTime.player[SplitTime.currentPlayer].y + ", " + SplitTime.player[SplitTime.currentPlayer].z);
+            alert("Huzzah!");
         }
 
         keyDown[keyCode] = true;

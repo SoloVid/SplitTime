@@ -1,4 +1,5 @@
 dependsOn("/time/FrameStabilizer.js");
+dependsOn("/SLVD/SLVD.js");
 
 SplitTime.WeatherRenderer = function() {};
 
@@ -11,6 +12,11 @@ SplitTime.WeatherRenderer.prototype.isRaining = false;
 SplitTime.WeatherRenderer.prototype.lightningFrequency = 0; //
 /** @type {boolean} */
 SplitTime.WeatherRenderer.prototype.isCloudy = false;
+/**
+ * 0-1 invisible to fully visible
+ * @type {number}
+ */
+SplitTime.WeatherRenderer.prototype.cloudAlpha = 1;
 /**
  * 0-1 not dark to 100% dark
  * @type {number}
@@ -48,21 +54,6 @@ SplitTime.WeatherRenderer.prototype.render = function(ctx) {
     var screen = SplitTime.BoardRenderer.getScreenCoordinates();
 
     var counter = frameStabilizer.getCounter();
-    //Weather
-    if(this.isRaining) {
-        ctx.drawImage(SplitTime.Image.get("rain.png"), -((counter % 100) / 100) * SCREEN_WIDTH, ((counter % 25) / 25) * SCREEN_HEIGHT - SCREEN_HEIGHT);
-    }
-    if(this.isCloudy) {
-        ctx.drawImage(SplitTime.Image.get("stormClouds.png"), 2560 - counter % 2560, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        ctx.drawImage(SplitTime.Image.get("stormClouds.png"), 0 - counter % 2560, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    }
-    if(this.lightningFrequency > 0) {
-        // TODO: tie to time rather than frames
-        if(SLVD.randomInt(SplitTime.FPS * 60) <= this.lightningFrequency) {
-            ctx.fillStyle = "rgba(255, 255, 255, .75)";
-            ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        }
-    }
     //Light in dark
     if(this.darkness > 0) {
         //Transparentize buffer
@@ -94,6 +85,26 @@ SplitTime.WeatherRenderer.prototype.render = function(ctx) {
         //Return to default SplitTime.image layering
         bufferCtx.globalCompositeOperation = "source-over";
     }
+    //Weather
+    if(this.isRaining) {
+        ctx.drawImage(SplitTime.Image.get("rain.png"), -((counter % 100) / 100) * SCREEN_WIDTH, ((counter % 25) / 25) * SCREEN_HEIGHT - SCREEN_HEIGHT);
+    }
+    if(this.isCloudy) {
+        var CLOUDS_WIDTH = 2560;
+        var CLOUDS_HEIGHT = 480;
+        var xPixelsShift = -SLVD.mod(counter - screen.x, CLOUDS_WIDTH);
+        var yPixelsShift = SLVD.mod(screen.y, CLOUDS_HEIGHT);
+        ctx.globalAlpha = this.cloudAlpha;
+        drawTiled(ctx, SplitTime.Image.get("stormClouds.png"), xPixelsShift, yPixelsShift);
+        ctx.globalAlpha = 1;
+    }
+    if(this.lightningFrequency > 0) {
+        // TODO: tie to time rather than frames
+        if(SLVD.randomInt(SplitTime.FPS * 60) <= this.lightningFrequency) {
+            ctx.fillStyle = "rgba(255, 255, 255, .75)";
+            ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
+    }
 };
 
 /**
@@ -110,3 +121,33 @@ SplitTime.WeatherRenderer.createCanvases = function(width, height) {
     buffer.setAttribute("height", SCREEN_HEIGHT);
     bufferCtx = buffer.getContext("2d");
 };
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {HTMLImageElement} image
+ * @param {number} left x in image to start tiling at
+ * @param {number} top y in image to start tiling at
+ */
+function drawTiled(ctx, image, left, top) {
+    left = SLVD.mod(left, image.naturalWidth);
+    top = SLVD.mod(top, image.naturalHeight);
+    // Draw upper left tile
+    ctx.drawImage(image, left, top, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    var xEnd = image.naturalWidth - left;
+    if(xEnd < SCREEN_WIDTH) {
+        // Draw upper right tile if needed
+        ctx.drawImage(image, 0, top, SCREEN_WIDTH, SCREEN_HEIGHT, xEnd, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
+
+    var yEnd = image.naturalHeight - top;
+    if(yEnd < SCREEN_HEIGHT) {
+        // Draw lower left tile if needed
+        ctx.drawImage(image, left, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, yEnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
+
+    if(xEnd < SCREEN_WIDTH && yEnd < SCREEN_HEIGHT) {
+        // Draw lower right tile if needed
+        ctx.drawImage(image, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, xEnd, yEnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
+}

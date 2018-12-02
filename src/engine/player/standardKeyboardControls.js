@@ -43,39 +43,28 @@ dependsOn("Controls.js");
         }
     };
 
-    // TODO: replace with implementation utilizing x and y calculations
     SplitTime.Controls.JoyStick.getDirection = function() {
-        var dKeys = 0;
-        var dir = 0;
+        var x = 0;
+        var y = 0;
         if(Keyboard.isKeyDown(Keyboard.A) || Keyboard.isKeyDown(Keyboard.LEFT)) //West
         {
-            //How many directional keys down
-            dKeys++;
-            //Average in the new direction to the current direction
-            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.W)/dKeys;
+            x--;
         }
         if(Keyboard.isKeyDown(Keyboard.W) || Keyboard.isKeyDown(Keyboard.UP)) //North
         {
-            dKeys++;
-            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.N)/dKeys;
+            y--;
         }
         if(Keyboard.isKeyDown(Keyboard.D) || Keyboard.isKeyDown(Keyboard.RIGHT)) //East
         {
-            dKeys++;
-            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.E)/dKeys;
+            x++;
         }
         if(Keyboard.isKeyDown(Keyboard.S) || Keyboard.isKeyDown(Keyboard.DOWN)) //South
         {
-            dKeys++;
-            dir = ((dir*(dKeys - 1)) + SplitTime.Direction.S)/dKeys;
-        }
-        if((Keyboard.isKeyDown(Keyboard.S) || Keyboard.isKeyDown(Keyboard.DOWN)) && (Keyboard.isKeyDown(Keyboard.D) || Keyboard.isKeyDown(Keyboard.RIGHT))) //Southeast
-        {
-            dir += 2;
+            y++;
         }
 
-        if(dKeys > 0) {
-            return dir % 4;
+        if(x !== 0 || y !== 0) {
+            return SplitTime.Direction.fromTo(0, 0, x, y);
         }
         return null;
     };

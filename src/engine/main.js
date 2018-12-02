@@ -94,13 +94,8 @@ SplitTime.main = function() {
 		SplitTime.see.fillStyle="#FF0000";
 	}
 
-	// if(SplitTime.showFPS) {
-	// 	SplitTime.see.font="18px Verdana";
-	// 	SplitTime.see.fillText("FPS: " + displayFPS, SplitTime.SCREENX/2, SplitTime.SCREENY - 20);
-	// }
-
     SplitTime.Debug.update({
-        FPS: displayFPS,
+        "FPS": displayFPS,
         "Board Layers": SplitTime.BoardRenderer.countLayers(),
         "Board Bodies": SplitTime.BoardRenderer.countBodies(),
         "Agents": agentCount,
@@ -114,3 +109,10 @@ SplitTime.main.State = {
     ACTION: "action",
     OTHER: "other"
 };
+
+/**
+ * @interface
+ */
+function FrameNotified() {}
+
+FrameNotified.prototype.notifyFrameUpdate = function() {};

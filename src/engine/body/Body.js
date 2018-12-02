@@ -63,6 +63,9 @@ SplitTime.Body.prototype.rotate = 0;
 SplitTime.Body.prototype._level = undefined;
 SplitTime.Body.prototype.team = "neutral";
 SplitTime.Body.prototype.x = 0;
+SplitTime.Body.prototype.getX = function() {
+	return this.x;
+};
 SplitTime.Body.prototype.setX = function(x) {
 	var children = this.getChildren();
 	for(var i = 0; i < children.length; i++) {
@@ -73,6 +76,9 @@ SplitTime.Body.prototype.setX = function(x) {
 	this.x = x;
 };
 SplitTime.Body.prototype.y = 0;
+SplitTime.Body.prototype.getY = function() {
+    return this.y;
+};
 SplitTime.Body.prototype.setY = function(y) {
 	var children = this.getChildren();
 	for(var i = 0; i < children.length; i++) {
@@ -85,6 +91,9 @@ SplitTime.Body.prototype.setY = function(y) {
 SplitTime.Body.prototype.offX = 0;
 SplitTime.Body.prototype.offY = 0;
 SplitTime.Body.prototype.z = 0;
+SplitTime.Body.prototype.getZ = function() {
+    return this.z;
+};
 SplitTime.Body.prototype.setZ = function(layer) {
 	var children = this.getChildren();
 	for(var i = 0; i < children.length; i++) {
@@ -94,13 +103,8 @@ SplitTime.Body.prototype.setZ = function(layer) {
 	}
 	this.z = layer;
 };
-//SplitTime.Body.prototype.inAir = null;
-//SplitTime.Body.prototype.mvmt = 1; //0 - still; 1 - random moving; 2 - back and forth; 4 - square
-//SplitTime.Body.prototype.speech; //0/"" or message
-// SplitTime.Body.prototype.dmnr = 1; //0 - peaceful; 1 - excitable; 2 - aggressive
+
 SplitTime.Body.prototype.dir = 3;
-// SplitTime.Body.prototype.steps = 0;// = 5;
-// SplitTime.Body.prototype.wait = undefined;// = 0;
 
 SplitTime.Body.prototype.isInCurrentLevel = function() {
     return this.getLevel() === SplitTime.Level.getCurrent();

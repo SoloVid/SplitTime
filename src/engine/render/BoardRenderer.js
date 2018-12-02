@@ -62,6 +62,7 @@ SplitTime.BoardRenderer.removeFocusPoint = function(point) {
 
 /**
  * @param {{x: number, y: number}} thing
+ * @return {{x: number, y: number}}
  */
 SplitTime.BoardRenderer.getRelativeToScreen = function(thing) {
     var screen = SplitTime.BoardRenderer.getScreenCoordinates();

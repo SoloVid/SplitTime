@@ -38,9 +38,9 @@ SplitTime.Body.prototype.defaultStance = function() {
 	this.requestStance("default", true);
 };
 
-SplitTime.Body.prototype.say = function(message, overrideName) {
-	SplitTime.personSays(this, message, overrideName);
-};
+// SplitTime.Body.prototype.say = function(message, overrideName) {
+// 	SplitTime.personSays(this, message, overrideName);
+// };
 SplitTime.Body.prototype.see = function(ctx) {
 	if(!this.canSee) return;
 

@@ -1,6 +1,8 @@
-SplitTime.Dialog = {};
+dependsOn("Dialog.js");
 
-SplitTime.Dialog.drawAwesomeRect = function(sx, sy, ex, ey, context, px, py, down) {
+SplitTime.Dialog.Renderer = {};
+
+SplitTime.Dialog.Renderer.drawAwesomeRect = function(sx, sy, ex, ey, context, px, py, down) {
 	context.beginPath();
 	context.moveTo(sx + 10, sy);
 	if(px && py && down) {
@@ -35,7 +37,7 @@ SplitTime.Dialog.drawAwesomeRect = function(sx, sy, ex, ey, context, px, py, dow
 	context.fill();
 };
 
-SplitTime.Dialog.personSays = function(persOb, message, overrideName) {
+SplitTime.Dialog.Renderer.personSays = function(persOb, message, overrideName) {
 	// SplitTime.renderBoardState(); //in SplitTime.main.js
 
 	var tSpkr = overrideName || persOb.name;
@@ -44,15 +46,15 @@ SplitTime.Dialog.personSays = function(persOb, message, overrideName) {
     var py = SplitTime.BoardRenderer.getRelativeToScreen(persOb) - persOb.yres + persOb.baseY - 5;
 	//if(persOb.y - SplitTime.wY < 220) py = persOb.y - SplitTime.wY - persOb.yres + 40;
 
-	SplitTime.Dialog.speechBubble(message, tSpkr, px, py);
+	SplitTime.Dialog.Renderer.speechBubble(message, tSpkr, px, py);
 };
 
-SplitTime.Dialog.say = function(message) {
+SplitTime.Dialog.Renderer.say = function(message) {
 	// SplitTime.renderBoardState();
-	SplitTime.Dialog.speechBubble(message);
+	SplitTime.Dialog.Renderer.speechBubble(message);
 };
 
-SplitTime.Dialog.speechBubble = function(msg, spkr, px, py) {
+SplitTime.Dialog.Renderer.speechBubble = function(msg, spkr, px, py) {
 	//Used in message case of engine to grab single line of text
 	function getLine(str, leng) {
 		SplitTime.see.font = "18px Verdana";
@@ -93,7 +95,7 @@ SplitTime.Dialog.speechBubble = function(msg, spkr, px, py) {
 	if(!py) yShift = 0;
 
 	//Text box
-	SplitTime.Dialog.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift + 30, SplitTime.SCREENX/2 + 300, yShift + (line.length)*20 + 40, SplitTime.see, px, py, (line.length)*20 + 50 > py);
+	SplitTime.Dialog.Renderer.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift + 30, SplitTime.SCREENX/2 + 300, yShift + (line.length)*20 + 40, SplitTime.see, px, py, (line.length)*20 + 50 > py);
 
 	SplitTime.see.fillStyle="#FFFFFF";
 	SplitTime.see.font="18px Verdana";
@@ -104,7 +106,7 @@ SplitTime.Dialog.speechBubble = function(msg, spkr, px, py) {
 
 	if(spkr) {
 		//Name box
-		SplitTime.Dialog.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift, SplitTime.see.measureText(spkr).width + SplitTime.SCREENX/2 - 260, yShift + 30, SplitTime.see);
+		SplitTime.Dialog.Renderer.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift, SplitTime.see.measureText(spkr).width + SplitTime.SCREENX/2 - 260, yShift + 30, SplitTime.see);
 
 		SplitTime.see.fillStyle="#FFFFFF";
 		SplitTime.see.font="18px Verdana";
