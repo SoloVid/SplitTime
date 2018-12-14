@@ -39,12 +39,17 @@ SplitTime.main = function() {
                 c.logUnusual();
 
                 var currentLevel = SplitTime.Level.getCurrent();
-                if(currentLevel.getBodies().length === 0) currentLevel.refetchBodies();
-                else currentLevel.sortBodies();
+                if(currentLevel.getBodies().length === 0) {
+                    currentLevel.refetchBodies();
+                } else {
+                    currentLevel.sortBodies();
+                }
                 var e = new SLVD.speedCheck("SplitTime sort board bodies", c.date);
                 e.logUnusual();
 
-                if(SplitTime.process != "action") break;
+                if(SplitTime.process !== "action") {
+                    break;
+                }
 
                 //Render board, SplitTime.see below
                 SplitTime.BoardRenderer.renderBoardState(true);
@@ -69,6 +74,7 @@ SplitTime.main = function() {
         }
 
         SplitTime.FrameStabilizer.notifyFrameUpdate();
+        SplitTime.DialogManager.notifyFrameUpdate();
     } catch(ex) {
 		console.error(ex);
 	}

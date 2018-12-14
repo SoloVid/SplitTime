@@ -10,6 +10,13 @@ SplitTime.Region.prototype.getTime = function() {
 SplitTime.Region.prototype.getTimeMs = function() {
     return this.time.getTimeMs();
 };
+
+/**
+ *
+ * @param msPerStep
+ * @param maxCounter
+ * @return {Signaler}
+ */
 SplitTime.Region.prototype.getTimeStabilizer = function(msPerStep, maxCounter) {
     return new this.TimeStabilizer(msPerStep, maxCounter);
 };

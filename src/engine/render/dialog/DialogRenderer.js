@@ -1,117 +1,205 @@
+dependsOn("../HUDRenderer.js");
 dependsOn("Dialog.js");
 
 SplitTime.Dialog.Renderer = {};
 
-SplitTime.Dialog.Renderer.drawAwesomeRect = function(sx, sy, ex, ey, context, px, py, down) {
-	context.beginPath();
-	context.moveTo(sx + 10, sy);
-	if(px && py && down) {
-		context.lineTo((sx + ex)/2 - 10, sy);
-		context.lineTo(px, py);
-		context.lineTo((sx + ex)/2 + 10, sy);
-	}
-	context.lineTo(ex - 10, sy);
-	context.arc(ex - 10, sy + 10, 10, 1.5*Math.PI, 0*Math.PI, false);
-	context.lineTo(ex, ey - 10);
-	context.arc(ex - 10, ey - 10, 10, 0, 0.5*Math.PI, false);
-	if(px && py && !down) {
-		context.lineTo((sx + ex)/2 + 10, ey);
-		context.lineTo(px, py);
-		context.lineTo((sx + ex)/2 - 10, ey);
-	}
-	context.lineTo(sx + 10, ey);
-	context.arc(sx + 10, ey - 10, 10, 0.5*Math.PI, 1*Math.PI, false);
-	context.lineTo(sx, sy + 10);
-	context.arc(sx + 10, sy + 10, 10, 1*Math.PI, 1.5*Math.PI, false);
-	context.closePath();
+SplitTime.HUD.pushRenderer(SplitTime.Dialog.Renderer);
 
-	context.strokeStyle = "rgba(255, 255, 255, .8)";
-	context.lineWidth = 3;
-	context.stroke();
+/**
+ * @type {DialogDrawing[]}
+ */
+var dialogDrawings = [];
 
-	var grd = context.createLinearGradient(0, sy, 0, ey);
-	grd.addColorStop(0, "rgba(50, 100, 200, .4)");
-	grd.addColorStop("0.5", "rgba(50, 100, 220, .9)");
-	grd.addColorStop(1, "rgba(50, 100, 200, .4)");
-	context.fillStyle = grd;
-	context.fill();
+SplitTime.Dialog.Renderer.show = function(dialog) {
+    dialogDrawings.push(new DialogDrawing(dialog));
 };
 
-SplitTime.Dialog.Renderer.personSays = function(persOb, message, overrideName) {
-	// SplitTime.renderBoardState(); //in SplitTime.main.js
-
-	var tSpkr = overrideName || persOb.name;
-
-    var px = SplitTime.BoardRenderer.getRelativeToScreen(persOb);
-    var py = SplitTime.BoardRenderer.getRelativeToScreen(persOb) - persOb.yres + persOb.baseY - 5;
-	//if(persOb.y - SplitTime.wY < 220) py = persOb.y - SplitTime.wY - persOb.yres + 40;
-
-	SplitTime.Dialog.Renderer.speechBubble(message, tSpkr, px, py);
-};
-
-SplitTime.Dialog.Renderer.say = function(message) {
-	// SplitTime.renderBoardState();
-	SplitTime.Dialog.Renderer.speechBubble(message);
-};
-
-SplitTime.Dialog.Renderer.speechBubble = function(msg, spkr, px, py) {
-	//Used in message case of engine to grab single line of text
-	function getLine(str, leng) {
-		SplitTime.see.font = "18px Verdana";
-		if(!str) {
-			return null;
+SplitTime.Dialog.Renderer.hide = function(dialog) {
+	for(var i = 0; i < dialogDrawings.length; i++) {
+		if(dialogDrawings[i].dialog === dialog) {
+			dialogDrawings[i].in = false;
 		}
-		var word = str.split(" ");
-		var lin = "";
-		var wid = SplitTime.see.measureText(lin).width;
-		for(var index = 0; wid < leng; index++) {
-			if(word[index]) {
-				lin += word[index] + " ";
-				wid = SplitTime.see.measureText(lin).width;
-			} else {
-				break;
+	}
+};
+
+SplitTime.Dialog.Renderer.notifyFrameUpdate = function() {
+    for(var i = dialogDrawings.length - 1; i >= 0; i--) {
+        var drawing = dialogDrawings[i];
+        if(drawing.in) {
+        	drawing.visibility = Math.min(drawing.visibility + 0.1, 1);
+		} else {
+        	drawing.visibility -= 0.1;
+        	if(drawing.visibility < 0) {
+        		dialogDrawings.splice(i, 1);
 			}
 		}
-		if(wid > leng) {
-			lin = lin.substr(0, -word[index - 1].length - 1);
-		}
-		return lin;
-	}
+    }
+};
 
-	var line = [];
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ */
+SplitTime.Dialog.Renderer.renderDialogs = function(ctx) {
+    for(var i = 0; i < dialogDrawings.length; i++) {
+        // TODO: visibility
+		var drawing = dialogDrawings[i];
+		var dialog = drawing.dialog;
+		var location = dialog.getLocation();
+		sayFromBoardFocalPoint(ctx, {x: location.getX(), y: location.getY()},
+			dialog.getFullCurrentLine(), dialog.getDisplayedCurrentLine(), dialog.getSpeaker());
+    }
+};
 
-	while(msg.length > 0) {
-		var linNum = line.length;
-		line[linNum] = getLine(msg, 560);
-		//alert("'" + line[linNum] + "'");
-		msg = msg.substr(line[linNum].length, msg.length - line[linNum].length);
-	}
+/**
+ * @param {SplitTime.Dialog} dialog
+ * @class
+ */
+function DialogDrawing(dialog) {
+	this.dialog = dialog;
+	this.in = true;
+	this.visibility = 0;
+}
 
-	var yShift = py - ((line.length)*20 + 70);
-	if((line.length)*20 + 50 > py) {
-		yShift = py + 40;
-		py += 35;
+/**
+ * @param {number} left
+ * @param {number} top
+ * @param {number} right
+ * @param {number} bottom
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} [pointX]
+ * @param {number} [pointY]
+ * @param {boolean} [isDown]
+ */
+function drawAwesomeRect(left, top, right, bottom, ctx, pointX, pointY, isDown) {
+	ctx.beginPath();
+	ctx.moveTo(left + 10, top);
+	if(pointX && pointY && isDown) {
+		ctx.lineTo((left + right)/2 - 10, top);
+		ctx.lineTo(pointX, pointY);
+		ctx.lineTo((left + right)/2 + 10, top);
 	}
-	if(!py) yShift = 0;
+	ctx.lineTo(right - 10, top);
+	ctx.arc(right - 10, top + 10, 10, 1.5*Math.PI, 0, false);
+	ctx.lineTo(right, bottom - 10);
+	ctx.arc(right - 10, bottom - 10, 10, 0, 0.5*Math.PI, false);
+	if(pointX && pointY && !isDown) {
+		ctx.lineTo((left + right)/2 + 10, bottom);
+		ctx.lineTo(pointX, pointY);
+		ctx.lineTo((left + right)/2 - 10, bottom);
+	}
+	ctx.lineTo(left + 10, bottom);
+	ctx.arc(left + 10, bottom - 10, 10, 0.5*Math.PI, Math.PI, false);
+	ctx.lineTo(left, top + 10);
+	ctx.arc(left + 10, top + 10, 10, Math.PI, 1.5*Math.PI, false);
+	ctx.closePath();
+
+	ctx.strokeStyle = "rgba(255, 255, 255, .8)";
+	ctx.lineWidth = 3;
+	ctx.stroke();
+
+	var grd = ctx.createLinearGradient(0, top, 0, bottom);
+	grd.addColorStop(0, "rgba(50, 100, 200, .4)");
+	grd.addColorStop(0.5, "rgba(50, 100, 220, .9)");
+	grd.addColorStop(1, "rgba(50, 100, 200, .4)");
+	ctx.fillStyle = grd;
+	ctx.fill();
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {{x: number, y: number}} focalPoint
+ * @param {string} fullMessage
+ * @param {string} displayedMessage
+ * @param {string} speakerName
+ */
+function sayFromBoardFocalPoint(ctx, focalPoint, fullMessage, displayedMessage, speakerName) {
+	var pointRelativeToScreen = SplitTime.BoardRenderer.getRelativeToScreen(focalPoint);
+    drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointRelativeToScreen.x, pointRelativeToScreen.y);
+}
+
+var FONT = "18px Verdana";
+var MAX_ROW_CHARACTERS = 560;
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string} fullMessage
+ * @param {string} displayedMessage
+ * @param {string} [speakerName]
+ * @param {number} [pointX]
+ * @param {number} [pointY]
+ */
+function drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointX, pointY) {
+    var allLines = getLinesFromMessage(fullMessage, ctx);
+
+	var yShift = pointY - ((allLines.length)*20 + 70);
+	if((allLines.length)*20 + 50 > pointY) {
+		yShift = pointY + 40;
+		pointY += 35;
+	}
+	if(!pointY) {
+		yShift = 0;
+	}
 
 	//Text box
-	SplitTime.Dialog.Renderer.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift + 30, SplitTime.SCREENX/2 + 300, yShift + (line.length)*20 + 40, SplitTime.see, px, py, (line.length)*20 + 50 > py);
+	drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift + 30, SplitTime.SCREENX/2 + 300, yShift + (allLines.length)*20 + 40, SplitTime.see, pointX, pointY, (allLines.length)*20 + 50 > pointY);
 
 	SplitTime.see.fillStyle="#FFFFFF";
-	SplitTime.see.font="18px Verdana";
-	//Lines
-	for(var index = 0; index < line.length; index++) {
-		SplitTime.see.fillText(line[index], SplitTime.SCREENX/2 - 290, yShift + 20*index + 50);
+	SplitTime.see.font=FONT;
+    //Lines
+    var drawnLines = getLinesFromMessage(displayedMessage, ctx);
+	for(var index = 0; index < drawnLines.length; index++) {
+		SplitTime.see.fillText(drawnLines[index], SplitTime.SCREENX/2 - 290, yShift + 20*index + 50);
 	}
 
-	if(spkr) {
+	if(speakerName) {
 		//Name box
-		SplitTime.Dialog.Renderer.drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift, SplitTime.see.measureText(spkr).width + SplitTime.SCREENX/2 - 260, yShift + 30, SplitTime.see);
+		drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift, SplitTime.see.measureText(speakerName).width + SplitTime.SCREENX/2 - 260, yShift + 30, SplitTime.see);
 
 		SplitTime.see.fillStyle="#FFFFFF";
 		SplitTime.see.font="18px Verdana";
 
 		//Name
-		SplitTime.see.fillText(spkr, SplitTime.SCREENX/2 - 280, yShift + 20);
+		SplitTime.see.fillText(speakerName, SplitTime.SCREENX/2 - 280, yShift + 20);
 	}
-};
+}
+
+/**
+ * @param {string} message
+ * @param {CanvasRenderingContext2D} ctx
+ */
+function getLinesFromMessage(message, ctx) {
+    function getLine(str) {
+    	var initialFont = ctx.font;
+        ctx.font = FONT;
+        if(!str) {
+            return null;
+        }
+        var words = str.split(" ");
+        var nextWord = words.shift();
+        var line = nextWord;
+        var width = ctx.measureText(line).width;
+        while(words.length > 0 && width < MAX_ROW_CHARACTERS) {
+        	nextWord = words.shift();
+        	line += " " + nextWord;
+            width = ctx.measureText(line).width;
+		}
+
+		if(width > MAX_ROW_CHARACTERS && line !== nextWord) {
+        	words.unshift(nextWord);
+        	line = line.substr(0, -nextWord.length - 1);
+		}
+
+        ctx.font = initialFont;
+        return line;
+    }
+
+    var lines = [];
+
+    while(message.length > 0) {
+        var i = lines.length;
+        lines[i] = getLine(message);
+        message = message.substr(lines[i].length, message.length - lines[i].length).trim();
+    }
+
+    return lines;
+}

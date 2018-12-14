@@ -302,7 +302,6 @@ SplitTime.Level.setCurrent = function(level) {
             SplitTime.cTeam = SplitTime.player;
         } else if(SplitTime.process == "overworld") {
             SplitTime.cTeam = SplitTime.player;
-            SplitTime.currentPlayer = -1;
             SplitTime.TRPGNextTurn();
         }
 
