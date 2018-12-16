@@ -39,7 +39,7 @@ SplitTime.Dialog.Renderer.notifyFrameUpdate = function() {
 /**
  * @param {CanvasRenderingContext2D} ctx
  */
-SplitTime.Dialog.Renderer.renderDialogs = function(ctx) {
+SplitTime.Dialog.Renderer.render = function(ctx) {
     for(var i = 0; i < dialogDrawings.length; i++) {
         // TODO: visibility
 		var drawing = dialogDrawings[i];
@@ -117,8 +117,14 @@ function sayFromBoardFocalPoint(ctx, focalPoint, fullMessage, displayedMessage, 
     drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointRelativeToScreen.x, pointRelativeToScreen.y);
 }
 
-var FONT = "18px Verdana";
-var MAX_ROW_CHARACTERS = 560;
+var FONT_SIZE = 18;
+var FONT = FONT_SIZE + "px Verdana";
+var MAX_ROW_LENGTH = 500;
+var MIN_ROW_LENGTH_SPLIT = 100;
+var LINE_SPACING = 2;
+var IDEAL_TAIL_HEIGHT = 70;
+var TEXT_BOX_PADDING = 10;
+var IDEAL_HEIGHT_TO_WIDTH = 9/16;
 
 /**
  * @param {CanvasRenderingContext2D} ctx
@@ -129,48 +135,79 @@ var MAX_ROW_CHARACTERS = 560;
  * @param {number} [pointY]
  */
 function drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointX, pointY) {
-    var allLines = getLinesFromMessage(fullMessage, ctx);
+    // TODO: isn't top what we want here? but it looks funny
+    ctx.textBaseline = "hanging";
+    ctx.font=FONT;
 
-	var yShift = pointY - ((allLines.length)*20 + 70);
-	if((allLines.length)*20 + 50 > pointY) {
-		yShift = pointY + 40;
+    var textHeight = getLineHeight(ctx);
+    var lineHeight = textHeight + LINE_SPACING;
+
+    var nameWidth = 0;
+    if(speakerName) {
+        nameWidth = ctx.measureText(speakerName).width;
+    }
+    var singleLineWidth = ctx.measureText(fullMessage).width;
+    var singleLineArea = singleLineWidth * lineHeight;
+    var proposedWidth = Math.round(Math.sqrt(singleLineArea / IDEAL_HEIGHT_TO_WIDTH) + 3*lineHeight);
+
+    var maxTextWidth = Math.min(MAX_ROW_LENGTH, Math.max(MIN_ROW_LENGTH_SPLIT, nameWidth, proposedWidth));
+    var lines = getLinesFromMessage(fullMessage, displayedMessage, ctx, maxTextWidth);
+
+    var bubbleWidth = Math.max(lines.maxWidth, nameWidth) + 2*TEXT_BOX_PADDING;
+    var halfBubbleWidth = bubbleWidth / 2;
+    var bubbleMidPointX = SplitTime.SCREENX/2;
+    var wholeBubbleTextHeight = lines.all.length * lineHeight;
+    var bubbleHeight = wholeBubbleTextHeight + 2*TEXT_BOX_PADDING;
+
+    var isAbovePoint = true;
+	var top = pointY - (bubbleHeight + IDEAL_TAIL_HEIGHT);
+	if(bubbleHeight + 50 > pointY) {
+		isAbovePoint = false;
+		top = pointY + 40;
 		pointY += 35;
 	}
 	if(!pointY) {
-		yShift = 0;
+		top = 0;
 	}
+	var messageTop = top;
+
+    if(speakerName) {
+    	var namePadding = TEXT_BOX_PADDING;
+    	var nameBoxHeight = textHeight + 2*namePadding;
+    	var nameBoxWidth = nameWidth + 2*namePadding;
+    	var nameBoxLeft = bubbleMidPointX - halfBubbleWidth;
+        //Name box
+        drawAwesomeRect(nameBoxLeft, top, nameBoxLeft + nameBoxWidth, top + nameBoxHeight, ctx);
+
+        ctx.fillStyle="#FFFFFF";
+        //Name
+        ctx.fillText(speakerName, nameBoxLeft + namePadding, top + namePadding);
+
+        messageTop += nameBoxHeight;
+    }
 
 	//Text box
-	drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift + 30, SplitTime.SCREENX/2 + 300, yShift + (allLines.length)*20 + 40, SplitTime.see, pointX, pointY, (allLines.length)*20 + 50 > pointY);
+	drawAwesomeRect(bubbleMidPointX - halfBubbleWidth, messageTop, bubbleMidPointX + halfBubbleWidth, messageTop + bubbleHeight, ctx, pointX, pointY, !isAbovePoint);
 
-	SplitTime.see.fillStyle="#FFFFFF";
-	SplitTime.see.font=FONT;
+    ctx.fillStyle="#FFFFFF";
     //Lines
-    var drawnLines = getLinesFromMessage(displayedMessage, ctx);
-	for(var index = 0; index < drawnLines.length; index++) {
-		SplitTime.see.fillText(drawnLines[index], SplitTime.SCREENX/2 - 290, yShift + 20*index + 50);
-	}
-
-	if(speakerName) {
-		//Name box
-		drawAwesomeRect(SplitTime.SCREENX/2 - 300, yShift, SplitTime.see.measureText(speakerName).width + SplitTime.SCREENX/2 - 260, yShift + 30, SplitTime.see);
-
-		SplitTime.see.fillStyle="#FFFFFF";
-		SplitTime.see.font="18px Verdana";
-
-		//Name
-		SplitTime.see.fillText(speakerName, SplitTime.SCREENX/2 - 280, yShift + 20);
+	for(var index = 0; index < lines.displayed.length; index++) {
+		ctx.fillText(lines.displayed[index], bubbleMidPointX - halfBubbleWidth + TEXT_BOX_PADDING, messageTop + lineHeight*index + TEXT_BOX_PADDING);
 	}
 }
 
 /**
- * @param {string} message
+ * @param {string} fullMessage
+ * @param {string} displayedMessage
  * @param {CanvasRenderingContext2D} ctx
+ * @param {number} maxRowLength
+ * @return {{maxWidth: number, all: string[], displayed: string[]}}
  */
-function getLinesFromMessage(message, ctx) {
+function getLinesFromMessage(fullMessage, displayedMessage, ctx, maxRowLength) {
+    var initialFont = ctx.font;
+    ctx.font = FONT;
+
     function getLine(str) {
-    	var initialFont = ctx.font;
-        ctx.font = FONT;
         if(!str) {
             return null;
         }
@@ -178,28 +215,48 @@ function getLinesFromMessage(message, ctx) {
         var nextWord = words.shift();
         var line = nextWord;
         var width = ctx.measureText(line).width;
-        while(words.length > 0 && width < MAX_ROW_CHARACTERS) {
+        while(words.length > 0 && width < maxRowLength) {
         	nextWord = words.shift();
         	line += " " + nextWord;
             width = ctx.measureText(line).width;
 		}
 
-		if(width > MAX_ROW_CHARACTERS && line !== nextWord) {
+		if(width > maxRowLength && line !== nextWord) {
         	words.unshift(nextWord);
-        	line = line.substr(0, -nextWord.length - 1);
+        	line = line.substr(0, line.length - (nextWord.length + 1));
 		}
 
-        ctx.font = initialFont;
         return line;
     }
 
-    var lines = [];
+    var allLines = [];
+    var displayedLines = [];
+    var maxWidth = 0;
 
-    while(message.length > 0) {
-        var i = lines.length;
-        lines[i] = getLine(message);
-        message = message.substr(lines[i].length, message.length - lines[i].length).trim();
+    var remainingFullMessage = fullMessage;
+    var remainingDisplayedMessage = displayedMessage;
+    while(remainingFullMessage.length > 0) {
+        var i = allLines.length;
+        allLines[i] = getLine(remainingFullMessage);
+        displayedLines[i] = allLines[i].substring(0, remainingDisplayedMessage.length);
+        remainingFullMessage = remainingFullMessage.substring(allLines[i].length).trim();
+        remainingDisplayedMessage = remainingDisplayedMessage.substring(displayedLines[i].length).trim();
+        maxWidth = Math.max(maxWidth, ctx.measureText(allLines[i]).width);
     }
 
-    return lines;
+    ctx.font = initialFont;
+
+    return {
+    	maxWidth: maxWidth,
+    	all: allLines,
+		displayed: displayedLines
+	};
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @return {number}
+ */
+function getLineHeight(ctx) {
+   return FONT_SIZE;
 }

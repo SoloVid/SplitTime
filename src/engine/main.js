@@ -47,14 +47,17 @@ SplitTime.main = function() {
                 var e = new SLVD.speedCheck("SplitTime sort board bodies", c.date);
                 e.logUnusual();
 
-                if(SplitTime.process !== "action") {
+                if(SplitTime.process !== SplitTime.main.State.ACTION) {
                     break;
                 }
 
                 //Render board, SplitTime.see below
                 SplitTime.BoardRenderer.renderBoardState(true);
-                var f = new SLVD.speedCheck("SplitTime.renderBoardState", e.date);
+                var f = new SLVD.speedCheck("SplitTime.BoardRenderer.renderBoardState", e.date);
                 f.logUnusual(5);
+                SplitTime.DialogManager.notifyFrameUpdate();
+                var g = new SLVD.speedCheck("SplitTime.DialogManager.notifyFrameUpdate", e.date);
+                g.logUnusual();
 
                 break;
             }
@@ -74,7 +77,6 @@ SplitTime.main = function() {
         }
 
         SplitTime.FrameStabilizer.notifyFrameUpdate();
-        SplitTime.DialogManager.notifyFrameUpdate();
     } catch(ex) {
 		console.error(ex);
 	}

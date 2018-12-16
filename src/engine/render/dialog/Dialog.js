@@ -11,20 +11,24 @@ SplitTime.Dialog = function(speaker, lines, location) {
 	this.setLocation(location);
 	this._currentLine = 0;
 	this._charactersDisplayed = 0;
+	this._startDelay = null;
+	this._isFinished = false;
 };
 
 SplitTime.Dialog.AdvanceMethod = {
 	AUTO: "AUTO",
-	INTERACTION: "INTERACTION"
+	INTERACTION: "INTERACTION",
+    HYBRID: "HYBRID"
 };
+var AdvanceMethod = SplitTime.Dialog.AdvanceMethod;
 
-SplitTime.Dialog.prototype._advanceMethod = SplitTime.Dialog.AdvanceMethod.INTERACTION;
+SplitTime.Dialog.prototype._advanceMethod = SplitTime.Dialog.AdvanceMethod.HYBRID;
 /**
  *
  * @type {number}
  */
-SplitTime.Dialog.prototype._delay = 0;
-SplitTime.Dialog.prototype._speed = 10;
+SplitTime.Dialog.prototype._delay = 2000;
+SplitTime.Dialog.prototype._speed = 25;
 
 /**
  * @return {LevelLocation}
@@ -73,7 +77,7 @@ SplitTime.Dialog.prototype.registerPlayerInteractHandler = function(handler) {
 
 /**
  * TODO: potentially support multiple
- * @param {DialogEndHandler} handler
+ * @param {DialogEndHandler|function} handler
  */
 SplitTime.Dialog.prototype.registerDialogEndHandler = function(handler) {
     this._dialogEndHandler = handler;
@@ -82,18 +86,28 @@ SplitTime.Dialog.prototype.registerDialogEndHandler = function(handler) {
 SplitTime.Dialog.prototype.onPlayerInteract = function() {
 	if(this._playerInteractHandler) {
 		this._playerInteractHandler.onPlayerInteract(this);
-	} else if(this._advanceMethod === SplitTime.Dialog.AdvanceMethod.INTERACTION) {
+	} else if(this._advanceMethod === AdvanceMethod.INTERACTION || this._advanceMethod === AdvanceMethod.HYBRID) {
 		this.advance();
 	}
 };
 
+SplitTime.Dialog.prototype.start = function() {
+    SplitTime.DialogManager.submit(this);
+};
+
 SplitTime.Dialog.prototype.advance = function() {
-    if(this._currentLine >= this._lines.length) {
+    this._startDelay = null;
+    if(this._isFinished) {
         this.close();
-    } else if(this._charactersDisplayed < this._lines[this._currentLine]) {
-        this._charactersDisplayed = this._lines[this._currentLine];
+    } else if(this._charactersDisplayed < this._getCurrentLineLength()) {
+        this._charactersDisplayed = this._getCurrentLineLength();
     } else {
-        this._currentLine++;
+        if(this._currentLine + 1 < this._lines.length) {
+            this._currentLine++;
+            this._charactersDisplayed = 0;
+        } else {
+            this._isFinished = true;
+        }
     }
 };
 
@@ -101,19 +115,32 @@ SplitTime.Dialog.prototype.advance = function() {
  * Move forward one frame relative to the dialog speed
  */
 SplitTime.Dialog.prototype.step = function() {
-    if(this._charactersDisplayed < this._lines[this._currentLine]) {
+    if(this._charactersDisplayed < this._getCurrentLineLength()) {
         this._charactersDisplayed++;
-    } else if(this._advanceMethod === SplitTime.Dialog.AdvanceMethod.AUTO) {
-    	// TODO: implement delay
-        this.advance();
+    } else if(this._advanceMethod === AdvanceMethod.AUTO || this._advanceMethod === AdvanceMethod.HYBRID) {
+        if(!this._startDelay) {
+            this._startDelay = this._getTimeMs();
+        } else if(this._getTimeMs() > this._startDelay + this._delay) {
+            this.advance();
+        }
     }
 };
 
 SplitTime.Dialog.prototype.close = function() {
      SplitTime.DialogManager.remove(this);
      if(this._dialogEndHandler) {
-     	this._dialogEndHandler.onDialogEnd(this);
+         if(typeof this._dialogEndHandler === "function") {
+             this._dialogEndHandler(this);
+         } else if(typeof this._dialogEndHandler.onDialogEnd === "function") {
+             this._dialogEndHandler.onDialogEnd(this);
+         } else {
+             console.error("Invalid dialog end handler: ", this._dialogEndHandler);
+         }
 	 }
+};
+
+SplitTime.Dialog.prototype.isFinished = function() {
+    return this._isFinished;
 };
 
 SplitTime.Dialog.prototype._refreshSignaler = function() {
@@ -124,6 +151,18 @@ SplitTime.Dialog.prototype._refreshSignaler = function() {
 	}
 };
 
+SplitTime.Dialog.prototype._getTimeMs = function() {
+    if(this._location) {
+        return this._location.getLevel().getRegion().getTimeMs();
+    } else {
+        return +(new Date());
+    }
+};
+
 SplitTime.Dialog.prototype._getMsPerStep = function() {
-	return Math.round(1000 / this.speed);
+	return Math.round(1000 / this._speed);
+};
+
+SplitTime.Dialog.prototype._getCurrentLineLength = function() {
+    return this._lines[this._currentLine].length;
 };

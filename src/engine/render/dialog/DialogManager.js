@@ -14,12 +14,6 @@ SplitTime.DialogManager = {};
 var dialogs = [];
 
 /**
- * Cache of dialogs in the current level
- * @type {SplitTime.Dialog[]}
- */
-var currentLevelDialogs = [];
-
-/**
  * If a dialog has been engaged, it will be stored here.
  * @type {SplitTime.Dialog|null}
  */
@@ -43,7 +37,11 @@ SplitTime.DialogManager.remove = function(dialog) {
     for(var i = dialogs.length - 1; i >= 0; i--) {
         if(dialogs[i] === dialog) {
             dialogs.splice(i, 1);
+            SplitTime.Dialog.Renderer.hide(dialog);
         }
+    }
+    if(dialog === engagedDialog) {
+        engagedDialog = null;
     }
 };
 
@@ -55,32 +53,38 @@ SplitTime.DialogManager.disengageAllDialogs = function() {
     engagedDialog = null;
 };
 
+var MIN_SCORE = 0;
+
 SplitTime.DialogManager.notifyFrameUpdate = function() {
     var currentLevel = SplitTime.Level.getCurrent();
     var currentRegion = currentLevel.getRegion();
-    currentLevelDialogs = [];
 
-    var reigningChampionScore = engagedDialog ? calculateDialogImportanceScore(engagedDialog) : 0;
+    var engagedScore = engagedDialog ? calculateDialogImportanceScore(engagedDialog) : MIN_SCORE;
+    var winningScore = Math.max(engagedScore, MIN_SCORE);
     var usurper = null;
 
     for(var i = 0; i < dialogs.length; i++) {
-        var location = dialogs[i].getLocation();
+        var dialog = dialogs[i];
+        var location = dialog.getLocation();
         var level = location.getLevel();
         if(level.getRegion() === currentRegion) {
-            dialogs[i].notifyFrameUpdate();
-            if(level === currentLevel) {
-                currentLevelDialogs.push(dialogs[i]);
-                var score = calculateDialogImportanceScore(dialogs[i]);
-                if(score > reigningChampionScore) {
-                    usurper = dialogs[i];
-                    reigningChampionScore = score;
+            dialog.notifyFrameUpdate();
+            if(level === currentLevel && !dialog.isFinished()) {
+                var score = calculateDialogImportanceScore(dialog);
+                if(score > winningScore) {
+                    usurper = dialog;
+                    winningScore = score;
                 }
             }
         }
     }
 
-    if(usurper !== null) {
+    if(winningScore > engagedScore) {
         SplitTime.Dialog.Renderer.hide(engagedDialog);
+        engagedDialog = null;
+    }
+
+    if(usurper !== null) {
         engagedDialog = usurper;
         SplitTime.Dialog.Renderer.show(engagedDialog);
     }
@@ -100,10 +104,10 @@ function calculateDialogImportanceScore(dialog) {
     var location = dialog.getLocation();
 
     var distance = SplitTime.Measurement.distanceEasy(player.getX(), player.getY(), location.getX(), location.getY());
-    var distanceScore = SplitTime.SCREENX / distance;
+    var distanceScore = ((SplitTime.SCREENX / 2) / distance) - 1;
 
     if(dialog === engagedDialog) {
-        return distanceScore * 100;
+        return distanceScore * 2;
     }
     return distanceScore;
 }
