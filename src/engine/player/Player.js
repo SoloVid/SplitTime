@@ -13,10 +13,11 @@ SplitTime.Player.getActiveBody = function() {
 };
 /**
  * @param {SplitTime.Body} body
+ * @return {SLVD.Promise}
  */
 SplitTime.Player.setActiveBody = function(body) {
     activeBody = body;
-    SplitTime.Player.focusCameraOnActiveBody();
+    return SplitTime.Level.setCurrent(body.getLevel()).then(SplitTime.Player.focusCameraOnActiveBody);
 };
 
 SplitTime.Player.focusCameraOnActiveBody = function() {

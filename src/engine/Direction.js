@@ -53,6 +53,14 @@ SplitTime.Direction.fromTo = function(fromX, fromY, toX, toY) {
 	return (baseDir + 4) % 4;
 };
 
+//Get direction from one thing to another (both in Maven orientation)
+SplitTime.Direction.fromToThing = function(fromThing, toThing) {
+	if(typeof fromThing.getX === "function") {
+        return SplitTime.Direction.fromTo(fromThing.getX(), fromThing.getY(), toThing.getX(), toThing.getY());
+    }
+	return SplitTime.Direction.fromTo(fromThing.x, fromThing.y, toThing.x, toThing.y);
+};
+
 SplitTime.Direction.simplifyToCardinal = function(realDir) {
 	if(realDir === null) {
 		return null;
@@ -109,6 +117,13 @@ SplitTime.Direction.getYSign = function(direction) {
     return 0;
 };
 
+/**
+ *
+ * @param {number} dir1
+ * @param {number} dir2
+ * @param {int} [howMany90Degrees]
+ * @return {boolean}
+ */
 SplitTime.Direction.areWithin90Degrees = function(dir1, dir2, howMany90Degrees) {
 	howMany90Degrees = howMany90Degrees || 1;
     var dDir = Math.abs(dir1 - dir2);
