@@ -73,6 +73,10 @@ SLVD.randomSeed = function() {
 	}
 };
 
+SLVD.constrain = function(num, min, max) {
+	return Math.max(min, Math.min(num, max));
+};
+
 SLVD.mod = function(n, base) {
 	return ((n % base) + base) % base;
 };

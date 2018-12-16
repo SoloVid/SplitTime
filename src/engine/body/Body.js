@@ -1,18 +1,27 @@
-SplitTime.Body = function() {};
+SplitTime.Body = function(skipInit) {
+	if(skipInit) {
+		return;
+    }
+	this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
+	// TODO: sort out (throw out) inheritance to make this work right
+	this.speechBox = new SplitTime.Body.SpeechBox(this, -42);
+};
 SplitTime.BodyTemplate = {};
-SplitTime.BodyTemplate[""] = new SplitTime.Body();
+SplitTime.BodyTemplate[""] = new SplitTime.Body(true);
 
 SplitTime.Body.prototype.childrenBolted = [];
 SplitTime.Body.prototype.childrenLoose = [];
 SplitTime.Body.prototype.addChild = function(child, isBolted) {
 	if(isBolted) {
-		if(this.childrenBolted.length === 0)
+		if(this.childrenBolted.length === 0) {
 			this.childrenBolted = [];
+		}
 		this.childrenBolted.push(child);
 	}
 	else {
-		if(this.childrenLoose.length === 0)
-			this.childrenLoose = [];
+		if(this.childrenLoose.length === 0) {
+            this.childrenLoose = [];
+        }
 		this.childrenLoose.push(child);
 	}
 };
@@ -41,8 +50,9 @@ SplitTime.Body.prototype.isCurrentPlayer = function() {
 
 SplitTime.Body.prototype.staticTrace = [];
 SplitTime.Body.prototype.addStaticTrace = function(traceStr, type) {
-	if(this.staticTrace.length === 0)
-		this.staticTrace = [];
+	if(this.staticTrace.length === 0) {
+        this.staticTrace = [];
+    }
 	this.staticTrace.push({traceStr: traceStr, type: type});
 };
 
@@ -117,6 +127,9 @@ SplitTime.Body.prototype.put = function(level, x, y, layer) {
 	this.setZ(layer);
 };
 
+/**
+ * @param {string|SplitTime.Level} level
+ */
 SplitTime.Body.prototype.setLevel = function(level) {
 	if(typeof level === "string") {
 		level = SplitTime.Level.get(level);
@@ -136,9 +149,15 @@ SplitTime.Body.prototype.setLevel = function(level) {
 
     this.timeStabilizer = level.getRegion().getTimeStabilizer(200);
 };
+/**
+ * @return {SplitTime.Level}
+ */
 SplitTime.Body.prototype.getLevel = function() {
 	return this._level;
 };
+/**
+ * @return {SplitTime.Region}
+ */
 SplitTime.Body.prototype.getRegion = function() {
 	var level = this.getLevel();
 	if(!level) {
@@ -161,6 +180,14 @@ SplitTime.Body.prototype.setAgent = function(agent) {
 SplitTime.Body.prototype.keyFunc = {};
 //Function run on ENTER or SPACE
 SplitTime.Body.prototype.interact = function() {};
+
+SplitTime.Body.prototype.onPlayerInteract = function(handler) {
+	if(handler) {
+		this.playerInteractHandlers.registerCallback(handler);
+	} else {
+		this.playerInteractHandlers.runCallbacks();
+	}
+};
 
 SplitTime.Body.prototype.pushy = true;
 
@@ -213,7 +240,9 @@ SplitTime.Body.prototype.canBeHere = function(allowInAir) {
 			var iData = SplitTime.pixCoordToIndex(this.x + iY, this.y + iX, SplitTime.currentLevel.layerFuncData[this.z]);
 			if(SplitTime.currentLevel.layerFuncData[this.z].data[iData] == 255) {
 				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[this.z].data[iData + 1] == 255) { }
-				else return 0;
+				else {
+					return 0;
+                }
 			}
 		}
 	}
@@ -222,13 +251,11 @@ SplitTime.Body.prototype.canBeHere = function(allowInAir) {
 
 SplitTime.Body.prototype.canSeeBody = function(body) {
     var tDir = SplitTime.Direction.fromTo(this.x, this.y, body.x, body.y);
-    return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
+    return SplitTime.Direction.areWithin90Degrees(this.dir, tDir);
 };
 
 SplitTime.Body.prototype.canSeePlayer = function() {
-    var player = SplitTime.Player.getActiveBody();
-    var tDir = SplitTime.Direction.fromTo(this.x, this.y, player.x, player.y);
-    return (Math.abs(tDir - this.dir) < 1 || Math.abs(tDir - this.dir) > 3);
+    return this.canSeeBody(SplitTime.Player.getActiveBody());
 };
 
 //Based in time.js, this SplitTime.provides = function simple interface for setting a timed sequence of movement events for Bodys

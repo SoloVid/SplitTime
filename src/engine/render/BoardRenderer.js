@@ -61,14 +61,14 @@ SplitTime.BoardRenderer.removeFocusPoint = function(point) {
 };
 
 /**
- * @param {{x: number, y: number}} thing
+ * @param {{x: number, y: number, z: number}} thing
  * @return {{x: number, y: number}}
  */
 SplitTime.BoardRenderer.getRelativeToScreen = function(thing) {
     var screen = SplitTime.BoardRenderer.getScreenCoordinates();
     return {
         x: thing.x - screen.x,
-        y: thing.y - screen.y
+        y: thing.y - screen.y - thing.z
     };
 };
 

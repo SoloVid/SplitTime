@@ -45,7 +45,7 @@ SplitTime.Dialog.Renderer.render = function(ctx) {
 		var drawing = dialogDrawings[i];
 		var dialog = drawing.dialog;
 		var location = dialog.getLocation();
-		sayFromBoardFocalPoint(ctx, {x: location.getX(), y: location.getY()},
+		sayFromBoardFocalPoint(ctx, {x: location.getX(), y: location.getY(), z: location.getZ()},
 			dialog.getFullCurrentLine(), dialog.getDisplayedCurrentLine(), dialog.getSpeaker());
     }
 };
@@ -68,29 +68,64 @@ function DialogDrawing(dialog) {
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} [pointX]
  * @param {number} [pointY]
- * @param {boolean} [isDown]
  */
-function drawAwesomeRect(left, top, right, bottom, ctx, pointX, pointY, isDown) {
+function drawAwesomeRect(left, top, right, bottom, ctx, pointX, pointY) {
+	var CURVE_RADIUS = 10;
+	var TRI_CURVE_BUFFER = 2*CURVE_RADIUS;
+	var TRI_BASE_HALF = 10;
+    var horizontalMid = SLVD.constrain((pointX + left + right)/3, left + TRI_CURVE_BUFFER, right - TRI_CURVE_BUFFER);
+    var verticalMid = SLVD.constrain((pointY + top + bottom)/3, top + TRI_CURVE_BUFFER, bottom - TRI_CURVE_BUFFER);
+
+	var isLeft = false;
+	var isTop = false;
+	var isRight = false;
+	var isBottom = false;
+	if(pointX !== undefined && pointY !== undefined) {
+		var dLeft = left - pointX;
+		var dTop = top - pointY;
+		var dRight = pointX - right;
+		var dBottom = pointY - bottom;
+        if(pointX < left && dLeft >= dTop && dLeft > dBottom) {
+            isLeft = true;
+        } else if(pointY < top && dTop > dRight) {
+            isTop = true;
+        } else if(pointX > right && dRight > dBottom) {
+            isRight = true;
+        } else if(pointY > bottom) {
+            isBottom = true;
+        }
+    }
+
 	ctx.beginPath();
-	ctx.moveTo(left + 10, top);
-	if(pointX && pointY && isDown) {
-		ctx.lineTo((left + right)/2 - 10, top);
+	ctx.moveTo(left + CURVE_RADIUS, top);
+	if(isTop) {
+		ctx.lineTo(horizontalMid - TRI_BASE_HALF, top);
 		ctx.lineTo(pointX, pointY);
-		ctx.lineTo((left + right)/2 + 10, top);
+		ctx.lineTo(horizontalMid + TRI_BASE_HALF, top);
 	}
-	ctx.lineTo(right - 10, top);
-	ctx.arc(right - 10, top + 10, 10, 1.5*Math.PI, 0, false);
-	ctx.lineTo(right, bottom - 10);
-	ctx.arc(right - 10, bottom - 10, 10, 0, 0.5*Math.PI, false);
-	if(pointX && pointY && !isDown) {
-		ctx.lineTo((left + right)/2 + 10, bottom);
+	ctx.lineTo(right - CURVE_RADIUS, top);
+	ctx.arc(right - CURVE_RADIUS, top + CURVE_RADIUS, CURVE_RADIUS, 1.5*Math.PI, 0, false);
+    if(isRight) {
+        ctx.lineTo(right, verticalMid - TRI_BASE_HALF);
+        ctx.lineTo(pointX, pointY);
+        ctx.lineTo(right, verticalMid + TRI_BASE_HALF);
+    }
+	ctx.lineTo(right, bottom - CURVE_RADIUS);
+	ctx.arc(right - CURVE_RADIUS, bottom - CURVE_RADIUS, CURVE_RADIUS, 0, 0.5*Math.PI, false);
+	if(isBottom) {
+        ctx.lineTo(horizontalMid + TRI_BASE_HALF, bottom);
 		ctx.lineTo(pointX, pointY);
-		ctx.lineTo((left + right)/2 - 10, bottom);
+		ctx.lineTo(horizontalMid - TRI_BASE_HALF, bottom);
 	}
-	ctx.lineTo(left + 10, bottom);
-	ctx.arc(left + 10, bottom - 10, 10, 0.5*Math.PI, Math.PI, false);
-	ctx.lineTo(left, top + 10);
-	ctx.arc(left + 10, top + 10, 10, Math.PI, 1.5*Math.PI, false);
+	ctx.lineTo(left + CURVE_RADIUS, bottom);
+	ctx.arc(left + CURVE_RADIUS, bottom - CURVE_RADIUS, CURVE_RADIUS, 0.5*Math.PI, Math.PI, false);
+    if(isLeft) {
+        ctx.lineTo(left, verticalMid + TRI_BASE_HALF);
+        ctx.lineTo(pointX, pointY);
+        ctx.lineTo(left, verticalMid - TRI_BASE_HALF);
+    }
+	ctx.lineTo(left, top + CURVE_RADIUS);
+	ctx.arc(left + CURVE_RADIUS, top + CURVE_RADIUS, CURVE_RADIUS, Math.PI, 1.5*Math.PI, false);
 	ctx.closePath();
 
 	ctx.strokeStyle = "rgba(255, 255, 255, .8)";
@@ -107,7 +142,7 @@ function drawAwesomeRect(left, top, right, bottom, ctx, pointX, pointY, isDown) 
 
 /**
  * @param {CanvasRenderingContext2D} ctx
- * @param {{x: number, y: number}} focalPoint
+ * @param {{x: number, y: number, z: number}} focalPoint
  * @param {string} fullMessage
  * @param {string} displayedMessage
  * @param {string} speakerName
@@ -122,9 +157,10 @@ var FONT = FONT_SIZE + "px Verdana";
 var MAX_ROW_LENGTH = 500;
 var MIN_ROW_LENGTH_SPLIT = 100;
 var LINE_SPACING = 2;
-var IDEAL_TAIL_HEIGHT = 70;
+var IDEAL_TAIL_LENGTH = 32;
 var TEXT_BOX_PADDING = 10;
 var IDEAL_HEIGHT_TO_WIDTH = 9/16;
+var FOCAL_MARGIN = 16;
 
 /**
  * @param {CanvasRenderingContext2D} ctx
@@ -142,58 +178,127 @@ function drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, point
     var textHeight = getLineHeight(ctx);
     var lineHeight = textHeight + LINE_SPACING;
 
+    var namePadding = TEXT_BOX_PADDING;
     var nameWidth = 0;
+    var nameBoxHeight = 0;
+    var nameBoxWidth = 0;
     if(speakerName) {
         nameWidth = ctx.measureText(speakerName).width;
+        nameBoxHeight = textHeight + 2*namePadding;
+        nameBoxWidth = nameWidth + 2*namePadding;
     }
-    var singleLineWidth = ctx.measureText(fullMessage).width;
-    var singleLineArea = singleLineWidth * lineHeight;
-    var proposedWidth = Math.round(Math.sqrt(singleLineArea / IDEAL_HEIGHT_TO_WIDTH) + 3*lineHeight);
 
-    var maxTextWidth = Math.min(MAX_ROW_LENGTH, Math.max(MIN_ROW_LENGTH_SPLIT, nameWidth, proposedWidth));
+    var maxTextWidth = calculateIdealizedMaxWidth(ctx, fullMessage, lineHeight, nameWidth);
     var lines = getLinesFromMessage(fullMessage, displayedMessage, ctx, maxTextWidth);
 
     var bubbleWidth = Math.max(lines.maxWidth, nameWidth) + 2*TEXT_BOX_PADDING;
-    var halfBubbleWidth = bubbleWidth / 2;
-    var bubbleMidPointX = SplitTime.SCREENX/2;
     var wholeBubbleTextHeight = lines.all.length * lineHeight;
     var bubbleHeight = wholeBubbleTextHeight + 2*TEXT_BOX_PADDING;
 
-    var isAbovePoint = true;
-	var top = pointY - (bubbleHeight + IDEAL_TAIL_HEIGHT);
-	if(bubbleHeight + 50 > pointY) {
-		isAbovePoint = false;
-		top = pointY + 40;
-		pointY += 35;
-	}
-	if(!pointY) {
-		top = 0;
-	}
-	var messageTop = top;
+    var position = calculateDialogPosition(bubbleWidth, bubbleHeight + nameBoxHeight, pointX, pointY);
 
-    if(speakerName) {
-    	var namePadding = TEXT_BOX_PADDING;
-    	var nameBoxHeight = textHeight + 2*namePadding;
-    	var nameBoxWidth = nameWidth + 2*namePadding;
-    	var nameBoxLeft = bubbleMidPointX - halfBubbleWidth;
-        //Name box
-        drawAwesomeRect(nameBoxLeft, top, nameBoxLeft + nameBoxWidth, top + nameBoxHeight, ctx);
+    var messageTop = position.top + nameBoxHeight;
 
-        ctx.fillStyle="#FFFFFF";
-        //Name
-        ctx.fillText(speakerName, nameBoxLeft + namePadding, top + namePadding);
-
-        messageTop += nameBoxHeight;
-    }
-
-	//Text box
-	drawAwesomeRect(bubbleMidPointX - halfBubbleWidth, messageTop, bubbleMidPointX + halfBubbleWidth, messageTop + bubbleHeight, ctx, pointX, pointY, !isAbovePoint);
+    //Text box
+	drawAwesomeRect(position.left, messageTop, position.left + bubbleWidth, messageTop + bubbleHeight, ctx, position.triPointX, position.triPointY);
 
     ctx.fillStyle="#FFFFFF";
     //Lines
 	for(var index = 0; index < lines.displayed.length; index++) {
-		ctx.fillText(lines.displayed[index], bubbleMidPointX - halfBubbleWidth + TEXT_BOX_PADDING, messageTop + lineHeight*index + TEXT_BOX_PADDING);
+		ctx.fillText(lines.displayed[index], position.left + TEXT_BOX_PADDING, messageTop + lineHeight*index + TEXT_BOX_PADDING);
 	}
+
+	// Draw speaker box afterward in case it needs to cover part of the triangle
+    if(speakerName) {
+        var nameBoxLeft = position.left;
+        //Name box
+        drawAwesomeRect(nameBoxLeft, position.top, nameBoxLeft + nameBoxWidth, position.top + nameBoxHeight, ctx);
+
+        ctx.fillStyle="#FFFFFF";
+        //Name
+        ctx.fillText(speakerName, nameBoxLeft + namePadding, position.top + namePadding);
+    }
+}
+
+/**
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string} fullMessage
+ * @param {number} lineHeight
+ * @param {number} nameWidth
+ * @return {number}
+ */
+function calculateIdealizedMaxWidth(ctx, fullMessage, lineHeight, nameWidth) {
+    var singleLineWidth = ctx.measureText(fullMessage).width;
+    var singleLineArea = singleLineWidth * lineHeight;
+    var proposedWidth = Math.sqrt(singleLineArea / IDEAL_HEIGHT_TO_WIDTH) + 3*lineHeight;
+    return Math.min(MAX_ROW_LENGTH, Math.max(MIN_ROW_LENGTH_SPLIT, nameWidth, proposedWidth));
+}
+
+var MIN_SCREEN_MARGIN = 10;
+
+/**
+ * @param {number} areaWidth
+ * @param {number} areaHeight
+ * @param {number} focalPointX
+ * @param {number} focalPointY
+ * @return {{left: number, top: number triPointX: number, triPointY: number}}
+ */
+function calculateDialogPosition(areaWidth, areaHeight, focalPointX, focalPointY) {
+	// Start centered (around focal point) horizontally
+	var idealLeft = SLVD.constrain(
+		focalPointX - areaWidth/2, // ideal
+		MIN_SCREEN_MARGIN, // left side of screen
+		SplitTime.SCREENX - MIN_SCREEN_MARGIN - areaWidth // right side of screen
+	);
+	var left = idealLeft;
+
+	// Try to make the top be above the focal point
+    var top = focalPointY - (areaHeight + IDEAL_TAIL_LENGTH + FOCAL_MARGIN);
+	if(top < MIN_SCREEN_MARGIN) {
+		// If that is off screen, try below
+		top = focalPointY + (FOCAL_MARGIN + IDEAL_TAIL_LENGTH);
+
+		if(top + areaHeight > SplitTime.SCREENY - MIN_SCREEN_MARGIN) {
+            // If below is also off screen, try switching to more of a horizontal approach
+			var idealTop = SLVD.constrain(
+                focalPointY - areaHeight/2, // ideal
+                MIN_SCREEN_MARGIN, // top of screen
+                SplitTime.SCREENY - MIN_SCREEN_MARGIN - areaHeight // bottom of screen
+			);
+			top = idealTop;
+
+			// TODO: prefer away from player rather than left over right
+			// Try to make dialog left of focal point
+			left = focalPointX - (areaWidth + IDEAL_TAIL_LENGTH + FOCAL_MARGIN);
+			if(left < MIN_SCREEN_MARGIN) {
+				// If that is off screen, try to the right
+				left = focalPointX + (FOCAL_MARGIN + IDEAL_TAIL_LENGTH);
+
+				if(left + areaWidth > SplitTime.SCREENX - MIN_SCREEN_MARGIN) {
+                    // At this point, give up trying to avoid the focal point
+                    left = idealLeft;
+					top = idealTop;
+				}
+			}
+		}
+	}
+
+	// Determine off-focal point
+	var centerX = left + areaWidth/2;
+	var centerY = top + areaHeight/2;
+	var dx = centerX - focalPointX;
+	var dy = centerY - focalPointY;
+	var dist = Math.sqrt(dx*dx + dy*dy);
+    var triPointX = focalPointX + dx/dist * FOCAL_MARGIN;
+    var triPointY = focalPointY + dy/dist * FOCAL_MARGIN;
+
+    return {
+        left: left,
+    	top: top,
+		triPointX: triPointX,
+		triPointY: triPointY
+	};
 }
 
 /**
