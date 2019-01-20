@@ -73,8 +73,8 @@ function drawAwesomeRect(left, top, right, bottom, ctx, pointX, pointY) {
 	var CURVE_RADIUS = 10;
 	var TRI_CURVE_BUFFER = 2*CURVE_RADIUS;
 	var TRI_BASE_HALF = 10;
-    var horizontalMid = SLVD.constrain((pointX + left + right)/3, left + TRI_CURVE_BUFFER, right - TRI_CURVE_BUFFER);
-    var verticalMid = SLVD.constrain((pointY + top + bottom)/3, top + TRI_CURVE_BUFFER, bottom - TRI_CURVE_BUFFER);
+    var horizontalMid = SLVD.constrain((2*pointX + left + right)/4, left + TRI_CURVE_BUFFER, right - TRI_CURVE_BUFFER);
+    var verticalMid = SLVD.constrain((2*pointY + top + bottom)/4, top + TRI_CURVE_BUFFER, bottom - TRI_CURVE_BUFFER);
 
 	var isLeft = false;
 	var isTop = false;
@@ -159,8 +159,8 @@ var MIN_ROW_LENGTH_SPLIT = 100;
 var LINE_SPACING = 2;
 var IDEAL_TAIL_LENGTH = 32;
 var TEXT_BOX_PADDING = 10;
-var IDEAL_HEIGHT_TO_WIDTH = 9/16;
-var FOCAL_MARGIN = 16;
+var IDEAL_HEIGHT_TO_WIDTH = 7/16;
+var FOCAL_MARGIN = 20;
 
 /**
  * @param {CanvasRenderingContext2D} ctx
@@ -253,7 +253,7 @@ function calculateDialogPosition(areaWidth, areaHeight, focalPointX, focalPointY
 	);
 	var left = idealLeft;
 
-	// Try to make the top be above the focal point
+	// Try to make the dialog be above the focal point
     var top = focalPointY - (areaHeight + IDEAL_TAIL_LENGTH + FOCAL_MARGIN);
 	if(top < MIN_SCREEN_MARGIN) {
 		// If that is off screen, try below
@@ -269,7 +269,7 @@ function calculateDialogPosition(areaWidth, areaHeight, focalPointX, focalPointY
 			top = idealTop;
 
 			// TODO: prefer away from player rather than left over right
-			// Try to make dialog left of focal point
+			// Try to make dialog be to the left of focal point
 			left = focalPointX - (areaWidth + IDEAL_TAIL_LENGTH + FOCAL_MARGIN);
 			if(left < MIN_SCREEN_MARGIN) {
 				// If that is off screen, try to the right

@@ -28,6 +28,9 @@ SplitTime.Level.prototype.waitForLoadAssets = function() {
     return this.loadPromise;
 };
 
+/**
+ * @return {SplitTime.Region}
+ */
 SplitTime.Level.prototype.getRegion = function() {
     return this.region;
 };
@@ -271,9 +274,17 @@ SplitTime.Level.get = function(levelId) {
     return levelMap[levelId];
 };
 
+/**
+ * @param {SplitTime.Level|string} level
+ * @return {SLVD.Promise}
+ */
 SplitTime.Level.setCurrent = function(level) {
     if(typeof level === "string") {
         level = SplitTime.Level.get(level);
+    }
+
+    if(level === currentLevel) {
+        return SLVD.Promise.as();
     }
 
     var exitingLevel = currentLevel;
@@ -296,9 +307,9 @@ SplitTime.Level.setCurrent = function(level) {
 
     // TODO: This loading should take place at the region level; not the level level
     SplitTime.process = "loading";
-    currentLevel.waitForLoadAssets().then(function() {
+    return currentLevel.waitForLoadAssets().then(function() {
         SplitTime.process = currentLevel.type;
-        if(SplitTime.process == "action") {
+        if(SplitTime.process === SplitTime.main.State.ACTION) {
             SplitTime.cTeam = SplitTime.player;
         } else if(SplitTime.process == "overworld") {
             SplitTime.cTeam = SplitTime.player;
