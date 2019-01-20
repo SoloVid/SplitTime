@@ -5,6 +5,41 @@ SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
 	return SplitTime.Trace.drawColor(traceStr, ctx, color, offsetPos);
 };
 
+SplitTime.Trace.extractArray = function(traceStr) {
+	var pointsArr = [];
+    var regex = /\([^\)]+\)/g;
+    var xRegex = /\(([-]?[\d]+),/;
+    var yRegex = /,[\s]*([-]?[\d]+)\)/;
+
+    var points = traceStr.match(regex);
+    //console.log(points.length + "|" + points + "|");
+
+    if(points.length === 0) {
+        log.warn("Empty trace string: " + traceStr);
+        return;
+    }
+
+    for(var i = 0; i < points.length; i++)
+    {
+        if(points[i] == "(close)") {
+        	pointsArr.push(null);
+        } else {
+            var xMatch = points[i].match(xRegex);
+            var yMatch = points[i].match(yRegex);
+            if(xMatch === null || yMatch === null) {
+                console.warn("Invalid trace point " + points[i] + "(" + i + " point) in trace string \"" + traceStr + "\"");
+                continue;
+            }
+
+            pointsArr.push({
+				x: +(xMatch[1]),
+				y: +(yMatch[1])
+			});
+        }
+    }
+    return pointsArr;
+};
+
 SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
 	if(!offsetPos) {
 		offsetPos = {x: 0, y: 0};

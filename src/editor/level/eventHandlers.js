@@ -1,8 +1,8 @@
 var levelXML;
 var $levelXML;
+var levelObject;
 
 var BOARDX = 100, BOARDY = 100;
-var PPP = 1; //pixels per pixel
 
 var mode = "position";
 
@@ -97,7 +97,7 @@ $(document).ready(function() {
 		else if(event.which == 32)
 		{
 			console.log("export of level XML:");
-			exportLevel(levelXML);
+			console.log(JSON.stringify(levelObject, null, 4));
 		}
 	});
 
@@ -533,7 +533,8 @@ $(document).ready(function() {
 
 				node.attr("id", getEditorValue("id"));
 				node.attr("type", getEditorValue("type"));
-				node.attr("reference", getEditorValue("reference"));
+                node.attr("dir", getEditorValue("dir"));
+                node.attr("reference", getEditorValue("reference"));
 				node.text(getEditorValue("vertices"));
 
 				generateLayerMenu();

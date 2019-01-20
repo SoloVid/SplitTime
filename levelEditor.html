@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
+		<script src="node_modules/vue/dist/vue.js"></script>
 		<script src="src/libs/jquery-1.11.1.min.js"></script>
 		<script src="src/libs/vkbeautify.js"></script>
 
@@ -10,6 +11,7 @@
 		<link rel="stylesheet" href="src/editor/level/style.css">
 	</head>
 	<body>
+	<div id="app">
 		<div id="navmenu">
 			<ul>
 				<li><a href="javascript:createLevel();">New Level</a></li>
@@ -22,7 +24,17 @@
 			</ul>
 		</div>
 		<div id="editorTools">
-			<div id="layers"></div>
+			<div id="layers" v-bind:style="{ width: levelWidth + 'px', height: levelHeight + 'px' }">
+				<rendered-layer
+						v-for="(layer, layerIndex) in level.layers"
+						v-bind:key="layerIndex"
+						v-bind:level="level"
+						v-bind:layer="layer"
+						v-bind:index="layerIndex"
+						v-bind:width="levelWidth"
+						v-bind:height="levelHeight"
+				></rendered-layer>
+			</div>
 
 			<div class="menu" style="left:0px;width:100px">
 				Tools:
@@ -36,7 +48,9 @@
 					>Prop</div>
 				<br>
 				Active Layer:
-				<select id="activeLayer"></select>
+				<select id="activeLayer" v-model="activeLayer">
+					<option v-for="(layer, index) in level.layers" v-bind:value="index">Layer {{ index }}</option>
+				</select>
 				<br><br>
 				<div id="traceOptions" title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;Solid traces represent completely inpenetrable areas.&#013;Void traces are used for areas of open air where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;Function traces indicate areas of the level which will trigger a function call when a body moves into the area.&#013;Paths link positions together for walking purposes.&#013;Stairs move Bodys to different layers.
 				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
@@ -46,8 +60,27 @@
 				<div class="option" id="btnEnterFunc" title="Function to run on entrance to board">Level Enter Function</div>
 				<div class="option" id="btnExitFunc" title="Function to run on exit from board">Level Exit Function</div>
 			</div>
-			<div id="layerMenu" class="menu" style="right:0px;">
-				<br id="layerMenuBreak" />
+			<div id="layerMenuVue" class="menu" style="right:0px;">
+				<ul>
+					<li v-for="(layer, index) in level.layers">
+						Layer {{ index }}
+						<input type="checkbox" v-model="layer.displayed"/>
+						<ul>
+							<li v-for="(trace, traceIndex) in layer.traces">
+								Trace {{ traceIndex }}
+								<input type="checkbox" v-model="trace.displayed"/>
+							</li>
+						</ul>
+					</li>
+					<li v-for="(prop, index) in level.props">
+						Prop {{ index }}
+						<input type="checkbox" v-model="prop.displayed"/>
+					</li>
+					<li v-for="(position, index) in level.positions">
+						Position {{ index }}
+						<input type="checkbox" v-model="position.displayed"/>
+					</li>
+				</ul>
 				<div class="option" onclick="createLayer()">Add Layer</div>
 			</div>
 
@@ -62,9 +95,45 @@
 
 		<canvas id="subImg" width="256" height="256" style="display:none"></canvas>
 		<canvas id="subImg2" width="320" height="320" style="display:none"></canvas>
+	</div>
 
-		<script src="src/editor/level/eventHandlers.js"></script>
+	<script type="text/x-template" id="rendered-layer-template">
+		<div v-show="layer.displayed">
+			<img class="background" v-bind:src="imgSrc"/>
+			<rendered-trace v-for="trace in layer.traces" v-bind:trace="trace" v-bind:width="width" v-bind:height="height"></rendered-trace>
+			<rendered-prop v-for="prop in props" v-bind:prop="prop"></rendered-prop>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="rendered-trace-template">
+		<svg
+				v-show="trace.displayed"
+				style="position:absolute"
+				v-bind:width="width"
+				v-bind:height="height"
+		>
+			<polygon
+					v-bind:points="points"
+					v-bind:fill="traceFill"
+					v-bind:stroke="traceStroke"
+					v-bind:fill-opacity="traceOpacity"
+			></polygon>
+		</svg>
+	</script>
+
+	<script type="text/x-template" id="rendered-prop-template">
+		<div
+				v-show="prop.displayed"
+				class="draggable prop"
+			 	v-bind:style="{ position: 'absolute', overflow: 'hidden', left: positionLeft + 'px', top: positionTop + 'px', width: width + 'px', height: height + 'px' }"
+		>
+			<img v-bind:src="image" v-bind:style="{ position: 'absolute', left: cropLeft + 'px' }"/>
+		</div>
+	</script>
+
+	<script src="src/editor/level/eventHandlers.js"></script>
 		<script src="src/editor/level/form.js"></script>
 		<script src="src/editor/level/editorFunctions.js"></script>
+		<script src="src/editor/level/vueSetup.js"></script>
 	</body>
 </html>

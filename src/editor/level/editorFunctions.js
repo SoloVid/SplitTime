@@ -154,8 +154,7 @@ function clickFileChooser() {
 function loadFile2(data) {
 	console.log(data);
 
-	levelXML = $.parseXML(data);
-	$levelXML = $(levelXML);
+	levelObject = JSON.parse(data);
 
 	$("#layers").empty();
 
@@ -179,15 +178,15 @@ function loadFile2(data) {
 }
 
 function downloadFile() {
-	var xmltext = exportLevel(levelXML);
+	var jsonText = JSON.stringify(levelObject, null, 4);
 
 	var filename = prompt("File name?");
-	if(!filename.endsWith(".xml")) {
-		filename += ".xml";
+	if(!filename.endsWith(".json")) {
+		filename += ".json";
 	}
 
 	var pom = document.createElement('a');
-	pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(xmltext));
+	pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonText));
 	pom.setAttribute('download', filename);
 
 	pom.style.display = 'none';
@@ -198,122 +197,20 @@ function downloadFile() {
 	document.body.removeChild(pom);
 }
 
-function resizeBoard(x, y) {
-	if(!x || !y)
-	{
-		BOARDX = Number(prompt("Width: ", BOARDX));
-		BOARDY = Number(prompt("Width: ", BOARDY));
-	}
-	else
-	{
-		BOARDX = Number(x);
-		BOARDY = Number(y);
-	}
-
-	$("#layers").css("width", (BOARDX + 220) + "px");
-	$("#layers").css("height", (BOARDY) + "px");
-
-	$(".whiteboard").each(function() {
-		ctx = this.getContext("2d");
-		ctx.canvas.width = BOARDX/getPixelsPerPixel();
-		ctx.canvas.height = BOARDY/getPixelsPerPixel();
-		$(this).width(BOARDX);
-		$(this).height(BOARDY);
-	});
-
-	$(".backupCanv").each(function() {
-		ctx = this.getContext("2d");
-		ctx.canvas.width = BOARDX/getPixelsPerPixel();
-		ctx.canvas.height = BOARDY/getPixelsPerPixel();
-		$(this).width(BOARDX);
-		$(this).height(BOARDY);
-	});
-
-	$(".layerDisplay").each(function() {
-		$(this).width(BOARDX);
-		$(this).height(BOARDY);
-	});
-
-	drawTraces();
-}
-
 function resizeBoardCheck(imgEl) {
 	var layerWidth = imgEl.width;
 	var layerHeight = imgEl.height;
 
 	if(layerWidth > BOARDX || layerHeight > BOARDY)
 	{
-		resizeBoard(layerWidth, layerHeight);
+		vueApp.levelWidth = layerWidth;
+		vueApp.levelHeight = layerHeight;
+		// resizeBoard(layerWidth, layerHeight);
 	}
 }
 
-function generateLayerMenu() {
-	var layerMenu = $("#layerMenu");
-	var node;
-
-	layerMenu.find(".menuLayer").remove();
-
-	$levelXML.find("layer").each(function(i) {
-		var menuLayer = $("<div></div>");
-		menuLayer.addClass("menuLayer");
-		menuLayer.insertBefore($("#layerMenuBreak"));
-
-		var layerLabel = $("<div></div>");
-		layerLabel.addClass("layerLabel");
-		layerLabel.text("Layer " + i);
-		layerLabel.css("display", "inline");
-		menuLayer.append(layerLabel);
-
-		var checkBox = $('<input type="checkbox"></input>');
-		if($("#layerDisplay:eq(" + i + ")").is(":visible")) {
-			checkBox.prop("checked", true);
-		}
-		checkBox.css("display", "inline");
-		menuLayer.append(checkBox);
-
-		$(this).find("trace").each(function(j) {
-			node = $('<div class="trace">Trace ' + j + '</div>');
-			node.css("paddingLeft", "10px");
-			menuLayer.append(node);
-		});
-	});
-
-	$levelXML.find("prop").each(function(i) {
-		node = implantMenuItem(this);
-		node.addClass("prop");
-		node.html("Prop " + i);
-		node.attr("id", "prop" + i + "Handle");
-	});
-
-	$levelXML.find("position").each(function(i) {
-		node = implantMenuItem(this);
-		node.addClass("position");
-		node.html("position " + i);
-		node.attr("id", "position" + i + "Handle");
-	});
-}
-
-//Used solely in above function
-function implantMenuItem(XMLNode) {
-	var layerMenu = $("#layerMenu");
-	var node = $("<div></div>");
-	node.css("paddingLeft", "10px");
-
-	var objLayer = $(XMLNode).attr("layer");
-
-	objLayer = Number(objLayer);
-
-	var menuLayer = layerMenu.find(".menuLayer:eq(" + objLayer + ")");
-	menuLayer.append(node);
-
-	return node;
-}
-
 function getPixelsPerPixel() {
-	var lType = $levelXML.find("type").text();
-
-	if(lType == "TRPG") return 32;
-	else return 1;
+	return levelObject.type === "TRPG" ? 32 : 1;
 }
 
 function helpXML() {
@@ -331,25 +228,6 @@ function helpXML() {
 	msg += "- 2 means that a player character may trigger the program if ENTER or SPACE is pressed while on the trace.\n";
 
 	alert(msg);
-}
-
-function openXMLEditor(node, disableTemplate) {
-	typeSelected = node.get(0).tagName;
-
-	indexSelected = node.index();
-
-	$("#XMLEditorBack").show();
-	if(disableTemplate)
-	{
-		$("#template").prop('disabled', true);
-		$("#template").val("Board Program #" + i);
-	}
-	else
-	{
-		$("#template").prop('disabled', false);
-		$("#template").val(node.getAttribute("template"));
-	}
-	$("#hardCode").val(node.textContent);
 }
 
 function updateObject(type, index) {
@@ -391,23 +269,16 @@ function updateObject(type, index) {
 }
 
 function createLevel(type) {
-	if(!type)
-	{
-		type = prompt("Type: (action/overworld)");
+	if(!type) {
+        type = prompt("Type: (action/overworld)");
 	}
 
-	levelXML = $.parseXML('<?xml version="1.0" encoding="UTF-8"?>\n<level xmlns="http://www.solovid.com/SplitTime/">\n</level>', "text/xml");
-	$levelXML = $(levelXML);
-    $levelXML[0].namespaceURI = "http://www.solovid.com/SplitTime/";
-	console.log("namespace: " + $levelXML[0].namespaceURI);
-
-	$levelXML.find("level").append("<type>" + type + "</type>");
-
-	$levelXML.find("level").append("<enterFunction/>");
-	$levelXML.find("level").append("<exitFunction/>");
-	$levelXML.find("level").append("<layers/>");
-	$levelXML.find("level").append("<positions/>");
-	$levelXML.find("level").append("<props/>");
+	levelObject = {
+		type: type,
+		layers: [],
+		positions: [],
+		props: []
+	};
 
 	createLayer();
 
@@ -416,28 +287,23 @@ function createLevel(type) {
 	return levelXML;
 }
 
-function createLayer(back, skipXML) {
+function createLayer(back, skipJson) {
 	if(!back || back === "" || back == projectPath + "images/") back = subImg2;
 
-	if(!skipXML)
+	if(!skipJson)
 	{
-		var layerNode = $("<layer>", $levelXML);
-
-		var background = $("<background>", $levelXML);
-		layerNode.append(background);
-
-		var traces = $("<traces>", $levelXML);
-
-		layerNode.append(traces);
-
-		$levelXML.find("layers").append(layerNode);
+		levelObject.layers.push({
+			displayed: true,
+			background: back,
+			traces: []
+		});
 	}
 
 	var layerDisplay = $("<div/>");
 	layerDisplay.addClass("layerDisplay");
 	layerDisplay.height(BOARDY);
 	layerDisplay.width(BOARDX);
-	layerDisplay.html('<img class="background" src="' + back + '"></img><canvas class="whiteboard" onContextMenu="return false;" width="' + BOARDX/getPixelsPerPixel() + '" height="' + BOARDY/getPixelsPerPixel() + '" style="width:' + BOARDX + 'px; height:' + BOARDY + 'px"></canvas>');
+	layerDisplay.html('<img class="background" src="' + back + '"/><canvas class="whiteboard" onContextMenu="return false;" width="' + BOARDX/getPixelsPerPixel() + '" height="' + BOARDY/getPixelsPerPixel() + '" style="width:' + BOARDX + 'px; height:' + BOARDY + 'px"></canvas>');
 
 	var backupCanv = document.createElement("canvas");
 	backupCanv.width = BOARDX/getPixelsPerPixel();
@@ -470,18 +336,13 @@ function createObject(type, skipXML, index)  {
 	positionContainer.css("position", "absolute");
 	positionContainer.css("overflow", "hidden");
 
-	var defImg = "";
-
 	var displayNPC = $('<img />');
 	displayNPC.css("position", "absolute");
 	positionContainer.append(displayNPC);
 
-	var pos = $("#layers").position();
 	var x = mouseLevelX;
 	var y = mouseLevelY;
 	var layer = $("#activeLayer").val();
-	var xres = 32;
-	var yres = 64;
 
 	$("#layers .layerDisplay:eq(" + layer + ")").append(positionContainer);
 
@@ -518,16 +379,6 @@ function createObject(type, skipXML, index)  {
 	}
 
 	updateObject(type, index);
-}
-
-function exportLevel(XML) {
-	var serialized = /*'<?xml version="1.0" encoding="UTF-8"?>' + */(new XMLSerializer())
-		.serializeToString(XML)
-		.replace(/\s?xmlns=""/g, "");
-    // console.log(serialized);
-	var prettyXML = vkbeautify.xml(serialized, "\t");
-	console.log(prettyXML);
-	return prettyXML;
 }
 
 function loadBodyFromTemplate(templateName) {

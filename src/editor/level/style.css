@@ -148,7 +148,7 @@ textarea {
 }
 
 #editorTools {
-    display: none;
+    /*display: none;*/
     padding: 0;
     margin: 0;
 }

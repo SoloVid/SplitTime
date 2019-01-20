@@ -5,10 +5,6 @@ Let's call "Bodys" NPCs in this doc.
 - The majority of the code for NPCs ought to be outside of the editors and in an actual coding environment.
 - Events, particularly paths, ought to be easy to set up.
 - Events should be divorced from NPCs (despite their close relationship). This necessitates NPC IDs, almost certainly specified by developer.
-- NPCs really shouldn't be tied to one board if they are intended to move from one board to another.
-- Instead of placing NPCs on boards, we ought to put NPC positions on boards.
-    - Positions can be tied to NPCs (e.g. NPC["Bob"].position["home"]) and show that NPC's image in the level editor.
-    - Positions can be generic and tied to boards (e.g. level["castle"].position["entrance"]) and show some kind of placeholder image.
 - API should allow developer to easily specify an event where NPC moves through a series of positions.
 - Since we already have traces in the level editor, it would be cool to be able to make path traces.
     - Path traces ought to be able to bind to positions (one-way or two-way?) so that the engine knows how to handle a call to move from one position to another.
@@ -71,4 +67,24 @@ Positions have
         NPC
         Absolute
 
-Parallax weather?
+3D
+
+- Ramps should be implemented as steps (different heights of wall)
+    - Use createLinearGradient
+    - Specify angle (upward) of stairs in level (probably a Maven angle)
+    - Find center points of two edges most representative of angle
+- Rather than simple "solid" traces, use something more akin to "wall" traces. These traces will have a specified height.
+- Layers are specified at some height above the layer below
+- Sprites should be rendered in order of a topological sort based on comparisons between overlapping sprites rather than in simple y order. (See http://andrewrussell.net/2016/06/how-2-5d-sorting-works-in-river-city-ransom-underground/ and Tarjan's Algorithm)
+- Add additional sticky collision for verticality
+- Some time during frame loop, check all bodies for falling
+    - If cached standing on top of other body, check if still standing on that body
+    - If middle pixel is standable, end early (typical case)
+    - Otherwise, check rest of base pixels for some evidence of standing on something
+    - Otherwise, check all bodies to see if standing on
+        - Only check bodies whose z + height is exactly our z
+    - Otherwise, push downward (new zeldaStep() type method)
+        - Acceleration or no?
+- Bodies aren't split into multiple layers anymore
+- Still split rendering into layers
+    - Split sprites automatically into separate layers during rendering

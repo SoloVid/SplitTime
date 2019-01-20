@@ -148,6 +148,10 @@ function showEditorTrace(trace) {
             id: "reference"
         },
         {
+            value: trace.attr("dir"),
+            id: "dir"
+        },
+        {
             type: "textarea",
             value: trace.text(),
             id: "vertices"
