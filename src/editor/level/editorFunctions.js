@@ -15,115 +15,6 @@ function normalizeTraceStr(traceStr) {
 	});
 }
 
-function drawTraces(highlightIndex, drawTo, drawFromBackup, findX, findY) {
-	if(!$levelXML) return;
-	var ignoreHighlighted = false;
-	if(!drawTo)
-	{
-		drawTo = "whiteboard";
-	}
-	else
-	{
-		ignoreHighlighted = true;
-	}
-
-	var retVal = -1;
-
-	// var XMLLayers = levelXML.getElementsByTagName("layer");
-	var XMLLayers = $levelXML.find("layer");
-
-	// var cnvLayers = document.getElementsByClassName(drawTo);
-	var cnvLayers = $("." + drawTo);
-	var absoluteTraceIndex = 0;
-
-	// for(var i = 0; i < XMLLayers.length; i++)
-	// {
-	XMLLayers.each(function(i) {
-		// var layerTraces = XMLLayers[i].getElementsByTagName("trace");
-		var layerTraces = $(this).find("trace");
-
-		// var ctx = cnvLayers[i].getContext("2d");
-		var ctx = cnvLayers.get(i).getContext("2d");
-
-		ctx.clearRect(window.pageXOffset - 120, window.pageYOffset - 10, window.innerWidth + 20, window.innerHeight + 20);
-		//ctx.clearRect(0, 0, cnvLayers[i].width, cnvLayers[i].height);
-
-		ctx.translate(0.5, 0.5);
-
-		// for(var j = 0; j < layerTraces.length; j++)
-		// {
-		layerTraces.each(function() {
-			// var color = layerTraces[j].getAttribute("template");
-			var traceType = $(this).attr("type");
-			var color = traceEditorColors[traceType];
-			if(highlightIndex !== undefined && highlightIndex == absoluteTraceIndex)
-			{
-				if(ignoreHighlighted)
-				{
-					absoluteTraceIndex++;
-					return true;
-				}
-				color = traceEditorColors["highlight"];
-			}
-
-			var traceStr = normalizeTraceStr($(this).text());
-			SplitTime.Trace.drawColor(traceStr, ctx, color);
-
-			if(findX && findY) {
-				var imgData = ctx.getImageData(findX, findY, 1, 1);
-				if(imgData.data[3] !== 0)
-				{
-					retVal = absoluteTraceIndex;
-					return false;
-				}
-			}
-
-			absoluteTraceIndex++;
-		});
-		ctx.translate(-0.5, -0.5);
-	});
-	if(findX && findY) {
-		return retVal;
-	}
-}
-
-function drawTracesFromBackup(highlightIndex) {
-	// var XMLLayers = levelXML.getElementsByTagName("layer");
-	var XMLLayers = $levelXML.find("layer");
-	var ctx;
-	// var cnvLayers = document.getElementsByClassName("whiteboard");
-	// var backupLayers = document.getElementsByClassName("backupCanv");
-	var cnvLayers = $(".whiteboard");
-	var backupLayers = $(".backupCanv");
-
-	var i;
-
-	// for(i = 0; i < XMLLayers.length; i++)
-	// {
-	XMLLayers.each(function(index) {
-		i = index;
-		ctx = cnvLayers.get(i).getContext("2d");
-
-		ctx.clearRect(window.pageXOffset - 120, window.pageYOffset - 10, window.innerWidth + 20, window.innerHeight + 20);
-
-		ctx.drawImage(backupLayers.get(i), window.pageXOffset - 120, window.pageYOffset - 10, window.innerWidth + 20, window.innerHeight + 20, window.pageXOffset - 120, window.pageYOffset - 10, window.innerWidth + 20, window.innerHeight + 20);
-	});
-
-	i--;
-
-	// var highlightTrace = levelXML.getElementsByTagName("trace")[highlightIndex];
-	var highlightTrace = $levelXML.find("trace:eq(" + highlightIndex + ")");
-
-	ctx = cnvLayers.get(i).getContext("2d");
-
-	ctx.translate(0.5, 0.5);
-
-	var traceStr = normalizeTraceStr(highlightTrace.text());
-	SplitTime.Trace.drawColor(traceStr, ctx, traceEditorColors["highlight"]);
-
-	ctx.translate(-0.5, -0.5);
-}
-
 function findTrace(x, y) {
 	return drawTraces(-1, "whiteboard", false, x, y);
 }
@@ -201,7 +92,7 @@ function resizeBoardCheck(imgEl) {
 	var layerWidth = imgEl.width;
 	var layerHeight = imgEl.height;
 
-	if(layerWidth > BOARDX || layerHeight > BOARDY)
+	if(layerWidth > vueApp.levelWidth || layerHeight > vueApp.levelHeight)
 	{
 		vueApp.levelWidth = layerWidth;
 		vueApp.levelHeight = layerHeight;
@@ -285,44 +176,6 @@ function createLevel(type) {
 	$("#editorTools").show();
 
 	return levelXML;
-}
-
-function createLayer(back, skipJson) {
-	if(!back || back === "" || back == projectPath + "images/") back = subImg2;
-
-	if(!skipJson)
-	{
-		levelObject.layers.push({
-			displayed: true,
-			background: back,
-			traces: []
-		});
-	}
-
-	var layerDisplay = $("<div/>");
-	layerDisplay.addClass("layerDisplay");
-	layerDisplay.height(BOARDY);
-	layerDisplay.width(BOARDX);
-	layerDisplay.html('<img class="background" src="' + back + '"/><canvas class="whiteboard" onContextMenu="return false;" width="' + BOARDX/getPixelsPerPixel() + '" height="' + BOARDY/getPixelsPerPixel() + '" style="width:' + BOARDX + 'px; height:' + BOARDY + 'px"></canvas>');
-
-	var backupCanv = document.createElement("canvas");
-	backupCanv.width = BOARDX/getPixelsPerPixel();
-	backupCanv.height = BOARDY/getPixelsPerPixel();
-	backupCanv.className = "backupCanv";
-
-	layerDisplay.append(backupCanv);
-
-	$("#layers").append(layerDisplay);
-
-	var layerNum = $(".layerDisplay").length - 1;
-
-	var layerOption = $("<option/>");
-	layerOption.html(layerNum);
-	layerOption.val(layerNum);
-
-	$("#activeLayer").append(layerOption);
-
-	generateLayerMenu();
 }
 
 function createObject(type, skipXML, index)  {

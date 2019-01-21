@@ -1,8 +1,4 @@
-var levelXML;
-var $levelXML;
 var levelObject;
-
-var BOARDX = 100, BOARDY = 100;
 
 var mode = "position";
 
@@ -23,10 +19,6 @@ var pathInProgress = false;
 var subImg;
 var ctx;
 var subImg2;
-
-var mainBoardPrg = null;
-
-var editorOpen = null;
 
 var projectName = window.location.hash.substring(1);
 while(!projectName) {
@@ -63,6 +55,8 @@ $(document).ready(function() {
 		ctx.fillStyle = "rgba(0, 0, 0, 0)";
 		ctx.fillRect(0, 0, 320, 320);
 		subImg2 = subImg2.toDataURL();
+
+		$.getScript("src/editor/level/vueSetup.js");
 	});
 
 	$(document).on('dragstart', 'img', function(event) {
@@ -96,7 +90,7 @@ $(document).ready(function() {
 		}
 		else if(event.which == 32)
 		{
-			console.log("export of level XML:");
+			console.log("export of level JSON:");
 			console.log(JSON.stringify(levelObject, null, 4));
 		}
 	});
@@ -134,88 +128,22 @@ $(document).ready(function() {
 		setMode("trace");
 	});
 
-	$("#btnEnterFunc").click(function(event) {
-		editorOpen = "enterFunction";
-		mainBoardPrg = "enterFunction";
-
-		var currentReference = $levelXML.find(mainBoardPrg).text();
-
-		showEditor([
-			{
-				type: "input",
-				title: "Board Entrance Function",
-				value: currentReference,
-				id: "reference"
-			}
-		]);
-	});
-	$("#btnExitFunc").click(function(event) {
-		editorOpen = exitFunction;
-		mainBoardPrg = "exitFunction";
-
-		var currentReference = $levelXML.find(mainBoardPrg).text();
-
-		showEditor([
-			{
-				type: "input",
-				title: "Board Exit Function",
-				value: currentReference,
-				id: "reference"
-			}
-		]);
-	});
-
 	$(document).mousemove(function(event) {
 		var regex;
-		if(follower || follower === 0)
-		{
-			if(mode == "trace")
-			{
-				var dx = event.pageX - mouseX;
-				var dy = event.pageY - mouseY;
-
-				XMLNode = $levelXML.find("trace:eq(" + follower + ")");
-
+		if(follower) {
+            var dx = event.pageX - mouseX;
+            var dy = event.pageY - mouseY;
+			if(mode == "trace") {
 				regex = /\((-?[\d]+), (-?[\d]+)\)/g;
-				var pointString = XMLNode.text();
-				XMLNode.text(pointString.replace(regex, function(match, p1, p2) {
+				var pointString = follower.vertices;
+				follower.vertices = pointString.replace(regex, function(match, p1, p2) {
 					var newX = Number(p1) + dx;
 					var newY = Number(p2) + dy;
 					return "(" + newX + ", " + newY + ")";
-				}));
-
-				drawTracesFromBackup(follower);
-			}
-			else
-			{
-				var pos = follower.position();
-				var x = pos.left + (event.pageX - mouseX);
-				var y = pos.top + (event.pageY - mouseY);
-				follower.css("left", x + "px");
-				follower.css("top", y + "px");
-
-				//Locate index of element
-				var clazz = follower.attr("class");
-				regex = /[\s]*draggable[\s]*/;
-				thisType = clazz.replace(regex, "");
-
-				var i = /[\d]+/.exec(follower.attr("id"))[0];
-
-				var XMLNode = $levelXML.find(thisType + ":eq(" + i + ")");
-
-				var t;
-				if(thisType == "prop") {
-					t = loadBodyFromTemplate(XMLNode.attr("template"));
-				}
-				else if(thisType == "position") {
-					t = SplitTime.Actor[XMLNode.find("alias").attr("actor")] || loadBodyFromTemplate();
-				}
-
-				engineX = x + t.xres/2 + t.baseOffX + t.offX;
-				engineY = y + t.yres - t.baseLength/2 + t.baseOffY + t.offY;
-
-				XMLNode.attr("x", engineX);
-				XMLNode.attr("y", engineY);
+				});
+			} else {
+				follower.x += dx;
+				follower.y += dy;
 			}
 		}
 
@@ -257,28 +185,12 @@ $(document).ready(function() {
 				$levelXML.find(thisType + "s").append(XMLClone);
 
 				follower = $(HTMLClone);
-
-				generateLayerMenu();
 			}
 			else
 			{
 				follower = $(this);
 			}
 		}
-	});
-	$(document.body).on("dblclick", ".draggable.position", function(event) {
-		//Locate index of element
-		var i = /[\d]+/.exec(this.id)[0];
-		indexSelected = i;
-
-		showEditorPosition($levelXML.find("position:eq(" + indexSelected + ")"));
-	});
-	$(document.body).on("dblclick", ".draggable.prop", function(event) {
-		//Locate index of element
-		var i = /[\d]+/.exec(this.id)[0];
-		indexSelected = i;
-
-		showEditorProp($levelXML.find("prop:eq(" + indexSelected + ")"));
 	});
 	$(document.body).on("mouseup", ".draggable", function(event) {
 		follower = null;
@@ -308,20 +220,14 @@ $(document).ready(function() {
 						var traceClicked = traceList[traceIndexClicked];
 						var traceClone = traceClicked.cloneNode(true);
 						traceClicked.parentNode.appendChild(traceClone);
-						generateLayerMenu();
-					}
-					else
-					{
+					} else {
 						follower = traceIndexClicked;
 					}
-					drawTraces(follower, "backupCanv");
-					drawTracesFromBackup(follower);
 				}
 				else
 				{
 					var oldDef = pathInProgress.text();
 					pathInProgress.text(oldDef + " (" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")");
-					drawTraces();
 				}
 			}
 			else if(event.which == 3)
@@ -347,12 +253,7 @@ $(document).ready(function() {
 					var activeLayer = $("#activeLayer").val();
 
 					$levelXML.find("traces:eq(" + activeLayer + ")").append(trace);
-
-					generateLayerMenu();
-					drawTraces();
-				}
-				else
-				{
+				} else {
 					if(!ctrlDown)
 					{
 						if(pathInProgress.attr("type") == "path") {
@@ -366,7 +267,6 @@ $(document).ready(function() {
 						}
 					}
 					pathInProgress = false;
-					drawTraces();
 				}
 			}
 		}
@@ -398,58 +298,9 @@ $(document).ready(function() {
 		event.preventDefault();
 	});
 
-	$(document).mouseup(function() { follower = null; mouseDown = false; drawTraces(); });
-
-
-	$("#layerMenu").on("dblclick", ".layerLabel", function(event) {
-		var layerList = $("#layerMenu").find(".layerLabel");
-
-		var i = $(this).index(layerList);
-
-		var XMLLayerBack = $levelXML.find("background:eq(" + i + ")");
-		XMLLayerBack.text(prompt("Background image:", XMLLayerBack.text()));
-
-		var HTMLLayerBack = document.getElementsByClassName("background")[i];
-		HTMLLayerBack.onload = function()
-		{
-			var img = HTMLLayerBack;
-			resizeBoard(img.width, img.height);
-		};
-
-		HTMLLayerBack.src = projectPath + "images/" + XMLLayerBack.text();
-	});
-
-	$("#layerMenu").on("click", ":checkbox", function(event) {
-		var layerList = $("#layerMenu").find("input");
-
-		var i = $(this).index(layerList);
-
-		var layerDisplay = $(".layerDisplay:eq(" + i + ")");
-
-		if($(this).is(":checked"))
-		{
-			layerDisplay.show();
-		}
-		else
-		{
-			layerDisplay.hide();
-		}
-	});
-
-	$("#layerMenu").on("mouseenter", ".trace", function(event) {
-		var i = $(this).index("#layerMenu .trace");
-		drawTraces(i);
-	});
-	$("#layerMenu").on("click", ".trace", function(event) {
-		typeSelected = "trace";
-		var i = $(this).index("#layerMenu .trace");
-		indexSelected = i;
-
-		showEditorTrace($levelXML.find("trace:eq(" + indexSelected + ")"));
-	});
-
-	$("#layerMenu").mouseleave(function(event) {
-		drawTraces();
+	$(document).mouseup(function() {
+		follower = null;
+		mouseDown = false;
 	});
 
 	$("#layerMenu").on("mouseenter", ".prop", function(event) {
@@ -467,7 +318,7 @@ $(document).ready(function() {
 
 		indexSelected = i;
 
-		var prop = $levelXML.find(typeSelected + ":eq(" + indexSelected + ")");
+		var prop = levelObject.props[i];
 		showEditorProp(prop);
 	});
 
@@ -486,95 +337,7 @@ $(document).ready(function() {
 
 		indexSelected = i;
 
-		var position = $levelXML.find(typeSelected + ":eq(" + indexSelected + ")");
+		var position = levelObject.positions[i];
 		showEditorPosition(position);
-	});
-
-	$("#saveChanges").click(function(event) {
-		var node;
-		switch(editorOpen) {
-			case "enterFunction":
-			case "exitFunction":
-				$levelXML.find(mainBoardPrg).text(getEditorValue("reference"));
-				break;
-			case "position":
-				node = $levelXML.find(typeSelected + ":eq(" + indexSelected + ")");
-
-				node.attr("id", getEditorValue("id"));
-				node.attr("x", getEditorValue("x"));
-				node.attr("y", getEditorValue("y"));
-				node.attr("layer", getEditorValue("layer"));
-				node.attr("dir", getEditorValue("dir"));
-				node.attr("stance", getEditorValue("stance"));
-				node.find("alias").attr("actor", getEditorValue("actor"));
-				node.find("alias").text(getEditorValue("alias"));
-
-				updateObject(typeSelected, indexSelected);
-				generateLayerMenu();
-
-				break;
-			case "prop":
-				node = $levelXML.find(typeSelected + ":eq(" + indexSelected + ")");
-
-				node.attr("id", getEditorValue("id"));
-				node.attr("template", getEditorValue("template"));
-				node.attr("x", getEditorValue("x"));
-				node.attr("y", getEditorValue("y"));
-				node.attr("layer", getEditorValue("layer"));
-				node.attr("dir", getEditorValue("dir"));
-				node.attr("stance", getEditorValue("stance"));
-
-				updateObject(typeSelected, indexSelected);
-				generateLayerMenu();
-
-				break;
-			case "trace":
-				node = $levelXML.find(typeSelected + ":eq(" + indexSelected + ")");
-
-				node.attr("id", getEditorValue("id"));
-				node.attr("type", getEditorValue("type"));
-                node.attr("dir", getEditorValue("dir"));
-                node.attr("reference", getEditorValue("reference"));
-				node.text(getEditorValue("vertices"));
-
-				generateLayerMenu();
-				drawTraces();
-
-				break;
-			default:
-				console.log("unrecognized editor type: " + editorOpen);
-		}
-
-		$("#XMLEditorBack").hide();
-	});
-
-	$("#deleteThing").click(function(event) {
-		if(!confirm("Are you sure you want to delete this?")) return;
-
-		if(editorOpen == "enterFunction" || editorOpen == "exitFunction") {
-			$levelXML.find(mainBoardPrg).text("");
-			return;
-		}
-
-		var node = $levelXML.find(typeSelected + ":eq(" + indexSelected + ")");
-		node.remove();
-
-		$("#" + typeSelected + indexSelected).remove();
-
-		var i = indexSelected;
-		i++;
-		var element = $("#" + typeSelected + i);
-		while(element.length > 0)
-		{
-			element.attr("id", typeSelected + (i - 1));
-			i++;
-			element = $("#" + typeSelected + i);
-		}
-
-		//Redraw menu
-		generateLayerMenu();
-		drawTraces();
-
-		$("#XMLEditorBack").hide();
 	});
 });

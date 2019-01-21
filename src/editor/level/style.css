@@ -112,7 +112,7 @@ canvas {
 
 .backdrop {
     display: none;
-    position: absolute;
+    position: fixed;
     z-index: 10;
     top: 0;
     left: 0;
@@ -137,10 +137,6 @@ canvas {
 .draggable.position img {
     opacity: .5;
     background-color: #CD96CD;
-}
-
-.backupCanv {
-    display: none;
 }
 
 textarea {

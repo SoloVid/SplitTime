@@ -3,11 +3,6 @@
 	<head>
 		<script src="node_modules/vue/dist/vue.js"></script>
 		<script src="src/libs/jquery-1.11.1.min.js"></script>
-		<script src="src/libs/vkbeautify.js"></script>
-
-		<!-- TODO: re-evaluate use of jQuery UI -->
-		<!--<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>-->
-
 		<link rel="stylesheet" href="src/editor/level/style.css">
 	</head>
 	<body>
@@ -20,7 +15,6 @@
 				</li>
 				<li><a href="javascript:downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
 				</li>
-				<li><a href="javascript:resizeBoard();" title="This function is a manual resize if the editor fails to auto-size the board.&#013;Resizing the board here will have no effect on the level in the engine.">Resize Board</a></li>
 			</ul>
 		</div>
 		<div id="editorTools">
@@ -56,69 +50,74 @@
 				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
 					<h4>Traces</h4>
 				</div>
-				<br>
-				<div class="option" id="btnEnterFunc" title="Function to run on entrance to board">Level Enter Function</div>
-				<div class="option" id="btnExitFunc" title="Function to run on exit from board">Level Exit Function</div>
 			</div>
 			<div id="layerMenuVue" class="menu" style="right:0px;">
 				<ul>
 					<li v-for="(layer, index) in level.layers">
-						Layer {{ index }}
+						<span v-on:click="editLayer(layer)">Layer {{ index }}</span>
 						<input type="checkbox" v-model="layer.displayed"/>
 						<ul>
-							<li v-for="(trace, traceIndex) in layer.traces">
-								Trace {{ traceIndex }}
+							<li v-for="(trace, traceIndex) in layer.traces"
+								v-on:mouseenter="trace.isHighlighted = true"
+								v-on:mouseleave="trace.isHighlighted = false"
+							>
+								<span v-on:click="editTrace(trace)">Trace {{ traceIndex }}</span>
 								<input type="checkbox" v-model="trace.displayed"/>
 							</li>
 						</ul>
 					</li>
 					<li v-for="(prop, index) in level.props">
-						Prop {{ index }}
+						<span v-on:click="editProp(prop)">Prop {{ index }}</span>
 						<input type="checkbox" v-model="prop.displayed"/>
 					</li>
 					<li v-for="(position, index) in level.positions">
-						Position {{ index }}
+						<span v-on:click="editPosition(position)">Position {{ index }}</span>
 						<input type="checkbox" v-model="position.displayed"/>
 					</li>
 				</ul>
-				<div class="option" onclick="createLayer()">Add Layer</div>
+				<div class="option" v-on:click="createLayer">Add Layer</div>
 			</div>
 
-			<div id="XMLEditorBack" class="backdrop">
-				<div id="XMLEditor">
-					<div id="XMLEditorFields"></div>
-					<button id="saveChanges" style="right:0;">Save Changes</button>
-					<button id="deleteThing">Delete This</button>
-				</div>
-			</div>
 		</div>
 
 		<canvas id="subImg" width="256" height="256" style="display:none"></canvas>
 		<canvas id="subImg2" width="320" height="320" style="display:none"></canvas>
 	</div>
 
+	<div id="XMLEditorBack" class="backdrop">
+		<div id="XMLEditor">
+			<div id="XMLEditorFields"></div>
+			<button id="saveChanges" style="right:0;">Save Changes</button>
+			<button id="deleteThing">Delete This</button>
+		</div>
+	</div>
+
 	<script type="text/x-template" id="rendered-layer-template">
 		<div v-show="layer.displayed">
 			<img class="background" v-bind:src="imgSrc"/>
-			<rendered-trace v-for="trace in layer.traces" v-bind:trace="trace" v-bind:width="width" v-bind:height="height"></rendered-trace>
+			<svg
+					style="position:absolute"
+					v-bind:width="width"
+					v-bind:height="height"
+			>
+				<rendered-trace v-for="trace in layer.traces" v-bind:trace="trace"></rendered-trace>
+			</svg>
 			<rendered-prop v-for="prop in props" v-bind:prop="prop"></rendered-prop>
+			<rendered-position v-for="position in positions" v-bind:position="position"></rendered-position>
 		</div>
 	</script>
 
 	<script type="text/x-template" id="rendered-trace-template">
-		<svg
-				v-show="trace.displayed"
-				style="position:absolute"
-				v-bind:width="width"
-				v-bind:height="height"
-		>
 			<polygon
+					v-show="trace.displayed"
+					v-on:click="edit"
+					v-on:mouseenter="trace.isHighlighted = true"
+					v-on:mouseleave="trace.isHighlighted = false"
 					v-bind:points="points"
 					v-bind:fill="traceFill"
 					v-bind:stroke="traceStroke"
 					v-bind:fill-opacity="traceOpacity"
 			></polygon>
-		</svg>
 	</script>
 
 	<script type="text/x-template" id="rendered-prop-template">
@@ -127,13 +126,23 @@
 				class="draggable prop"
 			 	v-bind:style="{ position: 'absolute', overflow: 'hidden', left: positionLeft + 'px', top: positionTop + 'px', width: width + 'px', height: height + 'px' }"
 		>
-			<img v-bind:src="image" v-bind:style="{ position: 'absolute', left: cropLeft + 'px' }"/>
+			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
+		</div>
+	</script>
+
+	<script type="text/x-template" id="rendered-position-template">
+		<div
+				v-show="position.displayed"
+				class="draggable position"
+				v-bind:style="{ position: 'absolute', overflow: 'hidden', left: positionLeft + 'px', top: positionTop + 'px', width: width + 'px', height: height + 'px' }"
+		>
+			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
 		</div>
 	</script>
 
 	<script src="src/editor/level/eventHandlers.js"></script>
 		<script src="src/editor/level/form.js"></script>
 		<script src="src/editor/level/editorFunctions.js"></script>
-		<script src="src/editor/level/vueSetup.js"></script>
+		<!--<script src="src/editor/level/vueSetup.js"></script>-->
 	</body>
 </html>
