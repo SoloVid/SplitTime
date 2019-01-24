@@ -1,37 +1,104 @@
 function setMode(name) { mode = name; }
 
+function exportLevel() {
+	var levelCopy = JSON.parse(JSON.stringify(levelObject));
+	for(var iLayer = 0; iLayer < levelCopy.layers.length; iLayer++) {
+		var layer = levelCopy.layers[iLayer];
+		removeEditorProperties(layer);
+		for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
+			removeEditorProperties(layer.traces[iTrace]);
+		}
+	}
+    for(var iPos = 0; iPos < levelCopy.positions.length; iPos++) {
+        removeEditorProperties(levelCopy.positions[iPos]);
+    }
+    for(var iProp = 0; iProp < levelCopy.props.length; iProp++) {
+        removeEditorProperties(levelCopy.props[iProp]);
+    }
+    return JSON.stringify(levelCopy, null, 4);
+}
+
+function importLevel(levelObject) {
+    for(var iLayer = 0; iLayer < levelObject.layers.length; iLayer++) {
+        var layer = levelObject.layers[iLayer];
+        addEditorProperties(layer);
+        for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
+            addEditorProperties(layer.traces[iTrace]);
+        }
+    }
+    for(var iPos = 0; iPos < levelObject.positions.length; iPos++) {
+        addEditorProperties(levelObject.positions[iPos]);
+    }
+    for(var iProp = 0; iProp < levelObject.props.length; iProp++) {
+        addEditorProperties(levelObject.props[iProp]);
+    }
+    return JSON.stringify(levelObject);
+}
+
+function addEditorProperties(object) {
+    object.displayed = true;
+    object.isHighlighted = false;
+}
+
+function removeEditorProperties(object) {
+    delete object.displayed;
+    delete object.isHighlighted;
+}
+
+function imgSrc(fileName) {
+    if(!fileName) {
+        return "";
+    }
+    return projectPath + SplitTime.location.images + fileName;
+}
+
+function safeGetColor(trace) {
+    // if(!window.SplitTime) {
+    //     return [];
+    // }
+    // return SplitTime.Trace.getColor(type);
+    if(trace.isHighlighted) {
+        return traceEditorColors["highlight"];
+    }
+    return traceEditorColors[trace.type];
+}
+function safeExtractTraceArray(traceStr) {
+    // if(!window.SplitTime) {
+    //     return [];
+    // }
+    var normalizedTraceStr = normalizeTraceStr(traceStr);
+    return SplitTime.Trace.extractArray(normalizedTraceStr);
+}
+
 function normalizeTraceStr(traceStr) {
 	return traceStr.replace(/\(pos:(.+?)\)/g, function(match, posId) {
-		var position = $levelXML.find("position[id='" + posId + "']");
+		var position = null;
+		for(var i = 0; i < levelObject.positions.length; i++) {
+			if(levelObject.positions[i].id === posId) {
+				position = levelObject.positions[i];
+			}
+		}
 
-		if(position.length === 0) {
+		if(!position) {
 			console.warn("Position (" + posId + ") undefined in trace string \"" + traceStr + "\"");
 			return "";
 		}
 
-		var x = position.attr("x");
-		var y = position.attr("y");
-		return "(" + x + ", " + y + ")";
+		return "(" + position.x + ", " + position.y + ")";
 	});
-}
-
-function findTrace(x, y) {
-	return drawTraces(-1, "whiteboard", false, x, y);
 }
 
 function findClosestPosition(x, y) {
 	var closestDistance = Number.MAX_SAFE_INTEGER;
 	var closestPosition = null;
 
-	$levelXML.find("position").each(function() {
-		var posX = $(this).attr("x");
-		var posY = $(this).attr("y");
-		var dx = posX - x;
-		var dy = posY - y;
+	levelObject.positions.forEach(function(pos) {
+		var dx = pos.x - x;
+		var dy = pos.y - y;
 		var dist = Math.sqrt((dx * dx) + (dy * dy));
 		if(dist < closestDistance) {
 			closestDistance = dist;
-			closestPosition = $(this).attr("id");
+			closestPosition = pos;
 		}
 	});
 
@@ -46,24 +113,6 @@ function loadFile2(data) {
 	console.log(data);
 
 	levelObject = JSON.parse(data);
-
-	$("#layers").empty();
-
-	var layers = $levelXML.find("background");
-
-	layers.each(function() {
-		createLayer(projectPath + "images/" + $(this).text(), true);
-	});
-
-	$levelXML.find("position").each(function(i) {
-		createObject("position", true, i);
-	});
-	$levelXML.find("prop").each(function(i) {
-		createObject("prop", true, i);
-	});
-
-	generateLayerMenu();
-	drawTraces();
 
 	$("#editorTools").show();
 }
@@ -121,44 +170,6 @@ function helpXML() {
 	alert(msg);
 }
 
-function updateObject(type, index) {
-	if(type === undefined) type = typeSelected;
-	if(index === undefined) index = indexSelected;
-
-	XMLNode = $levelXML.find(type + ":eq(" + index + ")");
-	HTMLNode = $("#" + type + index);
-	HTMLImg = HTMLNode.find("img");
-
-	var t;
-	if(type == "prop") {
-		t = loadBodyFromTemplate(XMLNode.attr("template"));
-	}
-	else if(type == "position") {
-		t = SplitTime.Actor[XMLNode.find("alias").attr("actor")] || loadBodyFromTemplate();
-	}
-
-	var layer = XMLNode.attr("layer");
-	var img = t.img ? projectPath + SplitTime.location.images + t.img : subImg;
-
-	$("#layers").find(".layerDisplay:eq(" + layer + ")").append(HTMLNode);
-
-	HTMLImg.get(0).src = img;
-
-	x = XMLNode.attr("x") - t.xres/2 - t.baseOffX - t.offX;
-	y = XMLNode.attr("y") - t.yres + t.baseLength/2 - t.baseOffY - t.offY;
-
-	HTMLNode.css({
-		left: x + "px",
-		top: y + "px",
-		width: t.xres + "px",
-		height: t.yres + "px"
-	});
-
-	t.dir = XMLNode.attr("dir");
-	var crop = t.getAnimationFrameCrop(t.dir, t.stance, 0);
-	HTMLImg.css("left", (-crop.sx + "px"));
-}
-
 function createLevel(type) {
 	if(!type) {
         type = prompt("Type: (action/overworld)");
@@ -171,78 +182,46 @@ function createLevel(type) {
 		props: []
 	};
 
-	createLayer();
+	vueApp.createLayer();
 
 	$("#editorTools").show();
-
-	return levelXML;
 }
 
-function createObject(type, skipXML, index)  {
-	if(!index)
-	{
-		index = $("#layers").find("." + type).length;
-	}
-
-
-	var positionContainer = $('<div id="' + (type + index) + '" class="draggable ' + type + '"></div>');
-	positionContainer.css("position", "absolute");
-	positionContainer.css("overflow", "hidden");
-
-	var displayNPC = $('<img />');
-	displayNPC.css("position", "absolute");
-	positionContainer.append(displayNPC);
+function createObject(type)  {
+	// var positionContainer = $('<div id="' + (type + index) + '" class="draggable ' + type + '"></div>');
+	// positionContainer.css("position", "absolute");
+	// positionContainer.css("overflow", "hidden");
+    //
+	// var displayNPC = $('<img />');
+	// displayNPC.css("position", "absolute");
+	// positionContainer.append(displayNPC);
 
 	var x = mouseLevelX;
 	var y = mouseLevelY;
 	var layer = $("#activeLayer").val();
 
-	$("#layers .layerDisplay:eq(" + layer + ")").append(positionContainer);
+	var node = {
+        id: "",
+        x: x,
+        y: y,
+        layer: layer,
+        dir: 3,
+        stance: "default"
+    };
 
-	positionContainer.css({
-		"left": x + "px",
-		"top": y + "px",
-		"width": "32px",
-		"height": "64px"
-	});
-
-	if(!skipXML)
-	{
-		var XMLNPC = $("<" + type + ">", $levelXML);
-		XMLNPC.attr({
-			id: "",
-			x: x,
-			y: y,
-			layer: layer,
-			dir: 3,
-			stance: "default"
-		});
-		$levelXML.find(type + "s").append(XMLNPC);
-
-		typeSelected = type;
-		indexSelected = XMLNPC.index();
-
-		if(type == "position") {
-			XMLNPC.append('<alias actor=""></alias>');
-			showEditorPosition(XMLNPC);
-		}
-		else if(type == "prop") {
-			showEditorProp(XMLNPC);
-		}
+	if(type == "position") {
+		levelObject.positions.push(node);
+		showEditorPosition(node);
+	} else if(type == "prop") {
+		levelObject.props.push(node);
+		showEditorProp(node);
 	}
-
-	updateObject(type, index);
 }
 
 function loadBodyFromTemplate(templateName) {
-	if(!templateName) {
+	var bodyInstance = SplitTime.Body.getTemplateInstance(templateName);
+	if(!bodyInstance) {
 		return new SplitTime.Body();
 	}
-	else if(!(templateName in SplitTime.BodyTemplate)) {
-		//alert("Invalid sprite template: " + templateName);
-		return new SplitTime.Body();
-	}
-	else {
-		return new SplitTime.BodyTemplate[templateName]();
-	}
+	return bodyInstance;
 }

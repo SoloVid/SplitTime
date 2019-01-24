@@ -3,7 +3,6 @@ var levelObject;
 var mode = "position";
 
 var typeSelected;
-var indexSelected;
 var color;
 
 var mouseX = 0;
@@ -38,16 +37,12 @@ var traceEditorColors = {
 };
 
 $(document).ready(function() {
-	for(var traceType in traceEditorColors) {
-		$("#traceOptions").append('<div class="option" style="color: white; background-color: ' + traceEditorColors[traceType] + '">' + traceType + '</div>');
-	}
-
 	$.getScript(projectPath + "dist/game.js", function() {
 		subImg = $("#subImg").get(0);
 		ctx = subImg.getContext("2d");
 		subImg2 = $("#subImg2").get(0);
 
-		t = new SplitTime.Body();
+		var t = new SplitTime.Body();
 		ctx.fillStyle = "#CD96CD";
 		ctx.fillRect(5, 5, t.xres - 10, t.yres - 10);
 		subImg = subImg.toDataURL();
@@ -78,28 +73,16 @@ $(document).ready(function() {
 	}, 1000);
 
 	$(document).keydown(function(event) {
-		if(event.which == 16)
-		{
+		if(event.which == 16) {
 			ctrlDown = true;
 		}
 	});
 	$(document).keyup(function(event) {
-		if(event.which == 16)
-		{
+		if(event.which == 16) {
 			ctrlDown = false;
-		}
-		else if(event.which == 32)
-		{
+		} else if(event.which == 32) {
 			console.log("export of level JSON:");
-			console.log(JSON.stringify(levelObject, null, 4));
-		}
-	});
-
-	$("#XMLEditorBack").hide();
-
-	$("#XMLEditorBack").click(function(event) {
-		if(event.target == this) {
-			$("#XMLEditorBack").hide();
+			console.log(exportLevel());
 		}
 	});
 
@@ -120,12 +103,6 @@ $(document).ready(function() {
 
 	$(document.body).on("click", ".option", function() {
 		pathInProgress = false;
-	});
-
-	$("#traceOptions").on("click", ".option", function() {
-		typeSelected = $(this).text();
-		color = this.style.backgroundColor;
-		setMode("trace");
 	});
 
 	$(document).mousemove(function(event) {
@@ -186,19 +163,10 @@ $(document).ready(function() {
 
 				follower = $(HTMLClone);
 			}
-			else
-			{
-				follower = $(this);
-			}
 		}
-	});
-	$(document.body).on("mouseup", ".draggable", function(event) {
-		follower = null;
 	});
 
 	$(document.body).on("mouseup", "#layers", function(event) {
-		mouseDown = true;
-
 		var pos = $(this).position();
 
 		if(mode == "trace")
@@ -206,26 +174,7 @@ $(document).ready(function() {
 			var closestPosition = null;
 			if(event.which == 1)
 			{
-				if(!pathInProgress)
-				{
-					var traceIndexClicked = findTrace(mouseX - pos.left, mouseY - pos.top);
-					console.log("clicked trace: " + traceIndexClicked);
-
-					if(traceIndexClicked < 0) return;
-
-					if(ctrlDown)
-					{
-						var traceList = $levelXML.find("trace");
-						follower = traceList.length;
-						var traceClicked = traceList[traceIndexClicked];
-						var traceClone = traceClicked.cloneNode(true);
-						traceClicked.parentNode.appendChild(traceClone);
-					} else {
-						follower = traceIndexClicked;
-					}
-				}
-				else
-				{
+				if(pathInProgress) {
 					var oldDef = pathInProgress.text();
 					pathInProgress.text(oldDef + " (" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")");
 				}
@@ -282,62 +231,9 @@ $(document).ready(function() {
 			}
 		}
 	});
-	$(document.body).on("dblclick", "#layers", function(event) {
-		var pos = $(this).position();
-
-		if(mode == "trace")
-		{
-			var traceIndexClicked = findTrace(mouseX - pos.left, mouseY - pos.top);
-
-			if(traceIndexClicked >= 0)
-			{
-				showEditorTrace($levelXML.find("trace:eq(" + traceIndexClicked + ")"));
-			}
-		}
-
-		event.preventDefault();
-	});
 
 	$(document).mouseup(function() {
 		follower = null;
 		mouseDown = false;
-	});
-
-	$("#layerMenu").on("mouseenter", ".prop", function(event) {
-		var i = /[\d]+/.exec(this.id)[0];
-		$("#prop" + i).css("background-color", "rgba(255, 255, 0, 1)");
-	});
-	$("#layerMenu").on("mouseleave", ".prop", function(event) {
-		var i = /[\d]+/.exec(this.id)[0];
-		$("#prop" + i).css("background-color", "");
-	});
-	$("#layerMenu").on("click", ".prop", function(event) {
-		typeSelected = "prop";
-
-		var i = /[\d]+/.exec(this.id)[0];
-
-		indexSelected = i;
-
-		var prop = levelObject.props[i];
-		showEditorProp(prop);
-	});
-
-	$("#layerMenu").on("mouseenter", ".position", function(event) {
-		var i = /[\d]+/.exec(this.id)[0];
-		$("#position" + i).css("background-color", "rgba(255, 255, 0, 1)");
-	});
-	$("#layerMenu").on("mouseleave", ".position", function(event) {
-		var i = /[\d]+/.exec(this.id)[0];
-		$("#position" + i).css("background-color", "");
-	});
-	$("#layerMenu").on("click", ".position", function(event) {
-		typeSelected = "position";
-
-		var i = /[\d]+/.exec(this.id)[0];
-
-		indexSelected = i;
-
-		var position = levelObject.positions[i];
-		showEditorPosition(position);
 	});
 });

@@ -49,33 +49,50 @@
 				<div id="traceOptions" title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;Solid traces represent completely inpenetrable areas.&#013;Void traces are used for areas of open air where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;Function traces indicate areas of the level which will trigger a function call when a body moves into the area.&#013;Paths link positions together for walking purposes.&#013;Stairs move Bodys to different layers.
 				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
 					<h4>Traces</h4>
+					<div v-for="(color, type) in traceOptions"
+						 v-if="type !== 'highlight'"
+						 class="option"
+						 v-bind:style="{ color: 'white', backgroundColor: color }"
+						 v-on:click="selectTraceOption(type, color)"
+					>
+						{{ type }}
+					</div>
 				</div>
 			</div>
 			<div id="layerMenuVue" class="menu" style="right:0px;">
 				<ul>
 					<li v-for="(layer, index) in level.layers">
-						<span v-on:click="editLayer(layer)">Layer {{ index }}</span>
+						<span v-on:click="editLayer(layer)" class="pointer">Layer {{ index }}</span>
 						<input type="checkbox" v-model="layer.displayed"/>
 						<ul>
 							<li v-for="(trace, traceIndex) in layer.traces"
 								v-on:mouseenter="trace.isHighlighted = true"
 								v-on:mouseleave="trace.isHighlighted = false"
 							>
-								<span v-on:click="editTrace(trace)">Trace {{ traceIndex }}</span>
+								<span v-on:click.left="editTrace(trace)" class="pointer">
+									Trace {{ traceIndex }}
+									<span v-show="!!trace.id">({{trace.id}})</span>
+								</span>
 								<input type="checkbox" v-model="trace.displayed"/>
 							</li>
 						</ul>
 					</li>
-					<li v-for="(prop, index) in level.props">
-						<span v-on:click="editProp(prop)">Prop {{ index }}</span>
+					<li v-for="(prop, index) in level.props"
+						v-on:mouseenter="prop.isHighlighted = true"
+						v-on:mouseleave="prop.isHighlighted = false"
+					>
+						<span v-on:click.left="editProp(prop)" class="pointer">Prop {{ index }}</span>
 						<input type="checkbox" v-model="prop.displayed"/>
 					</li>
-					<li v-for="(position, index) in level.positions">
-						<span v-on:click="editPosition(position)">Position {{ index }}</span>
+					<li v-for="(position, index) in level.positions"
+						v-on:mouseenter="position.isHighlighted = true"
+						v-on:mouseleave="position.isHighlighted = false"
+					>
+						<span v-on:click.left="editPosition(position)" class="pointer">Position {{ index }}</span>
 						<input type="checkbox" v-model="position.displayed"/>
 					</li>
 				</ul>
-				<div class="option" v-on:click="createLayer">Add Layer</div>
+				<div class="option" v-on:click.left="createLayer">Add Layer</div>
 			</div>
 
 		</div>
@@ -110,9 +127,10 @@
 	<script type="text/x-template" id="rendered-trace-template">
 			<polygon
 					v-show="trace.displayed"
-					v-on:click="edit"
-					v-on:mouseenter="trace.isHighlighted = true"
-					v-on:mouseleave="trace.isHighlighted = false"
+					v-on:dblclick="edit"
+					v-on:mousedown.left="track"
+					v-on:mouseenter="toggleHighlight(true)"
+					v-on:mouseleave="toggleHighlight(false)"
 					v-bind:points="points"
 					v-bind:fill="traceFill"
 					v-bind:stroke="traceStroke"
@@ -124,7 +142,11 @@
 		<div
 				v-show="prop.displayed"
 				class="draggable prop"
-			 	v-bind:style="{ position: 'absolute', overflow: 'hidden', left: positionLeft + 'px', top: positionTop + 'px', width: width + 'px', height: height + 'px' }"
+				v-on:dblclick="edit"
+				v-on:mousedown.left="track"
+				v-on:mouseenter="toggleHighlight(true)"
+				v-on:mouseleave="toggleHighlight(false)"
+				v-bind:style="styleObject"
 		>
 			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
 		</div>
@@ -134,7 +156,11 @@
 		<div
 				v-show="position.displayed"
 				class="draggable position"
-				v-bind:style="{ position: 'absolute', overflow: 'hidden', left: positionLeft + 'px', top: positionTop + 'px', width: width + 'px', height: height + 'px' }"
+				v-on:dblclick="edit"
+				v-on:mousedown.left="track"
+				v-on:mouseenter="toggleHighlight(true)"
+				v-on:mouseleave="toggleHighlight(false)"
+				v-bind:style="styleObject"
 		>
 			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
 		</div>

@@ -100,6 +100,10 @@ canvas {
     cursor: pointer;
 }
 
+.pointer {
+    cursor: pointer;
+}
+
 #layerMenu > div
 {
     cursor: pointer;

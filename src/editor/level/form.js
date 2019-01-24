@@ -2,19 +2,30 @@ var editingThing;
 var editFields = [];
 
 $(document).ready(function() {
-    $("#XMLEditorFields").on("keyup", "input", function(event) {
-        if(event.which == 13) {
-            $("#saveChanges").click();
+    var $back = $("#XMLEditorBack");
+    var $fields = $("#XMLEditorFields");
+    var $saveButton = $("#saveChanges");
+    $back.hide();
+
+    $back.click(function(event) {
+        if(event.target == this) {
+            $back.hide();
         }
     });
 
-    $("#saveChanges").click(function(event) {
+    $fields.on("keyup", "input", function(event) {
+        if(event.which == 13) {
+            $saveButton.click();
+        }
+    });
+
+    $saveButton.click(function(event) {
         for(var i = 0; i < editFields.length; i++) {
             var field = editFields[i];
             editingThing[field] = getEditorValue(field);
         }
 
-        $("#XMLEditorBack").hide();
+        $back.hide();
     });
 
     $("#deleteThing").click(function(event) {
@@ -44,7 +55,7 @@ $(document).ready(function() {
             }
         }
 
-        $("#XMLEditorBack").hide();
+        $back.hide();
     });
 });
 

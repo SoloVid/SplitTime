@@ -25,10 +25,11 @@ levelObject = {
     props: [
         {
             displayed: true,
+            isHighlighted: false,
             id: "banner",
-			template: "Ruby_Banner",
-            x: 50,
-            y: 50,
+			template: "Ruby Banner",
+            x: 350,
+            y: 250,
             z: 0,
             dir: 3,
             stance: "default"
@@ -37,6 +38,7 @@ levelObject = {
     positions: [
 		{
 			displayed: true,
+            isHighlighted: false,
 			id: "patrol1",
 			x: 50,
 			y: 50,
@@ -46,30 +48,6 @@ levelObject = {
 		}
 	]
 };
-
-function imgSrc(fileName) {
-	if(!fileName) {
-		return "";
-	}
-    return projectPath + "images/" + fileName;
-}
-
-function safeGetColor(trace) {
-    // if(!window.SplitTime) {
-    //     return [];
-    // }
-    // return SplitTime.Trace.getColor(type);
-	if(trace.isHighlighted) {
-		return traceEditorColors["highlight"];
-	}
-    return traceEditorColors[trace.type];
-}
-function safeExtractTraceArray(traceStr) {
-    // if(!window.SplitTime) {
-    //     return [];
-    // }
-    return SplitTime.Trace.extractArray(traceStr);
-}
 
 Vue.component("rendered-trace", {
     props: ["trace"],
@@ -101,10 +79,16 @@ Vue.component("rendered-trace", {
     		console.log("himom");
     		showEditorTrace(this.trace);
 		},
-		mousedown: function() {
+		track: function() {
     		follower = this.trace;
     		setMode("trace");
-		}
+		},
+        toggleHighlight: function(highlight) {
+            if(follower) {
+                return;
+            }
+            this.trace.isHighlighted = highlight;
+        }
 	}
 });
 
@@ -112,54 +96,114 @@ Vue.component("rendered-prop", {
     props: ["prop"],
     template: "#rendered-prop-template",
     computed: {
+        styleObject: function() {
+            return {
+                outline: this.prop.isHighlighted ? "2px solid yellow" : "",
+                backgroundColor: this.prop.isHighlighted ? "yellow" : "initial",
+                position: 'absolute',
+                overflow: 'hidden',
+                left: this.positionLeft + 'px',
+                top: this.positionTop + 'px',
+                width: this.width + 'px',
+                height: this.height + 'px'
+            };
+        },
+    	body: function() {
+    		return loadBodyFromTemplate(this.prop.template);
+		},
     	imgSrc: function() {
-
+            return this.body.img ? imgSrc(this.body.img) : subImg;
 		},
     	positionLeft: function() {
-
+            return this.prop.x - this.body.xres/2 - this.body.baseOffX - this.body.offX;
 		},
 		positionTop: function() {
-
+            return this.prop.y - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
 		},
 		width: function() {
-
+			return this.body.xres;
 		},
 		height: function() {
-
+			return this.body.yres;
 		},
 		cropLeft: function() {
-            return 0;
+            return this.body.getAnimationFrameCrop(this.body.dir, this.body.stance, 0);
 		},
 		cropTop: function() {
             return 0;
 		}
-	}
+	},
+    methods: {
+        edit: function() {
+            showEditorTrace(this.prop);
+        },
+        track: function() {
+            follower = this.prop;
+            setMode("prop");
+        },
+        toggleHighlight: function(highlight) {
+            if(follower) {
+                return;
+            }
+            this.prop.isHighlighted = highlight;
+        }
+    }
 });
 
 Vue.component("rendered-position", {
     props: ["position"],
     template: "#rendered-position-template",
     computed: {
+        styleObject: function() {
+            return {
+                outline: this.position.isHighlighted ? "2px solid yellow" : "",
+                backgroundColor: this.position.isHighlighted ? "yellow" : "initial",
+                position: 'absolute',
+                overflow: 'hidden',
+                left: this.positionLeft + 'px',
+                top: this.positionTop + 'px',
+                width: this.width + 'px',
+                height: this.height + 'px'
+            };
+        },
+        body: function() {
+            return loadBodyFromTemplate();
+        },
         imgSrc: function() {
-
+            return this.body.img ? imgSrc(this.body.img) : subImg;
         },
         positionLeft: function() {
-
+            return this.position.x - this.body.xres/2 - this.body.baseOffX - this.body.offX;
         },
         positionTop: function() {
-
+            return this.position.y - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
         },
         width: function() {
-
+            return this.body.xres;
         },
         height: function() {
-
+            return this.body.yres;
         },
         cropLeft: function() {
-            return 0;
+            return this.body.getAnimationFrameCrop(this.body.dir, this.body.stance, 0);
         },
         cropTop: function() {
-			return 0;
+            return 0;
+        }
+    },
+    methods: {
+        edit: function() {
+            showEditorTrace(this.position);
+        },
+        track: function() {
+            follower = this.position;
+            setMode("position");
+        },
+        toggleHighlight: function(highlight) {
+            if(follower) {
+                return;
+            }
+            this.position.isHighlighted = highlight;
         }
     }
 });
@@ -196,7 +240,8 @@ var vueApp = new Vue({
 		level: levelObject,
 		levelWidth: 0,
 		levelHeight: 0,
-		activeLayer: 0
+		activeLayer: 0,
+		traceOptions: traceEditorColors
 	},
 	computed: {
 		// levelWidth: function() {
@@ -209,10 +254,21 @@ var vueApp = new Vue({
 		// }
 	},
 	methods: {
+		selectTraceOption: function(type, color) {
+            typeSelected = type;
+            window.color = color;
+            setMode("trace");
+        },
 		createLayer: function() {
+		    var height = 0;
+		    if(this.level.layers.length > 0) {
+		        var previousLayer = this.level.layers[this.level.layers.length - 1];
+		        height = previousLayer.height + 64;
+            }
             this.level.layers.push({
                 displayed: true,
                 background: "",
+                height: height,
                 traces: []
             });
 		},
