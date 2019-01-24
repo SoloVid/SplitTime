@@ -251,9 +251,14 @@ Vue.component("menu-layer", {
 });
 
 Vue.component("rendered-layer", {
-    props: ["level", "layer", "index", "width", "height"],
+    props: ["level", "layer", "index", "width", "height", "isActive"],
     template: "#rendered-layer-template",
     computed: {
+        styleObject: function() {
+            return {
+                pointerEvents: this.isActive ? "initial" : "none"
+            };
+        },
     	imgSrc: function() {
     		return imgSrc(this.layer.background);
 		},
@@ -285,16 +290,6 @@ var vueApp = new Vue({
 		activeLayer: 0,
 		traceOptions: traceEditorColors
 	},
-	computed: {
-		// levelWidth: function() {
-		// 	// TODO
-		// 	return 100;
-		// },
-		// levelHeight: function() {
-		// 	//TODO
-		// 	return 100;
-		// }
-	},
 	methods: {
 	    selectModeOption: function(mode) {
 	        setMode(mode);
@@ -304,17 +299,7 @@ var vueApp = new Vue({
             setMode("trace");
         },
 		createLayer: function() {
-		    var height = 0;
-		    if(this.level.layers.length > 0) {
-		        var previousLayer = this.level.layers[this.level.layers.length - 1];
-		        height = previousLayer.height + 64;
-            }
-            this.level.layers.push({
-                displayed: true,
-                background: "",
-                height: height,
-                traces: []
-            });
+	        addNewLayer();
 		}
 	}
 });

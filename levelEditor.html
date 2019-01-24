@@ -27,6 +27,7 @@
 						v-bind:index="layerIndex"
 						v-bind:width="levelWidth"
 						v-bind:height="levelHeight"
+						v-bind:is-active="layerIndex === activeLayer"
 				></rendered-layer>
 			</div>
 
@@ -65,6 +66,7 @@
 				<ul>
 					<menu-layer
 							v-for="(layer, index) in level.layers"
+							v-bind:key="index"
 							v-bind:level="level"
 							v-bind:layer="layer"
 							v-bind:index="index"
@@ -89,7 +91,10 @@
 
 	<script type="text/x-template" id="menu-layer-template">
 		<li>
-			<span v-on:click="edit" class="pointer">Layer {{ index }}</span>
+			<span v-on:click="edit" class="pointer">
+				<span v-show="!layer.id">Layer {{ index }}</span>
+				<span v-show="layer.id">{{layer.id}}</span>
+			</span>
 			<input type="checkbox" v-model="layer.displayed"/>
 			<ul>
 				<li v-for="(trace, traceIndex) in layer.traces"
@@ -130,17 +135,23 @@
 	</script>
 
 	<script type="text/x-template" id="rendered-layer-template">
-		<div v-show="layer.displayed">
+		<div v-show="layer.displayed" v-bind:style="styleObject">
 			<img class="background" v-bind:src="imgSrc"/>
 			<svg
 					style="position:absolute"
 					v-bind:width="width"
 					v-bind:height="height"
 			>
-				<rendered-trace v-for="trace in layer.traces" v-bind:trace="trace"></rendered-trace>
+				<rendered-trace v-for="(trace, traceIndex) in layer.traces"
+								v-bind:trace="trace"
+				></rendered-trace>
 			</svg>
-			<rendered-prop v-for="prop in props" v-bind:prop="prop"></rendered-prop>
-			<rendered-position v-for="position in positions" v-bind:position="position"></rendered-position>
+			<rendered-prop v-for="(prop, propIndex) in props"
+						   v-bind:prop="prop"
+			></rendered-prop>
+			<rendered-position v-for="(position, posIndex) in positions"
+							   v-bind:position="position"
+			></rendered-position>
 		</div>
 	</script>
 

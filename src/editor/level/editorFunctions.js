@@ -46,10 +46,30 @@ function removeEditorProperties(object) {
     delete object.isHighlighted;
 }
 
+function addNewLayer() {
+	var assumedRelativeHeight = 64;
+	if(levelObject.layers.length > 1) {
+		assumedRelativeHeight = Math.abs(levelObject.layers[1].height - levelObject.layers[0].height);
+	}
+    var height = 0;
+    if(levelObject.layers.length > 0) {
+        var previousLayer = levelObject.layers[levelObject.layers.length - 1];
+        height = previousLayer.height + assumedRelativeHeight;
+    }
+    levelObject.layers.push({
+        displayed: true,
+		id: "",
+        background: "",
+        height: height,
+        traces: []
+    });
+}
+
 function addNewTrace(layerIndex) {
 	var trace = {
 		type: "",
 		vertices: "",
+		parameter: ""
 	};
 	addEditorProperties(trace);
 	levelObject.layers[layerIndex].traces.push(trace);
@@ -148,8 +168,15 @@ function getPixelsPerPixel() {
 }
 
 function createLevel(type) {
+	if(levelObject.layers.length > 0) {
+		if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
+			return;
+		}
+    }
+
 	if(!type) {
-        type = prompt("Type: (action/overworld)");
+        // type = prompt("Type: (action/overworld)");
+		type = "action";
 	}
 
 	levelObject = {
@@ -159,6 +186,7 @@ function createLevel(type) {
 		props: []
 	};
 
+	vueApp.level = levelObject;
 	vueApp.createLayer();
 
 	$("#editorTools").show();

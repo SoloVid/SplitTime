@@ -22,7 +22,7 @@ $(document).ready(function() {
     $saveButton.click(function(event) {
         for(var i = 0; i < editFields.length; i++) {
             var field = editFields[i];
-            editingThing[field] = getEditorValue(field);
+            editingThing[field.key] = getEditorValue(field);
         }
 
         $back.hide();
@@ -35,10 +35,15 @@ $(document).ready(function() {
 
         for(var iLayer = 0; iLayer < levelObject.layers.length; iLayer++) {
             var layer = levelObject.layers[iLayer];
-            for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
-                if(layer.traces[iTrace] === editingThing) {
-                    layer.traces.splice(iTrace, 1);
-                    iTrace--;
+            if(layer === editingThing) {
+                levelObject.layers.splice(iLayer, 1);
+                iLayer--;
+            } else {
+                for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
+                    if(layer.traces[iTrace] === editingThing) {
+                        layer.traces.splice(iTrace, 1);
+                        iTrace--;
+                    }
                 }
             }
         }
@@ -210,10 +215,8 @@ function showEditorTrace(trace) {
             key: "type"
         },
         {
-            key: "reference"
-        },
-        {
-            key: "dir"
+            title: "direction/height/function",
+            key: "parameter"
         },
         {
             type: "textarea",

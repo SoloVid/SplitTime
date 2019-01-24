@@ -30,8 +30,7 @@ var traceEditorColors = {
 	"void": "rgba(255, 0, 255, 1)",
 	"function": "rgba(255, 0, 0, 1)",
 	"path": "rgba(0, 0, 0, 1)",
-	"stairDown": "rgba(0, 255, 0, 1)",
-	"stairUp": "rgba(0, 255, 0, 1)",
+	"stairs": "rgba(0, 255, 0, 1)",
 	"highlight": "rgba(255, 255, 0, 1)"
 };
 
@@ -131,6 +130,8 @@ $(document).ready(function() {
 		var levelContainerPos = $("#layers").position();
 		mouseLevelX = mouseX - levelContainerPos.left;
 		mouseLevelY = mouseY - levelContainerPos.top;
+
+		event.preventDefault();
 	});
 
 	// $(document.body).on("mousedown", ".draggable", function(event) {
@@ -167,6 +168,9 @@ $(document).ready(function() {
 	// 		}
 	// 	}
 	// });
+    $(document.body).on("dblclick", "#layers", function(event) {
+    	event.preventDefault();
+    });
 
 	$(document.body).on("mouseup", "#layers", function(event) {
 		if(mode == "trace") {
