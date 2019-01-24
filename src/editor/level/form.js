@@ -59,29 +59,32 @@ $(document).ready(function() {
     });
 });
 
-function showEditor(thing, fieldSpecs) {
+function showEditor(thing, fields) {
     $("#XMLEditorFields").empty();
     editingThing = thing;
-    editFields = [];
+    editFields = fields;
 
-    for(var i = 0; i < fieldSpecs.length; i++) {
-        var fieldSpec = fieldSpecs[i];
-        editFields.push(fieldSpec.key);
+    for(var i = 0; i < fields.length; i++) {
+        var field = fields[i];
 
         var container = $("<div></div>");
         var element;
 
-        if(!fieldSpec.type) {
-            fieldSpec.type = "input";
+        if(!field.type) {
+            field.type = "input";
         }
-        if(!fieldSpec.title) {
-            fieldSpec.title = fieldSpec.key;
+        if(!field.title) {
+            field.title = field.key;
         }
 
-        var value = thing[fieldSpec.key];
-        switch(fieldSpec.type) {
+        var value = thing[field.key];
+        switch(field.type) {
             case "input":
                 element = $("<input/>");
+                element.val(value);
+                break;
+            case "number":
+                element = $("<input type='number'/>");
                 element.val(value);
                 break;
             case "textarea":
@@ -92,14 +95,14 @@ function showEditor(thing, fieldSpecs) {
                 element = $("<h2>" + value + "</h2>");
                 break;
             default:
-                console.warn("unrecognized type: " + fieldSpec.type);
+                console.warn("unrecognized type: " + field.type);
         }
 
-        if(fieldSpec.key) {
-            element.attr("id", "FIELD" + fieldSpec.key);
+        if(field.key) {
+            element.attr("id", "FIELD" + field.key);
         }
-        if(fieldSpec.title) {
-            container.append($("<span>" + fieldSpec.title + ": </span>"));
+        if(field.title) {
+            container.append($("<span>" + field.title + ": </span>"));
         }
         container.append(element);
         // container.append("<br />");
@@ -113,8 +116,13 @@ function showEditor(thing, fieldSpecs) {
     firstInput.focus();
 }
 
-function getEditorValue(id) {
-    return $("#FIELD" + id).val();
+function getEditorValue(field) {
+    var strVal = $("#FIELD" + field.key).val();
+    switch(field.type) {
+        case "number":
+            return +strVal;
+    }
+    return strVal;
 }
 
 function showEditorLayer(layer) {
@@ -126,7 +134,8 @@ function showEditorLayer(layer) {
             key: "background"
         },
         {
-            key: "height"
+            key: "height",
+            type: "number"
         }
     ]);
 }
@@ -140,13 +149,16 @@ function showEditorProp(prop) {
             key: "template"
         },
         {
-            key: "x"
+            key: "x",
+            type: "number"
         },
         {
-            key: "y"
+            key: "y",
+            type: "number"
         },
         {
-            key: "z"
+            key: "z",
+            type: "number"
         },
         {
             key: "dir"
@@ -169,13 +181,16 @@ function showEditorPosition(position) {
             key: "alias"
         },
         {
-            key: "x"
+            key: "x",
+            type: "number"
         },
         {
-            key: "y"
+            key: "y",
+            type: "number"
         },
         {
-            key: "z"
+            key: "z",
+            type: "number"
         },
         {
             key: "dir"

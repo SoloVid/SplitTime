@@ -10,6 +10,7 @@ levelObject = {
                 {
                     displayed: true,
                     isHighlighted: false,
+                    id: "himom",
                     type: "solid",
                     vertices: "(0, 384) (503, 384) (503, 641) (641, 641) (640, 2) (0, 1) (close)"
                 },
@@ -53,12 +54,18 @@ Vue.component("rendered-trace", {
     props: ["trace"],
     template: "#rendered-trace-template",
     computed: {
+        hasClose: function() {
+            var pointArray = safeExtractTraceArray(this.trace.vertices);
+            return pointArray.length > 0 && pointArray.pop() === null;
+        },
         points: function() {
         	var pointsArray = safeExtractTraceArray(this.trace.vertices);
             return pointsArray.reduce(function(pointsStr, point) {
 				if(point !== null) {
 					return pointsStr + " " + point.x + "," + point.y;
-				}
+				} else if(pointsArray.length > 0 && pointsArray[0] !== null) {
+				    return pointsStr + " " + pointsArray[0].x + "," + pointsArray[0].y;
+                }
 				return pointsStr;
 			}, "");
         },
@@ -69,9 +76,7 @@ Vue.component("rendered-trace", {
 			return safeGetColor(this.trace);
         },
         traceOpacity: function() {
-        	var pointArray = safeExtractTraceArray(this.trace.vertices);
-			var hasClose = pointArray.length > 0 && pointArray.pop() === null;
-			return hasClose ? 1 : 0;
+			return this.hasClose ? 1 : 0;
         }
     },
 	methods: {
@@ -208,6 +213,43 @@ Vue.component("rendered-position", {
     }
 });
 
+Vue.component("menu-layer", {
+    props: ["level", "layer", "index"],
+    template: "#menu-layer-template",
+    computed: {
+        props: function() {
+            var that = this;
+            var layerAbove = this.level.layers[this.index + 1];
+            var maxHeight = layerAbove ? layerAbove.height : Number.MAX_VALUE;
+            return this.level.props.filter(function(prop) {
+                return prop.z >= that.layer.height && prop.z < maxHeight;
+            });
+        },
+        positions: function() {
+            var that = this;
+            var layerAbove = this.level.layers[this.index + 1];
+            var maxHeight = layerAbove ? layerAbove.height : Number.MAX_VALUE;
+            return this.level.positions.filter(function(pos) {
+                return pos.z >= that.layer.height && pos.z < maxHeight;
+            });
+        }
+    },
+    methods: {
+        edit: function() {
+            showEditorLayer(this.layer);
+        },
+        editTrace: function(trace) {
+            showEditorTrace(trace);
+        },
+        editProp: function(prop) {
+            showEditorProp(prop);
+        },
+        editPosition: function(position) {
+            showEditorPosition(position);
+        }
+    }
+});
+
 Vue.component("rendered-layer", {
     props: ["level", "layer", "index", "width", "height"],
     template: "#rendered-layer-template",
@@ -254,9 +296,11 @@ var vueApp = new Vue({
 		// }
 	},
 	methods: {
-		selectTraceOption: function(type, color) {
+	    selectModeOption: function(mode) {
+	        setMode(mode);
+        },
+		selectTraceOption: function(type) {
             typeSelected = type;
-            window.color = color;
             setMode("trace");
         },
 		createLayer: function() {
@@ -271,18 +315,6 @@ var vueApp = new Vue({
                 height: height,
                 traces: []
             });
-		},
-		editLayer: function(layer) {
-			showEditorLayer(layer);
-		},
-		editTrace: function(trace) {
-			showEditorTrace(trace);
-		},
-		editProp: function(prop) {
-			showEditorProp(prop);
-		},
-		editPosition: function(position) {
-			showEditorPosition(position);
 		}
 	}
 });

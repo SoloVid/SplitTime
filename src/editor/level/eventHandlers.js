@@ -3,7 +3,6 @@ var levelObject;
 var mode = "position";
 
 var typeSelected;
-var color;
 
 var mouseX = 0;
 var mouseY = 0;
@@ -13,7 +12,7 @@ var mouseDown = false;
 var ctrlDown = false;
 
 var follower = null;
-var pathInProgress = false;
+var pathInProgress = null;
 
 var subImg;
 var ctx;
@@ -87,13 +86,16 @@ $(document).ready(function() {
 	});
 
 	$("#fileChooser").change(function(evt) {
-		cEvent = evt; //Set for r.onload
 		var f = evt.target.files[0];
 		if (f) {
 			var r = new FileReader();
 			r.onload = function(e) {
 				var contents = e.target.result;
-				loadFile2(contents);
+                console.log(contents);
+
+                importLevel(contents);
+
+                $("#editorTools").show();
 			};
 			r.readAsText(f);
 		} else {
@@ -131,102 +133,82 @@ $(document).ready(function() {
 		mouseLevelY = mouseY - levelContainerPos.top;
 	});
 
-	$(document.body).on("mousedown", ".draggable", function(event) {
-		if(mode != "trace" && event.which == 1)
-		{
-			if(ctrlDown)
-			{
-				//Locate index of element
-				var thisType = this.className;
-				var regex = /[\s]*draggable[\s]*/;
-				thisType = thisType.replace(regex, "");
-
-				var activeLayer = document.getElementById("activeLayer").value;
-
-				var i = /[\d]+/.exec(this.id)[0];
-
-				cloneIndex = $("." + thisType).length;
-
-				var XMLNode = $levelXML.find(thisType + ":eq(" + i + ")");
-
-				var template = XMLNode.attr("template");
-
-				var t = loadBodyFromTemplate(template);
-
-				var HTMLClone = this.cloneNode(true);
-				HTMLClone.id = thisType + cloneIndex;
-				var XMLClone = XMLNode.cloneNode(true);
-
-				$("#layers").find(".layerDisplay:eq(" + activeLayer + ")").append(HTMLClone);
-
-				$levelXML.find(thisType + "s").append(XMLClone);
-
-				follower = $(HTMLClone);
-			}
-		}
-	});
+	// $(document.body).on("mousedown", ".draggable", function(event) {
+	// 	if(mode != "trace" && event.which == 1)
+	// 	{
+	// 		if(ctrlDown)
+	// 		{
+	// 			//Locate index of element
+	// 			var thisType = this.className;
+	// 			var regex = /[\s]*draggable[\s]*/;
+	// 			thisType = thisType.replace(regex, "");
+    //
+	// 			var activeLayer = document.getElementById("activeLayer").value;
+    //
+	// 			var i = /[\d]+/.exec(this.id)[0];
+    //
+	// 			cloneIndex = $("." + thisType).length;
+    //
+	// 			var XMLNode = $levelXML.find(thisType + ":eq(" + i + ")");
+    //
+	// 			var template = XMLNode.attr("template");
+    //
+	// 			var t = loadBodyFromTemplate(template);
+    //
+	// 			var HTMLClone = this.cloneNode(true);
+	// 			HTMLClone.id = thisType + cloneIndex;
+	// 			var XMLClone = XMLNode.cloneNode(true);
+    //
+	// 			$("#layers").find(".layerDisplay:eq(" + activeLayer + ")").append(HTMLClone);
+    //
+	// 			$levelXML.find(thisType + "s").append(XMLClone);
+    //
+	// 			follower = $(HTMLClone);
+	// 		}
+	// 	}
+	// });
 
 	$(document.body).on("mouseup", "#layers", function(event) {
-		var pos = $(this).position();
-
-		if(mode == "trace")
-		{
-			var closestPosition = null;
-			if(event.which == 1)
-			{
+		if(mode == "trace") {
+            var literalPoint = "(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")";
+			var closestPosition = findClosestPosition(mouseLevelX, mouseLevelY);
+			var positionPoint = closestPosition ? "(pos:" + closestPosition.id + ")" : "";
+			if(event.which == 1) { // left click
 				if(pathInProgress) {
-					var oldDef = pathInProgress.text();
-					pathInProgress.text(oldDef + " (" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")");
+                    if(typeSelected == "path" && ctrlDown) {
+                        pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint;
+                    } else {
+                        pathInProgress.vertices = pathInProgress.vertices + " " + literalPoint;
+                    }
 				}
-			}
-			else if(event.which == 3)
-			{
-				if(!pathInProgress)
-				{
-					var trace = $("<trace/>", $levelXML);
-
-					trace.attr("type", typeSelected);
+			} else if(event.which == 3) { // right click
+				if(!pathInProgress) {
+					var trace = addNewTrace(vueApp.activeLayer);
+					trace.type = typeSelected;
 
 					if(typeSelected == "path" && !ctrlDown) {
-						closestPosition = findClosestPosition(mouseLevelX, mouseLevelY);
+						trace.vertices = positionPoint;
+					} else {
+						trace.vertices = literalPoint;
 					}
 
-					if(closestPosition) {
-						trace.text("(pos:" + closestPosition + ")");
-					}
-					else {
-						trace.text("(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")");
-					}
 					pathInProgress = trace;
-
-					var activeLayer = $("#activeLayer").val();
-
-					$levelXML.find("traces:eq(" + activeLayer + ")").append(trace);
 				} else {
-					if(!ctrlDown)
-					{
-						if(pathInProgress.attr("type") == "path") {
-							closestPosition = findClosestPosition(mouseLevelX, mouseLevelY);
+					if(!ctrlDown) {
+						if(pathInProgress.type == "path") {
 							if(closestPosition) {
-								pathInProgress.text(pathInProgress.text() + " (pos:" + closestPosition + ")");
+								pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint;
 							}
 						}
 						else {
-							pathInProgress.text(pathInProgress.text() + " (close)");
+                            pathInProgress.vertices = pathInProgress.vertices + " (close)";
 						}
 					}
-					pathInProgress = false;
+					pathInProgress = null;
 				}
 			}
-		}
-		else if(mode == "position" || mode == "prop")
-		{
-			if(event.which == 1)
-			{
-
-			}
-			else if(event.which == 3)
-			{
+		} else if(mode == "position" || mode == "prop") {
+			if(event.which == 3) { // right click
 				createObject(mode);
 			}
 		}

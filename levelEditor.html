@@ -32,12 +32,14 @@
 
 			<div class="menu" style="left:0px;width:100px">
 				Tools:
-				<div class="option" onclick="setMode('position')"
-					title="Positions are handles for locations that Actors may occupy or paths may lead to and from.&#013;&#013;NPCs are generally people or things that have dynamic properties.&#013;NPCs are loaded at game start and transcend the board (i.e. they are not in any way actually tied to the board and may be moved to other boards).
+				<div class="option"
+					 v-on:click="selectModeOption('position')"
+					 title="Positions are handles for locations that Actors may occupy or paths may lead to and from.&#013;&#013;NPCs are generally people or things that have dynamic properties.&#013;NPCs are loaded at game start and transcend the board (i.e. they are not in any way actually tied to the board and may be moved to other boards).
 					&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
 					>Position</div>
-				<div class="option" onclick="setMode('prop')"
-					title="Props are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Props are generally static (or animated) graphical elements Bodys can walk behind or in front of.
+				<div class="option"
+					 v-on:click="selectModeOption('prop')"
+					 title="Props are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Props are generally static (or animated) graphical elements Bodys can walk behind or in front of.
 					&#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone&#013;Double-click to open properties."
 					>Prop</div>
 				<br>
@@ -53,7 +55,7 @@
 						 v-if="type !== 'highlight'"
 						 class="option"
 						 v-bind:style="{ color: 'white', backgroundColor: color }"
-						 v-on:click="selectTraceOption(type, color)"
+						 v-on:click="selectTraceOption(type)"
 					>
 						{{ type }}
 					</div>
@@ -61,36 +63,12 @@
 			</div>
 			<div id="layerMenuVue" class="menu" style="right:0px;">
 				<ul>
-					<li v-for="(layer, index) in level.layers">
-						<span v-on:click="editLayer(layer)" class="pointer">Layer {{ index }}</span>
-						<input type="checkbox" v-model="layer.displayed"/>
-						<ul>
-							<li v-for="(trace, traceIndex) in layer.traces"
-								v-on:mouseenter="trace.isHighlighted = true"
-								v-on:mouseleave="trace.isHighlighted = false"
-							>
-								<span v-on:click.left="editTrace(trace)" class="pointer">
-									Trace {{ traceIndex }}
-									<span v-show="!!trace.id">({{trace.id}})</span>
-								</span>
-								<input type="checkbox" v-model="trace.displayed"/>
-							</li>
-						</ul>
-					</li>
-					<li v-for="(prop, index) in level.props"
-						v-on:mouseenter="prop.isHighlighted = true"
-						v-on:mouseleave="prop.isHighlighted = false"
-					>
-						<span v-on:click.left="editProp(prop)" class="pointer">Prop {{ index }}</span>
-						<input type="checkbox" v-model="prop.displayed"/>
-					</li>
-					<li v-for="(position, index) in level.positions"
-						v-on:mouseenter="position.isHighlighted = true"
-						v-on:mouseleave="position.isHighlighted = false"
-					>
-						<span v-on:click.left="editPosition(position)" class="pointer">Position {{ index }}</span>
-						<input type="checkbox" v-model="position.displayed"/>
-					</li>
+					<menu-layer
+							v-for="(layer, index) in level.layers"
+							v-bind:level="level"
+							v-bind:layer="layer"
+							v-bind:index="index"
+					></menu-layer>
 				</ul>
 				<div class="option" v-on:click.left="createLayer">Add Layer</div>
 			</div>
@@ -109,6 +87,48 @@
 		</div>
 	</div>
 
+	<script type="text/x-template" id="menu-layer-template">
+		<li>
+			<span v-on:click="edit" class="pointer">Layer {{ index }}</span>
+			<input type="checkbox" v-model="layer.displayed"/>
+			<ul>
+				<li v-for="(trace, traceIndex) in layer.traces"
+					v-on:mouseenter="trace.isHighlighted = true"
+					v-on:mouseleave="trace.isHighlighted = false"
+					style="list-style-type: circle"
+				>
+					<span v-on:click.left="editTrace(trace)" class="pointer">
+						<span v-show="!trace.id">Trace {{ traceIndex }}</span>
+						<span v-show="trace.id">{{trace.id}}</span>
+					</span>
+					<input type="checkbox" v-model="trace.displayed"/>
+				</li>
+				<li v-for="(prop, index) in props"
+					v-on:mouseenter="prop.isHighlighted = true"
+					v-on:mouseleave="prop.isHighlighted = false"
+					style="list-style-type: square"
+				>
+					<span v-on:click.left="editProp(prop)" class="pointer">
+						<span v-show="!prop.id">Prop {{ index }}</span>
+						<span v-show="prop.id">{{prop.id}}</span>
+					</span>
+					<input type="checkbox" v-model="prop.displayed"/>
+				</li>
+				<li v-for="(position, index) in positions"
+					v-on:mouseenter="position.isHighlighted = true"
+					v-on:mouseleave="position.isHighlighted = false"
+					style="list-style-type: disc"
+				>
+					<span v-on:click.left="editPosition(position)" class="pointer">
+						<span v-show="!position.id">Position {{ index }}</span>
+						<span v-show="position.id">{{position.id}}</span>
+					</span>
+					<input type="checkbox" v-model="position.displayed"/>
+				</li>
+			</ul>
+		</li>
+	</script>
+
 	<script type="text/x-template" id="rendered-layer-template">
 		<div v-show="layer.displayed">
 			<img class="background" v-bind:src="imgSrc"/>
@@ -125,7 +145,7 @@
 	</script>
 
 	<script type="text/x-template" id="rendered-trace-template">
-			<polygon
+			<polyline
 					v-show="trace.displayed"
 					v-on:dblclick="edit"
 					v-on:mousedown.left="track"
@@ -135,7 +155,7 @@
 					v-bind:fill="traceFill"
 					v-bind:stroke="traceStroke"
 					v-bind:fill-opacity="traceOpacity"
-			></polygon>
+			></polyline>
 	</script>
 
 	<script type="text/x-template" id="rendered-prop-template">
