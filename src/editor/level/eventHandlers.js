@@ -1,4 +1,10 @@
-var levelObject;
+var levelObject = {
+    type: "",
+    region: "",
+    layers: [],
+    props: [],
+    positions: []
+};
 
 var mode = "position";
 
@@ -52,18 +58,27 @@ $(document).ready(function() {
 		$.getScript("src/editor/level/vueSetup.js");
 	});
 
-	$(document).on('dragstart', 'img', function(event) {
-		event.preventDefault();
-	});
-	$(document).on('contextmenu', function(event) {
-		event.preventDefault();
-	});
+    $(document.body).on("dragstart", "#layers img", function(event) {
+        event.preventDefault();
+    });
+	// $(document).on('dragstart', 'img', function(event) {
+	// 	event.preventDefault();
+	// });
+    $(document.body).on("contextmenu", "#layers", function(event) {
+        event.preventDefault();
+    });
+	// $(document).on('contextmenu', function(event) {
+	// 	event.preventDefault();
+	// });
 	// $(document).on('click', function(event) {
 	// 	event.preventDefault();
 	// });
-	$(document).on('dblclick', function(event) {
-		event.preventDefault();
-	});
+    $(document.body).on("dblclick", "#layers", function(event) {
+        event.preventDefault();
+    });
+	// $(document).on('dblclick', function(event) {
+	// 	event.preventDefault();
+	// });
 
 	setInterval(function(event) {
 		if(document.getElementsByClassName("background").length > 0)
@@ -84,8 +99,9 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#fileChooser").change(function(evt) {
-		var f = evt.target.files[0];
+    $(document.body).on("change", "#fileChooser", function(event) {
+	// $("#fileChooser").change(function(event) {
+		var f = event.target.files[0];
 		if (f) {
 			var r = new FileReader();
 			r.onload = function(e) {
@@ -173,9 +189,11 @@ $(document).ready(function() {
     });
 
 	$(document.body).on("mouseup", "#layers", function(event) {
+		var height = levelObject.layers[vueApp.activeLayer].height;
+		var yOnLayer = mouseLevelY + height;
 		if(mode == "trace") {
-            var literalPoint = "(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel()) + ")";
-			var closestPosition = findClosestPosition(mouseLevelX, mouseLevelY);
+            var literalPoint = "(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel() + height) + ")";
+			var closestPosition = findClosestPosition(mouseLevelX, yOnLayer);
 			var positionPoint = closestPosition ? "(pos:" + closestPosition.id + ")" : "";
 			if(event.which == 1) { // left click
 				if(pathInProgress) {

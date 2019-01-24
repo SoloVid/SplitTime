@@ -6,8 +6,8 @@ canvas {
     image-rendering: pixelated;                 /* Awesome future-browsers       */
     -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
 }
-#navmenu
-{
+
+#navmenu {
     position: fixed;
     margin: 0;
     left: 0;
@@ -38,8 +38,7 @@ canvas {
     color: white;
     background-color: lightgreen;
 }
-.background
-{
+.background {
     position: absolute;
     margin: 0px;
     left: 0px;
@@ -47,18 +46,7 @@ canvas {
     cursor: crosshair;
     padding-right: 300px;
 }
-.whiteboard
-{
-    position: absolute;
-    margin: 0px;
-    padding: -0px;
-    left: 0px;
-    top: 0;
-    cursor:crosshair;
-    /*border: 1px solid black;*/
-}
-#layers
-{
+#layers {
     position: absolute;
     left: 110px;
     top: 40px;
@@ -70,15 +58,7 @@ canvas {
     cursor: crosshair;
 }
 
-.layerDisplay
-{
-    position: absolute;
-    overflow: hidden;
-    border: 1px solid black;
-}
-
-.menu
-{
+.menu {
     position: fixed;
     top: 40px;
     /*right: 0;*/
@@ -109,11 +89,6 @@ canvas {
     cursor: pointer;
 }
 
-.draggable
-{
-    cursor: all-scroll;
-}
-
 .backdrop {
     display: none;
     position: fixed;
@@ -138,6 +113,10 @@ canvas {
     padding: 15px;
 }
 
+.draggable {
+    /*cursor: all-scroll;*/
+}
+
 .draggable.position img {
     opacity: .5;
     background-color: #CD96CD;
@@ -148,7 +127,7 @@ textarea {
 }
 
 #editorTools {
-    /*display: none;*/
+    display: none;
     padding: 0;
     margin: 0;
 }

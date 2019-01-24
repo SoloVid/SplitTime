@@ -91,11 +91,19 @@
 
 	<script type="text/x-template" id="menu-layer-template">
 		<li>
-			<span v-on:click="edit" class="pointer">
+			<strong v-on:click="edit" class="pointer">
 				<span v-show="!layer.id">Layer {{ index }}</span>
 				<span v-show="layer.id">{{layer.id}}</span>
-			</span>
+			</strong>
 			<input type="checkbox" v-model="layer.displayed"/>
+			<div v-show="layer.traces.length > 0">
+			<div>
+				Traces
+				<input type="checkbox"
+					   v-bind:checked="allTracesDisplayed"
+					   v-on:click.left="toggleAllTracesDisplayed"
+				/>
+			</div>
 			<ul>
 				<li v-for="(trace, traceIndex) in layer.traces"
 					v-on:mouseenter="trace.isHighlighted = true"
@@ -108,6 +116,17 @@
 					</span>
 					<input type="checkbox" v-model="trace.displayed"/>
 				</li>
+			</ul>
+			</div>
+			<div v-show="props.length > 0">
+			<div>
+				Props
+				<input type="checkbox"
+					   v-bind:checked="allPropsDisplayed"
+					   v-on:click.left="toggleAllPropsDisplayed"
+				/>
+			</div>
+			<ul>
 				<li v-for="(prop, index) in props"
 					v-on:mouseenter="prop.isHighlighted = true"
 					v-on:mouseleave="prop.isHighlighted = false"
@@ -119,6 +138,17 @@
 					</span>
 					<input type="checkbox" v-model="prop.displayed"/>
 				</li>
+			</ul>
+			</div>
+			<div v-show="positions.length > 0">
+			<div>
+				Positions
+				<input type="checkbox"
+					   v-bind:checked="allPositionsDisplayed"
+					   v-on:click.left="toggleAllPositionsDisplayed"
+				/>
+			</div>
+			<ul>
 				<li v-for="(position, index) in positions"
 					v-on:mouseenter="position.isHighlighted = true"
 					v-on:mouseleave="position.isHighlighted = false"
@@ -131,6 +161,7 @@
 					<input type="checkbox" v-model="position.displayed"/>
 				</li>
 			</ul>
+			</div>
 		</li>
 	</script>
 
@@ -142,8 +173,21 @@
 					v-bind:width="width"
 					v-bind:height="height"
 			>
+				<!--<defs>-->
+					<!--<linearGradient-->
+							<!--v-for="(trace, traceIndex) in layer.traces"-->
+							<!--v-bind:id="'stairGradient' + traceIndex"-->
+							<!--v-bind:x1="stairsGradient.x1" v-bind:y1="stairsGradient.y1"-->
+							<!--v-bind:x2="stairsGradient.x2" v-bind:y2="stairsGradient.y2"-->
+					<!--&gt;-->
+						<!--<stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:0" />-->
+						<!--<stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" />-->
+					<!--</linearGradient>-->
+				<!--</defs>-->
 				<rendered-trace v-for="(trace, traceIndex) in layer.traces"
 								v-bind:trace="trace"
+								v-bind:index="traceIndex"
+								v-bind:height="layer.height"
 				></rendered-trace>
 			</svg>
 			<rendered-prop v-for="(prop, propIndex) in props"

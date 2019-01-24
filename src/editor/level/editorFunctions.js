@@ -193,10 +193,10 @@ function createLevel(type) {
 }
 
 function createObject(type)  {
-	var x = mouseLevelX;
-	var y = mouseLevelY;
 	var layerIndex = vueApp.activeLayer;
 	var z = levelObject.layers[layerIndex].height;
+    var x = mouseLevelX;
+    var y = mouseLevelY + z;
 
 	var object = {
         id: "",

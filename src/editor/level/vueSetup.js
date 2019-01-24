@@ -1,57 +1,5 @@
-levelObject = {
-    type: "action",
-    region: "somewhere",
-    layers: [
-        {
-        	displayed: true,
-            background: "level_FirstFight_Lower.jpg",
-			height: 0,
-            traces: [
-                {
-                    displayed: true,
-                    isHighlighted: false,
-                    id: "himom",
-                    type: "solid",
-                    vertices: "(0, 384) (503, 384) (503, 641) (641, 641) (640, 2) (0, 1) (close)"
-                },
-                {
-                    displayed: true,
-                    isHighlighted: false,
-                    type: "function",
-                    vertices: "(100, 384) (503, 384) (503, 641) (641, 641) (640, 102) (100, 100) (close)"
-                },
-			],
-        }
-    ],
-    props: [
-        {
-            displayed: true,
-            isHighlighted: false,
-            id: "banner",
-			template: "Ruby Banner",
-            x: 350,
-            y: 250,
-            z: 0,
-            dir: 3,
-            stance: "default"
-        }
-	],
-    positions: [
-		{
-			displayed: true,
-            isHighlighted: false,
-			id: "patrol1",
-			x: 50,
-			y: 50,
-			z: 0,
-			dir: 3,
-			stance: "default"
-		}
-	]
-};
-
 Vue.component("rendered-trace", {
-    props: ["trace"],
+    props: ["trace", "index", "height"],
     template: "#rendered-trace-template",
     computed: {
         hasClose: function() {
@@ -59,17 +7,32 @@ Vue.component("rendered-trace", {
             return pointArray.length > 0 && pointArray.pop() === null;
         },
         points: function() {
+            var that = this;
         	var pointsArray = safeExtractTraceArray(this.trace.vertices);
             return pointsArray.reduce(function(pointsStr, point) {
+                var y;
 				if(point !== null) {
-					return pointsStr + " " + point.x + "," + point.y;
+                    y = point.y - that.height;
+                    return pointsStr + " " + point.x + "," + y;
 				} else if(pointsArray.length > 0 && pointsArray[0] !== null) {
-				    return pointsStr + " " + pointsArray[0].x + "," + pointsArray[0].y;
+                    y = pointsArray[0].y - that.height;
+                    return pointsStr + " " + pointsArray[0].x + "," + y;
                 }
 				return pointsStr;
 			}, "");
         },
+        // stairsGradient: function() {
+        //     return {
+        //         x1: "0%",
+        //         y1: "0%",
+        //         x2: "100%",
+        //         y2: "0%"
+        //     };
+        // },
         traceFill: function() {
+            // if(this.trace.type === "stairs") {
+            //     return "url(#stairGradient" + this.index + ")";
+            // }
 			return safeGetColor(this.trace);
         },
         traceStroke: function() {
@@ -85,11 +48,14 @@ Vue.component("rendered-trace", {
     		showEditorTrace(this.trace);
 		},
 		track: function() {
+    	    if(pathInProgress) {
+    	        return;
+            }
     		follower = this.trace;
     		setMode("trace");
 		},
         toggleHighlight: function(highlight) {
-            if(follower) {
+            if(follower || pathInProgress) {
                 return;
             }
             this.trace.isHighlighted = highlight;
@@ -123,7 +89,7 @@ Vue.component("rendered-prop", {
             return this.prop.x - this.body.xres/2 - this.body.baseOffX - this.body.offX;
 		},
 		positionTop: function() {
-            return this.prop.y - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
+            return this.prop.y - this.prop.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
 		},
 		width: function() {
 			return this.body.xres;
@@ -140,14 +106,17 @@ Vue.component("rendered-prop", {
 	},
     methods: {
         edit: function() {
-            showEditorTrace(this.prop);
+            showEditorProp(this.prop);
         },
         track: function() {
+            if(pathInProgress) {
+                return;
+            }
             follower = this.prop;
             setMode("prop");
         },
         toggleHighlight: function(highlight) {
-            if(follower) {
+            if(follower || pathInProgress) {
                 return;
             }
             this.prop.isHighlighted = highlight;
@@ -181,7 +150,7 @@ Vue.component("rendered-position", {
             return this.position.x - this.body.xres/2 - this.body.baseOffX - this.body.offX;
         },
         positionTop: function() {
-            return this.position.y - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
+            return this.position.y - this.position.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
         },
         width: function() {
             return this.body.xres;
@@ -198,14 +167,17 @@ Vue.component("rendered-position", {
     },
     methods: {
         edit: function() {
-            showEditorTrace(this.position);
+            showEditorPosition(this.position);
         },
         track: function() {
+            if(pathInProgress) {
+                return;
+            }
             follower = this.position;
             setMode("position");
         },
         toggleHighlight: function(highlight) {
-            if(follower) {
+            if(follower || pathInProgress) {
                 return;
             }
             this.position.isHighlighted = highlight;
@@ -232,6 +204,21 @@ Vue.component("menu-layer", {
             return this.level.positions.filter(function(pos) {
                 return pos.z >= that.layer.height && pos.z < maxHeight;
             });
+        },
+        allTracesDisplayed: function() {
+            return this.layer.traces.every(function(trace) {
+                return trace.displayed;
+            });
+        },
+        allPropsDisplayed: function() {
+            return this.props.every(function(prop) {
+                return prop.displayed;
+            });
+        },
+        allPositionsDisplayed: function() {
+            return this.positions.every(function(pos) {
+                return pos.displayed;
+            });
         }
     },
     methods: {
@@ -246,6 +233,24 @@ Vue.component("menu-layer", {
         },
         editPosition: function(position) {
             showEditorPosition(position);
+        },
+        toggleAllTracesDisplayed: function() {
+            var displayed = this.allTracesDisplayed;
+            this.layer.traces.forEach(function(trace) {
+                trace.displayed = !displayed;
+            });
+        },
+        toggleAllPropsDisplayed: function() {
+            var displayed = this.allPropsDisplayed;
+            this.props.forEach(function(prop) {
+                prop.displayed = !displayed;
+            });
+        },
+        toggleAllPositionsDisplayed: function() {
+            var displayed = this.allPositionsDisplayed;
+            this.positions.forEach(function(pos) {
+                pos.displayed = !displayed;
+            });
         }
     }
 });
