@@ -114,17 +114,19 @@ SplitTime.Body.prototype.setZ = function(layer) {
 	this.z = layer;
 };
 
+SplitTime.Body.prototype.height = 64;
+
 SplitTime.Body.prototype.dir = 3;
 
 SplitTime.Body.prototype.isInCurrentLevel = function() {
     return this.getLevel() === SplitTime.Level.getCurrent();
 };
 
-SplitTime.Body.prototype.put = function(level, x, y, layer) {
+SplitTime.Body.prototype.put = function(level, x, y, z) {
 	this.setLevel(level);
 	this.setX(x);
 	this.setY(y);
-	this.setZ(layer);
+	this.setZ(z);
 };
 
 /**

@@ -1,14 +1,16 @@
+dependsOn("/SLVD/SLVD.js");
+
 SplitTime.Image = {};
 
-var ROOT = "images/";
+var ROOT = SLVD.getScriptDirectory() + "images/";
 var map = {};
 var loadingPromises = {};
 
 /**
  * @param {string} relativePath
- * @param {string} alias
- * @param {boolean} isPermanent
- * @returns {HTMLImageElement}
+ * @param {string} [alias]
+ * @param {boolean} [isPermanent]
+ * @returns {SLVD.Promise}
  */
 SplitTime.Image.load = function(relativePath, alias, isPermanent) {
     if(relativePath in loadingPromises) {

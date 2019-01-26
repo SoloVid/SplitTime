@@ -171,35 +171,33 @@ function zeldaCheckStepTraces(body, axis, altAxis, isPositive) {
 
     coords[axis] = Math.round(isPositive ? (body[axis] + body.baseLength / 2) : (body[axis] - body.baseLength / 2));
 
-    var data = level.layerFuncData[body.z];
-
-    //Loop through width of base
-    for(var i = -body.baseLength / 2; i < body.baseLength / 2; i++) {
-        coords[altAxis] = Math.round(body[altAxis] + i);
-        var dataIndex = SplitTime.pixCoordToIndex(coords.x, coords.y, data);
-        var r = data.data[dataIndex++];
-        var g = data.data[dataIndex++];
-        var b = data.data[dataIndex++];
-        var a = data.data[dataIndex++];
-        if(r === 255) {
-            return false;
-        }
-        else if(a !== 0) {
-            var colorId = r + "," + g + "," + b + "," + a;
-            if(body._pixelsCrossed[colorId] === undefined) {
-                try {
-                    body._pixelsCrossed[colorId] = crossPixel(body, r, g, b, a) !== false;
+    var stopped = level.withRelevantTraceDataLayers(body, function(data) {
+        //Loop through width of base
+        for(var i = -body.baseLength / 2; i < body.baseLength / 2; i++) {
+            coords[altAxis] = Math.round(body[altAxis] + i);
+            var dataIndex = SplitTime.pixCoordToIndex(coords.x, coords.y, data);
+            var r = data.data[dataIndex++];
+            var g = data.data[dataIndex++];
+            var b = data.data[dataIndex++];
+            var a = data.data[dataIndex++];
+            if(r === 255) {
+                return true;
+            } else if(a !== 0) {
+                var colorId = r + "," + g + "," + b + "," + a;
+                if(body._pixelsCrossed[colorId] === undefined) {
+                    try {
+                        body._pixelsCrossed[colorId] = crossPixel(body, r, g, b, a) !== false;
+                    } catch(ex) {
+                        console.error(ex);
+                    }
                 }
-                catch(ex) {
-                    console.error(ex);
+                if(!body._pixelsCrossed[colorId]) {
+                    return true;
                 }
             }
-            if(!body._pixelsCrossed[colorId]) {
-                return false;
-            }
         }
-    }
-    return true;
+    });
+    return !stopped;
 }
 
 /**

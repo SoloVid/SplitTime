@@ -1,4 +1,16 @@
+var path = require("path");
+
 module.exports = function(grunt) {
+
+    var LEVEL_DIRECTORY = "levels/";
+    var PRELOADED_IMAGE_DIRECTORY = "images/preloaded/";
+    var AUDIO_DIRECTORY = "audio/";
+    var MUSIC_DIRECTORY = AUDIO_DIRECTORY + "music/";
+    var SOUND_EFFECT_DIRECTORY = AUDIO_DIRECTORY + "soundeffects/";
+    var TEMP_DIRECTORY = "tmp/";
+    var TEMP_SOURCE_DIRECTORY = TEMP_DIRECTORY + "src/";
+    var DATA_SCRIPT = TEMP_SOURCE_DIRECTORY + "data.js";
+    var TASK_DATA_GEN = 'generate-data-js';
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -26,86 +38,32 @@ module.exports = function(grunt) {
                 },
                 src: [
                     'dist/engine.js',
-                    '<%= grunt.config("projectPath") %>src/**/*.js'],
+                    '<%= grunt.config("projectPath") %>src/**/*.js',
+                    '<%= grunt.config("projectPath") %>' + TEMP_SOURCE_DIRECTORY + "**/*.js"
+                ],
                 dest: '<%= grunt.config("projectPath") %>dist/game.js'//'dist/<%= pkg.name %>.js'
             }
         },
-        clean: {
-            renamer: {
-                src: ['**/src/**/*.tjs']
-            }
-        },
-        copy: {
-            renamer: {
+        sync: {
+            project: {
                 files: [{
-                    expand: true,
-                    dot: true,
-                    //dest: 'dist/',
+                    cwd: '<%= grunt.config("projectPath") %>',
                     src: [
-                        '**/src/**/*.tjs'
+                        // 'levels/**'
+                        // 'projects/maven/levels/**'
+                        'images/**',
+                        'audio/**'
+                        // '<%= grunt.config("projectPath") %>images/**',
+                        // '<%= grunt.config("projectPath") %>audio/**'
+                        // '!**/*.txt' /* but exclude txt files */
                     ],
-                    rename: function(dest, src) {
-                        return src.replace('.tjs','.js');
-                    }
-                }]
-            }
-        },
-        injector: {
-            options: {
-                addRootSlash: false
-            },
-            level_files: {
-                options: {
-                    templateString: '<?xml version="1.0" encoding="UTF-8"?>\n<stuff>\n\t<levels>\t\n</levels>\n\t<images>\n\t</images>\n\t<musics>\n\t</musics>\n\t<soundeffects>\n\t</soundeffects>\n</stuff>',
-                    starttag: '<levels>',
-                    endtag: '</levels>',
-                    transform: function(filepath, index, length) {
-                        return '\t<level>' + filepath + '</level>';
-                    },
-                    ignorePath: '<%= grunt.config("projectPath") %>levels/'
-                },
-                files: {
-                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>levels/**/*.xml']
-                }
-            },
-            music_files: {
-                options: {
-                    starttag: '<musics>',
-                    endtag: '</musics>',
-                    transform: function(filepath, index, length) {
-                        return '\t<music>' + filepath + '</music>';
-                    },
-                    ignorePath: '<%= grunt.config("projectPath") %>audio/music/'
-                },
-                files: {
-                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>audio/music/**/*.mp3']
-                }
-            },
-            sound_effect_files: {
-                options: {
-                    starttag: '<soundeffects>',
-                    endtag: '</soundeffects>',
-                    transform: function(filepath, index, length) {
-                        return '\t<soundeffect>' + filepath + '</soundeffect>';
-                    },
-                    ignorePath: '<%= grunt.config("projectPath") %>audio/soundeffects/'
-                },
-                files: {
-                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>audio/soundeffects/**/*.mp3']
-                }
-            },
-            preloaded_image_files: {
-                options: {
-                    starttag: '<images>',
-                    endtag: '</images>',
-                    transform: function(filepath, index, length) {
-                        return '\t<image>' + filepath + '</image>';
-                    },
-                    ignorePath: '<%= grunt.config("projectPath") %>images/preloaded/'
-                },
-                files: {
-                    '<%= grunt.config("projectPath") %>dist/master.xml': ['<%= grunt.config("projectPath") %>images/preloaded/**/*']
-                }
+                    dest: '<%= grunt.config("projectPath") %>dist'
+                    // dest: '<%= grunt.config("projectPath") %>dist',
+                }],
+                ignoreInDest: 'game.js',
+                updateAndDelete: true,
+                // pretend: true, // Don't do any IO. Before you run the task with `updateAndDelete` PLEASE MAKE SURE it doesn't remove too much.
+                verbose: true // Display log messages when copying files
             }
         },
         uglify: {
@@ -119,9 +77,6 @@ module.exports = function(grunt) {
                 }
             }
         },
-        //    qunit: {
-        //      files: ['test/**/*.html']
-        //    },
         jshint: {
             options: {
                 // options here to override JSHint defaults
@@ -155,28 +110,16 @@ module.exports = function(grunt) {
                 tasks: [
                     'build:<%= grunt.config("project") %>'
                 ]
-            },
-            tscripts: {
-                options: {
-                    event: ['added']
-                },
-                files: ['**/src/**/*.tjs'],
-                tasks: 'rename'
             }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    //grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-ordered-concat');
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-injector');
+    grunt.loadNpmTasks('grunt-sync');
 
-    grunt.registerTask('test', ['jshint'/*, 'qunit'*/]);
-    grunt.registerTask('rename', ['copy:renamer', 'clean:renamer']);
     grunt.registerTask('default', 'spin');
 
     grunt.registerTask('spin', 'Handle Grunt tasks for a project with watch', function(projectName) {
@@ -197,20 +140,52 @@ module.exports = function(grunt) {
         else {
             grunt.config("project", projectName);
             grunt.config("projectPath", "projects/" + projectName + "/");
-            grunt.task.run(['jshint:project', 'oconcat:project', 'injector']);
+            grunt.task.run(['jshint:project', TASK_DATA_GEN + ":" + projectName, 'oconcat:project', 'sync:project']);
             if(grunt.option('min')) {
                 grunt.task.run('uglify:project');
             }
         }
     });
 
-    grunt.registerTask('pbuild', 'Handle Grunt tasks for a project (plus engine) without watch', function(projectName) {
-        grunt.task.run(['build']);
-        grunt.config("project", projectName);
-        grunt.config("projectPath", "projects/" + projectName + "/");
-        grunt.task.run(['jshint:project', 'oconcat:project', 'injector']);
-        if(grunt.option('min')) {
-            grunt.task.run('uglify:project');
+    function join() {
+        var args = [];
+        for(var i = 0; i < arguments.length; i++) {
+            args.push(arguments[i] || "");
         }
+        return path.join.apply(path, args).replace(/\\/, "/");
+    }
+
+    grunt.registerTask(TASK_DATA_GEN, 'Construct JS of assets', function(projectName) {
+        grunt.log.writeln("Generating JSON for " + projectName);
+        var projectRoot = "projects/" + projectName + "/";
+        var gameData = {
+            levels: [],
+            preloadedImageFiles: [],
+            musicFiles: [],
+            soundEffectFiles: []
+        };
+        grunt.file.recurse(join(projectRoot, LEVEL_DIRECTORY), function(absPath, rootDir, subDir, fileName) {
+            if(/\.json$/.test(fileName)) {
+                grunt.verbose.writeln("Reading " + fileName);
+                var fileData = grunt.file.readJSON(absPath);
+                fileData.fileName = join(subDir, fileName);
+                gameData.levels.push(fileData);
+            } else {
+                grunt.warn("Non-JSON file found in levels directory: " + fileName);
+            }
+        });
+        grunt.file.recurse(path.join(projectRoot, PRELOADED_IMAGE_DIRECTORY), function(absPath, rootDir, subDir, fileName) {
+            gameData.preloadedImageFiles.push(join(subDir, fileName));
+        });
+        grunt.file.recurse(path.join(projectRoot, MUSIC_DIRECTORY), function(absPath, rootDir, subDir, fileName) {
+            gameData.musicFiles.push(join(subDir, fileName));
+        });
+        grunt.file.recurse(path.join(projectRoot, SOUND_EFFECT_DIRECTORY), function(absPath, rootDir, subDir, fileName) {
+            gameData.soundEffectFiles.push(join(subDir, fileName));
+        });
+
+        var dataFileContents = "SplitTime._GAME_DATA = " + JSON.stringify(gameData) + ";";
+        grunt.verbose.writeln("Writing data JS file");
+        grunt.file.write(path.join(projectRoot, DATA_SCRIPT), dataFileContents);
     });
 };

@@ -18,6 +18,15 @@ SLVD.speedCheck.prototype.logUnusual = function(allow) {
 	}
 };
 
+// from https://stackoverflow.com/a/2161748/4639640
+var scripts = document.getElementsByTagName('script');
+var path = scripts[scripts.length-1].src.split('?')[0];      // remove any ?query
+var SCRIPT_DIRECTORY = path.split('/').slice(0, -1).join('/')+'/';  // remove last filename part of path
+
+SLVD.getScriptDirectory = function() {
+	return SCRIPT_DIRECTORY;
+};
+
 //Get text from file; returns SLVD promise
 SLVD.getTXT = function(fil) {
 	var promise = new SLVD.Promise();

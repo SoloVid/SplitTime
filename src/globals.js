@@ -4,7 +4,6 @@ window.SplitTime = {};
 SplitTime.SAVE = {};
 
 //var SplitTime.seeB, SplitTime.see;
-SplitTime.audio = [];
 
 SplitTime.location = {};
 SplitTime.location.images = "images/";
@@ -16,9 +15,6 @@ SplitTime.Actor = [];
 SplitTime.Teams = {};
 
 SplitTime.process = "hold"; //Input of master setInterval switch-case
-
-SplitTime.currentAudio = undefined;
-SplitTime.volume = 1;
 
 SplitTime.SCREENX = 640;
 SplitTime.SCREENY = 480;

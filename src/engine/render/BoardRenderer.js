@@ -192,15 +192,17 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
 
         snapshotCtx.globalCompositeOperation = "destination-over";
 
-        var backImg = SplitTime.Image.get(currentLevel.layerImg[layer]);
-        //Note: this single call on a perform test is a huge percentage of CPU usage.
-        snapshotCtx.drawImage(
-            backImg,
-            screen.x + xBackShift, screen.y + yBackShift,
-            SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift,
-            xBackShift, yBackShift,
-            SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift
-        );
+        if(currentLevel.layerImg[layer]) {
+            var backImg = SplitTime.Image.get(currentLevel.layerImg[layer]);
+            //Note: this single call on a perform test is a huge percentage of CPU usage.
+            snapshotCtx.drawImage(
+                backImg,
+                screen.x + xBackShift, screen.y + yBackShift,
+                SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift,
+                xBackShift, yBackShift,
+                SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift
+            );
+        }
 
         snapshotCtx.globalCompositeOperation = "source-over";
 
@@ -234,7 +236,7 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
  * @param {int} layer
  */
 function drawBodyToForLayer(body, ctx, layer) {
-    var canvasRequirements = body.getCanvasRequirements(layer);
+    var canvasRequirements = body.getCanvasRequirements();
     if(canvasRequirements === null) {
         return;
     }

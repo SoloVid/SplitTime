@@ -1,36 +1,3 @@
-//Create an SplitTime.audio element
-SplitTime.audioCreate = function(source, iden) {
-	var aud = document.createElement("audio");
-	aud.setAttribute("src", source);
-	aud.setAttribute("id", iden);
-	return aud;
-	//document.write('<SplitTime.audio preload src="' + source + '" id="' + iden + '"></SplitTime.audio>');
-	//return document.getElementById(iden);
-};
-
-//Pause current SplitTime.audio
-SplitTime.audioPause = function() {
-	SplitTime.currentAudio.pause();
-};
-
-//Play new SplitTime.audio, string audi
-SplitTime.audioPlay = function(audi, boolContinue) {
-	var audiovar = SplitTime.audio[audi]; //added var
-	//Set SplitTime.volume to current SplitTime.volume
-	audiovar.volume = SplitTime.volume;
-	if(boolContinue != 1)
-	{
-		audiovar.currentTime = 0;
-	}
-	audiovar.play();
-	SplitTime.currentAudio = audiovar;
-};
-
-//Resume current SplitTime.audio
-SplitTime.audioResume = function() {
-	SplitTime.currentAudio.play();
-};
-
 //Black out canvas
 SplitTime.canvasBlackout = function(canv) {
 	canv.fillStyle="#000000";
@@ -48,27 +15,6 @@ SplitTime.damage = function(attacker, victim) {
 			victim.hp -= atk - ((atk/(Math.PI/2))*Math.atan(Math.pow(def,0.7)/(atk/10)));//(attacker.hp/100)*(attacker.strg/victim.strg)*40;
 		}
 	}
-};
-
-SplitTime.distanceEasy = function(x1, y1, x2, y2) {
-	return Math.abs(x1 - x2) + Math.abs(y1 - y2);
-};
-
-SplitTime.distanceTrue = function(x1, y1, x2, y2) {
-	return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-};
-
-SplitTime.getPixel = function(x, y, data) {
-	var i = SplitTime.pixCoordToIndex(x, y, data);
-
-	var pixArray = [];
-
-	for(var j = 0; j < 4; j++)
-	{
-		pixArray[j] = data.data[i + j];
-	}
-
-	return pixArray;//data.data.slice(i, i + 4);
 };
 
 /**

@@ -15,145 +15,54 @@ SplitTime.launch = function(callback, width, height, parentId) {
 	document.onkeydown = SplitTime.Keyboard.onKeyDown;
 	document.onkeyup = SplitTime.Keyboard.onKeyUp;
 
-	//Initialize
-	SLVD.getXML("dist/master.xml").then(function(master) {
-		var itemsToLoad = master.getElementsByTagName("level").length + master.getElementsByTagName("image").length;
-		var itemsLoaded = 0;
-		var promiseCollection = new SLVD.Promise.Collection();
+	var masterData = SplitTime._GAME_DATA;
+	var itemsToLoad = masterData.levels.length + masterData.preloadedImageFiles.length;
+	var itemsLoaded = 0;
+	var promiseCollection = new SLVD.Promise.Collection();
 
-		function incrementAndUpdateLoading() {
-			itemsLoaded++;
-			updateLoading();
-		}
-
-		function updateLoading() {
-			//Display load "percentage"
-			SplitTime.see.fillStyle = "#000000";
-			SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-			SplitTime.see.font="30px Arial";
-			SplitTime.see.fillStyle = "#FFFFFF";
-			SplitTime.see.fillText("Loading: " + Math.round((itemsLoaded/itemsToLoad)*100) + "%", 250, 230);
-		}
-
+	function incrementAndUpdateLoading() {
+		itemsLoaded++;
 		updateLoading();
+	}
 
-		var index, second, filename;
-		for(index = 0; index < master.getElementsByTagName("image").length; index++) //Load all images referenced in master.xml outside of levels
-		{
-			filename = master.getElementsByTagName("image")[index].childNodes[0].nodeValue;
-			promiseCollection.add(SplitTime.Image.load("preloaded/" + filename, filename, true).then(incrementAndUpdateLoading));
-		}
+	function updateLoading() {
+		//Display load "percentage"
+		SplitTime.see.fillStyle = "#000000";
+		SplitTime.see.fillRect(0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+		SplitTime.see.font="30px Arial";
+		SplitTime.see.fillStyle = "#FFFFFF";
+		SplitTime.see.fillText("Loading: " + Math.round((itemsLoaded/itemsToLoad)*100) + "%", 250, 230);
+	}
 
-		for(index = 0; index < master.getElementsByTagName("music").length; index++) //Load all SplitTime.audio
-		{
-			filename = master.getElementsByTagName("music")[index].childNodes[0].nodeValue;
-			SplitTime.audio[index] = SplitTime.audioCreate("audio/music/" + filename, index);
-			SplitTime.audio[index].loop = true;
-			SplitTime.audio[filename] = SplitTime.audio[index];
-		}
-		for(second = index; second < master.getElementsByTagName("soundeffect") + index; second++)
-		{
-			filename = master.getElementsByTagName("soundeffect")[second - index].childNodes[0].nodeValue;
-			SplitTime.audio[second] = SplitTime.audioCreate("audio/soundeffects/" + filname, second);
-			SplitTime.audio[second].loop = false;
-			SplitTime.audio[filename] = SplitTime.audio[second];
-		}
+	updateLoading();
 
-		function makeLevelXMLHandler(filename) {
-			var levelName = filename.replace(/\.xml$/, "");
-			return function(data) {
-				var level = SplitTime.Level.get(levelName);
-				var levelLoadPromise = new SLVD.Promise.Collection();
+	var i, fileName;
+	for(i = 0; i < masterData.preloadedImageFiles.length; i++) {
+		fileName = masterData.preloadedImageFiles[i];
+		promiseCollection.add(SplitTime.Image.load("preloaded/" + fileName, fileName, true).then(incrementAndUpdateLoading));
+	}
 
-                SplitTime.Region.get(data.getElementsByTagName("type")[0].textContent).addLevel(level);
+	for(i = 0; i < masterData.musicFiles.length; i++) {
+		fileName = masterData.musicFiles[i];
+		SplitTime.Audio.registerMusic(fileName);
+	}
+	for(i = 0; i < masterData.soundEffectFiles.length; i++) {
+		fileName = masterData.soundEffectFiles[i];
+		SplitTime.Audio.registerSoundEffect(fileName);
+	}
 
-                // TODO: move subsequent stuff to other files (like Level.js)
+	for(i = 0; i < masterData.levels.length; i++) {
+		var levelData = masterData.levels[i];
+		promiseCollection.add(SplitTime.Level.load(levelData).then(incrementAndUpdateLoading));
+	}
 
-				level.filedata = data;
-                level.type = data.getElementsByTagName("type")[0].textContent;
-				level.width = 0;
-				level.height = 0;
+	//Begin recursion
+	promiseCollection.then(function() {
+		//Begin main loop
+		SplitTime.main();
 
-				function onloadImage(layerImg) {
-					if(layerImg.height > level.height)
-					{
-						level.height = layerImg.height;
-					}
-					if(layerImg.width > level.width)
-					{
-						level.width = layerImg.width;
-					}
-				}
-
-				for(var iLayerImg = 0; iLayerImg < data.getElementsByTagName("background").length; iLayerImg++) {
-					t = data.getElementsByTagName("background")[iLayerImg].textContent;
-					level.layerImg[iLayerImg] = t;
-					var loadProm = SplitTime.Image.load(t).then(onloadImage);
-					levelLoadPromise.add(loadProm);
-				}
-
-				//Pull positions from file
-				for(index = 0; index < data.getElementsByTagName("position").length; index++) {
-					var posNode = data.getElementsByTagName("position")[index];
-
-                    var position = new SplitTime.Position(
-                    	level,
-						+posNode.getAttribute("x"),
-                        +posNode.getAttribute("y"),
-                        +posNode.getAttribute("layer"),
-                        +posNode.getAttribute("dir"),
-                        posNode.getAttribute("stance")
-					);
-
-					var id = posNode.getAttribute("id");
-					if(id) {
-						level.registerPosition(id, position);
-					} else {
-						console.warn("position missing id in level: " + levelName);
-					}
-
-					var actor = posNode.getElementsByTagName("alias")[0].getAttribute("actor");
-					var alias = posNode.getElementsByTagName("alias")[0].textContent;
-
-					if(actor && alias) {
-						SplitTime.Actor[actor].registerPosition(alias, position);
-					}
-				}
-
-				incrementAndUpdateLoading();
-
-				level.setLoadPromise(levelLoadPromise);
-
-				return loadOneLevel();
-			};
-		}
-
-        var iLevel = 0;
-        function loadOneLevel() {
-			var iLevelLocal = iLevel++;
-
-			if(iLevelLocal >= master.getElementsByTagName("level").length) {
-				return SLVD.Promise.as();
-			}
-
-			var filename = master.getElementsByTagName("level")[iLevelLocal].childNodes[0].nodeValue;
-			//TODO: Why is this needed if we do lazy loading anyway?
-			// SplitTime.Level.get(filename);
-			return SLVD.getXML("levels/" + filename).then(makeLevelXMLHandler(filename));
-		}
-
-		for(var iLevelLane = 0; iLevelLane < 10; iLevelLane++) {
-			promiseCollection.add(loadOneLevel());
-		}
-
-		//Begin recursion
-		promiseCollection.then(function() {
-			//Begin main loop
-			SplitTime.main();
-
-			//If done SplitTime.loading, startup (in the initialize.js file)
-            startUpCallback();
-		});
+		//If done SplitTime.loading, startup (in the initialize.js file)
+		startUpCallback();
 	});
 };
 

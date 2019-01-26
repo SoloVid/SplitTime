@@ -1,3 +1,6 @@
+var ENTER_LEVEL_FUNCTION_ID = "__ENTER_LEVEL";
+var EXIT_LEVEL_FUNCTION_ID = "__EXIT_LEVEL";
+
 /**
  * @param {string} levelId
  * @constructor
@@ -11,10 +14,77 @@ SplitTime.Level = function(levelId) {
     this.bodies = [];
     this.loadPromise = new SLVD.Promise();
     this.layerImg = [];
+    /** @type ImageData[] */
     this.layerFuncData = [];
 
     /** @type {SplitTime.WeatherRenderer} */
     this.weatherRenderer = new SplitTime.WeatherRenderer();
+};
+
+SplitTime.Level.load = function(levelData) {
+    var levelName = levelData.fileName.replace(/\.json$/, "");
+    var level = SplitTime.Level.get(levelName);
+    return level.load(levelData);
+};
+
+SplitTime.Level.prototype.load = function(levelData) {
+    var levelLoadPromise = new SLVD.Promise.Collection();
+
+    SplitTime.Region.get(levelData.region).addLevel(this);
+
+    this.fileData = levelData;
+    this.type = levelData.type;
+    this.width = 0;
+    this.height = 0;
+
+    var that = this;
+    function onloadImage(layerImg) {
+        if(layerImg.height > that.height) {
+            that.height = layerImg.height;
+        }
+        if(layerImg.width > that.width) {
+            that.width = layerImg.width;
+        }
+    }
+
+    for(var iLayer = 0; iLayer < levelData.layers.length; iLayer++) {
+        var background = levelData.layers[iLayer].background;
+        this.layerImg[iLayer] = background;
+        if(background) {
+            var loadProm = SplitTime.Image.load(background).then(onloadImage);
+            levelLoadPromise.add(loadProm);
+        }
+    }
+
+    //Pull positions from file
+    for(var i = 0; i < levelData.positions.length; i++) {
+        var posObj = levelData.positions[i];
+        var position = new SplitTime.Position(
+            this,
+            +posObj.x,
+            +posObj.y,
+            +posObj.z,
+            +posObj.dir,
+            posObj.stance
+        );
+
+        if(posObj.id) {
+            this.registerPosition(posObj.id, position);
+        } else {
+            console.warn("position missing id in level: " + this.id);
+        }
+
+        // var actor = ...;
+        // var alias = ...;
+        //
+        // if(actor && alias) {
+        //     SplitTime.Actor[actor].registerPosition(alias, position);
+        // }
+    }
+
+    this.setLoadPromise(levelLoadPromise);
+
+    return levelLoadPromise;
 };
 
 SplitTime.Level.prototype.setLoadPromise = function(actualLoadPromise) {
@@ -32,11 +102,31 @@ SplitTime.Level.prototype.waitForLoadAssets = function() {
  * @return {SplitTime.Region}
  */
 SplitTime.Level.prototype.getRegion = function() {
+    if(!this.region) {
+        console.warn("Level \"" + this.id + "\" is not assigned to a region");
+        this.region = SplitTime.Region.getDefault();
+    }
     return this.region;
 };
 
+/**
+ * @param {string} positionId
+ * @return {SplitTime.Position}
+ */
 SplitTime.Level.prototype.getPosition = function(positionId) {
+    if(!this.positions[positionId]) {
+        console.warn("Level \"" + this.id + "\" does not contain the position \"" + positionId + "\"");
+        this.positions[positionId] = new SplitTime.Position(this, 0, 0, 0, SplitTime.Direction.S, "default");
+    }
     return this.positions[positionId];
+};
+
+SplitTime.Level.prototype.registerEnterFunction = function(fun) {
+    this.registerFunction(ENTER_LEVEL_FUNCTION_ID, fun);
+};
+
+SplitTime.Level.prototype.registerExitFunction = function(fun) {
+    this.registerFunction(EXIT_LEVEL_FUNCTION_ID, fun);
 };
 
 SplitTime.Level.prototype.registerFunction = function(functionId, fun) {
@@ -137,23 +227,21 @@ SplitTime.Level.prototype.refetchBodies = function() {
     }
 
     //Pull board objects from file
-    for(index = 0; index < this.filedata.getElementsByTagName("prop").length; index++) {
-        var prop = this.filedata.getElementsByTagName("prop")[index];
-        var template = prop.getAttribute("template");
+    for(index = 0; index < this.fileData.props.length; index++) {
+        var prop = this.fileData.props[index];
+        var template = prop.template;
 
-        var obj;
-        if(template) {
-            obj = new SplitTime.BodyTemplate[template]();
+        var obj = SplitTime.Body.getTemplateInstance(template);
+        if(obj) {
+            obj.id = prop.id;
+            obj.put(this, +prop.x, +prop.y, +prop.z);
+            obj.dir = isNaN(prop.dir) ? SplitTime.Direction.fromString(prop.dir) : +prop.dir;
+            obj.stance = prop.stance;
+
+            putObjOnBoard(obj);
         } else {
-            obj = new SplitTime.Body(null, null);
+            console.error("Template \"" + template + "\" not found for instantiating prop");
         }
-
-        obj.id = prop.getAttribute("id");
-        obj.put(this, +prop.getAttribute("x"), +prop.getAttribute("y"), +prop.getAttribute("layer"));
-        obj.dir = +prop.getAttribute("dir");
-        obj.stance = prop.getAttribute("stance");
-
-        putObjOnBoard(obj);
     }
 
     // TODO: better implementation of players
@@ -204,6 +292,24 @@ SplitTime.Level.prototype.removeBody = function(element) {
     }
 };
 
+/**
+ * @param {SplitTime.Body} body
+ * @param {function(ImageData)} callback
+ */
+SplitTime.Level.prototype.withRelevantTraceDataLayers = function(body, callback) {
+    for(var iLayer = 1; iLayer < this.fileData.layers.length; iLayer++) {
+        var layerZ = this.fileData.layers[iLayer].z;
+        if(layerZ <= body.z || layerZ < body.z + body.height) {
+            var retVal = callback(this.layerFuncData[iLayer]);
+            if(retVal !== undefined) {
+                return retVal;
+            }
+        } else {
+            break;
+        }
+    }
+};
+
 var levelMap = {};
 var currentLevel = null;
 
@@ -216,27 +322,27 @@ SplitTime.Level.prototype.loadForPlay = function() {
     var nextFunctionId = 1;
 
     //Initialize functional map
-    for(var iLayer = 0; iLayer < this.filedata.getElementsByTagName("layer").length; iLayer++) {
+    for(var iLayer = 0; iLayer < this.fileData.layers.length; iLayer++) {
         holderCanvas.width = this.width/(this.type == "overworld" ? 32 : 1);
         holderCanvas.height = this.height/(this.type == "overworld" ? 32 : 1);
         var holderCtx = holderCanvas.getContext("2d");
         holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
 
         //Draw traces
-        var layerTraces = this.filedata.getElementsByTagName("layer")[iLayer].getElementsByTagName("trace");
+        var layerTraces = this.fileData.layers[iLayer].traces;
 
         holderCtx.translate(0.5, 0.5);
 
         for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
-            var type = layerTraces[iLayerTrace].getAttribute("type");
+            var type = layerTraces[iLayerTrace].type;
             if(type === SplitTime.Trace.Type.FUNCTION) {
-                var functionStringId = layerTraces[iLayerTrace].getAttribute("reference");
+                var functionStringId = layerTraces[iLayerTrace].parameter;
                 var functionIntId = nextFunctionId++;
                 this.internalFunctionIdMap[functionIntId] = functionStringId;
                 var color = SplitTime.Trace.getFunctionColor(functionIntId);
-                SplitTime.Trace.drawColor(layerTraces[iLayerTrace].textContent, holderCtx, color);
+                SplitTime.Trace.drawColor(layerTraces[iLayerTrace].vertices, holderCtx, color);
             } else {
-                SplitTime.Trace.draw(layerTraces[iLayerTrace].textContent, holderCtx, type);
+                SplitTime.Trace.draw(layerTraces[iLayerTrace].vertices, holderCtx, type);
             }
         }
         var bodies = this.getBodies();
@@ -253,8 +359,7 @@ SplitTime.Level.prototype.loadForPlay = function() {
         this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, this.width, this.height);
     }
 
-    var enterFunctionId = this.filedata.getElementsByTagName("enterFunction")[0].textContent;
-    this.runFunction(enterFunctionId);
+    this.runFunction(ENTER_LEVEL_FUNCTION_ID);
 };
 
 SplitTime.Level.createCanvases = function(screenWidth, screenHeight) {
@@ -296,8 +401,7 @@ SplitTime.Level.setCurrent = function(level) {
 
     // TODO: clear exiting board data; probably in context of region rather than level
     if(exitingLevel) {
-        var exitFunctionId = exitingLevel.filedata.getElementsByTagName("exitFunction")[0].textContent;
-        exitingLevel.runFunction(exitFunctionId);
+        exitingLevel.runFunction(EXIT_LEVEL_FUNCTION_ID);
 
         // //Clear out all functional maps
         // exitingLevel.layerFuncData.length = 0;

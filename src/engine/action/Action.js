@@ -41,7 +41,7 @@ SplitTime.Action.Slash.prototype = new SplitTime.Action.BaseAction();
 SplitTime.Action.Slash.prototype.constructor = SplitTime.Action.Slash;
 SplitTime.Action.Slash.prototype.time = 4;
 SplitTime.Action.Slash.prototype.canUse = function(person) {
-	return SplitTime.distanceTrue(person.x, person.y, SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y) < 36 && person.canSeePlayer();
+	return SplitTime.Measurement.distanceTrue(person.x, person.y, SplitTime.player[SplitTime.currentPlayer].x, SplitTime.player[SplitTime.currentPlayer].y) < 36 && person.canSeePlayer();
 };
 SplitTime.Action.Slash.prototype.use = function(person) {
 	this.time = 4;
@@ -56,7 +56,7 @@ SplitTime.Action.Slash.prototype.use = function(person) {
 			//Distance < 40
 			var caseZelda = Math.sqrt(Math.pow(agent.x - person.x, 2) + Math.pow(agent.y - person.y, 2)) < 40;
 
-			if((SplitTime.process == "TRPG" && caseTRPG) || (SplitTime.process == "action" && caseZelda))
+			if((SplitTime.process == "TRPG" && caseTRPG) || (SplitTime.process === SplitTime.main.State.ACTION && caseZelda))
 			{
 				//Determine angle between slasher and opponent (in terms of PI/2)
 				var angle = SplitTime.Direction.fromTo(person.x, person.y, agent.x, agent.y);

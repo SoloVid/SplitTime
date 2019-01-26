@@ -18,11 +18,10 @@ SplitTime.Body.prototype.stances = {
     }
 };
 
-SplitTime.Body.prototype.getCanvasRequirements = function(layer) {
-    // TODO: allow multiple layers and decimals
-    if(layer != this.z) {
-        return null;
-    }
+/**
+ * @return {{x: number, y: number, width: number, height: number, isCleared: boolean}}
+ */
+SplitTime.Body.prototype.getCanvasRequirements = function() {
     return {
         // board location on this layer for center of canvas
         x: this.x,
@@ -38,28 +37,21 @@ SplitTime.Body.prototype.defaultStance = function() {
 	this.requestStance("default", true);
 };
 
-// SplitTime.Body.prototype.say = function(message, overrideName) {
-// 	SplitTime.personSays(this, message, overrideName);
-// };
-SplitTime.Body.prototype.see = function(ctx) {
-	if(!this.canSee) return;
+/**
+ * Draw a segment (split vertically) of the body onto the canvas context
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {int} minZ minimum z value for segment of Body that should be drawn
+ * @param {int} exMaxZ maximum (exclusive) z value for the segment of the Body that should be drawn
+ */
+SplitTime.Body.prototype.see = function(ctx, minZ, exMaxZ) {
+	if(!this.canSee) {return;}
 
 	ctx.rotate(this.rotate);
 
 	//SplitTime.onBoard.bodies is displayed partially transparent depending on health (<= 50% transparent)
 	//ctx.globalAlpha = (this.hp + this.strg)/(2*this.strg);
 
-	this.draw(ctx);
-	// var col = this.getStance(); //in functions.js
-	// var tImg = this.getImage();
-	// var sx = this.xres*col;
-	// var sy = this.yres*this.frame;
-	// var pos = this.getShownPosition();
-	// var x = -Math.round(this.xres/2) - this.baseOffX;
-	// var y = -this.yres + Math.round(this.baseLength/2) - this.baseOffY;
-	// ctx.drawImage(tImg, sx, sy, this.xres, this.yres, x, y, this.xres, this.yres);
-
-	//ctx.globalAlpha = 1;
+	this.draw(ctx, minZ, exMaxZ);
 
 	this.seeAction();
 	this.seeStatus();
@@ -69,7 +61,12 @@ SplitTime.Body.prototype.see = function(ctx) {
 	this.rotate = 0;
 };
 
-SplitTime.Body.prototype.draw = function(ctx) {
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {int} minZ minimum z value for segment of Body that should be drawn
+ * @param {int} exMaxZ maximum (exclusive) z value for the segment of the Body that should be drawn
+ */
+SplitTime.Body.prototype.draw = function(ctx, minZ, exMaxZ) {
     var tImg = this.getImage();
 
     var crop = this.getAnimationFrameCrop(this.dir, this.stance, this.frame);
@@ -117,6 +114,13 @@ SplitTime.Body.prototype.getAnimationFrameCrop = function(numDir, stance, frame)
 
     crop.sx = this.xres*column;
     return crop;
+};
+
+SplitTime.Body.prototype.getVerticalSegmentCrop = function(dimensions, minZ, exMaxZ) {
+    if(minZ > this.z + this.height || exMaxZ < this.z) {
+        return null;
+    }
+
 };
 
 // TODO: abstract this?
