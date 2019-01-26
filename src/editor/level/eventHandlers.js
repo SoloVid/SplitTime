@@ -17,7 +17,10 @@ var mouseLevelY = 0;
 var mouseDown = false;
 var ctrlDown = false;
 
+var cancelNextContextMenu = false;
+
 var follower = null;
+var lastFollower = null;
 var pathInProgress = null;
 
 var subImg;
@@ -33,10 +36,9 @@ var projectPath = "projects/" + projectName + "/";
 
 var traceEditorColors = {
 	"solid": "rgba(0, 0, 255, 1)",
-	"void": "rgba(255, 0, 255, 1)",
 	"function": "rgba(255, 0, 0, 1)",
 	"path": "rgba(0, 0, 0, 1)",
-	"stairs": "rgba(0, 255, 0, 1)",
+	"stairs": "rgba(0, 200, 0, 1)",
 	"highlight": "rgba(255, 255, 0, 1)"
 };
 
@@ -64,12 +66,15 @@ $(document).ready(function() {
 	// $(document).on('dragstart', 'img', function(event) {
 	// 	event.preventDefault();
 	// });
-    $(document.body).on("contextmenu", "#layers", function(event) {
-        event.preventDefault();
-    });
-	// $(document).on('contextmenu', function(event) {
-	// 	event.preventDefault();
-	// });
+    // $(document.body).on("contextmenu", "#layers", function(event) {
+     //    event.preventDefault();
+    // });
+	$(document).on('contextmenu', function(event) {
+		if(cancelNextContextMenu) {
+            event.preventDefault();
+        }
+        cancelNextContextMenu = false;
+	});
 	// $(document).on('click', function(event) {
 	// 	event.preventDefault();
 	// });
@@ -86,11 +91,37 @@ $(document).ready(function() {
 	}, 1000);
 
 	$(document).keydown(function(event) {
-		if(event.which == 16) {
-			ctrlDown = true;
+		// if(event.which == 16) {
+		// 	ctrlDown = true;
+		// }
+
+		var specialKey = true;
+        switch(event.which) {
+			case 16:
+                ctrlDown = true;
+				break;
+            case 37:
+                moveFollower(-1, 0);
+                break;
+            case 38:
+                moveFollower(0, -1);
+                break;
+            case 39:
+                moveFollower(1, 0);
+                break;
+            case 40:
+                moveFollower(0, 1);
+                break;
+			default:
+				specialKey = false;
+        }
+
+        if(specialKey) {
+        	event.preventDefault();
 		}
-	});
-	$(document).keyup(function(event) {
+    });
+
+    $(document).keyup(function(event) {
 		if(event.which == 16) {
 			ctrlDown = false;
 		} else if(event.which == 32) {
@@ -123,31 +154,18 @@ $(document).ready(function() {
 	});
 
 	$(document).mousemove(function(event) {
-		var regex;
-		if(follower) {
+		if(follower && mouseDown) {
             var dx = event.pageX - mouseX;
             var dy = event.pageY - mouseY;
-			if(mode == "trace") {
-				regex = /\((-?[\d]+), (-?[\d]+)\)/g;
-				var pointString = follower.vertices;
-				follower.vertices = pointString.replace(regex, function(match, p1, p2) {
-					var newX = Number(p1) + dx;
-					var newY = Number(p2) + dy;
-					return "(" + newX + ", " + newY + ")";
-				});
-			} else {
-				follower.x += dx;
-				follower.y += dy;
-			}
-		}
+			moveFollower(dx, dy);
+            event.preventDefault();
+        }
 
 		mouseX = event.pageX;
 		mouseY = event.pageY;
 		var levelContainerPos = $("#layers").position();
 		mouseLevelX = mouseX - levelContainerPos.left;
 		mouseLevelY = mouseY - levelContainerPos.top;
-
-		event.preventDefault();
 	});
 
 	// $(document.body).on("mousedown", ".draggable", function(event) {
@@ -189,10 +207,10 @@ $(document).ready(function() {
     });
 
 	$(document.body).on("mouseup", "#layers", function(event) {
-		var height = levelObject.layers[vueApp.activeLayer].height;
-		var yOnLayer = mouseLevelY + height;
+		var z = levelObject.layers[vueApp.activeLayer].z;
+		var yOnLayer = mouseLevelY + z;
 		if(mode == "trace") {
-            var literalPoint = "(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel() + height) + ")";
+            var literalPoint = "(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel() + z) + ")";
 			var closestPosition = findClosestPosition(mouseLevelX, yOnLayer);
 			var positionPoint = closestPosition ? "(pos:" + closestPosition.id + ")" : "";
 			if(event.which == 1) { // left click
@@ -228,15 +246,21 @@ $(document).ready(function() {
 					}
 					pathInProgress = null;
 				}
-			}
+                cancelNextContextMenu = true;
+            }
 		} else if(mode == "position" || mode == "prop") {
 			if(event.which == 3) { // right click
 				createObject(mode);
-			}
+                cancelNextContextMenu = true;
+            }
 		}
 	});
 
+    $(document).mousedown(function(event) {
+        mouseDown = true;
+    });
 	$(document).mouseup(function() {
+		lastFollower = follower;
 		follower = null;
 		mouseDown = false;
 	});

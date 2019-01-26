@@ -47,20 +47,20 @@ function removeEditorProperties(object) {
 }
 
 function addNewLayer() {
-	var assumedRelativeHeight = 64;
+	var assumedRelativeZ = 64;
 	if(levelObject.layers.length > 1) {
-		assumedRelativeHeight = Math.abs(levelObject.layers[1].height - levelObject.layers[0].height);
+		assumedRelativeZ = Math.abs(levelObject.layers[1].z - levelObject.layers[0].z);
 	}
-    var height = 0;
+    var z = 0;
     if(levelObject.layers.length > 0) {
         var previousLayer = levelObject.layers[levelObject.layers.length - 1];
-        height = previousLayer.height + assumedRelativeHeight;
+        z = previousLayer.z + assumedRelativeZ;
     }
     levelObject.layers.push({
         displayed: true,
 		id: "",
         background: "",
-        height: height,
+        z: z,
         traces: []
     });
 }
@@ -129,6 +129,25 @@ function findClosestPosition(x, y) {
 	return closestPosition;
 }
 
+function moveFollower(dx, dy) {
+	var toMove = follower || lastFollower;
+	if(!toMove) {
+		return;
+	}
+    if(toMove.vertices !== undefined) {
+        var regex = /\((-?[\d]+), (-?[\d]+)\)/g;
+        var pointString = toMove.vertices;
+        toMove.vertices = pointString.replace(regex, function(match, p1, p2) {
+            var newX = Number(p1) + dx;
+            var newY = Number(p2) + dy;
+            return "(" + newX + ", " + newY + ")";
+        });
+    } else {
+        toMove.x += dx;
+        toMove.y += dy;
+    }
+}
+
 function clickFileChooser() {
 	$("#fileChooser").click();
 }
@@ -194,7 +213,7 @@ function createLevel(type) {
 
 function createObject(type)  {
 	var layerIndex = vueApp.activeLayer;
-	var z = levelObject.layers[layerIndex].height;
+	var z = levelObject.layers[layerIndex].z;
     var x = mouseLevelX;
     var y = mouseLevelY + z;
 

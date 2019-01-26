@@ -139,7 +139,7 @@ function showEditorLayer(layer) {
             key: "background"
         },
         {
-            key: "height",
+            key: "z",
             type: "number"
         }
     ]);

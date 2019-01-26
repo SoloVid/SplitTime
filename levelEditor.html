@@ -187,7 +187,8 @@
 				<rendered-trace v-for="(trace, traceIndex) in layer.traces"
 								v-bind:trace="trace"
 								v-bind:index="traceIndex"
-								v-bind:height="layer.height"
+								v-bind:layerZ="layer.z"
+								v-bind:layerHeight="layerHeight"
 				></rendered-trace>
 			</svg>
 			<rendered-prop v-for="(prop, propIndex) in props"
@@ -200,6 +201,7 @@
 	</script>
 
 	<script type="text/x-template" id="rendered-trace-template">
+		<g>
 			<polyline
 					v-show="trace.displayed"
 					v-on:dblclick="edit"
@@ -211,6 +213,15 @@
 					v-bind:stroke="traceStroke"
 					v-bind:fill-opacity="traceOpacity"
 			></polyline>
+			<polyline
+					v-show="trace.displayed"
+					v-bind:points="pointsShadow"
+					v-bind:fill="traceShadowFill"
+					v-bind:stroke="traceShadowStroke"
+					v-if="traceShadowDisplayed"
+					style="pointer-events: none;"
+			></polyline>
+		</g>
 	</script>
 
 	<script type="text/x-template" id="rendered-prop-template">

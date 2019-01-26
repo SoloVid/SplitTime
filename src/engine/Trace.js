@@ -107,7 +107,8 @@ SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
 SplitTime.Trace.Type = {
 	SOLID: "solid",
 	FUNCTION: "function",
-	VOID: "void"
+	PATH: "path",
+	STAIRS: "stairs"
 };
 
 SplitTime.Trace.RColor = {
@@ -116,11 +117,9 @@ SplitTime.Trace.RColor = {
 };
 SplitTime.Trace.typeToColor = {
 	"solid": [255, 0, 0, 1],
-	"void": [255, 0, 255, 1],
 	"function": [100, 0, 0, 1],
 	"path": [0, 0, 0, 1],
-	"stairDown": [0, 255, 0, 1],
-	"stairUp": [0, 255, 0, 1]
+	"stairs": [0, 255, 0, 1]
 };
 SplitTime.Trace.colorToType = {};
 

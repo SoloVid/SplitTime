@@ -1,25 +1,54 @@
 Vue.component("rendered-trace", {
-    props: ["trace", "index", "height"],
+    props: ["trace", "index", "layerZ", "layerHeight"],
     template: "#rendered-trace-template",
     computed: {
         hasClose: function() {
             var pointArray = safeExtractTraceArray(this.trace.vertices);
             return pointArray.length > 0 && pointArray.pop() === null;
         },
+        height: function() {
+            var displayLayerHeight = Math.min(this.layerHeight, 10000);
+            switch(this.trace.type) {
+                case SplitTime.Trace.Type.SOLID:
+                    if(!this.trace.parameter && this.trace.parameter !== "0") {
+                        return displayLayerHeight;
+                    }
+                    return this.trace.parameter;
+                case SplitTime.Trace.Type.STAIRS:
+                    console.log("stairs height: " + displayLayerHeight);
+                    return displayLayerHeight;
+            }
+            return 0;
+        },
         points: function() {
             var that = this;
-        	var pointsArray = safeExtractTraceArray(this.trace.vertices);
+            var pointsArray = safeExtractTraceArray(this.trace.vertices);
             return pointsArray.reduce(function(pointsStr, point) {
                 var y;
-				if(point !== null) {
-                    y = point.y - that.height;
+                if(point !== null) {
+                    y = point.y - that.layerZ;
                     return pointsStr + " " + point.x + "," + y;
-				} else if(pointsArray.length > 0 && pointsArray[0] !== null) {
-                    y = pointsArray[0].y - that.height;
+                } else if(pointsArray.length > 0 && pointsArray[0] !== null) {
+                    y = pointsArray[0].y - that.layerZ;
                     return pointsStr + " " + pointsArray[0].x + "," + y;
                 }
-				return pointsStr;
-			}, "");
+                return pointsStr;
+            }, "");
+        },
+        pointsShadow: function() {
+            var that = this;
+            var pointsArray = safeExtractTraceArray(this.trace.vertices);
+            return pointsArray.reduce(function(pointsStr, point) {
+                var y;
+                if(point !== null) {
+                    y = point.y - that.layerZ - that.height;
+                    return pointsStr + " " + point.x + "," + y;
+                } else if(pointsArray.length > 0 && pointsArray[0] !== null) {
+                    y = pointsArray[0].y - that.layerZ - that.height;
+                    return pointsStr + " " + pointsArray[0].x + "," + y;
+                }
+                return pointsStr;
+            }, "");
         },
         // stairsGradient: function() {
         //     return {
@@ -40,11 +69,19 @@ Vue.component("rendered-trace", {
         },
         traceOpacity: function() {
 			return this.hasClose ? 1 : 0;
+        },
+        traceShadowFill: function() {
+            return "rgba(100, 100, 100, .5)";
+        },
+        traceShadowStroke: function() {
+            return "black";
+        },
+        traceShadowDisplayed: function() {
+            return this.height > 0;
         }
     },
 	methods: {
     	edit: function() {
-    		console.log("himom");
     		showEditorTrace(this.trace);
 		},
 		track: function() {
@@ -52,10 +89,9 @@ Vue.component("rendered-trace", {
     	        return;
             }
     		follower = this.trace;
-    		setMode("trace");
 		},
         toggleHighlight: function(highlight) {
-            if(follower || pathInProgress) {
+            if(mouseDown || pathInProgress) {
                 return;
             }
             this.trace.isHighlighted = highlight;
@@ -113,10 +149,9 @@ Vue.component("rendered-prop", {
                 return;
             }
             follower = this.prop;
-            setMode("prop");
         },
         toggleHighlight: function(highlight) {
-            if(follower || pathInProgress) {
+            if(mouseDown || pathInProgress) {
                 return;
             }
             this.prop.isHighlighted = highlight;
@@ -174,10 +209,9 @@ Vue.component("rendered-position", {
                 return;
             }
             follower = this.position;
-            setMode("position");
         },
         toggleHighlight: function(highlight) {
-            if(follower || pathInProgress) {
+            if(mouseDown || pathInProgress) {
                 return;
             }
             this.position.isHighlighted = highlight;
@@ -189,20 +223,23 @@ Vue.component("menu-layer", {
     props: ["level", "layer", "index"],
     template: "#menu-layer-template",
     computed: {
+        layerAboveZ: function() {
+            var layerAbove = this.level.layers[this.index + 1];
+            return layerAbove ? layerAbove.z : Number.MAX_VALUE;
+        },
+        layerHeight: function() {
+            return this.layerAboveZ - this.layer.z;
+        },
         props: function() {
             var that = this;
-            var layerAbove = this.level.layers[this.index + 1];
-            var maxHeight = layerAbove ? layerAbove.height : Number.MAX_VALUE;
             return this.level.props.filter(function(prop) {
-                return prop.z >= that.layer.height && prop.z < maxHeight;
+                return prop.z >= that.layer.z && prop.z < that.layerAboveZ;
             });
         },
         positions: function() {
             var that = this;
-            var layerAbove = this.level.layers[this.index + 1];
-            var maxHeight = layerAbove ? layerAbove.height : Number.MAX_VALUE;
             return this.level.positions.filter(function(pos) {
-                return pos.z >= that.layer.height && pos.z < maxHeight;
+                return pos.z >= that.layer.z && pos.z < that.layerAboveZ;
             });
         },
         allTracesDisplayed: function() {
@@ -259,6 +296,13 @@ Vue.component("rendered-layer", {
     props: ["level", "layer", "index", "width", "height", "isActive"],
     template: "#rendered-layer-template",
     computed: {
+        layerAboveZ: function() {
+            var layerAbove = this.level.layers[this.index + 1];
+            return layerAbove ? layerAbove.z : Number.MAX_VALUE;
+        },
+        layerHeight: function() {
+            return this.layerAboveZ - this.layer.z;
+        },
         styleObject: function() {
             return {
                 pointerEvents: this.isActive ? "initial" : "none"
@@ -269,18 +313,14 @@ Vue.component("rendered-layer", {
 		},
         props: function() {
     		var that = this;
-    		var layerAbove = this.level.layers[this.index + 1];
-    		var maxHeight = layerAbove ? layerAbove.height : Number.MAX_VALUE;
         	return this.level.props.filter(function(prop) {
-				return prop.z >= that.layer.height && prop.z < maxHeight;
+				return prop.z >= that.layer.z && prop.z < that.layerAboveZ;
 			});
 		},
 		positions: function() {
     		var that = this;
-            var layerAbove = this.level.layers[this.index + 1];
-            var maxHeight = layerAbove ? layerAbove.height : Number.MAX_VALUE;
             return this.level.positions.filter(function(pos) {
-                return pos.z >= that.layer.height && pos.z < maxHeight;
+                return pos.z >= that.layer.z && pos.z < that.layerAboveZ;
             });
 		}
     }
