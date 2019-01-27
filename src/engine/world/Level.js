@@ -13,7 +13,7 @@ SplitTime.Level = function(levelId) {
     this.region = null;
     this.bodies = [];
     this.loadPromise = new SLVD.Promise();
-    this.layerImg = [];
+    this.background = "";
     /** @type ImageData[] */
     this.layerFuncData = [];
 
@@ -34,26 +34,30 @@ SplitTime.Level.prototype.load = function(levelData) {
 
     this.fileData = levelData;
     this.type = levelData.type;
-    this.width = 0;
-    this.height = 0;
+    this.width = levelData.width || 0;
+    this.height = levelData.height || 0;
+    this.yWidth = levelData.yWidth || 0;
+
+    var highestLayerZ = 0;
+    if(levelData.layers.length > 0) {
+        highestLayerZ = levelData.layers[levelData.layers.length - 1].z;
+    }
 
     var that = this;
-    function onloadImage(layerImg) {
-        if(layerImg.height > that.height) {
-            that.height = layerImg.height;
+    function onLoadImage(backgroundImg) {
+        if(backgroundImg.height > that.height) {
+            that.height = backgroundImg.height;
+            that.yWidth = that.height + highestLayerZ;
         }
-        if(layerImg.width > that.width) {
-            that.width = layerImg.width;
+        if(backgroundImg.width > that.width) {
+            that.width = backgroundImg.width;
         }
     }
 
-    for(var iLayer = 0; iLayer < levelData.layers.length; iLayer++) {
-        var background = levelData.layers[iLayer].background;
-        this.layerImg[iLayer] = background;
-        if(background) {
-            var loadProm = SplitTime.Image.load(background).then(onloadImage);
-            levelLoadPromise.add(loadProm);
-        }
+    this.background = levelData.background;
+    if(this.background) {
+        var loadProm = SplitTime.Image.load(this.background).then(onLoadImage);
+        levelLoadPromise.add(loadProm);
     }
 
     //Pull positions from file
@@ -96,6 +100,13 @@ SplitTime.Level.prototype.setLoadPromise = function(actualLoadPromise) {
 
 SplitTime.Level.prototype.waitForLoadAssets = function() {
     return this.loadPromise;
+};
+
+SplitTime.Level.prototype.getBackgroundImage = function() {
+    if(!this.background) {
+        return null;
+    }
+    return SplitTime.Image.get(this.background);
 };
 
 /**
@@ -144,8 +155,9 @@ SplitTime.Level.prototype.runFunctionFromBodyCrossPixel = function(body, r, g, b
 };
 
 SplitTime.Level.prototype.runFunction = function(functionId, param) {
+    var that = this;
     var fun = this.functions[functionId] || function() {
-        console.warn("Function \"" + functionId + "\" not found for level " + this.id);
+        console.warn("Function \"" + functionId + "\" not found for level " + that.id);
     };
     return fun(param);
 };
@@ -297,15 +309,18 @@ SplitTime.Level.prototype.removeBody = function(element) {
  * @param {function(ImageData)} callback
  */
 SplitTime.Level.prototype.withRelevantTraceDataLayers = function(body, callback) {
-    for(var iLayer = 1; iLayer < this.fileData.layers.length; iLayer++) {
+    for(var iLayer = 0; iLayer < this.fileData.layers.length; iLayer++) {
         var layerZ = this.fileData.layers[iLayer].z;
-        if(layerZ <= body.z || layerZ < body.z + body.height) {
+        var nextLayer = this.fileData.layers[iLayer + 1];
+        var nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_VALUE;
+        if(body.z + body.height > layerZ && body.z < nextLayerZ) {
+            // console.log("checking on layer " + iLayer);
             var retVal = callback(this.layerFuncData[iLayer]);
             if(retVal !== undefined) {
                 return retVal;
             }
-        } else {
-            break;
+        // } else {
+        //     break;
         }
     }
 };

@@ -235,21 +235,21 @@ SplitTime.Body.prototype.resetCans = function() { delete this.canSee; delete thi
 
 // SplitTime.Body.prototype.dart = {};
 
-//Checks if the a SplitTime.Body's location is valid (based on current location and layer func data)
-SplitTime.Body.prototype.canBeHere = function(allowInAir) {
-	for(var iX = 0; iX < 8; iX++) {
-		for(var iY = 0; iY < 16; iY++) {
-			var iData = SplitTime.pixCoordToIndex(this.x + iY, this.y + iX, SplitTime.currentLevel.layerFuncData[this.z]);
-			if(SplitTime.currentLevel.layerFuncData[this.z].data[iData] == 255) {
-				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[this.z].data[iData + 1] == 255) { }
-				else {
-					return 0;
-                }
-			}
-		}
-	}
-	return 1;
-};
+// //Checks if the a SplitTime.Body's location is valid (based on current location and layer func data)
+// SplitTime.Body.prototype.canBeHere = function(allowInAir) {
+// 	for(var iX = 0; iX < 8; iX++) {
+// 		for(var iY = 0; iY < 16; iY++) {
+// 			var iData = SplitTime.pixCoordToIndex(this.x + iY, this.y + iX, SplitTime.currentLevel.layerFuncData[this.z]);
+// 			if(SplitTime.currentLevel.layerFuncData[this.z].data[iData] == 255) {
+// 				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[this.z].data[iData + 1] == 255) { }
+// 				else {
+// 					return 0;
+//                 }
+// 			}
+// 		}
+// 	}
+// 	return 1;
+// };
 
 SplitTime.Body.prototype.canSeeBody = function(body) {
     var tDir = SplitTime.Direction.fromTo(this.x, this.y, body.x, body.y);

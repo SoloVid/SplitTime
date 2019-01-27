@@ -24,7 +24,7 @@ SplitTime.Action.PropelProjectile.prototype.update = function(dart) {
 		var potOpp = SplitTime.onBoard.agents[index];
 		if(!dart.getTeam().isAllied(potOpp.getTeam()))
 		{
-			if(SplitTime.distanceTrue(dart.x, dart.y, potOpp.x, potOpp.y) <= dart.baseLength + potOpp.baseLength + 2)
+			if(SplitTime.Measurement.distanceTrue(dart.x, dart.y, potOpp.x, potOpp.y) <= dart.baseLength + potOpp.baseLength + 2)
 			{
 				potOpp.damage(dart.atk); //damage hit opponent
 				this.time = 0;

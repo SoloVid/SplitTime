@@ -15,13 +15,12 @@ SplitTime.Trace.extractArray = function(traceStr) {
     //console.log(points.length + "|" + points + "|");
 
     if(points.length === 0) {
-        log.warn("Empty trace string: " + traceStr);
+        console.warn("Empty trace string: " + traceStr);
         return;
     }
 
-    for(var i = 0; i < points.length; i++)
-    {
-        if(points[i] == "(close)") {
+    for(var i = 0; i < points.length; i++) {
+        if(points[i] === "(close)") {
         	pointsArr.push(null);
         } else {
             var xMatch = points[i].match(xRegex);
@@ -47,58 +46,35 @@ SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
 	ctx.strokeStyle = color;
 	ctx.fillStyle = ctx.strokeStyle;
 
-	var regex = /\([^\)]+\)/g;
-	var xRegex = /\(([-]?[\d]+),/;
-	var yRegex = /,[\s]*([-]?[\d]+)\)/;
+	var pointsArray = SplitTime.Trace.extractArray(traceStr);
 	var newX, newY;
-
-	var pointStr = traceStr;
-	var points = pointStr.match(regex);
-	//console.log(points.length + "|" + points + "|");
-
-	if(points.length === 0) {
-		log.warn("Empty trace string: " + traceStr);
-		return;
-	}
 
 	ctx.beginPath();
 
-	var xMatch = points[0].match(xRegex);
-	var yMatch = points[0].match(yRegex);
-	if(!xMatch || !yMatch) {
-		console.warn("Invalid trace point " + points[0] + " in trace string \"" + traceStr + "\"");
-		return;
+	if(pointsArray.length === 0 || pointsArray[0] === null) {
+		console.error("Trace string \"" + traceStr + "\" doesn't have a valid point to begin with");
 	}
 
-	newX = +(xMatch[1]) + offsetPos.x;
-	newY = +(yMatch[1]) + offsetPos.y;
+	newX = pointsArray[0].x + offsetPos.x;
+	newY = pointsArray[0].y + offsetPos.y;
 
 	ctx.moveTo(newX, newY);
 
-	ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
+    // ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
+    ctx.fillRect(newX - 1, newY - 1, 1, 1);
 
-	for(var k = 1; k < points.length; k++)
-	{
-		if(points[k] == "(close)")
-		{
+	for(var k = 1; k < pointsArray.length; k++) {
+		if(pointsArray[k] === null) {
 			ctx.closePath();
-			ctx.stroke();
+			// ctx.stroke();
 			ctx.fill();
-		}
-		else
-		{
-			xMatch = points[k].match(xRegex);
-			yMatch = points[k].match(yRegex);
-			if(!xMatch || !yMatch) {
-				console.warn("Invalid trace point " + points[k] + " in trace string \"" + traceStr + "\"");
-				continue;
-			}
-
-			newX = +(xMatch[1]) + offsetPos.x;
-			newY = +(yMatch[1]) + offsetPos.y;
+		} else {
+			newX = pointsArray[k].x + offsetPos.x;
+			newY = pointsArray[k].y + offsetPos.y;
 
 			ctx.lineTo(newX, newY);
-			ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
+            // ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
+            ctx.fillRect(newX - 1, newY - 1, 1, 1);
 		}
 	}
 	ctx.stroke();
@@ -106,9 +82,10 @@ SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
 
 SplitTime.Trace.Type = {
 	SOLID: "solid",
+    STAIRS: "stairs",
+	GROUND: "ground",
 	FUNCTION: "function",
 	PATH: "path",
-	STAIRS: "stairs"
 };
 
 SplitTime.Trace.RColor = {

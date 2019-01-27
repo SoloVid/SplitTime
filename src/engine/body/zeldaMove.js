@@ -87,8 +87,7 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
             this.x += iHat;
             if(this.x >= level.width || this.x < 0) {
                 outX = true;
-            }
-            else {
+            } else {
                 stoppedX = !zeldaCheckStep(this, "x", "y", dx > 0);
             }
 
@@ -96,8 +95,7 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
 
             if(stoppedX || outX) {
                 this.x -= iHat;
-            }
-            else {
+            } else {
                 xPixelsRemaining--;
                 pixelsMovedX++;
             }
@@ -106,17 +104,15 @@ SplitTime.Body.prototype.zeldaStep = function(distance) {
         if(yPixelsRemaining > 0) {
             this.y += jHat;
             //Check if out of bounds
-            if(this.y >= level.height || this.y < 0) {
+            if(this.y >= level.yWidth || this.y < 0) {
                 outY = true;
-            }
-            else {
+            } else {
                 stoppedY = !zeldaCheckStep(this, "y", "x", dy > 0);
             }
 
             if(stoppedY || outY) {
                 this.y -= jHat;
-            }
-            else {
+            } else {
                 yPixelsRemaining--;
                 pixelsMovedY++;
             }
@@ -182,7 +178,8 @@ function zeldaCheckStepTraces(body, axis, altAxis, isPositive) {
             var a = data.data[dataIndex++];
             if(r === 255) {
                 return true;
-            } else if(a !== 0) {
+            // } else if(a !== 0) {
+            } else if(a === 255) {
                 var colorId = r + "," + g + "," + b + "," + a;
                 if(body._pixelsCrossed[colorId] === undefined) {
                     try {
@@ -274,13 +271,18 @@ function zeldaSlide(body, maxDistance) {
     var negativeDiagonal = (Math.round(body.dir + 3.9) - 0.5) % 4;
 
     function isCornerOpen(direction, howFarAway) {
-        var iCorner = SplitTime.pixCoordToIndex(
-            x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway),
-            y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway),
-            level.layerFuncData[z]
-        );
+        var isCornerClosed = level.withRelevantTraceDataLayers(body, function(data) {
+            var iCorner = SplitTime.pixCoordToIndex(
+                x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway),
+                y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway),
+                data
+            );
 
-        return level.layerFuncData[z].data[iCorner] !== 255;
+            if(data.data[iCorner] === SplitTime.Trace.RColor.SOLID) {
+                return true;
+            }
+        });
+        return !isCornerClosed;
     }
 
     for(var howFarOut = 1; howFarOut <= 5; howFarOut++) {

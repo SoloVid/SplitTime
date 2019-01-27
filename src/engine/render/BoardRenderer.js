@@ -108,18 +108,10 @@ SplitTime.BoardRenderer.getScreenCoordinates = function() {
         screen.y = focusPoint.y - (SCREEN_HEIGHT / 2);
     }
 
-    // screen.x = Math.round(screen.x);
-    // screen.y = Math.round(screen.y);
+    screen.x = Math.round(screen.x);
+    screen.y = Math.round(screen.y);
 
     return screen;
-};
-
-SplitTime.BoardRenderer.countLayers = function() {
-    var currentLevel = SplitTime.Level.getCurrent();
-    if(!currentLevel) {
-        return 0;
-    }
-    return currentLevel.layerImg.length;
 };
 
 SplitTime.BoardRenderer.countBodies = function() {
@@ -160,7 +152,6 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     weatherRenderer.setLights(lights);
 
     //Rendering sequence
-    for(var layer = 0; layer < currentLevel.layerImg.length; layer++) {
         // bufferCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         snapshotCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -179,7 +170,7 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         // }
 
         for(iBody = 0; iBody < bodies.length; iBody++) {
-            drawBodyToForLayer(bodies[iBody], snapshotCtx, layer);
+            drawBodyTo(bodies[iBody], snapshotCtx);
         }
         snapshotCtx.globalAlpha = 1;
 
@@ -192,11 +183,10 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
 
         snapshotCtx.globalCompositeOperation = "destination-over";
 
-        if(currentLevel.layerImg[layer]) {
-            var backImg = SplitTime.Image.get(currentLevel.layerImg[layer]);
+        if(currentLevel.getBackgroundImage()) {
             //Note: this single call on a perform test is a huge percentage of CPU usage.
             snapshotCtx.drawImage(
-                backImg,
+                currentLevel.getBackgroundImage(),
                 screen.x + xBackShift, screen.y + yBackShift,
                 SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift,
                 xBackShift, yBackShift,
@@ -207,7 +197,6 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         snapshotCtx.globalCompositeOperation = "source-over";
 
         bufferCtx.drawImage(snapshot, 0, 0);
-    }
 
     weatherRenderer.render(bufferCtx);
 
@@ -233,9 +222,8 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
  *
  * @param {SplitTime.Body} body
  * @param {CanvasRenderingContext2D} ctx
- * @param {int} layer
  */
-function drawBodyToForLayer(body, ctx, layer) {
+function drawBodyTo(body, ctx) {
     var canvasRequirements = body.getCanvasRequirements();
     if(canvasRequirements === null) {
         return;
@@ -244,8 +232,10 @@ function drawBodyToForLayer(body, ctx, layer) {
 
     // TODO: potentially give the body a cleared personal canvas if requested
 
-    ctx.translate(canvasRequirements.x - screen.x, canvasRequirements.y - screen.y);
+    // Translate origin to body location
+    ctx.translate(Math.round(canvasRequirements.x - screen.x), Math.round(canvasRequirements.y - canvasRequirements.z - screen.y));
     body.see(ctx);
+    // Reset transform
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     // TODO: address these commented items as their proper location should be moved
@@ -258,6 +248,10 @@ function drawBodyToForLayer(body, ctx, layer) {
     //     cBody.resetCans();
 }
 
+/**
+ * @param {int} width
+ * @param {int} height
+ */
 SplitTime.BoardRenderer.createCanvases = function(width, height) {
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;

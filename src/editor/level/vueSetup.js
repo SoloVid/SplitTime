@@ -309,7 +309,10 @@ Vue.component("rendered-layer", {
             };
         },
     	imgSrc: function() {
-    		return imgSrc(this.layer.background);
+            if(this.index > 0) {
+                return null;
+            }
+    		return imgSrc(this.level.background);
 		},
         props: function() {
     		var that = this;

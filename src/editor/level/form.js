@@ -130,13 +130,21 @@ function getEditorValue(field) {
     return strVal;
 }
 
+function showEditorLevel() {
+    showEditor(levelObject, [
+        {
+            key: "region"
+        },
+        {
+            key: "background"
+        }
+    ]);
+}
+
 function showEditorLayer(layer) {
     showEditor(layer, [
         {
             key: "id"
-        },
-        {
-            key: "background"
         },
         {
             key: "z",

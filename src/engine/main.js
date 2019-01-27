@@ -104,7 +104,6 @@ SplitTime.main = function() {
 
     SplitTime.Debug.update({
         "FPS": displayFPS,
-        "Board Layers": SplitTime.BoardRenderer.countLayers(),
         "Board Bodies": SplitTime.BoardRenderer.countBodies(),
         "Agents": agentCount,
         "HUD Layers": SplitTime.HUD.getRendererCount(),

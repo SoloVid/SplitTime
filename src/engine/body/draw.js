@@ -19,13 +19,14 @@ SplitTime.Body.prototype.stances = {
 };
 
 /**
- * @return {{x: number, y: number, width: number, height: number, isCleared: boolean}}
+ * @return {{x: number, y: number, z: number, width: number, height: number, isCleared: boolean}}
  */
 SplitTime.Body.prototype.getCanvasRequirements = function() {
     return {
         // board location on this layer for center of canvas
         x: this.x,
         y: this.y,
+        z: this.z,
         // TODO: smarter calculations
         width: this.xres * 4,
         height: this.yres * 4,
@@ -38,12 +39,9 @@ SplitTime.Body.prototype.defaultStance = function() {
 };
 
 /**
- * Draw a segment (split vertically) of the body onto the canvas context
  * @param {CanvasRenderingContext2D} ctx
- * @param {int} minZ minimum z value for segment of Body that should be drawn
- * @param {int} exMaxZ maximum (exclusive) z value for the segment of the Body that should be drawn
  */
-SplitTime.Body.prototype.see = function(ctx, minZ, exMaxZ) {
+SplitTime.Body.prototype.see = function(ctx) {
 	if(!this.canSee) {return;}
 
 	ctx.rotate(this.rotate);
@@ -51,7 +49,7 @@ SplitTime.Body.prototype.see = function(ctx, minZ, exMaxZ) {
 	//SplitTime.onBoard.bodies is displayed partially transparent depending on health (<= 50% transparent)
 	//ctx.globalAlpha = (this.hp + this.strg)/(2*this.strg);
 
-	this.draw(ctx, minZ, exMaxZ);
+	this.draw(ctx);
 
 	this.seeAction();
 	this.seeStatus();
@@ -63,10 +61,8 @@ SplitTime.Body.prototype.see = function(ctx, minZ, exMaxZ) {
 
 /**
  * @param {CanvasRenderingContext2D} ctx
- * @param {int} minZ minimum z value for segment of Body that should be drawn
- * @param {int} exMaxZ maximum (exclusive) z value for the segment of the Body that should be drawn
  */
-SplitTime.Body.prototype.draw = function(ctx, minZ, exMaxZ) {
+SplitTime.Body.prototype.draw = function(ctx) {
     var tImg = this.getImage();
 
     var crop = this.getAnimationFrameCrop(this.dir, this.stance, this.frame);
@@ -116,13 +112,6 @@ SplitTime.Body.prototype.getAnimationFrameCrop = function(numDir, stance, frame)
     return crop;
 };
 
-SplitTime.Body.prototype.getVerticalSegmentCrop = function(dimensions, minZ, exMaxZ) {
-    if(minZ > this.z + this.height || exMaxZ < this.z) {
-        return null;
-    }
-
-};
-
 // TODO: abstract this?
 SplitTime.Body.prototype.hasIdleAnimation = false;
 SplitTime.Body.prototype.finalizeFrame = function() {
@@ -144,7 +133,7 @@ SplitTime.Body.prototype.getAnimationFramesAvailable = function() {
 };
 
 SplitTime.Body.prototype.finalizeStance = function() {
-    //Allow for non-complicated spritesheets with one column
+    //Allow for non-complicated sprite sheets with one column
     if(!this.stances) {
         return;
     }

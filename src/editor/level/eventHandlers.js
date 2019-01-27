@@ -36,9 +36,10 @@ var projectPath = "projects/" + projectName + "/";
 
 var traceEditorColors = {
 	"solid": "rgba(0, 0, 255, 1)",
+    "stairs": "rgba(0, 200, 0, 1)",
+	"ground": "rgba(0, 100, 100, .75)",
 	"function": "rgba(255, 0, 0, 1)",
 	"path": "rgba(0, 0, 0, 1)",
-	"stairs": "rgba(0, 200, 0, 1)",
 	"highlight": "rgba(255, 255, 0, 1)"
 };
 
@@ -226,7 +227,7 @@ $(document).ready(function() {
 					var trace = addNewTrace(vueApp.activeLayer);
 					trace.type = typeSelected;
 
-					if(typeSelected == "path" && !ctrlDown) {
+					if(typeSelected == SplitTime.Trace.Type.PATH && !ctrlDown) {
 						trace.vertices = positionPoint;
 					} else {
 						trace.vertices = literalPoint;
@@ -235,7 +236,7 @@ $(document).ready(function() {
 					pathInProgress = trace;
 				} else {
 					if(!ctrlDown) {
-						if(pathInProgress.type == "path") {
+						if(pathInProgress.type == SplitTime.Trace.Type.PATH) {
 							if(closestPosition) {
 								pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint;
 							}

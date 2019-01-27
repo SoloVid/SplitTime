@@ -15,6 +15,7 @@
 				</li>
 				<li><a href="javascript:downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
 				</li>
+				<li><a href="javascript:showEditorLevel();">Edit Settings</a></li>
 			</ul>
 		</div>
 		<div id="editorTools">
@@ -167,7 +168,7 @@
 
 	<script type="text/x-template" id="rendered-layer-template">
 		<div v-show="layer.displayed" v-bind:style="styleObject">
-			<img class="background" v-bind:src="imgSrc"/>
+			<img v-if="!!imgSrc" class="background" v-bind:src="imgSrc"/>
 			<svg
 					style="position:absolute"
 					v-bind:width="width"
