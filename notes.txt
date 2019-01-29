@@ -73,18 +73,30 @@ Positions have
     - Use createLinearGradient
     - Specify angle (upward) of stairs in level (probably a Maven angle)
     - Find center points of two edges most representative of angle
+    - OR use point representing corner (e.g. min(x), min(y) for NE) and walk direction until hitting polygon (isPointInPath()) and then again until leaving polygon
 - Rather than simple "solid" traces, use something more akin to "wall" traces. These traces will have a specified height.
 - Layers are specified at some height above the layer below
 - Sprites should be rendered in order of a topological sort based on comparisons between overlapping sprites rather than in simple y order. (See http://andrewrussell.net/2016/06/how-2-5d-sorting-works-in-river-city-ransom-underground/ and Tarjan's Algorithm)
+    - Keep two sorted arrays of all visible sprites: 1 for vertical alignment and 1 for horizontal alignment
+        - Get data from canvas requirements from sprite
+        - Cache data and only update in arrays if changed
+        - Each array stores two points per sprite: begin and end
+        - Comparison algorithm each frame knows it only has to check against other sprites between the two endpoints of each sprite
+        - Probably keep separate map into the arrays for quicker access in updating preliminary sort
+        - Should I actually do horizontal and vertical data structures, or just choose one and pick up the slack in the comparisons part?
 - Add additional sticky collision for verticality
-- Some time during frame loop, check all bodies for falling
-    - If cached standing on top of other body, check if still standing on that body
-    - If middle pixel is standable, end early (typical case)
-    - Otherwise, check rest of base pixels for some evidence of standing on something
-    - Otherwise, check all bodies to see if standing on
-        - Only check bodies whose z + height is exactly our z
-    - Otherwise, push downward (new zeldaStep() type method)
-        - Acceleration or no?
+    - On zeldaStep() stopped, check if stopping pixel is solid within height tolerance of sticky vertical collision. If so, bump up by that much. I was thinking this should only be done once per zeldaStep(), but I'm thinking now you might end up doing that multiple times each frame (e.g. traversing several steps) (also not typical case; so not too expensive?)
+- A similar method to zeldaBump() will need to be implemented, e.g. zeldaVerticalBump()
+    - Rather than using iterative process like horizontal zeldaMove(), try to do the whole thing in one go
+    - Think of method like, "What's the furthest this body can go vertically in this direction up to X pixels?"
+        - This kind of method limits the base pixel check to 1 time through
+    - I guess it still might be iterative like zeldaMove(); the difference is that each step of iteration here would be on a layer rather than 1 horizontal pixel.
+    - If falling (typical case):
+        - If cached standing on top of other body, check if still standing on that body
+        - If still on stood pixel from last frame, end early (common occurrence optimization I think)
+        - Otherwise proceed with general case
+    - If stopped, set vertical speed to zero (true for upward or downward motion)
+        - Not sure if we care about pushing things vertically? That might change the delta vertical speed formula.
+- Before agents run in the main game loop, decrement every body's vertical speed by some constant (modulated by time)
+- After agents run (and before rendering) in the main game loop, do a zeldaVerticalBump() on all bodies with vertical speed != 0
 - Bodies aren't split into multiple layers anymore
-- Still split rendering into layers
-    - Split sprites automatically into separate layers during rendering
