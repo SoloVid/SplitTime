@@ -77,15 +77,25 @@ Positions have
 - Rather than simple "solid" traces, use something more akin to "wall" traces. These traces will have a specified height.
 - Layers are specified at some height above the layer below
 - Sprites should be rendered in order of a topological sort based on comparisons between overlapping sprites rather than in simple y order. (See http://andrewrussell.net/2016/06/how-2-5d-sorting-works-in-river-city-ransom-underground/ and Tarjan's Algorithm)
-    - Keep two sorted arrays of all visible sprites: 1 for vertical alignment and 1 for horizontal alignment
+    - Keep sorted array of visible sprites by horizontal alignment
         - Get data from canvas requirements from sprite
         - Cache data and only update in arrays if changed
-        - Each array stores two points per sprite: begin and end
+        - Array stores two points per sprite: begin and end
         - Comparison algorithm each frame knows it only has to check against other sprites between the two endpoints of each sprite
         - Probably keep separate map into the arrays for quicker access in updating preliminary sort
-        - Should I actually do horizontal and vertical data structures, or just choose one and pick up the slack in the comparisons part?
+    - How do I know which of two sprites to draw in front of the other?
+        - If they don't overlap horizontally, it doesn't matter
+        - Figure out which body is higher
+        - //If higher body is also forward body, draw higher second
+        - (Generally either higher Y or higher Z will cause the sprite to be rendered second.)
+        - (We need one more piece of info--either height or baseY--, in addition to coordinates and canvas size, to properly sort sprites)
+        - If lowerBody.y - higherBody.y < higherBody.halfBaseY + lowerBody.halfBaseY, draw higher second
+            - (If the distance from lower to higher equals/exceeds the minimum space between as allowed by bases, draw higher first/behind)
+            - This method prefers drawing higher Z sprites in conflict
+        - Otherwise, draw first (behind) (i.e. when higher sprite is back (Y) sprite and the higher body's and lower body's bases are in the middle)
 - Add additional sticky collision for verticality
     - On zeldaStep() stopped, check if stopping pixel is solid within height tolerance of sticky vertical collision. If so, bump up by that much. I was thinking this should only be done once per zeldaStep(), but I'm thinking now you might end up doing that multiple times each frame (e.g. traversing several steps) (also not typical case; so not too expensive?)
+    - Push back down amount pushed up at end of step (so don't fly if gravity too low)
 - A similar method to zeldaBump() will need to be implemented, e.g. zeldaVerticalBump()
     - Rather than using iterative process like horizontal zeldaMove(), try to do the whole thing in one go
     - Think of method like, "What's the furthest this body can go vertically in this direction up to X pixels?"
@@ -100,3 +110,10 @@ Positions have
 - Before agents run in the main game loop, decrement every body's vertical speed by some constant (modulated by time)
 - After agents run (and before rendering) in the main game loop, do a zeldaVerticalBump() on all bodies with vertical speed != 0
 - Bodies aren't split into multiple layers anymore
+
+- I need to make sure that rounding for positions is done at appropriate times.
+    - Most of the time I want pixel coordinates because that is how all of the physics and rendering (should) work
+    - The only reason for having fractional coordinates is for sub-pixel frame movement
+    - Maybe create special getters for rounded values?
+    
+- Change body level calls should be mostly deferred until a dedicated time in game loop rather than happening, say, mid-step
