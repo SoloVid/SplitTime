@@ -11,6 +11,7 @@ SplitTime.Level = function(levelId) {
     this.functions = {};
     this.positions = {};
     this.region = null;
+    /** @type SplitTime.Body[] */
     this.bodies = [];
     this.loadPromise = new SLVD.Promise();
     this.background = "";
@@ -164,6 +165,16 @@ SplitTime.Level.prototype.runFunction = function(functionId, param) {
 
 /**
  *
+ * @param {function(SplitTime.Body)} callback
+ */
+SplitTime.Level.prototype.forEachBody = function(callback) {
+    for(var i = 0; i < this.bodies.length; i++) {
+        callback(this.bodies[i]);
+    }
+};
+
+/**
+ *
  * @param {SplitTime.Agent.Callback} callback
  */
 SplitTime.Level.prototype.forEachAgent = function(callback) {
@@ -308,19 +319,26 @@ SplitTime.Level.prototype.removeBody = function(element) {
  * @param {SplitTime.Body} body
  * @param {function(ImageData)} callback
  */
-SplitTime.Level.prototype.withRelevantTraceDataLayers = function(body, callback) {
+SplitTime.Level.prototype.forEachRelevantTraceDataLayer = function(body, callback) {
+    return this.forEachTraceDataLayerBetween(body.z, body.z + body.height, callback);
+};
+
+/**
+ * @param {number} minZ
+ * @param {number} exMaxZ
+ * @param {function(ImageData, int)} callback
+ */
+SplitTime.Level.prototype.forEachTraceDataLayerBetween = function(minZ, exMaxZ, callback) {
     for(var iLayer = 0; iLayer < this.fileData.layers.length; iLayer++) {
         var layerZ = this.fileData.layers[iLayer].z;
         var nextLayer = this.fileData.layers[iLayer + 1];
         var nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_VALUE;
-        if(body.z + body.height > layerZ && body.z < nextLayerZ) {
+        if(exMaxZ > layerZ && minZ < nextLayerZ) {
             // console.log("checking on layer " + iLayer);
-            var retVal = callback(this.layerFuncData[iLayer]);
+            var retVal = callback(this.layerFuncData[iLayer], layerZ);
             if(retVal !== undefined) {
-                return retVal;
+                return;
             }
-        // } else {
-        //     break;
         }
     }
 };
@@ -343,6 +361,11 @@ SplitTime.Level.prototype.loadForPlay = function() {
         var holderCtx = holderCanvas.getContext("2d");
         holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
 
+        var layerZ = this.fileData.layers[iLayer].z;
+        var nextLayer = this.fileData.layers[iLayer + 1];
+        var nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_VALUE;
+        var layerHeight = nextLayerZ - layerZ;
+
         //Draw traces
         var layerTraces = this.fileData.layers[iLayer].traces;
 
@@ -356,6 +379,11 @@ SplitTime.Level.prototype.loadForPlay = function() {
                 this.internalFunctionIdMap[functionIntId] = functionStringId;
                 var color = SplitTime.Trace.getFunctionColor(functionIntId);
                 SplitTime.Trace.drawColor(layerTraces[iLayerTrace].vertices, holderCtx, color);
+            } else if(type === SplitTime.Trace.Type.SOLID) {
+                var height = layerTraces[iLayerTrace].parameter || layerHeight;
+                SplitTime.Trace.drawColor(layerTraces[iLayerTrace].vertices, holderCtx, SplitTime.Trace.getSolidColor(height));
+            } else if(type === SplitTime.Trace.Type.GROUND) {
+                SplitTime.Trace.drawColor(layerTraces[iLayerTrace].vertices, holderCtx, SplitTime.Trace.getSolidColor(0));
             } else {
                 SplitTime.Trace.draw(layerTraces[iLayerTrace].vertices, holderCtx, type);
             }

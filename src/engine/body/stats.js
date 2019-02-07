@@ -18,6 +18,13 @@ SplitTime.Body.prototype.getPixelSpeedForFrame = function(speed) {
     speed = speed || this.spd;
     return speed * this.getLevel().getRegion().TimeStabilizer.howManyMsSinceLastFrame() / 1000;
 };
+SplitTime.Body.prototype.getPixelGravityForFrame = function() {
+    return this.GRAVITY * this.getLevel().getRegion().TimeStabilizer.howManyMsSinceLastFrame() / 1000;
+};
+SplitTime.Body.prototype.getPixelZVelocityForFrame = function(zVelocity) {
+    zVelocity = zVelocity || this.zVelocity;
+    return zVelocity * this.getLevel().getRegion().TimeStabilizer.howManyMsSinceLastFrame() / 1000;
+};
 SplitTime.Body.prototype.getStrength = function() {
     return this.strg;
 };

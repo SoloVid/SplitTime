@@ -41,6 +41,16 @@ SplitTime.Region.prototype.getAgents = function() {
 
 /**
  *
+ * @param {function(SplitTime.Body)} callback
+ */
+SplitTime.Region.prototype.forEachBody = function(callback) {
+    for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
+        this.levels[iLevel].forEachBody(callback);
+    }
+};
+
+/**
+ *
  * @param {SplitTime.Agent.Callback} callback
  */
 SplitTime.Region.prototype.forEachAgent = function(callback) {
@@ -49,30 +59,28 @@ SplitTime.Region.prototype.forEachAgent = function(callback) {
     }
 };
 
-(function() {
-    var regionMap = {};
-    var defaultRegion = new SplitTime.Region();
+var regionMap = {};
+var defaultRegion = new SplitTime.Region();
 
-    SplitTime.Region.get = function(regionId) {
-        if(!regionMap[regionId]) {
-            regionMap[regionId] = new SplitTime.Region(regionId);
-        }
-        return regionMap[regionId];
-    };
+SplitTime.Region.get = function(regionId) {
+    if(!regionMap[regionId]) {
+        regionMap[regionId] = new SplitTime.Region(regionId);
+    }
+    return regionMap[regionId];
+};
 
-    /**
-     * Get the region currently in play.
-     * @returns {SplitTime.Region|null}
-     */
-    SplitTime.Region.getCurrent = function() {
-        var currentLevel = SplitTime.Level.getCurrent();
-        if(currentLevel === null) {
-            return null;
-        }
-        return currentLevel.getRegion();
-    };
+/**
+ * Get the region currently in play.
+ * @returns {SplitTime.Region|null}
+ */
+SplitTime.Region.getCurrent = function() {
+    var currentLevel = SplitTime.Level.getCurrent();
+    if(currentLevel === null) {
+        return null;
+    }
+    return currentLevel.getRegion();
+};
 
-    SplitTime.Region.getDefault = function() {
-        return defaultRegion;
-    };
-} ());
+SplitTime.Region.getDefault = function() {
+    return defaultRegion;
+};

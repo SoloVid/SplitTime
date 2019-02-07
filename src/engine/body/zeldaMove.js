@@ -154,6 +154,35 @@ function zeldaCheckStep(body, axis, altAxis, isPositive) {
 }
 
 /**
+ * @param {SplitTime.Body} body
+ * @param {number} coordinate
+ * @param {function(int)} callback
+ */
+function forEachPixelAlongBase(body, coordinate, callback) {
+    for(var i = -body.baseLength / 2; i < body.baseLength / 2; i++) {
+        var retVal = callback(Math.round(coordinate + i));
+        if(retVal !== undefined) {
+            return;
+        }
+    }
+}
+
+/**
+ * @param {ImageData} data
+ * @param {int} x
+ * @param {int} y
+ * @param {function(int, int, int, int)} callback
+ */
+function withPixelColor(data, x, y, callback) {
+    var dataIndex = SplitTime.pixCoordToIndex(x, y, data);
+    var r = data.data[dataIndex++];
+    var g = data.data[dataIndex++];
+    var b = data.data[dataIndex++];
+    var a = data.data[dataIndex++];
+    callback(r, g, b, a);
+}
+
+/**
  * Check that the last moved pixel is allowed in level collision canvas data.
  * @param {SplitTime.Body} body
  * @param {string} axis "x" or "y" primary movement direction
@@ -167,31 +196,50 @@ function zeldaCheckStepTraces(body, axis, altAxis, isPositive) {
 
     coords[axis] = Math.round(isPositive ? (body[axis] + body.baseLength / 2) : (body[axis] - body.baseLength / 2));
 
-    var stopped = level.withRelevantTraceDataLayers(body, function(data) {
+    var stopped = false;
+    level.forEachRelevantTraceDataLayer(body, function(imageData, layerZ) {
         //Loop through width of base
         for(var i = -body.baseLength / 2; i < body.baseLength / 2; i++) {
+        // forEachPixelAlongBase(body, body[altAxis], function(coordinate) {
             coords[altAxis] = Math.round(body[altAxis] + i);
-            var dataIndex = SplitTime.pixCoordToIndex(coords.x, coords.y, data);
-            var r = data.data[dataIndex++];
-            var g = data.data[dataIndex++];
-            var b = data.data[dataIndex++];
-            var a = data.data[dataIndex++];
-            if(r === 255) {
-                return true;
-            // } else if(a !== 0) {
-            } else if(a === 255) {
-                var colorId = r + "," + g + "," + b + "," + a;
-                if(body._pixelsCrossed[colorId] === undefined) {
-                    try {
-                        body._pixelsCrossed[colorId] = crossPixel(body, r, g, b, a) !== false;
-                    } catch(ex) {
-                        console.error(ex);
+            // coords[altAxis] = coordinate;
+            var dataIndex = SplitTime.pixCoordToIndex(coords.x, coords.y, imageData);
+            var r = imageData.data[dataIndex++];
+            var g = imageData.data[dataIndex++];
+            var b = imageData.data[dataIndex++];
+            var a = imageData.data[dataIndex++];
+            // withPixelColor(imageData, coords.x, coords.y, function(r, g, b, a) {
+                if(r === SplitTime.Trace.RColor.SOLID) {
+                    var height = g;
+                    if(height > 0) {
+                        if(layerZ + height <= body.z || body.z + body.height <= layerZ) {
+                            // do nothing
+                        } else {
+                            stopped = true;
+                            return true;
+                        }
+                    }
+                } else if(a === 255) {
+                    // Since traces are drawn inexactly, we can't rely on colors with alpha not 100%
+                    var colorId = r + "," + g + "," + b + "," + a;
+                    if(body._pixelsCrossed[colorId] === undefined) {
+                        try {
+                            body._pixelsCrossed[colorId] = crossPixel(body, r, g, b, a) !== false;
+                        }
+                        catch(ex) {
+                            console.error(ex);
+                        }
+                    }
+                    if(!body._pixelsCrossed[colorId]) {
+                        stopped = true;
+                        return true;
                     }
                 }
-                if(!body._pixelsCrossed[colorId]) {
-                    return true;
-                }
-            }
+            // });
+        // });
+        // if(stopped) {
+        //     return true;
+        // }
         }
     });
     return !stopped;
@@ -271,7 +319,7 @@ function zeldaSlide(body, maxDistance) {
     var negativeDiagonal = (Math.round(body.dir + 3.9) - 0.5) % 4;
 
     function isCornerOpen(direction, howFarAway) {
-        var isCornerClosed = level.withRelevantTraceDataLayers(body, function(data) {
+        var isCornerClosed = level.forEachRelevantTraceDataLayer(body, function(data) {
             var iCorner = SplitTime.pixCoordToIndex(
                 x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway),
                 y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway),
@@ -327,4 +375,229 @@ function crossPixel(body, r, g, b, a) {
         var level = body.getLevel();
         return level.runFunctionFromBodyCrossPixel(body, r, g, b, a);
     }
+}
+
+SplitTime.Body.prototype._zeldaPreviousGroundBody = null;
+SplitTime.Body.prototype._zeldaPreviousGroundTraceX = null;
+SplitTime.Body.prototype._zeldaPreviousGroundTraceY = null;
+SplitTime.Body.prototype._zeldaPreviousGroundTraceZ = null;
+
+
+/**
+ * Move the body along the Z-axis up to the specified (maxZ) number of pixels.
+ * @param {number} maxZ
+ * @returns {number} Z pixels actually moved
+ */
+SplitTime.Body.prototype.zeldaVerticalBump = function(maxZ) {
+    return zeldaVerticalBumpImpl(this, maxZ);
+};
+
+/**
+ * Move the body along the Z-axis up to the specified (maxZ) number of pixels.
+ * @param {SplitTime.Body} body
+ * @param {number} maxDZ
+ * @returns {number} Z pixels actually moved
+ */
+function zeldaVerticalBumpImpl(body, maxDZ) {
+    ensureInLevel(body);
+    var level = body.getLevel();
+
+    var groundBody = body._zeldaPreviousGroundBody;
+    if(groundBody && isStandingOnBody(body, groundBody)) {
+        return 0;
+    }
+    body._zeldaPreviousGroundBody = null;
+    if(maxDZ < 0 && isGroundTracePixelRelevant(body, body._zeldaPreviousGroundTraceX, body._zeldaPreviousGroundTraceY, body._zeldaPreviousGroundTraceZ)) {
+        return 0;
+    }
+    body._zeldaPreviousGroundTraceX = null;
+    body._zeldaPreviousGroundTraceY = null;
+    body._zeldaPreviousGroundTraceZ = null;
+
+    var traceDZ;
+    if(Math.abs(maxDZ) < 0.000001) {
+        // do nothing
+        return 0;
+    } else if(maxDZ > 0) {
+        traceDZ = zeldaVerticalRiseTraces(body, maxDZ);
+        // TODO: check bodies
+        return traceDZ;
+    } else {
+        traceDZ = zeldaVerticalSinkTraces(body, maxDZ);
+        // TODO: check bodies
+        return traceDZ;
+    }
+}
+
+/**
+ * @param {SplitTime.Body} body
+ * @param {number} maxDZ (positive)
+ * @returns {number} Z pixels can move (non-negative)
+ */
+function zeldaVerticalRiseTraces(body, maxDZ) {
+    var level = body.getLevel();
+    var bodyTop = body.z + body.height;
+    var restrictivePixel = {
+        x: -1,
+        y: -1,
+        distanceAllowed: maxDZ,
+        zBlocked: null
+    };
+    level.forEachTraceDataLayerBetween(bodyTop, bodyTop + maxDZ, function(imageData, layerZ) {
+        var startX = Math.round(body.x - body.baseLength / 2);
+        var endX = startX + body.baseLength;
+        var startY = Math.round(body.y - body.baseLength / 2);
+        var endY = startY + body.baseLength;
+        //Loop through width of base
+        for(var y = startY; y < endY; y++) {
+            //Loop through height of base
+            for(var x = startX; x < endX; x++) {
+                var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
+                var r = imageData.data[dataIndex++];
+                var g = imageData.data[dataIndex++];
+                var b = imageData.data[dataIndex++];
+                var a = imageData.data[dataIndex++];
+                if(r === SplitTime.Trace.RColor.SOLID) {
+                    // Assuming moving upward through layers, we will hit the bottom of a layer all at the same time
+                    // if(restrictivePixel.heightBlocked === null) {
+                        restrictivePixel.x = x;
+                        restrictivePixel.y = y;
+                        restrictivePixel.distanceAllowed = layerZ - bodyTop;
+                        restrictivePixel.zBlocked = layerZ;
+                        // Moving up is the easy case
+                        return true;
+                    // }
+                }
+                // else if(a === 255) {
+                //     // Since traces are drawn inexactly, we can't rely on colors with alpha not 100%
+                //     var colorId = r + "," + g + "," + b + "," + a;
+                //     if(body._pixelsCrossed[colorId] === undefined) {
+                //         try {
+                //             body._pixelsCrossed[colorId] = crossPixel(body, r, g, b, a) !== false;
+                //         }
+                //         catch(ex) {
+                //             console.error(ex);
+                //         }
+                //     }
+                //     if(!body._pixelsCrossed[colorId]) {
+                //         return stopped = true;
+                //     }
+                // }
+            }
+        }
+    });
+
+    if(restrictivePixel.zBlocked !== null) {
+        body.z = restrictivePixel.zBlocked - body.height;
+        return restrictivePixel.distanceAllowed;
+    } else {
+        body.z = body.z + maxDZ;
+        return maxDZ;
+    }
+}
+
+/**
+ * @param {SplitTime.Body} body
+ * @param {number} maxDZ (negative)
+ * @returns {number} Z pixels moved (non-positive)
+ */
+function zeldaVerticalSinkTraces(body, maxDZ) {
+    if(body.z <= 0) {
+        body.z = 0;
+        return 0;
+    }
+
+    var targetZ = body.z + maxDZ;
+    var level = body.getLevel();
+    var restrictivePixel = {
+        x: -1,
+        y: -1,
+        // positive number
+        distanceAllowed: -maxDZ,
+        zBlocked: null
+    };
+    level.forEachTraceDataLayerBetween(targetZ, body.z + 1, function(imageData, layerZ) {
+        // console.log("Checking sink trace at z = " + layerZ);
+        var startX = Math.round(body.x - body.baseLength / 2);
+        var endX = startX + body.baseLength;
+        var startY = Math.round(body.y - body.baseLength / 2);
+        var endY = startY + body.baseLength;
+        //Loop through width of base
+        for(var y = startY; y < endY; y++) {
+            //Loop through height of base
+            for(var x = startX; x < endX; x++) {
+                var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
+                var r = imageData.data[dataIndex++]; // pixel type
+                var g = imageData.data[dataIndex++]; // height if solid
+                var b = imageData.data[dataIndex++];
+                var a = imageData.data[dataIndex++];
+                if(r === SplitTime.Trace.RColor.SOLID) {
+                    // console.log("g = " + g);
+                    var zBlocked = layerZ + g;
+                    if(restrictivePixel.zBlocked === null || restrictivePixel.zBlocked < zBlocked) {
+                        restrictivePixel.x = x;
+                        restrictivePixel.y = y;
+                        restrictivePixel.distanceAllowed = body.z - zBlocked;
+                        restrictivePixel.zBlocked = zBlocked;
+
+                        if(restrictivePixel.distanceAllowed <= 0) {
+                            return true;
+                        }
+                    }
+                }
+                // else if(a === 255) {
+                //     // Since traces are drawn inexactly, we can't rely on colors with alpha not 100%
+                //     var colorId = r + "," + g + "," + b + "," + a;
+                //     if(body._pixelsCrossed[colorId] === undefined) {
+                //         try {
+                //             body._pixelsCrossed[colorId] = crossPixel(body, r, g, b, a) !== false;
+                //         }
+                //         catch(ex) {
+                //             console.error(ex);
+                //         }
+                //     }
+                //     if(!body._pixelsCrossed[colorId]) {
+                //         return stopped = true;
+                //     }
+                // }
+            }
+        }
+    });
+
+    if(restrictivePixel.zBlocked !== null && restrictivePixel.distanceAllowed <= -maxDZ) {
+        body.z = restrictivePixel.zBlocked;
+        body._zeldaPreviousGroundTraceX = restrictivePixel.x;
+        body._zeldaPreviousGroundTraceY = restrictivePixel.y;
+        body._zeldaPreviousGroundTraceZ = restrictivePixel.zBlocked;
+        // console.log("blocked dropping " + restrictivePixel.distanceAllowed);
+        return -restrictivePixel.distanceAllowed;
+    } else if(targetZ < 0) {
+        var dZ = 0 - body.z;
+        body.z = 0;
+        return dZ;
+    } else {
+        // console.log("unblocked dropping " + maxDZ);
+        body.z = targetZ;
+        return maxDZ;
+    }
+}
+/**
+ * @param {SplitTime.Body} standingBody
+ * @param {SplitTime.Body} groundBody
+ * @returns {boolean}
+ */
+function isStandingOnBody(standingBody, groundBody) {
+    return false;
+    // TODO
+    // Check for perfect groundBody.z + groundBody.height === standingBody.z
+    // Then check for horizontal overlap of bases
+}
+
+function isGroundTracePixelRelevant(body, x, y, z) {
+    if(body._zeldaPreviousGroundTraceX && body._zeldaPreviousGroundTraceY && body._zeldaPreviousGroundTraceZ) {
+        // TODO
+        // Check if body still covers x and y
+        // If so, check that z matches pixel
+    }
+    return false;
 }

@@ -113,7 +113,8 @@ SplitTime.Body.prototype.setZ = function(layer) {
 	}
 	this.z = layer;
 };
-
+SplitTime.Body.prototype.GRAVITY = -640;
+SplitTime.Body.prototype.zVelocity = 0;
 SplitTime.Body.prototype.height = 64;
 
 SplitTime.Body.prototype.dir = 3;
@@ -185,9 +186,9 @@ SplitTime.Body.prototype.interact = function() {};
 
 SplitTime.Body.prototype.onPlayerInteract = function(handler) {
 	if(handler) {
-		this.playerInteractHandlers.registerCallback(handler);
+		this.playerInteractHandlers.register(handler);
 	} else {
-		this.playerInteractHandlers.runCallbacks();
+		this.playerInteractHandlers.run();
 	}
 };
 
@@ -209,19 +210,6 @@ SplitTime.Body.prototype.getPosition = function() {
 	pos.y = this.y;
 	pos.z = this.z;
 	return pos;
-};
-SplitTime.Body.prototype.getShownPosition = function() {
-	var pos = {};
-	pos.x = this.x;
-	pos.y = this.y;
-	pos.z = this.z;
-	return pos;
-};
-SplitTime.Body.prototype.getShownX = function() {
-	return this.x;
-};
-SplitTime.Body.prototype.getShownY = function() {
-	return this.y;
 };
 SplitTime.Body.prototype.getTeam = function() {
 	return SplitTime.Teams[this.team];

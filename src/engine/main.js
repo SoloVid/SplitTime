@@ -25,6 +25,10 @@ SplitTime.main = function() {
                 var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
                 b.logUnusual();
 
+                region.forEachBody(function(body) {
+                    body.zVelocity += body.getPixelGravityForFrame();
+                });
+
                 region.forEachAgent(function(agent) {
                     try {
                         if(typeof agent.notifyFrameUpdate === "function") {
@@ -32,6 +36,16 @@ SplitTime.main = function() {
                         }
                     } catch(ex) {
                         console.error(ex);
+                    }
+                });
+
+                region.forEachBody(function(body) {
+                    if(Math.abs(body.zVelocity) > 0.00001) {
+                        var expectedDZ = body.getPixelZVelocityForFrame();
+                        var actualDZ = body.zeldaVerticalBump(expectedDZ);
+                        if(Math.abs(actualDZ) < Math.abs(expectedDZ)) {
+                            body.zVelocity = 0;
+                        }
                     }
                 });
 
@@ -51,10 +65,10 @@ SplitTime.main = function() {
                     break;
                 }
 
-                //Render board, SplitTime.see below
                 SplitTime.BoardRenderer.renderBoardState(true);
                 var f = new SLVD.speedCheck("SplitTime.BoardRenderer.renderBoardState", e.date);
                 f.logUnusual(5);
+
                 SplitTime.DialogManager.notifyFrameUpdate();
                 var g = new SLVD.speedCheck("SplitTime.DialogManager.notifyFrameUpdate", e.date);
                 g.logUnusual();

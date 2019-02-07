@@ -114,6 +114,12 @@ SplitTime.Trace.getType = function(r, g, b, a) {
 	return SplitTime.Trace.colorToType[r + "," + g + "," + b + "," + a];
 };
 
+SplitTime.Trace.getSolidColor = function(height) {
+	var g = Math.min(Math.max(0, +height), 255);
+	var b = 0;
+    return "rgba(" + SplitTime.Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)";
+};
+
 SplitTime.Trace.getFunctionColor = function(id) {
 	var b = id % 256;
 	var g = Math.floor(id / 256);
