@@ -425,7 +425,7 @@ function zeldaVerticalBumpImpl(body, maxDZ) {
         // TODO: check bodies
         return traceDZ;
     } else {
-        traceDZ = zeldaVerticalSinkTraces(body, maxDZ);
+        traceDZ = zeldaVerticalDropTraces(body, maxDZ);
         // TODO: check bodies
         return traceDZ;
     }
@@ -503,7 +503,7 @@ function zeldaVerticalRiseTraces(body, maxDZ) {
  * @param {number} maxDZ (negative)
  * @returns {number} Z pixels moved (non-positive)
  */
-function zeldaVerticalSinkTraces(body, maxDZ) {
+function zeldaVerticalDropTraces(body, maxDZ) {
     if(body.z <= 0) {
         body.z = 0;
         return 0;

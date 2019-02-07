@@ -67,6 +67,10 @@ Positions have
         NPC
         Absolute
 
+Action traces
+    - trigger when body enters horizontal area on same layer
+    - may or may not run any number of times until body leaves
+        
 3D
 
 - Ramps should be implemented as steps (different heights of wall)
@@ -110,6 +114,10 @@ Positions have
 - Before agents run in the main game loop, decrement every body's vertical speed by some constant (modulated by time)
 - After agents run (and before rendering) in the main game loop, do a zeldaVerticalBump() on all bodies with vertical speed != 0
 - Bodies aren't split into multiple layers anymore
+
+- Bodies can have shadows (configurable)
+    - Keep extra body in level
+    - Each frame reset position to parent body position and then zeldaVerticalDrop arbitrarily large maxDZ
 
 - I need to make sure that rounding for positions is done at appropriate times.
     - Most of the time I want pixel coordinates because that is how all of the physics and rendering (should) work
