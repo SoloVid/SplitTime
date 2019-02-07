@@ -1,3 +1,5 @@
+dependsOn("/SLVD/RegisterCallbacks.js");
+
 SplitTime.Controls = {};
 
 SplitTime.Controls.JoyStick = {
@@ -13,26 +15,63 @@ SplitTime.Controls.Button = {
 };
 
 function ControllerButton(onDown, onUp, isDown) {
-    this.onDown = onDown || function() {};
-    this.onUp = onUp || function() {};
+    this._bindings = {
+        obsolete: true
+    };
+
+    this._downCallbacks = new SLVD.RegisterCallbacks();
+    this._upCallbacks = new SLVD.RegisterCallbacks();
+
+    var that = this;
+    this.onDown = onDown || function(callback) {
+        that._downCallbacks.register(callback);
+    };
+    this.onUp = onUp || function(callback) {
+        that._upCallbacks.register(callback);
+    };
     this.isDown = isDown || function() { return false; };
 }
 
+// ControllerButton.prototype.onDown = function(callback) {
+//     this._downCallbacks.register(callback);
+// };
+//
+// ControllerButton.prototype.onUp = function(callback) {
+//     this._upCallbacks.register(callback);
+// };
+
 ControllerButton.prototype.setKeyboardBindings = function(/* keyCodes...*/) {
     var keyCodes = [];
-    for(var i = 0; i < arguments.length; i++) {
-        keyCodes.push(arguments[i]);
+    for(var iArg = 0; iArg < arguments.length; iArg++) {
+        keyCodes.push(arguments[iArg]);
     }
-    this.onDown = function(callback) {
-        for(var i = 0; i < keyCodes.length; i++) {
-            SplitTime.Keyboard.onDown(keyCodes[i], callback);
-        }
+
+    this._bindings.obsolete = true;
+    this._bindings = {
+        obsolete: false
     };
-    this.onUp = function(callback) {
-        for(var i = 0; i < keyCodes.length; i++) {
-            SplitTime.Keyboard.afterUp(keyCodes[i], callback);
+    var currentBindings = this._bindings;
+    var that = this;
+
+    function runDownCallbacks() {
+        if(currentBindings.obsolete) {
+            return true;
         }
-    };
+        that._downCallbacks.run();
+    }
+
+    function runUpCallbacks() {
+        if(currentBindings.obsolete) {
+            return true;
+        }
+        that._upCallbacks.run();
+    }
+
+    for(var i = 0; i < keyCodes.length; i++) {
+        SplitTime.Keyboard.onDown(keyCodes[i], runDownCallbacks);
+        SplitTime.Keyboard.afterUp(keyCodes[i], runUpCallbacks);
+    }
+
     this.isDown = function() {
         for(var i = 0; i < keyCodes.length; i++) {
             if(SplitTime.Keyboard.isKeyDown(keyCodes[i])) {

@@ -20,36 +20,38 @@ var snapshot;
 /** @type {CanvasRenderingContext2D} */
 var snapshotCtx;
 
-/** @type {{x: number, y: number}[]} */
+/** @type {{x: number, y: number, z: number}[]} */
 var focusPoints = [];
 
 SplitTime.BoardRenderer.getFocusPoint = function() {
     var focus = {
         x: 0,
-        y: 0
+        y: 0,
+        z: 0
     };
 
     for(var i = 0; i < focusPoints.length; i++) {
         focus.x += focusPoints[i].x / focusPoints.length;
         focus.y += focusPoints[i].y / focusPoints.length;
+        focus.z += focusPoints[i].z / focusPoints.length;
     }
 
     return focus;
 };
 /**
- * @param {{x: number, y: number}} point
+ * @param {{x: number, y: number, z: number}} point
  */
 SplitTime.BoardRenderer.setFocusPoint = function(point) {
     focusPoints = [point];
 };
 /**
- * @param {{x: number, y: number}} point
+ * @param {{x: number, y: number, z: number}} point
  */
 SplitTime.BoardRenderer.addFocusPoint = function(point) {
     focusPoints.push(point);
 };
 /**
- * @param {{x: number, y: number}} point
+ * @param {{x: number, y: number, z: number}} point
  */
 SplitTime.BoardRenderer.removeFocusPoint = function(point) {
     for(var i = 0; i < focusPoints.length; i++) {
@@ -85,27 +87,31 @@ SplitTime.BoardRenderer.getScreenCoordinates = function() {
 
     var currentLevel = SplitTime.Level.getCurrent();
     var focusPoint = SplitTime.BoardRenderer.getFocusPoint();
+    var focusPoint2D = {
+        x: focusPoint.x,
+        y: focusPoint.y - focusPoint.z
+    };
 
     if(currentLevel.width <= SCREEN_WIDTH) {
         // If the board is smaller than the screen, screen edge is at negative position
         screen.x = (currentLevel.width - SCREEN_WIDTH) / 2;
-    } else if(focusPoint.x + SCREEN_WIDTH / 2 >= currentLevel.width) {
+    } else if(focusPoint2D.x + SCREEN_WIDTH / 2 >= currentLevel.width) {
         // If the focused body is close to the far edge of the board, screen edge is fixed
         screen.x = currentLevel.width - SCREEN_WIDTH;
-    } else if(focusPoint.x >= SCREEN_WIDTH / 2) {
+    } else if(focusPoint2D.x >= SCREEN_WIDTH / 2) {
         // (dominant case) if the focused body is somewhere in the middle of the board
-        screen.x = focusPoint.x - (SCREEN_WIDTH / 2);
+        screen.x = focusPoint2D.x - (SCREEN_WIDTH / 2);
     }
 
     if(currentLevel.height <= SCREEN_HEIGHT) {
         // If the board is smaller than the screen, screen edge is at negative position
         screen.y = (currentLevel.height - SCREEN_HEIGHT) / 2;
-    } else if(focusPoint.y + SCREEN_HEIGHT / 2 >= currentLevel.height) {
+    } else if(focusPoint2D.y + SCREEN_HEIGHT / 2 >= currentLevel.height) {
         // If the focused body is close to the far edge of the board, screen edge is fixed
         screen.y = currentLevel.height - SCREEN_HEIGHT;
-    } else if(focusPoint.y >= SCREEN_HEIGHT / 2) {
+    } else if(focusPoint2D.y >= SCREEN_HEIGHT / 2) {
         // (dominant case) if the focused body is somewhere in the middle of the board
-        screen.y = focusPoint.y - (SCREEN_HEIGHT / 2);
+        screen.y = focusPoint2D.y - (SCREEN_HEIGHT / 2);
     }
 
     screen.x = Math.round(screen.x);

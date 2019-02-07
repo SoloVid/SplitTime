@@ -15,74 +15,72 @@ SplitTime.Keyboard.K = 75; // 'k'
 SplitTime.Keyboard.L = 76; // 'l'
 SplitTime.Keyboard.I = 73; // 'i'
 
-(function() {
-    var keyDown = {};
+var keyDown = {};
 
-    var downCallbacks = {};
-    function getDownCallbacks(keyCode) {
-        if(!downCallbacks[keyCode]) {
-            downCallbacks[keyCode] = new SLVD.RegisterCallbacks();
-        }
-        return downCallbacks[keyCode];
+var downCallbacks = {};
+function getDownCallbacks(keyCode) {
+    if(!downCallbacks[keyCode]) {
+        downCallbacks[keyCode] = new SLVD.RegisterCallbacks();
     }
-    var upCallbacks = {};
-    function getUpCallbacks(keyCode) {
-        if(!upCallbacks[keyCode]) {
-            upCallbacks[keyCode] = new SLVD.RegisterCallbacks();
-        }
-        return upCallbacks[keyCode];
+    return downCallbacks[keyCode];
+}
+var upCallbacks = {};
+function getUpCallbacks(keyCode) {
+    if(!upCallbacks[keyCode]) {
+        upCallbacks[keyCode] = new SLVD.RegisterCallbacks();
+    }
+    return upCallbacks[keyCode];
+}
+
+SplitTime.Keyboard.isKeyDown = function(keyCode) {
+    return !!keyDown[keyCode];
+};
+
+SplitTime.Keyboard.waitForDown = function(keyCode) {
+    return getDownCallbacks(keyCode).waitForOnce();
+};
+SplitTime.Keyboard.onDown = function(keyCode, callback) {
+    getDownCallbacks(keyCode).register(callback);
+};
+
+SplitTime.Keyboard.waitForUp = function(keyCode) {
+    return getUpCallbacks(keyCode).waitForOnce();
+};
+SplitTime.Keyboard.afterUp = function(keyCode, callback) {
+    getUpCallbacks(keyCode).register(callback);
+};
+
+//Sets variables useful for determining what keys are down at any time.
+SplitTime.Keyboard.onKeyDown = function(e) {
+    var keyCode = e.which || e.keyCode;
+
+    //Prevent scrolling with arrows
+    if([
+            SplitTime.Keyboard.SPACE,
+            SplitTime.Keyboard.DOWN,
+            SplitTime.Keyboard.UP,
+            SplitTime.Keyboard.LEFT,
+            SplitTime.Keyboard.RIGHT
+        ].indexOf(keyCode) > -1) {
+        e.preventDefault();
     }
 
-    SplitTime.Keyboard.isKeyDown = function(keyCode) {
-        return !!keyDown[keyCode];
-    };
+    var key = e.key.toLowerCase();
 
-    SplitTime.Keyboard.waitForDown = function(keyCode) {
-        return getDownCallbacks(keyCode).waitForOnce();
-    };
-    SplitTime.Keyboard.onDown = function(keyCode, callback) {
-        getDownCallbacks(keyCode).registerCallback(callback);
-    };
+    if(key == "t") {
+        // Note: This case is just here for quick and dirty testing
+        alert("Huzzah!");
+    }
 
-    SplitTime.Keyboard.waitForUp = function(keyCode) {
-        return getUpCallbacks(keyCode).waitForOnce();
-    };
-    SplitTime.Keyboard.afterUp = function(keyCode, callback) {
-        getUpCallbacks(keyCode).registerCallback(callback);
-    };
+    keyDown[keyCode] = true;
 
-    //Sets variables useful for determining what keys are down at any time.
-    SplitTime.Keyboard.onKeyDown = function(e) {
-        var keyCode = e.which || e.keyCode;
+    getDownCallbacks(keyCode).run();
+};
 
-        //Prevent scrolling with arrows
-        if([
-                SplitTime.Keyboard.SPACE,
-                SplitTime.Keyboard.DOWN,
-                SplitTime.Keyboard.UP,
-                SplitTime.Keyboard.LEFT,
-                SplitTime.Keyboard.RIGHT
-            ].indexOf(keyCode) > -1) {
-            e.preventDefault();
-        }
+//The clean-up of the above function.
+SplitTime.Keyboard.onKeyUp = function(e) {
+    var keyCode = e.which || e.keyCode;
+    keyDown[keyCode] = false;
 
-        var key = e.key.toLowerCase();
-
-        if(key == "t") {
-            // Note: This case is just here for quick and dirty testing
-            alert("Huzzah!");
-        }
-
-        keyDown[keyCode] = true;
-
-        getDownCallbacks(keyCode).runCallbacks();
-    };
-
-    //The clean-up of the above function.
-    SplitTime.Keyboard.onKeyUp = function(e) {
-        var keyCode = e.which || e.keyCode;
-        keyDown[keyCode] = false;
-
-        getUpCallbacks(keyCode).runCallbacks();
-    };
-} ());
+    getUpCallbacks(keyCode).run();
+};

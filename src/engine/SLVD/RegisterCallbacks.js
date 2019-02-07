@@ -71,11 +71,13 @@ SLVD.RegisterCallbacks.prototype.runCallbacks = function(data) {
 SLVD.RegisterCallbacks.prototype.run = function(data) {
     this._isRunningCallbacks = true;
     for(var i = this._handlers.length - 1; i >= 0; i--) {
+        // Default to true so exceptions don't continue
         var done = true;
         try {
             done = this._callFunction(this._handlers[i], data);
         } catch(ex) {
             console.error(ex);
+            console.warn("callback will be removed");
         }
         if(done) {
             this._handlers.splice(i, 1);

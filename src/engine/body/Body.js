@@ -113,9 +113,9 @@ SplitTime.Body.prototype.setZ = function(layer) {
 	}
 	this.z = layer;
 };
-SplitTime.Body.prototype.GRAVITY = -640;
+SplitTime.Body.prototype.GRAVITY = -1280;
 SplitTime.Body.prototype.zVelocity = 0;
-SplitTime.Body.prototype.height = 64;
+SplitTime.Body.prototype.height = 32;
 
 SplitTime.Body.prototype.dir = 3;
 

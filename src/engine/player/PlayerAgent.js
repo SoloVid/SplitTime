@@ -1,4 +1,5 @@
 dependsOn("/action/Agent.js");
+dependsOn("Controls.js");
 
 SplitTime.Agent.Player = function(body) {
     this.body = body;
@@ -24,3 +25,10 @@ SplitTime.Agent.Player.prototype.notifyFrameUpdate = function() {
     }
     this.movementAgent.notifyFrameUpdate();
 };
+
+SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
+    var activeBody = SplitTime.Player.getActiveBody();
+    if(activeBody) {
+        activeBody.zVelocity = 560;
+    }
+});

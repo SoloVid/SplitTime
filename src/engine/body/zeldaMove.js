@@ -319,7 +319,8 @@ function zeldaSlide(body, maxDistance) {
     var negativeDiagonal = (Math.round(body.dir + 3.9) - 0.5) % 4;
 
     function isCornerOpen(direction, howFarAway) {
-        var isCornerClosed = level.forEachRelevantTraceDataLayer(body, function(data) {
+        var open = true;
+        level.forEachRelevantTraceDataLayer(body, function(data) {
             var iCorner = SplitTime.pixCoordToIndex(
                 x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway),
                 y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway),
@@ -327,10 +328,11 @@ function zeldaSlide(body, maxDistance) {
             );
 
             if(data.data[iCorner] === SplitTime.Trace.RColor.SOLID) {
+                open = false;
                 return true;
             }
         });
-        return !isCornerClosed;
+        return open;
     }
 
     for(var howFarOut = 1; howFarOut <= 5; howFarOut++) {
