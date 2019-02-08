@@ -80,6 +80,85 @@ SplitTime.Trace.drawColor = function(traceStr, ctx, color, offsetPos) {
 	ctx.stroke();
 };
 
+/**
+ *
+ * @param traceStr
+ * @param {CanvasRenderingContext2D} ctx
+ * @param direction
+ * @returns {CanvasGradient}
+ */
+SplitTime.Trace.calculateGradient = function(traceStr, ctx, direction) {
+    var pointsArray = SplitTime.Trace.extractArray(traceStr);
+    var minX = 100000;
+    var minY = 100000;
+    var maxX = 0;
+    var maxY = 0;
+    for(var i = 0; i < pointsArray.length; i++) {
+    	var point = pointsArray[i];
+
+    	if(point === null) {
+    		continue;
+		}
+
+    	if(i === 0) {
+    		ctx.beginPath();
+    		// TODO: if first point null?
+    		ctx.moveTo(point.x, point.y);
+		} else {
+    		ctx.lineTo(point.x, point.y);
+		}
+
+    	if(point.x < minX) {
+    		minX = point.x;
+		} else if(point.x > maxX) {
+    		maxX = point.x;
+		}
+		if(point.y < minY) {
+    		minY = point.y;
+		} else if(point.y > maxY) {
+    		maxY = point.y;
+		}
+	}
+	ctx.closePath();
+
+	var xUnit = SplitTime.Direction.getXSign(direction);
+    var minXWeight = 1 + xUnit; // for negative X, prefer starting right (weight 0 on minX)
+	var maxXWeight = 1 - xUnit; // for positive X, prefer starting left (weight 0 on maxX)
+    var startX = ((minXWeight * minX) + (maxXWeight * maxX)) / 2;
+
+    var yUnit = SplitTime.Direction.getYSign(direction);
+    var minYWeight = 1 + yUnit; // for negative Y, prefer starting down (weight 0 on minY)
+    var maxYWeight = 1 - yUnit; // for positive Y, prefer starting up (weight 0 on maxY)
+    var startY = ((minYWeight * minY) + (maxYWeight * maxY)) / 2;
+
+    var checkingX = startX;
+    var checkingY = startY;
+
+    var x0 = null;
+    var y0 = null;
+    var x1 = null;
+    var y1 = null;
+    for(var iBound = 0; iBound < 100000; iBound++) {
+		if(ctx.isPointInPath(checkingX, checkingY)) {
+			if(x0 === null) {
+				x0 = checkingX;
+				y0 = checkingY;
+			}
+		} else {
+			if(x0 !== null) {
+				x1 = checkingX;
+				y1 = checkingY;
+                return ctx.createLinearGradient(x0, y0, x1, y1);
+			}
+		}
+
+    	checkingX += xUnit;
+    	checkingY += yUnit;
+	}
+
+	return null;
+};
+
 SplitTime.Trace.Type = {
 	SOLID: "solid",
     STAIRS: "stairs",
@@ -116,7 +195,7 @@ SplitTime.Trace.getType = function(r, g, b, a) {
 
 SplitTime.Trace.getSolidColor = function(height) {
 	var g = Math.min(Math.max(0, +height), 255);
-	var b = 0;
+	var b = 4 * g;
     return "rgba(" + SplitTime.Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)";
 };
 

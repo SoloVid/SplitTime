@@ -202,7 +202,19 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
 
         snapshotCtx.globalCompositeOperation = "source-over";
 
-        bufferCtx.drawImage(snapshot, 0, 0);
+        if(SplitTime.Debug.ENABLED && SplitTime.Debug.DRAW_TRACES) {
+            snapshotCtx.globalAlpha = 0.5;
+            snapshotCtx.drawImage(
+                currentLevel.getDebugTraceCanvas(),
+                screen.x + xBackShift, screen.y + yBackShift,
+                SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift,
+                xBackShift, yBackShift,
+                SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift
+            );
+            snapshotCtx.globalAlpha = 1;
+        }
+
+    bufferCtx.drawImage(snapshot, 0, 0);
 
     weatherRenderer.render(bufferCtx);
 

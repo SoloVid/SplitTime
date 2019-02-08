@@ -128,6 +128,7 @@ SplitTime.main = function() {
 SplitTime.main.State = {
     LOADING: "loading",
     ACTION: "action",
+    OVERWORLD: "overworld",
     OTHER: "other"
 };
 
