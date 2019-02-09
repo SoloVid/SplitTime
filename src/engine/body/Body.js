@@ -1,4 +1,7 @@
+var nextRef = 0;
+
 SplitTime.Body = function(skipInit) {
+	this.ref = nextRef++;
 	if(skipInit) {
 		return;
     }
