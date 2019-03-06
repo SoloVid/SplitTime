@@ -2,6 +2,7 @@
  * A class for arranging bodies for collisions
  * @param {SplitTime.Level} level
  * @constructor
+ * @alias SplitTime.Level.BodyOrganizer
  */
 function BodyOrganizer(level) {
     var maxX32 = Math.ceil(level.width / 32);
@@ -52,9 +53,9 @@ BodyOrganizer.prototype.removeBody = function(body) {
 BodyOrganizer.prototype.resort = function(body) {
     var halfBaseLength = Math.round(body.baseLength / 2);
     var roundHeight = Math.round(body.height);
-    var roundX = Math.round(body.x);
-    var roundY = Math.round(body.y);
-    var roundZ = Math.round(body.z);
+    var roundX = Math.round(body.getX());
+    var roundY = Math.round(body.getY());
+    var roundZ = Math.round(body.getZ());
 
     this._sortedByXLeft.resortBody(body, roundX - halfBaseLength);
     this._sortedByXRight.resortBody(body, roundX + halfBaseLength);
@@ -122,23 +123,35 @@ function forEachBodyAtValue(value, callback, bodiesSortHolder) {
     return foundBody;
 }
 
-function BodiesSortedByOneValue(maxValue) {
-    this.maxValue = maxValue;
-    this.valueLookup32 = new Array(maxValue);
-    this.sortedByValue = [];
+var BUFFER = 10000;
+
+function BodiesSortedByOneValue(max32Value) {
+    this.max32Value = max32Value;
+    this.valueLookup32 = new Array(max32Value);
+    var minSentinel = {
+        value: -BUFFER
+    };
+    var maxSentinel = {
+        value: this._getBeyondMaxValue()
+    };
+    this.sortedByValue = [minSentinel, maxSentinel];
     this.reverseSortLookup = [];
 }
 
+BodiesSortedByOneValue.prototype._getBeyondMaxValue = function() {
+    return this.max32Value * 32 + BUFFER;
+};
+
 BodiesSortedByOneValue.prototype.addBody = function(body) {
     this.sortedByValue.push({
-        value: this.maxValue + 10000,
+        value: this._getBeyondMaxValue(),
         body: body
     });
     this.reverseSortLookup[body.ref] = this.sortedByValue.length - 1;
 };
 
 BodiesSortedByOneValue.prototype.removeBody = function(body) {
-    this.resortBody(body, this.maxValue + 10000);
+    this.resortBody(body, this._getBeyondMaxValue());
     this.sortedByValue.splice(this.reverseSortLookup[body.ref], 1);
     delete this.reverseSortLookup[body.ref];
 };
@@ -211,3 +224,5 @@ BodiesSortedByOneValue.prototype.resortBodyDownward = function(body, value) {
         }
     }
 };
+
+SplitTime.Level.BodyOrganizer = BodyOrganizer;
