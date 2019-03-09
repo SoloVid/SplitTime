@@ -5,6 +5,18 @@
  * @alias SplitTime.Level.BodyOrganizer
  */
 function BodyOrganizer(level) {
+    this._initialized = false;
+    this._waitingBodies = [];
+
+    if(level) {
+        this.initialize(level);
+    }
+}
+
+/**
+ * @param {SplitTime.Level} level
+ */
+BodyOrganizer.prototype.initialize = function(level) {
     var maxX32 = Math.ceil(level.width / 32);
     var maxY32 = Math.ceil(level.yWidth / 32);
     var maxZ32 = Math.ceil(level.highestLayerZ / 32);
@@ -14,13 +26,23 @@ function BodyOrganizer(level) {
     this._sortedByYBottom = new BodiesSortedByOneValue(maxY32);
     this._sortedByZTop = new BodiesSortedByOneValue(maxZ32);
     this._sortedByZBottom = new BodiesSortedByOneValue(maxZ32);
-}
+
+    this._initialized = true;
+    for(var i = 0; i < this._waitingBodies.length; i++) {
+        this.addBody(this._waitingBodies[i]);
+    }
+};
 
 /**
  * Register a body with the organizer (such as on level entrance)
  * @param {SplitTime.Body} body
  */
 BodyOrganizer.prototype.addBody = function(body) {
+    if(!this._initialized) {
+        this._waitingBodies.push(body);
+        return;
+    }
+
     this._sortedByXLeft.addBody(body);
     this._sortedByXRight.addBody(body);
     this._sortedByYTop.addBody(body);
@@ -36,6 +58,13 @@ BodyOrganizer.prototype.addBody = function(body) {
  * @param {SplitTime.Body} body
  */
 BodyOrganizer.prototype.removeBody = function(body) {
+    if(!this._initialized) {
+        for(var i = this._waitingBodies.length - 1; i >= 0; i++) {
+            this._waitingBodies.splice(i, 1);
+        }
+        return;
+    }
+
     this._sortedByXLeft.removeBody(body);
     this._sortedByXRight.removeBody(body);
     this._sortedByYTop.removeBody(body);
@@ -51,6 +80,10 @@ BodyOrganizer.prototype.removeBody = function(body) {
  * @param {SplitTime.Body} body
  */
 BodyOrganizer.prototype.resort = function(body) {
+    if(!this._initialized) {
+        return;
+    }
+
     var halfBaseLength = Math.round(body.baseLength / 2);
     var roundHeight = Math.round(body.height);
     var roundX = Math.round(body.getX());
@@ -75,16 +108,6 @@ BodyOrganizer.prototype.resort = function(body) {
 BodyOrganizer.prototype.forEachXLeft = function(x, callback) {
     return forEachBodyAtValue(x, callback, this._sortedByXLeft);
 };
-// /**
-//  * Check if any bodies are present with left at specified x.
-//  * If so, run callback for each one.
-//  * @param {int} x
-//  * @param {function(SplitTime.Body)} callback
-//  * @return {boolean} whether any bodies were found
-//  */
-// BodyOrganizer.prototype.existsXLeft = function(x) {
-//     return isBodyAtValue(x, this._sortedByXLeft);
-// };
 
 BodyOrganizer.prototype.forEachXRight = function(x, callback) {
     return forEachBodyAtValue(x, callback, this._sortedByXRight);
@@ -106,27 +129,6 @@ BodyOrganizer.prototype.forEachZBottom = function(z, callback) {
     return forEachBodyAtValue(z, callback, this._sortedByZBottom);
 };
 
-// /**
-//  * @param {int} value
-//  * @param {BodiesSortedByOneValue} bodiesSortHolder
-//  * @return {boolean}
-//  */
-// function isBodyAtValue(value, bodiesSortHolder) {
-//     var index32 = Math.floor(value/32);
-//     if(index32 >= bodiesSortHolder.valueLookup32.length) {
-//         index32 = bodiesSortHolder.valueLookup32.length - 1;
-//     }
-//     var iSorted = bodiesSortHolder.valueLookup32[index32];
-//     var iSortedEnd = index32 + 1 < bodiesSortHolder.valueLookup32.length ? bodiesSortHolder.valueLookup32[index32 + 1] : bodiesSortHolder.sortedByValue.length;
-//     for(; iSorted < iSortedEnd; iSorted++) {
-//         var sortedItem = bodiesSortHolder.sortedByValue[iSorted];
-//         if(sortedItem.value === value) {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
 /**
  * @param {int} value
  * @param {function(SplitTime.Body)} callback
@@ -134,6 +136,11 @@ BodyOrganizer.prototype.forEachZBottom = function(z, callback) {
  * @return {boolean}
  */
 function forEachBodyAtValue(value, callback, bodiesSortHolder) {
+    if(!bodiesSortHolder) {
+        console.warn("Attempting to use BodyOrganizer before initialized");
+        return false;
+    }
+
     var index32 = Math.floor(value/32);
     if(index32 >= bodiesSortHolder.valueLookup32.length) {
         index32 = bodiesSortHolder.valueLookup32.length - 1;
@@ -163,14 +170,19 @@ var BUFFER = 10000;
 function BodiesSortedByOneValue(max32Value) {
     this.max32Value = max32Value;
     this.valueLookup32 = new Array(max32Value);
+    for(var i = 0; i < this.valueLookup32.length; i++) {
+        this.valueLookup32[i] = 0;
+    }
     var minSentinel = {
-        value: -BUFFER
+        value: -BUFFER,
+        body: { ref: 0 }
     };
     var maxSentinel = {
-        value: this._getBeyondMaxValue()
+        value: this._getBeyondMaxValue(),
+        body: { ref: 1 }
     };
     this.sortedByValue = [minSentinel, maxSentinel];
-    this.reverseSortLookup = [];
+    this.reverseSortLookup = [0, 1];
 }
 
 BodiesSortedByOneValue.prototype._getBeyondMaxValue = function() {
@@ -220,7 +232,7 @@ BodiesSortedByOneValue.prototype.resortBodyUpward = function(body, value) {
     this.reverseSortLookup[body.ref] = currentIndex;
 
     // Only boundary markers greater than the old value and less than the new value may have shifted
-    for(var index32 = Math.floor(oldValue/32) + 1; index32 <= Math.floor(value/32); index32++) {
+    for(var index32 = Math.floor(oldValue/32) + 1; index32 < this.valueLookup32.length && index32 <= Math.floor(value/32); index32++) {
         var iSorted = this.valueLookup32[index32];
         // The only chance of change is that a boundary needs to point one lower
         if(this.sortedByValue[iSorted - 1].value/32 > index32) {
@@ -248,7 +260,7 @@ BodiesSortedByOneValue.prototype.resortBodyDownward = function(body, value) {
     this.reverseSortLookup[body.ref] = currentIndex;
 
     // Only boundary markers less than the old value and greater than the new value may have shifted
-    for(var index32 = Math.ceil(oldValue/32) - 1; index32 >= Math.ceil(value/32); index32--) {
+    for(var index32 = Math.min(this.valueLookup32.length - 1, Math.ceil(oldValue/32) - 1); index32 >= Math.ceil(value/32); index32--) {
         var iSorted = this.valueLookup32[index32];
         // The only chance of change is that a boundary needs to point one higher
         if(this.sortedByValue[iSorted + 1].value/32 < index32) {
@@ -260,4 +272,5 @@ BodiesSortedByOneValue.prototype.resortBodyDownward = function(body, value) {
     }
 };
 
+dependsOn("Level.js");
 SplitTime.Level.BodyOrganizer = BodyOrganizer;

@@ -1,3 +1,5 @@
+dependsOn("BodyMover.js");
+
 /**
  *
  * @param {number} maxDistance
@@ -25,7 +27,7 @@ SplitTime.Body.Mover.prototype.zeldaSlide = function(maxDistance) {
     var me = this;
     function isCornerOpen(direction, howFarAway) {
         var open = true;
-        this.level.forEachRelevantTraceDataLayer(me.body, function(data) {
+        me.level.forEachRelevantTraceDataLayer(me.body, function(data) {
             var iCorner = SplitTime.pixCoordToIndex(
                 x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway),
                 y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway),

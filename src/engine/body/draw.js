@@ -54,7 +54,7 @@ SplitTime.Body.prototype.defaultStance = function() {
  * @param {CanvasRenderingContext2D} ctx
  */
 SplitTime.Body.prototype.see = function(ctx) {
-	if(!this.canSee) {return;}
+	// if(!this.canSee) {return;}
 
 	ctx.rotate(this.rotate);
 

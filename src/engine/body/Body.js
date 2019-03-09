@@ -1,14 +1,43 @@
-var nextRef = 0;
+var nextRef = 10; //reserve first 10
 
-SplitTime.Body = function() {
+// TODO: remove parameter when moving templates elsewhere
+SplitTime.Body = function(skipInit) {
 	this.ref = nextRef++;
-	this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
-	// TODO: sort out (throw out) inheritance to make this work right
-	this.speechBox = new SplitTime.Body.SpeechBox(this, -42);
+	if(!skipInit) {
+        this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
+        // TODO: sort out (throw out) inheritance to make this work right
+        this.speechBox = new SplitTime.Body.SpeechBox(this, -42);
+    }
 };
 SplitTime.BodyTemplate = {};
 SplitTime.BodyTemplate[""] = new SplitTime.Body(true);
 
+SplitTime.Body.prototype = {
+	get x() {
+		return this.getX();
+	},
+	set x(newX) {
+		this.setX(newX, true);
+	},
+	get y() {
+		return this.getY();
+	},
+    set y(newY) {
+        this.setY(newY, true);
+    },
+	get z() {
+		return this.getZ();
+	},
+    set z(newZ) {
+        this.setZ(newZ, true);
+    },
+	get level() {
+		return this.getLevel();
+	},
+    set level(newLevel) {
+        this.setLevel(newLevel, true);
+    }
+};
 SplitTime.Body.prototype.childrenBolted = [];
 SplitTime.Body.prototype.childrenLoose = [];
 SplitTime.Body.prototype.addChild = function(child, isBolted) {

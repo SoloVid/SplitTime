@@ -18,7 +18,7 @@ SplitTime.Level = function(levelId) {
     /** @type ImageData[] */
     this.layerFuncData = [];
 
-    this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
+    this._bodyOrganizer = new SplitTime.Level.BodyOrganizer();
 
     /** @type {SplitTime.WeatherRenderer} */
     this.weatherRenderer = new SplitTime.WeatherRenderer();
@@ -55,6 +55,8 @@ SplitTime.Level.prototype.load = function(levelData) {
         if(backgroundImg.width > that.width) {
             that.width = backgroundImg.width;
         }
+
+        that._bodyOrganizer.initialize(that);
     }
 
     this.background = levelData.background;
@@ -262,13 +264,15 @@ SplitTime.Level.prototype.getBodiesWithin = function(point, distance) {
 
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
+    this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
     this.bodies.length = 0;
     var index;
     //Figure out which Actors are on board
     for(var id in SplitTime.Actor) {
         var actor = SplitTime.Actor[id];
         if(actor.getLevel() === this) {
-            this.insertBody(actor);
+            // this._bodyOrganizer.removeBody(actor);
+            this.insertBody(actor, true);
         }
     }
 
@@ -327,14 +331,17 @@ SplitTime.Level.prototype.sortBodies = function() {
 /**
  * @deprecated Only really needed currently for rendering, which should elsewhere and different
  * @param {SplitTime.Body} body
+ * @param {boolean} [skipOrganizer]
  */
-SplitTime.Level.prototype.insertBody = function(body) {
+SplitTime.Level.prototype.insertBody = function(body, skipOrganizer) {
     var index = 0;
     while(index < this.bodies.length && body.y > this.bodies[index].y) {
         index++;
     }
     this.bodies.splice(index, 0, body);
-    this._bodyOrganizer.addBody(body);
+    // if(!skipOrganizer) {
+        this._bodyOrganizer.addBody(body);
+    // }
 };
 
 /**

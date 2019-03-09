@@ -22,13 +22,15 @@ SplitTime.Agent.ControlledCollisionMovement.prototype.setWalkingDirection = func
 };
 SplitTime.Agent.ControlledCollisionMovement.prototype.setStopped = function() {
     this.resetTarget();
+    this.body.defaultStance();
 };
 SplitTime.Agent.ControlledCollisionMovement.prototype.notifyFrameUpdate = function() {
     var walkingDir = this.getWalkingDirection();
     if(walkingDir !== null) {
         this.body.dir = walkingDir;
         this.body.requestStance("walk");
-        this.body.zeldaStep(this.body.getPixelSpeedForFrame());
+        var mover = new SplitTime.Body.Mover(this.body);
+        mover.zeldaStep(this.body.dir, this.body.getPixelSpeedForFrame());
     } else {
         this.body.defaultStance();
     }

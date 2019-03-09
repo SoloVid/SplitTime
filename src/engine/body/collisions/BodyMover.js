@@ -1,4 +1,4 @@
-dependsOn("Body.js");
+dependsOn("/body/Body.js");
 
 /**
  * @type {Object.<int, BodyExt>}
@@ -47,7 +47,7 @@ SplitTime.Body.Mover = function(body) {
     this.height = this.body.height;
 };
 
-var VERTICAL_FUDGE = 4;
+SplitTime.Body.Mover.VERTICAL_FUDGE = 4;
 
 /**
  * Zelda step with input direction
@@ -68,12 +68,12 @@ SplitTime.Body.Mover.prototype.zeldaBump = function(distance, direction) {
     //Set direction
     this.dir = direction;
     //Bump
-    var moved = this.zeldaStep(distance);
+    var moved = this.zeldaStep(direction, distance);
     //Revert direction;
     this.dir = tDir;
 
     this.bodyExt.bumped = false;
-    return moved;
+    return moved > 0;
 };
 
 /**

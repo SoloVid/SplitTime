@@ -1,3 +1,5 @@
+dependsOn("BodyMover.js");
+
 /**
  * Advances SplitTime.Body up to maxDistance pixels as far as is legal.
  * Includes pushing other Bodys out of the way? (this part is currently unavailable)
@@ -20,9 +22,6 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
     var jHat = dyRounded / ady;
     var iHat = dxRounded / adx;
 
-    this._totalStepDistance = maxDistance;
-    this.pushedBodies = [];
-
     var maxIterations = adx + ady;
     var xPixelsRemaining = adx;
     var yPixelsRemaining = ady;
@@ -35,11 +34,11 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
     var stoppedX = false;
     var pixelsMovedX = 0;
 
-    var oldX = this.getX();
-    var oldY = this.getY();
+    var oldX = this.body.getX();
+    var oldY = this.body.getY();
     var roundX = Math.round(oldX);
     var roundY = Math.round(oldY);
-    var currentZ = this.getZ();
+    var currentZ = this.body.getZ();
 
     var functionIdSet = {};
     for(var i = 0; i < maxIterations; i++) {
@@ -49,9 +48,8 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                 outX = true;
             } else {
                 var xCollisionInfo = this.calculateXPixelCollisionWithStepUp(roundX, roundY, currentZ, iHat);
-                stoppedX = xCollisionInfo.blocked;
                 if(xCollisionInfo.blocked) {
-                    stoppedX = xCollisionInfo.blocked;
+                    stoppedX = true;
                     if(xCollisionInfo.bodies.length > 0) {
                         // Slow down when pushing
                         xPixelsRemaining--;
@@ -68,40 +66,43 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
         }
 
         if(yPixelsRemaining > 0) {
-            roundY += jHat;
+            var newRoundY = roundY + jHat;
             //Check if out of bounds
-            if(roundY >= level.yWidth || roundY < 0) {
+            if(newRoundY >= level.yWidth || newRoundY < 0) {
                 outY = true;
             } else {
-                var edgeY = dy > 0 ? roundY + halfBaseLength : roundY - halfBaseLength;
-                var left = roundX - halfBaseLength;
-                stoppedY = !checkAreaCollision(level, left, this.baseLength, edgeY, 1, this.z, this.height);
-            }
 
-            if(stoppedY || outY) {
-                roundY -= jHat;
-            } else {
-                yPixelsRemaining--;
-                pixelsMovedY++;
+                var yCollisionInfo = this.calculateYPixelCollisionWithStepUp(roundX, roundY, currentZ, jHat);
+                if(yCollisionInfo.blocked) {
+                    stoppedY = true;
+                    if(yCollisionInfo.bodies.length > 0) {
+                        // Slow down when pushing
+                        yPixelsRemaining--;
+                        this.tryPushOtherBodies(yCollisionInfo.bodies, dir);
+                    }
+                } else {
+                    roundY = newRoundY;
+                    currentZ = yCollisionInfo.adjustedZ;
+                    yPixelsRemaining--;
+                    pixelsMovedY++;
+                    addArrayToSet(yCollisionInfo.functions, functionIdSet);
+                }
             }
         }
     }
     if(ady > 0 && !stoppedY && !outY) {
         // Subtract off any overshoot
-        this.setY(roundY - (dyRounded - dy));
+        this.body.setY(roundY - (dyRounded - dy));
     } else {
-        this.setY(roundY);
+        this.body.setY(roundY);
     }
     if(adx > 0 && !stoppedX && !outX) {
         // Subtract off any overshoot
-        this.setX(roundX - (dxRounded - dx));
+        this.body.setX(roundX - (dxRounded - dx));
     } else {
-        this.setX(roundX);
+        this.body.setX(roundX);
     }
-    this.setZ(currentZ);
-
-    this.nearbyBodies = null;
-    this.pushedBodies = null;
+    this.body.setZ(currentZ);
 
     //If stopped, help person out by sliding around corner
     var stopped = stoppedX || stoppedY;
@@ -112,7 +113,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
 
     this.level.runFunctionSet(functionIdSet, this.body);
 
-    return SplitTime.Measurement.distanceTrue(oldX, oldY, this.x, this.y);
+    return SplitTime.Measurement.distanceTrue(oldX, oldY, this.body.getX(), this.body.getY());
 };
 
 function addArrayToSet(arr, set) {
@@ -122,10 +123,12 @@ function addArrayToSet(arr, set) {
 }
 
 SplitTime.Body.Mover.prototype.tryPushOtherBodies = function(bodies, dir) {
+    this.bodyExt.pushing = true;
     for(var i = 0; i < bodies.length; i++) {
         var mover = new SplitTime.Body.Mover(bodies[i]);
         mover.zeldaBump(1, dir);
     }
+    this.bodyExt.pushing = false;
 };
 
 function isZOverlap(z1, height1, z2, height2) {
@@ -170,7 +173,7 @@ SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xP
                         }
                     }
                 } else if(r === SplitTime.Trace.RColor.FUNCTION) {
-                    var funcId = level.getFunctionIdFromPixel(r, g, b, a);
+                    var funcId = me.level.getFunctionIdFromPixel(r, g, b, a);
                     if(!functionsSet[funcId]) {
                         functionsSet[funcId] = true;
                         collisionInfo.functions.push(funcId);
@@ -181,46 +184,3 @@ SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xP
     });
     return collisionInfo;
 };
-
-/**
- *
- * @param {SplitTime.Body} me
- * @returns {boolean}
- */
-function zeldaCheckStepBodies(me) {
-    //Check for collision with people
-    for(var i = 0; i < me.nearbyBodies.length; i++) {
-        var body = me.nearbyBodies[i];
-        if(me.team != body.team && body.baseLength > 0) {
-            var collisionDist = (me.baseLength + body.baseLength) / 2;
-            // var potentialCollisionDist = me.stepDistanceRemaining + collisionDist;
-            var dx = Math.abs(me.x - body.x);
-            var dy = Math.abs(me.y - body.y);
-            // if(dx < potentialCollisionDist && dy < potentialCollisionDist) {
-            if(dx < collisionDist && dy < collisionDist) {
-                var dirToOther = SplitTime.Direction.fromTo(me.x, me.y, body.x, body.y);
-                if(SplitTime.Direction.areWithin90Degrees(me.dir, dirToOther)) {
-                    //The .pushing here ensures that there is no infinite loop of pushing back and forth
-                    if(me.pushy && body.pushy && me.pushedBodies.indexOf(body) < 0) {
-                        me._zeldaPushing = true; //prevent counter-push
-                        var moved = body.zeldaBump(me._totalStepDistance / 2, me.dir);
-                        me._zeldaPushing = false;
-
-                        if(moved) {
-                            //Don't repush the same body
-                            me.pushedBodies.push(body);
-
-                            //Rerun this iteration of the loop
-                            i--;
-                            continue;
-                        }
-                    }
-                    //Hit a body we couldn't push
-                    return false;
-                }
-            }
-        }
-    }
-
-    return true;
-}

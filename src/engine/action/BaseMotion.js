@@ -20,27 +20,27 @@ SplitTime.Action.BaseMotion.prototype.steps = 0;
 SplitTime.Action.BaseMotion.prototype.wait = 0;
 
 SplitTime.Action.BaseMotion.prototype.regularMotion = function(person, newSteps, newDir) {
-	if(this.steps > 0)
-	{
-		person.requestStance("walk");
-		person.zeldaStep(person.spd);
-		this.steps--;
-		if(this.steps <= 0)
-		{
-			this.wait = SLVD.randomInt(4) + 28;
-		}
-	}
-	else if(this.wait > 0)
-	{
-		this.wait--;
-
-		person.defaultStance();
-	}
-	else if(this.steps <= 0)
-	{
-		person.dir = newDir;
-		this.steps = newSteps;
-	}
+	// if(this.steps > 0)
+	// {
+	// 	person.requestStance("walk");
+	// 	person.zeldaStep(person.spd);
+	// 	this.steps--;
+	// 	if(this.steps <= 0)
+	// 	{
+	// 		this.wait = SLVD.randomInt(4) + 28;
+	// 	}
+	// }
+	// else if(this.wait > 0)
+	// {
+	// 	this.wait--;
+    //
+	// 	person.defaultStance();
+	// }
+	// else if(this.steps <= 0)
+	// {
+	// 	person.dir = newDir;
+	// 	this.steps = newSteps;
+	// }
 };
 
 SplitTime.Motion.Random = function() {};
@@ -72,7 +72,7 @@ SplitTime.Motion.Chase.prototype.canUse = function(person) {
 	return (dist < 256 && person.z == player.z && person.canSeeBody(player));
 };
 SplitTime.Motion.Chase.prototype.use = function(person) {
-	person.zeldaLockOnPlayer();
-	person.requestStance("run");
-	person.zeldaStep(person.spd);
+	// person.zeldaLockOnPlayer();
+	// person.requestStance("run");
+	// person.zeldaStep(person.spd);
 };

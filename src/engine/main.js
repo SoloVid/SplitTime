@@ -42,7 +42,8 @@ SplitTime.main = function() {
                 region.forEachBody(function(body) {
                     if(Math.abs(body.zVelocity) > 0.00001) {
                         var expectedDZ = body.getPixelZVelocityForFrame();
-                        var actualDZ = body.zeldaVerticalBump(expectedDZ);
+                        var mover = new SplitTime.Body.Mover(body);
+                        var actualDZ = mover.zeldaVerticalBump(expectedDZ);
                         if(Math.abs(actualDZ) < Math.abs(expectedDZ)) {
                             body.zVelocity = 0;
                         }

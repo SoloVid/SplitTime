@@ -1,3 +1,5 @@
+dependsOn("BodyMover.js");
+
 /**
  * @param {number} maxDZ (positive)
  * @returns {number} Z pixels can move (non-negative)
@@ -68,7 +70,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
                         // }
                     }
                 } else if(r === SplitTime.Trace.RColor.FUNCTION) {
-                    var funcId = level.getFunctionIdFromPixel(r, g, b, a);
+                    var funcId = me.level.getFunctionIdFromPixel(r, g, b, a);
                     if(!(funcId in functionLayerZMap)) {
                         functionLayerZMap[funcId] = layerZ;
                     } else {

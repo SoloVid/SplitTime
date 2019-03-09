@@ -1,3 +1,5 @@
+dependsOn("BodyMover.js");
+
 /**
  * @param {number} maxDZ (positive)
  * @returns {number} Z pixels moved (non-positive)
@@ -6,7 +8,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalDropTraces = function(maxDZ) {
     var roundX = Math.round(this.body.getX());
     var roundY = Math.round(this.body.getY());
 
-    var collisionInfo = calculateDropThroughTraces(
+    var collisionInfo = this.calculateDropThroughTraces(
         roundX,
         roundY,
         this.body.getZ(),
@@ -57,6 +59,7 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
 
     var potentialFunctionsMap = {};
     var potentialFunctions = [];
+    var me = this;
     this.level.forEachTraceDataLayerBetween(targetZ, z + 1, function(imageData, layerZ, nextLayerZ) {
         // console.log("Checking sink trace at z = " + layerZ);
         //Loop through width of base
@@ -83,7 +86,7 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
                             }
                         }
                     } else if(r === SplitTime.Trace.RColor.FUNCTION) {
-                        var funcId = level.getFunctionIdFromPixel(r, g, b, a);
+                        var funcId = me.level.getFunctionIdFromPixel(r, g, b, a);
                         var funcDetails = potentialFunctionsMap[funcId];
                         if(!funcDetails) {
                             funcDetails = {

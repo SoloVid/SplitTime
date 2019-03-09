@@ -1,17 +1,17 @@
-// NOTE: This file has a sister that is nearly identical: collisionsHorizontalY.js
+// NOTE: This file has a sister that is nearly identical: collisionsHorizontalX.js
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
 dependsOn("BodyMover.js");
 
 /**
- * Check that dx can be accomplished, potentially with vertical adjustment.
+ * Check that dy can be accomplished, potentially with vertical adjustment.
  * @param {int} x
  * @param {int} y
  * @param {number} z
- * @param {int} dx should be -1 or 1
+ * @param {int} dy should be -1 or 1
  * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, functions: string[]}}
  */
-SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, y, z, dx) {
+SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, y, z, dy) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
@@ -19,12 +19,12 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, 
         functions: []
     };
 
-    var simpleCollisionInfo = this.calculateXPixelCollision(x, y, z, dx);
+    var simpleCollisionInfo = this.calculateYPixelCollision(x, y, z, dy);
     if(simpleCollisionInfo.blocked && simpleCollisionInfo.vStepUpEstimate <= SplitTime.Body.Mover.VERTICAL_FUDGE) {
-        var stepUpZ = this.calculateRiseThroughTraces(x + dx, y, z, SplitTime.Body.Mover.VERTICAL_FUDGE).zEnd;
-        var simpleStepUpCollisionInfo = this.calculateXPixelCollision(x, y, stepUpZ, dx);
+        var stepUpZ = this.calculateRiseThroughTraces(x, y + dy, z, SplitTime.Body.Mover.VERTICAL_FUDGE).zEnd;
+        var simpleStepUpCollisionInfo = this.calculateYPixelCollision(x, y, stepUpZ, dy);
         if(!simpleStepUpCollisionInfo.blocked) {
-            collisionInfo.adjustedZ = this.calculateDropThroughTraces(x + dx, y, stepUpZ, SplitTime.Body.Mover.VERTICAL_FUDGE).zBlocked;
+            collisionInfo.adjustedZ = this.calculateDropThroughTraces(x, y + dy, stepUpZ, SplitTime.Body.Mover.VERTICAL_FUDGE).zBlocked;
             simpleCollisionInfo = simpleStepUpCollisionInfo;
         }
     }
@@ -36,14 +36,14 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, 
 };
 
 /**
- * Check that dx can be accomplished.
+ * Check that dy can be accomplished.
  * @param {int} x
  * @param {int} y
  * @param {number} z
- * @param {int} dx should be -1 or 1
+ * @param {int} dy should be -1 or 1
  * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, functions: string[]}}
  */
-SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(x, y, z, dx) {
+SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(x, y, z, dy) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
@@ -58,16 +58,16 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(x, y, z, dx) 
             collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - z;
         }
     }
-    if(dx > 0) {
-        this.levelBodyOrganizer.forEachXLeft(x + dx, handleFoundBody);
+    if(dy > 0) {
+        this.levelBodyOrganizer.forEachYTop(y + dy, handleFoundBody);
     } else {
-        this.levelBodyOrganizer.forEachXRight(x + dx, handleFoundBody);
+        this.levelBodyOrganizer.forEachYBottom(y + dy, handleFoundBody);
     }
 
     if(!collisionInfo.blocked) {
-        var edgeX = dx > 0 ? x + dx + this.halfBaseLength : x + dx - this.halfBaseLength;
-        var top = y - this.halfBaseLength;
-        var traceCollision = this.calculateAreaTraceCollision(edgeX, 1, top, this.baseLength, z);
+        var edgeY = dy > 0 ? y + dy + this.halfBaseLength : y + dy - this.halfBaseLength;
+        var left = x - this.halfBaseLength;
+        var traceCollision = this.calculateAreaTraceCollision(left, this.baseLength, edgeY, 1, z);
         collisionInfo.blocked = traceCollision.blocked;
         collisionInfo.functions = traceCollision.functions;
     }
