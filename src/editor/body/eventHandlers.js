@@ -185,10 +185,10 @@ function matchObjectCodeToPosition(i, x, y) {
 
 	var x0 = getOriginX();
 	var y0 = getOriginY();
-	//engineX = x + t.xres/2 + t.baseOffX + t.offX;
-	engineX = -x0 + x + Math.round(t.xres/2) + t.baseOffX + t.offX;
-	//engineY = y + t.yres - t.baseLength/2 + t.baseOffY + t.offY;
-	engineY = -y0 + y + t.yres - Math.round(t.baseLength/2) + t.baseOffY + t.offY;
+	//engineX = x + t.xres/2 + t.baseOffX;
+	engineX = -x0 + x + Math.round(t.xres/2) + t.baseOffX;
+	//engineY = y + t.yres - t.baseLength/2 + t.baseOffY;
+	engineY = -y0 + y + t.yres - Math.round(t.baseLength/2) + t.baseOffY;
 
 	//Update XML
 	regex = /child\.setX\(-?[\d]+\);/g;

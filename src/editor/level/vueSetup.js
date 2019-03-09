@@ -122,10 +122,10 @@ Vue.component("rendered-prop", {
             return this.body.img ? imgSrc(this.body.img) : subImg;
 		},
     	positionLeft: function() {
-            return this.prop.x - this.body.xres/2 - this.body.baseOffX - this.body.offX;
+            return this.prop.x - this.body.xres/2 - this.body.baseOffX;
 		},
 		positionTop: function() {
-            return this.prop.y - this.prop.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
+            return this.prop.y - this.prop.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY;
 		},
 		width: function() {
 			return this.body.xres;

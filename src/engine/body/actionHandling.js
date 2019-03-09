@@ -1,5 +1,7 @@
 dependsOn("Body.js");
 
+SplitTime.Body.prototype.keyFunc = {};
+
 SplitTime.Body.prototype.act = [];
 SplitTime.Body.prototype.pushAct = function(item) {
 	if(this.act.length === 0) {

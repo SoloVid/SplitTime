@@ -1,10 +1,7 @@
 var nextRef = 0;
 
-SplitTime.Body = function(skipInit) {
+SplitTime.Body = function() {
 	this.ref = nextRef++;
-	if(skipInit) {
-		return;
-    }
 	this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
 	// TODO: sort out (throw out) inheritance to make this work right
 	this.speechBox = new SplitTime.Body.SpeechBox(this, -42);
@@ -20,8 +17,7 @@ SplitTime.Body.prototype.addChild = function(child, isBolted) {
 			this.childrenBolted = [];
 		}
 		this.childrenBolted.push(child);
-	}
-	else {
+	} else {
 		if(this.childrenLoose.length === 0) {
             this.childrenLoose = [];
         }
@@ -52,6 +48,11 @@ SplitTime.Body.prototype.isCurrentPlayer = function() {
 };
 
 SplitTime.Body.prototype.staticTrace = [];
+/**
+ * @deprecated should be moved to Prop class or something
+ * @param traceStr
+ * @param type
+ */
 SplitTime.Body.prototype.addStaticTrace = function(traceStr, type) {
 	if(this.staticTrace.length === 0) {
         this.staticTrace = [];
@@ -59,62 +60,70 @@ SplitTime.Body.prototype.addStaticTrace = function(traceStr, type) {
 	this.staticTrace.push({traceStr: traceStr, type: type});
 };
 
-SplitTime.Body.prototype.xres = 32;
-SplitTime.Body.prototype.yres = 64;
-
 //The SplitTime.Body's base is the collision area of the SplitTime.Body
 SplitTime.Body.prototype.baseLength = 16;
-SplitTime.Body.prototype.baseX = 16;
-SplitTime.Body.prototype.baseY = 8;
 //Standard offset of the base is 0--that is, x=0 is centered and y=0 is at bottom
 SplitTime.Body.prototype.baseOffX = 0;
 SplitTime.Body.prototype.baseOffY = 0;
 
-SplitTime.Body.prototype.omniDir = false;
-SplitTime.Body.prototype.rotate = 0;
+SplitTime.Body.prototype._resortInBodyOrganizer = function() {
+	if(this._level) {
+		this._level.getBodyOrganizer().resort(this);
+	}
+};
 
-SplitTime.Body.prototype._level = undefined;
-SplitTime.Body.prototype.team = "neutral";
-SplitTime.Body.prototype.x = 0;
+/**
+ * @type {SplitTime.Level}
+ * @private
+ */
+SplitTime.Body.prototype._level = null;
+SplitTime.Body.prototype._x = 0;
 SplitTime.Body.prototype.getX = function() {
-	return this.x;
+	return this._x;
 };
-SplitTime.Body.prototype.setX = function(x) {
-	var children = this.getChildren();
-	for(var i = 0; i < children.length; i++) {
-		var currentChild = children[i];
-		var dx = currentChild.x - this.x;
-		currentChild.setX(x + dx);
-	}
-	this.x = x;
+SplitTime.Body.prototype.setX = function(x, includeChildren) {
+	if(includeChildren) {
+        var children = this.getChildren();
+        for(var i = 0; i < children.length; i++) {
+            var currentChild = children[i];
+            var dx = currentChild.getX() - this._x;
+            currentChild.setX(x + dx, true);
+        }
+    }
+	this._x = x;
+	this._resortInBodyOrganizer();
 };
-SplitTime.Body.prototype.y = 0;
+SplitTime.Body.prototype._y = 0;
 SplitTime.Body.prototype.getY = function() {
-    return this.y;
+    return this._y;
 };
-SplitTime.Body.prototype.setY = function(y) {
-	var children = this.getChildren();
-	for(var i = 0; i < children.length; i++) {
-		var currentChild = children[i];
-		var dy = currentChild.y - this.y;
-		currentChild.setY(y + dy);
-	}
-	this.y = y;
+SplitTime.Body.prototype.setY = function(y, includeChildren) {
+	if(includeChildren) {
+        var children = this.getChildren();
+        for(var i = 0; i < children.length; i++) {
+            var currentChild = children[i];
+            var dy = currentChild.getY() - this._y;
+            currentChild.setY(y + dy, true);
+        }
+    }
+	this._y = y;
+	this._resortInBodyOrganizer();
 };
-SplitTime.Body.prototype.offX = 0;
-SplitTime.Body.prototype.offY = 0;
-SplitTime.Body.prototype.z = 0;
+SplitTime.Body.prototype._z = 0;
 SplitTime.Body.prototype.getZ = function() {
-    return this.z;
+    return this._z;
 };
-SplitTime.Body.prototype.setZ = function(layer) {
-	var children = this.getChildren();
-	for(var i = 0; i < children.length; i++) {
-		var currentChild = children[i];
-		var dLayer = currentChild.z - this.z;
-		currentChild.setZ(layer + dLayer);
-	}
-	this.z = layer;
+SplitTime.Body.prototype.setZ = function(z, includeChildren) {
+	if(includeChildren) {
+        var children = this.getChildren();
+        for(var i = 0; i < children.length; i++) {
+            var currentChild = children[i];
+            var dLayer = currentChild.getZ() - this._z;
+            currentChild.setZ(z + dLayer, true);
+        }
+    }
+	this._z = z;
+	this._resortInBodyOrganizer();
 };
 SplitTime.Body.prototype.GRAVITY = -1280;
 SplitTime.Body.prototype.zVelocity = 0;
@@ -122,6 +131,10 @@ SplitTime.Body.prototype.height = 32;
 
 SplitTime.Body.prototype.dir = 3;
 
+/**
+ * @deprecated
+ * @return {boolean}
+ */
 SplitTime.Body.prototype.isInCurrentLevel = function() {
     return this.getLevel() === SplitTime.Level.getCurrent();
 };
@@ -135,10 +148,15 @@ SplitTime.Body.prototype.put = function(level, x, y, z) {
 
 /**
  * @param {string|SplitTime.Level} level
+ * @param {boolean} [includeChildren]
  */
-SplitTime.Body.prototype.setLevel = function(level) {
+SplitTime.Body.prototype.setLevel = function(level, includeChildren) {
 	if(typeof level === "string") {
 		level = SplitTime.Level.get(level);
+	}
+
+	if(level === this._level) {
+		return;
 	}
 
 	if(this._level) {
@@ -148,9 +166,15 @@ SplitTime.Body.prototype.setLevel = function(level) {
     this._level = level;
     this._level.insertBody(this);
 
-    var children = this.getChildren();
-    for(var i = 0; i < children.length; i++) {
-        children[i].setLevel(level);
+    if(includeChildren) {
+        var children = this.getChildren();
+        for(var i = 0; i < children.length; i++) {
+        	if(includeChildren) {
+                children[i].setLevel(level, includeChildren);
+            } else {
+        		this.removeChild(children[i]);
+			}
+        }
     }
 
     this.timeStabilizer = level.getRegion().getTimeStabilizer(200);
@@ -162,6 +186,7 @@ SplitTime.Body.prototype.getLevel = function() {
 	return this._level;
 };
 /**
+ * @deprecated perhaps too much clog
  * @return {SplitTime.Region}
  */
 SplitTime.Body.prototype.getRegion = function() {
@@ -183,10 +208,7 @@ SplitTime.Body.prototype.setAgent = function(agent) {
 	}
 };
 
-SplitTime.Body.prototype.keyFunc = {};
 //Function run on ENTER or SPACE
-SplitTime.Body.prototype.interact = function() {};
-
 SplitTime.Body.prototype.onPlayerInteract = function(handler) {
 	if(handler) {
 		this.playerInteractHandlers.register(handler);
@@ -194,146 +216,3 @@ SplitTime.Body.prototype.onPlayerInteract = function(handler) {
 		this.playerInteractHandlers.run();
 	}
 };
-
-SplitTime.Body.prototype.pushy = true;
-
-SplitTime.Body.prototype.canAct = true;
-//SplitTime.Body.prototype.canMove = true;
-SplitTime.Body.prototype.canSeeAct = true;
-//SplitTime.Body.prototype.canSeeMove = true;
-SplitTime.Body.prototype.canSeeStatus = true;
-SplitTime.Body.prototype.canSee = true;
-
-SplitTime.Body.prototype.getImage = function() {
-	return SplitTime.Image.get(this.img);
-};
-SplitTime.Body.prototype.getPosition = function() {
-	var pos = {};
-	pos.x = this.x;
-	pos.y = this.y;
-	pos.z = this.z;
-	return pos;
-};
-SplitTime.Body.prototype.getTeam = function() {
-	return SplitTime.Teams[this.team];
-};
-
-SplitTime.Body.prototype.preventAction = function() { this.canAct = false; };
-SplitTime.Body.prototype.preventActionSee = function() { this.canSeeAct = false; };
-SplitTime.Body.prototype.preventStatusSee = function() { this.canSeeStatus = false; };
-SplitTime.Body.prototype.preventRender = function() { this.canSee = false; };
-SplitTime.Body.prototype.resetCans = function() { delete this.canSee; delete this.canAct; delete this.canSeeAct; delete this.canSeeStatus; };
-
-// SplitTime.Body.prototype.dart = {};
-
-// //Checks if the a SplitTime.Body's location is valid (based on current location and layer func data)
-// SplitTime.Body.prototype.canBeHere = function(allowInAir) {
-// 	for(var iX = 0; iX < 8; iX++) {
-// 		for(var iY = 0; iY < 16; iY++) {
-// 			var iData = SplitTime.pixCoordToIndex(this.x + iY, this.y + iX, SplitTime.currentLevel.layerFuncData[this.z]);
-// 			if(SplitTime.currentLevel.layerFuncData[this.z].data[iData] == 255) {
-// 				if(allowInAir == 1 && SplitTime.currentLevel.layerFuncData[this.z].data[iData + 1] == 255) { }
-// 				else {
-// 					return 0;
-//                 }
-// 			}
-// 		}
-// 	}
-// 	return 1;
-// };
-
-SplitTime.Body.prototype.canSeeBody = function(body) {
-    var tDir = SplitTime.Direction.fromTo(this.x, this.y, body.x, body.y);
-    return SplitTime.Direction.areWithin90Degrees(this.dir, tDir);
-};
-
-SplitTime.Body.prototype.canSeePlayer = function() {
-    return this.canSeeBody(SplitTime.Player.getActiveBody());
-};
-
-//Based in time.js, this SplitTime.provides = function simple interface for setting a timed sequence of movement events for Bodys
-// SplitTime.Body.prototype.registerWalkEvent = function(eventA, isDaily, day, hour, minute, second) {
-// 	/*eventA should be an array with specific sequences of "arguments". Acceptable forms:
-// 		coordinates: x, y
-// 		abrupt relocation: "put", x, y, z
-// 		move to new board: "send", [board name], x, y, z
-// 		call function: "function", [function object] (this is intended for simple things like sound effects)
-// 	*/
-// 	if(isDaily)
-// 	{
-// 		day = 0;
-// 	}
-// 	var cTime = SplitTime.Time.componentToAbsolute(day, hour, minute, second);
-// 	var nTime = cTime;
-//
-// 	var i = 0;
-// 	var ptA = [];
-//
-// 	var cx, cy;
-// 	var nx = this.x;
-// 	var ny = this.y;
-//
-// 	while(i < eventA.length)
-// 	{
-// 		if(typeof eventA[i] == "number")
-// 		{
-// 			cx = nx;
-// 			cy = ny;
-// 			nx = eventA[i];
-// 			ny = eventA[i + 1];
-// 			ptA.push(nx);
-// 			ptA.push(ny);
-// 			i += 2;
-// 			var tDir = SplitTime.dirFromTo(cx, cy, nx, ny); //in functions.js
-//
-// 			//Single step component distances
-// 			var dy = Math.round(this.spd*Math.sin((tDir)*(Math.PI/2)));
-// 			var dx = Math.round(this.spd*Math.cos((tDir)*(Math.PI/2)));
-//
-// 			//Frames used to travel between points
-// 			var f = Math.ceil(Math.abs(nx - cx)/dx) || Math.ceil(Math.abs(ny - cy)/dy);
-//
-// 			//Expect next event's time to be f frames farther
-// 			nTime += f;
-// 			if(isDaily)
-// 			{
-// 				nTime = nTime%(60*60*24);
-// 			}
-// 		}
-// 		else
-// 		{
-// 			var event;
-// 			if(ptA.length > 0)
-// 			{
-// 				event = new Function("var tNPC = SplitTime.getNPCByName(\"" + this.name + "\"); tNPC.walkPath(" + ptA.toString() + ");");
-// 				SplitTime.Time.registerEvent(event, isDaily, cTime);
-// 				ptA.length = 0;
-// 				cTime = nTime + 8; //tack on a few extra frames to be safe
-// 			}
-//
-// 			if(eventA[i] == "put")
-// 			{
-// 				event = new Function("var tNPC = SplitTime.getNPCByName(\"" + this.name + "\"); tNPC.x = " + eventA[i + 1] + "; tNPC.y = " + eventA[i + 2] + "; tNPC.z = " + eventA[i + 3] + ";");
-// 				SplitTime.Time.registerEvent(event, isDaily, cTime);
-// 				i += 4;
-//
-// 				nx = eventA[i + 1];
-// 				ny = eventA[i + 2];
-// 			}
-// 			else if(eventA[i] == "send")
-// 			{
-// 				event = new Function("var tNPC = SplitTime.getNPCByName(\"" + this.name + "\"); tNPC.lvl = " + eventA[i + 1] + "; tNPC.x = " + eventA[i + 2] + "; tNPC.y = " + eventA[i + 3] + "; tNPC.z = " + eventA[i + 4] + ";");
-// 				SplitTime.Time.registerEvent(event, isDaily, cTime);
-// 				i += 5;
-//
-// 				nx = eventA[i + 2];
-// 				ny = eventA[i + 3];
-// 			}
-// 			else if(eventA[i] == "function")
-// 			{
-// 				SplitTime.Time.registerEvent(eventA[i + 1], isDaily, cTime);
-// 			}
-// 		}
-// 	}
-// };
-

@@ -1,5 +1,10 @@
 dependsOn("Body.js");
 
+SplitTime.Body.prototype.team = "neutral";
+SplitTime.Body.prototype.getTeam = function() {
+    return SplitTime.Teams[this.team];
+};
+
 SplitTime.Body.prototype.hp = 100;
 SplitTime.Body.prototype.strg = 5;
 // Generally equates to pixels per second (game time)

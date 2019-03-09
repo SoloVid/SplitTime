@@ -1,15 +1,57 @@
 dependsOn("Body.js");
 
 /**
+ * @type {{}}
+ */
+var bodyMap = {};
+
+/**
+ * @param {SplitTime.Body} body
+ * @constructor
+ */
+function BodyExt(body) {
+    this.bumped = false;
+    this.pushing = false;
+    this.sliding = false;
+    this.previousGroundBody = null;
+    this.previousGroundTraceX = null;
+    this.previousGroundTraceY = null;
+    this.previousGroundTraceZ = null;
+}
+
+/**
+ * @param {SplitTime.Body} body
+ */
+function getBodyExt(body) {
+    if(!(body.ref in bodyMap)) {
+        bodyMap[body.ref] = new BodyExt(body);
+    }
+
+    return bodyMap[body.ref];
+}
+
+/**
+ * @param {SplitTime.Body} body
+ * @constructor
+ */
+function BodyMover(body) {
+    this.body = body;
+    this.level = body.getLevel();
+    this.bodyExt = getBodyExt(this.body);
+}
+
+var VERTICAL_FUDGE = 4;
+
+/**
  * Zelda step with input direction
  * @param distance
  * @param direction
  * @returns {boolean}
  */
-SplitTime.Body.prototype.zeldaBump = function(distance, direction) {
-    ensureInLevel(this);
+BodyMover.prototype.zeldaBump = function(distance, direction) {
+    this.ensureInLevel();
     //Prevent infinite recursion
-    if(this._zeldaPushing || this._zeldaBumped) {
+    if(this.bodyExt.pushing || this._zeldaBumped) {
         return false;
     }
     this._zeldaBumped = true;
@@ -27,27 +69,14 @@ SplitTime.Body.prototype.zeldaBump = function(distance, direction) {
     return moved;
 };
 
-SplitTime.Body.prototype.zeldaLockOnPlayer = function() {
-    var player = SplitTime.Player.getActiveBody();
-    this.zeldaLockOnPoint(player.x, player.y);
-};
-
-/**
- * @param {number} qx
- * @param {number} qy
- */
-SplitTime.Body.prototype.zeldaLockOnPoint = function(qx, qy) {
-    this.dir = SplitTime.Direction.fromTo(this.x, this.y, qx, qy);
-};
-
 /**
  * Advances SplitTime.Body person up to maxDistance pixels as far as is legal.
  * Includes pushing other Bodys out of the way?
  * @param {number} maxDistance
  * @returns {number} distance actually moved
  */
-SplitTime.Body.prototype.zeldaStep = function(maxDistance) {
-    ensureInLevel(this);
+BodyMover.prototype.zeldaStep = function(maxDistance) {
+    this.ensureInLevel();
     var level = this.getLevel();
 
     var dy = -maxDistance * Math.sin((this.dir) * (Math.PI / 2)); //Total y distance to travel
@@ -63,9 +92,6 @@ SplitTime.Body.prototype.zeldaStep = function(maxDistance) {
 
     this._totalStepDistance = maxDistance;
     // this.stepDistanceRemaining = adx + ady;
-    // TODO: put some logic for nearby agents in Level
-    // this.nearbyBodies = level.getBodies();
-    this.nearbyBodies = level.getBodiesWithin(this, this.baseLength / 2);
     this.pushedBodies = [];
     this._pixelsCrossed = {};
 
@@ -81,9 +107,11 @@ SplitTime.Body.prototype.zeldaStep = function(maxDistance) {
     var stoppedX = false;
     var pixelsMovedX = 0;
 
-    var roundX = Math.round(this.x);
-    var roundY = Math.round(this.y);
-    var currentZ = this.z;
+    var oldX = this.getX();
+    var oldY = this.getY();
+    var roundX = Math.round(oldX);
+    var roundY = Math.round(oldY);
+    var currentZ = this.getZ();
     var halfBaseLength = Math.round(this.baseLength / 2);
 
     for(var i = 0; i < maxIterations; i++) {
@@ -96,7 +124,6 @@ SplitTime.Body.prototype.zeldaStep = function(maxDistance) {
                 var top = roundY - halfBaseLength;
                 stoppedX = !checkAreaCollision(level, edgeX, 1, top, this.baseLength, currentZ, this.height);
                 if(stoppedX) {
-                    var VERTICAL_FUDGE = 4;
                     var zBeforeFudge = currentZ;
                     currentZ = calculateRiseThroughTraces(level, roundX - halfBaseLength, this.baseLength, top, this.baseLength, currentZ, this.height, VERTICAL_FUDGE).zEnd;
                     stoppedX = !checkAreaCollision(level, edgeX, 1, top, this.baseLength, currentZ, this.height);
@@ -137,21 +164,19 @@ SplitTime.Body.prototype.zeldaStep = function(maxDistance) {
             }
         }
     }
-    var oldX = this.x;
-    var oldY = this.y;
     if(ady > 0 && !stoppedY && !outY) {
         // Subtract off any overshoot
-        this.y = roundY - (dyRounded - dy);
+        this.setY(roundY - (dyRounded - dy));
     } else {
-        this.y = roundY;
+        this.setY(roundY);
     }
     if(adx > 0 && !stoppedX && !outX) {
         // Subtract off any overshoot
-        this.x = roundX - (dxRounded - dx);
+        this.setX(roundX - (dxRounded - dx));
     } else {
-        this.x = roundX;
+        this.setX(roundX);
     }
-    this.z = currentZ;
+    this.setZ(currentZ);
 
     this.nearbyBodies = null;
     this.pushedBodies = null;
@@ -217,12 +242,12 @@ function withPixelColor(data, x, y, callback) {
  * @param {int} startY
  * @param {int} yPixels
  * @param {number} z
- * @param {number} height
+ * @param {number} areaHeight
  * @returns {boolean}
  */
-function checkAreaCollision(level, startX, xPixels, startY, yPixels, z, height) {
+function checkAreaCollision(level, startX, xPixels, startY, yPixels, z, areaHeight) {
     var stopped = false;
-    level.forEachTraceDataLayerBetween(z, z + height, function(imageData, layerZ) {
+    level.forEachTraceDataLayerBetween(z, z + areaHeight, function(imageData, layerZ) {
         // console.log("checking layer " + layerZ);
         //Loop through width of base
         for(var y = startY; y < startY + yPixels; y++) {
@@ -237,9 +262,9 @@ function checkAreaCollision(level, startX, xPixels, startY, yPixels, z, height) 
                 var a = imageData.data[dataIndex++];
                 // withPixelColor(imageData, coords.x, coords.y, function(r, g, b, a) {
                 if(r === SplitTime.Trace.RColor.SOLID) {
-                    var height = g;
-                    if(height > 0) {
-                        if(layerZ + height <= z || z + height <= layerZ) {
+                    var traceHeight = g;
+                    if(traceHeight > 0) {
+                        if(layerZ + traceHeight <= z || z + areaHeight <= layerZ) {
                             // do nothing
                         } else {
                             stopped = true;
@@ -378,40 +403,14 @@ function zeldaSlide(body, maxDistance) {
     body._zeldaSliding = false;
 }
 
-SplitTime.Body.prototype._zeldaBumped = false;
-SplitTime.Body.prototype._zeldaPushing = false;
-SplitTime.Body.prototype._zeldaSliding = false;
-
 /**
  * Check that body is in current level
- * @param {SplitTime.Body} body
  */
-function ensureInLevel(body) {
-    if(body.getLevel() !== SplitTime.Level.getCurrent()) {
+BodyMover.prototype.ensureInLevel = function() {
+    if(this.body.getLevel() !== SplitTime.Level.getCurrent()) {
         throw new Error("Attempt to do zelda movement for body not on current board");
     }
-}
-
-/**
- * Called by zeldaStep() for first time pixel of color is crossed
- * @param {SplitTime.Body} body
- * @param {int} r
- * @param {int} g
- * @param {int} b
- * @param {number} a
- */
-function crossPixel(body, r, g, b, a) {
-    if(r === SplitTime.Trace.RColor.FUNCTION) {
-        var level = body.getLevel();
-        return level.runFunctionFromBodyCrossPixel(body, r, g, b, a);
-    }
-}
-
-SplitTime.Body.prototype._zeldaPreviousGroundBody = null;
-SplitTime.Body.prototype._zeldaPreviousGroundTraceX = null;
-SplitTime.Body.prototype._zeldaPreviousGroundTraceY = null;
-SplitTime.Body.prototype._zeldaPreviousGroundTraceZ = null;
-
+};
 
 /**
  * Move the body along the Z-axis up to the specified (maxZ) number of pixels.
@@ -465,18 +464,20 @@ function zeldaVerticalBumpImpl(body, maxDZ) {
  * @returns {number} Z pixels can move (non-negative)
  */
 function zeldaVerticalRiseTraces(body, maxDZ) {
+    var level = body.getLevel();
     var halfBaseLength = Math.round(body.baseLength / 2);
     var roundX = Math.round(body.x);
     var roundY = Math.round(body.y);
 
     var collisionInfo = calculateRiseThroughTraces(
-        body.getLevel(),
+        level,
         roundX - halfBaseLength, body.baseLength,
         roundY - halfBaseLength, body.baseLength,
         body.z, body.height, maxDZ
     );
 
     body.z += collisionInfo.distanceAllowed;
+    level.runFunctions(collisionInfo.functions, body);
     return collisionInfo.distanceAllowed;
 }
 
@@ -504,6 +505,7 @@ function calculateRiseThroughTraces(level, startX, xPixels, startY, yPixels, z, 
         functions: []
     };
 
+    var functionLayerZMap = {};
     level.forEachTraceDataLayerBetween(top, top + maxDZ, function(imageData, layerZ) {
         if(layerZ <= z || layerZ > collisionInfo.zBlocked) {
             return;
@@ -517,36 +519,36 @@ function calculateRiseThroughTraces(level, startX, xPixels, startY, yPixels, z, 
                 var g = imageData.data[dataIndex++];
                 var b = imageData.data[dataIndex++];
                 var a = imageData.data[dataIndex++];
-                if(r === SplitTime.Trace.RColor.SOLID) {
-                    // Assuming moving upward through layers, we will hit the bottom of a layer all at the same time
-                    // if(restrictivePixel.heightBlocked === null) {
-                    collisionInfo.x = x;
-                    collisionInfo.y = y;
-                    collisionInfo.distanceAllowed = layerZ - top;
-                    collisionInfo.zBlocked = layerZ;
-                    collisionInfo.zEnd = layerZ - height;
-                    // Moving up is the easy case
-                    return true;
-                    // }
+                if(a === 255) {
+                    if(r === SplitTime.Trace.RColor.SOLID) {
+                        // Assuming moving upward through layers, we will hit the bottom of a layer all at the same time
+                        // if(restrictivePixel.heightBlocked === null) {
+                        collisionInfo.x = x;
+                        collisionInfo.y = y;
+                        collisionInfo.distanceAllowed = layerZ - top;
+                        collisionInfo.zBlocked = layerZ;
+                        collisionInfo.zEnd = layerZ - height;
+                        // Moving up is the easy case
+                        return true;
+                        // }
+                    }
+                } else if(r === SplitTime.Trace.RColor.FUNCTION) {
+                    var funcId = level.getFunctionIdFromPixel(r, g, b, a);
+                    if(!(funcId in functionLayerZMap)) {
+                        functionLayerZMap[funcId] = layerZ;
+                    } else {
+                        functionLayerZMap[funcId] = Math.min(functionLayerZMap[funcId], layerZ);
+                    }
                 }
-                // else if(a === 255) {
-                //     // Since traces are drawn inexactly, we can't rely on colors with alpha not 100%
-                //     var colorId = r + "," + g + "," + b + "," + a;
-                //     if(body._pixelsCrossed[colorId] === undefined) {
-                //         try {
-                //             body._pixelsCrossed[colorId] = crossPixel(body, r, g, b, a) !== false;
-                //         }
-                //         catch(ex) {
-                //             console.error(ex);
-                //         }
-                //     }
-                //     if(!body._pixelsCrossed[colorId]) {
-                //         return stopped = true;
-                //     }
-                // }
             }
         }
     });
+
+    for(var funcId in functionLayerZMap) {
+        if(functionLayerZMap[funcId] < collisionInfo.zBlocked) {
+            collisionInfo.functions.push(funcId);
+        }
+    }
 
     return collisionInfo;
 }
@@ -557,13 +559,13 @@ function calculateRiseThroughTraces(level, startX, xPixels, startY, yPixels, z, 
  * @returns {number} Z pixels moved (non-positive)
  */
 function zeldaVerticalDropTraces(body, maxDZ) {
-
+    var level = body.getLevel();
     var halfBaseLength = Math.round(body.baseLength / 2);
     var roundX = Math.round(body.x);
     var roundY = Math.round(body.y);
 
     var collisionInfo = calculateDropThroughTraces(
-        body.getLevel(),
+        level,
         roundX - halfBaseLength, body.baseLength,
         roundY - halfBaseLength, body.baseLength,
         body.z, maxDZ
@@ -575,6 +577,7 @@ function zeldaVerticalDropTraces(body, maxDZ) {
         body._zeldaPreviousGroundTraceY = collisionInfo.y;
         body._zeldaPreviousGroundTraceZ = collisionInfo.zBlocked;
     }
+    level.runFunctions(collisionInfo.functions, body);
     return -collisionInfo.distanceAllowed;
 }
 

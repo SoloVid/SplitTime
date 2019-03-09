@@ -299,8 +299,8 @@ function updateObject(index)
 	var x0 = getOriginX();
 	var y0 = getOriginY();
 
-	x = x0 + x - Math.round(xres/2) - childTemplate.baseOffX - childTemplate.offX;
-	y = y0 + y - yres + Math.round(childTemplate.baseLength/2) - childTemplate.baseOffY - childTemplate.offY;
+	x = x0 + x - Math.round(xres/2) - childTemplate.baseOffX;
+	y = y0 + y - yres + Math.round(childTemplate.baseLength/2) - childTemplate.baseOffY;
 
 	HTMLNode.style.left = x + "px";
 	HTMLNode.style.top = y + "px";
