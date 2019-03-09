@@ -69,12 +69,22 @@ BodyOrganizer.prototype.resort = function(body) {
  * Check if any bodies are present with left at specified x.
  * If so, run callback for each one.
  * @param {int} x
- * @param {function(SplitTime.Body)} callback
+ * @param {function(SplitTime.Body)} [callback]
  * @return {boolean} whether any bodies were found
  */
 BodyOrganizer.prototype.forEachXLeft = function(x, callback) {
     return forEachBodyAtValue(x, callback, this._sortedByXLeft);
 };
+// /**
+//  * Check if any bodies are present with left at specified x.
+//  * If so, run callback for each one.
+//  * @param {int} x
+//  * @param {function(SplitTime.Body)} callback
+//  * @return {boolean} whether any bodies were found
+//  */
+// BodyOrganizer.prototype.existsXLeft = function(x) {
+//     return isBodyAtValue(x, this._sortedByXLeft);
+// };
 
 BodyOrganizer.prototype.forEachXRight = function(x, callback) {
     return forEachBodyAtValue(x, callback, this._sortedByXRight);
@@ -96,6 +106,27 @@ BodyOrganizer.prototype.forEachZBottom = function(z, callback) {
     return forEachBodyAtValue(z, callback, this._sortedByZBottom);
 };
 
+// /**
+//  * @param {int} value
+//  * @param {BodiesSortedByOneValue} bodiesSortHolder
+//  * @return {boolean}
+//  */
+// function isBodyAtValue(value, bodiesSortHolder) {
+//     var index32 = Math.floor(value/32);
+//     if(index32 >= bodiesSortHolder.valueLookup32.length) {
+//         index32 = bodiesSortHolder.valueLookup32.length - 1;
+//     }
+//     var iSorted = bodiesSortHolder.valueLookup32[index32];
+//     var iSortedEnd = index32 + 1 < bodiesSortHolder.valueLookup32.length ? bodiesSortHolder.valueLookup32[index32 + 1] : bodiesSortHolder.sortedByValue.length;
+//     for(; iSorted < iSortedEnd; iSorted++) {
+//         var sortedItem = bodiesSortHolder.sortedByValue[iSorted];
+//         if(sortedItem.value === value) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
+
 /**
  * @param {int} value
  * @param {function(SplitTime.Body)} callback
@@ -113,6 +144,10 @@ function forEachBodyAtValue(value, callback, bodiesSortHolder) {
     for(; iSorted < iSortedEnd; iSorted++) {
         var sortedItem = bodiesSortHolder.sortedByValue[iSorted];
         if(sortedItem.value === value) {
+            // If the caller just wanted boolean, return early
+            if(!callback) {
+                return true;
+            }
             foundBody = true;
             callback(sortedItem.body);
         // } else if(sortedItem.value > value) {

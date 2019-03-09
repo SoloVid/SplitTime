@@ -18,6 +18,8 @@ SplitTime.Level = function(levelId) {
     /** @type ImageData[] */
     this.layerFuncData = [];
 
+    this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
+
     /** @type {SplitTime.WeatherRenderer} */
     this.weatherRenderer = new SplitTime.WeatherRenderer();
 };
@@ -39,16 +41,16 @@ SplitTime.Level.prototype.load = function(levelData) {
     this.height = levelData.height || 0;
     this.yWidth = levelData.yWidth || 0;
 
-    var highestLayerZ = 0;
+    this.highestLayerZ = 0;
     if(levelData.layers.length > 0) {
-        highestLayerZ = levelData.layers[levelData.layers.length - 1].z;
+        this.highestLayerZ = levelData.layers[levelData.layers.length - 1].z;
     }
 
     var that = this;
     function onLoadImage(backgroundImg) {
         if(backgroundImg.height > that.height) {
             that.height = backgroundImg.height;
-            that.yWidth = that.height + highestLayerZ;
+            that.yWidth = that.height + that.highestLayerZ;
         }
         if(backgroundImg.width > that.width) {
             that.width = backgroundImg.width;
@@ -103,6 +105,16 @@ SplitTime.Level.prototype.waitForLoadAssets = function() {
     return this.loadPromise;
 };
 
+/**
+ * @return {SplitTime.Level.BodyOrganizer}
+ */
+SplitTime.Level.prototype.getBodyOrganizer = function() {
+    return this._bodyOrganizer;
+};
+
+/**
+ * @return {HTMLImageElement}
+ */
 SplitTime.Level.prototype.getBackgroundImage = function() {
     if(!this.background) {
         return null;
@@ -170,6 +182,17 @@ SplitTime.Level.prototype.runFunction = function(functionId, param) {
         console.warn("Function \"" + functionId + "\" not found for level " + that.id);
     };
     return fun(param);
+};
+
+SplitTime.Level.prototype.runFunctions = function(functionIds, param) {
+    for(var i = 0; i < functionIds.length; i++) {
+        this.runFunction(functionIds[i], param);
+    }
+};
+SplitTime.Level.prototype.runFunctionSet = function(functionIdSet, param) {
+    for(var id in functionIdSet) {
+        this.runFunction(id, param);
+    }
 };
 
 /**
@@ -302,26 +325,30 @@ SplitTime.Level.prototype.sortBodies = function() {
 };
 
 /**
- * @param {SplitTime.Body} element
+ * @deprecated Only really needed currently for rendering, which should elsewhere and different
+ * @param {SplitTime.Body} body
  */
-SplitTime.Level.prototype.insertBody = function(element) {
+SplitTime.Level.prototype.insertBody = function(body) {
     var index = 0;
-    while(index < this.bodies.length && element.y > this.bodies[index].y) {
+    while(index < this.bodies.length && body.y > this.bodies[index].y) {
         index++;
     }
-    this.bodies.splice(index, 0, element);
+    this.bodies.splice(index, 0, body);
+    this._bodyOrganizer.addBody(body);
 };
 
 /**
- * @param {SplitTime.Body} element
+ * @deprecated Only really needed currently for rendering, which should elsewhere and different
+ * @param {SplitTime.Body} body
  */
-SplitTime.Level.prototype.removeBody = function(element) {
+SplitTime.Level.prototype.removeBody = function(body) {
     for(var index = 0; index < this.bodies.length; index++) {
-        if(element == this.bodies[index]) {
+        if(body == this.bodies[index]) {
             this.bodies.splice(index, 1);
             index = this.bodies.length;
         }
     }
+    this._bodyOrganizer.removeBody(body);
 };
 
 /**
