@@ -161,22 +161,22 @@ SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xP
                 var g = imageData.data[dataIndex++];
                 var b = imageData.data[dataIndex++];
                 var a = imageData.data[dataIndex++];
-                if(r === SplitTime.Trace.RColor.SOLID) {
-                    var traceHeight = g;
-                    if(traceHeight > 0) {
-                        if(isZOverlap(layerZ, traceHeight, z, me.height)) {
-                            // do nothing
-                        } else {
-                            collisionInfo.blocked = true;
-                            collisionInfo.vStepUpEstimate = layerZ + traceHeight - z;
-                            return true;
+                if(a === 255) {
+                    if(r === SplitTime.Trace.RColor.SOLID) {
+                        var traceHeight = g;
+                        if(traceHeight > 0) {
+                            if(isZOverlap(layerZ, traceHeight, z, me.height)) {
+                                collisionInfo.blocked = true;
+                                collisionInfo.vStepUpEstimate = layerZ + traceHeight - z;
+                                return true;
+                            }
                         }
-                    }
-                } else if(r === SplitTime.Trace.RColor.FUNCTION) {
-                    var funcId = me.level.getFunctionIdFromPixel(r, g, b, a);
-                    if(!functionsSet[funcId]) {
-                        functionsSet[funcId] = true;
-                        collisionInfo.functions.push(funcId);
+                    } else if(r === SplitTime.Trace.RColor.FUNCTION) {
+                        var funcId = me.level.getFunctionIdFromPixel(r, g, b, a);
+                        if(!functionsSet[funcId]) {
+                            functionsSet[funcId] = true;
+                            collisionInfo.functions.push(funcId);
+                        }
                     }
                 }
             }
