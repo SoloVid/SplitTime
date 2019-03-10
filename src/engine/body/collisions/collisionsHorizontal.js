@@ -1,5 +1,7 @@
 dependsOn("BodyMover.js");
 
+var ZILCH = 0.000001;
+
 /**
  * Advances SplitTime.Body up to maxDistance pixels as far as is legal.
  * Includes pushing other Bodys out of the way? (this part is currently unavailable)
@@ -12,15 +14,21 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
     var level = this.level;
 
     var dy = -maxDistance * Math.sin(dir * (Math.PI / 2)); //Total y distance to travel
+    if(Math.abs(dy) < ZILCH) {
+        dy = 0;
+    }
     var dyRounded = dy > 0 ? Math.ceil(dy) : Math.floor(dy);
     var ady = Math.abs(dyRounded);
 
     var dx = maxDistance * Math.cos(dir * (Math.PI / 2)); //Total x distance to travel
+    if(Math.abs(dx) < ZILCH) {
+        dx = 0;
+    }
     var dxRounded = dx > 0 ? Math.ceil(dx) : Math.floor(dx);
     var adx = Math.abs(dxRounded);
 
-    var jHat = dyRounded / ady;
-    var iHat = dxRounded / adx;
+    var jHat = dy === 0 ? 0 : dyRounded / ady;
+    var iHat = dx === 0 ? 0 : dxRounded / adx;
 
     var maxIterations = adx + ady;
     var xPixelsRemaining = adx;

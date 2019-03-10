@@ -7,6 +7,7 @@
 function BodyOrganizer(level) {
     this._initialized = false;
     this._waitingBodies = [];
+    this._bodySet = {};
 
     if(level) {
         this.initialize(level);
@@ -38,10 +39,16 @@ BodyOrganizer.prototype.initialize = function(level) {
  * @param {SplitTime.Body} body
  */
 BodyOrganizer.prototype.addBody = function(body) {
+    if(this._bodySet[body.ref]) {
+        return;
+    }
+
     if(!this._initialized) {
         this._waitingBodies.push(body);
         return;
     }
+
+    this._bodySet[body.ref] = true;
 
     this._sortedByXLeft.addBody(body);
     this._sortedByXRight.addBody(body);
@@ -71,6 +78,8 @@ BodyOrganizer.prototype.removeBody = function(body) {
     this._sortedByYBottom.removeBody(body);
     this._sortedByZTop.removeBody(body);
     this._sortedByZBottom.removeBody(body);
+
+    this._bodySet[body.ref] = false;
 };
 
 /**
@@ -171,7 +180,7 @@ function BodiesSortedByOneValue(max32Value) {
     this.max32Value = max32Value;
     this.valueLookup32 = new Array(max32Value);
     for(var i = 0; i < this.valueLookup32.length; i++) {
-        this.valueLookup32[i] = 0;
+        this.valueLookup32[i] = 1;
     }
     var minSentinel = {
         value: -BUFFER,
@@ -231,16 +240,11 @@ BodiesSortedByOneValue.prototype.resortBodyUpward = function(body, value) {
     };
     this.reverseSortLookup[body.ref] = currentIndex;
 
-    // Only boundary markers greater than the old value and less than the new value may have shifted
-    for(var index32 = Math.floor(oldValue/32) + 1; index32 < this.valueLookup32.length && index32 <= Math.floor(value/32); index32++) {
-        var iSorted = this.valueLookup32[index32];
-        // The only chance of change is that a boundary needs to point one lower
-        if(this.sortedByValue[iSorted - 1].value/32 > index32) {
-            this.valueLookup32[index32] = iSorted - 1;
-        } else {
-            // nobody later is going to move either
-            break;
-        }
+    // Every boundary crossed must move down
+    var index32AboveOldValue = Math.floor(oldValue/32) + 1;
+    var index32New = Math.floor(value/32);
+    for(var index32 = index32AboveOldValue; index32 < this.valueLookup32.length && index32 <= index32New; index32++) {
+        this.valueLookup32[index32]--;
     }
 };
 
@@ -259,16 +263,11 @@ BodiesSortedByOneValue.prototype.resortBodyDownward = function(body, value) {
     };
     this.reverseSortLookup[body.ref] = currentIndex;
 
-    // Only boundary markers less than the old value and greater than the new value may have shifted
-    for(var index32 = Math.min(this.valueLookup32.length - 1, Math.ceil(oldValue/32) - 1); index32 >= Math.ceil(value/32); index32--) {
-        var iSorted = this.valueLookup32[index32];
-        // The only chance of change is that a boundary needs to point one higher
-        if(this.sortedByValue[iSorted + 1].value/32 < index32) {
-            this.valueLookup32[index32] = iSorted + 1;
-        } else {
-            // nobody later is going to move either
-            break;
-        }
+    // Every boundary crossed must move up
+    var index32Old = Math.floor(oldValue/32);
+    var index32AboveNew = Math.floor(value/32) + 1;
+    for(var index32 = index32AboveNew; index32 < this.valueLookup32.length && index32 <= index32Old; index32++) {
+        this.valueLookup32[index32]++;
     }
 };
 
