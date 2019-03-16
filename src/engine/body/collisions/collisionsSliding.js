@@ -13,9 +13,9 @@ SplitTime.Body.Mover.prototype.zeldaSlide = function(maxDistance) {
 
     var halfBase = Math.round(this.body.baseLength / 2);
 
-    var x = Math.round(this.body.getX());
-    var y = Math.round(this.body.getY());
-    var z = Math.round(this.body.getZ());
+    var x = Math.floor(this.body.getX());
+    var y = Math.floor(this.body.getY());
+    var z = Math.floor(this.body.getZ());
 
     var dist = maxDistance; //Math.min(1, maxDistance);
 

@@ -78,7 +78,7 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(x, y, z, dy) 
 function isXOverlap(x1, baseLength1, x2, baseLength2) {
     var left1 = x1 - baseLength1 / 2;
     var left2 = x2 - baseLength2 / 2;
-    var noOverlap = left1 + baseLength1 <= left2 || left2 + baseLength2 <= left1;
+    var noOverlap = left1 + baseLength1 < left2 || left2 + baseLength2 < left1;
     return !noOverlap;
 }
 

@@ -6,8 +6,8 @@ dependsOn("BodyMover.js");
  */
 SplitTime.Body.Mover.prototype.zeldaVerticalRiseTraces = function(maxDZ) {
     var halfBaseLength = Math.round(this.body.baseLength / 2);
-    var roundX = Math.round(this.body.getX());
-    var roundY = Math.round(this.body.getY());
+    var roundX = Math.floor(this.body.getX());
+    var roundY = Math.floor(this.body.getY());
 
     var collisionInfo = this.calculateRiseThroughTraces(roundX, roundY, this.body.getZ(), maxDZ);
 

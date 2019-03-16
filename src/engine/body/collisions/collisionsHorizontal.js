@@ -44,8 +44,10 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
 
     var oldX = this.body.getX();
     var oldY = this.body.getY();
-    var roundX = Math.round(oldX);
-    var roundY = Math.round(oldY);
+    var oldRoundX = Math.floor(oldX);
+    var oldRoundY = Math.floor(oldY);
+    var roundX = oldRoundX;
+    var roundY = oldRoundY;
     var currentZ = this.body.getZ();
 
     var functionIdSet = {};
@@ -98,17 +100,20 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
             }
         }
     }
-    if(ady > 0 && !stoppedY && !outY) {
+
+    if(ady > 0 && pixelsMovedY > 0) {
+        var roundYMoved = roundY - oldRoundY;
+        var newYFromSteps = oldY + roundYMoved;
         // Subtract off any overshoot
-        this.body.setY(roundY - (dyRounded - dy));
-    } else {
-        this.body.setY(roundY);
+        var actualNewY = newYFromSteps - (dyRounded - dy);
+        this.body.setY(actualNewY);
     }
-    if(adx > 0 && !stoppedX && !outX) {
+    if(adx > 0 && pixelsMovedX > 0) {
+        var roundXMoved = roundX - oldRoundX;
+        var newXFromSteps = oldX + roundXMoved;
         // Subtract off any overshoot
-        this.body.setX(roundX - (dxRounded - dx));
-    } else {
-        this.body.setX(roundX);
+        var actualNewX = newXFromSteps - (dxRounded - dx);
+        this.body.setX(actualNewX);
     }
     this.body.setZ(currentZ);
 

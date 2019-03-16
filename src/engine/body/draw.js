@@ -105,6 +105,12 @@ SplitTime.Body.prototype.draw = function(ctx) {
     var y = -crop.yres - this.baseOffY;
 
     ctx.drawImage(tImg, crop.sx, crop.sy, crop.xres, crop.yres, x, y, crop.xres, crop.yres);
+
+    if(SplitTime.Debug.ENABLED && SplitTime.Debug.DRAW_TRACES) {
+        ctx.fillStyle = "#FF0000";
+        var halfBaseLength = Math.round(this.baseLength / 2);
+        ctx.fillRect(-halfBaseLength, -halfBaseLength, this.baseLength, this.baseLength);
+    }
 };
 
 SplitTime.Body.prototype.getAnimationFrameCrop = function(numDir, stance, frame) {

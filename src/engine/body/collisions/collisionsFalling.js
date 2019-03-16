@@ -5,8 +5,8 @@ dependsOn("BodyMover.js");
  * @returns {number} Z pixels moved (non-positive)
  */
 SplitTime.Body.Mover.prototype.zeldaVerticalDropTraces = function(maxDZ) {
-    var roundX = Math.round(this.body.getX());
-    var roundY = Math.round(this.body.getY());
+    var roundX = Math.floor(this.body.getX());
+    var roundY = Math.floor(this.body.getY());
 
     var collisionInfo = this.calculateDropThroughTraces(
         roundX,

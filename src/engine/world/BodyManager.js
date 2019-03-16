@@ -95,9 +95,9 @@ BodyOrganizer.prototype.resort = function(body) {
 
     var halfBaseLength = Math.round(body.baseLength / 2);
     var roundHeight = Math.round(body.height);
-    var roundX = Math.round(body.getX());
-    var roundY = Math.round(body.getY());
-    var roundZ = Math.round(body.getZ());
+    var roundX = Math.floor(body.getX());
+    var roundY = Math.floor(body.getY());
+    var roundZ = Math.floor(body.getZ());
 
     this._sortedByXLeft.resortBody(body, roundX - halfBaseLength);
     this._sortedByXRight.resortBody(body, roundX + halfBaseLength);
