@@ -31,14 +31,14 @@ SplitTime.Body.prototype.getImage = function() {
 };
 
 /**
- * @return {{x: number, y: number, z: number, width: number, height: number, isCleared: boolean}}
+ * @return {{x: int, y: int, z: int, width: int, height: int, isCleared: boolean}}
  */
 SplitTime.Body.prototype.getCanvasRequirements = function() {
     return {
         // board location on this layer for center of canvas
-        x: this.x,
-        y: this.y,
-        z: this.z,
+        x: Math.round(this.x),
+        y: Math.round(this.y),
+        z: Math.round(this.z),
         // TODO: smarter calculations
         width: this.xres * 4,
         height: this.yres * 4,

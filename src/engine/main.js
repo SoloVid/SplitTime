@@ -1,11 +1,10 @@
 SplitTime.main = function() {
-	var clock = SplitTime.FrameStabilizer.getSimpleClock(1000);
 	var startTime = new Date().getTime();
 
 	var agentCount = 0;
 
     try {
-        var a = new Date(); //for speed checking
+        var loopStart = new Date(); //for speed checking
         switch(SplitTime.process) {
             case SplitTime.main.State.LOADING: {
                 SplitTime.see.fillStyle = "#000000";
@@ -22,8 +21,8 @@ SplitTime.main = function() {
                     region.getTime().advance(SplitTime.msPerFrame);
                 // }
                 region.TimeStabilizer.notifyFrameUpdate();
-                var b = new SLVD.speedCheck("SplitTime.Time.advance", a);
-                b.logUnusual();
+                var timeAdvance = new SLVD.speedCheck("SplitTime.Time.advance", loopStart);
+                timeAdvance.logUnusual();
 
                 region.forEachBody(function(body) {
                     body.zVelocity += body.getPixelGravityForFrame();
@@ -50,29 +49,20 @@ SplitTime.main = function() {
                     }
                 });
 
-                var c = new SLVD.speedCheck("agents update", b.date);
-                c.logUnusual();
-
-                var currentLevel = SplitTime.Level.getCurrent();
-                if(currentLevel.getBodies().length === 0) {
-                    currentLevel.refetchBodies();
-                } else {
-                    currentLevel.sortBodies();
-                }
-                var e = new SLVD.speedCheck("SplitTime sort board bodies", c.date);
-                e.logUnusual();
+                var agentsUpdate = new SLVD.speedCheck("agents update", timeAdvance.date);
+                agentsUpdate.logUnusual();
 
                 if(SplitTime.process !== SplitTime.main.State.ACTION) {
                     break;
                 }
 
                 SplitTime.BoardRenderer.renderBoardState(true);
-                var f = new SLVD.speedCheck("SplitTime.BoardRenderer.renderBoardState", e.date);
-                f.logUnusual(5);
+                var renderCheck = new SLVD.speedCheck("SplitTime.BoardRenderer.renderBoardState", agentsUpdate.date);
+                renderCheck.logUnusual(5);
 
                 SplitTime.DialogManager.notifyFrameUpdate();
-                var g = new SLVD.speedCheck("SplitTime.DialogManager.notifyFrameUpdate", e.date);
-                g.logUnusual();
+                var dialogCheck = new SLVD.speedCheck("SplitTime.DialogManager.notifyFrameUpdate", renderCheck.date);
+                dialogCheck.logUnusual();
 
                 break;
             }

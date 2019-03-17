@@ -36,7 +36,10 @@ SplitTime.Body.prototype = {
 	},
     set level(newLevel) {
         this.setLevel(newLevel, true);
-    }
+    },
+	get halfBaseLength() {
+		return Math.round(this.baseLength);
+	}
 };
 SplitTime.Body.prototype.childrenBolted = [];
 SplitTime.Body.prototype.childrenLoose = [];

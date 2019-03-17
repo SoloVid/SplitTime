@@ -212,24 +212,13 @@ SplitTime.Level.prototype.forEachBody = function(callback) {
  * @param {SplitTime.Agent.Callback} callback
  */
 SplitTime.Level.prototype.forEachAgent = function(callback) {
-    for(var i = 0; i < this.bodies.length; i++) {
-        var agent = this.bodies[i].getAgent();
+    var bodies = this._bodyOrganizer.getBodies();
+    for(var i = 0; i < bodies.length; i++) {
+        var agent = bodies[i].getAgent();
         if(agent) {
             callback(agent);
         }
     }
-};
-
-SplitTime.Level.prototype.getAgents = function() {
-    // TODO: implement
-    var agents = [];
-    for(var i = 0; i < this.bodies.length; i++) {
-        var agent = this.bodies[i].getAgent();
-        if(agent) {
-            agents.push(agent);
-        }
-    }
-    return agents;
 };
 
 /**
@@ -238,28 +227,6 @@ SplitTime.Level.prototype.getAgents = function() {
 SplitTime.Level.prototype.getBodies = function() {
     // TODO: implement
     return this.bodies;
-};
-
-// TODO: optimize
-SplitTime.Level.prototype.getBodiesWithin = function(point, distance) {
-    var bodies = this.bodies;
-    var totalBodies = bodies.length;
-    var nearbyBodies = new Array(totalBodies);
-    var length = 0;
-    //Check for collision with people
-    for(var i = 0; i < totalBodies; i++) {
-        var body = bodies[i];
-        var potentialClosestDist = distance + body.baseLength/2;
-        var dx = Math.abs(point.x - body.x);
-        var dy = Math.abs(point.y - body.y);
-        if(dx < potentialClosestDist || dy < potentialClosestDist) {
-            nearbyBodies[length++] = body;
-            // nearbyBodies.push(body);
-        }
-    }
-
-    nearbyBodies.length = length;
-    return nearbyBodies;
 };
 
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
