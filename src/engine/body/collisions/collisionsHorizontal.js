@@ -63,7 +63,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                     if(xCollisionInfo.bodies.length > 0) {
                         // Slow down when pushing
                         xPixelsRemaining--;
-                        this.tryPushOtherBodies(xCollisionInfo.bodies, dir);
+                        this.tryPushOtherBodies(xCollisionInfo.bodies, dx > 0 ? SplitTime.Direction.E : SplitTime.Direction.W);
                     }
                 } else {
                     roundX = newRoundX;
@@ -88,7 +88,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                     if(yCollisionInfo.bodies.length > 0) {
                         // Slow down when pushing
                         yPixelsRemaining--;
-                        this.tryPushOtherBodies(yCollisionInfo.bodies, dir);
+                        this.tryPushOtherBodies(yCollisionInfo.bodies, dy > 0 ? SplitTime.Direction.S : SplitTime.Direction.N);
                     }
                 } else {
                     roundY = newRoundY;
