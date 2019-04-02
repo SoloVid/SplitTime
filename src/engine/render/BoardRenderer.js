@@ -148,11 +148,14 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     var lights = [];
 
     for(var iBody = 0; iBody < bodies.length; iBody++) {
-        if(typeof bodies[iBody].prepareForRender === "function") {
-            bodies[iBody].prepareForRender();
-        }
-        if(bodies[iBody].lightIntensity > 0) {
-            lights.push(bodies[iBody]);
+        var body = bodies[iBody];
+        if(body.drawable) {
+            if(typeof body.drawable.prepareForRender === "function") {
+                body.drawable.prepareForRender();
+            }
+            if(body.drawable.lightIntensity > 0) {
+                lights.push(body);
+            }
         }
     }
     weatherRenderer.setLights(lights);
@@ -230,8 +233,9 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     snapshotCtx.drawImage(buffer, 0, 0);
 
     for(iBody = 0; iBody < bodies.length; iBody++) {
-        if(typeof bodies[iBody].cleanupAfterRender === "function") {
-            bodies[iBody].cleanupAfterRender();
+        var drawable = bodies[iBody].drawable;
+        if(drawable && typeof drawable.cleanupAfterRender === "function") {
+            drawable.cleanupAfterRender();
         }
     }
 };
@@ -242,7 +246,11 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
  * @param {CanvasRenderingContext2D} ctx
  */
 function drawBodyTo(body, ctx) {
-    var canvasRequirements = body.getCanvasRequirements();
+    if(!body.drawable) {
+        return;
+    }
+
+    var canvasRequirements = body.drawable.getCanvasRequirements(body.x, body.y, body.z);
     if(canvasRequirements === null) {
         return;
     }
@@ -252,7 +260,14 @@ function drawBodyTo(body, ctx) {
 
     // Translate origin to body location
     ctx.translate(Math.round(canvasRequirements.x - screen.x), Math.round(canvasRequirements.y - canvasRequirements.z - screen.y));
-    body.see(ctx);
+    body.drawable.draw(ctx);
+
+    if(SplitTime.Debug.ENABLED && SplitTime.Debug.DRAW_TRACES) {
+        ctx.fillStyle = "#FF0000";
+        var halfBaseLength = Math.round(body.baseLength / 2);
+        ctx.fillRect(-halfBaseLength, -halfBaseLength, body.baseLength, body.baseLength);
+    }
+
     // Reset transform
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 

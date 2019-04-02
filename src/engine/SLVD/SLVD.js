@@ -69,7 +69,9 @@ SLVD.getXML = function(fil) {
 	return promise;
 };
 
-//random integer between 1 and num
+/**
+ * random integer between 1 and num
+ */
 SLVD.randomInt = function(num) {
 	return Math.floor((Math.random() * num) + 1);
 };

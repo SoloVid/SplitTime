@@ -38,6 +38,12 @@ SplitTime.Body.prototype = {
         this.setLevel(newLevel, true);
     }
 };
+
+/**
+ * @type {SplitTime.Body.Drawable|null}
+ */
+SplitTime.Body.prototype.drawable = null;
+
 SplitTime.Body.prototype.childrenBolted = [];
 SplitTime.Body.prototype.childrenLoose = [];
 SplitTime.Body.prototype.addChild = function(child, isBolted) {
