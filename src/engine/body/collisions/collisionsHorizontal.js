@@ -164,36 +164,15 @@ SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xP
         vStepUpEstimate: 0,
         functions: []
     };
-    var functionsSet = {};
-    var me = this;
-    this.level.forEachTraceDataLayerBetween(z, z + this.height, function(imageData, layerZ) {
-        for(var y = startY; y < startY + yPixels; y++) {
-            for(var x = startX; x < startX + xPixels; x++) {
-                var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
-                var r = imageData.data[dataIndex++];
-                var g = imageData.data[dataIndex++];
-                var b = imageData.data[dataIndex++];
-                var a = imageData.data[dataIndex++];
-                if(a === 255) {
-                    if(r === SplitTime.Trace.RColor.SOLID) {
-                        var traceHeight = g;
-                        if(traceHeight > 0) {
-                            if(isZOverlap(layerZ, traceHeight, z, me.height)) {
-                                collisionInfo.blocked = true;
-                                collisionInfo.vStepUpEstimate = layerZ + traceHeight - z;
-                                return true;
-                            }
-                        }
-                    } else if(r === SplitTime.Trace.RColor.FUNCTION) {
-                        var funcId = me.level.getFunctionIdFromPixel(r, g, b, a);
-                        if(!functionsSet[funcId]) {
-                            functionsSet[funcId] = true;
-                            collisionInfo.functions.push(funcId);
-                        }
-                    }
-                }
-            }
-        }
-    });
+
+    var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
+    this.level.getLevelTraces().calculateVolumeCollision(originCollisionInfo, startX, xPixels, startY, yPixels, z, z + this.height);
+
+    collisionInfo.blocked = originCollisionInfo.containsSolid;
+    collisionInfo.vStepUpEstimate = originCollisionInfo.zBlockedTopEx - z;
+    for(var funcId in originCollisionInfo.functions) {
+        collisionInfo.functions.push(funcId);
+    }
+
     return collisionInfo;
 };

@@ -37,6 +37,7 @@ function getBodyExt(body) {
  */
 SplitTime.Body.Mover = function(body) {
     this.body = body;
+    /** @type {SplitTime.Level} */
     this.level = body.getLevel();
     /** @type {SplitTime.Level.BodyOrganizer} */
     this.levelBodyOrganizer = this.level.getBodyOrganizer();

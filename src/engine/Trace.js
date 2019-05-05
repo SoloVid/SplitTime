@@ -1,4 +1,12 @@
-SplitTime.Trace = {};
+SplitTime.Trace = function(type) {
+    this.type = type;
+    /** @type {SplitTime.Level|null} */
+	this.level = null;
+	this.offsetX = 0;
+	this.offsetY = 0;
+	this.height = 0;
+	this.functionId = "";
+};
 
 SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
 	var color = SplitTime.Trace.getColor(type);
@@ -165,15 +173,17 @@ SplitTime.Trace.Type = {
 	GROUND: "ground",
 	FUNCTION: "function",
 	PATH: "path",
+	POINTER: "pointer"
 };
 
 SplitTime.Trace.RColor = {
 	SOLID: 255,
-	FUNCTION: 100
+	FUNCTION: 100,
+	POINTER: 127
 };
 SplitTime.Trace.typeToColor = {
-	"solid": [255, 0, 0, 1],
-	"function": [100, 0, 0, 1],
+	"solid": [SplitTime.Trace.RColor.SOLID, 0, 0, 1],
+	"function": [SplitTime.Trace.RColor.FUNCTION, 0, 0, 1],
 	"path": [0, 0, 0, 1],
 	"stairs": [0, 255, 0, 1]
 };
@@ -200,11 +210,21 @@ SplitTime.Trace.getSolidColor = function(height) {
 };
 
 SplitTime.Trace.getFunctionColor = function(id) {
-	var b = id % 256;
-	var g = Math.floor(id / 256);
-	return "rgba(" + SplitTime.Trace.RColor.FUNCTION + ", " + g + ", " + b + ", 1)";
+    var b = id % 256;
+    var g = Math.floor(id / 256);
+    return "rgba(" + SplitTime.Trace.RColor.FUNCTION + ", " + g + ", " + b + ", 1)";
 };
 
 SplitTime.Trace.getFunctionIdFromColor = function(r, g, b, a) {
-	return b + 256 * g;
+    return b + 256 * g;
+};
+
+SplitTime.Trace.getPointerColor = function(id) {
+    var b = id % 256;
+    var g = Math.floor(id / 256);
+    return "rgba(" + SplitTime.Trace.RColor.POINTER + ", " + g + ", " + b + ", 1)";
+};
+
+SplitTime.Trace.getPointerIdFromColor = function(r, g, b, a) {
+    return b + 256 * g;
 };

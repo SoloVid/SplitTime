@@ -115,6 +115,13 @@ SplitTime.Level.prototype.getBodyOrganizer = function() {
 };
 
 /**
+ * @return {SplitTime.LevelTraces}
+ */
+SplitTime.Level.prototype.getLevelTraces = function() {
+    return this._levelTraces;
+};
+
+/**
  * @return {HTMLImageElement}
  */
 SplitTime.Level.prototype.getBackgroundImage = function() {
@@ -125,7 +132,7 @@ SplitTime.Level.prototype.getBackgroundImage = function() {
 };
 
 SplitTime.Level.prototype.getDebugTraceCanvas = function() {
-    return debugTraceCanvas;
+    return this._levelTraces.getDebugTraceCanvas();
 };
 
 /**
@@ -165,17 +172,6 @@ SplitTime.Level.prototype.registerFunction = function(functionId, fun) {
 
 SplitTime.Level.prototype.registerPosition = function(positionId, position) {
     this.positions[positionId] = position;
-};
-
-SplitTime.Level.prototype.getFunctionIdFromPixel = function(r, g, b, a) {
-    var functionIntId = SplitTime.Trace.getFunctionIdFromColor(r, g, b, a);
-    return this.internalFunctionIdMap[functionIntId];
-};
-
-SplitTime.Level.prototype.runFunctionFromBodyCrossPixel = function(body, r, g, b, a) {
-    var functionIntId = SplitTime.Trace.getFunctionIdFromColor(r, g, b, a);
-    var functionStringId = this.internalFunctionIdMap[functionIntId];
-    return this.runFunction(functionStringId, body);
 };
 
 SplitTime.Level.prototype.runFunction = function(functionId, param) {
@@ -240,28 +236,6 @@ SplitTime.Level.prototype.getBodies = function() {
     return this.bodies;
 };
 
-// TODO: optimize
-SplitTime.Level.prototype.getBodiesWithin = function(point, distance) {
-    var bodies = this.bodies;
-    var totalBodies = bodies.length;
-    var nearbyBodies = new Array(totalBodies);
-    var length = 0;
-    //Check for collision with people
-    for(var i = 0; i < totalBodies; i++) {
-        var body = bodies[i];
-        var potentialClosestDist = distance + body.baseLength/2;
-        var dx = Math.abs(point.x - body.x);
-        var dy = Math.abs(point.y - body.y);
-        if(dx < potentialClosestDist || dy < potentialClosestDist) {
-            nearbyBodies[length++] = body;
-            // nearbyBodies.push(body);
-        }
-    }
-
-    nearbyBodies.length = length;
-    return nearbyBodies;
-};
-
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
     this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
@@ -302,20 +276,13 @@ SplitTime.Level.prototype.refetchBodies = function() {
             console.error("Template \"" + template + "\" not found for instantiating prop");
         }
     }
-
-    // TODO: better implementation of players
-    // for(index = 0; index < SplitTime.player.length; index++) {
-    //     if(index == SplitTime.currentPlayer || this.type == "TRPG") {
-    //         this.agents.push(SplitTime.player[index]);
-    //         this.insertBody(SplitTime.player[index]);
-    //     }
-    // }
 };
 
 //Sort the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.sortBodies = function() {
-    if(this.bodies.length === 0) this.refetchBodies();
-    else {
+    if(this.bodies.length === 0){
+        this.refetchBodies();
+    } else {
         for(var index = 1; index < this.bodies.length; index++) {
             var second = index;
             while(second > 0 && this.bodies[second].y < this.bodies[second - 1].y) {
@@ -358,118 +325,13 @@ SplitTime.Level.prototype.removeBody = function(body) {
     this._bodyOrganizer.removeBody(body);
 };
 
-/**
- * @param {SplitTime.Body} body
- * @param {function(ImageData)} callback
- */
-SplitTime.Level.prototype.forEachRelevantTraceDataLayer = function(body, callback) {
-    return this.forEachTraceDataLayerBetween(body.z, body.z + body.height, callback);
-};
-
-/**
- * @param {number} minZ
- * @param {number} exMaxZ
- * @param {function(ImageData, [int], [int])} callback
- */
-SplitTime.Level.prototype.forEachTraceDataLayerBetween = function(minZ, exMaxZ, callback) {
-    for(var iLayer = 0; iLayer < this.fileData.layers.length; iLayer++) {
-        var layerZ = this.fileData.layers[iLayer].z;
-        var nextLayer = this.fileData.layers[iLayer + 1];
-        var nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_SAFE_INTEGER;
-        if(exMaxZ > layerZ && minZ < nextLayerZ) {
-            // console.log("checking on layer " + iLayer);
-            var retVal = callback(this.layerFuncData[iLayer], layerZ, nextLayerZ);
-            if(retVal !== undefined) {
-                return;
-            }
-        }
-    }
-};
-
 var levelMap = {};
 var currentLevel = null;
 
-var holderCanvas;
-var debugTraceCanvas;
-
 SplitTime.Level.prototype.loadForPlay = function() {
     this.refetchBodies();
-
-    this.internalFunctionIdMap = {};
-    var nextFunctionId = 1;
-
-    holderCanvas.width = this.width/(this.type === SplitTime.main.State.OVERWORLD ? 32 : 1);
-    holderCanvas.height = this.yWidth/(this.type === SplitTime.main.State.OVERWORLD ? 32 : 1);
-    var holderCtx = holderCanvas.getContext("2d");
-
-    debugTraceCanvas.width = this.width;
-    debugTraceCanvas.height = this.height;
-    var debugTraceCtx = debugTraceCanvas.getContext("2d");
-    debugTraceCtx.clearRect(0, 0, debugTraceCanvas.width, debugTraceCanvas.height);
-
-    //Initialize functional map
-    for(var iLayer = 0; iLayer < this.fileData.layers.length; iLayer++) {
-        holderCtx.clearRect(0, 0, holderCanvas.width, holderCanvas.height);
-
-        var layerZ = this.fileData.layers[iLayer].z;
-        var nextLayer = this.fileData.layers[iLayer + 1];
-        var nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_VALUE;
-        var layerHeight = nextLayerZ - layerZ;
-
-        //Draw traces
-        var layerTraces = this.fileData.layers[iLayer].traces;
-
-        holderCtx.translate(0.5, 0.5);
-
-        for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
-            var trace = layerTraces[iLayerTrace];
-            var type = trace.type;
-            if(type === SplitTime.Trace.Type.FUNCTION) {
-                var functionStringId = trace.parameter;
-                var functionIntId = nextFunctionId++;
-                this.internalFunctionIdMap[functionIntId] = functionStringId;
-                var color = SplitTime.Trace.getFunctionColor(functionIntId);
-                SplitTime.Trace.drawColor(trace.vertices, holderCtx, color);
-            } else if(type === SplitTime.Trace.Type.SOLID) {
-                var height = trace.parameter || layerHeight;
-                SplitTime.Trace.drawColor(trace.vertices, holderCtx, SplitTime.Trace.getSolidColor(height));
-            } else if(type === SplitTime.Trace.Type.GROUND) {
-                SplitTime.Trace.drawColor(trace.vertices, holderCtx, SplitTime.Trace.getSolidColor(0));
-            } else if(type === SplitTime.Trace.Type.STAIRS) {
-                var stairsUpDirection = trace.parameter;
-                var gradient = SplitTime.Trace.calculateGradient(trace.vertices, holderCtx, stairsUpDirection);
-                gradient.addColorStop(0, SplitTime.Trace.getSolidColor(0));
-                gradient.addColorStop(1, SplitTime.Trace.getSolidColor(layerHeight));
-                SplitTime.Trace.drawColor(trace.vertices, holderCtx, gradient);
-            } else {
-                SplitTime.Trace.draw(layerTraces[iLayerTrace].vertices, holderCtx, type);
-            }
-        }
-        var bodies = this.getBodies();
-        for(var iBody = 0; iBody < bodies.length; iBody++) {
-            var cBody = bodies[iBody];
-            if(cBody.z == iLayer) {
-                for(var iStaticTrace = 0; iStaticTrace < cBody.staticTrace.length; iStaticTrace++) {
-                    SplitTime.Trace.draw(cBody.staticTrace[iStaticTrace].traceStr, holderCtx, cBody.staticTrace[iStaticTrace].type, cBody);
-                }
-            }
-        }
-        holderCtx.translate(-0.5, -0.5);
-
-        this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, this.width, this.height);
-
-        debugTraceCtx.drawImage(holderCanvas, 0, -layerZ);
-    }
-
+    this._levelTraces = new SplitTime.LevelTraces(this, this.fileData);
     this.runFunction(ENTER_LEVEL_FUNCTION_ID);
-};
-
-SplitTime.Level.createCanvases = function(screenWidth, screenHeight) {
-    holderCanvas = document.createElement("canvas");
-    holderCanvas.setAttribute("width", screenWidth);
-    holderCanvas.setAttribute("height", screenHeight);
-
-    debugTraceCanvas = document.createElement("canvas");
 };
 
 /**
@@ -506,9 +368,8 @@ SplitTime.Level.setCurrent = function(level) {
     // TODO: clear exiting board data; probably in context of region rather than level
     if(exitingLevel) {
         exitingLevel.runFunction(EXIT_LEVEL_FUNCTION_ID);
-
-        // //Clear out all functional maps
-        // exitingLevel.layerFuncData.length = 0;
+        //Clear out all functional maps
+        exitingLevel._levelTraces = null;
     }
 
     //********Enter new board

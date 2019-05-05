@@ -26,7 +26,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalRiseTraces = function(maxDZ) {
 SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, maxDZ) {
     var top = z + this.height;
     var targetZ = z + maxDZ;
-    var targetTop = targetZ + this.height;
+    var targetTop = top + maxDZ;
     var collisionInfo = {
         x: -1,
         y: -1,
@@ -41,48 +41,33 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
     var startY = y - this.halfBaseLength;
     var yPixels = this.baseLength;
 
-    var functionLayerZMap = {};
-    var me = this;
-    this.level.forEachTraceDataLayerBetween(top, top + maxDZ, function(imageData, layerZ) {
-        if(layerZ <= z || layerZ > collisionInfo.zBlocked) {
-            return;
-        }
-        //Loop through width of base
-        for(var y = startY; y < startY + yPixels; y++) {
-            //Loop through height of base
-            for(var x = startX; x < startX + xPixels; x++) {
-                var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
-                var r = imageData.data[dataIndex++];
-                var g = imageData.data[dataIndex++];
-                var b = imageData.data[dataIndex++];
-                var a = imageData.data[dataIndex++];
-                if(a === 255) {
-                    if(r === SplitTime.Trace.RColor.SOLID) {
-                        // Assuming moving upward through layers, we will hit the bottom of a layer all at the same time
-                        // if(restrictivePixel.heightBlocked === null) {
-                        collisionInfo.x = x;
-                        collisionInfo.y = y;
-                        collisionInfo.distanceAllowed = layerZ - top;
-                        collisionInfo.zBlocked = layerZ;
-                        collisionInfo.zEnd = layerZ - me.height;
-                        // Moving up is the easy case
-                        return true;
-                        // }
-                    }
-                } else if(r === SplitTime.Trace.RColor.FUNCTION) {
-                    var funcId = me.level.getFunctionIdFromPixel(r, g, b, a);
-                    if(!(funcId in functionLayerZMap)) {
-                        functionLayerZMap[funcId] = layerZ;
-                    } else {
-                        functionLayerZMap[funcId] = Math.min(functionLayerZMap[funcId], layerZ);
+    var levelTraces = this.level.getLevelTraces();
+    var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
+    //Loop through width of base
+    for(var testY = startY; testY < startY + yPixels; testY++) {
+        //Loop through height of base
+        for(var testX = startX; testX < startX + xPixels; testX++) {
+            levelTraces.calculatePixelColumnCollisionInfo(originCollisionInfo, testX, testY, top, targetTop);
+            if(originCollisionInfo.containsSolid && originCollisionInfo.zBlockedTopEx !== collisionInfo.zBlocked) {
+                if(collisionInfo.zBlocked === null || collisionInfo.zBlocked > originCollisionInfo.zBlockedBottom) {
+                    collisionInfo.x = testX;
+                    collisionInfo.y = testY;
+                    collisionInfo.distanceAllowed = originCollisionInfo.zBlockedBottom - top;
+                    collisionInfo.zBlocked = originCollisionInfo.zBlockedBottom;
+                    collisionInfo.zEnd = collisionInfo.zBlocked - this.height;
+
+                    if(collisionInfo.distanceAllowed <= 0) {
+                        // TODO: break loops
+                        // return true;
                     }
                 }
             }
         }
-    });
+    }
 
-    for(var funcId in functionLayerZMap) {
-        if(functionLayerZMap[funcId] < collisionInfo.zBlocked) {
+    for(var funcId in originCollisionInfo.functions) {
+        var zRange = originCollisionInfo.functions[funcId];
+        if(zRange.minZ < originCollisionInfo.zBlockedBottom) {
             collisionInfo.functions.push(funcId);
         }
     }
