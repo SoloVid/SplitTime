@@ -54,7 +54,6 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
                     collisionInfo.y = testY;
                     collisionInfo.distanceAllowed = originCollisionInfo.zBlockedBottom - top;
                     collisionInfo.zBlocked = originCollisionInfo.zBlockedBottom;
-                    collisionInfo.zEnd = collisionInfo.zBlocked - this.height;
 
                     if(collisionInfo.distanceAllowed <= 0) {
                         // TODO: break loops
@@ -71,6 +70,15 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
             collisionInfo.functions.push(funcId);
         }
     }
+
+    // Make sure we don't go down
+    if(collisionInfo.distanceAllowed < 0) {
+        collisionInfo.distanceAllowed = 0;
+    }
+    if(collisionInfo.zBlocked < top){
+        collisionInfo.zBlocked = top;
+    }
+    collisionInfo.zEnd = collisionInfo.zBlocked - this.height;
 
     return collisionInfo;
 };

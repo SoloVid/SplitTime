@@ -179,7 +179,7 @@ SplitTime.Trace.Type = {
 SplitTime.Trace.RColor = {
 	SOLID: 255,
 	FUNCTION: 100,
-	POINTER: 127
+	POINTER: 20
 };
 SplitTime.Trace.typeToColor = {
 	"solid": [SplitTime.Trace.RColor.SOLID, 0, 0, 1],

@@ -63,7 +63,7 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
     for(var testY = startY; testY < startY + yPixels; testY++) {
         //Loop through height of base
         for(var testX = startX; testX < startX + xPixels; testX++) {
-            levelTraces.calculatePixelColumnCollisionInfo(originCollisionInfo, testX, testY, targetZ, z);
+            levelTraces.calculatePixelColumnCollisionInfo(originCollisionInfo, testX, testY, targetZ, z + 1);
             if(originCollisionInfo.containsSolid && originCollisionInfo.zBlockedTopEx !== collisionInfo.zBlocked) {
                 if(collisionInfo.zBlocked === null || collisionInfo.zBlocked < originCollisionInfo.zBlockedTopEx) {
                     collisionInfo.x = testX;
@@ -85,6 +85,14 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
         if(zRange.exMaxZ > originCollisionInfo.zBlockedTopEx) {
             collisionInfo.functions.push(funcId);
         }
+    }
+
+    // Make sure we don't go up
+    if(collisionInfo.distanceAllowed < 0) {
+        collisionInfo.distanceAllowed = 0;
+    }
+    if(collisionInfo.zBlocked > z){
+        collisionInfo.zBlocked = z;
     }
 
     return collisionInfo;

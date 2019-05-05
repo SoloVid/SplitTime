@@ -168,8 +168,8 @@ SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xP
     var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
     this.level.getLevelTraces().calculateVolumeCollision(originCollisionInfo, startX, xPixels, startY, yPixels, z, z + this.height);
 
-    collisionInfo.blocked = originCollisionInfo.containsSolid;
     collisionInfo.vStepUpEstimate = originCollisionInfo.zBlockedTopEx - z;
+    collisionInfo.blocked = originCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0;
     for(var funcId in originCollisionInfo.functions) {
         collisionInfo.functions.push(funcId);
     }

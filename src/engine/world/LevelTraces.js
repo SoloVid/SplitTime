@@ -90,7 +90,7 @@ SplitTime.LevelTraces.prototype._calculatePixelCollision = function(collisionInf
         switch(r) {
             case SplitTime.Trace.RColor.SOLID:
                 var height = layerZ + g;
-                if(height > minZ) {
+                if(height >= minZ) {
                     collisionInfo.containsSolid = true;
                     collisionInfo.zBlockedTopEx = Math.max(height, collisionInfo.zBlockedTopEx);
                     collisionInfo.zBlockedBottom = Math.min(layerZ, collisionInfo.zBlockedBottom);

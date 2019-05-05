@@ -71,6 +71,7 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(x, y, z, dx) 
         var traceCollision = this.calculateAreaTraceCollision(edgeX, 1, top, this.baseLength, z);
         collisionInfo.blocked = traceCollision.blocked;
         collisionInfo.functions = traceCollision.functions;
+        collisionInfo.vStepUpEstimate = traceCollision.vStepUpEstimate;
     }
     return collisionInfo;
 };
