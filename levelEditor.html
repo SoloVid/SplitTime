@@ -11,7 +11,7 @@
 			<ul>
 				<li><a href="javascript:createLevel();">New Level</a></li>
 				<li><a href="javascript:clickFileChooser();">Load Level</a>
-					<input id="fileChooser" type="file" style="display:none">
+					<input id="fileChooser" type="file" accept=".json" style="display:none">
 				</li>
 				<li><a href="javascript:downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
 				</li>
@@ -50,16 +50,16 @@
 					<option v-for="(layer, index) in level.layers" v-bind:value="index">Layer {{ index }}</option>
 				</select>
 				<br><br>
-				<div id="traceOptions" title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;Solid traces represent completely inpenetrable areas.&#013;Void traces are used for areas of open air where walking is disabled, but things (e.g. arrows, jumping people) may fly through.&#013;Function traces indicate areas of the level which will trigger a function call when a body moves into the area.&#013;Paths link positions together for walking purposes.&#013;Stairs move Bodys to different layers.
-				&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">
-					<h4>Traces</h4>
-					<div v-for="(color, type) in traceOptions"
-						 v-if="type !== 'highlight'"
+				<div id="traceOptions">
+					<h4 title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;
+						&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">Traces</h4>
+					<div v-for="(traceOption) in traceOptions"
 						 class="option"
-						 v-bind:style="{ color: 'white', backgroundColor: color }"
-						 v-on:click="selectTraceOption(type)"
+						 v-bind:style="{ color: 'white', backgroundColor: traceOption.color }"
+						 v-on:click="selectTraceOption(traceOption.type)"
+						 v-bind:title="traceOption.help"
 					>
-						{{ type }}
+						{{ traceOption.type }}
 					</div>
 				</div>
 			</div>

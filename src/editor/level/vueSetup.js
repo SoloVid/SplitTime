@@ -10,12 +10,11 @@ Vue.component("rendered-trace", {
             var displayLayerHeight = Math.min(this.layerHeight, 10000);
             switch(this.trace.type) {
                 case SplitTime.Trace.Type.SOLID:
-                    if(!this.trace.parameter && this.trace.parameter !== "0") {
+                    if(!this.trace.height && this.trace.height !== "0") {
                         return displayLayerHeight;
                     }
-                    return this.trace.parameter;
+                    return this.trace.height;
                 case SplitTime.Trace.Type.STAIRS:
-                    console.log("stairs height: " + displayLayerHeight);
                     return displayLayerHeight;
             }
             return 0;
@@ -182,10 +181,12 @@ Vue.component("rendered-position", {
             return this.body.img ? imgSrc(this.body.img) : subImg;
         },
         positionLeft: function() {
-            return this.position.x - this.body.xres/2 - this.body.baseOffX - this.body.offX;
+            // console.log(this.position);
+            // console.log(this.body);
+            return this.position.x - this.body.xres/2 - this.body.baseOffX;
         },
         positionTop: function() {
-            return this.position.y - this.position.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY - this.body.offY;
+            return this.position.y - this.position.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY;
         },
         width: function() {
             return this.body.xres;
@@ -336,7 +337,38 @@ var vueApp = new Vue({
 		levelWidth: 0,
 		levelHeight: 0,
 		activeLayer: 0,
-		traceOptions: traceEditorColors
+		traceOptions: [
+            {
+                type: SplitTime.Trace.Type.SOLID,
+                color: "rgba(0, 0, 255, 1)",
+                help: "Completely impenetrable areas bodies may not pass through (but may sit on top)"
+            },
+            {
+                type: SplitTime.Trace.Type.STAIRS,
+                color: "rgba(0, 200, 0, 1)",
+                help: "Solid trace slope up to the next layer"
+            },
+            {
+                type: SplitTime.Trace.Type.GROUND,
+                color: "rgba(0, 100, 100, .75)",
+                help: "Zero-height solid trace, perfect for bridges"
+            },
+            {
+                type: SplitTime.Trace.Type.EVENT,
+                color: "rgba(255, 0, 0, 1)",
+                help: "Indicates area of the level which will trigger a function call when a body moves into the area"
+            },
+            {
+                type: SplitTime.Trace.Type.PATH,
+                color: "rgba(0, 0, 0, 1)",
+                help: "Link positions together for walking purposes"
+            },
+            {
+                type: SplitTime.Trace.Type.POINTER,
+                color: "rgba(100, 50, 100, 1)",
+                help: "Link to another level. Traces from that level will affect this area, and a body fully moved into the pointer trace will be transported to that level."
+            }
+        ]
 	},
 	methods: {
 	    selectModeOption: function(mode) {
