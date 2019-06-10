@@ -21,7 +21,7 @@ SplitTime.LevelTraces.CollisionInfo = function() {
     /** @type {int} */
     this.zBlockedBottom = Number.MAX_SAFE_INTEGER;
     /** @type {Object.<string, ZRange>} */
-    this.functions = {};
+    this.events = {};
 };
 
 function ZRange(minZ, exMaxZ) {
@@ -31,7 +31,7 @@ function ZRange(minZ, exMaxZ) {
 
 SplitTime.LevelTraces.prototype.getFunctionIdFromPixel = function(r, g, b, a) {
     var functionIntId = SplitTime.Trace.getFunctionIdFromColor(r, g, b, a);
-    return this._internalFunctionIdMap[functionIntId];
+    return this._internalEventIdMap[functionIntId];
 };
 
 /**
@@ -79,6 +79,8 @@ SplitTime.LevelTraces.prototype.calculatePixelColumnCollisionInfo = function(col
     }
 };
 
+var fromPointerLevels = [];
+
 SplitTime.LevelTraces.prototype._calculatePixelCollision = function(collisionInfo, x, y, layer, layerZ, minZ, exMaxZ) {
     var imageData = this.layerFuncData[layer];
     var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
@@ -96,30 +98,50 @@ SplitTime.LevelTraces.prototype._calculatePixelCollision = function(collisionInf
                     collisionInfo.zBlockedBottom = Math.min(layerZ, collisionInfo.zBlockedBottom);
                 }
                 break;
-            case SplitTime.Trace.RColor.FUNCTION:
+            case SplitTime.Trace.RColor.EVENT:
                 var functionId = this.getFunctionIdFromPixel(r, g, b, a);
-                if(!(functionId in collisionInfo.functions)) {
-                    collisionInfo.functions[functionId] = new ZRange(minZ, exMaxZ);
+                if(!(functionId in collisionInfo.events)) {
+                    collisionInfo.events[functionId] = new ZRange(minZ, exMaxZ);
                 } else {
-                    collisionInfo.functions[functionId].minZ = Math.min(minZ, collisionInfo.functions[functionId].minZ);
-                    collisionInfo.functions[functionId].exMaxZ = Math.max(exMaxZ, collisionInfo.functions[functionId].exMaxZ);
+                    collisionInfo.events[functionId].minZ = Math.min(minZ, collisionInfo.events[functionId].minZ);
+                    collisionInfo.events[functionId].exMaxZ = Math.max(exMaxZ, collisionInfo.events[functionId].exMaxZ);
                 }
                 break;
             case SplitTime.Trace.RColor.POINTER:
                 var trace = this.getPointerTraceFromPixel(r, g, b, a);
-                if(!SplitTime.Debug.ENABLED || this.level.getRegion() === trace.level.getRegion()) {
-                    trace.level.getLevelTraces().calculatePixelColumnCollisionInfo(collisionInfo, x, y, minZ, exMaxZ);
-                } else {
-                    console.warn("Pointer trace accessing level outside region: " + trace.level.id);
+                if(fromPointerLevels.indexOf(trace.level.id) < 0) {
+                    fromPointerLevels.push(this.level.id);
+                    try {
+                        if(!SplitTime.Debug.ENABLED || this.level.getRegion() === trace.level.getRegion()) {
+                            var otherCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
+                            trace.level.getLevelTraces().calculatePixelColumnCollisionInfo(
+                                otherCollisionInfo,
+                                x + trace.offsetX,
+                                y + trace.offsetY,
+                                minZ + trace.offsetZ,
+                                exMaxZ + trace.offsetZ
+                            );
+                            if(otherCollisionInfo.containsSolid) {
+                                collisionInfo.containsSolid = true;
+                                collisionInfo.zBlockedTopEx = Math.max(otherCollisionInfo.zBlockedTopEx - trace.offsetZ, collisionInfo.zBlockedTopEx);
+                                collisionInfo.zBlockedBottom = Math.min(otherCollisionInfo.zBlockedBottom - trace.offsetZ, collisionInfo.zBlockedBottom);
+                            }
+                            // TODO: maybe harvest events from other level
+                        } else {
+                            console.warn("Pointer trace accessing level outside region: " + trace.level.id);
+                        }
+                        collisionInfo.otherLevelInvolved = true;
+                    } finally {
+                        fromPointerLevels.pop();
+                    }
                 }
-                collisionInfo.otherLevelInvolved = true;
                 break;
         }
     }
 };
 
 SplitTime.LevelTraces.prototype.initCanvasData = function() {
-    this._internalFunctionIdMap = {};
+    this._internalEventIdMap = {};
     this._internalPointerTraceMap = {};
     var nextFunctionId = 1;
     var nextPointerId = 1;
@@ -156,22 +178,22 @@ SplitTime.LevelTraces.prototype.initCanvasData = function() {
             var trace = layerTraces[iLayerTrace];
             var type = trace.type;
             switch(type) {
-                case SplitTime.Trace.Type.FUNCTION:
-                    var functionStringId = trace.parameter;
-                    var functionIntId = nextFunctionId++;
-                    this._internalFunctionIdMap[functionIntId] = functionStringId;
-                    var functionColor = SplitTime.Trace.getFunctionColor(functionIntId);
+                case SplitTime.Trace.Type.EVENT:
+                    var eventStringId = trace.event;
+                    var eventIntId = nextFunctionId++;
+                    this._internalEventIdMap[eventIntId] = eventStringId;
+                    var functionColor = SplitTime.Trace.getFunctionColor(eventIntId);
                     SplitTime.Trace.drawColor(trace.vertices, holderCtx, functionColor);
                     break;
                 case SplitTime.Trace.Type.SOLID:
-                    var height = trace.parameter || layerHeight;
+                    var height = trace.height || layerHeight;
                     SplitTime.Trace.drawColor(trace.vertices, holderCtx, SplitTime.Trace.getSolidColor(height));
                     break;
                 case SplitTime.Trace.Type.GROUND:
                     SplitTime.Trace.drawColor(trace.vertices, holderCtx, SplitTime.Trace.getSolidColor(0));
                     break;
                 case SplitTime.Trace.Type.STAIRS:
-                    var stairsUpDirection = trace.parameter;
+                    var stairsUpDirection = trace.direction;
                     var gradient = SplitTime.Trace.calculateGradient(trace.vertices, holderCtx, stairsUpDirection);
                     gradient.addColorStop(0, SplitTime.Trace.getSolidColor(0));
                     gradient.addColorStop(1, SplitTime.Trace.getSolidColor(layerHeight));
@@ -180,7 +202,7 @@ SplitTime.LevelTraces.prototype.initCanvasData = function() {
                 case SplitTime.Trace.Type.POINTER:
                     var pointerIntId = nextPointerId++;
                     // TODO: actual SplitTime.Trace object
-                    this._internalPointerTraceMap[pointerIntId] = trace;
+                    this._internalPointerTraceMap[pointerIntId] = SplitTime.Trace.fromRaw(trace);
                     var pointerColor = SplitTime.Trace.getPointerColor(pointerIntId);
                     SplitTime.Trace.drawColor(trace.vertices, holderCtx, pointerColor);
                     break;

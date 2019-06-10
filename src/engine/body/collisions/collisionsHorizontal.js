@@ -70,7 +70,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                     currentZ = xCollisionInfo.adjustedZ;
                     xPixelsRemaining--;
                     pixelsMovedX++;
-                    addArrayToSet(xCollisionInfo.functions, functionIdSet);
+                    addArrayToSet(xCollisionInfo.events, functionIdSet);
                 }
             }
         }
@@ -95,7 +95,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                     currentZ = yCollisionInfo.adjustedZ;
                     yPixelsRemaining--;
                     pixelsMovedY++;
-                    addArrayToSet(yCollisionInfo.functions, functionIdSet);
+                    addArrayToSet(yCollisionInfo.events, functionIdSet);
                 }
             }
         }
@@ -156,13 +156,13 @@ function isZOverlap(z1, height1, z2, height2) {
  * @param {int} startY
  * @param {int} yPixels
  * @param {number} z
- * @returns {{blocked: boolean, vStepUpEstimate: number, functions: string[]}}
+ * @returns {{blocked: boolean, vStepUpEstimate: number, events: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xPixels, startY, yPixels, z) {
     var collisionInfo = {
         blocked: false,
         vStepUpEstimate: 0,
-        functions: []
+        events: []
     };
 
     var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
@@ -170,8 +170,8 @@ SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xP
 
     collisionInfo.vStepUpEstimate = originCollisionInfo.zBlockedTopEx - z;
     collisionInfo.blocked = originCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0;
-    for(var funcId in originCollisionInfo.functions) {
-        collisionInfo.functions.push(funcId);
+    for(var funcId in originCollisionInfo.events) {
+        collisionInfo.events.push(funcId);
     }
 
     return collisionInfo;

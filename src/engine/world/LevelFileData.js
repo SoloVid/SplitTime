@@ -23,5 +23,11 @@ function LevelFileDataTrace() {
     this.id = "";
     this.type = "";
     this.vertices = "";
-    this.parameter = "";
+    this.height = ""; // for solid
+    this.direction = ""; // for stairs
+    this.event = ""; // for events
+    this.level = ""; // for pointers
+    this.offsetX = ""; // for pointers
+    this.offsetY = ""; // for pointers
+    this.offsetZ = ""; // for pointers
 }

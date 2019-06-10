@@ -8,7 +8,7 @@ var EXIT_LEVEL_FUNCTION_ID = "__EXIT_LEVEL";
  */
 SplitTime.Level = function(levelId) {
     this.id = levelId;
-    this.functions = {};
+    this.events = {};
     this.positions = {};
     this.region = null;
     /** @type SplitTime.Body[] */
@@ -159,37 +159,37 @@ SplitTime.Level.prototype.getPosition = function(positionId) {
 };
 
 SplitTime.Level.prototype.registerEnterFunction = function(fun) {
-    this.registerFunction(ENTER_LEVEL_FUNCTION_ID, fun);
+    this.registerEvent(ENTER_LEVEL_FUNCTION_ID, fun);
 };
 
 SplitTime.Level.prototype.registerExitFunction = function(fun) {
-    this.registerFunction(EXIT_LEVEL_FUNCTION_ID, fun);
+    this.registerEvent(EXIT_LEVEL_FUNCTION_ID, fun);
 };
 
-SplitTime.Level.prototype.registerFunction = function(functionId, fun) {
-    this.functions[functionId] = fun;
+SplitTime.Level.prototype.registerEvent = function(eventId, callback) {
+    this.events[eventId] = callback;
 };
 
 SplitTime.Level.prototype.registerPosition = function(positionId, position) {
     this.positions[positionId] = position;
 };
 
-SplitTime.Level.prototype.runFunction = function(functionId, param) {
+SplitTime.Level.prototype.runEvent = function(eventId, param) {
     var that = this;
-    var fun = this.functions[functionId] || function() {
-        console.warn("Function \"" + functionId + "\" not found for level " + that.id);
+    var fun = this.events[eventId] || function() {
+        console.warn("Event \"" + eventId + "\" not found for level " + that.id);
     };
     return fun(param);
 };
 
 SplitTime.Level.prototype.runFunctions = function(functionIds, param) {
     for(var i = 0; i < functionIds.length; i++) {
-        this.runFunction(functionIds[i], param);
+        this.runEvent(functionIds[i], param);
     }
 };
 SplitTime.Level.prototype.runFunctionSet = function(functionIdSet, param) {
     for(var id in functionIdSet) {
-        this.runFunction(id, param);
+        this.runEvent(id, param);
     }
 };
 
@@ -329,9 +329,18 @@ var levelMap = {};
 var currentLevel = null;
 
 SplitTime.Level.prototype.loadForPlay = function() {
-    this.refetchBodies();
-    this._levelTraces = new SplitTime.LevelTraces(this, this.fileData);
-    this.runFunction(ENTER_LEVEL_FUNCTION_ID);
+    var that = this;
+    return currentLevel.waitForLoadAssets().then(function() {
+        that.refetchBodies();
+        that._levelTraces = new SplitTime.LevelTraces(that, that.fileData);
+    });
+};
+
+SplitTime.Level.prototype.unload = function() {
+    //TODO: give agents a chance to clean up
+
+    //Clear out all functional maps
+    this._levelTraces = null;
 };
 
 /**
@@ -361,31 +370,24 @@ SplitTime.Level.setCurrent = function(level) {
     var exitingLevel = currentLevel;
     currentLevel = level;
 
-    //********Leave current board
+    var changeRegion = !exitingLevel || exitingLevel.getRegion() !== currentLevel.getRegion();
 
-    //TODO: give agents a chance to clean up
+    //********Leave current level
 
-    // TODO: clear exiting board data; probably in context of region rather than level
     if(exitingLevel) {
-        exitingLevel.runFunction(EXIT_LEVEL_FUNCTION_ID);
-        //Clear out all functional maps
-        exitingLevel._levelTraces = null;
+        exitingLevel.runEvent(EXIT_LEVEL_FUNCTION_ID);
+        if(changeRegion) {
+            exitingLevel.getRegion().unloadLevels();
+        }
     }
 
-    //********Enter new board
+    //********Enter new level
 
-    // TODO: This loading should take place at the region level; not the level level
     SplitTime.process = "loading";
-    return currentLevel.waitForLoadAssets().then(function() {
+    var promise = changeRegion ? currentLevel.getRegion().loadForPlay() : new SLVD.Promise.as();
+    return promise.then(function() {
         SplitTime.process = currentLevel.type;
-        if(SplitTime.process === SplitTime.main.State.ACTION) {
-            SplitTime.cTeam = SplitTime.player;
-        } else if(SplitTime.process == "overworld") {
-            SplitTime.cTeam = SplitTime.player;
-            SplitTime.TRPGNextTurn();
-        }
-
-        currentLevel.loadForPlay();
+        currentLevel.runEvent(ENTER_LEVEL_FUNCTION_ID);
     });
 };
 

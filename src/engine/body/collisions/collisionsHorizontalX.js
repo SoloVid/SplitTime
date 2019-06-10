@@ -9,14 +9,14 @@ dependsOn("BodyMover.js");
  * @param {int} y
  * @param {number} z
  * @param {int} dx should be -1 or 1
- * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, functions: string[]}}
+ * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, events: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, y, z, dx) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
         adjustedZ: z,
-        functions: []
+        events: []
     };
 
     var simpleCollisionInfo = this.calculateXPixelCollision(x, y, z, dx);
@@ -30,7 +30,7 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, 
     }
     collisionInfo.blocked = simpleCollisionInfo.blocked;
     collisionInfo.bodies = simpleCollisionInfo.bodies;
-    collisionInfo.functions = simpleCollisionInfo.functions;
+    collisionInfo.events = simpleCollisionInfo.events;
 
     return collisionInfo;
 };
@@ -41,14 +41,14 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, 
  * @param {int} y
  * @param {number} z
  * @param {int} dx should be -1 or 1
- * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, functions: string[]}}
+ * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(x, y, z, dx) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
         vStepUpEstimate: 0,
-        functions: []
+        events: []
     };
     var me = this;
     function handleFoundBody(otherBody) {
@@ -70,7 +70,7 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(x, y, z, dx) 
         var top = y - this.halfBaseLength;
         var traceCollision = this.calculateAreaTraceCollision(edgeX, 1, top, this.baseLength, z);
         collisionInfo.blocked = traceCollision.blocked;
-        collisionInfo.functions = traceCollision.functions;
+        collisionInfo.events = traceCollision.events;
         collisionInfo.vStepUpEstimate = traceCollision.vStepUpEstimate;
     }
     return collisionInfo;

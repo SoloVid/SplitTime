@@ -12,7 +12,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalRiseTraces = function(maxDZ) {
     var collisionInfo = this.calculateRiseThroughTraces(roundX, roundY, this.body.getZ(), maxDZ);
 
     this.body.setZ(this.body.getZ() + collisionInfo.distanceAllowed);
-    this.level.runFunctions(collisionInfo.functions, this.body);
+    this.level.runFunctions(collisionInfo.events, this.body);
     return collisionInfo.distanceAllowed;
 };
 
@@ -21,7 +21,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalRiseTraces = function(maxDZ) {
  * @param {int} y
  * @param {number} z
  * @param {number} maxDZ (positive)
- * @returns {{x: number, y: number, distanceAllowed: number, zBlocked: number, zEnd: number, functions: Array}}
+ * @returns {{x: number, y: number, distanceAllowed: number, zBlocked: number, zEnd: number, events: Array}}
  */
 SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, maxDZ) {
     var top = z + this.height;
@@ -33,7 +33,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
         distanceAllowed: maxDZ,
         zBlocked: targetTop,
         zEnd: targetZ,
-        functions: []
+        events: []
     };
 
     var startX = x - this.halfBaseLength;
@@ -64,10 +64,10 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
         }
     }
 
-    for(var funcId in originCollisionInfo.functions) {
-        var zRange = originCollisionInfo.functions[funcId];
+    for(var funcId in originCollisionInfo.events) {
+        var zRange = originCollisionInfo.events[funcId];
         if(zRange.minZ < originCollisionInfo.zBlockedBottom) {
-            collisionInfo.functions.push(funcId);
+            collisionInfo.events.push(funcId);
         }
     }
 

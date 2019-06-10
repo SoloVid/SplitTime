@@ -3,9 +3,33 @@ SplitTime.Trace = function(type) {
     /** @type {SplitTime.Level|null} */
 	this.level = null;
 	this.offsetX = 0;
-	this.offsetY = 0;
+    this.offsetY = 0;
+    this.offsetZ = 0;
 	this.height = 0;
-	this.functionId = "";
+	this.direction = "";
+	this.eventId = "";
+};
+
+SplitTime.Trace.fromRaw = function(rawTrace) {
+	var trace = new SplitTime.Trace(rawTrace.type);
+	switch(trace.type) {
+        case SplitTime.Trace.Type.SOLID:
+            trace.height = +rawTrace.height;
+            break;
+        case SplitTime.Trace.Type.STAIRS:
+            trace.direction = rawTrace.direction;
+            break;
+        case SplitTime.Trace.Type.EVENT:
+            trace.eventId = rawTrace.event;
+            break;
+        case SplitTime.Trace.Type.POINTER:
+            trace.level = SplitTime.Level.get(rawTrace.level);
+            trace.offsetX = +rawTrace.offsetX;
+            trace.offsetY = +rawTrace.offsetY;
+            trace.offsetZ = +rawTrace.offsetZ;
+            break;
+	}
+	return trace;
 };
 
 SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
@@ -171,7 +195,7 @@ SplitTime.Trace.Type = {
 	SOLID: "solid",
     STAIRS: "stairs",
 	GROUND: "ground",
-	FUNCTION: "function",
+	EVENT: "event",
 	PATH: "path",
 	POINTER: "pointer"
 };
@@ -183,7 +207,7 @@ SplitTime.Trace.RColor = {
 };
 SplitTime.Trace.typeToColor = {
 	"solid": [SplitTime.Trace.RColor.SOLID, 0, 0, 1],
-	"function": [SplitTime.Trace.RColor.FUNCTION, 0, 0, 1],
+	"event": [SplitTime.Trace.RColor.EVENT, 0, 0, 1],
 	"path": [0, 0, 0, 1],
 	"stairs": [0, 255, 0, 1]
 };
@@ -212,7 +236,7 @@ SplitTime.Trace.getSolidColor = function(height) {
 SplitTime.Trace.getFunctionColor = function(id) {
     var b = id % 256;
     var g = Math.floor(id / 256);
-    return "rgba(" + SplitTime.Trace.RColor.FUNCTION + ", " + g + ", " + b + ", 1)";
+    return "rgba(" + SplitTime.Trace.RColor.EVENT + ", " + g + ", " + b + ", 1)";
 };
 
 SplitTime.Trace.getFunctionIdFromColor = function(r, g, b, a) {

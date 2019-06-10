@@ -21,7 +21,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalDropTraces = function(maxDZ) {
         this.bodyExt.previousGroundTraceY = collisionInfo.y;
         this.bodyExt.previousGroundTraceZ = collisionInfo.zBlocked;
     }
-    this.level.runFunctions(collisionInfo.functions, this.body);
+    this.level.runFunctions(collisionInfo.events, this.body);
     return -collisionInfo.distanceAllowed;
 };
 
@@ -30,7 +30,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalDropTraces = function(maxDZ) {
  * @param {int} y
  * @param {number} z
  * @param {number} maxDZ (positive)
- * @returns {{x: number, y: number, distanceAllowed: number, zBlocked: number, functions: string[]}}
+ * @returns {{x: number, y: number, distanceAllowed: number, zBlocked: number, events: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, maxDZ) {
     var targetZ = z - maxDZ;
@@ -40,7 +40,7 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
         // positive number
         distanceAllowed: maxDZ,
         zBlocked: targetZ,
-        functions: []
+        events: []
     };
 
     var startX = x - this.halfBaseLength;
@@ -80,10 +80,10 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
         }
     }
 
-    for(var funcId in originCollisionInfo.functions) {
-        var zRange = originCollisionInfo.functions[funcId];
+    for(var funcId in originCollisionInfo.events) {
+        var zRange = originCollisionInfo.events[funcId];
         if(zRange.exMaxZ > originCollisionInfo.zBlockedTopEx) {
-            collisionInfo.functions.push(funcId);
+            collisionInfo.events.push(funcId);
         }
     }
 
