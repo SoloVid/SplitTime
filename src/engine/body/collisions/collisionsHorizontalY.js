@@ -52,19 +52,20 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(x, y, z, dy) 
     };
     var me = this;
     function handleFoundBody(otherBody) {
-        if(isXOverlap(x, me.baseLength, otherBody.getX(), otherBody.baseLength) &&
-            isZOverlap(z, me.height, otherBody.getZ(), otherBody.height)) {
+        // if(isXOverlap(x, me.baseLength, otherBody.getX(), otherBody.baseLength) &&
+        //     isZOverlap(z, me.height, otherBody.getZ(), otherBody.height)) {
             collisionInfo.blocked = true;
             collisionInfo.bodies.push(otherBody);
             collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - z;
-        }
+        // }
     }
     var edgeY = dy > 0 ? y + dy + this.halfBaseLength : y + dy - this.halfBaseLength;
-    if(dy > 0) {
-        this.levelBodyOrganizer.forEachYTop(edgeY, handleFoundBody);
-    } else {
-        this.levelBodyOrganizer.forEachYBottom(edgeY, handleFoundBody);
-    }
+    // if(dy > 0) {
+    //     this.levelBodyOrganizer.forEachYTop(edgeY, handleFoundBody);
+    // } else {
+    //     this.levelBodyOrganizer.forEachYBottom(edgeY, handleFoundBody);
+    // }
+    this.levelBodyOrganizer.forEachBody(x, edgeY, z, x + me.baseLength, edgeY + 1, z + me.height, handleFoundBody);
 
     if(!collisionInfo.blocked) {
         var left = x - this.halfBaseLength;

@@ -18,7 +18,8 @@ SplitTime.Level = function(levelId) {
     /** @type ImageData[] */
     this.layerFuncData = [];
 
-    this._bodyOrganizer = new SplitTime.Level.BodyOrganizer();
+    // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer();
+    this._bodyOrganizer = new SplitTime.Level.CellGrid();
 
     /** @type {SplitTime.WeatherRenderer} */
     this.weatherRenderer = new SplitTime.WeatherRenderer();
@@ -30,6 +31,10 @@ SplitTime.Level.load = function(levelData) {
     return level.load(levelData);
 };
 
+/**
+ * @param {SplitTime.LevelFileData} levelData
+ * @return {SLVD.Promise.Collection}
+ */
 SplitTime.Level.prototype.load = function(levelData) {
     var levelLoadPromise = new SLVD.Promise.Collection();
 
@@ -238,7 +243,8 @@ SplitTime.Level.prototype.getBodies = function() {
 
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
-    this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
+    // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
+    this._bodyOrganizer = new SplitTime.Level.CellGrid(this);
     this.bodies.length = 0;
     var index;
     //Figure out which Actors are on board
