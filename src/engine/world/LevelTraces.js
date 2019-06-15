@@ -30,9 +30,9 @@ function ZRange(minZ, exMaxZ) {
     this.exMaxZ = exMaxZ;
 }
 
-SplitTime.LevelTraces.prototype.getFunctionIdFromPixel = function(r, g, b, a) {
-    var functionIntId = SplitTime.Trace.getFunctionIdFromColor(r, g, b, a);
-    return this._internalEventIdMap[functionIntId];
+SplitTime.LevelTraces.prototype.getEventIdFromPixel = function(r, g, b, a) {
+    var eventIntId = SplitTime.Trace.getEventIdFromColor(r, g, b, a);
+    return this._internalEventIdMap[eventIntId];
 };
 
 /**
@@ -169,7 +169,7 @@ SplitTime.LevelTraces.prototype.initCanvasData = function() {
                     var eventStringId = trace.event;
                     var eventIntId = nextFunctionId++;
                     this._internalEventIdMap[eventIntId] = eventStringId;
-                    var functionColor = SplitTime.Trace.getFunctionColor(eventIntId);
+                    var functionColor = SplitTime.Trace.getEventColor(eventIntId);
                     SplitTime.Trace.drawColor(trace.vertices, holderCtx, functionColor);
                     break;
                 case SplitTime.Trace.Type.SOLID:

@@ -21,7 +21,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalDropTraces = function(maxDZ) {
         this.bodyExt.previousGroundTraceY = collisionInfo.y;
         this.bodyExt.previousGroundTraceZ = collisionInfo.zBlocked;
     }
-    this.level.runFunctions(collisionInfo.events, this.body);
+    this.level.runEvents(collisionInfo.events, this.body);
     return -collisionInfo.distanceAllowed;
 };
 

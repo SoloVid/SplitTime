@@ -50,7 +50,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
     var roundY = oldRoundY;
     var currentZ = this.body.getZ();
 
-    var functionIdSet = {};
+    var eventIdSet = {};
     for(var i = 0; i < maxIterations; i++) {
         if(xPixelsRemaining > 0) {
             var newRoundX = roundX + iHat;
@@ -70,7 +70,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                     currentZ = xCollisionInfo.adjustedZ;
                     xPixelsRemaining--;
                     pixelsMovedX++;
-                    addArrayToSet(xCollisionInfo.events, functionIdSet);
+                    addArrayToSet(xCollisionInfo.events, eventIdSet);
                 }
             }
         }
@@ -95,7 +95,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                     currentZ = yCollisionInfo.adjustedZ;
                     yPixelsRemaining--;
                     pixelsMovedY++;
-                    addArrayToSet(yCollisionInfo.events, functionIdSet);
+                    addArrayToSet(yCollisionInfo.events, eventIdSet);
                 }
             }
         }
@@ -124,7 +124,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
         this.zeldaSlide(maxDistance / 2);
     }
 
-    this.level.runFunctionSet(functionIdSet, this.body);
+    this.level.runEventSet(eventIdSet, this.body);
 
     return SplitTime.Measurement.distanceTrue(oldX, oldY, this.body.getX(), this.body.getY());
 };
@@ -143,11 +143,6 @@ SplitTime.Body.Mover.prototype.tryPushOtherBodies = function(bodies, dir) {
     }
     this.bodyExt.pushing = false;
 };
-
-function isZOverlap(z1, height1, z2, height2) {
-    var noOverlap = z1 + height1 <= z2 || z2 + height2 <= z1;
-    return !noOverlap;
-}
 
 /**
  * Check that the area is open in level collision canvas data.

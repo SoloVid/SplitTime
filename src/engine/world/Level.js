@@ -187,13 +187,13 @@ SplitTime.Level.prototype.runEvent = function(eventId, param) {
     return fun(param);
 };
 
-SplitTime.Level.prototype.runFunctions = function(functionIds, param) {
-    for(var i = 0; i < functionIds.length; i++) {
-        this.runEvent(functionIds[i], param);
+SplitTime.Level.prototype.runEvents = function(eventIds, param) {
+    for(var i = 0; i < eventIds.length; i++) {
+        this.runEvent(eventIds[i], param);
     }
 };
-SplitTime.Level.prototype.runFunctionSet = function(functionIdSet, param) {
-    for(var id in functionIdSet) {
+SplitTime.Level.prototype.runEventSet = function(eventIdSet, param) {
+    for(var id in eventIdSet) {
         this.runEvent(id, param);
     }
 };

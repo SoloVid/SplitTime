@@ -12,7 +12,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalRiseTraces = function(maxDZ) {
     var collisionInfo = this.calculateRiseThroughTraces(roundX, roundY, this.body.getZ(), maxDZ);
 
     this.body.setZ(this.body.getZ() + collisionInfo.distanceAllowed);
-    this.level.runFunctions(collisionInfo.events, this.body);
+    this.level.runEvents(collisionInfo.events, this.body);
     return collisionInfo.distanceAllowed;
 };
 

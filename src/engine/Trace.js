@@ -202,7 +202,7 @@ SplitTime.Trace.Type = {
 
 SplitTime.Trace.RColor = {
 	SOLID: 255,
-	FUNCTION: 100,
+	EVENT: 100,
 	POINTER: 20
 };
 SplitTime.Trace.typeToColor = {
@@ -233,13 +233,13 @@ SplitTime.Trace.getSolidColor = function(height) {
     return "rgba(" + SplitTime.Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)";
 };
 
-SplitTime.Trace.getFunctionColor = function(id) {
+SplitTime.Trace.getEventColor = function(id) {
     var b = id % 256;
     var g = Math.floor(id / 256);
     return "rgba(" + SplitTime.Trace.RColor.EVENT + ", " + g + ", " + b + ", 1)";
 };
 
-SplitTime.Trace.getFunctionIdFromColor = function(r, g, b, a) {
+SplitTime.Trace.getEventIdFromColor = function(r, g, b, a) {
     return b + 256 * g;
 };
 
