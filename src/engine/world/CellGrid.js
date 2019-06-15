@@ -60,8 +60,27 @@ CellGrid.prototype.addBody = function(body) {
         this._waitingBodies.push(body);
         return;
     }
+    console.log("Add " + body.ref);
 
-    this.resort(body);
+    var whereIsBodyNow = new WhereIsBody(this, body);
+
+    for(var iZ = whereIsBodyNow.minZCellIndex; iZ < whereIsBodyNow.exMaxZCellIndex; iZ++) {
+        for(var iY = whereIsBodyNow.minYCellIndex; iY < whereIsBodyNow.exMaxYCellIndex; iY++) {
+            for(var iX = whereIsBodyNow.minXCellIndex; iX < whereIsBodyNow.exMaxXCellIndex; iX++) {
+                var cell = this._grids[iZ][iY*this._xCells + iX];
+                if(SplitTime.Debug.ENABLED) {
+                    for(var i = 0; i < cell.length; i++) {
+                        if(cell[i] === body) {
+                            console.warn("Body " + body.ref + " added to cell more than once");
+                            return;
+                        }
+                    }
+                }
+                cell.push(body);
+            }
+        }
+    }
+    this._whereAreBodies[body.ref] = whereIsBodyNow;
 };
 
 /**
@@ -70,28 +89,26 @@ CellGrid.prototype.addBody = function(body) {
  */
 CellGrid.prototype.removeBody = function(body) {
     if(!this._initialized) {
-        for(var i = this._waitingBodies.length - 1; i >= 0; i++) {
-            this._waitingBodies.splice(i, 1);
+        for(var iBody = this._waitingBodies.length - 1; iBody >= 0; iBody++) {
+            this._waitingBodies.splice(iBody, 1);
         }
         return;
     }
 
     var whereWasBody = this._whereAreBodies[body.ref];
-    var whereIsBodyNow = new WhereIsBody(this);
 
-    var me = this;
-    function removeFromCell(body, x, y, z) {
-        var cell = me._grids[z][y*me._xCells + x];
-        for(var i = 0; i < cell.length; i++) {
-            if(cell[i] === body) {
-                cell.splice(i, 1);
-                return;
+    for(var iZ = whereWasBody.minZCellIndex; iZ < whereWasBody.exMaxZCellIndex; iZ++) {
+        for(var iY = whereWasBody.minYCellIndex; iY < whereWasBody.exMaxYCellIndex; iY++) {
+            for(var iX = whereWasBody.minXCellIndex; iX < whereWasBody.exMaxXCellIndex; iX++) {
+                var cell = this._grids[iZ][iY*this._xCells + iX];
+                for(var i = 0; i < cell.length; i++) {
+                    if(cell[i] === body) {
+                        cell.splice(i, 1);
+                        return;
+                    }
+                }
             }
         }
-    }
-
-    if(whereWasBody) {
-        this._adjustCellClaims(body, whereWasBody, whereIsBodyNow, removeFromCell);
     }
 
     this._whereAreBodies[body.ref] = undefined;
@@ -107,6 +124,7 @@ CellGrid.prototype.resort = function(body) {
     if(!this._initialized) {
         return;
     }
+    console.log("Resort " + body.ref);
 
     var whereWasBody = this._whereAreBodies[body.ref] || new WhereIsBody(this);
     var whereIsBodyNow = new WhereIsBody(this, body);
@@ -124,6 +142,14 @@ CellGrid.prototype.resort = function(body) {
 
     function addToCell(body, x, y, z) {
         var cell = me._grids[z][y*me._xCells + x];
+        if(SplitTime.Debug.ENABLED) {
+            for(var i = 0; i < cell.length; i++) {
+                if(cell[i] === body) {
+                    console.warn("Body " + body.ref + " added to cell more than once");
+                    return;
+                }
+            }
+        }
         cell.push(body);
     }
 
@@ -144,86 +170,57 @@ CellGrid.prototype.resort = function(body) {
  */
 CellGrid.prototype._adjustCellClaims = function(body, whitelistArea, blacklistArea, callback) {
     var iX, iY, iZ;
-    // Visit cells in whitelistArea to the left of cells in blacklistArea
-    for(var iLeftX = whitelistArea.minXCellIndex; iLeftX < Math.min(whitelistArea.exMaxXCellIndex, blacklistArea.minXCellIndex); iLeftX++) {
-        for(iY = whitelistArea.minYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
-            for(iZ = whitelistArea.minZCellIndex; iZ < whitelistArea.exMaxZCellIndex; iZ++) {
-                callback(body, iLeftX, iY, iZ);
-            }
-        }
-    }
-    // Visit cells in whitelistArea to the right of cells in blacklistArea
-    for(var iRightX = Math.max(blacklistArea.exMaxXCellIndex, whitelistArea.minXCellIndex); iRightX < whitelistArea.exMaxXCellIndex; iRightX++) {
-        for(iY = whitelistArea.minYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
-            for(iZ = whitelistArea.minZCellIndex; iZ < whitelistArea.exMaxZCellIndex; iZ++) {
-                callback(body, iRightX, iY, iZ);
-            }
-        }
-    }
-    // Visit cells in whitelistArea to the top (y) of cells in blacklistArea
-    for(var iTopY = whitelistArea.minYCellIndex; iTopY < Math.min(whitelistArea.exMaxYCellIndex, blacklistArea.minYCellIndex); iTopY++) {
-        for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
-            for(iZ = whitelistArea.minZCellIndex; iZ < whitelistArea.exMaxZCellIndex; iZ++) {
-                callback(body, iX, iTopY, iZ);
-            }
-        }
-    }
-    // Visit cells in whitelistArea to the bottom (y) of cells in blacklistArea
-    for(var iBottomY = Math.max(blacklistArea.exMaxYCellIndex, whitelistArea.minYCellIndex); iBottomY < whitelistArea.exMaxYCellIndex; iBottomY++) {
-        for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
-            for(iZ = whitelistArea.minZCellIndex; iZ < whitelistArea.exMaxZCellIndex; iZ++) {
-                callback(body, iX, iBottomY, iZ);
-            }
-        }
-    }
+
+    var whitelistAreaUnderBlacklistExMaxZCellIndex = Math.min(whitelistArea.exMaxZCellIndex, blacklistArea.minZCellIndex);
+    var whitelistAreaAboveBlacklistMinZCellIndex = Math.max(blacklistArea.exMaxZCellIndex, whitelistArea.minZCellIndex);
     // Visit cells in whitelistArea to the bottom (z) of cells in blacklistArea
-    for(var iBottomZ = whitelistArea.minZCellIndex; iBottomZ < Math.min(whitelistArea.exMaxZCellIndex, blacklistArea.minZCellIndex); iBottomZ++) {
-        for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
-            for(iY = whitelistArea.minYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
-                callback(body, iX, iY, iBottomZ);
+    for(iZ = whitelistArea.minZCellIndex; iZ < whitelistAreaUnderBlacklistExMaxZCellIndex; iZ++) {
+        for(iY = whitelistArea.minYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
+            for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
+                callback(body, iX, iY, iZ);
             }
         }
     }
     // Visit cells in whitelistArea to the top (z) of cells in blacklistArea
-    for(var iTopZ = Math.max(blacklistArea.exMaxZCellIndex, whitelistArea.minZCellIndex); iTopZ < whitelistArea.exMaxZCellIndex; iTopZ++) {
-        for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
-            for(iY = whitelistArea.minYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
-                callback(body, iX, iY, iTopZ);
+    for(iZ = whitelistAreaAboveBlacklistMinZCellIndex; iZ < whitelistArea.exMaxZCellIndex; iZ++) {
+        for(iY = whitelistArea.minYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
+            for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
+                callback(body, iX, iY, iZ);
             }
         }
     }
+    // Visit cells in whitelistArea within z range of blacklistArea
+    for(iZ = whitelistAreaUnderBlacklistExMaxZCellIndex; iZ < whitelistAreaAboveBlacklistMinZCellIndex; iZ++) {
+        var whitelistAreaTopBlacklistExMaxYCellIndex = Math.min(whitelistArea.exMaxYCellIndex, blacklistArea.minYCellIndex);
+        var whitelistAreaBottomBlacklistMinYCellIndex = Math.max(blacklistArea.exMaxYCellIndex, whitelistArea.minYCellIndex);
+        // Visit cells in whitelistArea to the top (y) of cells in blacklistArea
+        for(iY = whitelistArea.minYCellIndex; iY < whitelistAreaTopBlacklistExMaxYCellIndex; iY++) {
+            for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
+                callback(body, iX, iY, iZ);
+            }
+        }
+        // Visit cells in whitelistArea to the bottom (y) of cells in blacklistArea
+        for(iY = whitelistAreaBottomBlacklistMinYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
+            for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
+                callback(body, iX, iY, iZ);
+            }
+        }
+        // Visit cells in whitelistArea within y range of blacklistArea
+        for(iY = whitelistAreaTopBlacklistExMaxYCellIndex; iY < whitelistAreaBottomBlacklistMinYCellIndex; iY++) {
+            var whitelistAreaLeftBlacklistExMaxXCellIndex = Math.min(whitelistArea.exMaxXCellIndex, blacklistArea.minXCellIndex);
+            var whitelistAreaRightBlacklistMinXCellIndex = Math.max(blacklistArea.exMaxXCellIndex, whitelistArea.minXCellIndex);
+            // Visit cells in whitelistArea to the left of cells in blacklistArea
+            for(iX = whitelistArea.minXCellIndex; iX < whitelistAreaLeftBlacklistExMaxXCellIndex; iX++) {
+                callback(body, iX, iY, iZ);
+            }
+            // Visit cells in whitelistArea to the right of cells in blacklistArea
+            for(iX = whitelistAreaRightBlacklistMinXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
+                callback(body, iX, iY, iZ);
+            }
+            // We should have hit all cases at this point; so don't need the last loop like the other dimensions
+        }
+    }
 };
-
-// /**
-//  * Check if any bodies are present with left at specified x.
-//  * If so, run callback for each one.
-//  * @param {int} x
-//  * @param {function(SplitTime.Body)} [callback]
-//  * @return {boolean} whether any bodies were found
-//  */
-// CellGrid.prototype.forEachXLeft = function(x, callback) {
-//     return forEachBodyAtValue(x, callback, this._sortedByXLeft);
-// };
-//
-// CellGrid.prototype.forEachXRight = function(x, callback) {
-//     return forEachBodyAtValue(x, callback, this._sortedByXRight);
-// };
-//
-// CellGrid.prototype.forEachYTop = function(y, callback) {
-//     return forEachBodyAtValue(y, callback, this._sortedByYTop);
-// };
-//
-// CellGrid.prototype.forEachYBottom = function(y, callback) {
-//     return forEachBodyAtValue(y, callback, this._sortedByYBottom);
-// };
-//
-// CellGrid.prototype.forEachZTop = function(z, callback) {
-//     return forEachBodyAtValue(z, callback, this._sortedByZTop);
-// };
-//
-// CellGrid.prototype.forEachZBottom = function(z, callback) {
-//     return forEachBodyAtValue(z, callback, this._sortedByZBottom);
-// };
 
 /**
  *
@@ -256,16 +253,6 @@ CellGrid.prototype.forEachBody = function(minX, minY, minZ, exMaxX, exMaxY, exMa
 };
 
 /**
- * @param x
- * @param y
- * @param z
- * @return {SplitTime.Body}
- */
-CellGrid.prototype.getCellAt = function(x, y, z) {
-    return this._grids[this.getZIndex(z)][this.getFlatIndex(x, y)];
-};
-
-/**
  * Map real x coordinate to cell x-coordinate
  * @param {int} x
  * @return {int}
@@ -288,15 +275,6 @@ CellGrid.prototype.getYIndex = function(y) {
  */
 CellGrid.prototype.getZIndex = function(z) {
     return Math.min(Math.max(0, Math.floor(z / PARTITION_SIZE)), this._zCells - 1);
-};
-
-/**
- * @param x
- * @param y
- * @return {int}
- */
-CellGrid.prototype.getFlatIndex = function(x, y) {
-    return (this.getYIndex(y)*this._xCells + this.getXIndex(x));
 };
 
 /**
