@@ -10,7 +10,7 @@ var ZILCH = 0.000001;
  * @returns {number} distance actually moved
  */
 SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
-    this.ensureInLevel();
+    this.ensureInRegion();
     var level = this.level;
 
     var dy = -maxDistance * Math.sin(dir * (Math.PI / 2)); //Total y distance to travel
@@ -151,27 +151,32 @@ function isZOverlap(z1, height1, z2, height2) {
 
 /**
  * Check that the area is open in level collision canvas data.
+ * @param {SplitTime.Level} level
  * @param {int} startX
  * @param {int} xPixels
  * @param {int} startY
  * @param {int} yPixels
  * @param {number} z
- * @returns {{blocked: boolean, vStepUpEstimate: number, events: string[]}}
+ * @returns {{blocked: boolean, vStepUpEstimate: number, pointerTraces: SplitTime.Trace[], events: string[]}}
  */
-SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(startX, xPixels, startY, yPixels, z) {
+SplitTime.Body.Mover.prototype.calculateAreaTraceCollision = function(level, startX, xPixels, startY, yPixels, z) {
     var collisionInfo = {
         blocked: false,
         vStepUpEstimate: 0,
+        pointerTraces: [],
         events: []
     };
 
     var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
-    this.level.getLevelTraces().calculateVolumeCollision(originCollisionInfo, startX, xPixels, startY, yPixels, z, z + this.height);
+    level.getLevelTraces().calculateVolumeCollision(originCollisionInfo, startX, xPixels, startY, yPixels, z, z + this.height);
 
     collisionInfo.vStepUpEstimate = originCollisionInfo.zBlockedTopEx - z;
     collisionInfo.blocked = originCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0;
-    for(var funcId in originCollisionInfo.events) {
-        collisionInfo.events.push(funcId);
+    for(var levelId in originCollisionInfo.pointerTraces) {
+        collisionInfo.pointerTraces.push(originCollisionInfo.pointerTraces[levelId]);
+    }
+    for(var eventId in originCollisionInfo.events) {
+        collisionInfo.events.push(eventId);
     }
 
     return collisionInfo;

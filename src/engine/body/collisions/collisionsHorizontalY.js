@@ -19,10 +19,10 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, 
         events: []
     };
 
-    var simpleCollisionInfo = this.calculateYPixelCollision(x, y, z, dy);
+    var simpleCollisionInfo = this.calculateYPixelCollision(this.body.getLevel(), x, y, z, dy);
     if(simpleCollisionInfo.blocked && simpleCollisionInfo.vStepUpEstimate <= SplitTime.Body.Mover.VERTICAL_FUDGE) {
         var stepUpZ = this.calculateRiseThroughTraces(x, y + dy, z, SplitTime.Body.Mover.VERTICAL_FUDGE).zEnd;
-        var simpleStepUpCollisionInfo = this.calculateYPixelCollision(x, y, stepUpZ, dy);
+        var simpleStepUpCollisionInfo = this.calculateYPixelCollision(this.body.getLevel(), x, y, stepUpZ, dy);
         if(!simpleStepUpCollisionInfo.blocked) {
             collisionInfo.adjustedZ = this.calculateDropThroughTraces(x, y + dy, stepUpZ, SplitTime.Body.Mover.VERTICAL_FUDGE).zBlocked;
             simpleCollisionInfo = simpleStepUpCollisionInfo;
@@ -37,13 +37,14 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, 
 
 /**
  * Check that dy can be accomplished.
+ * @param {SplitTime.Level} level
  * @param {int} x
  * @param {int} y
  * @param {number} z
  * @param {int} dy should be -1 or 1
  * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[]}}
  */
-SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(x, y, z, dy) {
+SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(level, x, y, z, dy) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
@@ -57,13 +58,40 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(x, y, z, dy) 
     }
     var edgeY = dy > 0 ? y + dy + this.halfBaseLength : y + dy - this.halfBaseLength;
     var left = x - this.halfBaseLength;
-    this.levelBodyOrganizer.forEachBody(left, edgeY, z, left + this.baseLength, edgeY + 1, z + this.height, handleFoundBody);
+    level.getCellGrid().forEachBody(left, edgeY, z, left + this.baseLength, edgeY + 1, z + this.height, handleFoundBody);
 
     if(!collisionInfo.blocked) {
-        var traceCollision = this.calculateAreaTraceCollision(left, this.baseLength, edgeY, 1, z);
-        collisionInfo.blocked = traceCollision.blocked;
+        var traceCollision = this.calculateAreaTraceCollision(level, left, this.baseLength, edgeY, 1, z);
         collisionInfo.events = traceCollision.events;
-        collisionInfo.vStepUpEstimate = traceCollision.vStepUpEstimate;
+        if(traceCollision.blocked) {
+            collisionInfo.blocked = traceCollision.blocked;
+            collisionInfo.vStepUpEstimate = traceCollision.vStepUpEstimate;
+        } else {
+            for(var iPointerCollision = 0; iPointerCollision < traceCollision.pointerTraces.length; iPointerCollision++) {
+                var pointerTrace = traceCollision.pointerTraces[iPointerCollision];
+                if(this.fromPointerLevels.indexOf(pointerTrace.level.id) < 0) {
+                    this.fromPointerLevels.push(this.level.id);
+                    try {
+                        var otherLevelCollisionInfo = this.calculateYPixelCollision(
+                            pointerTrace.level,
+                            x + pointerTrace.offsetX,
+                            y + pointerTrace.offsetY,
+                            z + pointerTrace.offsetZ,
+                            dy
+                        );
+                        // TODO: maybe add events?
+                        if(otherLevelCollisionInfo.blocked) {
+                            collisionInfo.blocked = true;
+                            collisionInfo.bodies = otherLevelCollisionInfo.bodies;
+                            collisionInfo.vStepUpEstimate = otherLevelCollisionInfo.vStepUpEstimate;
+                            break;
+                        }
+                    } finally {
+                        this.fromPointerLevels.pop();
+                    }
+                }
+            }
+        }
     }
     return collisionInfo;
 };

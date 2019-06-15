@@ -97,7 +97,7 @@ SplitTime.Body.prototype.baseOffY = 0;
 
 SplitTime.Body.prototype._resortInBodyOrganizer = function() {
 	if(this._level) {
-		this._level.getBodyOrganizer().resort(this);
+		this._level.getCellGrid().resort(this);
 	}
 };
 

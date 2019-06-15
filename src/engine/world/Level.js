@@ -19,7 +19,7 @@ SplitTime.Level = function(levelId) {
     this.layerFuncData = [];
 
     // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer();
-    this._bodyOrganizer = new SplitTime.Level.CellGrid();
+    this._cellGrid = new SplitTime.Level.CellGrid();
 
     /** @type {SplitTime.WeatherRenderer} */
     this.weatherRenderer = new SplitTime.WeatherRenderer();
@@ -61,7 +61,7 @@ SplitTime.Level.prototype.load = function(levelData) {
             that.width = backgroundImg.width;
         }
 
-        that._bodyOrganizer.initialize(that);
+        that._cellGrid.initialize(that);
     }
 
     this.background = levelData.background;
@@ -113,10 +113,10 @@ SplitTime.Level.prototype.waitForLoadAssets = function() {
 };
 
 /**
- * @return {SplitTime.Level.BodyOrganizer}
+ * @return {SplitTime.Level.CellGrid}
  */
-SplitTime.Level.prototype.getBodyOrganizer = function() {
-    return this._bodyOrganizer;
+SplitTime.Level.prototype.getCellGrid = function() {
+    return this._cellGrid;
 };
 
 /**
@@ -244,14 +244,14 @@ SplitTime.Level.prototype.getBodies = function() {
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
     // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
-    this._bodyOrganizer = new SplitTime.Level.CellGrid(this);
+    this._cellGrid = new SplitTime.Level.CellGrid(this);
     this.bodies.length = 0;
     var index;
     //Figure out which Actors are on board
     for(var id in SplitTime.Actor) {
         var actor = SplitTime.Actor[id];
         if(actor.getLevel() === this) {
-            // this._bodyOrganizer.removeBody(actor);
+            // this._cellGrid.removeBody(actor);
             this.insertBody(actor, true);
         }
     }
@@ -313,7 +313,7 @@ SplitTime.Level.prototype.insertBody = function(body, skipOrganizer) {
     }
     this.bodies.splice(index, 0, body);
     // if(!skipOrganizer) {
-        this._bodyOrganizer.addBody(body);
+        this._cellGrid.addBody(body);
     // }
 };
 
@@ -328,7 +328,7 @@ SplitTime.Level.prototype.removeBody = function(body) {
             index = this.bodies.length;
         }
     }
-    this._bodyOrganizer.removeBody(body);
+    this._cellGrid.removeBody(body);
 };
 
 var levelMap = {};

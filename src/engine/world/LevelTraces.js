@@ -15,7 +15,8 @@ SplitTime.LevelTraces = function(level, levelFileData) {
 
 SplitTime.LevelTraces.CollisionInfo = function() {
     this.containsSolid = false;
-    this.otherLevelInvolved = false;
+    /** @type {Object.<string, SplitTime.Trace>} */
+    this.pointerTraces = {};
     /** @type {int} */
     this.zBlockedTopEx = 0;
     /** @type {int} */
@@ -81,6 +82,17 @@ SplitTime.LevelTraces.prototype.calculatePixelColumnCollisionInfo = function(col
 
 var fromPointerLevels = [];
 
+/**
+ *
+ * @param {SplitTime.LevelTraces.CollisionInfo} collisionInfo
+ * @param {int} x
+ * @param {int} y
+ * @param {int} layer
+ * @param layerZ
+ * @param minZ
+ * @param exMaxZ
+ * @private
+ */
 SplitTime.LevelTraces.prototype._calculatePixelCollision = function(collisionInfo, x, y, layer, layerZ, minZ, exMaxZ) {
     var imageData = this.layerFuncData[layer];
     var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
@@ -99,42 +111,17 @@ SplitTime.LevelTraces.prototype._calculatePixelCollision = function(collisionInf
                 }
                 break;
             case SplitTime.Trace.RColor.EVENT:
-                var functionId = this.getFunctionIdFromPixel(r, g, b, a);
-                if(!(functionId in collisionInfo.events)) {
-                    collisionInfo.events[functionId] = new ZRange(minZ, exMaxZ);
+                var eventId = this.getEventIdFromPixel(r, g, b, a);
+                if(!(eventId in collisionInfo.events)) {
+                    collisionInfo.events[eventId] = new ZRange(minZ, exMaxZ);
                 } else {
-                    collisionInfo.events[functionId].minZ = Math.min(minZ, collisionInfo.events[functionId].minZ);
-                    collisionInfo.events[functionId].exMaxZ = Math.max(exMaxZ, collisionInfo.events[functionId].exMaxZ);
+                    collisionInfo.events[eventId].minZ = Math.min(minZ, collisionInfo.events[eventId].minZ);
+                    collisionInfo.events[eventId].exMaxZ = Math.max(exMaxZ, collisionInfo.events[eventId].exMaxZ);
                 }
                 break;
             case SplitTime.Trace.RColor.POINTER:
                 var trace = this.getPointerTraceFromPixel(r, g, b, a);
-                if(fromPointerLevels.indexOf(trace.level.id) < 0) {
-                    fromPointerLevels.push(this.level.id);
-                    try {
-                        if(!SplitTime.Debug.ENABLED || this.level.getRegion() === trace.level.getRegion()) {
-                            var otherCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
-                            trace.level.getLevelTraces().calculatePixelColumnCollisionInfo(
-                                otherCollisionInfo,
-                                x + trace.offsetX,
-                                y + trace.offsetY,
-                                minZ + trace.offsetZ,
-                                exMaxZ + trace.offsetZ
-                            );
-                            if(otherCollisionInfo.containsSolid) {
-                                collisionInfo.containsSolid = true;
-                                collisionInfo.zBlockedTopEx = Math.max(otherCollisionInfo.zBlockedTopEx - trace.offsetZ, collisionInfo.zBlockedTopEx);
-                                collisionInfo.zBlockedBottom = Math.min(otherCollisionInfo.zBlockedBottom - trace.offsetZ, collisionInfo.zBlockedBottom);
-                            }
-                            // TODO: maybe harvest events from other level
-                        } else {
-                            console.warn("Pointer trace accessing level outside region: " + trace.level.id);
-                        }
-                        collisionInfo.otherLevelInvolved = true;
-                    } finally {
-                        fromPointerLevels.pop();
-                    }
-                }
+                collisionInfo.pointerTraces[trace.level.id] = trace;
                 break;
         }
     }
