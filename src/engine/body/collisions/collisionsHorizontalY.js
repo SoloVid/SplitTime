@@ -65,10 +65,10 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(x, y, z, dy) 
     // } else {
     //     this.levelBodyOrganizer.forEachYBottom(edgeY, handleFoundBody);
     // }
-    this.levelBodyOrganizer.forEachBody(x, edgeY, z, x + me.baseLength, edgeY + 1, z + me.height, handleFoundBody);
+    var left = x - this.halfBaseLength;
+    this.levelBodyOrganizer.forEachBody(left, edgeY, z, left + this.baseLength, edgeY + 1, z + this.height, handleFoundBody);
 
     if(!collisionInfo.blocked) {
-        var left = x - this.halfBaseLength;
         var traceCollision = this.calculateAreaTraceCollision(left, this.baseLength, edgeY, 1, z);
         collisionInfo.blocked = traceCollision.blocked;
         collisionInfo.events = traceCollision.events;

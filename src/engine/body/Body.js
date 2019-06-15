@@ -161,6 +161,20 @@ SplitTime.Body.prototype.height = 32;
 SplitTime.Body.prototype.dir = 3;
 
 /**
+ * @return {number}
+ */
+SplitTime.Body.prototype.getLeft = function() {
+    return this.getX() - this.baseLength / 2;
+};
+
+/**
+ * @return {number}
+ */
+SplitTime.Body.prototype.getTopY = function() {
+    return this.getY() - this.baseLength / 2;
+};
+
+/**
  * @deprecated
  * @return {boolean}
  */
