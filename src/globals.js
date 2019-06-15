@@ -19,7 +19,7 @@ SplitTime.process = "hold"; //Input of master setInterval switch-case
 SplitTime.SCREENX = 640;
 SplitTime.SCREENY = 480;
 
-SplitTime.FPS = 50;
+SplitTime.FPS = 60;
 SplitTime.msPerFrame = (1/SplitTime.FPS)*1000;
 
 window.dependsOn = function(filename) {

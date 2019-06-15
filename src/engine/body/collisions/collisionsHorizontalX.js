@@ -50,21 +50,12 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(x, y, z, dx) 
         vStepUpEstimate: 0,
         events: []
     };
-    var me = this;
     function handleFoundBody(otherBody) {
-        // if(isYOverlap(y, me.baseLength, otherBody.getY(), otherBody.baseLength) &&
-        //     isZOverlap(z, me.height, otherBody.getZ(), otherBody.height)) {
-            collisionInfo.blocked = true;
-            collisionInfo.bodies.push(otherBody);
-            collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - z;
-        // }
+        collisionInfo.blocked = true;
+        collisionInfo.bodies.push(otherBody);
+        collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - z;
     }
     var edgeX = dx > 0 ? x + dx + this.halfBaseLength : x + dx - this.halfBaseLength;
-    // if(dx > 0) {
-    //     this.levelBodyOrganizer.forEachXLeft(edgeX, handleFoundBody);
-    // } else {
-    //     this.levelBodyOrganizer.forEachXRight(edgeX, handleFoundBody);
-    // }
     var top = y - this.halfBaseLength;
     this.levelBodyOrganizer.forEachBody(edgeX, top, z, edgeX + 1, top + this.baseLength, z + this.height, handleFoundBody);
 
@@ -76,15 +67,3 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(x, y, z, dx) 
     }
     return collisionInfo;
 };
-
-function isYOverlap(y1, baseLength1, y2, baseLength2) {
-    var top1 = y1 - baseLength1 / 2;
-    var top2 = y2 - baseLength2 / 2;
-    var noOverlap = top1 + baseLength1 < top2 || top2 + baseLength2 < top1;
-    return !noOverlap;
-}
-
-function isZOverlap(z1, height1, z2, height2) {
-    var noOverlap = z1 + height1 <= z2 || z2 + height2 <= z1;
-    return !noOverlap;
-}

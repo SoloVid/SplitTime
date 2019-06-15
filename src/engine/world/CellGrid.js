@@ -60,7 +60,6 @@ CellGrid.prototype.addBody = function(body) {
         this._waitingBodies.push(body);
         return;
     }
-    console.log("Add " + body.ref);
 
     var whereIsBodyNow = new WhereIsBody(this, body);
 
@@ -124,7 +123,6 @@ CellGrid.prototype.resort = function(body) {
     if(!this._initialized) {
         return;
     }
-    console.log("Resort " + body.ref);
 
     var whereWasBody = this._whereAreBodies[body.ref] || new WhereIsBody(this);
     var whereIsBodyNow = new WhereIsBody(this, body);
