@@ -98,6 +98,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
                     yPixelsRemaining--;
                     pixelsMovedY++;
                     addArrayToSet(yCollisionInfo.events, eventIdSet);
+                    addArrayToSet(yCollisionInfo.otherLevels, levelIdSet);
                 }
             }
         }
@@ -163,23 +164,6 @@ SplitTime.Body.Mover.prototype.transportLevelIfApplicable = function(levelIdSet)
         return;
     }
     var currentLevel = this.body.getLevel();
-    // var levelTraces = currentLevel.getLevelTraces();
-    // var cornerCollisionInfos = [new SplitTime.LevelTraces.CollisionInfo(), new SplitTime.LevelTraces.CollisionInfo(), new SplitTime.LevelTraces.CollisionInfo(), new SplitTime.LevelTraces.CollisionInfo()];
-    // var left = Math.round(this.body.getLeft());
-    // var topY = Math.round(this.body.getTopY());
-    // var roundBase = Math.round(this.baseLength);
-    // var z = Math.round(this.body.getZ());
-    // var topZ = z + Math.round(this.height);
-    // levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[0], left, topY, z, topZ);
-    // levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[1], left, topY + roundBase, z, topZ);
-    // levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[2], left + roundBase, topY, z, topZ);
-    // levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[3], left + roundBase, topY + roundBase, z, topZ);
-    // for(var i = 0; i < cornerCollisionInfos.length; i++) {
-    //     if(!cornerCollisionInfos[i].pointerTraces[id]) {
-    //         return;
-    //     }
-    // }
-    // var pointerTrace = cornerCollisionInfos[0].pointerTraces[id];
     var whereToNext = this._theNextTransport(currentLevel, id, this.body.getX(), this.body.getY(), this.body.getZ());
     var whereTo = null;
     while(whereToNext !== null && whereToNext.level !== currentLevel) {
@@ -194,10 +178,6 @@ SplitTime.Body.Mover.prototype.transportLevelIfApplicable = function(levelIdSet)
     } else if(whereTo !== null) {
         this.body.put(whereTo.level, whereTo.x, whereTo.y, whereTo.z);
     }
-    // var whereTo = this._shouldTransportLevel(currentLevel, id, this.body.getX(), this.body.getY(), this.body.getZ());
-    // if(whereTo) {
-    //     this.body.put(whereTo.level, x, y, z);
-    // }
 };
 
 /**
@@ -239,56 +219,6 @@ SplitTime.Body.Mover.prototype._theNextTransport = function(levelFrom, levelIdTo
         y: y + pointerTrace.offsetY,
         z: z + pointerTrace.offsetZ
     };
-};
-
-/**
- * @param {SplitTime.Level} levelFrom
- * @param {string|null} levelIdTo
- * @param {number} x
- * @param {number} y
- * @param {number} z
- * @returns {{level: SplitTime.Level, x: number, y: number, z: number}|null}
- */
-SplitTime.Body.Mover.prototype._shouldTransportLevel = function(levelFrom, levelIdTo, x, y, z) {
-    var levelTraces = levelFrom.getLevelTraces();
-    var cornerCollisionInfos = [new SplitTime.LevelTraces.CollisionInfo(), new SplitTime.LevelTraces.CollisionInfo(), new SplitTime.LevelTraces.CollisionInfo(), new SplitTime.LevelTraces.CollisionInfo()];
-    var left = Math.round(x - this.baseLength / 2);
-    var topY = Math.round(y - this.baseLength / 2);
-    var roundBase = Math.round(this.baseLength);
-    var roundZ = Math.round(z);
-    var topZ = roundZ + Math.round(this.height);
-    levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[0], left, topY, roundZ, topZ);
-    levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[1], left, topY + roundBase, roundZ, topZ);
-    levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[2], left + roundBase, topY, roundZ, topZ);
-    levelTraces.calculatePixelColumnCollisionInfo(cornerCollisionInfos[3], left + roundBase, topY + roundBase, roundZ, topZ);
-    for(var i = 0; i < cornerCollisionInfos.length; i++) {
-        for(var key in cornerCollisionInfos[i].pointerTraces) {
-            if(levelIdTo === null) {
-                levelIdTo = key;
-            } else if(key !== levelIdTo) {
-                return null;
-            }
-        }
-        if(!levelIdTo || !cornerCollisionInfos[i].pointerTraces[levelIdTo]) {
-            return null;
-        }
-    }
-    var pointerTrace = cornerCollisionInfos[0].pointerTraces[id];
-    try {
-        this._levelIdStack.push(levelFrom.id);
-        var destination = this._shouldTransportLevel(pointerTrace.level, null, x + pointerTrace.offsetX, y + pointerTrace.offsetY, z + pointerTrace.offsetZ);
-        if(!destination) {
-            destination = {
-                level: pointerTrace.level,
-                x: x + pointerTrace.offsetX,
-                y: y + pointerTrace.offsetY,
-                z: z + pointerTrace.offsetZ
-            };
-        }
-        return destination;
-    } finally {
-        this._levelIdStack.pop();
-    }
 };
 
 /**

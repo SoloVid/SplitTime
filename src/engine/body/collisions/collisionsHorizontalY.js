@@ -9,14 +9,15 @@ dependsOn("BodyMover.js");
  * @param {int} y
  * @param {number} z
  * @param {int} dy should be -1 or 1
- * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, events: string[]}}
+ * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, events: string[], otherLevels: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, y, z, dy) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
         adjustedZ: z,
-        events: []
+        events: [],
+        otherLevels: []
     };
 
     var simpleCollisionInfo = this.calculateYPixelCollision(this.body.getLevel(), x, y, z, dy);
@@ -31,6 +32,7 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, 
     collisionInfo.blocked = simpleCollisionInfo.blocked;
     collisionInfo.bodies = simpleCollisionInfo.bodies;
     collisionInfo.events = simpleCollisionInfo.events;
+    collisionInfo.otherLevels = simpleCollisionInfo.otherLevels;
 
     return collisionInfo;
 };
@@ -49,7 +51,8 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(level, x, y, 
         blocked: false,
         bodies: [],
         vStepUpEstimate: 0,
-        events: []
+        events: [],
+        otherLevels: []
     };
     function handleFoundBody(otherBody) {
         collisionInfo.blocked = true;
@@ -69,6 +72,7 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(level, x, y, 
         } else {
             for(var iPointerCollision = 0; iPointerCollision < traceCollision.pointerTraces.length; iPointerCollision++) {
                 var pointerTrace = traceCollision.pointerTraces[iPointerCollision];
+                collisionInfo.otherLevels.push(pointerTrace.level.id);
                 if(this._levelIdStack.indexOf(pointerTrace.level.id) < 0) {
                     this._levelIdStack.push(this.level.id);
                     try {
