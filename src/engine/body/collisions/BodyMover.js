@@ -47,7 +47,7 @@ SplitTime.Body.Mover = function(body) {
     this.halfBaseLength = Math.round(this.baseLength / 2);
     this.height = this.body.height;
 
-    this.fromPointerLevels = [];
+    this._levelIdStack = [];
 };
 
 SplitTime.Body.Mover.VERTICAL_FUDGE = 4;

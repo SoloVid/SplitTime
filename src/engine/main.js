@@ -16,6 +16,8 @@ SplitTime.main = function() {
                 break;
             }
             case SplitTime.main.State.ACTION: {
+                SplitTime.Level.setCurrent(SplitTime.Player.getActiveBody().getLevel());
+
                 var region = SplitTime.Region.getCurrent();
                 //Advance one second per second (given 20ms SplitTime.main interval)
                 // if(clock.isSignaling()) {

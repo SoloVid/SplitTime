@@ -69,8 +69,8 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(level, x, y, 
         } else {
             for(var iPointerCollision = 0; iPointerCollision < traceCollision.pointerTraces.length; iPointerCollision++) {
                 var pointerTrace = traceCollision.pointerTraces[iPointerCollision];
-                if(this.fromPointerLevels.indexOf(pointerTrace.level.id) < 0) {
-                    this.fromPointerLevels.push(this.level.id);
+                if(this._levelIdStack.indexOf(pointerTrace.level.id) < 0) {
+                    this._levelIdStack.push(this.level.id);
                     try {
                         var otherLevelCollisionInfo = this.calculateYPixelCollision(
                             pointerTrace.level,
@@ -87,7 +87,7 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(level, x, y, 
                             break;
                         }
                     } finally {
-                        this.fromPointerLevels.pop();
+                        this._levelIdStack.pop();
                     }
                 }
             }

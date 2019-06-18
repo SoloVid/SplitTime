@@ -9,14 +9,15 @@ dependsOn("BodyMover.js");
  * @param {int} y
  * @param {number} z
  * @param {int} dx should be -1 or 1
- * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, events: string[]}}
+ * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, events: string[], otherLevels: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, y, z, dx) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
         adjustedZ: z,
-        events: []
+        events: [],
+        otherLevels: []
     };
 
     var simpleCollisionInfo = this.calculateXPixelCollision(this.body.getLevel(), x, y, z, dx);
@@ -31,6 +32,7 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, 
     collisionInfo.blocked = simpleCollisionInfo.blocked;
     collisionInfo.bodies = simpleCollisionInfo.bodies;
     collisionInfo.events = simpleCollisionInfo.events;
+    collisionInfo.otherLevels = simpleCollisionInfo.otherLevels;
 
     return collisionInfo;
 };
@@ -42,14 +44,15 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, 
  * @param {int} y
  * @param {number} z
  * @param {int} dx should be -1 or 1
- * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[]}}
+ * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[], otherLevels: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(level, x, y, z, dx) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
         vStepUpEstimate: 0,
-        events: []
+        events: [],
+        otherLevels: []
     };
     function handleFoundBody(otherBody) {
         collisionInfo.blocked = true;
@@ -69,8 +72,9 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(level, x, y, 
         } else {
             for(var iPointerCollision = 0; iPointerCollision < traceCollision.pointerTraces.length; iPointerCollision++) {
                 var pointerTrace = traceCollision.pointerTraces[iPointerCollision];
-                if(this.fromPointerLevels.indexOf(pointerTrace.level.id) < 0) {
-                    this.fromPointerLevels.push(this.level.id);
+                collisionInfo.otherLevels.push(pointerTrace.level.id);
+                if(this._levelIdStack.indexOf(pointerTrace.level.id) < 0) {
+                    this._levelIdStack.push(this.level.id);
                     try {
                         var otherLevelCollisionInfo = this.calculateXPixelCollision(
                             pointerTrace.level,
@@ -87,7 +91,7 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(level, x, y, 
                             break;
                         }
                     } finally {
-                        this.fromPointerLevels.pop();
+                        this._levelIdStack.pop();
                     }
                 }
             }

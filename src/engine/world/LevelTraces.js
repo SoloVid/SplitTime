@@ -80,8 +80,6 @@ SplitTime.LevelTraces.prototype.calculatePixelColumnCollisionInfo = function(col
     }
 };
 
-var fromPointerLevels = [];
-
 /**
  *
  * @param {SplitTime.LevelTraces.CollisionInfo} collisionInfo

@@ -88,7 +88,7 @@ CellGrid.prototype.addBody = function(body) {
  */
 CellGrid.prototype.removeBody = function(body) {
     if(!this._initialized) {
-        for(var iBody = this._waitingBodies.length - 1; iBody >= 0; iBody++) {
+        for(var iBody = this._waitingBodies.length - 1; iBody >= 0; iBody--) {
             this._waitingBodies.splice(iBody, 1);
         }
         return;
