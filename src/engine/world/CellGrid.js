@@ -103,7 +103,7 @@ CellGrid.prototype.removeBody = function(body) {
                 for(var i = 0; i < cell.length; i++) {
                     if(cell[i] === body) {
                         cell.splice(i, 1);
-                        return;
+                        break;
                     }
                 }
             }
