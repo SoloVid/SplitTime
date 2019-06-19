@@ -47,55 +47,7 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, 
  * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(level, x, y, z, dy) {
-    var collisionInfo = {
-        blocked: false,
-        bodies: [],
-        vStepUpEstimate: 0,
-        events: [],
-        otherLevels: []
-    };
-    function handleFoundBody(otherBody) {
-        collisionInfo.blocked = true;
-        collisionInfo.bodies.push(otherBody);
-        collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - z;
-    }
     var edgeY = dy > 0 ? y + dy + this.halfBaseLength : y + dy - this.halfBaseLength;
     var left = x - this.halfBaseLength;
-    level.getCellGrid().forEachBody(left, edgeY, z, left + this.baseLength, edgeY + 1, z + this.height, handleFoundBody);
-
-    if(!collisionInfo.blocked) {
-        var traceCollision = this.calculateAreaTraceCollision(level, left, this.baseLength, edgeY, 1, z);
-        collisionInfo.events = traceCollision.events;
-        if(traceCollision.blocked) {
-            collisionInfo.blocked = traceCollision.blocked;
-            collisionInfo.vStepUpEstimate = traceCollision.vStepUpEstimate;
-        } else {
-            for(var iPointerCollision = 0; iPointerCollision < traceCollision.pointerTraces.length; iPointerCollision++) {
-                var pointerTrace = traceCollision.pointerTraces[iPointerCollision];
-                collisionInfo.otherLevels.push(pointerTrace.level.id);
-                if(this._levelIdStack.indexOf(pointerTrace.level.id) < 0) {
-                    this._levelIdStack.push(this.level.id);
-                    try {
-                        var otherLevelCollisionInfo = this.calculateYPixelCollision(
-                            pointerTrace.level,
-                            x + pointerTrace.offsetX,
-                            y + pointerTrace.offsetY,
-                            z + pointerTrace.offsetZ,
-                            dy
-                        );
-                        // TODO: maybe add events?
-                        if(otherLevelCollisionInfo.blocked) {
-                            collisionInfo.blocked = true;
-                            collisionInfo.bodies = otherLevelCollisionInfo.bodies;
-                            collisionInfo.vStepUpEstimate = otherLevelCollisionInfo.vStepUpEstimate;
-                            break;
-                        }
-                    } finally {
-                        this._levelIdStack.pop();
-                    }
-                }
-            }
-        }
-    }
-    return collisionInfo;
+    return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(level, left, this.baseLength, edgeY, 1, Math.round(z), Math.round(this.height));
 };

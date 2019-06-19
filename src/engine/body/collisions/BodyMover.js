@@ -39,15 +39,11 @@ SplitTime.Body.Mover = function(body) {
     this.body = body;
     /** @type {SplitTime.Level} */
     this.level = body.getLevel();
-    /** @type {SplitTime.Level.CellGrid} */
-    this.levelBodyOrganizer = this.level.getCellGrid();
     this.bodyExt = getBodyExt(this.body);
 
     this.baseLength = this.body.baseLength;
     this.halfBaseLength = Math.round(this.baseLength / 2);
     this.height = this.body.height;
-
-    this._levelIdStack = [];
 };
 
 SplitTime.Body.Mover.VERTICAL_FUDGE = 4;

@@ -30,7 +30,6 @@ var PARTITION_SIZE = 32;
  * @param {SplitTime.Level} level
  */
 CellGrid.prototype.initialize = function(level) {
-    this._level = level;
     this._xCells = Math.ceil(level.width / PARTITION_SIZE);
     this._yCells = Math.ceil(level.yWidth / PARTITION_SIZE);
     this._zCells = Math.ceil(level.highestLayerZ / PARTITION_SIZE) + 1;
@@ -169,8 +168,13 @@ CellGrid.prototype.resort = function(body) {
 CellGrid.prototype._adjustCellClaims = function(body, whitelistArea, blacklistArea, callback) {
     var iX, iY, iZ;
 
+    var whitelistAreaLeftBlacklistExMaxXCellIndex = Math.min(whitelistArea.exMaxXCellIndex, blacklistArea.minXCellIndex);
+    var whitelistAreaRightBlacklistMinXCellIndex = Math.max(blacklistArea.exMaxXCellIndex, whitelistArea.minXCellIndex);
+    var whitelistAreaTopBlacklistExMaxYCellIndex = Math.min(whitelistArea.exMaxYCellIndex, blacklistArea.minYCellIndex);
+    var whitelistAreaBottomBlacklistMinYCellIndex = Math.max(blacklistArea.exMaxYCellIndex, whitelistArea.minYCellIndex);
     var whitelistAreaUnderBlacklistExMaxZCellIndex = Math.min(whitelistArea.exMaxZCellIndex, blacklistArea.minZCellIndex);
     var whitelistAreaAboveBlacklistMinZCellIndex = Math.max(blacklistArea.exMaxZCellIndex, whitelistArea.minZCellIndex);
+
     // Visit cells in whitelistArea to the bottom (z) of cells in blacklistArea
     for(iZ = whitelistArea.minZCellIndex; iZ < whitelistAreaUnderBlacklistExMaxZCellIndex; iZ++) {
         for(iY = whitelistArea.minYCellIndex; iY < whitelistArea.exMaxYCellIndex; iY++) {
@@ -189,8 +193,6 @@ CellGrid.prototype._adjustCellClaims = function(body, whitelistArea, blacklistAr
     }
     // Visit cells in whitelistArea within z range of blacklistArea
     for(iZ = whitelistAreaUnderBlacklistExMaxZCellIndex; iZ < whitelistAreaAboveBlacklistMinZCellIndex; iZ++) {
-        var whitelistAreaTopBlacklistExMaxYCellIndex = Math.min(whitelistArea.exMaxYCellIndex, blacklistArea.minYCellIndex);
-        var whitelistAreaBottomBlacklistMinYCellIndex = Math.max(blacklistArea.exMaxYCellIndex, whitelistArea.minYCellIndex);
         // Visit cells in whitelistArea to the top (y) of cells in blacklistArea
         for(iY = whitelistArea.minYCellIndex; iY < whitelistAreaTopBlacklistExMaxYCellIndex; iY++) {
             for(iX = whitelistArea.minXCellIndex; iX < whitelistArea.exMaxXCellIndex; iX++) {
@@ -205,8 +207,6 @@ CellGrid.prototype._adjustCellClaims = function(body, whitelistArea, blacklistAr
         }
         // Visit cells in whitelistArea within y range of blacklistArea
         for(iY = whitelistAreaTopBlacklistExMaxYCellIndex; iY < whitelistAreaBottomBlacklistMinYCellIndex; iY++) {
-            var whitelistAreaLeftBlacklistExMaxXCellIndex = Math.min(whitelistArea.exMaxXCellIndex, blacklistArea.minXCellIndex);
-            var whitelistAreaRightBlacklistMinXCellIndex = Math.max(blacklistArea.exMaxXCellIndex, whitelistArea.minXCellIndex);
             // Visit cells in whitelistArea to the left of cells in blacklistArea
             for(iX = whitelistArea.minXCellIndex; iX < whitelistAreaLeftBlacklistExMaxXCellIndex; iX++) {
                 callback(body, iX, iY, iZ);
