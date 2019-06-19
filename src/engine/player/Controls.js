@@ -11,7 +11,8 @@ SplitTime.Controls.JoyStick = {
 
 SplitTime.Controls.Button = {
     GUI_CONFIRMATION: new ControllerButton(),
-    PRIMARY_INTERACT: new ControllerButton()
+    PRIMARY_INTERACT: new ControllerButton(),
+    PRIMARY_ACTION: new ControllerButton()
 };
 
 function ControllerButton(onDown, onUp, isDown) {

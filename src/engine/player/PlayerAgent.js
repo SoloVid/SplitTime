@@ -32,3 +32,12 @@ SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
         activeBody.zVelocity = 560;
     }
 });
+
+SplitTime.Controls.Button.PRIMARY_ACTION.onDown(function() {
+    var activeBody = SplitTime.Player.getActiveBody();
+    if(activeBody) {
+        var dir = activeBody.dir;
+        var warper = new SplitTime.Body.Warper(activeBody);
+        warper.warp(dir, 64);
+    }
+});

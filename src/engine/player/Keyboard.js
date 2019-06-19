@@ -14,6 +14,9 @@ SplitTime.Keyboard.J = 74; // 'j'
 SplitTime.Keyboard.K = 75; // 'k'
 SplitTime.Keyboard.L = 76; // 'l'
 SplitTime.Keyboard.I = 73; // 'i'
+SplitTime.Keyboard.Z = 90; // 'z'
+SplitTime.Keyboard.X = 88; // 'x'
+SplitTime.Keyboard.C = 67; // 'c'
 
 var keyDown = {};
 

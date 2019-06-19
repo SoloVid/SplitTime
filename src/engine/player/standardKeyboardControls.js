@@ -6,6 +6,7 @@ var Keyboard = SplitTime.Keyboard;
 
 Button.GUI_CONFIRMATION.setKeyboardBindings(Keyboard.SPACE, Keyboard.ENTER);
 Button.PRIMARY_INTERACT.setKeyboardBindings(Keyboard.SPACE, Keyboard.ENTER);
+Button.PRIMARY_ACTION.setKeyboardBindings(Keyboard.X);
 
 var DIRECTIONAL_KEYS = [
     Keyboard.A,
