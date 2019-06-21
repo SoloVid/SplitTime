@@ -16,6 +16,9 @@ SplitTime.main = function() {
                 break;
             }
             case SplitTime.main.State.ACTION: {
+                // TODO: figure out a better place to put this; might not work for switching regions
+                SplitTime.Level.setCurrent(SplitTime.Player.getActiveBody().getLevel());
+
                 var region = SplitTime.Region.getCurrent();
                 //Advance one second per second (given 20ms SplitTime.main interval)
                 // if(clock.isSignaling()) {

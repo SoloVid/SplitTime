@@ -34,15 +34,6 @@ while(!projectName) {
 window.location.hash = "#" + projectName;
 var projectPath = "projects/" + projectName + "/";
 
-var traceEditorColors = {
-	"solid": "rgba(0, 0, 255, 1)",
-    "stairs": "rgba(0, 200, 0, 1)",
-	"ground": "rgba(0, 100, 100, .75)",
-	"function": "rgba(255, 0, 0, 1)",
-	"path": "rgba(0, 0, 0, 1)",
-	"highlight": "rgba(255, 255, 0, 1)"
-};
-
 $(document).ready(function() {
 	$.getScript(projectPath + "dist/game.js", function() {
 		subImg = $("#subImg").get(0);
@@ -64,37 +55,23 @@ $(document).ready(function() {
     $(document.body).on("dragstart", "#layers img", function(event) {
         event.preventDefault();
     });
-	// $(document).on('dragstart', 'img', function(event) {
-	// 	event.preventDefault();
-	// });
-    // $(document.body).on("contextmenu", "#layers", function(event) {
-     //    event.preventDefault();
-    // });
 	$(document).on('contextmenu', function(event) {
 		if(cancelNextContextMenu) {
             event.preventDefault();
         }
         cancelNextContextMenu = false;
 	});
-	// $(document).on('click', function(event) {
-	// 	event.preventDefault();
-	// });
     $(document.body).on("dblclick", "#layers", function(event) {
         event.preventDefault();
     });
-	// $(document).on('dblclick', function(event) {
-	// 	event.preventDefault();
-	// });
 
 	setInterval(function(event) {
-		if(document.getElementsByClassName("background").length > 0)
-		resizeBoardCheck(document.getElementsByClassName("background")[0]);
+		if(document.getElementsByClassName("background").length > 0) {
+            resizeBoardCheck(document.getElementsByClassName("background")[0]);
+        }
 	}, 1000);
 
 	$(document).keydown(function(event) {
-		// if(event.which == 16) {
-		// 	ctrlDown = true;
-		// }
 
 		var specialKey = true;
         switch(event.which) {
@@ -132,7 +109,6 @@ $(document).ready(function() {
 	});
 
     $(document.body).on("change", "#fileChooser", function(event) {
-	// $("#fileChooser").change(function(event) {
 		var f = event.target.files[0];
 		if (f) {
 			var r = new FileReader();
@@ -169,40 +145,6 @@ $(document).ready(function() {
 		mouseLevelY = mouseY - levelContainerPos.top;
 	});
 
-	// $(document.body).on("mousedown", ".draggable", function(event) {
-	// 	if(mode != "trace" && event.which == 1)
-	// 	{
-	// 		if(ctrlDown)
-	// 		{
-	// 			//Locate index of element
-	// 			var thisType = this.className;
-	// 			var regex = /[\s]*draggable[\s]*/;
-	// 			thisType = thisType.replace(regex, "");
-    //
-	// 			var activeLayer = document.getElementById("activeLayer").value;
-    //
-	// 			var i = /[\d]+/.exec(this.id)[0];
-    //
-	// 			cloneIndex = $("." + thisType).length;
-    //
-	// 			var XMLNode = $levelXML.find(thisType + ":eq(" + i + ")");
-    //
-	// 			var template = XMLNode.attr("template");
-    //
-	// 			var t = loadBodyFromTemplate(template);
-    //
-	// 			var HTMLClone = this.cloneNode(true);
-	// 			HTMLClone.id = thisType + cloneIndex;
-	// 			var XMLClone = XMLNode.cloneNode(true);
-    //
-	// 			$("#layers").find(".layerDisplay:eq(" + activeLayer + ")").append(HTMLClone);
-    //
-	// 			$levelXML.find(thisType + "s").append(XMLClone);
-    //
-	// 			follower = $(HTMLClone);
-	// 		}
-	// 	}
-	// });
     $(document.body).on("dblclick", "#layers", function(event) {
     	event.preventDefault();
     });
