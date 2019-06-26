@@ -188,11 +188,11 @@ SplitTime.Body.prototype.isInCurrentLevel = function() {
     return this.getLevel() === SplitTime.Level.getCurrent();
 };
 
-SplitTime.Body.prototype.put = function(level, x, y, z) {
-	this.setLevel(level);
-	this.setX(x);
-	this.setY(y);
-	this.setZ(z);
+SplitTime.Body.prototype.put = function(level, x, y, z, includeChildren) {
+	this.setLevel(level, includeChildren);
+	this.setX(x, includeChildren);
+	this.setY(y, includeChildren);
+	this.setZ(z, includeChildren);
 };
 
 /**

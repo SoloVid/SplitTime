@@ -273,11 +273,9 @@ SplitTime.Level.prototype.refetchBodies = function() {
         var obj = SplitTime.Body.getTemplateInstance(template);
         if(obj) {
             obj.id = prop.id;
-            obj.put(this, +prop.x, +prop.y, +prop.z);
+            obj.put(this, +prop.x, +prop.y, +prop.z, true);
             obj.dir = isNaN(prop.dir) ? SplitTime.Direction.fromString(prop.dir) : +prop.dir;
             obj.stance = prop.stance;
-
-            putObjOnBoard(obj);
         } else {
             console.error("Template \"" + template + "\" not found for instantiating prop");
         }
