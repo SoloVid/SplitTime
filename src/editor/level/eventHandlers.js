@@ -10,6 +10,7 @@ var mode = "position";
 
 var typeSelected;
 
+var EDITOR_PADDING = 32;
 var mouseX = 0;
 var mouseY = 0;
 var mouseLevelX = 0;
@@ -141,8 +142,8 @@ $(document).ready(function() {
 		mouseX = event.pageX;
 		mouseY = event.pageY;
 		var levelContainerPos = $("#layers").position();
-		mouseLevelX = mouseX - levelContainerPos.left;
-		mouseLevelY = mouseY - levelContainerPos.top;
+		mouseLevelX = mouseX - levelContainerPos.left - EDITOR_PADDING;
+		mouseLevelY = mouseY - levelContainerPos.top - EDITOR_PADDING;
 	});
 
     $(document.body).on("dblclick", "#layers", function(event) {

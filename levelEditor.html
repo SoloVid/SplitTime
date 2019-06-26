@@ -19,7 +19,8 @@
 			</ul>
 		</div>
 		<div id="editorTools">
-			<div id="layers" v-bind:style="{ width: levelWidth + 'px', height: levelHeight + 'px' }">
+			<div id="layers" v-bind:style="{ width: containerWidth + 'px', height: containerHeight + 'px' }">
+				<img v-if="!!backgroundSrc" class="background" v-bind:src="backgroundSrc" v-bind:style="{ left: leftPadding + 'px', top: topPadding + 'px' }"/>
 				<rendered-layer
 						v-for="(layer, layerIndex) in level.layers"
 						v-bind:key="layerIndex"
@@ -168,11 +169,12 @@
 
 	<script type="text/x-template" id="rendered-layer-template">
 		<div v-show="layer.displayed" v-bind:style="styleObject">
-			<img v-if="!!imgSrc" class="background" v-bind:src="imgSrc"/>
+			<!--<img v-if="!!imgSrc" class="background" v-bind:src="imgSrc"/>-->
 			<svg
 					style="position:absolute"
-					v-bind:width="width"
-					v-bind:height="height"
+					v-bind:width="containerWidth"
+					v-bind:height="containerHeight"
+					v-bind:viewBox="viewBox"
 			>
 				<!--<defs>-->
 					<!--<linearGradient-->
@@ -192,12 +194,14 @@
 								v-bind:layerHeight="layerHeight"
 				></rendered-trace>
 			</svg>
-			<rendered-prop v-for="(prop, propIndex) in props"
-						   v-bind:prop="prop"
-			></rendered-prop>
-			<rendered-position v-for="(position, posIndex) in positions"
-							   v-bind:position="position"
-			></rendered-position>
+			<div v-bind:style="thingsStyleObject">
+				<rendered-prop v-for="(prop, propIndex) in props"
+							   v-bind:prop="prop"
+				></rendered-prop>
+				<rendered-position v-for="(position, posIndex) in positions"
+								   v-bind:position="position"
+				></rendered-position>
+			</div>
 		</div>
 	</script>
 
