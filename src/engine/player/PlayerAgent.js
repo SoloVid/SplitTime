@@ -38,6 +38,6 @@ SplitTime.Controls.Button.PRIMARY_ACTION.onDown(function() {
     if(activeBody) {
         var dir = activeBody.dir;
         var warper = new SplitTime.Body.Warper(activeBody);
-        warper.warp(dir, 64);
+        warper.warp(dir, 96);
     }
 });

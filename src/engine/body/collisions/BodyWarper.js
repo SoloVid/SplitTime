@@ -45,6 +45,12 @@ SplitTime.Body.Warper.prototype.warp = function(dir, maxDistance) {
 
     var me = this;
     SLVD.Bresenham.forEachPoint(furthestX, furthestY, startX, startY, function(x, y) {
+        if(x >= me.level.width || x < 0) {
+            return false;
+        }
+        if(y >= me.level.yWidth || y < 0) {
+            return false;
+        }
         var collisionInfo = me._getCollisionInfoAt(x, y, z);
         if(!collisionInfo.blocked) {
             if(toX === null) {
@@ -58,7 +64,7 @@ SplitTime.Body.Warper.prototype.warp = function(dir, maxDistance) {
         }
     });
 
-    if(toX !== null && toY !== null && (Math.abs(toX - startX) > 1 || Math.abs(toY - startY) > 1)) {
+    if(toX !== null && toY !== null && (Math.abs(toX - startX) > this.baseLength || Math.abs(toY - startY) > this.baseLength)) {
         this.body.put(this.level, toX, toY, z);
         if(otherLevelId !== null) {
             var transporter = new SplitTime.Body.Transporter(this.body);
