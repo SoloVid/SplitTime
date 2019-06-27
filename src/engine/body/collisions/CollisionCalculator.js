@@ -3,7 +3,7 @@ var CollisionCalculator = function() {
 };
 
 /**
- * Calculate collisions in volume.
+ * Calculate collisions in volume. This function is primarily useful for gauging a slice of volume (i.e. one-pixel step).
  * @param {SplitTime.Level} level
  * @param {int} startX
  * @param {int} xPixels

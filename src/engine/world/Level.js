@@ -379,7 +379,9 @@ SplitTime.Level.setCurrent = function(level) {
     //********Leave current level
 
     if(exitingLevel) {
-        exitingLevel.runEvent(EXIT_LEVEL_FUNCTION_ID);
+        if(exitingLevel.events[EXIT_LEVEL_FUNCTION_ID]) {
+            exitingLevel.runEvent(EXIT_LEVEL_FUNCTION_ID);
+        }
         if(changeRegion) {
             exitingLevel.getRegion().unloadLevels();
         }
@@ -391,7 +393,9 @@ SplitTime.Level.setCurrent = function(level) {
     var promise = changeRegion ? currentLevel.getRegion().loadForPlay() : new SLVD.Promise.as();
     return promise.then(function() {
         SplitTime.process = currentLevel.type;
-        currentLevel.runEvent(ENTER_LEVEL_FUNCTION_ID);
+        if(currentLevel.events[ENTER_LEVEL_FUNCTION_ID]) {
+            currentLevel.runEvent(ENTER_LEVEL_FUNCTION_ID);
+        }
     });
 };
 

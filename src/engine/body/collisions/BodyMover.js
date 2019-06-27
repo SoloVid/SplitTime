@@ -57,7 +57,7 @@ SplitTime.Body.Mover.VERTICAL_FUDGE = 4;
 SplitTime.Body.Mover.prototype.zeldaBump = function(distance, direction) {
     this.ensureInRegion();
     //Prevent infinite recursion
-    if(this.bodyExt.pushing || this.bodyExt.bumped) {
+    if(this.bodyExt.pushing || (this.bodyExt.bumped && !this.bodyExt.sliding)) {
         return false;
     }
     this.bodyExt.bumped = true;
