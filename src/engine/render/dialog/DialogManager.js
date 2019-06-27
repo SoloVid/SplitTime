@@ -53,13 +53,13 @@ SplitTime.DialogManager.disengageAllDialogs = function() {
     engagedDialog = null;
 };
 
-var MIN_SCORE = 0;
+var MIN_SCORE = 1;
 
 SplitTime.DialogManager.notifyFrameUpdate = function() {
     var currentLevel = SplitTime.Level.getCurrent();
     var currentRegion = currentLevel.getRegion();
 
-    var engagedScore = engagedDialog ? calculateDialogImportanceScore(engagedDialog) : MIN_SCORE;
+    var engagedScore = engagedDialog ? calculateDialogImportanceScore(engagedDialog) : 0;
     var winningScore = Math.max(engagedScore, MIN_SCORE);
     var usurper = null;
 
@@ -79,7 +79,7 @@ SplitTime.DialogManager.notifyFrameUpdate = function() {
         }
     }
 
-    if(winningScore > engagedScore) {
+    if(engagedDialog && winningScore > engagedScore) {
         SplitTime.Dialog.Renderer.hide(engagedDialog);
         engagedDialog = null;
     }
@@ -97,17 +97,17 @@ SplitTime.DialogManager.notifyFrameUpdate = function() {
  */
 function calculateDialogImportanceScore(dialog) {
     if(dialog.getLocation().getLevel() !== SplitTime.Level.getCurrent()) {
-        return 0;
+        return MIN_SCORE - 1;
     }
 
     var player = SplitTime.Player.getActiveBody();
     var location = dialog.getLocation();
 
     var distance = SplitTime.Measurement.distanceEasy(player.getX(), player.getY(), location.getX(), location.getY());
-    var distanceScore = ((SplitTime.SCREENX / 2) / distance) - 1;
+    var distanceScore = ((SplitTime.SCREENX / 3) / distance);
 
     if(dialog === engagedDialog) {
-        return distanceScore * 2;
+        return distanceScore * 1.5;
     }
     return distanceScore;
 }

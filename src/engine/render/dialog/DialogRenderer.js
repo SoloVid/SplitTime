@@ -2,6 +2,18 @@ dependsOn("../HUDRenderer.js");
 dependsOn("Dialog.js");
 
 SplitTime.Dialog.Renderer = {};
+var CONFIG = {
+	OUTLINE_STYLE: "rgba(255, 255, 255, .8)",
+	OUTLINE_WIDTH: 3,
+	BACKGROUND_STYLE: "rgba(50, 100, 150, .4)",
+	TEXT_OUTLINE_COLOR: "#000000",
+	TEXT_OUTLINE_WIDTH: 5,
+	TEXT_COLOR: "#FFFFFF",
+	FONT_SIZE: 18,
+	FONT: "Verdana",
+	SPEAKER_NAMES_ENABLED: false
+};
+SplitTime.Dialog.Renderer.Configuration = CONFIG;
 
 SplitTime.HUD.pushRenderer(SplitTime.Dialog.Renderer);
 
@@ -128,15 +140,11 @@ function drawAwesomeRect(left, top, right, bottom, ctx, pointX, pointY) {
 	ctx.arc(left + CURVE_RADIUS, top + CURVE_RADIUS, CURVE_RADIUS, Math.PI, 1.5*Math.PI, false);
 	ctx.closePath();
 
-	ctx.strokeStyle = "rgba(255, 255, 255, .8)";
-	ctx.lineWidth = 3;
+	ctx.strokeStyle = CONFIG.OUTLINE_STYLE;
+	ctx.lineWidth = CONFIG.OUTLINE_WIDTH;
 	ctx.stroke();
 
-	var grd = ctx.createLinearGradient(0, top, 0, bottom);
-	grd.addColorStop(0, "rgba(50, 100, 200, .4)");
-	grd.addColorStop(0.5, "rgba(50, 100, 220, .9)");
-	grd.addColorStop(1, "rgba(50, 100, 200, .4)");
-	ctx.fillStyle = grd;
+	ctx.fillStyle = CONFIG.BACKGROUND_STYLE;
 	ctx.fill();
 }
 
@@ -152,8 +160,6 @@ function sayFromBoardFocalPoint(ctx, focalPoint, fullMessage, displayedMessage, 
     drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointRelativeToScreen.x, pointRelativeToScreen.y);
 }
 
-var FONT_SIZE = 18;
-var FONT = FONT_SIZE + "px Verdana";
 var MAX_ROW_LENGTH = 500;
 var MIN_ROW_LENGTH_SPLIT = 100;
 var LINE_SPACING = 2;
@@ -173,7 +179,7 @@ var FOCAL_MARGIN = 20;
 function drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointX, pointY) {
     // TODO: isn't top what we want here? but it looks funny
     ctx.textBaseline = "hanging";
-    ctx.font=FONT;
+    ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT;
 
     var textHeight = getLineHeight(ctx);
     var lineHeight = textHeight + LINE_SPACING;
@@ -182,7 +188,7 @@ function drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, point
     var nameWidth = 0;
     var nameBoxHeight = 0;
     var nameBoxWidth = 0;
-    if(speakerName) {
+    if(CONFIG.SPEAKER_NAMES_ENABLED && speakerName) {
         nameWidth = ctx.measureText(speakerName).width;
         nameBoxHeight = textHeight + 2*namePadding;
         nameBoxWidth = nameWidth + 2*namePadding;
@@ -197,27 +203,35 @@ function drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, point
 
     var position = calculateDialogPosition(bubbleWidth, bubbleHeight + nameBoxHeight, pointX, pointY);
 
-    var messageTop = position.top + nameBoxHeight;
+    var messageTop = position.triPointY > position.top ? position.top + nameBoxHeight : position.top;
 
     //Text box
 	drawAwesomeRect(position.left, messageTop, position.left + bubbleWidth, messageTop + bubbleHeight, ctx, position.triPointX, position.triPointY);
 
-    ctx.fillStyle="#FFFFFF";
     //Lines
 	for(var index = 0; index < lines.displayed.length; index++) {
-		ctx.fillText(lines.displayed[index], position.left + TEXT_BOX_PADDING, messageTop + lineHeight*index + TEXT_BOX_PADDING);
+		drawText(ctx, lines.displayed[index], position.left + TEXT_BOX_PADDING, messageTop + lineHeight*index + TEXT_BOX_PADDING);
 	}
 
 	// Draw speaker box afterward in case it needs to cover part of the triangle
-    if(speakerName) {
-        var nameBoxLeft = position.left;
+    if(CONFIG.SPEAKER_NAMES_ENABLED && speakerName) {
+		var nameTop = position.triPointY > position.top ? position.top : position.top + bubbleHeight;
+		var nameBoxLeft = position.left;
         //Name box
-        drawAwesomeRect(nameBoxLeft, position.top, nameBoxLeft + nameBoxWidth, position.top + nameBoxHeight, ctx);
-
-        ctx.fillStyle="#FFFFFF";
-        //Name
-        ctx.fillText(speakerName, nameBoxLeft + namePadding, position.top + namePadding);
+        drawAwesomeRect(nameBoxLeft, nameTop, nameBoxLeft + nameBoxWidth, nameTop + nameBoxHeight, ctx);
+		//Name
+		drawText(ctx, speakerName, nameBoxLeft + namePadding, nameTop + namePadding);
     }
+}
+
+function drawText(ctx, text, x, y) {
+	ctx.strokeStyle = CONFIG.TEXT_OUTLINE_COLOR;
+	ctx.lineWidth = CONFIG.TEXT_OUTLINE_WIDTH;
+	ctx.lineJoin="round";
+	ctx.miterLimit=2;
+	ctx.strokeText(text, x, y);
+	ctx.fillStyle=CONFIG.TEXT_COLOR;
+	ctx.fillText(text, x, y);
 }
 
 /**
@@ -310,7 +324,7 @@ function calculateDialogPosition(areaWidth, areaHeight, focalPointX, focalPointY
  */
 function getLinesFromMessage(fullMessage, displayedMessage, ctx, maxRowLength) {
     var initialFont = ctx.font;
-    ctx.font = FONT;
+	ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT;
 
     function getLine(str) {
         if(!str) {
@@ -363,5 +377,5 @@ function getLinesFromMessage(fullMessage, displayedMessage, ctx, maxRowLength) {
  * @return {number}
  */
 function getLineHeight(ctx) {
-   return FONT_SIZE;
+   return CONFIG.FONT_SIZE;
 }
