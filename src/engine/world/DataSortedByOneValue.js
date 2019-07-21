@@ -143,3 +143,24 @@ SplitTime.DataSortedByOneValue.prototype.forEachInRange = function(valueStart, v
     }
     return found;
 };
+
+
+/**
+ *
+ * @param {function(Object)} callback - function that will be called for each item in the sorted list
+ * @return {boolean} found - true if there is something in the list
+ */
+SplitTime.DataSortedByOneValue.prototype.forEachInList = function(callback) {
+    var found = false;
+    for(var iSorted = 0; iSorted < this.sortedByValue.length; iSorted++) {
+        var sortedItem = this.sortedByValue[iSorted];
+		
+		// If the caller just wanted boolean, return early
+		if(!callback) {
+			return true;
+		}
+		found = true;
+		callback(sortedItem.object);
+    }
+    return found;
+};

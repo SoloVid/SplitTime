@@ -110,7 +110,8 @@ SplitTime.main = function() {
     SplitTime.Debug.update({
         "FPS": displayFPS,
         "Board Bodies": SplitTime.BoardRenderer.countBodies(),
-        "Agents": agentCount,
+		"Focus point": Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z),
+		"Agents": agentCount,
         "HUD Layers": SplitTime.HUD.getRendererCount(),
         "Joystick Direction": SplitTime.Controls.JoyStick.getDirection()
     });

@@ -226,7 +226,8 @@ SplitTime.Level.prototype.forEachAgent = function(callback) {
  */
 SplitTime.Level.prototype.getBodies = function() {
     // TODO: implement
-    return this.bodies;
+    //return this.bodies;
+	return this._bodyOrganizer.getBodies();
 };
 
 //Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
