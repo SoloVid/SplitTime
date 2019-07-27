@@ -1,6 +1,6 @@
 /**
  * A class for arranging bodies for collisions
- * @param {SplitTime.Level} level
+ * @param {SplitTime.Level} [level]
  * @constructor
  * @alias SplitTime.Level.BodyOrganizer
  */

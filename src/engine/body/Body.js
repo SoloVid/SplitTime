@@ -100,7 +100,7 @@ SplitTime.Body.prototype.baseOffY = 0;
 
 SplitTime.Body.prototype._resortInBodyOrganizer = function() {
 	if(this._level) {
-		this._level.getBodyOrganizer().resort(this);
+		this._level.getCellGrid().resort(this);
 	}
 };
 
@@ -122,8 +122,10 @@ SplitTime.Body.prototype.setX = function(x, includeChildren) {
             currentChild.setX(x + dx, true);
         }
     }
-	this._x = x;
-	this._resortInBodyOrganizer();
+    if(x !== this._x) {
+        this._x = x;
+        this._resortInBodyOrganizer();
+    }
 };
 SplitTime.Body.prototype._y = 0;
 SplitTime.Body.prototype.getY = function() {
@@ -138,8 +140,10 @@ SplitTime.Body.prototype.setY = function(y, includeChildren) {
             currentChild.setY(y + dy, true);
         }
     }
-	this._y = y;
-	this._resortInBodyOrganizer();
+    if(y !== this._y) {
+        this._y = y;
+        this._resortInBodyOrganizer();
+    }
 };
 SplitTime.Body.prototype._z = 0;
 SplitTime.Body.prototype.getZ = function() {
@@ -154,14 +158,30 @@ SplitTime.Body.prototype.setZ = function(z, includeChildren) {
             currentChild.setZ(z + dLayer, true);
         }
     }
-	this._z = z;
-	this._resortInBodyOrganizer();
+    if(z !== this._z) {
+        this._z = z;
+        this._resortInBodyOrganizer();
+    }
 };
 SplitTime.Body.prototype.GRAVITY = -1280;
 SplitTime.Body.prototype.zVelocity = 0;
 SplitTime.Body.prototype.height = 32;
 
 SplitTime.Body.prototype.dir = 3;
+
+/**
+ * @return {number}
+ */
+SplitTime.Body.prototype.getLeft = function() {
+    return this.getX() - this.baseLength / 2;
+};
+
+/**
+ * @return {number}
+ */
+SplitTime.Body.prototype.getTopY = function() {
+    return this.getY() - this.baseLength / 2;
+};
 
 /**
  * @deprecated
@@ -171,11 +191,11 @@ SplitTime.Body.prototype.isInCurrentLevel = function() {
     return this.getLevel() === SplitTime.Level.getCurrent();
 };
 
-SplitTime.Body.prototype.put = function(level, x, y, z) {
-	this.setLevel(level);
-	this.setX(x);
-	this.setY(y);
-	this.setZ(z);
+SplitTime.Body.prototype.put = function(level, x, y, z, includeChildren) {
+	this.setLevel(level, includeChildren);
+	this.setX(x, includeChildren);
+	this.setY(y, includeChildren);
+	this.setZ(z, includeChildren);
 };
 
 /**

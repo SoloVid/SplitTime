@@ -156,7 +156,7 @@ SplitTime.Body.prototype.getAnimationFrameCrop = function(numDir, stance, frame)
 // TODO: abstract this?
 SplitTime.Body.prototype.hasIdleAnimation = false;
 SplitTime.Body.prototype.finalizeFrame = function() {
-    if(this.hasIdleAnimation && this.stance != this.requestedStance || this.requestedFrameReset) {
+    if(isNaN(this.frame) || this.hasIdleAnimation && this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
     } else {
         //TODO: don't rely on global time passing since we might skip frames at some point
@@ -170,7 +170,15 @@ SplitTime.Body.prototype.finalizeFrame = function() {
 };
 
 SplitTime.Body.prototype.getAnimationFramesAvailable = function() {
-    return Math.floor(this.getImage().height / this.yres);
+    var calculation = Math.floor(this.getImage().height / this.yres);
+    if(isNaN(calculation)) {
+        if(SplitTime.Debug.ENABLED) {
+            console.warn(this.img + " not loaded yet for frame count calculation for " + this.ref);
+        }
+        return 1;
+    } else {
+        return calculation;
+    }
 };
 
 SplitTime.Body.prototype.finalizeStance = function() {

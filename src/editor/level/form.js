@@ -22,7 +22,8 @@ $(document).ready(function() {
     $saveButton.click(function(event) {
         for(var i = 0; i < editFields.length; i++) {
             var field = editFields[i];
-            editingThing[field.key] = getEditorValue(field);
+            Vue.set(editingThing, field.key, getEditorValue(field));
+            // editingThing[field.key] = getEditorValue(field);
         }
 
         $back.hide();
@@ -101,6 +102,10 @@ function showEditor(thing, fields) {
                 break;
             default:
                 console.warn("unrecognized type: " + field.type);
+        }
+
+        if(field.readonly) {
+            element.attr("readonly", true);
         }
 
         if(field.key) {
@@ -215,20 +220,37 @@ function showEditorPosition(position) {
 }
 
 function showEditorTrace(trace) {
-    showEditor(trace, [
+    var fields = [
         {
             key: "id"
         },
         {
-            key: "type"
-        },
-        {
-            title: "direction/height/function",
-            key: "parameter"
+            key: "type",
+            readonly: true
         },
         {
             type: "textarea",
             key: "vertices"
         }
-    ]);
+    ];
+
+    switch(trace.type) {
+        case SplitTime.Trace.Type.SOLID:
+            fields.push({key: "height"});
+            break;
+        case SplitTime.Trace.Type.STAIRS:
+            fields.push({key: "direction"});
+            break;
+        case SplitTime.Trace.Type.EVENT:
+            fields.push({key: "event"});
+            break;
+        case SplitTime.Trace.Type.POINTER:
+            fields.push({key: "level"});
+            fields.push({key: "offsetX"});
+            fields.push({key: "offsetY"});
+            fields.push({key: "offsetZ"});
+            break;
+    }
+
+    showEditor(trace, fields);
 }

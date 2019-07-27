@@ -25,21 +25,13 @@ SplitTime.Body.Mover.prototype.zeldaSlide = function(maxDistance) {
     var negativeDiagonal = (Math.round(this.body.dir + 3.9) - 0.5) % 4;
 
     var me = this;
+    var levelTraces = this.level.getLevelTraces();
     function isCornerOpen(direction, howFarAway) {
-        var open = true;
-        me.level.forEachRelevantTraceDataLayer(me.body, function(data) {
-            var iCorner = SplitTime.pixCoordToIndex(
-                x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway),
-                y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway),
-                data
-            );
-
-            if(data.data[iCorner] === SplitTime.Trace.RColor.SOLID) {
-                open = false;
-                return true;
-            }
-        });
-        return open;
+        var collisionInfo = new SplitTime.LevelTraces.CollisionInfo();
+        var testX = x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway);
+        var testY = y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway);
+        levelTraces.calculatePixelColumnCollisionInfo(collisionInfo, testX, testY, me.body.z, me.body.z + me.body.height);
+        return !collisionInfo.containsSolid;
     }
 
     for(var howFarOut = 1; howFarOut <= 5; howFarOut++) {

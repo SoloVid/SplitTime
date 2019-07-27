@@ -87,7 +87,6 @@ SplitTime.launch.createCanvases = function(width, height, parentId) {
 	SplitTime.see.fillText("this game will not run on your browser.", 10, 60);
 
     SplitTime.HUD.createCanvases(width, height);
-	SplitTime.Level.createCanvases(width, height);
     SplitTime.BoardRenderer.createCanvases(width, height);
     SplitTime.WeatherRenderer.createCanvases(width, height);
 };

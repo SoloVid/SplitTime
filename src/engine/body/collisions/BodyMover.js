@@ -37,9 +37,8 @@ function getBodyExt(body) {
  */
 SplitTime.Body.Mover = function(body) {
     this.body = body;
+    /** @type {SplitTime.Level} */
     this.level = body.getLevel();
-    /** @type {SplitTime.Level.BodyOrganizer} */
-    this.levelBodyOrganizer = this.level.getBodyOrganizer();
     this.bodyExt = getBodyExt(this.body);
 
     this.baseLength = this.body.baseLength;
@@ -56,7 +55,7 @@ SplitTime.Body.Mover.VERTICAL_FUDGE = 4;
  * @returns {boolean}
  */
 SplitTime.Body.Mover.prototype.zeldaBump = function(distance, direction) {
-    this.ensureInLevel();
+    this.ensureInRegion();
     //Prevent infinite recursion
     if(this.bodyExt.pushing || this.bodyExt.bumped) {
         return false;
@@ -77,11 +76,11 @@ SplitTime.Body.Mover.prototype.zeldaBump = function(distance, direction) {
 };
 
 /**
- * Check that body is in current level
+ * Check that body is in current region
  */
-SplitTime.Body.Mover.prototype.ensureInLevel = function() {
-    if(this.body.getLevel() !== SplitTime.Level.getCurrent()) {
-        throw new Error("Attempt to do zelda movement for body not on current board");
+SplitTime.Body.Mover.prototype.ensureInRegion = function() {
+    if(this.body.getLevel().getRegion() !== SplitTime.Region.getCurrent()) {
+        throw new Error("Attempt to do zelda movement for body not in current region");
     }
 };
 
@@ -91,7 +90,7 @@ SplitTime.Body.Mover.prototype.ensureInLevel = function() {
  * @returns {number} Z pixels actually moved
  */
 SplitTime.Body.Mover.prototype.zeldaVerticalBump = function(maxDZ) {
-    this.ensureInLevel();
+    this.ensureInRegion();
 
     var groundBody = this.bodyExt.previousGroundBody;
     if(groundBody && isStandingOnBody(this.body, groundBody)) {
