@@ -76,7 +76,7 @@ SplitTime.BodyRenderer.prototype._visitNode = function(node) {
         this._visitNode(node.before[i]);
     }
 
-    this.drawBodyTo(node.body, node.canvReq);
+    this.drawBodyTo(node);
 };
 
 SplitTime.BodyRenderer.prototype._removeDeadBodies = function() {
@@ -99,8 +99,14 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
         var canvReq = node.canvReq;
         //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
         var screenY = canvReq.y - canvReq.z;
-        var halfHeight = canvReq.height / 2;
-        var halfWidth = canvReq.width / 2;
+        
+		//Half width/height is used for determining the edge of 
+		//	the visible body relative to the y position (bottom)
+		//  and x position (center of the body).
+		//Note that I've subtracted 2px from this to account for
+		//	the empty space around objects in the .png files.
+		var halfWidth = (node.body.xres / 2) - 2;
+		var height = (node.body.yres) - 2;
 
         //For each other node we haven't visited yet
         for(var h = i + 1; h < nodesOnScreen.length; h++) {
@@ -108,16 +114,18 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
             var otherCanvReq = otherNode.canvReq;
 
             var otherScreenY = otherCanvReq.y - otherCanvReq.z;
-            var otherHalfHeight = otherCanvReq.height / 2;
+            var otherHeight = (otherNode.body.yres) - 2;
 
             //Skip if the two bodies don't overlap on the screen's y axis (top to bottom)
-            if((screenY - halfHeight < otherScreenY + otherHalfHeight) && (screenY + halfHeight > otherScreenY - otherHalfHeight)){
-                var otherHalfWidth = otherCanvReq.width / 2;
+            if(screenY > otherScreenY - otherHeight){
+				if (screenY - height < otherScreenY){
+					var otherHalfWidth = (otherNode.body.xres / 2) - 2;
 
-                //Skip if the two bodies don't overlap on the x axis (left to right)
-                if((canvReq.x - halfWidth) < (otherCanvReq.x + otherHalfWidth) && (canvReq.x + halfWidth) > (otherCanvReq.x - otherHalfWidth)) {
-                    this._constructEdge(node, otherNode);
-                }
+					//Skip if the two bodies don't overlap on the x axis (left to right)
+					if((canvReq.x - halfWidth) < (otherCanvReq.x + otherHalfWidth) && (canvReq.x + halfWidth) > (otherCanvReq.x - otherHalfWidth)) {
+						this._constructEdge(node, otherNode);
+					}
+				}
             }
         }
     }
@@ -129,7 +137,8 @@ SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
     for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
         var canvReq = node.canvReq;
-        //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
+        
+		//Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
         var screenY = canvReq.y - canvReq.z;
 
         //optimization for not drawing if out of bounds
@@ -167,7 +176,13 @@ SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2) {
         nodeInFront = node2;
         nodeBehind = node1;
     }
-
+	
+	//If the active player is behind an object, lower the opacity
+	if(nodeBehind.body === SplitTime.Player.getActiveBody())
+	{
+		nodeInFront.opacity = 0.7;
+	}
+	
     //construct the edge (make the nodes point to each other)
     nodeInFront.before.push(nodeBehind);
 };
@@ -184,6 +199,7 @@ function shouldRenderInFront(body1, body2) {
     } else if(isAbove(body2, body1) || isInFront(body2, body1)) {   //if body2 is completely above or in front
         return false;
     }
+		
     //If neither body is clearly above or in front,
     //go with the one whose base position is farther forward on the y axis
     return (body1.y > body2.y);
@@ -211,15 +227,26 @@ function isInFront(body1, body2) {
 
 /**
  *
- * @param {SplitTime.Body} body
- * @param canvasRequirements
+ * @param {BodyNode} node
  */
-SplitTime.BodyRenderer.prototype.drawBodyTo = function(body, canvasRequirements) {
+SplitTime.BodyRenderer.prototype.drawBodyTo = function(node) {
     // TODO: potentially give the body a cleared personal canvas if requested
+	
+	canvReq = node.canvReq;
 
     // Translate origin to body location
-    this.ctx.translate(Math.round(canvasRequirements.x - this.screen.x), Math.round(canvasRequirements.y - canvasRequirements.z - this.screen.y));
-    body.see(this.ctx);
+    this.ctx.translate(Math.round(canvReq.x - this.screen.x), Math.round(canvReq.y - canvReq.z - this.screen.y));
+    
+	//Set the opacity for this body
+	this.ctx.globalAlpha = node.opacity;
+	
+	//Draw the body
+	node.body.see(this.ctx);
+	
+	//Reset opacity settings back to 1 ("not opaque")
+	this.ctx.globalAlpha = 1;
+	node.opacity = 1;
+	
     // Reset transform
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -241,6 +268,7 @@ function BodyNode(body) {
 
     this.canvReq = {};
 
-    this.visitedThisFrame = false;
+	this.visitedThisFrame = false;
     this.shouldBeDrawnThisFrame = false;
+	this.opacity = 1;
 }
