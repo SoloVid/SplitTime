@@ -188,12 +188,15 @@ SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2, overlap
 	//If the active player is behind an object, lower the opacity
 	if(nodeBehind.body === SplitTime.Player.getActiveBody())
 	{
-		//If we're close to the edge, fade in/out gradually
-		if(overlappingPixels < 25){
-			nodeInFront.opacity = 1 - (overlappingPixels / 50);
-		}
-		else {
-			nodeInFront.opacity = 0.5;
+		//If this sprite has the "allowOpacity" property in the .json file set to true
+		if(nodeInFront.body.allowOpacity){
+			//If we're close to the edge, fade in/out gradually
+			if(overlappingPixels < 25){
+				nodeInFront.opacity = 1 - (overlappingPixels / 50);
+			}
+			else {
+				nodeInFront.opacity = 0.5;
+			}
 		}
 	}
 	

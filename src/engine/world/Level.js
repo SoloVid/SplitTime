@@ -260,6 +260,7 @@ SplitTime.Level.prototype.refetchBodies = function() {
             obj.put(this, +prop.x, +prop.y, +prop.z, true);
             obj.dir = isNaN(prop.dir) ? SplitTime.Direction.fromString(prop.dir) : +prop.dir;
             obj.stance = prop.stance;
+			obj.allowOpacity = prop.allowOpacity;
         } else {
             console.error("Template \"" + template + "\" not found for instantiating prop");
         }
