@@ -1,12 +1,7 @@
-dependsOn("/world/DataSortedByOneValue.js");
-
 SplitTime.BodyRenderer = function() {
-    this._nextRef = 100;                          //Reserve the first 100 refs
     /** @type {BodyNode[]} */
     this._nodes = [];
-	this._bodyToNodeIndexMap = {};
-    // TODO: actual size
-    //this._sortedData = new SplitTime.DataSortedByOneValue(10000);
+    this._bodyToNodeIndexMap = {};
 
     this.screen = null;
     this.ctx = null;
@@ -19,7 +14,6 @@ SplitTime.BodyRenderer = function() {
 SplitTime.BodyRenderer.prototype.notifyNewFrame = function(screen, ctx) {
     this.screen = screen;
     this.ctx = ctx;
-	this._edgeCount = 0;
     for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
         // This will be set back to true soon if appropriate
@@ -34,17 +28,12 @@ SplitTime.BodyRenderer.prototype.notifyNewFrame = function(screen, ctx) {
  * @param {SplitTime.Body} body
  */
 SplitTime.BodyRenderer.prototype.feedBody = function(body) {
-    var canvReq = body.getCanvasRequirements();    //MM - canvas req location is the "board location on this layer for center of canvas"
+    var canvReq = body.getCanvasRequirements();    // canvas req location is the "board location on this layer for center of canvas"
     if(!canvReq) {
         return;
     }
     var node = this._getBodyNode(body);
-	node.canvReq = canvReq;
-    
-	//Sort sprites to determine which ones overlap on the x axis (an optimization to reduce comparisons)	
-	//var halfWidth = Math.round(canvReq.width / 2);
-	//this._sortedData.resort(node.refLeft, canvReq.x - halfWidth);  //sort from the leftmost point of the canvas
-    //this._sortedData.resort(node.refRight, canvReq.x + halfWidth); //sort from the rightmost point of the canvas
+    node.canvReq = canvReq;
     node.shouldBeDrawnThisFrame = true;
 };
 
@@ -55,12 +44,10 @@ SplitTime.BodyRenderer.prototype.feedBody = function(body) {
  */
 SplitTime.BodyRenderer.prototype._getBodyNode = function(body) {
     if(!(body.ref in this._bodyToNodeIndexMap)) {
-        var node = new BodyNode(body, this._nextRef++, this._nextRef++);
+        var node = new BodyNode(body);
         var index = this._nodes.length;
         this._nodes.push(node);
         this._bodyToNodeIndexMap[body.ref] = index;
-        //this._sortedData.add(node.refLeft, node);
-        //this._sortedData.add(node.refRight, node);
         return node;
     }
     return this._nodes[this._bodyToNodeIndexMap[body.ref]];
@@ -97,91 +84,72 @@ SplitTime.BodyRenderer.prototype._removeDeadBodies = function() {
         var node = this._nodes[i];
         if(!node.shouldBeDrawnThisFrame) {
             this._nodes.splice(i, 1);
-            //this._sortedData.remove(node.refLeft);
-            //this._sortedData.remove(node.refRight);
         } else {
-            this._removeNodeEdges(node);
+            node.before = [];
         }
     }
 };
 
 SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
+    //optimization for not drawing if out of bounds
+    var nodesOnScreen = this._getNodesOnScreen();
     //For each node
-	for(var i = 0; i < this._nodes.length; i++) {
+    for(var i = 0; i < nodesOnScreen.length; i++) {
+        var node = nodesOnScreen[i];
+        var canvReq = node.canvReq;
+        //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
+        var screenY = canvReq.y - canvReq.z;
+        var halfHeight = canvReq.height / 2;
+        var halfWidth = canvReq.width / 2;
+
+        //For each other node we haven't visited yet
+        for(var h = i + 1; h < nodesOnScreen.length; h++) {
+            var otherNode = nodesOnScreen[h];
+            var otherCanvReq = otherNode.canvReq;
+
+            var otherScreenY = otherCanvReq.y - otherCanvReq.z;
+            var otherHalfHeight = otherCanvReq.height / 2;
+
+            //Skip if the two bodies don't overlap on the screen's y axis (top to bottom)
+            if((screenY - halfHeight < otherScreenY + otherHalfHeight) && (screenY + halfHeight > otherScreenY - otherHalfHeight)){
+                var otherHalfWidth = otherCanvReq.width / 2;
+
+                //Skip if the two bodies don't overlap on the x axis (left to right)
+                if((canvReq.x - halfWidth) < (otherCanvReq.x + otherHalfWidth) && (canvReq.x + halfWidth) > (otherCanvReq.x - otherHalfWidth)) {
+                    this._constructEdge(node, otherNode);
+                }
+            }
+        }
+    }
+};
+
+SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
+    var nodesOnScreen = [];
+    //For each node
+    for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
-		var canvReq = node.canvReq;
-		//Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
-		var screenY = canvReq.y - canvReq.z; 
-		
-		//optimization for not drawing if out of bounds
-		var screen = SplitTime.BoardRenderer.getScreenCoordinates();
-		var screenBottom = screen.y + SplitTime.SCREENY;
-		var screenRightEdge = screen.x + SplitTime.SCREENX;
-		
-		//If the body is in bounds 
-		if(screenY >= screen.y && canvReq.x >= screen.x && (canvReq.y - node.body.yres) <= screenBottom && (canvReq.x - node.body.xres) <= screenRightEdge) {
-			//For each other node we haven't visited yet
-			for(var h = i; h < this._nodes.length; h++) {
-				var otherNode = this._nodes[h];
-				var otherCanvReq = otherNode.canvReq;
-				
-				//If the canvas requirements are not null and the nodes are not the same body
-				if(otherCanvReq) {
-					var otherScreenY = otherCanvReq.y - otherCanvReq.z;
-					
-					//Skip if the two bodies don't overlap on the screen's y axis (top to bottom)
-					if(((screenY - (canvReq.height / 4)) < otherScreenY) && (screenY > (otherScreenY - (otherCanvReq.height / 4)))){
-						var width1 = canvReq.width / 8;
-						var width2 = otherCanvReq.width / 8;
-						
-						//Skip if the two bodies don't overlap on the x axis (left to right)
-						if((canvReq.x - width1) < (otherCanvReq.x + width2) && (canvReq.x + width1) > (otherCanvReq.x - width2)) {
-							this._constructEdge(node, otherNode);
-						}
-					}
-				}
-			}
-		}
-		else {
-			node.visitedThisFrame = true;
-		}
-    }
-};
+        var canvReq = node.canvReq;
+        //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
+        var screenY = canvReq.y - canvReq.z;
 
-/**
- * @param {BodyNode} node
- * @private
- */
-SplitTime.BodyRenderer.prototype._removeNodeEdges = function(node) {
-    for(var iAfter = 0; iAfter < node.after.length; iAfter++) {
-        var afterNode = node.after[iAfter];
-        // TODO: This line represents a quick-thought but not working solution to a problem with this setup
-        // Smaller object won't recalculate with larger object that completely surrounds
+        //optimization for not drawing if out of bounds
+        var screen = SplitTime.BoardRenderer.getScreenCoordinates();
+        var screenBottom = screen.y + SplitTime.SCREENY;
+        var screenRightEdge = screen.x + SplitTime.SCREENX;
 
-        var myIndexInAfter = afterNode.before.indexOf(node);
-        if(myIndexInAfter < 0) {
-            console.error("node for " + node.body.ref + " not found in after's before list");
+        //If the body is in bounds
+        if(
+            (screenY + canvReq.height / 2) >= screen.y &&
+            (canvReq.x + canvReq.width / 2) >= screen.x &&
+            (canvReq.y - canvReq.height / 2) <= screenBottom &&
+            (canvReq.x - canvReq.width / 2) <= screenRightEdge
+        ) {
+            nodesOnScreen.push(node);
+        } else {
+            node.visitedThisFrame = true;
         }
-        afterNode.before.splice(myIndexInAfter, 1);
     }
-    node.after = [];
-    for(var iBefore = 0; iBefore < node.before.length; iBefore++) {
-        var beforeNode = node.before[iBefore];
-        var myIndexInBefore = beforeNode.after.indexOf(node);
-        if(myIndexInBefore < 0) {
-            console.error("node for " + node.body.ref + " not found in before's after list");
-        }
-        beforeNode.after.splice(myIndexInBefore, 1);
-    }
-    node.before = [];
-};
-
-/**
- * @param {BodyNode} node
- * @private
- */
-SplitTime.BodyRenderer.prototype._recalculateNodeEdges = function(node) {
-    
+    return nodesOnScreen;
 };
 
 /**
@@ -200,9 +168,8 @@ SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2) {
         nodeBehind = node1;
     }
 
-	//construct the edge (make the nodes point to each other)
+    //construct the edge (make the nodes point to each other)
     nodeInFront.before.push(nodeBehind);
-    nodeBehind.after.push(nodeInFront);
 };
 
 /**
@@ -212,13 +179,13 @@ SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2) {
  * @param {SplitTime.Body} body2
  */
 function shouldRenderInFront(body1, body2) {
-	if(isAbove(body1, body2) || isInFront(body1, body2)) {  //if body1 is completely above or in front
+    if(isAbove(body1, body2) || isInFront(body1, body2)) {  //if body1 is completely above or in front
         return true;
     } else if(isAbove(body2, body1) || isInFront(body2, body1)) {   //if body2 is completely above or in front
         return false;
     }
-	//If neither body is clearly above or in front, 
-	//go with the one whose base position is farther forward on the y axis
+    //If neither body is clearly above or in front,
+    //go with the one whose base position is farther forward on the y axis
     return (body1.y > body2.y);
 }
 
@@ -229,7 +196,7 @@ function shouldRenderInFront(body1, body2) {
  * @param {SplitTime.Body} body2
  */
 function isAbove(body1, body2) {
-	return (body1.z > body2.z + body2.height);
+    return (body1.z >= body2.z + body2.height);
 }
 
 /**
@@ -239,7 +206,7 @@ function isAbove(body1, body2) {
  * @param {SplitTime.Body} body2
  */
 function isInFront(body1, body2) {
-	return (body1.y - body1.halfBaseLength > body2.y + body2.halfBaseLength);
+    return (body1.y - body1.halfBaseLength >= body2.y + body2.halfBaseLength);
 }
 
 /**
@@ -248,36 +215,31 @@ function isInFront(body1, body2) {
  * @param canvasRequirements
  */
 SplitTime.BodyRenderer.prototype.drawBodyTo = function(body, canvasRequirements) {
-	// TODO: potentially give the body a cleared personal canvas if requested
+    // TODO: potentially give the body a cleared personal canvas if requested
 
-	// Translate origin to body location
-	this.ctx.translate(Math.round(canvasRequirements.x - this.screen.x), Math.round(canvasRequirements.y - canvasRequirements.z - this.screen.y));
-	body.see(this.ctx);
-	// Reset transform
-	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // Translate origin to body location
+    this.ctx.translate(Math.round(canvasRequirements.x - this.screen.x), Math.round(canvasRequirements.y - canvasRequirements.z - this.screen.y));
+    body.see(this.ctx);
+    // Reset transform
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-	// TODO: address these commented items as their proper location should be moved
-	//     //Determine if SplitTime.onBoard.bodies is lighted
-	//     if(cBody.isLight) {
-	//         lightedThings.push(cBody);
-	//     }
-	//
-	//     cBody.resetStance();
-	//     cBody.resetCans();
+    // TODO: address these commented items as their proper location should be moved
+    //     //Determine if SplitTime.onBoard.bodies is lighted
+    //     if(cBody.isLight) {
+    //         lightedThings.push(cBody);
+    //     }
+    //
+    //     cBody.resetStance();
+    //     cBody.resetCans();
 };
 
-function BodyNode(body, refLeft, refRight) {
+function BodyNode(body) {
     /** @type {SplitTime.Body} */
     this.body = body;
     /** @type {BodyNode[]} bodies drawn before this one */
     this.before = [];
-    /** @type {BodyNode[]} bodies drawn after this one */
-    this.after = [];
 
     this.canvReq = {};
-
-    this.refLeft = refLeft;
-    this.refRight = refRight;
 
     this.visitedThisFrame = false;
     this.shouldBeDrawnThisFrame = false;

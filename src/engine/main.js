@@ -1,7 +1,7 @@
 SplitTime.main = function() {
-	var startTime = new Date().getTime();
+    var startTime = new Date().getTime();
 
-	var agentCount = 0;
+    var agentCount = 0;
 
     try {
         var loopStart = new Date(); //for speed checking
@@ -83,35 +83,35 @@ SplitTime.main = function() {
 
         SplitTime.FrameStabilizer.notifyFrameUpdate();
     } catch(ex) {
-		console.error(ex);
-	}
-
-	try {
-	    SplitTime.HUD.render(SplitTime.see);
-    } catch(ex) {
-	    console.error(ex);
+        console.error(ex);
     }
 
-	var endTime = new Date().getTime();
-	var msElapsed = endTime - startTime;
+    try {
+        SplitTime.HUD.render(SplitTime.see);
+    } catch(ex) {
+        console.error(ex);
+    }
 
-	var displayFPS = SplitTime.FPS;
-	if(msElapsed < SplitTime.msPerFrame) {
-		setTimeout(SplitTime.main, SplitTime.msPerFrame - msElapsed);
-		SplitTime.see.fillStyle="#00FF00";
-	}
-	else {
-		setTimeout(SplitTime.main, 2); //give browser a quick breath
-		var secondsElapsed = msElapsed/1000;
-		displayFPS = Math.round(1/secondsElapsed);
-		SplitTime.see.fillStyle="#FF0000";
-	}
+    var endTime = new Date().getTime();
+    var msElapsed = endTime - startTime;
+
+    var displayFPS = SplitTime.FPS;
+    if(msElapsed < SplitTime.msPerFrame) {
+        setTimeout(SplitTime.main, SplitTime.msPerFrame - msElapsed);
+        SplitTime.see.fillStyle="#00FF00";
+    }
+    else {
+        setTimeout(SplitTime.main, 2); //give browser a quick breath
+        var secondsElapsed = msElapsed/1000;
+        displayFPS = Math.round(1/secondsElapsed);
+        SplitTime.see.fillStyle="#FF0000";
+    }
 
     SplitTime.Debug.update({
         "FPS": displayFPS,
         "Board Bodies": SplitTime.BoardRenderer.countBodies(),
-		"Focus point": Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z),
-		"Agents": agentCount,
+        "Focus point": Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z),
+        "Agents": agentCount,
         "HUD Layers": SplitTime.HUD.getRendererCount(),
         "Joystick Direction": SplitTime.Controls.JoyStick.getDirection()
     });

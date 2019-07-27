@@ -202,8 +202,9 @@ SplitTime.Level.prototype.runFunctionSet = function(functionIdSet, param) {
  * @param {function(SplitTime.Body)} callback
  */
 SplitTime.Level.prototype.forEachBody = function(callback) {
-    for(var i = 0; i < this.bodies.length; i++) {
-        callback(this.bodies[i]);
+    var bodies = this._bodyOrganizer.getBodies();
+    for(var i = 0; i < bodies.length; i++) {
+        callback(bodies[i]);
     }
 };
 
@@ -225,22 +226,17 @@ SplitTime.Level.prototype.forEachAgent = function(callback) {
  * @returns {SplitTime.Body[]}
  */
 SplitTime.Level.prototype.getBodies = function() {
-    // TODO: implement
-    //return this.bodies;
-	return this._bodyOrganizer.getBodies();
+    return this._bodyOrganizer.getBodies();
 };
 
-//Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
     this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
-    this.bodies.length = 0;
     var index;
     //Figure out which Actors are on board
     for(var id in SplitTime.Actor) {
         var actor = SplitTime.Actor[id];
         if(actor.getLevel() === this) {
-            // this._bodyOrganizer.removeBody(actor);
-            this.insertBody(actor, true);
+            this.insertBody(actor);
         }
     }
 
@@ -270,59 +266,21 @@ SplitTime.Level.prototype.refetchBodies = function() {
             console.error("Template \"" + template + "\" not found for instantiating prop");
         }
     }
-
-    // TODO: better implementation of players
-    // for(index = 0; index < SplitTime.player.length; index++) {
-    //     if(index == SplitTime.currentPlayer || this.type == "TRPG") {
-    //         this.agents.push(SplitTime.player[index]);
-    //         this.insertBody(SplitTime.player[index]);
-    //     }
-    // }
-};
-
-//Sort the array this.bodies in order of y location (in order to properly render sprite overlap).
-SplitTime.Level.prototype.sortBodies = function() {
-    if(this.bodies.length === 0) this.refetchBodies();
-    else {
-        for(var index = 1; index < this.bodies.length; index++) {
-            var second = index;
-            while(second > 0 && this.bodies[second].y < this.bodies[second - 1].y) {
-                var tempC = this.bodies[second];
-                this.bodies[second] = this.bodies[second - 1];
-                this.bodies[second - 1] = tempC;
-                second--;
-            }
-        }
-    }
 };
 
 /**
- * @deprecated Only really needed currently for rendering, which should elsewhere and different
+ * @deprecated Used to be related to rendering; not sure interface is still appropriate
  * @param {SplitTime.Body} body
- * @param {boolean} [skipOrganizer]
  */
-SplitTime.Level.prototype.insertBody = function(body, skipOrganizer) {
-    var index = 0;
-    while(index < this.bodies.length && body.y > this.bodies[index].y) {
-        index++;
-    }
-    this.bodies.splice(index, 0, body);
-    // if(!skipOrganizer) {
-        this._bodyOrganizer.addBody(body);
-    // }
+SplitTime.Level.prototype.insertBody = function(body) {
+    this._bodyOrganizer.addBody(body);
 };
 
 /**
- * @deprecated Only really needed currently for rendering, which should elsewhere and different
+ * @deprecated Used to be related to rendering; not sure interface is still appropriate
  * @param {SplitTime.Body} body
  */
 SplitTime.Level.prototype.removeBody = function(body) {
-    for(var index = 0; index < this.bodies.length; index++) {
-        if(body == this.bodies[index]) {
-            this.bodies.splice(index, 1);
-            index = this.bodies.length;
-        }
-    }
     this._bodyOrganizer.removeBody(body);
 };
 
