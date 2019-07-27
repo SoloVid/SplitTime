@@ -284,7 +284,7 @@ function updateObject(index)
 		yres = childBlock.match(/child\.yres[\s]*=[\s]*[\d]+;/)[0];
 		yres = Number(yres.match(dRegex)[0]);
 	}
-	catch(e) { var xres = childTemplate.xres; var yres = childTemplate.yres; }
+	catch(e) { xres = childTemplate.xres; yres = childTemplate.yres; }
 
 	try {
 		dir = childBlock.match(/child\.dir[\s]*=[\s]*[\d]+;/)[0];
