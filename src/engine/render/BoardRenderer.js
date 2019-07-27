@@ -128,6 +128,9 @@ SplitTime.BoardRenderer.countBodies = function() {
     return currentLevel.getBodies().length;
 };
 
+dependsOn("BodyRenderer.js");
+var bodyRenderer = new SplitTime.BodyRenderer();
+
 /**
  * @param {boolean} forceCalculate
  */
@@ -144,15 +147,18 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     bufferCtx.fillStyle = "#000000";
     bufferCtx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+    bodyRenderer.notifyNewFrame(screen, snapshotCtx);
     var bodies = currentLevel.getBodies();
     var lights = [];
 
     for(var iBody = 0; iBody < bodies.length; iBody++) {
-        if(typeof bodies[iBody].prepareForRender === "function") {
-            bodies[iBody].prepareForRender();
+        var body = bodies[iBody];
+        bodyRenderer.feedBody(body);
+        if(typeof body.prepareForRender === "function") {
+            body.prepareForRender();
         }
-        if(bodies[iBody].lightIntensity > 0) {
-            lights.push(bodies[iBody]);
+        if(body.lightIntensity > 0) {
+            lights.push(body);
         }
     }
     weatherRenderer.setLights(lights);
@@ -175,9 +181,7 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         // 	}
         // }
 
-        for(iBody = 0; iBody < bodies.length; iBody++) {
-            drawBodyTo(bodies[iBody], snapshotCtx);
-        }
+        bodyRenderer.render();
         snapshotCtx.globalAlpha = 1;
 
         //Work out details of smaller-than-screen dimensions
@@ -235,36 +239,6 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         }
     }
 };
-
-/**
- *
- * @param {SplitTime.Body} body
- * @param {CanvasRenderingContext2D} ctx
- */
-function drawBodyTo(body, ctx) {
-    var canvasRequirements = body.getCanvasRequirements();
-    if(canvasRequirements === null) {
-        return;
-    }
-    // TODO: add optimization for not drawing if out of bounds
-
-    // TODO: potentially give the body a cleared personal canvas if requested
-
-    // Translate origin to body location
-    ctx.translate(Math.round(canvasRequirements.x - screen.x), Math.round(canvasRequirements.y - canvasRequirements.z - screen.y));
-    body.see(ctx);
-    // Reset transform
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    // TODO: address these commented items as their proper location should be moved
-    //     //Determine if SplitTime.onBoard.bodies is lighted
-    //     if(cBody.isLight) {
-    //         lightedThings.push(cBody);
-    //     }
-    //
-    //     cBody.resetStance();
-    //     cBody.resetCans();
-}
 
 /**
  * @param {int} width

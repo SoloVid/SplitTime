@@ -221,38 +221,22 @@ SplitTime.Level.prototype.forEachAgent = function(callback) {
     }
 };
 
-SplitTime.Level.prototype.getAgents = function() {
-    // TODO: implement
-    var agents = [];
-    for(var i = 0; i < this.bodies.length; i++) {
-        var agent = this.bodies[i].getAgent();
-        if(agent) {
-            agents.push(agent);
-        }
-    }
-    return agents;
-};
-
 /**
  * @returns {SplitTime.Body[]}
  */
 SplitTime.Level.prototype.getBodies = function() {
-    // TODO: implement
     return this.bodies;
 };
 
-//Sort all board characters into the array this.bodies in order of y location (in order to properly render sprite overlap).
 SplitTime.Level.prototype.refetchBodies = function() {
     // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
     this._cellGrid = new SplitTime.Level.CellGrid(this);
-    this.bodies.length = 0;
     var index;
     //Figure out which Actors are on board
     for(var id in SplitTime.Actor) {
         var actor = SplitTime.Actor[id];
         if(actor.getLevel() === this) {
-            // this._cellGrid.removeBody(actor);
-            this.insertBody(actor, true);
+            this.insertBody(actor);
         }
     }
 
@@ -282,51 +266,27 @@ SplitTime.Level.prototype.refetchBodies = function() {
     }
 };
 
-//Sort the array this.bodies in order of y location (in order to properly render sprite overlap).
-SplitTime.Level.prototype.sortBodies = function() {
-    if(this.bodies.length === 0){
-        this.refetchBodies();
-    } else {
-        for(var index = 1; index < this.bodies.length; index++) {
-            var second = index;
-            while(second > 0 && this.bodies[second].y < this.bodies[second - 1].y) {
-                var tempC = this.bodies[second];
-                this.bodies[second] = this.bodies[second - 1];
-                this.bodies[second - 1] = tempC;
-                second--;
-            }
-        }
-    }
-};
-
 /**
- * @deprecated Only really needed currently for rendering, which should elsewhere and different
+ * @deprecated Used to be related to rendering; not sure interface is still appropriate
  * @param {SplitTime.Body} body
- * @param {boolean} [skipOrganizer]
  */
-SplitTime.Level.prototype.insertBody = function(body, skipOrganizer) {
-    var index = 0;
-    while(index < this.bodies.length && body.y > this.bodies[index].y) {
-        index++;
+SplitTime.Level.prototype.insertBody = function(body) {
+    if(this.bodies.indexOf(body) < 0) {
+        this.bodies.push(body);
     }
-    this.bodies.splice(index, 0, body);
-    // if(!skipOrganizer) {
-        this._cellGrid.addBody(body);
-    // }
+    this._cellGrid.addBody(body);
 };
 
 /**
- * @deprecated Only really needed currently for rendering, which should elsewhere and different
+ * @deprecated Used to be related to rendering; not sure interface is still appropriate
  * @param {SplitTime.Body} body
  */
 SplitTime.Level.prototype.removeBody = function(body) {
-    for(var index = 0; index < this.bodies.length; index++) {
-        if(body == this.bodies[index]) {
-            this.bodies.splice(index, 1);
-            index = this.bodies.length;
-        }
-    }
     this._cellGrid.removeBody(body);
+    var iBody = this.bodies.indexOf(body);
+    if(iBody >= 0) {
+        this.bodies.splice(iBody, 1);
+    }
 };
 
 var levelMap = {};

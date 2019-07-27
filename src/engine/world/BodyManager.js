@@ -6,7 +6,8 @@
  */
 function BodyOrganizer(level) {
     this._initialized = false;
-    this._waitingBodies = [];
+    /** @type {SplitTime.Body[]} */
+    this._bodies = [];
     this._bodySet = {};
 
     if(level) {
@@ -29,9 +30,16 @@ BodyOrganizer.prototype.initialize = function(level) {
     this._sortedByZBottom = new BodiesSortedByOneValue(maxZ32);
 
     this._initialized = true;
-    for(var i = 0; i < this._waitingBodies.length; i++) {
-        this.addBody(this._waitingBodies[i]);
+    for(var i = 0; i < this._bodies.length; i++) {
+        this.addBody(this._bodies[i]);
     }
+};
+
+/**
+ * @return {SplitTime.Body[]}
+ */
+BodyOrganizer.prototype.getBodies = function() {
+    return this._bodies;
 };
 
 /**
@@ -42,13 +50,12 @@ BodyOrganizer.prototype.addBody = function(body) {
     if(this._bodySet[body.ref]) {
         return;
     }
+    this._bodies.push(body);
+    this._bodySet[body.ref] = true;
 
     if(!this._initialized) {
-        this._waitingBodies.push(body);
         return;
     }
-
-    this._bodySet[body.ref] = true;
 
     this._sortedByXLeft.addBody(body);
     this._sortedByXRight.addBody(body);
@@ -65,10 +72,12 @@ BodyOrganizer.prototype.addBody = function(body) {
  * @param {SplitTime.Body} body
  */
 BodyOrganizer.prototype.removeBody = function(body) {
+    for(var i = this._bodies.length - 1; i >= 0; i++) {
+        this._bodies.splice(i, 1);
+    }
+    this._bodySet[body.ref] = false;
+
     if(!this._initialized) {
-        for(var i = this._waitingBodies.length - 1; i >= 0; i++) {
-            this._waitingBodies.splice(i, 1);
-        }
         return;
     }
 
@@ -78,8 +87,6 @@ BodyOrganizer.prototype.removeBody = function(body) {
     this._sortedByYBottom.removeBody(body);
     this._sortedByZTop.removeBody(body);
     this._sortedByZBottom.removeBody(body);
-
-    this._bodySet[body.ref] = false;
 };
 
 /**
@@ -149,6 +156,9 @@ function forEachBodyAtValue(value, callback, bodiesSortHolder) {
         console.warn("Attempting to use BodyOrganizer before initialized");
         return false;
     }
+    if(Math.floor(value) !== value) {
+        console.warn("Non-integer value: " + value);
+    }
 
     var index32 = Math.floor(value/32);
     if(index32 >= bodiesSortHolder.valueLookup32.length) {
@@ -213,6 +223,10 @@ BodiesSortedByOneValue.prototype.removeBody = function(body) {
 };
 
 BodiesSortedByOneValue.prototype.resortBody = function(body, value) {
+    if(Math.floor(value) !== value) {
+        console.warn("Non-integer value: " + value);
+    }
+
     var currentIndex = this.reverseSortLookup[body.ref];
     var oldValue = this.sortedByValue[currentIndex].value;
     if(value === oldValue) {
