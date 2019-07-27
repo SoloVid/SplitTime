@@ -98,7 +98,7 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
         var node = nodesOnScreen[i];
         var canvReq = node.canvReq;
         //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
-        var screenY = canvReq.y - canvReq.z;
+        var nodeBottom = canvReq.y - canvReq.z;
         
 		//Half width/height is used for determining the edge of 
 		//	the visible body relative to the y position (bottom)
@@ -113,18 +113,25 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
             var otherNode = nodesOnScreen[h];
             var otherCanvReq = otherNode.canvReq;
 
-            var otherScreenY = otherCanvReq.y - otherCanvReq.z;
+            var otherNodeBottom = otherCanvReq.y - otherCanvReq.z;
             var otherHeight = (otherNode.body.yres) - 2;
-
+			
+			var yDiffVal1 = nodeBottom - (otherNodeBottom - otherHeight);
+			var yDiffVal2 = otherNodeBottom - (nodeBottom - height);
+			
             //Skip if the two bodies don't overlap on the screen's y axis (top to bottom)
-            if(screenY > otherScreenY - otherHeight){
-				if (screenY - height < otherScreenY){
-					var otherHalfWidth = (otherNode.body.xres / 2) - 2;
-
-					//Skip if the two bodies don't overlap on the x axis (left to right)
-					if((canvReq.x - halfWidth) < (otherCanvReq.x + otherHalfWidth) && (canvReq.x + halfWidth) > (otherCanvReq.x - otherHalfWidth)) {
-						this._constructEdge(node, otherNode);
-					}
+            if(yDiffVal1 > 0 && yDiffVal2 > 0){
+				var otherHalfWidth = (otherNode.body.xres / 2) - 2;
+				
+				var xDiffVal1 = (otherCanvReq.x + otherHalfWidth) - (canvReq.x - halfWidth);
+				var xDiffVal2 = (canvReq.x + halfWidth) - (otherCanvReq.x - otherHalfWidth);
+				
+				//Skip if the two bodies don't overlap on the x axis (left to right)
+				if(xDiffVal1 > 0 && xDiffVal2 > 0) {
+					
+					var bottomDiff = otherNodeBottom - (nodeBottom);
+					var overlappingPixels = Math.min(xDiffVal1, xDiffVal2, yDiffVal1, bottomDiff);
+					this._constructEdge(node, otherNode, overlappingPixels);
 				}
             }
         }
@@ -166,9 +173,10 @@ SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
  *
  * @param {BodyNode} node1 
  * @param {BodyNode} node2 
+ * @param {int} overlappingPixels - the number of pixels by which the two are overlapping 
  * @private
  */
-SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2) {
+SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2, overlappingPixels) {
     //determine which node corresponds to the body in front
     var nodeInFront = node1;
     var nodeBehind = node2;
@@ -180,7 +188,13 @@ SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2) {
 	//If the active player is behind an object, lower the opacity
 	if(nodeBehind.body === SplitTime.Player.getActiveBody())
 	{
-		nodeInFront.opacity = 0.7;
+		//If we're close to the edge, fade in/out gradually
+		if(overlappingPixels < 25){
+			nodeInFront.opacity = 1 - (overlappingPixels / 50);
+		}
+		else {
+			nodeInFront.opacity = 0.5;
+		}
 	}
 	
     //construct the edge (make the nodes point to each other)
