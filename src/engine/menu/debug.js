@@ -1,3 +1,5 @@
+dependsOn("/time/FrameStabilizer.js");
+
 SplitTime.Debug = {
     ENABLED: true,
     DRAW_TRACES: true
@@ -16,9 +18,11 @@ SplitTime.Debug.attachDebug = function(parentId) {
     parent.appendChild(debugDiv);
 };
 
+var frameStabilizer = new SplitTime.FrameStabilizer(100);
+
 SplitTime.Debug.update = function(info) {
     debugInfo = info;
-    if(debugDiv === null || !SplitTime.FrameStabilizer.haveSoManyMsPassed(100)) {
+    if(debugDiv === null || !frameStabilizer.isSignaling()) {
         return;
     }
 

@@ -235,7 +235,9 @@ SplitTime.Body.prototype.setLevel = function(level, includeChildren) {
         }
     }
 
-    this.timeStabilizer = level.getRegion().getTimeStabilizer(200);
+    if(this.drawable) {
+    	this.drawable.setFrameSignaler(level.getRegion().getTimeStabilizer(200));
+	}
 };
 /**
  * @return {SplitTime.Level}

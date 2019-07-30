@@ -1,7 +1,7 @@
 SplitTime.Region = function() {
     this.levels = [];
     this.time = new SplitTime.Time();
-    this.TimeStabilizer = SplitTime.IntervalStabilizer.makeRegionStabilizerClass(this);
+    this.mainTimeStabilizer = this.getTimeStabilizer();
 };
 
 SplitTime.Region.prototype.getTime = function() {
@@ -18,11 +18,14 @@ SplitTime.Region.prototype.getTimeMs = function() {
  * @return {Signaler}
  */
 SplitTime.Region.prototype.getTimeStabilizer = function(msPerStep, maxCounter) {
-    return new this.TimeStabilizer(msPerStep, maxCounter);
+    var that = this;
+    return new SplitTime.IntervalStabilizer(msPerStep, maxCounter, function() {
+        return that.getTimeMs();
+    });
 };
 //This method may be dangerous for synchronization across skipped frames
 // SplitTime.Region.prototype.hasSoMuchTimePassed = function(milliseconds) {
-//     return this.TimeStabilizer.haveSoManyMsPassed(milliseconds);
+//     return this.mainTimeStabilizer.haveSoManyMsPassed(milliseconds);
 // };
 
 SplitTime.Region.prototype.addLevel = function(level) {

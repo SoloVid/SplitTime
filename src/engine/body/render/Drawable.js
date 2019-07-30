@@ -31,6 +31,13 @@ SplitTime.Body.Drawable.prototype.getCanvasRequirements = function(x, y, z) {
 };
 
 /**
+ * @param {Signaler} frameSignaler
+ */
+SplitTime.Body.Drawable.prototype.setFrameSignaler = function(frameSignaler) {
+    this._frameSignaler = frameSignaler;
+};
+
+/**
  * @param {CanvasRenderingContext2D} ctx
  */
 SplitTime.Body.Drawable.prototype.draw = function(ctx) {

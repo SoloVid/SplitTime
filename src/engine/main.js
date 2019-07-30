@@ -23,7 +23,6 @@ SplitTime.main = function() {
                 // if(clock.isSignaling()) {
                     region.getTime().advance(SplitTime.msPerFrame);
                 // }
-                region.TimeStabilizer.notifyFrameUpdate();
                 var timeAdvance = new SLVD.speedCheck("SplitTime.Time.advance", loopStart);
                 timeAdvance.logUnusual();
 
@@ -83,8 +82,6 @@ SplitTime.main = function() {
             // }
             default: {}
         }
-
-        SplitTime.FrameStabilizer.notifyFrameUpdate();
     } catch(ex) {
         console.error(ex);
     }

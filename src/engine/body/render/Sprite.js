@@ -1,4 +1,5 @@
 dependsOn("../Body.js");
+dependsOn("/Direction.js");
 
 /**
  * @param img
@@ -7,7 +8,14 @@ dependsOn("../Body.js");
  */
 SplitTime.Sprite = function(img) {
     this.img = img;
+    /**
+     * @type {Signaler}
+     * @private
+     */
+    this._frameSignaler = new SplitTime.FrameStabilizer();
 };
+
+SplitTime.Sprite.DEFAULT_STANCE = "default";
 
 SplitTime.Sprite.prototype.xres = 32;
 SplitTime.Sprite.prototype.yres = 64;
@@ -21,10 +29,12 @@ SplitTime.Sprite.prototype.rotate = 0;
 SplitTime.Sprite.prototype.lightIntensity = 0;
 SplitTime.Sprite.prototype.lightRadius = 150;
 SplitTime.Sprite.prototype.playerOcclusionFadeFactor = 0;
-SplitTime.Sprite.prototype.stance = "default";
-SplitTime.Sprite.prototype.requestedStance = "default";
+SplitTime.Sprite.prototype.stance = SplitTime.Sprite.DEFAULT_STANCE;
+SplitTime.Sprite.prototype.requestedStance = SplitTime.Sprite.DEFAULT_STANCE;
 SplitTime.Sprite.prototype.requestedFrameReset = false;
 SplitTime.Sprite.prototype.frame = 0;
+SplitTime.Sprite.prototype.dir = SplitTime.Direction.S;
+SplitTime.Sprite.prototype.requestedDir = SplitTime.Direction.S;
 
 SplitTime.Sprite.prototype.stances = {
     "default": {
@@ -52,14 +62,21 @@ SplitTime.Sprite.prototype.getCanvasRequirements = function(x, y, z) {
         y: Math.round(y),
         z: Math.round(z),
         // TODO: smarter calculations
-        width: this.xres * 4,
-        height: this.yres * 4,
+        width: this.xres,// * 4,
+        height: this.yres,// * 4,
         isCleared: false
     };
 };
 
+/**
+ * @param {Signaler} frameSignaler
+ */
+SplitTime.Sprite.prototype.setFrameSignaler = function(frameSignaler) {
+    this._frameSignaler = frameSignaler;
+};
+
 SplitTime.Sprite.prototype.defaultStance = function() {
-	this.requestStance("default", true);
+	this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, true);
 };
 
 /**
@@ -168,13 +185,13 @@ SplitTime.Sprite.prototype.finalizeFrame = function() {
         //TODO: don't rely on global time passing since we might skip frames at some point
         //i.e. ^^ instantiate a Stabilizer rather than using static method
         //Only update on frame tick
-        // if(this.timeStabilizer.isSignaling()) {
+        if(this._frameSignaler.isSignaling()) {
             var mod = this.getAnimationFramesAvailable();
             if(!isNaN(mod) && mod > 0) {
                 this.frame++;
                 this.frame %= mod;
             }
-        // }
+        }
     }
 };
 
@@ -200,15 +217,17 @@ SplitTime.Sprite.prototype.finalizeStance = function() {
         this.requestedStance = "default";
     }
     this.stance = this.requestedStance;
+    this.dir = this.requestedDir;
 };
 
-SplitTime.Sprite.prototype.requestStance = function(stance, forceReset) {
+SplitTime.Sprite.prototype.requestStance = function(stance, dir, forceReset) {
     this.requestedStance = stance;
+    this.requestedDir = dir;
     this.requestedFrameReset = forceReset;
 };
 
 SplitTime.Sprite.prototype.resetStance = function() {
-    this.requestStance("default", false);
+    this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, false);
 };
 
 SplitTime.Sprite.prototype.prepareForRender = function() {

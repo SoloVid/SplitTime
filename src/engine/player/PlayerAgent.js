@@ -17,7 +17,9 @@ SplitTime.Agent.Player.prototype.notifyFrameUpdate = function() {
         return;
     }
 
-    this.body.drawable.advanceTime(100);
+    // if(this.body.drawable) {
+    //     this.body.drawable.advanceTime(100);
+    // }
 
     var dir = SplitTime.Controls.JoyStick.getDirection();
     if(dir === null) {
