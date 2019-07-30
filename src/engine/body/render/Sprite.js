@@ -20,6 +20,7 @@ SplitTime.Sprite.prototype.rotate = 0;
 
 SplitTime.Sprite.prototype.lightIntensity = 0;
 SplitTime.Sprite.prototype.lightRadius = 150;
+SplitTime.Sprite.prototype.playerOcclusionFadeFactor = 0;
 SplitTime.Sprite.prototype.stance = "default";
 SplitTime.Sprite.prototype.requestedStance = "default";
 SplitTime.Sprite.prototype.requestedFrameReset = false;
@@ -161,7 +162,7 @@ SplitTime.Sprite.prototype.getAnimationFrameCrop = function(numDir, stance, fram
 // TODO: abstract this?
 SplitTime.Sprite.prototype.hasIdleAnimation = false;
 SplitTime.Sprite.prototype.finalizeFrame = function() {
-    if(this.hasIdleAnimation && this.stance != this.requestedStance || this.requestedFrameReset) {
+    if(isNaN(this.frame) || this.hasIdleAnimation && this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
     } else {
         //TODO: don't rely on global time passing since we might skip frames at some point
@@ -178,7 +179,15 @@ SplitTime.Sprite.prototype.finalizeFrame = function() {
 };
 
 SplitTime.Sprite.prototype.getAnimationFramesAvailable = function() {
-    return Math.floor(this.getImage().height / this.yres);
+    var calculation = Math.floor(this.getImage().height / this.yres);
+    if(isNaN(calculation)) {
+        if(SplitTime.Debug.ENABLED) {
+            console.warn(this.img + " not loaded yet for frame count calculation for " + this.ref);
+        }
+        return 1;
+    } else {
+        return calculation;
+    }
 };
 
 SplitTime.Sprite.prototype.finalizeStance = function() {

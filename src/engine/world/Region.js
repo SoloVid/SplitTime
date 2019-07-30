@@ -84,3 +84,17 @@ SplitTime.Region.getCurrent = function() {
 SplitTime.Region.getDefault = function() {
     return defaultRegion;
 };
+
+SplitTime.Region.prototype.loadForPlay = function() {
+    var promises = new SLVD.Promise.Collection();
+    for(var i = 0; i < this.levels.length; i++) {
+        promises.add(this.levels[i].loadForPlay());
+    }
+    return promises;
+};
+
+SplitTime.Region.prototype.unloadLevels = function() {
+    for(var i = 0; i < this.levels.length; i++) {
+        this.levels[i].unload();
+    }
+};

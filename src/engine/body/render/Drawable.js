@@ -10,6 +10,7 @@ SplitTime.Body.Drawable = function() {
 
 SplitTime.Body.Drawable.prototype.lightIntensity = 0;
 SplitTime.Body.Drawable.prototype.lightRadius = 150;
+SplitTime.Body.Drawable.prototype.playerOcclusionFadeFactor = 0;
 
 /**
  * @param {number} x

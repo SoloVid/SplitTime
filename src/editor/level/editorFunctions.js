@@ -68,8 +68,7 @@ function addNewLayer() {
 function addNewTrace(layerIndex) {
 	var trace = {
 		type: "",
-		vertices: "",
-		parameter: ""
+		vertices: ""
 	};
 	addEditorProperties(trace);
 	levelObject.layers[layerIndex].traces.push(trace);
@@ -85,9 +84,14 @@ function imgSrc(fileName) {
 
 function safeGetColor(trace) {
     if(trace.isHighlighted) {
-        return traceEditorColors["highlight"];
+        return "rgba(255, 255, 0, 1)";
     }
-    return traceEditorColors[trace.type];
+    for(var i = 0; i < vueApp.traceOptions.length; i++) {
+    	if(vueApp.traceOptions[i].type === trace.type) {
+    		return vueApp.traceOptions[i].color;
+		}
+	}
+    return "rgba(255, 255, 255, 1)";
 }
 function safeExtractTraceArray(traceStr) {
     var normalizedTraceStr = normalizeTraceStr(traceStr);
@@ -199,6 +203,8 @@ function createLevel(type) {
 	}
 
 	levelObject = {
+		region: "",
+		background: "",
 		type: type,
 		layers: [],
 		positions: [],

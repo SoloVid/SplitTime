@@ -128,6 +128,9 @@ SplitTime.BoardRenderer.countBodies = function() {
     return currentLevel.getBodies().length;
 };
 
+dependsOn("BodyRenderer.js");
+var bodyRenderer = new SplitTime.BodyRenderer();
+
 /**
  * @param {boolean} forceCalculate
  */
@@ -144,11 +147,13 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     bufferCtx.fillStyle = "#000000";
     bufferCtx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+    bodyRenderer.notifyNewFrame(screen, snapshotCtx);
     var bodies = currentLevel.getBodies();
     var lights = [];
 
     for(var iBody = 0; iBody < bodies.length; iBody++) {
         var body = bodies[iBody];
+        bodyRenderer.feedBody(body);
         if(body.drawable) {
             if(typeof body.drawable.prepareForRender === "function") {
                 body.drawable.prepareForRender();
@@ -178,9 +183,7 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         // 	}
         // }
 
-        for(iBody = 0; iBody < bodies.length; iBody++) {
-            drawBodyTo(bodies[iBody], snapshotCtx);
-        }
+        bodyRenderer.render();
         snapshotCtx.globalAlpha = 1;
 
         //Work out details of smaller-than-screen dimensions
@@ -241,47 +244,7 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
 };
 
 /**
- *
- * @param {SplitTime.Body} body
- * @param {CanvasRenderingContext2D} ctx
- */
-function drawBodyTo(body, ctx) {
-    if(!body.drawable) {
-        return;
-    }
 
-    var canvasRequirements = body.drawable.getCanvasRequirements(body.x, body.y, body.z);
-    if(canvasRequirements === null) {
-        return;
-    }
-    // TODO: add optimization for not drawing if out of bounds
-
-    // TODO: potentially give the body a cleared personal canvas if requested
-
-    // Translate origin to body location
-    ctx.translate(Math.round(canvasRequirements.x - screen.x), Math.round(canvasRequirements.y - canvasRequirements.z - screen.y));
-    body.drawable.draw(ctx);
-
-    if(SplitTime.Debug.ENABLED && SplitTime.Debug.DRAW_TRACES) {
-        ctx.fillStyle = "#FF0000";
-        var halfBaseLength = Math.round(body.baseLength / 2);
-        ctx.fillRect(-halfBaseLength, -halfBaseLength, body.baseLength, body.baseLength);
-    }
-
-    // Reset transform
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    // TODO: address these commented items as their proper location should be moved
-    //     //Determine if SplitTime.onBoard.bodies is lighted
-    //     if(cBody.isLight) {
-    //         lightedThings.push(cBody);
-    //     }
-    //
-    //     cBody.resetStance();
-    //     cBody.resetCans();
-}
-
-/**
  * @param {int} width
  * @param {int} height
  */

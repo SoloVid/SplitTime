@@ -9,20 +9,21 @@ dependsOn("BodyMover.js");
  * @param {int} y
  * @param {number} z
  * @param {int} dy should be -1 or 1
- * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, functions: string[]}}
+ * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, events: string[], otherLevels: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, y, z, dy) {
     var collisionInfo = {
         blocked: false,
         bodies: [],
         adjustedZ: z,
-        functions: []
+        events: [],
+        otherLevels: []
     };
 
-    var simpleCollisionInfo = this.calculateYPixelCollision(x, y, z, dy);
+    var simpleCollisionInfo = this.calculateYPixelCollision(this.body.getLevel(), x, y, z, dy);
     if(simpleCollisionInfo.blocked && simpleCollisionInfo.vStepUpEstimate <= SplitTime.Body.Mover.VERTICAL_FUDGE) {
         var stepUpZ = this.calculateRiseThroughTraces(x, y + dy, z, SplitTime.Body.Mover.VERTICAL_FUDGE).zEnd;
-        var simpleStepUpCollisionInfo = this.calculateYPixelCollision(x, y, stepUpZ, dy);
+        var simpleStepUpCollisionInfo = this.calculateYPixelCollision(this.body.getLevel(), x, y, stepUpZ, dy);
         if(!simpleStepUpCollisionInfo.blocked) {
             collisionInfo.adjustedZ = this.calculateDropThroughTraces(x, y + dy, stepUpZ, SplitTime.Body.Mover.VERTICAL_FUDGE).zBlocked;
             simpleCollisionInfo = simpleStepUpCollisionInfo;
@@ -30,59 +31,23 @@ SplitTime.Body.Mover.prototype.calculateYPixelCollisionWithStepUp = function(x, 
     }
     collisionInfo.blocked = simpleCollisionInfo.blocked;
     collisionInfo.bodies = simpleCollisionInfo.bodies;
-    collisionInfo.functions = simpleCollisionInfo.functions;
+    collisionInfo.events = simpleCollisionInfo.events;
+    collisionInfo.otherLevels = simpleCollisionInfo.otherLevels;
 
     return collisionInfo;
 };
 
 /**
  * Check that dy can be accomplished.
+ * @param {SplitTime.Level} level
  * @param {int} x
  * @param {int} y
  * @param {number} z
  * @param {int} dy should be -1 or 1
- * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, functions: string[]}}
+ * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[]}}
  */
-SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(x, y, z, dy) {
-    var collisionInfo = {
-        blocked: false,
-        bodies: [],
-        vStepUpEstimate: 0,
-        functions: []
-    };
-    var me = this;
-    function handleFoundBody(otherBody) {
-        if(isXOverlap(x, me.baseLength, otherBody.getX(), otherBody.baseLength) &&
-            isZOverlap(z, me.height, otherBody.getZ(), otherBody.height)) {
-            collisionInfo.blocked = true;
-            collisionInfo.bodies.push(otherBody);
-            collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - z;
-        }
-    }
+SplitTime.Body.Mover.prototype.calculateYPixelCollision = function(level, x, y, z, dy) {
     var edgeY = dy > 0 ? y + dy + this.halfBaseLength : y + dy - this.halfBaseLength;
-    if(dy > 0) {
-        this.levelBodyOrganizer.forEachYTop(edgeY, handleFoundBody);
-    } else {
-        this.levelBodyOrganizer.forEachYBottom(edgeY, handleFoundBody);
-    }
-
-    if(!collisionInfo.blocked) {
-        var left = x - this.halfBaseLength;
-        var traceCollision = this.calculateAreaTraceCollision(left, this.baseLength, edgeY, 1, z);
-        collisionInfo.blocked = traceCollision.blocked;
-        collisionInfo.functions = traceCollision.functions;
-    }
-    return collisionInfo;
+    var left = x - this.halfBaseLength;
+    return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(level, left, this.baseLength, edgeY, 1, Math.round(z), Math.round(this.height));
 };
-
-function isXOverlap(x1, baseLength1, x2, baseLength2) {
-    var left1 = x1 - baseLength1 / 2;
-    var left2 = x2 - baseLength2 / 2;
-    var noOverlap = left1 + baseLength1 < left2 || left2 + baseLength2 < left1;
-    return !noOverlap;
-}
-
-function isZOverlap(z1, height1, z2, height2) {
-    var noOverlap = z1 + height1 <= z2 || z2 + height2 <= z1;
-    return !noOverlap;
-}
