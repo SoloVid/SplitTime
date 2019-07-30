@@ -17,7 +17,7 @@ SplitTime.Body.prototype.requestedStance = "default";
 SplitTime.Body.prototype.requestedFrameReset = false;
 SplitTime.Body.prototype.frame = 0;
 
-SplitTime.Body.prototype.allowOpacity = false;
+SplitTime.Body.prototype.playerOcclusionFadeFactor = 0;
 
 SplitTime.Body.prototype.stances = {
     "default": {

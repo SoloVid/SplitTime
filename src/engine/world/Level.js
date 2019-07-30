@@ -260,7 +260,9 @@ SplitTime.Level.prototype.refetchBodies = function() {
             obj.put(this, +prop.x, +prop.y, +prop.z, true);
             obj.dir = isNaN(prop.dir) ? SplitTime.Direction.fromString(prop.dir) : +prop.dir;
             obj.stance = prop.stance;
-			obj.allowOpacity = prop.allowOpacity;
+            if(prop.playerOcclusionFadeFactor || +prop.playerOcclusionFadeFactor === 0) {
+                obj.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor;
+            }
         } else {
             console.error("Template \"" + template + "\" not found for instantiating prop");
         }

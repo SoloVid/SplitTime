@@ -24,7 +24,7 @@ SplitTime.BodyRenderer.prototype.notifyNewFrame = function(screen, ctx) {
 
 /**
  * receives a body that needs to be rendered (called by BoardRenderer)
- * 
+ *
  * @param {SplitTime.Body} body
  */
 SplitTime.BodyRenderer.prototype.feedBody = function(body) {
@@ -99,14 +99,12 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
         var canvReq = node.canvReq;
         //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
         var nodeBottom = canvReq.y - canvReq.z;
-        
-		//Half width/height is used for determining the edge of 
-		//	the visible body relative to the y position (bottom)
-		//  and x position (center of the body).
-		//Note that I've subtracted 2px from this to account for
-		//	the empty space around objects in the .png files.
-		var halfWidth = (node.body.xres / 2) - 2;
-		var height = (node.body.yres) - 2;
+
+        //Half width/height is used for determining the edge of
+        //  the visible body relative to the y position (bottom)
+        //  and x position (center of the body).
+        var halfWidth = (node.body.xres / 2);
+        var height = (node.body.yres);
 
         //For each other node we haven't visited yet
         for(var h = i + 1; h < nodesOnScreen.length; h++) {
@@ -114,25 +112,25 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
             var otherCanvReq = otherNode.canvReq;
 
             var otherNodeBottom = otherCanvReq.y - otherCanvReq.z;
-            var otherHeight = (otherNode.body.yres) - 2;
-			
-			var yDiffVal1 = nodeBottom - (otherNodeBottom - otherHeight);
-			var yDiffVal2 = otherNodeBottom - (nodeBottom - height);
-			
+            var otherHeight = (otherNode.body.yres);
+
+            var yDiffVal1 = nodeBottom - (otherNodeBottom - otherHeight);
+            var yDiffVal2 = otherNodeBottom - (nodeBottom - height);
+
             //Skip if the two bodies don't overlap on the screen's y axis (top to bottom)
-            if(yDiffVal1 > 0 && yDiffVal2 > 0){
-				var otherHalfWidth = (otherNode.body.xres / 2) - 2;
-				
-				var xDiffVal1 = (otherCanvReq.x + otherHalfWidth) - (canvReq.x - halfWidth);
-				var xDiffVal2 = (canvReq.x + halfWidth) - (otherCanvReq.x - otherHalfWidth);
-				
-				//Skip if the two bodies don't overlap on the x axis (left to right)
-				if(xDiffVal1 > 0 && xDiffVal2 > 0) {
-					
-					var bottomDiff = otherNodeBottom - (nodeBottom);
-					var overlappingPixels = Math.min(xDiffVal1, xDiffVal2, yDiffVal1, bottomDiff);
-					this._constructEdge(node, otherNode, overlappingPixels);
-				}
+            if(yDiffVal1 > 0 && yDiffVal2 > 0) {
+                var otherHalfWidth = (otherNode.body.xres / 2);
+
+                var xDiffVal1 = (otherCanvReq.x + otherHalfWidth) - (canvReq.x - halfWidth);
+                var xDiffVal2 = (canvReq.x + halfWidth) - (otherCanvReq.x - otherHalfWidth);
+
+                //Skip if the two bodies don't overlap on the x axis (left to right)
+                if(xDiffVal1 > 0 && xDiffVal2 > 0) {
+
+                    var bottomDiff = otherNodeBottom - (nodeBottom);
+                    var overlappingPixels = Math.min(xDiffVal1, xDiffVal2, yDiffVal1, bottomDiff);
+                    this._constructEdge(node, otherNode, overlappingPixels);
+                }
             }
         }
     }
@@ -144,8 +142,8 @@ SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
     for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
         var canvReq = node.canvReq;
-        
-		//Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
+
+        //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
         var screenY = canvReq.y - canvReq.z;
 
         //optimization for not drawing if out of bounds
@@ -171,9 +169,9 @@ SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
 /**
  * checks which node is in front, then constructs an edge between them in the directed graph
  *
- * @param {BodyNode} node1 
- * @param {BodyNode} node2 
- * @param {int} overlappingPixels - the number of pixels by which the two are overlapping 
+ * @param {BodyNode} node1
+ * @param {BodyNode} node2
+ * @param {int} overlappingPixels - the number of pixels by which the two are overlapping
  * @private
  */
 SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2, overlappingPixels) {
@@ -184,24 +182,40 @@ SplitTime.BodyRenderer.prototype._constructEdge = function(node1, node2, overlap
         nodeInFront = node2;
         nodeBehind = node1;
     }
-	
-	//If the active player is behind an object, lower the opacity
-	if(nodeBehind.body === SplitTime.Player.getActiveBody())
-	{
-		//If this sprite has the "allowOpacity" property in the .json file set to true
-		if(nodeInFront.body.allowOpacity){
-			//If we're close to the edge, fade in/out gradually
-			if(overlappingPixels < 25){
-				nodeInFront.opacity = 1 - (overlappingPixels / 50);
-			}
-			else {
-				nodeInFront.opacity = 0.5;
-			}
-		}
-	}
-	
+
+    this._fadeOccludingSprite(nodeInFront, nodeBehind, overlappingPixels);
+
     //construct the edge (make the nodes point to each other)
     nodeInFront.before.push(nodeBehind);
+};
+
+/**
+ * @param {BodyNode} nodeInFront
+ * @param {BodyNode} nodeBehind
+ * @param {int} overlappingPixels - the number of pixels by which the two are overlapping
+ * @private
+ */
+SplitTime.BodyRenderer.prototype._fadeOccludingSprite = function(nodeInFront, nodeBehind, overlappingPixels) {
+    //If this sprite has the "playerOcclusionFadeFactor" property set to a value greater than zero, fade it out when player is behind
+    if(nodeInFront.body.playerOcclusionFadeFactor > 0.01) {
+        //If the active player is behind an object, lower the opacity
+        if(nodeBehind.body === SplitTime.Player.getActiveBody()) {
+            var CROSS_FADE_PIXELS = 32;
+            if(SplitTime.Debug.ENABLED) {
+                if(nodeInFront.body.playerOcclusionFadeFactor < 0 || nodeInFront.body.playerOcclusionFadeFactor > 1) {
+                    console.error("Sprite specified with playerOcclusionFadeFactor invalid value: " + nodeInFront.body.playerOcclusionFadeFactor);
+                    return;
+                }
+            }
+            //If we're close to the edge, fade in/out gradually
+            if(overlappingPixels < CROSS_FADE_PIXELS) {
+                nodeInFront.opacity = 1 - (overlappingPixels / CROSS_FADE_PIXELS) * nodeInFront.body.playerOcclusionFadeFactor;
+            }
+            else {
+                nodeInFront.opacity = 1 - nodeInFront.body.playerOcclusionFadeFactor;
+            }
+        }
+    }
 };
 
 /**
@@ -216,7 +230,7 @@ function shouldRenderInFront(body1, body2) {
     } else if(isAbove(body2, body1) || isInFront(body2, body1)) {   //if body2 is completely above or in front
         return false;
     }
-		
+
     //If neither body is clearly above or in front,
     //go with the one whose base position is farther forward on the y axis
     return (body1.y > body2.y);
@@ -248,22 +262,22 @@ function isInFront(body1, body2) {
  */
 SplitTime.BodyRenderer.prototype.drawBodyTo = function(node) {
     // TODO: potentially give the body a cleared personal canvas if requested
-	
-	canvReq = node.canvReq;
+
+    canvReq = node.canvReq;
 
     // Translate origin to body location
     this.ctx.translate(Math.round(canvReq.x - this.screen.x), Math.round(canvReq.y - canvReq.z - this.screen.y));
-    
-	//Set the opacity for this body
-	this.ctx.globalAlpha = node.opacity;
-	
-	//Draw the body
-	node.body.see(this.ctx);
-	
-	//Reset opacity settings back to 1 ("not opaque")
-	this.ctx.globalAlpha = 1;
-	node.opacity = 1;
-	
+
+    //Set the opacity for this body
+    this.ctx.globalAlpha = node.opacity;
+
+    //Draw the body
+    node.body.see(this.ctx);
+
+    //Reset opacity settings back to 1 ("not opaque")
+    this.ctx.globalAlpha = 1;
+    node.opacity = 1;
+
     // Reset transform
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
@@ -285,7 +299,7 @@ function BodyNode(body) {
 
     this.canvReq = {};
 
-	this.visitedThisFrame = false;
+    this.visitedThisFrame = false;
     this.shouldBeDrawnThisFrame = false;
-	this.opacity = 1;
+    this.opacity = 1;
 }
