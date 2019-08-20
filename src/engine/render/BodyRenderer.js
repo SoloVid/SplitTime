@@ -224,8 +224,8 @@ SplitTime.BodyRenderer.prototype._fadeOccludingSprite = function(nodeInFront, no
             var pixelsFactor = (overlappingPixels / CROSS_FADE_PIXELS) * nodeInFront.body.playerOcclusionFadeFactor;
             
             //Fade in gradually based on the number of frames 
-            //    that have passed since the sprites started overlapping
-            //    unless the pixelsfactor is smaller.
+            //that have passed since the sprites started overlapping
+            //unless the pixelsfactor is smaller.
             if(framesFactor < pixelsFactor && nodeInFront.overlappingFrames < CROSS_FADE_FRAMES) {
                 nodeInFront.opacity = 1 - framesFactor;
             }
