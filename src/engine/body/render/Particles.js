@@ -7,6 +7,7 @@ dependsOn("../Body.js");
  * @constructor
  */
 SplitTime.Particle = function(posVec, vVec, accVec) {
+    this.seed = Math.random();
     this.age = 0; // milliseconds
     this.x = posVec ? posVec.x : 0;
     this.y = posVec ? posVec.y : 0;
@@ -15,21 +16,21 @@ SplitTime.Particle = function(posVec, vVec, accVec) {
     this.accX = accVec ? accVec.x : 0; // pixels per second per second
     this.accY = accVec ? accVec.y : 0; // pixels per second per second
     this.radius = 4;
-    this.r = 0;
-    this.g = 0;
-    this.b = 0;
+    this.r = 255;
+    this.g = 255;
+    this.b = 255;
     this.colorShiftR = 0;
     this.colorShiftG = 0;
     this.colorShiftB = 0;
     this.opacity = 0.8;
     this.opacityShift = 0;
     // this.updateHandler = SplitTime.Particle.applyBasicPhysics;
-    this.updateHandler = function(emitter, particle, msPassed) {
-        SplitTime.Particle.applyBasicPhysics(emitter, particle, msPassed);
-        SplitTime.Particle.applyLazyEffect(emitter, particle, msPassed);
-        SplitTime.Particle.applyColorShift(emitter, particle, msPassed);
-        SplitTime.Particle.applyOpacityShift(emitter, particle, msPassed);
-    };
+    // this.updateHandler = function(emitter, particle, msPassed) {
+    //     SplitTime.Particle.applyBasicPhysics(emitter, particle, msPassed);
+    //     SplitTime.Particle.applyLazyEffect(emitter, particle, msPassed);
+    //     SplitTime.Particle.applyColorShift(emitter, particle, msPassed);
+    //     SplitTime.Particle.applyOpacityShift(emitter, particle, msPassed);
+    // };
 };
 
 SplitTime.Particle.prototype.getFillStyle = function() {
@@ -37,11 +38,16 @@ SplitTime.Particle.prototype.getFillStyle = function() {
 };
 
 SplitTime.Particle.prototype.advanceTime = function(emitter, msPassed) {
-    this.updateHandler(emitter, this, msPassed);
+    SplitTime.Particle.applyBasicPhysics(emitter, this, msPassed);
+    SplitTime.Particle.applyLazyEffect(emitter, this, msPassed);
+    SplitTime.Particle.applyColorShift(emitter, this, msPassed);
+    SplitTime.Particle.applyOpacityShift(emitter, this, msPassed);
+    // this.updateHandler(emitter, this, msPassed);
 };
 
 SplitTime.Particle.prototype.isOccasion = function(howOften, msPassed) {
-    return Math.floor(this.age / howOften) !== Math.floor((this.age - msPassed / howOften));
+    var ageOffset = howOften * this.seed;
+    return Math.floor((this.age + ageOffset) / howOften) !== Math.floor((this.age + ageOffset - msPassed / howOften));
 };
 
 SplitTime.Particle.applyBasicPhysics = function(emitter, particle, msPassed) {
@@ -54,16 +60,17 @@ SplitTime.Particle.applyBasicPhysics = function(emitter, particle, msPassed) {
 };
 
 SplitTime.Particle.applyLazyEffect = function(emitter, particle, msPassed) {
-    var HOW_OFTEN = 2000;
+    var HOW_OFTEN = emitter.lazyIntervalMs;
+    var HOW_DRASTIC = emitter.lazyMagnitude;
     if(particle.isOccasion(HOW_OFTEN, msPassed)) {
-        particle.accX = SLVD.randomRanged(-100, 100);
-        particle.accY = SLVD.randomRanged(-100, 100);
+        particle.accX = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC);
+        particle.accY = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC);
     }
 };
 
 SplitTime.Particle.applyColorShift = function(emitter, particle, msPassed) {
-    var HOW_OFTEN = 2000;
-    var HOW_DRASTIC = 15;
+    var HOW_OFTEN = emitter.colorShiftIntervalMs;
+    var HOW_DRASTIC = emitter.colorShiftMagnitude;
     if(particle.isOccasion(HOW_OFTEN, msPassed)) {
         particle.colorShiftR = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC);
         particle.colorShiftG = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC);
@@ -75,8 +82,8 @@ SplitTime.Particle.applyColorShift = function(emitter, particle, msPassed) {
 };
 
 SplitTime.Particle.applyOpacityShift = function(emitter, particle, msPassed) {
-    var HOW_OFTEN = 2000;
-    var HOW_DRASTIC = 0.1;
+    var HOW_OFTEN = emitter.opacityShiftIntervalMs;
+    var HOW_DRASTIC = emitter.opacityShiftMagnitude;
     if(particle.isOccasion(HOW_OFTEN, msPassed)) {
         particle.opacityShift = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC);
     }
@@ -113,6 +120,15 @@ SplitTime.ParticleEmitter = function(location, particleGenerator) {
 
     this.xres = 100;
     this.yres = 100;
+
+    this.lazyIntervalMs = 2000;
+    this.lazyMagnitude = 0;
+
+    this.opacityShiftIntervalMs = 2000;
+    this.opacityShiftMagnitude = 0;
+
+    this.colorShiftIntervalMs = 2000;
+    this.colorShiftMagnitude = 0;
 };
 
 SplitTime.ParticleEmitter.prototype.playerOcclusionFadeFactor = 0.3;
@@ -196,4 +212,17 @@ SplitTime.ParticleEmitter.prototype.cleanupAfterRender = function() {
 
 SplitTime.ParticleEmitter.prototype.registerParticlesGoneHandler = function(handler) {
     this._particlesGoneHandlers.register(handler);
+};
+
+/**
+ * @param {SplitTime.Level} level
+ */
+SplitTime.ParticleEmitter.prototype.put = function(level) {
+    var tempBody = new SplitTime.Body();
+    tempBody.baseLength = 0;
+    tempBody.put(level, this.location.x, this.location.y, this.location.z);
+    tempBody.drawable = this;
+    this.registerParticlesGoneHandler(function() {
+        tempBody.setLevel(null);
+    });
 };

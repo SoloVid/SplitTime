@@ -225,7 +225,9 @@ SplitTime.Body.prototype.setLevel = function(level, includeChildren) {
     }
 
     this._level = level;
-    this._level.insertBody(this);
+    if(this._level) {
+        this._level.insertBody(this);
+    }
 
     if(includeChildren) {
         var children = this.getChildren();
