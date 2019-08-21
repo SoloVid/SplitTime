@@ -55,7 +55,21 @@ SLVD.getXML = function(fil) {
  * random integer between 1 and num
  */
 SLVD.randomInt = function(num) {
-	return Math.floor((Math.random() * num) + 1);
+    return Math.floor((Math.random() * num) + 1);
+};
+
+/**
+ * random integer between 1 and num
+ */
+SLVD.randomRangedInt = function(min, max) {
+    return Math.round((Math.random() * (max - min))) + min;
+};
+
+/**
+ * random integer between 1 and num
+ */
+SLVD.randomRanged = function(min, max) {
+    return (Math.random() * (max - min)) + min;
 };
 
 SLVD.randomSeed = function() {

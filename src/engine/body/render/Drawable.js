@@ -2,14 +2,13 @@ dependsOn("../Body.js");
 
 /**
  * @interface
+ * @extends FrameNotified
  * @constructor
  */
 SplitTime.Body.Drawable = function() {
 
 };
 
-SplitTime.Body.Drawable.prototype.lightIntensity = 0;
-SplitTime.Body.Drawable.prototype.lightRadius = 150;
 SplitTime.Body.Drawable.prototype.playerOcclusionFadeFactor = 0;
 
 /**
@@ -28,13 +27,6 @@ SplitTime.Body.Drawable.prototype.getCanvasRequirements = function(x, y, z) {
         height: 480,
         isCleared: false
     };
-};
-
-/**
- * @param {Signaler} frameSignaler
- */
-SplitTime.Body.Drawable.prototype.setFrameSignaler = function(frameSignaler) {
-    this._frameSignaler = frameSignaler;
 };
 
 /**

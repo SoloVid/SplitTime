@@ -1,13 +1,19 @@
 dependsOn("../Body.js");
 
-SplitTime.Particle = function(x, y, vx, vy) {
+/**
+ * @param {SplitTime.Vector2D} [vVec]
+ * @param {SplitTime.Vector2D} [accVec]
+ * @param {SplitTime.Vector2D} [posVec]
+ * @constructor
+ */
+SplitTime.Particle = function(vVec, accVec, posVec) {
     this.age = 0; // milliseconds
-    this.x = x || 0;
-    this.y = y || 0;
-    this.vx = vx || 0; // pixels per second
-    this.vy = vy || 0; // pixels per second
-    this.accX = 0; // pixels per second per second
-    this.accY = 0; // pixels per second per second
+    this.x = posVec ? posVec.x : 0;
+    this.y = posVec ? posVec.y : 0;
+    this.vx = vVec ? vVec.x : 0; // pixels per second
+    this.vy = vVec ? vVec.y : 0; // pixels per second
+    this.accX = accVec ? accVec.x : 0; // pixels per second per second
+    this.accY = accVec ? accVec.y : 0; // pixels per second per second
 };
 
 SplitTime.Particle.prototype.advanceTime = function(msPassed) {
@@ -20,16 +26,13 @@ SplitTime.Particle.prototype.advanceTime = function(msPassed) {
 };
 
 function generateDefaultParticle() {
-    var particle = new SplitTime.Particle();
-    particle.x = SLVD.randomInt(32) - 16;
-    particle.y = SLVD.randomInt(32) - 16;
-    particle.vx = SLVD.randomInt(20) - 10;
-    particle.vy = SLVD.randomInt(20) - 10;
-    particle.accX = SLVD.randomInt(10) - 5;
-    particle.accY = SLVD.randomInt(10) - 5;
-    return particle;
+    return new SplitTime.Particle(SplitTime.Vector2D.angular(SLVD.randomRanged(0, 2 * Math.PI), Math.random() * 32));
 }
 
+/**
+ * @constructor
+ * @implements {SplitTime.Body.Drawable}
+ */
 SplitTime.ParticleEmitter = function(particleGenerator) {
     this._particles = [];
     this._lastParticleGenerated = -1000;
@@ -37,10 +40,17 @@ SplitTime.ParticleEmitter = function(particleGenerator) {
     this.particleRadius = 2;
     this.fillStyle = "#ffffff";
     this.maxParticleAgeMs = 5000;
-    this.stopEmissionsAfter = 10000;
+    this.stopEmissionsAfter = 0;
     this.generateIntervalMs = 100;
     this.generateParticle = particleGenerator || generateDefaultParticle;
+
+    this._particlesGoneHandlers = new SLVD.RegisterCallbacks();
+
+    this.xres = 100;
+    this.yres = 100;
 };
+
+SplitTime.ParticleEmitter.prototype.playerOcclusionFadeFactor = 0.3;
 
 SplitTime.ParticleEmitter.prototype.spawn = function(n) {
     n = n || 1;
@@ -71,12 +81,16 @@ SplitTime.ParticleEmitter.prototype._advanceTimeStep = function(msPassed) {
             // regenerateCount++;
         }
     }
-    if(this._currentTime <= this.stopEmissionsAfter) {
+    if(this.stopEmissionsAfter <= 0 || this._currentTime <= this.stopEmissionsAfter) {
         var timePassedSinceLastGeneration = this._currentTime - this._lastParticleGenerated;
         var randomFactor = (Math.random() / 2) + 0.75;
         this.spawn(randomFactor * timePassedSinceLastGeneration / this.generateIntervalMs);
     }
     // this.spawn(regenerateCount);
+
+    if(this._particles.length === 0) {
+        this._particlesGoneHandlers.run();
+    }
 };
 
 /**
@@ -92,8 +106,8 @@ SplitTime.ParticleEmitter.prototype.getCanvasRequirements = function(x, y, z) {
         y: Math.round(y),
         z: Math.round(z),
         // TODO: smarter calculations
-        width: this.xres * 4,
-        height: this.yres * 4,
+        width: this.xres,
+        height: this.yres,
         isCleared: false
     };
 };
@@ -112,9 +126,17 @@ SplitTime.ParticleEmitter.prototype.draw = function(ctx) {
     }
 };
 
+SplitTime.ParticleEmitter.prototype.notifyFrameUpdate = function(delta) {
+    this.advanceTime(delta * 1000);
+};
+
 SplitTime.ParticleEmitter.prototype.prepareForRender = function() {
     // TODO maybe
 };
 SplitTime.ParticleEmitter.prototype.cleanupAfterRender = function() {
     // TODO maybe
+};
+
+SplitTime.ParticleEmitter.prototype.registerParticlesGoneHandler = function(handler) {
+    this._particlesGoneHandlers.register(handler);
 };
