@@ -23,43 +23,10 @@ SplitTime.Region.prototype.getTimeStabilizer = function(msPerStep, maxCounter) {
         return that.getTimeMs();
     });
 };
-//This method may be dangerous for synchronization across skipped frames
-// SplitTime.Region.prototype.hasSoMuchTimePassed = function(milliseconds) {
-//     return this.mainTimeStabilizer.haveSoManyMsPassed(milliseconds);
-// };
 
 SplitTime.Region.prototype.addLevel = function(level) {
     this.levels.push(level);
     level.region = this;
-};
-
-// TODO: add optimization to get on-screen agents and off-screen agents separately
-SplitTime.Region.prototype.getAgents = function() {
-    var agents = [];
-    for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
-        agents = agents.concat(this.levels[iLevel].getAgents());
-    }
-    return agents;
-};
-
-/**
- *
- * @param {function(SplitTime.Body)} callback
- */
-SplitTime.Region.prototype.forEachBody = function(callback) {
-    for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
-        this.levels[iLevel].forEachBody(callback);
-    }
-};
-
-/**
- *
- * @param {SplitTime.Agent.Callback} callback
- */
-SplitTime.Region.prototype.forEachAgent = function(callback) {
-    for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
-        this.levels[iLevel].forEachAgent(callback);
-    }
 };
 
 var regionMap = {};
@@ -86,6 +53,14 @@ SplitTime.Region.getCurrent = function() {
 
 SplitTime.Region.getDefault = function() {
     return defaultRegion;
+};
+
+SplitTime.Region.prototype.notifyFrameUpdate = function(delta) {
+    this.time.advance(delta);
+
+    for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
+        this.levels[iLevel].notifyFrameUpdate(delta);
+    }
 };
 
 SplitTime.Region.prototype.loadForPlay = function() {

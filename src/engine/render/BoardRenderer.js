@@ -158,9 +158,9 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
             if(typeof body.drawable.prepareForRender === "function") {
                 body.drawable.prepareForRender();
             }
-            if(body.drawable.lightIntensity > 0) {
-                lights.push(body);
-            }
+        }
+        if(body.lightIntensity > 0) {
+            lights.push(body);
         }
     }
     weatherRenderer.setLights(lights);

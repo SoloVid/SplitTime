@@ -16,9 +16,11 @@ SplitTime.BodyRenderer.prototype.notifyNewFrame = function(screen, ctx) {
     this.ctx = ctx;
     for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
-        // This will be set back to true soon if appropriate
-        node.shouldBeDrawnThisFrame = false;
-        node.visitedThisFrame = false;
+        if(node) {
+            // This will be set back to true soon if appropriate
+            node.shouldBeDrawnThisFrame = false;
+            node.visitedThisFrame = false;
+        }
     }
 };
 
@@ -46,10 +48,14 @@ SplitTime.BodyRenderer.prototype.feedBody = function(body) {
 SplitTime.BodyRenderer.prototype._getBodyNode = function(body) {
     if(!(body.ref in this._bodyToNodeIndexMap)) {
         var node = new BodyNode(body);
-        var index = this._nodes.length;
-        this._nodes.push(node);
-        this._bodyToNodeIndexMap[body.ref] = index;
-        return node;
+        for(var i = 0; i <= this._nodes.length; i++) {
+            if(!this._nodes[i]) {
+                this._nodes[i] = node;
+                this._bodyToNodeIndexMap[body.ref] = i;
+                return node;
+            }
+        }
+        SplitTime.Logger.error("Failed to find a suitable place in body rendering array for " + body.ref);
     }
     return this._nodes[this._bodyToNodeIndexMap[body.ref]];
 };
@@ -59,7 +65,9 @@ SplitTime.BodyRenderer.prototype.render = function() {
     this._rebuildGraph();
     for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
-        this._visitNode(node);
+        if(node) {
+            this._visitNode(node);
+        }
     }
 };
 
@@ -81,12 +89,14 @@ SplitTime.BodyRenderer.prototype._visitNode = function(node) {
 };
 
 SplitTime.BodyRenderer.prototype._removeDeadBodies = function() {
-    for(var i = this._nodes.length - 1; i >= 0; i--) {
+    for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
-        if(!node.shouldBeDrawnThisFrame) {
-            this._nodes.splice(i, 1);
-        } else {
-            node.before = [];
+        if(node) {
+            if(!node.shouldBeDrawnThisFrame) {
+                this._nodes[i] = null;
+            } else {
+                node.before = [];
+            }
         }
     }
 };
@@ -142,26 +152,28 @@ SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
     //For each node
     for(var i = 0; i < this._nodes.length; i++) {
         var node = this._nodes[i];
-        var canvReq = node.canvReq;
+        if(node) {
+            var canvReq = node.canvReq;
 
-        //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
-        var screenY = canvReq.y - canvReq.z;
+            //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
+            var screenY = canvReq.y - canvReq.z;
 
-        //optimization for not drawing if out of bounds
-        var screen = SplitTime.BoardRenderer.getScreenCoordinates();
-        var screenBottom = screen.y + SplitTime.SCREENY;
-        var screenRightEdge = screen.x + SplitTime.SCREENX;
+            //optimization for not drawing if out of bounds
+            var screen = SplitTime.BoardRenderer.getScreenCoordinates();
+            var screenBottom = screen.y + SplitTime.SCREENY;
+            var screenRightEdge = screen.x + SplitTime.SCREENX;
 
-        //If the body is in bounds
-        if(
-            (screenY + canvReq.height / 2) >= screen.y &&
-            (canvReq.x + canvReq.width / 2) >= screen.x &&
-            (canvReq.y - canvReq.height / 2) <= screenBottom &&
-            (canvReq.x - canvReq.width / 2) <= screenRightEdge
-        ) {
-            nodesOnScreen.push(node);
-        } else {
-            node.visitedThisFrame = true;
+            //If the body is in bounds
+            if(
+                (screenY + canvReq.height / 2) >= screen.y &&
+                (canvReq.x + canvReq.width / 2) >= screen.x &&
+                (canvReq.y - canvReq.height / 2) <= screenBottom &&
+                (canvReq.x - canvReq.width / 2) <= screenRightEdge
+            ) {
+                nodesOnScreen.push(node);
+            } else {
+                node.visitedThisFrame = true;
+            }
         }
     }
     return nodesOnScreen;

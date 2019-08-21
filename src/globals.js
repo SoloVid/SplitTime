@@ -1,4 +1,9 @@
+//TODO: don't attach to window
+// Global namespace for all things game-engine
 window.SplitTime = {};
+// Global namespace for all random globals in game code
+// ("G" is for "Global" or "Game")
+window.G = {};
 
 //implied SplitTime.SAVE object from load.js
 SplitTime.SAVE = {};

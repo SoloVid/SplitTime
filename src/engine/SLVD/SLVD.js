@@ -1,23 +1,5 @@
 window.SLVD = {};
 
-SLVD.speedCheck = function(name, comparison) {
-	this.date = new Date();
-	this.name = name;
-	this.prior = comparison;
-};
-SLVD.speedCheck.prototype.getTime = function() {
-	return this.date.getMilliseconds() - this.prior.getMilliseconds();
-};
-SLVD.speedCheck.prototype.logUnusual = function(allow) {
-	if(!allow)
-	{
-		allow = 1;
-	}
-	if(this.getTime() > allow) {
-		//console.log(this.name + " took " + this.getTime() + " milliseconds");
-	}
-};
-
 // from https://stackoverflow.com/a/2161748/4639640
 var scripts = document.getElementsByTagName('script');
 var path = scripts[scripts.length-1].src.split('?')[0];      // remove any ?query

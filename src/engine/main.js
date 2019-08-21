@@ -3,8 +3,9 @@ SplitTime.main = function() {
 
     var agentCount = 0;
 
+    SplitTime.performanceCheckpoint("start", 999999);
+
     try {
-        var loopStart = new Date(); //for speed checking
         switch(SplitTime.process) {
             case SplitTime.main.State.LOADING: {
                 SplitTime.see.fillStyle = "#000000";
@@ -19,68 +20,21 @@ SplitTime.main = function() {
                 SplitTime.Level.setCurrent(SplitTime.Player.getActiveBody().getLevel());
 
                 var region = SplitTime.Region.getCurrent();
-                //Advance one second per second (given 20ms SplitTime.main interval)
-                // if(clock.isSignaling()) {
-                    region.getTime().advance(SplitTime.msPerFrame);
-                // }
-                var timeAdvance = new SLVD.speedCheck("SplitTime.Time.advance", loopStart);
-                timeAdvance.logUnusual();
-
-                region.forEachBody(function(body) {
-                    body.zVelocity += body.getPixelGravityForFrame();
-                });
-
-                region.forEachAgent(function(agent) {
-                    try {
-                        if(typeof agent.notifyFrameUpdate === "function") {
-                            agent.notifyFrameUpdate();
-                        }
-                    } catch(ex) {
-                        console.error(ex);
-                    }
-                });
-
-                region.forEachBody(function(body) {
-                    if(Math.abs(body.zVelocity) > 0.00001) {
-                        var expectedDZ = body.getPixelZVelocityForFrame();
-                        var mover = new SplitTime.Body.Mover(body);
-                        var actualDZ = mover.zeldaVerticalBump(expectedDZ);
-                        if(Math.abs(actualDZ) < Math.abs(expectedDZ)) {
-                            body.zVelocity = 0;
-                        }
-                    }
-                });
-
-                var agentsUpdate = new SLVD.speedCheck("agents update", timeAdvance.date);
-                agentsUpdate.logUnusual();
-
-                if(SplitTime.process !== SplitTime.main.State.ACTION) {
-                    break;
-                }
+                region.notifyFrameUpdate(1/SplitTime.FPS);
+                SplitTime.performanceCheckpoint("region frame update");
 
                 SplitTime.BoardRenderer.renderBoardState(true);
-                var renderCheck = new SLVD.speedCheck("SplitTime.BoardRenderer.renderBoardState", agentsUpdate.date);
-                renderCheck.logUnusual(5);
+                SplitTime.performanceCheckpoint("SplitTime.BoardRenderer.renderBoardState");
 
                 SplitTime.DialogManager.notifyFrameUpdate();
-                var dialogCheck = new SLVD.speedCheck("SplitTime.DialogManager.notifyFrameUpdate", renderCheck.date);
-                dialogCheck.logUnusual();
+                SplitTime.performanceCheckpoint("SplitTime.DialogManager.notifyFrameUpdate");
 
                 break;
             }
-            // case "TRPG": {
-            //     if(SplitTime.cTeam == SplitTime.player) {
-            //         SplitTime.TRPGPlayerMotion();
-            //     }
-            //     else if(SplitTime.cTeam == boardNPC) {
-            //         SplitTime.TRPGNPCMotion();
-            //     }
-            //     SplitTime.onBoard.sortBodies();
-            //
-            //     SplitTime.renderBoardState(true);
-            //     break;
-            // }
-            default: {}
+            default: {
+                // TODO: don't allow random game states
+                // SplitTime.Logger.warn("Invalid main game state: " + SplitTime.process);
+            }
         }
     } catch(ex) {
         console.error(ex);
@@ -91,6 +45,7 @@ SplitTime.main = function() {
     } catch(ex) {
         console.error(ex);
     }
+    SplitTime.performanceCheckpoint("SplitTime.HUD.render");
 
     var endTime = new Date().getTime();
     var msElapsed = endTime - startTime;
@@ -99,8 +54,7 @@ SplitTime.main = function() {
     if(msElapsed < SplitTime.msPerFrame) {
         setTimeout(SplitTime.main, SplitTime.msPerFrame - msElapsed);
         SplitTime.see.fillStyle="#00FF00";
-    }
-    else {
+    } else {
         setTimeout(SplitTime.main, 2); //give browser a quick breath
         var secondsElapsed = msElapsed/1000;
         displayFPS = Math.round(1/secondsElapsed);
@@ -129,4 +83,7 @@ SplitTime.main.State = {
  */
 function FrameNotified() {}
 
-FrameNotified.prototype.notifyFrameUpdate = function() {};
+/**
+ * @param delta number of seconds passed (in game time) since last frame
+ */
+FrameNotified.prototype.notifyFrameUpdate = function(delta) {};

@@ -23,7 +23,7 @@ Button.PRIMARY_INTERACT.onUp(function() {
         }
     }
     if(chosenInteraction) {
-        chosenInteraction.body.onPlayerInteract();
+        chosenInteraction.body.notifyPlayerInteract();
     }
 });
 

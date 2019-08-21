@@ -8,11 +8,15 @@ dependsOn("/Direction.js");
  */
 SplitTime.Sprite = function(img) {
     this.img = img;
+    this._timeMs = 0;
+    var that = this;
     /**
      * @type {Signaler}
      * @private
      */
-    this._frameSignaler = new SplitTime.FrameStabilizer();
+    this._frameSignaler = new SplitTime.IntervalStabilizer(200, 1, function() {
+        return that._timeMs;
+    });
 };
 
 SplitTime.Sprite.DEFAULT_STANCE = "default";
@@ -26,8 +30,6 @@ SplitTime.Sprite.prototype.baseOffY = 0;
 SplitTime.Sprite.prototype.omniDir = false;
 SplitTime.Sprite.prototype.rotate = 0;
 
-SplitTime.Sprite.prototype.lightIntensity = 0;
-SplitTime.Sprite.prototype.lightRadius = 150;
 SplitTime.Sprite.prototype.playerOcclusionFadeFactor = 0;
 SplitTime.Sprite.prototype.stance = SplitTime.Sprite.DEFAULT_STANCE;
 SplitTime.Sprite.prototype.requestedStance = SplitTime.Sprite.DEFAULT_STANCE;
@@ -66,13 +68,6 @@ SplitTime.Sprite.prototype.getCanvasRequirements = function(x, y, z) {
         height: this.yres,// * 4,
         isCleared: false
     };
-};
-
-/**
- * @param {Signaler} frameSignaler
- */
-SplitTime.Sprite.prototype.setFrameSignaler = function(frameSignaler) {
-    this._frameSignaler = frameSignaler;
 };
 
 SplitTime.Sprite.prototype.defaultStance = function() {
@@ -228,6 +223,10 @@ SplitTime.Sprite.prototype.requestStance = function(stance, dir, forceReset) {
 
 SplitTime.Sprite.prototype.resetStance = function() {
     this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, false);
+};
+
+SplitTime.Sprite.prototype.notifyFrameUpdate = function(delta) {
+    this._timeMs += delta * 1000;
 };
 
 SplitTime.Sprite.prototype.prepareForRender = function() {

@@ -26,7 +26,7 @@ SplitTime.Agent.ControlledCollisionMovement.prototype.setStopped = function() {
         this.body.drawable.defaultStance();
     }
 };
-SplitTime.Agent.ControlledCollisionMovement.prototype.notifyFrameUpdate = function() {
+SplitTime.Agent.ControlledCollisionMovement.prototype.notifyFrameUpdate = function(delta) {
     var walkingDir = this.getWalkingDirection();
     if(walkingDir !== null) {
         this.body.dir = walkingDir;
@@ -34,7 +34,7 @@ SplitTime.Agent.ControlledCollisionMovement.prototype.notifyFrameUpdate = functi
             this.body.drawable.requestStance("walk", this.body.dir);
         }
         var mover = new SplitTime.Body.Mover(this.body);
-        mover.zeldaStep(this.body.dir, this.body.getPixelSpeedForFrame());
+        mover.zeldaStep(this.body.dir, this.body.spd * delta);
     } else {
         if(this.body.drawable && typeof this.body.drawable.defaultStance === "function") {
             this.body.drawable.defaultStance();

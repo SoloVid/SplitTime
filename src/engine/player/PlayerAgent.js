@@ -6,12 +6,7 @@ SplitTime.Agent.Player = function(body) {
     this.movementAgent = new SplitTime.Agent.ControlledCollisionMovement(body);
 };
 
-SplitTime.Agent.Player.prototype.setBody = function(body) {
-    this.body = body;
-    this.movementAgent.setBody(body);
-};
-
-SplitTime.Agent.Player.prototype.notifyFrameUpdate = function() {
+SplitTime.Agent.Player.prototype.notifyFrameUpdate = function(delta) {
     if(this.body !== SplitTime.Player.getActiveBody()) {
         this.movementAgent.setStopped();
         return;
@@ -27,7 +22,7 @@ SplitTime.Agent.Player.prototype.notifyFrameUpdate = function() {
     } else {
         this.movementAgent.setWalkingDirection(dir);
     }
-    this.movementAgent.notifyFrameUpdate();
+    this.movementAgent.notifyFrameUpdate(delta);
 };
 
 SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {

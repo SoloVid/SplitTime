@@ -5,8 +5,8 @@ Primarily, events will be queued in sprite template files using registerWalkEven
 SplitTime.Time = function() {
 	this.timeInMilliseconds = 0;
 
-	this.daily = [];
-	this.once = [];
+	this.daily = {};
+	this.once = {};
 
     this.clockSeconds = 0; //Second hand displayed on clock out of 2560
     this.clockMinutes = 0;
@@ -32,7 +32,8 @@ SplitTime.Time.prototype.getTimeMs = function() {
     return this.timeInMilliseconds;
 };
 
-SplitTime.Time.prototype.advance = function(milliseconds) {
+SplitTime.Time.prototype.advance = function(seconds) {
+    var milliseconds = Math.floor(seconds * 1000);
     var secondsLast = Math.floor(this.timeInMilliseconds / 1000);
     this.timeInMilliseconds += milliseconds;
     var secondsNext = Math.floor(this.timeInMilliseconds / 1000);
