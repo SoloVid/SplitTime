@@ -279,7 +279,11 @@ SplitTime.BodyRenderer.prototype.drawBodyTo = function(node) {
     var canvReq = node.canvReq;
 
     // Translate origin to body location
-    this.ctx.translate(Math.round(canvReq.x - this.screen.x), Math.round(canvReq.y - canvReq.z - this.screen.y));
+    if(canvReq.translateOrigin) {
+        this.ctx.translate(Math.round(canvReq.x - this.screen.x), Math.round(canvReq.y - canvReq.z - this.screen.y));
+    } else {
+        this.ctx.translate(Math.round(0 - this.screen.x), Math.round(0 - this.screen.y));
+    }
 
     //Set the opacity for this body
     this.ctx.globalAlpha = node.opacity;
@@ -293,15 +297,6 @@ SplitTime.BodyRenderer.prototype.drawBodyTo = function(node) {
 
     // Reset transform
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    // TODO: address these commented items as their proper location should be moved
-    //     //Determine if SplitTime.onBoard.bodies is lighted
-    //     if(cBody.isLight) {
-    //         lightedThings.push(cBody);
-    //     }
-    //
-    //     cBody.resetStance();
-    //     cBody.resetCans();
 };
 
 function BodyNode(body) {
@@ -312,7 +307,8 @@ function BodyNode(body) {
     /** @type {BodyNode[]} bodies drawn before this one */
     this.before = [];
 
-    this.canvReq = {};
+    /** @type {SplitTime.Body.Drawable.CanvasRequirements|null} */
+    this.canvReq = null;
 
     this.visitedThisFrame = false;
     this.shouldBeDrawnThisFrame = false;

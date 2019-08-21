@@ -51,23 +51,8 @@ SplitTime.Sprite.prototype.getImage = function() {
     return SplitTime.Image.get(this.img);
 };
 
-/**
- * @param {number} x
- * @param {number} y
- * @param {number} z
- * @return {{x: int, y: int, z: int, width: number, height: number, isCleared: boolean}}
- */
 SplitTime.Sprite.prototype.getCanvasRequirements = function(x, y, z) {
-    return {
-        // 2D board location for center of canvas
-        x: Math.round(x),
-        y: Math.round(y),
-        z: Math.round(z),
-        // TODO: smarter calculations
-        width: this.xres,// * 4,
-        height: this.yres,// * 4,
-        isCleared: false
-    };
+    return new SplitTime.Body.Drawable.CanvasRequirements(Math.round(x), Math.round(y), Math.round(z), this.xres, this.yres);
 };
 
 SplitTime.Sprite.prototype.defaultStance = function() {
