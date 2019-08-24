@@ -28,6 +28,13 @@ SplitTime.Agent.Player.prototype.notifyFrameUpdate = function(delta) {
 SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
     var activeBody = SplitTime.Player.getActiveBody();
     if(activeBody) {
+        activeBody.zVelocity = 560;
+    }
+});
+
+SplitTime.Controls.Button.PRIMARY_ACTION.onDown(function() {
+    var activeBody = SplitTime.Player.getActiveBody();
+    if(activeBody) {
         var particles = new SplitTime.ParticleEmitter({x: activeBody.x, y: activeBody.y, z: activeBody.z}, function(emitter) {
             var p = new SplitTime.Particle(
                 new SplitTime.Vector2D(SLVD.randomRanged(emitter.location.x - 16, emitter.location.x + 16), SLVD.randomRanged(emitter.location.y - 24, emitter.location.y + 24) - emitter.location.z - activeBody.height / 4),
@@ -46,12 +53,9 @@ SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
         particles.colorShiftMagnitude = 5;
         particles.put(activeBody.getLevel());
 
-        // activeBody.zVelocity = 560;
         var dir = activeBody.dir;
-        activeBody.x += 96 * SplitTime.Direction.getXMagnitude(dir);
-        activeBody.y += 96 * SplitTime.Direction.getYMagnitude(dir);
-        // var particles = new WhateverTypeOfParticle(paramLikeTime, paramLikeColor);
-        // showParticles(x, y, z, particles);
+        var warper = new SplitTime.Body.Warper(activeBody);
+        warper.warp(dir, 96);
 
         var particles2 = new SplitTime.ParticleEmitter(activeBody, function(emitter) {
             var p = new SplitTime.Particle(
@@ -72,14 +76,5 @@ SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
         // particles2.colorShiftMagnitude = 50;
         // particles2.colorShiftIntervalMs = 200;
         particles2.put(activeBody.getLevel());
-    }
-});
-
-SplitTime.Controls.Button.PRIMARY_ACTION.onDown(function() {
-    var activeBody = SplitTime.Player.getActiveBody();
-    if(activeBody) {
-        var dir = activeBody.dir;
-        var warper = new SplitTime.Body.Warper(activeBody);
-        warper.warp(dir, 96);
     }
 });
