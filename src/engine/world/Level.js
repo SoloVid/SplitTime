@@ -19,10 +19,15 @@ SplitTime.Level = function(levelId) {
     this.layerFuncData = [];
 
     // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer();
-    this._cellGrid = new SplitTime.Level.CellGrid();
+    /** @type SplitTime.Level.CellGrid|null */
+    this._cellGrid = null;
 
     /** @type {SplitTime.WeatherRenderer} */
     this.weatherRenderer = new SplitTime.WeatherRenderer();
+
+    this._addingProps = false;
+    /** @type SplitTime.Body[] */
+    this._props = [];
 };
 
 SplitTime.Level.load = function(levelData) {
@@ -61,7 +66,9 @@ SplitTime.Level.prototype.load = function(levelData) {
             that.width = backgroundImg.width;
         }
 
-        that._cellGrid.initialize(that);
+        if(that._cellGrid) {
+            that._cellGrid.initialize(that);
+        }
     }
 
     this.background = levelData.background;
@@ -198,6 +205,18 @@ SplitTime.Level.prototype.runEventSet = function(eventIdSet, param) {
     }
 };
 
+SplitTime.Level.prototype.notifyFrameUpdate = function(delta) {
+    this.forEachBody(function(body) {
+        body.notifyFrameUpdate(delta);
+    });
+};
+
+SplitTime.Level.prototype.notifyBodyMoved = function(body) {
+    if(this._cellGrid) {
+        this._cellGrid.resort(body);
+    }
+};
+
 /**
  *
  * @param {function(SplitTime.Body)} callback
@@ -205,19 +224,6 @@ SplitTime.Level.prototype.runEventSet = function(eventIdSet, param) {
 SplitTime.Level.prototype.forEachBody = function(callback) {
     for(var i = 0; i < this.bodies.length; i++) {
         callback(this.bodies[i]);
-    }
-};
-
-/**
- *
- * @param {SplitTime.Agent.Callback} callback
- */
-SplitTime.Level.prototype.forEachAgent = function(callback) {
-    for(var i = 0; i < this.bodies.length; i++) {
-        var agent = this.bodies[i].getAgent();
-        if(agent) {
-            callback(agent);
-        }
     }
 };
 
@@ -231,27 +237,15 @@ SplitTime.Level.prototype.getBodies = function() {
 SplitTime.Level.prototype.refetchBodies = function() {
     // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer(this);
     this._cellGrid = new SplitTime.Level.CellGrid(this);
-    var index;
-    //Figure out which Actors are on board
-    for(var id in SplitTime.Actor) {
-        var actor = SplitTime.Actor[id];
-        if(actor.getLevel() === this) {
-            this.insertBody(actor);
-        }
+
+    for(var iBody = 0; iBody < this.bodies.length; iBody++) {
+        this._cellGrid.addBody(this.bodies[iBody]);
     }
 
-    var me = this;
-    function putObjOnBoard(obj) {
-        me.insertBody(obj);
-        var children = obj.getChildren();
-        for(var i = 0; i < children.length; i++) {
-            putObjOnBoard(children[i]);
-        }
-    }
-
+    this._addingProps = true;
     //Pull board objects from file
-    for(index = 0; index < this.fileData.props.length; index++) {
-        var prop = this.fileData.props[index];
+    for(var iProp = 0; iProp < this.fileData.props.length; iProp++) {
+        var prop = this.fileData.props[iProp];
         var template = prop.template;
 
         var obj = SplitTime.Body.getTemplateInstance(template);
@@ -260,10 +254,14 @@ SplitTime.Level.prototype.refetchBodies = function() {
             obj.put(this, +prop.x, +prop.y, +prop.z, true);
             obj.dir = isNaN(prop.dir) ? SplitTime.Direction.fromString(prop.dir) : +prop.dir;
             obj.stance = prop.stance;
+            if(prop.playerOcclusionFadeFactor || +prop.playerOcclusionFadeFactor === 0) {
+                obj.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor;
+            }
         } else {
-            console.error("Template \"" + template + "\" not found for instantiating prop");
+            SplitTime.Logger.error("Template \"" + template + "\" not found for instantiating prop");
         }
     }
+    this._addingProps = false;
 };
 
 /**
@@ -273,8 +271,13 @@ SplitTime.Level.prototype.refetchBodies = function() {
 SplitTime.Level.prototype.insertBody = function(body) {
     if(this.bodies.indexOf(body) < 0) {
         this.bodies.push(body);
+        if(this._addingProps) {
+            this._props.push(body);
+        }
     }
-    this._cellGrid.addBody(body);
+    if(this._cellGrid) {
+        this._cellGrid.addBody(body);
+    }
 };
 
 /**
@@ -282,7 +285,9 @@ SplitTime.Level.prototype.insertBody = function(body) {
  * @param {SplitTime.Body} body
  */
 SplitTime.Level.prototype.removeBody = function(body) {
-    this._cellGrid.removeBody(body);
+    if(this._cellGrid) {
+        this._cellGrid.removeBody(body);
+    }
     var iBody = this.bodies.indexOf(body);
     if(iBody >= 0) {
         this.bodies.splice(iBody, 1);
@@ -301,10 +306,18 @@ SplitTime.Level.prototype.loadForPlay = function() {
 };
 
 SplitTime.Level.prototype.unload = function() {
-    //TODO: give agents a chance to clean up
+    //TODO: give listeners a chance to clean up
 
-    //Clear out all functional maps
+    //Clear out all functional maps and other high-memory resources
     this._levelTraces = null;
+    this._cellGrid = null;
+
+    for(var i = 0; i < this._props.length; i++) {
+        // We don't just remove from this level because we don't want props to leak out into other levels.
+        var l = this._props[i].getLevel();
+        l.removeBody(this._props[i]);
+    }
+    this._props = [];
 };
 
 /**

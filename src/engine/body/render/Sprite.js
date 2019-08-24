@@ -1,23 +1,44 @@
-dependsOn("Body.js");
+dependsOn("../Body.js");
+dependsOn("/Direction.js");
 
-// TODO: separate this stuff from Body
+/**
+ * @param img
+ * @constructor
+ * @implements {SplitTime.Body.Drawable}
+ */
+SplitTime.Sprite = function(img) {
+    this.img = img;
+    this._timeMs = 0;
+    var that = this;
+    /**
+     * @type {Signaler}
+     * @private
+     */
+    this._frameSignaler = new SplitTime.IntervalStabilizer(200, 1, function() {
+        return that._timeMs;
+    });
+};
 
-SplitTime.Body.prototype.xres = 32;
-SplitTime.Body.prototype.yres = 64;
+SplitTime.Sprite.DEFAULT_STANCE = "default";
 
-SplitTime.Body.prototype.omniDir = false;
-SplitTime.Body.prototype.rotate = 0;
+SplitTime.Sprite.prototype.xres = 32;
+SplitTime.Sprite.prototype.yres = 64;
 
-SplitTime.Body.prototype.lightIntensity = 0;
-SplitTime.Body.prototype.lightRadius = 150;
-SplitTime.Body.prototype.sx = 0;
-SplitTime.Body.prototype.sy = 0;
-SplitTime.Body.prototype.stance = "default";
-SplitTime.Body.prototype.requestedStance = "default";
-SplitTime.Body.prototype.requestedFrameReset = false;
-SplitTime.Body.prototype.frame = 0;
+SplitTime.Sprite.prototype.baseOffX = 0;
+SplitTime.Sprite.prototype.baseOffY = 0;
 
-SplitTime.Body.prototype.stances = {
+SplitTime.Sprite.prototype.omniDir = false;
+SplitTime.Sprite.prototype.rotate = 0;
+
+SplitTime.Sprite.prototype.playerOcclusionFadeFactor = 0;
+SplitTime.Sprite.prototype.stance = SplitTime.Sprite.DEFAULT_STANCE;
+SplitTime.Sprite.prototype.requestedStance = SplitTime.Sprite.DEFAULT_STANCE;
+SplitTime.Sprite.prototype.requestedFrameReset = false;
+SplitTime.Sprite.prototype.frame = 0;
+SplitTime.Sprite.prototype.dir = SplitTime.Direction.S;
+SplitTime.Sprite.prototype.requestedDir = SplitTime.Direction.S;
+
+SplitTime.Sprite.prototype.stances = {
     "default": {
         "S": 0,
         "N": 1,
@@ -26,34 +47,22 @@ SplitTime.Body.prototype.stances = {
     }
 };
 
-SplitTime.Body.prototype.getImage = function() {
+SplitTime.Sprite.prototype.getImage = function() {
     return SplitTime.Image.get(this.img);
 };
 
-/**
- * @return {{x: int, y: int, z: int, width: int, height: int, isCleared: boolean}}
- */
-SplitTime.Body.prototype.getCanvasRequirements = function() {
-    return {
-        // board location on this layer for center of canvas
-        x: Math.round(this.x),
-        y: Math.round(this.y),
-        z: Math.round(this.z),
-        // TODO: smarter calculations
-        width: this.xres * 4,
-        height: this.yres * 4,
-        isCleared: false
-    };
+SplitTime.Sprite.prototype.getCanvasRequirements = function(x, y, z) {
+    return new SplitTime.Body.Drawable.CanvasRequirements(Math.round(x), Math.round(y), Math.round(z), this.xres, this.yres);
 };
 
-SplitTime.Body.prototype.defaultStance = function() {
-	this.requestStance("default", true);
+SplitTime.Sprite.prototype.defaultStance = function() {
+	this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, true);
 };
 
 /**
  * @param {CanvasRenderingContext2D} ctx
  */
-SplitTime.Body.prototype.see = function(ctx) {
+SplitTime.Sprite.prototype.draw = function(ctx) {
 	// if(!this.canSee) {return;}
 
 	ctx.rotate(this.rotate);
@@ -61,10 +70,10 @@ SplitTime.Body.prototype.see = function(ctx) {
 	//SplitTime.onBoard.bodies is displayed partially transparent depending on health (<= 50% transparent)
 	//ctx.globalAlpha = (this.hp + this.strg)/(2*this.strg);
 
-	this.draw(ctx);
+	this._drawSimple(ctx);
 
-	this.seeAction();
-	this.seeStatus();
+	// this.seeAction();
+	// this.seeStatus();
 
 	//ctx.rotate(-this.rotate);
 
@@ -74,7 +83,7 @@ SplitTime.Body.prototype.see = function(ctx) {
 /**
  * @param {CanvasRenderingContext2D} ctx
  */
-SplitTime.Body.prototype.draw = function(ctx) {
+SplitTime.Sprite.prototype._drawSimple = function(ctx) {
     // var
     //     // Radii of the white glow.
     //     innerRadius = 2,
@@ -105,15 +114,9 @@ SplitTime.Body.prototype.draw = function(ctx) {
     var y = -crop.yres - this.baseOffY;
 
     ctx.drawImage(tImg, crop.sx, crop.sy, crop.xres, crop.yres, x, y, crop.xres, crop.yres);
-
-    if(SplitTime.Debug.ENABLED && SplitTime.Debug.DRAW_TRACES) {
-        ctx.fillStyle = "#FF0000";
-        var halfBaseLength = Math.round(this.baseLength / 2);
-        ctx.fillRect(-halfBaseLength, -halfBaseLength, this.baseLength, this.baseLength);
-    }
 };
 
-SplitTime.Body.prototype.getAnimationFrameCrop = function(numDir, stance, frame) {
+SplitTime.Sprite.prototype.getAnimationFrameCrop = function(numDir, stance, frame) {
     var crop = {
         xres: this.xres,
         yres: this.yres,
@@ -154,22 +157,25 @@ SplitTime.Body.prototype.getAnimationFrameCrop = function(numDir, stance, frame)
 };
 
 // TODO: abstract this?
-SplitTime.Body.prototype.hasIdleAnimation = false;
-SplitTime.Body.prototype.finalizeFrame = function() {
+SplitTime.Sprite.prototype.hasIdleAnimation = false;
+SplitTime.Sprite.prototype.finalizeFrame = function() {
     if(isNaN(this.frame) || this.hasIdleAnimation && this.stance != this.requestedStance || this.requestedFrameReset) {
         this.frame = 0;
     } else {
         //TODO: don't rely on global time passing since we might skip frames at some point
         //i.e. ^^ instantiate a Stabilizer rather than using static method
         //Only update on frame tick
-        if(this.timeStabilizer.isSignaling()) {
-            this.frame++;
-            this.frame %= this.getAnimationFramesAvailable();
+        if(this._frameSignaler.isSignaling()) {
+            var mod = this.getAnimationFramesAvailable();
+            if(!isNaN(mod) && mod > 0) {
+                this.frame++;
+                this.frame %= mod;
+            }
         }
     }
 };
 
-SplitTime.Body.prototype.getAnimationFramesAvailable = function() {
+SplitTime.Sprite.prototype.getAnimationFramesAvailable = function() {
     var calculation = Math.floor(this.getImage().height / this.yres);
     if(isNaN(calculation)) {
         if(SplitTime.Debug.ENABLED) {
@@ -181,7 +187,7 @@ SplitTime.Body.prototype.getAnimationFramesAvailable = function() {
     }
 };
 
-SplitTime.Body.prototype.finalizeStance = function() {
+SplitTime.Sprite.prototype.finalizeStance = function() {
     //Allow for non-complicated sprite sheets with one column
     if(!this.stances) {
         return;
@@ -191,22 +197,28 @@ SplitTime.Body.prototype.finalizeStance = function() {
         this.requestedStance = "default";
     }
     this.stance = this.requestedStance;
+    this.dir = this.requestedDir;
 };
 
-SplitTime.Body.prototype.requestStance = function(stance, forceReset) {
+SplitTime.Sprite.prototype.requestStance = function(stance, dir, forceReset) {
     this.requestedStance = stance;
+    this.requestedDir = dir;
     this.requestedFrameReset = forceReset;
 };
 
-SplitTime.Body.prototype.resetStance = function() {
-    this.requestStance("default", false);
+SplitTime.Sprite.prototype.resetStance = function() {
+    this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, false);
 };
 
-SplitTime.Body.prototype.prepareForRender = function() {
+SplitTime.Sprite.prototype.notifyFrameUpdate = function(delta) {
+    this._timeMs += delta * 1000;
+};
+
+SplitTime.Sprite.prototype.prepareForRender = function() {
     this.finalizeStance();
     this.finalizeFrame();
     // TODO: do things like lights
 };
-SplitTime.Body.prototype.cleanupAfterRender = function() {
+SplitTime.Sprite.prototype.cleanupAfterRender = function() {
     this.resetStance();
 };

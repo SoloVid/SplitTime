@@ -1,4 +1,4 @@
-dependsOn("/time/FrameStabilizer.js");
+dependsOn("/time/IntervalStabilizer.js");
 dependsOn("/SLVD/SLVD.js");
 
 SplitTime.WeatherRenderer = function() {};
@@ -24,7 +24,10 @@ SplitTime.WeatherRenderer.prototype.cloudAlpha = 1;
 SplitTime.WeatherRenderer.prototype.darkness = 0; // 0-1
 
 var COUNTER_BASE = 25600;
-var frameStabilizer = new SplitTime.FrameStabilizer(SplitTime.msPerFrame, COUNTER_BASE);
+// TODO: might want to use region time rather than real time
+var frameStabilizer = new SplitTime.IntervalStabilizer(SplitTime.msPerFrame, COUNTER_BASE, function() {
+    return new Date();
+});
 
 /** @type {int} */
 var SCREEN_WIDTH;

@@ -1,88 +1,53 @@
-SplitTime.IntervalStabilizer = {};
-
-SplitTime.IntervalStabilizer.makeRegionStabilizerClass = function(region) {
-    var time = region.getTime();
-    return SplitTime.IntervalStabilizer.makeClass(function() {
-        return time.getTimeMs();
-    });
+/**
+ * @implements Signaler
+ */
+SplitTime.IntervalStabilizer = function(msPerFrame, maxCounter, currentTimeGetter) {
+    this.msPerFrame = msPerFrame || 100;
+    this.maxCounter = maxCounter || 1;
+    this.currentTimeGetter = currentTimeGetter;
+    this.reset();
 };
 
-SplitTime.IntervalStabilizer.makeClass = function(currentTimeGetter) {
-    var Stabilizer = function(msPerFrame, maxCounter) {
-        this.msPerFrame = msPerFrame;
-        this.maxCounter = maxCounter || 1;
-        this.reset();
-    };
+SplitTime.IntervalStabilizer.prototype.howManyMsSinceLastFrame = function() {
+    this.checkUpdate();
+    return this._counterSetAt - this._previousCounterSetAt;
+};
 
-    var cache = {};
+SplitTime.IntervalStabilizer.prototype.reset = function() {
+    this._counter = 0;
+    this._counterSetAt = this.currentTimeGetter();
+    this._isClockFrame = true;
+};
 
-    var previousFrameTime = currentTimeGetter();
-    var ticksSameTime = 0;
-    var recentFrameTime = currentTimeGetter();
+SplitTime.IntervalStabilizer.prototype.checkUpdate = function() {
+    var newTime = this.currentTimeGetter();
+    if(this._counterSetAt < newTime) {
+        this._counter += (newTime - this._counterSetAt) / this.msPerFrame;
+        this._isClockFrame = this._counter >= this.maxCounter;
+        this._counter %= this.maxCounter;
+        this._previousCounterSetAt = this._counterSetAt;
+        this._counterSetAt = newTime;
+    } else {
+        this._isClockFrame = false;
+    }
+};
 
-    Stabilizer.getSimpleClock = function(msPerFrame) {
-        if(!cache[msPerFrame]) {
-            cache[msPerFrame] = new Stabilizer(msPerFrame);
-        }
-        return cache[msPerFrame];
-    };
+SplitTime.IntervalStabilizer.prototype.howManyMsSinceLastTick = function() {
+    this.checkUpdate();
+    return this._counterSetAt - this._previousCounterSetAt;
+};
 
-    Stabilizer.howManyMsSinceLastFrame = function() {
-        return recentFrameTime - previousFrameTime;
-    };
+SplitTime.IntervalStabilizer.prototype.getUnroundedCounter = function() {
+    this.checkUpdate();
+    return this._counter;
+};
 
-    Stabilizer.haveSoManyMsPassed = function(milliseconds) {
-        return Stabilizer.getSimpleClock(milliseconds).isSignaling();
-    };
+SplitTime.IntervalStabilizer.prototype.getCounter = function() {
+    this.checkUpdate();
+    return Math.round(this._counter);
+};
 
-    Stabilizer.notifyFrameUpdate = function() {
-        previousFrameTime = recentFrameTime;
-        recentFrameTime = currentTimeGetter();
-        var timeElapsedSinceLastFrame = recentFrameTime - previousFrameTime;
-        if(timeElapsedSinceLastFrame <= 0) {
-            ticksSameTime++;
-        } else {
-            ticksSameTime = 0;
-        }
-    };
-
-    Stabilizer.prototype.reset = function() {
-        this._counter = 0;
-        this._counterSetAt = currentTimeGetter();
-        this._isClockFrame = true;
-    };
-
-    Stabilizer.prototype.checkUpdate = function() {
-        if(this._counterSetAt < recentFrameTime) {
-            this._counter += (recentFrameTime - this._counterSetAt) / this.msPerFrame;
-            this._isClockFrame = this._counter >= this.maxCounter;
-            this._counter %= this.maxCounter;
-            this._previousCounterSetAt = this._counterSetAt;
-            this._counterSetAt = recentFrameTime;
-        } else if(ticksSameTime > 0) {
-            this._isClockFrame = false;
-        }
-    };
-
-    Stabilizer.prototype.howManyMsSinceLastTick = function() {
-        this.checkUpdate();
-        return this._counterSetAt - this._previousCounterSetAt;
-    };
-
-    Stabilizer.prototype.getUnroundedCounter = function() {
-        this.checkUpdate();
-        return this._counter;
-    };
-
-    Stabilizer.prototype.getCounter = function() {
-        this.checkUpdate();
-        return Math.round(this._counter);
-    };
-
-    Stabilizer.prototype.isSignaling = function() {
-        this.checkUpdate();
-        return this._isClockFrame;
-    };
-
-    return Stabilizer;
+SplitTime.IntervalStabilizer.prototype.isSignaling = function() {
+    this.checkUpdate();
+    return this._isClockFrame;
 };

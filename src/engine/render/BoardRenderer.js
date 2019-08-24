@@ -154,8 +154,10 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     for(var iBody = 0; iBody < bodies.length; iBody++) {
         var body = bodies[iBody];
         bodyRenderer.feedBody(body);
-        if(typeof body.prepareForRender === "function") {
-            body.prepareForRender();
+        if(body.drawable) {
+            if(typeof body.drawable.prepareForRender === "function") {
+                body.drawable.prepareForRender();
+            }
         }
         if(body.lightIntensity > 0) {
             lights.push(body);
@@ -234,13 +236,15 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     snapshotCtx.drawImage(buffer, 0, 0);
 
     for(iBody = 0; iBody < bodies.length; iBody++) {
-        if(typeof bodies[iBody].cleanupAfterRender === "function") {
-            bodies[iBody].cleanupAfterRender();
+        var drawable = bodies[iBody].drawable;
+        if(drawable && typeof drawable.cleanupAfterRender === "function") {
+            drawable.cleanupAfterRender();
         }
     }
 };
 
 /**
+
  * @param {int} width
  * @param {int} height
  */
