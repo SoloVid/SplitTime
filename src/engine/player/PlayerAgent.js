@@ -30,7 +30,7 @@ SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
     if(activeBody) {
         var particles = new SplitTime.ParticleEmitter({x: activeBody.x, y: activeBody.y, z: activeBody.z}, function(emitter) {
             var p = new SplitTime.Particle(
-                new SplitTime.Vector2D(SLVD.randomRanged(emitter.location.x - 16, emitter.location.x + 16), SLVD.randomRanged(emitter.location.y - 32, emitter.location.y + 32) - emitter.location.z - activeBody.height / 4),
+                new SplitTime.Vector2D(SLVD.randomRanged(emitter.location.x - 16, emitter.location.x + 16), SLVD.randomRanged(emitter.location.y - 24, emitter.location.y + 24) - emitter.location.z - activeBody.height / 4),
                 SplitTime.Vector2D.angular(SLVD.randomRanged(0, 2 * Math.PI), Math.random() * 16),
                 new SplitTime.Vector2D(0, 10)
             );
@@ -56,7 +56,7 @@ SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
         var particles2 = new SplitTime.ParticleEmitter(activeBody, function(emitter) {
             var p = new SplitTime.Particle(
                 new SplitTime.Vector2D(emitter.location.x, emitter.location.y - emitter.location.z - activeBody.height / 4),
-                SplitTime.Vector2D.angular(SLVD.randomRanged(0, 2 * Math.PI), Math.random() * 32 + 64),
+                SplitTime.Vector2D.angular(SLVD.randomRanged(0, 2 * Math.PI), Math.random() * 32 + 16),
                 new SplitTime.Vector2D(0, 10)
             );
             p.radius = 4;
@@ -68,7 +68,7 @@ SplitTime.Controls.Button.PRIMARY_INTERACT.onDown(function() {
         });
         particles2.generateIntervalMs = 10;
         particles2.maxParticleAgeMs = 800;
-        particles2.stopEmissionsAfter = 400;
+        particles2.stopEmissionsAfter = 800;
         // particles2.colorShiftMagnitude = 50;
         // particles2.colorShiftIntervalMs = 200;
         particles2.put(activeBody.getLevel());
