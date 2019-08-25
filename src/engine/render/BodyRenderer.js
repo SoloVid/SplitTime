@@ -145,12 +145,6 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
                 }
             }
         }
-        
-        //Reset overlapping frames variable if this node is no longer
-        //    overlapping with the active player
-        if(!node.overlappingWithPlayer){
-            node.overlappingFrames = 0;
-        }
     }
 };
 
@@ -220,36 +214,19 @@ SplitTime.BodyRenderer.prototype._fadeOccludingSprite = function(nodeInFront, no
     if(nodeInFront.drawable.playerOcclusionFadeFactor > 0.01) {
         //If the active player is behind an object, lower the opacity
         if(nodeBehind.body === SplitTime.Player.getActiveBody()) {
-            nodeInFront.overlappingWithPlayer = true;
-            nodeInFront.overlappingFrames++;
-
             var CROSS_FADE_PIXELS = 32;
-            var CROSS_FADE_FRAMES = 50;
-            
+
             if(SplitTime.Debug.ENABLED) {
                 if(nodeInFront.drawable.playerOcclusionFadeFactor < 0 || nodeInFront.drawable.playerOcclusionFadeFactor > 1) {
                     console.error("Sprite specified with playerOcclusionFadeFactor invalid value: " + nodeInFront.drawable.playerOcclusionFadeFactor);
                     return;
                 }
             }
-            
-            var framesFactor = (nodeInFront.overlappingFrames / CROSS_FADE_FRAMES) * nodeInFront.drawable.playerOcclusionFadeFactor;
-            var pixelsFactor = (overlappingPixels / CROSS_FADE_PIXELS) * nodeInFront.drawable.playerOcclusionFadeFactor;
-            
-            //Fade in gradually based on the number of frames 
-            //that have passed since the sprites started overlapping
-            //unless the pixelsfactor is smaller.
-            if(framesFactor < pixelsFactor && nodeInFront.overlappingFrames < CROSS_FADE_FRAMES) {
-                nodeInFront.opacity = 1 - framesFactor;
-            }
-            //If we're close to the edge, fade in/out gradually
-            else if(overlappingPixels < CROSS_FADE_PIXELS) {
-                nodeInFront.opacity = 1 - pixelsFactor;
-            }
-            //Render the sprite at the lowest allowable opacity
-            else {
-                nodeInFront.opacity = 1 - nodeInFront.drawable.playerOcclusionFadeFactor;
-            }
+
+            //Fade in gradually based on the number of overlapping pixels
+            var crossFadeFactor = Math.min(overlappingPixels / CROSS_FADE_PIXELS, 1);
+            var pixelsFactor = crossFadeFactor * nodeInFront.drawable.playerOcclusionFadeFactor;
+            nodeInFront.targetOpacity = 1 - pixelsFactor;
         }
     }
 };
@@ -308,7 +285,8 @@ SplitTime.BodyRenderer.prototype.drawBodyTo = function(node) {
         this.ctx.translate(Math.round(0 - this.screen.x), Math.round(0 - this.screen.y));
     }
 
-    //Set the opacity for this body
+    //Set the opacity for this body, but ease toward it
+    node.opacity = SLVD.approachValue(node.opacity, node.targetOpacity, 0.05);
     this.ctx.globalAlpha = node.opacity;
 
     //Draw the body
@@ -316,7 +294,7 @@ SplitTime.BodyRenderer.prototype.drawBodyTo = function(node) {
 
     //Reset opacity settings back to 1 ("not opaque")
     this.ctx.globalAlpha = 1;
-    node.opacity = 1;
+    node.targetOpacity = 1;
 
     // Reset transform
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -336,6 +314,5 @@ function BodyNode(body) {
     this.visitedThisFrame = false;
     this.shouldBeDrawnThisFrame = false;
     this.opacity = 1;
-    this.overlappingWithPlayer = false;
-    this.overlappingFrames = 0;    
+    this.targetOpacity = 1;
 }
