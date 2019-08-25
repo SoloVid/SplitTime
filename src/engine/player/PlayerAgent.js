@@ -67,8 +67,6 @@ SplitTime.Agent.Player.prototype.applyWarp = function() {
         this._freezeUntil = this.body.getLevel().getRegion().getTimeMs() + 100;
 
         var GHOST_SPACING = 16;
-        // var excessSpace = distanceMoved % GHOST_SPACING;
-        // var workableSpace = distanceMoved - excessSpace;
         var numberOfGhosts = Math.floor(distanceMoved / GHOST_SPACING);
         var dxStep = dx / numberOfGhosts;
         var dyStep = dy / numberOfGhosts;
@@ -87,8 +85,6 @@ SplitTime.Agent.Player.prototype.applyWarp = function() {
             gSprite.opacity = (1 - percent) * maxOpacity * gSprite.opacity;
             gSprite.frame = gSprite.frame + iGhost % gSprite.getAnimationFramesAvailable();
         }
-
-        // this.drawGhost((initialLocation.x + this.body.x)/2, (initialLocation.y + this.body.y)/2, this.body.z);
 
         var particles = new SplitTime.ParticleEmitter(initialLocation, function(emitter) {
             var p = new SplitTime.Particle(
@@ -116,16 +112,11 @@ SplitTime.Agent.Player.prototype.applyWarp = function() {
             );
             p.radius = 4;
             p.opacity = 0.5;
-            // p.r = 255;
-            // p.g = 200;
-            // p.b = 0;
             return p;
         });
         particles2.generateIntervalMs = 10;
         particles2.maxParticleAgeMs = 800;
         particles2.stopEmissionsAfter = 500;
-        // particles2.colorShiftMagnitude = 50;
-        // particles2.colorShiftIntervalMs = 200;
         particles2.put(this.body.getLevel());
     }
 };
@@ -138,7 +129,6 @@ SplitTime.Agent.Player.prototype.applyWarp = function() {
  * @return {SplitTime.Sprite}
  */
 SplitTime.Agent.Player.prototype.drawGhost = function(x, y, z, maxOpacity) {
-    // var sprite = G.createTestWomanSprite();
     if(this.body.drawable instanceof SplitTime.Sprite) {
         var tempSprite = this.body.drawable.clone();
         var tempBody = new SplitTime.Body();
