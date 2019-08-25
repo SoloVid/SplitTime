@@ -47,7 +47,10 @@ SplitTime.BodyRenderer.prototype.feedBody = function(body) {
  * @private
  */
 SplitTime.BodyRenderer.prototype._getBodyNode = function(body) {
-    if(!(body.ref in this._bodyToNodeIndexMap)) {
+    // If the body is unaccounted or misplaced, set up a new node
+    if(!(body.ref in this._bodyToNodeIndexMap) ||
+        !this._nodes[this._bodyToNodeIndexMap[body.ref]] ||
+        this._nodes[this._bodyToNodeIndexMap[body.ref]].body !== body) {
         var node = new BodyNode(body);
         for(var i = 0; i <= this._nodes.length; i++) {
             if(!this._nodes[i]) {
@@ -139,7 +142,7 @@ SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
                 //Skip if the two bodies don't overlap on the x axis (left to right)
                 if(xDiffVal1 > 0 && xDiffVal2 > 0) {
 
-                    var bottomDiff = otherNodeBottom - (nodeBottom);
+                    var bottomDiff = Math.abs(otherNodeBottom - nodeBottom);
                     var overlappingPixels = Math.min(xDiffVal1, xDiffVal2, yDiffVal1, bottomDiff);
                     this._constructEdge(node, otherNode, overlappingPixels);
                 }
