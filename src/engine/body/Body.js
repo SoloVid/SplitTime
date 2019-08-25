@@ -259,9 +259,12 @@ SplitTime.Body.prototype.getRegion = function() {
 };
 
 SplitTime.Body.prototype.notifyFrameUpdate = function(delta) {
-    this.zVelocity += this.GRAVITY * delta;
+    var ZILCH = 0.00001;
+    if(this.baseLength > ZILCH) {
+        this.zVelocity += this.GRAVITY * delta;
+    }
     this.frameUpdateHandlers.run(delta);
-    if(Math.abs(this.zVelocity) > 0.00001) {
+    if(this.baseLength > ZILCH && Math.abs(this.zVelocity) > ZILCH) {
         var expectedDZ = this.zVelocity * delta;
         var mover = new SplitTime.Body.Mover(this);
         var actualDZ = mover.zeldaVerticalBump(expectedDZ);
@@ -283,6 +286,9 @@ SplitTime.Body.prototype.notifyPlayerInteract = function() {
 };
 
 //Function run every frame
+/**
+ * @param {function(number)} handler
+ */
 SplitTime.Body.prototype.registerFrameUpdateHandler = function(handler) {
     this.frameUpdateHandlers.register(handler);
 };

@@ -2,7 +2,7 @@ dependsOn("../Body.js");
 dependsOn("/Direction.js");
 
 /**
- * @param img
+ * @param {string} img
  * @constructor
  * @implements {SplitTime.Body.Drawable}
  */
@@ -30,6 +30,7 @@ SplitTime.Sprite.prototype.baseOffY = 0;
 SplitTime.Sprite.prototype.omniDir = false;
 SplitTime.Sprite.prototype.rotate = 0;
 
+SplitTime.Sprite.prototype.opacity = 1;
 SplitTime.Sprite.prototype.playerOcclusionFadeFactor = 0;
 SplitTime.Sprite.prototype.stance = SplitTime.Sprite.DEFAULT_STANCE;
 SplitTime.Sprite.prototype.requestedStance = SplitTime.Sprite.DEFAULT_STANCE;
@@ -112,6 +113,8 @@ SplitTime.Sprite.prototype._drawSimple = function(ctx) {
     var crop = this.getAnimationFrameCrop(this.dir, this.stance, this.frame);
     var x = -Math.round(crop.xres/2) - this.baseOffX;
     var y = -crop.yres - this.baseOffY;
+
+    ctx.globalAlpha = ctx.globalAlpha * this.opacity;
 
     ctx.drawImage(tImg, crop.sx, crop.sy, crop.xres, crop.yres, x, y, crop.xres, crop.yres);
 };
@@ -221,4 +224,27 @@ SplitTime.Sprite.prototype.prepareForRender = function() {
 };
 SplitTime.Sprite.prototype.cleanupAfterRender = function() {
     this.resetStance();
+};
+
+/**
+ * @return {SplitTime.Sprite}
+ */
+SplitTime.Sprite.prototype.clone = function() {
+    var clone = new SplitTime.Sprite(this.img);
+    clone.xres = this.xres;
+    clone.yres = this.yres;
+    clone.baseOffX = this.baseOffX;
+    clone.baseOffY = this.baseOffY;
+    clone.omniDir = this.omniDir;
+    clone.rotate = this.rotate;
+    clone.opacity = this.opacity;
+    clone.playerOcclusionFadeFactor = this.playerOcclusionFadeFactor;
+    clone.stance = this.stance;
+    clone.requestedStance = this.requestedStance;
+    clone.requestedFrameReset = this.requestedFrameReset;
+    clone.frame = this.frame;
+    clone.dir = this.dir;
+    clone.requestedDir = this.requestedDir;
+    clone.stances = this.stances;
+    return clone;
 };
