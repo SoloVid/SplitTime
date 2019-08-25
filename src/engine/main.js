@@ -23,6 +23,7 @@ SplitTime.main = function() {
                 region.notifyFrameUpdate(1/SplitTime.FPS);
                 SplitTime.performanceCheckpoint("region frame update");
 
+                SplitTime.BoardRenderer.notifyFrameUpdate(1/SplitTime.FPS);
                 SplitTime.BoardRenderer.renderBoardState(true);
                 SplitTime.performanceCheckpoint("SplitTime.BoardRenderer.renderBoardState");
 

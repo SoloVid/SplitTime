@@ -20,23 +20,21 @@ var snapshot;
 /** @type {CanvasRenderingContext2D} */
 var snapshotCtx;
 
+/** @type {{x: number, y: number, z: number}} */
+var actualFocusPoint = {
+    x: 0,
+    y: 0,
+    z: 0
+};
+
+/** @type {SplitTime.Level} */
+var currentLevel = null;
+
 /** @type {{x: number, y: number, z: number}[]} */
 var focusPoints = [];
 
 SplitTime.BoardRenderer.getFocusPoint = function() {
-    var focus = {
-        x: 0,
-        y: 0,
-        z: 0
-    };
-
-    for(var i = 0; i < focusPoints.length; i++) {
-        focus.x += focusPoints[i].x / focusPoints.length;
-        focus.y += focusPoints[i].y / focusPoints.length;
-        focus.z += focusPoints[i].z / focusPoints.length;
-    }
-
-    return focus;
+    return actualFocusPoint;
 };
 /**
  * @param {{x: number, y: number, z: number}} point
@@ -131,6 +129,39 @@ SplitTime.BoardRenderer.countBodies = function() {
 dependsOn("BodyRenderer.js");
 var bodyRenderer = new SplitTime.BodyRenderer();
 
+SplitTime.BoardRenderer.SCREEN_LAZY_FACTOR = 0.4;
+
+function getScreenMoveSpeed(dx) {
+    var MAX_STEP = 100;
+    var curveValue = Math.abs(Math.pow(dx / (MAX_STEP * SplitTime.BoardRenderer.SCREEN_LAZY_FACTOR), 2));
+    return Math.min(curveValue + 0.4, MAX_STEP);
+}
+
+SplitTime.BoardRenderer.notifyFrameUpdate = function(delta) {
+    var existingLevel = currentLevel;
+    currentLevel = SplitTime.Level.getCurrent();
+
+    var targetFocus = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
+
+    for(var i = 0; i < focusPoints.length; i++) {
+        targetFocus.x += focusPoints[i].x / focusPoints.length;
+        targetFocus.y += focusPoints[i].y / focusPoints.length;
+        targetFocus.z += focusPoints[i].z / focusPoints.length;
+    }
+
+    if(currentLevel !== existingLevel) {
+        actualFocusPoint = targetFocus;
+    } else {
+        actualFocusPoint.x = SLVD.approachValue(actualFocusPoint.x, targetFocus.x, getScreenMoveSpeed(targetFocus.x - actualFocusPoint.x));
+        actualFocusPoint.y = SLVD.approachValue(actualFocusPoint.y, targetFocus.y, getScreenMoveSpeed(targetFocus.y - actualFocusPoint.y));
+        actualFocusPoint.z = SLVD.approachValue(actualFocusPoint.z, targetFocus.z, getScreenMoveSpeed(targetFocus.z - actualFocusPoint.z));
+    }
+};
+
 /**
  * @param {boolean} forceCalculate
  */
@@ -139,7 +170,6 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         SplitTime.see.drawImage(snapshot, 0, 0);
         return;
     }
-    var currentLevel = SplitTime.Level.getCurrent();
     var weatherRenderer = currentLevel.weatherRenderer;
     screen = SplitTime.BoardRenderer.getScreenCoordinates();
 

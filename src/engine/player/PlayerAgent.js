@@ -159,7 +159,6 @@ SplitTime.Agent.Player.prototype.drawGhost = function(x, y, z, maxOpacity) {
             }
 
             if(tempSprite.opacity <= 0) {
-                SplitTime.Logger.debug("Removing ghost");
                 tempBody.setLevel(null);
             }
         });

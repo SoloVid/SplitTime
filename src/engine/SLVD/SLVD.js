@@ -80,6 +80,14 @@ SLVD.randomSeed = function() {
 	}
 };
 
+SLVD.approachValue = function(oldValue, targetValue, step) {
+    if(oldValue < targetValue) {
+        return Math.min(oldValue + step, targetValue);
+    } else {
+        return Math.max(oldValue - step, targetValue);
+    }
+};
+
 SLVD.constrain = function(num, min, max) {
 	return Math.max(min, Math.min(num, max));
 };
