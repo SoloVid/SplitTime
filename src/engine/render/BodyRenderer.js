@@ -216,7 +216,7 @@ SplitTime.BodyRenderer.prototype._fadeOccludingSprite = function(nodeInFront, no
     //If this sprite has the "playerOcclusionFadeFactor" property set to a value greater than zero, fade it out when player is behind
     if(nodeInFront.drawable.playerOcclusionFadeFactor > 0.01) {
         //If the active player is behind an object, lower the opacity
-        if(nodeBehind.body === SplitTime.Player.getActiveBody()) {
+        if(nodeBehind.body.isPlayer()) {
             var CROSS_FADE_PIXELS = 32;
 
             if(SplitTime.Debug.ENABLED) {

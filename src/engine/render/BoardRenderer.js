@@ -33,6 +33,10 @@ var currentLevel = null;
 /** @type {{x: number, y: number, z: number}[]} */
 var focusPoints = [];
 
+SplitTime.BoardRenderer.focusCameraOnPlayerBody = function() {
+    SplitTime.BoardRenderer.setFocusPoint(SplitTime.playerBody);
+};
+
 SplitTime.BoardRenderer.getFocusPoint = function() {
     return actualFocusPoint;
 };

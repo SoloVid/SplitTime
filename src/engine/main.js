@@ -6,6 +6,9 @@ SplitTime.main = function() {
     SplitTime.performanceCheckpoint("start", 999999);
 
     try {
+        SplitTime.Level.applyTransition();
+        SplitTime.performanceCheckpoint("level transition", 10);
+
         switch(SplitTime.process) {
             case SplitTime.main.State.LOADING: {
                 SplitTime.see.fillStyle = "#000000";
@@ -16,9 +19,6 @@ SplitTime.main = function() {
                 break;
             }
             case SplitTime.main.State.ACTION: {
-                // TODO: figure out a better place to put this; might not work for switching regions
-                SplitTime.Level.setCurrent(SplitTime.Player.getActiveBody().getLevel());
-
                 var region = SplitTime.Region.getCurrent();
                 region.notifyFrameUpdate(1/SplitTime.FPS);
                 SplitTime.performanceCheckpoint("region frame update");

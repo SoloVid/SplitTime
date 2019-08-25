@@ -100,10 +100,10 @@ function calculateDialogImportanceScore(dialog) {
         return MIN_SCORE - 1;
     }
 
-    var player = SplitTime.Player.getActiveBody();
+    var focusPoint = SplitTime.BoardRenderer.getFocusPoint();
     var location = dialog.getLocation();
 
-    var distance = SplitTime.Measurement.distanceEasy(player.getX(), player.getY(), location.getX(), location.getY());
+    var distance = SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, location.getX(), location.getY());
     var distanceScore = ((SplitTime.SCREENX / 3) / distance);
 
     if(dialog === engagedDialog) {

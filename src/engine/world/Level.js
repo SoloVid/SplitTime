@@ -331,21 +331,24 @@ SplitTime.Level.get = function(levelId) {
     return levelMap[levelId];
 };
 
-/**
- * @param {SplitTime.Level|string} level
- * @return {SLVD.Promise}
- */
-SplitTime.Level.setCurrent = function(level) {
-    if(typeof level === "string") {
-        level = SplitTime.Level.get(level);
-    }
+var inTransition = false;
+/** @type {SLVD.Promise} */
+var transitionPromise = null;
 
-    if(level === currentLevel) {
-        return SLVD.Promise.as();
+/** @type {SplitTime.Level|null} */
+var nextLevel = null;
+
+/**
+ * STOP!!! This method should ONLY be called by the main game loop.
+ */
+SplitTime.Level.applyTransition = function() {
+    if(!inTransition) {
+        return;
     }
 
     var exitingLevel = currentLevel;
-    currentLevel = level;
+    currentLevel = nextLevel;
+    nextLevel = null;
 
     var changeRegion = !exitingLevel || exitingLevel.getRegion() !== currentLevel.getRegion();
 
@@ -364,12 +367,37 @@ SplitTime.Level.setCurrent = function(level) {
 
     SplitTime.process = "loading";
     var promise = changeRegion ? currentLevel.getRegion().loadForPlay() : new SLVD.Promise.as();
-    return promise.then(function() {
+    promise.then(function() {
         SplitTime.process = currentLevel.type;
         if(currentLevel.events[ENTER_LEVEL_FUNCTION_ID]) {
             currentLevel.runEvent(ENTER_LEVEL_FUNCTION_ID);
         }
+        inTransition = false;
+        transitionPromise.resolve();
     });
+};
+
+/**
+ * @param {SplitTime.Level|string} level
+ * @return {SLVD.Promise}
+ */
+SplitTime.Level.transition = function(level) {
+    if(typeof level === "string") {
+        level = SplitTime.Level.get(level);
+    }
+
+    if(inTransition) {
+        throw new Error("Level transition is already in progress. Cannot transition to " + level.id);
+    }
+
+    if(level === currentLevel) {
+        return SLVD.Promise.as();
+    }
+
+    inTransition = true;
+    nextLevel = level;
+    transitionPromise = new SLVD.Promise();
+    return transitionPromise;
 };
 
 /**

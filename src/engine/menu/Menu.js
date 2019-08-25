@@ -4,7 +4,8 @@ SplitTime.showImage = function(file, duration, waitForEnterSpace) {
 		if(waitForEnterSpace) {
 			var formerProcess = SplitTime.process;
             SplitTime.process = SplitTime.main.State.OTHER;
-            return SplitTime.Controls.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
+            // TODO: don't reach into game global land
+            return G.BUTTON.GUI_CONFIRMATION.waitForAfterUp().then(function() {
             	SplitTime.process = formerProcess;
 			});
 		} else {
@@ -32,7 +33,8 @@ SplitTime.Menu.prototype.runMenu = function() {
 
 	var promise = new SLVD.Promise();
 	var me = this;
-	SplitTime.Controls.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
+	// TODO: don't reach into game global land
+    G.BUTTON.GUI_CONFIRMATION.waitForAfterUp().then(function() {
 		isRunning = false;
 		SplitTime.HUD.removeRenderer(me);
 		promise.resolve(me.currentPoint);

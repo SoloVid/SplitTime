@@ -1,22 +1,29 @@
 SplitTime.Keyboard = {};
 
-SplitTime.Keyboard.A = 65; // 'a'
-SplitTime.Keyboard.S = 83; // 's'
-SplitTime.Keyboard.D = 68; // 'd'
-SplitTime.Keyboard.W = 87; // 'w'
-SplitTime.Keyboard.SPACE = 32; // 'space'
-SplitTime.Keyboard.ENTER = 13; // 'enter'
-SplitTime.Keyboard.LEFT = 37; // 'left'
-SplitTime.Keyboard.DOWN = 40; // 'down'
-SplitTime.Keyboard.RIGHT = 39; // 'right'
-SplitTime.Keyboard.UP = 38; // 'up'
-SplitTime.Keyboard.J = 74; // 'j'
-SplitTime.Keyboard.K = 75; // 'k'
-SplitTime.Keyboard.L = 76; // 'l'
-SplitTime.Keyboard.I = 73; // 'i'
-SplitTime.Keyboard.Z = 90; // 'z'
-SplitTime.Keyboard.X = 88; // 'x'
-SplitTime.Keyboard.C = 67; // 'c'
+SplitTime.Keyboard.A = 65;
+SplitTime.Keyboard.S = 83;
+SplitTime.Keyboard.D = 68;
+SplitTime.Keyboard.W = 87;
+
+SplitTime.Keyboard.LEFT = 37;
+SplitTime.Keyboard.DOWN = 40;
+SplitTime.Keyboard.RIGHT = 39;
+SplitTime.Keyboard.UP = 38;
+
+SplitTime.Keyboard.J = 74;
+SplitTime.Keyboard.K = 75;
+SplitTime.Keyboard.L = 76;
+SplitTime.Keyboard.I = 73;
+
+SplitTime.Keyboard.SPACE = 32;
+SplitTime.Keyboard.ENTER = 13;
+
+SplitTime.Keyboard.Q = 81;
+SplitTime.Keyboard.E = 69;
+
+SplitTime.Keyboard.Z = 90;
+SplitTime.Keyboard.X = 88;
+SplitTime.Keyboard.C = 67;
 
 var keyDown = {};
 

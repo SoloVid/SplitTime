@@ -9,13 +9,7 @@ SplitTime.Controls.JoyStick = {
     onTilt: function(callback) {}
 };
 
-SplitTime.Controls.Button = {
-    GUI_CONFIRMATION: new ControllerButton(),
-    PRIMARY_INTERACT: new ControllerButton(),
-    PRIMARY_ACTION: new ControllerButton()
-};
-
-function ControllerButton(onDown, onUp, isDown) {
+SplitTime.Controls.Button = function(onDown, onUp, isDown) {
     this._bindings = {
         obsolete: true
     };
@@ -31,17 +25,9 @@ function ControllerButton(onDown, onUp, isDown) {
         that._upCallbacks.register(callback);
     };
     this.isDown = isDown || function() { return false; };
-}
+};
 
-// ControllerButton.prototype.onDown = function(callback) {
-//     this._downCallbacks.register(callback);
-// };
-//
-// ControllerButton.prototype.onUp = function(callback) {
-//     this._upCallbacks.register(callback);
-// };
-
-ControllerButton.prototype.setKeyboardBindings = function(/* keyCodes...*/) {
+SplitTime.Controls.Button.prototype.setKeyboardBindings = function(/* keyCodes...*/) {
     var keyCodes = [];
     for(var iArg = 0; iArg < arguments.length; iArg++) {
         keyCodes.push(arguments[iArg]);
@@ -83,7 +69,7 @@ ControllerButton.prototype.setKeyboardBindings = function(/* keyCodes...*/) {
     };
 };
 
-ControllerButton.prototype.waitForDown = function() {
+SplitTime.Controls.Button.prototype.waitForDown = function() {
     var promise = new SLVD.Promise();
     var isResolved = false;
 
@@ -99,7 +85,7 @@ ControllerButton.prototype.waitForDown = function() {
     return promise;
 };
 
-ControllerButton.prototype.waitForAfterUp = function() {
+SplitTime.Controls.Button.prototype.waitForAfterUp = function() {
     var promise = new SLVD.Promise();
     var isResolved = false;
 

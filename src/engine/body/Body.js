@@ -84,8 +84,8 @@ SplitTime.Body.prototype.getChildren = function() {
     return this.childrenBolted.concat(this.childrenLoose);
 };
 
-SplitTime.Body.prototype.isCurrentPlayer = function() {
-    return this === SplitTime.Player.getActiveBody();
+SplitTime.Body.prototype.isPlayer = function() {
+    return this === SplitTime.playerBody;
 };
 
 SplitTime.Body.prototype.staticTrace = [];
@@ -238,6 +238,10 @@ SplitTime.Body.prototype.setLevel = function(level, includeChildren) {
                 this.removeChild(children[i]);
             }
         }
+    }
+
+    if(this.isPlayer()) {
+        SplitTime.Level.transition(this._level);
     }
 };
 /**
