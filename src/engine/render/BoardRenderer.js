@@ -193,6 +193,10 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
                 body.drawable.prepareForRender();
             }
         }
+        if(body.shadow) {
+            body.shadow.prepareForRender();
+            bodyRenderer.feedBody(body.shadow.shadowBody);
+        }
         if(body.lightIntensity > 0) {
             lights.push(body);
         }
@@ -274,6 +278,7 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
         if(drawable && typeof drawable.cleanupAfterRender === "function") {
             drawable.cleanupAfterRender();
         }
+        // TODO: maybe cleanup shadows?
     }
 };
 
