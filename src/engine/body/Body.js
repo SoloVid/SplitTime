@@ -49,8 +49,7 @@ SplitTime.Body.prototype = {
 SplitTime.Body.prototype.drawable = null;
 SplitTime.Body.prototype.lightIntensity = 0;
 SplitTime.Body.prototype.lightRadius = 150;
-/** @type {SplitTime.Body.Shadow|null} */
-SplitTime.Body.prototype.shadow = null;
+SplitTime.Body.prototype.shadow = false;
 
 SplitTime.Body.prototype.childrenBolted = [];
 SplitTime.Body.prototype.childrenLoose = [];

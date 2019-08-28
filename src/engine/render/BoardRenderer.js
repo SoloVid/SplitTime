@@ -194,8 +194,9 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
             }
         }
         if(body.shadow) {
-            body.shadow.prepareForRender();
-            bodyRenderer.feedBody(body.shadow.shadowBody);
+            var shadow = new SplitTime.Body.Shadow(body);
+            shadow.prepareForRender();
+            bodyRenderer.feedBody(shadow.shadowBody);
         }
         if(body.lightIntensity > 0) {
             lights.push(body);
