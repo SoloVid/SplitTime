@@ -4,25 +4,66 @@ dependsOn("BodyMover.js");
  * @param {number} maxDZ (positive)
  * @returns {number} Z pixels moved (non-positive)
  */
-SplitTime.Body.Mover.prototype.zeldaVerticalDropTraces = function(maxDZ) {
-    var roundX = Math.floor(this.body.getX());
-    var roundY = Math.floor(this.body.getY());
-
-    var collisionInfo = this.calculateDropThroughTraces(
-        roundX,
-        roundY,
-        this.body.getZ(),
-        maxDZ
-    );
+SplitTime.Body.Mover.prototype.zeldaVerticalDrop = function(maxDZ) {
+    var collisionInfo = this.calculateDrop(maxDZ);
 
     this.body.setZ(collisionInfo.zBlocked);
-    if(collisionInfo.x >= 0) {
+    if(collisionInfo.body) {
+        this.bodyExt.previousGroundBody = collisionInfo.body;
+    } else if(collisionInfo.x >= 0) {
         this.bodyExt.previousGroundTraceX = collisionInfo.x;
         this.bodyExt.previousGroundTraceY = collisionInfo.y;
         this.bodyExt.previousGroundTraceZ = collisionInfo.zBlocked;
+        this.level.runEvents(collisionInfo.events, this.body);
     }
-    this.level.runEvents(collisionInfo.events, this.body);
     return -collisionInfo.distanceAllowed;
+};
+
+/**
+ * @param {number} maxDZ (positive)
+ * @returns {{x: int, y: int, body: SplitTime.Body|null, distanceAllowed: number, zBlocked: number, events: string[]}}
+ */
+SplitTime.Body.Mover.prototype.calculateDrop = function(maxDZ) {
+    var roundX = Math.floor(this.body.getX());
+    var roundY = Math.floor(this.body.getY());
+    var z = this.body.getZ();
+    var targetZ = z - maxDZ;
+    var collisionInfo = {
+        x: -1,
+        y: -1,
+        body: null,
+        distanceAllowed: maxDZ,
+        zBlocked: targetZ,
+        events: []
+    };
+
+    var collisionInfoBodies = this.calculateDropThroughBodies(
+        roundX,
+        roundY,
+        z,
+        maxDZ
+    );
+
+    var collisionInfoTraces = this.calculateDropThroughTraces(
+        roundX,
+        roundY,
+        z,
+        collisionInfoBodies.distanceAllowed
+    );
+
+    if(collisionInfoTraces.distanceAllowed < collisionInfoBodies.distanceAllowed) {
+        collisionInfo.x = collisionInfoTraces.x;
+        collisionInfo.y = collisionInfoTraces.y;
+        collisionInfo.distanceAllowed = collisionInfoTraces.distanceAllowed;
+        collisionInfo.zBlocked = collisionInfoTraces.zBlocked;
+        collisionInfo.events = collisionInfoTraces.events;
+    } else {
+        collisionInfo.body = collisionInfoBodies.body;
+        collisionInfo.distanceAllowed = collisionInfoBodies.distanceAllowed;
+        collisionInfo.zBlocked = collisionInfoBodies.zBlocked;
+    }
+
+    return collisionInfo;
 };
 
 /**
@@ -30,7 +71,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalDropTraces = function(maxDZ) {
  * @param {int} y
  * @param {number} z
  * @param {number} maxDZ (positive)
- * @returns {{x: number, y: number, distanceAllowed: number, zBlocked: number, events: string[]}}
+ * @returns {{x: int, y: int, distanceAllowed: number, zBlocked: number, events: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, maxDZ) {
     var targetZ = z - maxDZ;
@@ -94,6 +135,57 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
     if(collisionInfo.zBlocked > z){
         collisionInfo.zBlocked = z;
     }
+
+    return collisionInfo;
+};
+
+/**
+ * @param {int} x
+ * @param {int} y
+ * @param {number} z
+ * @param {number} maxDZ (positive)
+ * @returns {{body: SplitTime.Body|null, distanceAllowed: number, zBlocked: number}}
+ */
+SplitTime.Body.Mover.prototype.calculateDropThroughBodies = function(x, y, z, maxDZ) {
+    var targetZ = z - maxDZ;
+    var collisionInfo = {
+        body: null,
+        // positive number
+        distanceAllowed: maxDZ,
+        zBlocked: targetZ
+    };
+
+    var startX = x - this.halfBaseLength;
+    var xPixels = this.baseLength;
+    var startY = y - this.halfBaseLength;
+    var yPixels = this.baseLength;
+
+    if(z <= 0) {
+        collisionInfo.distanceAllowed = 0;
+        collisionInfo.zBlocked = 0;
+        return collisionInfo;
+    } else if(targetZ <= 0) {
+        collisionInfo.distanceAllowed = z;
+        collisionInfo.zBlocked = 0;
+    }
+
+    function handleFoundBody(otherBody) {
+        var zBlocked = otherBody.getZ() + otherBody.height;
+        if(zBlocked > collisionInfo.zBlocked && zBlocked <= z) {
+            collisionInfo.body = otherBody;
+            collisionInfo.distanceAllowed = z - zBlocked;
+            collisionInfo.zBlocked = zBlocked;
+        }
+    }
+    this.level.getCellGrid().forEachBody(startX, startY, targetZ, startX + xPixels, startY + yPixels, z, handleFoundBody);
+
+    // Make sure we don't go up
+    // if(collisionInfo.distanceAllowed < 0) {
+    //     collisionInfo.distanceAllowed = 0;
+    // }
+    // if(collisionInfo.zBlocked > z){
+    //     collisionInfo.zBlocked = z;
+    // }
 
     return collisionInfo;
 };

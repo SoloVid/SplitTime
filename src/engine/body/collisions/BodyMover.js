@@ -14,9 +14,9 @@ function BodyExt(body) {
     this.pushing = false;
     this.sliding = false;
     this.previousGroundBody = null;
-    this.previousGroundTraceX = null;
-    this.previousGroundTraceY = null;
-    this.previousGroundTraceZ = null;
+    this.previousGroundTraceX = -1;
+    this.previousGroundTraceY = -1;
+    this.previousGroundTraceZ = -1;
 }
 
 /**
@@ -104,18 +104,17 @@ SplitTime.Body.Mover.prototype.zeldaVerticalBump = function(maxDZ) {
     this.bodyExt.previousGroundTraceY = null;
     this.bodyExt.previousGroundTraceZ = null;
 
-    var traceDZ;
+    var actualDZ;
     if(Math.abs(maxDZ) < 0.000001) {
         // do nothing
         return 0;
     } else if(maxDZ > 0) {
-        traceDZ = this.zeldaVerticalRiseTraces(maxDZ);
+        actualDZ = this.zeldaVerticalRiseTraces(maxDZ);
         // TODO: check bodies
-        return traceDZ;
+        return actualDZ;
     } else {
-        traceDZ = this.zeldaVerticalDropTraces(-maxDZ);
-        // TODO: check bodies
-        return traceDZ;
+        actualDZ = this.zeldaVerticalDrop(-maxDZ);
+        return actualDZ;
     }
 };
 
