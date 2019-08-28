@@ -92,18 +92,6 @@ SplitTime.Body.Mover.prototype.ensureInRegion = function() {
 SplitTime.Body.Mover.prototype.zeldaVerticalBump = function(maxDZ) {
     this.ensureInRegion();
 
-    var groundBody = this.bodyExt.previousGroundBody;
-    if(groundBody && isStandingOnBody(this.body, groundBody)) {
-        return 0;
-    }
-    this.bodyExt.previousGroundBody = null;
-    if(maxDZ < 0 && isGroundTracePixelRelevant(this.body, this.bodyExt.previousGroundTraceX, this.bodyExt.previousGroundTraceY, this.bodyExt.previousGroundTraceZ)) {
-        return 0;
-    }
-    this.bodyExt.previousGroundTraceX = null;
-    this.bodyExt.previousGroundTraceY = null;
-    this.bodyExt.previousGroundTraceZ = null;
-
     var actualDZ;
     if(Math.abs(maxDZ) < 0.000001) {
         // do nothing
@@ -111,29 +99,10 @@ SplitTime.Body.Mover.prototype.zeldaVerticalBump = function(maxDZ) {
     } else if(maxDZ > 0) {
         actualDZ = this.zeldaVerticalRise(maxDZ);
         return actualDZ;
-    } else {
+    } else if(this.body.z > 0) {
         actualDZ = this.zeldaVerticalDrop(-maxDZ);
         return actualDZ;
     }
+
+    return 0;
 };
-
-/**
- * @param {SplitTime.Body} standingBody
- * @param {SplitTime.Body} groundBody
- * @returns {boolean}
- */
-function isStandingOnBody(standingBody, groundBody) {
-    return false;
-    // TODO
-    // Check for perfect groundBody.z + groundBody.height === standingBody.z
-    // Then check for horizontal overlap of bases
-}
-
-function isGroundTracePixelRelevant(body, x, y, z) {
-    if(body._zeldaPreviousGroundTraceX && body._zeldaPreviousGroundTraceY && body._zeldaPreviousGroundTraceZ) {
-        // TODO
-        // Check if body still covers x and y
-        // If so, check that z matches pixel
-    }
-    return false;
-}
