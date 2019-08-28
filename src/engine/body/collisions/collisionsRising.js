@@ -1,8 +1,10 @@
 dependsOn("BodyMover.js");
 
+var ZILCH = 0.00001;
+
 /**
  * @param {number} maxDZ (positive)
- * @returns {number} Z pixels can move (non-negative)
+ * @returns {number} Z pixels moved (non-negative)
  */
 SplitTime.Body.Mover.prototype.zeldaVerticalRise = function(maxDZ) {
     var collisionInfo = this.calculateRise(maxDZ);
@@ -10,6 +12,19 @@ SplitTime.Body.Mover.prototype.zeldaVerticalRise = function(maxDZ) {
     this.body.setZ(collisionInfo.zEnd);
     if(collisionInfo.x >= 0) {
         this.level.runEvents(collisionInfo.events, this.body);
+    }
+    if(collisionInfo.body && collisionInfo.distanceAllowed < maxDZ) {
+        var mover = new SplitTime.Body.Mover(collisionInfo.body);
+        var howMuchUnmoved = maxDZ - collisionInfo.distanceAllowed;
+        var howFarToPushOther = Math.min(howMuchUnmoved, 1);
+        mover.zeldaVerticalRise(howFarToPushOther);
+        var howMuchMoreICanMove = howMuchUnmoved - howFarToPushOther * 2;
+        if(howMuchMoreICanMove > 0) {
+            return this.zeldaVerticalRise(howMuchMoreICanMove);
+        }
+    }
+    if(collisionInfo.distanceAllowed > ZILCH && this.body.zVelocity < 0) {
+        this.body.zVelocity = 0;
     }
     return collisionInfo.distanceAllowed;
 };
@@ -158,7 +173,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughBodies = function(x, y, z, ma
 
     function handleFoundBody(otherBody) {
         var zBlocked = otherBody.getZ();
-        if(zBlocked < collisionInfo.zBlocked && zBlocked >= top) {
+        if(zBlocked < collisionInfo.zBlocked && zBlocked + otherBody.height / 2 >= top) {
             collisionInfo.body = otherBody;
             collisionInfo.distanceAllowed = zBlocked - top;
             collisionInfo.zBlocked = zBlocked;

@@ -273,7 +273,7 @@ SplitTime.Body.prototype.notifyFrameUpdate = function(delta) {
         var expectedDZ = this.zVelocity * delta;
         var mover = new SplitTime.Body.Mover(this);
         var actualDZ = mover.zeldaVerticalBump(expectedDZ);
-        if(Math.abs(actualDZ) < Math.abs(expectedDZ)) {
+        if(Math.abs(actualDZ) <= ZILCH) {
             this.zVelocity = 0;
         }
     }
