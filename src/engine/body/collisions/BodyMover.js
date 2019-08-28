@@ -109,8 +109,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalBump = function(maxDZ) {
         // do nothing
         return 0;
     } else if(maxDZ > 0) {
-        actualDZ = this.zeldaVerticalRiseTraces(maxDZ);
-        // TODO: check bodies
+        actualDZ = this.zeldaVerticalRise(maxDZ);
         return actualDZ;
     } else {
         actualDZ = this.zeldaVerticalDrop(-maxDZ);

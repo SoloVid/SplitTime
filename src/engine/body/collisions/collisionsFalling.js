@@ -179,14 +179,6 @@ SplitTime.Body.Mover.prototype.calculateDropThroughBodies = function(x, y, z, ma
     }
     this.level.getCellGrid().forEachBody(startX, startY, targetZ, startX + xPixels, startY + yPixels, z, handleFoundBody);
 
-    // Make sure we don't go up
-    // if(collisionInfo.distanceAllowed < 0) {
-    //     collisionInfo.distanceAllowed = 0;
-    // }
-    // if(collisionInfo.zBlocked > z){
-    //     collisionInfo.zBlocked = z;
-    // }
-
     return collisionInfo;
 };
 
