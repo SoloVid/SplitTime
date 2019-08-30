@@ -11,11 +11,11 @@ SplitTime.Body.Shadow = function(body) {
     this.shadowBody.drawable = this;
     this.shadowBody.baseLength = body.baseLength;
     this.shadowBody.height = 0;
-};
 
-SplitTime.Body.Shadow.prototype.maxRadius = 16;
-SplitTime.Body.Shadow.prototype.minRadius = 4;
-SplitTime.Body.Shadow.prototype.radius = 16;
+    this.minRadius = 4;
+    this.maxRadius = this.shadowBody.baseLength;
+    this.radius = this.maxRadius;
+};
 
 SplitTime.Body.Shadow.prototype.opacity = 1;
 SplitTime.Body.Shadow.prototype.playerOcclusionFadeFactor = 0;
