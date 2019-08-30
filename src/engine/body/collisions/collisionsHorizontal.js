@@ -27,6 +27,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
     var dxRounded = dx > 0 ? Math.ceil(dx) : Math.floor(dx);
     var adx = Math.abs(dxRounded);
 
+    //-1 for negative movement on the axis, 1 for positive
     var jHat = dy === 0 ? 0 : dyRounded / ady;
     var iHat = dx === 0 ? 0 : dxRounded / adx;
 
@@ -50,12 +51,16 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
     var roundY = oldRoundY;
     var currentZ = this.body.getZ();
 
+    var halfLength = this.body.halfBaseLength;
+
     var eventIdSet = {};
     var levelIdSet = {};
     for(var i = 0; i < maxIterations; i++) {
         if(xPixelsRemaining > 0) {
             var newRoundX = roundX + iHat;
-            if(newRoundX >= level.width || newRoundX < 0) {
+            
+            //If the body is out of bounds on the x axis
+            if(newRoundX + halfLength >= level.width || newRoundX - halfLength < 0) {
                 outX = true;
             } else {
                 var xCollisionInfo = this.calculateXPixelCollisionWithStepUp(roundX, roundY, currentZ, iHat);
@@ -79,8 +84,8 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
 
         if(yPixelsRemaining > 0) {
             var newRoundY = roundY + jHat;
-            //Check if out of bounds
-            if(newRoundY >= level.yWidth || newRoundY < 0) {
+            //Check if out of bounds on the y axis
+            if(newRoundY + halfLength >= level.yWidth || newRoundY - halfLength < 0) {
                 outY = true;
             } else {
 

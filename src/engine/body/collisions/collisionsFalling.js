@@ -111,11 +111,17 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
 
     var levelTraces = this.level.getLevelTraces();
     var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
-    //Loop through width of base
+    //Loop through Y width of base
     for(var testY = startY; testY < startY + yPixels; testY++) {
-        //Loop through height of base
+        //Loop through X width of base
         for(var testX = startX; testX < startX + xPixels; testX++) {
             levelTraces.calculatePixelColumnCollisionInfo(originCollisionInfo, testX, testY, targetZ, z + 1);
+            
+            //If we have entered a new level by falling into it
+            if(Object.keys(originCollisionInfo.pointerTraces).length > 0) {
+                //TODO: make sure that the pointer trace gets handled properly
+            }
+            
             if(originCollisionInfo.containsSolid && originCollisionInfo.zBlockedTopEx !== collisionInfo.zBlocked) {
                 if(collisionInfo.zBlocked === null || collisionInfo.zBlocked < originCollisionInfo.zBlockedTopEx) {
                     collisionInfo.x = testX;

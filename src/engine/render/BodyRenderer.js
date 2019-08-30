@@ -106,7 +106,6 @@ SplitTime.BodyRenderer.prototype._removeDeadBodies = function() {
 };
 
 SplitTime.BodyRenderer.prototype._rebuildGraph = function() {
-    //optimization for not drawing if out of bounds
     var nodesOnScreen = this._getNodesOnScreen();
     //For each node
     for(var i = 0; i < nodesOnScreen.length; i++) {
