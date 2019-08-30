@@ -159,8 +159,10 @@ SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
         if(node) {
             var canvReq = node.canvReq;
 
-            //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
-            var screenY = canvReq.y - canvReq.z;
+            //Combine y and z axes to get the "screen y" position,
+            //which is the y location of the bottom of 
+            //the node on the 2D screen
+            var nodeScreenY = canvReq.y - canvReq.z;
 
             //optimization for not drawing if out of bounds
             var screen = SplitTime.BoardRenderer.getScreenCoordinates();
@@ -169,9 +171,9 @@ SplitTime.BodyRenderer.prototype._getNodesOnScreen = function() {
 
             //If the body is in bounds
             if(
-                (screenY + canvReq.height / 2) >= screen.y &&
+                (nodeScreenY) >= screen.y &&
                 (canvReq.x + canvReq.width / 2) >= screen.x &&
-                (canvReq.y - canvReq.height / 2) <= screenBottom &&
+                (nodeScreenY - canvReq.height) <= screenBottom &&
                 (canvReq.x - canvReq.width / 2) <= screenRightEdge
             ) {
                 nodesOnScreen.push(node);
