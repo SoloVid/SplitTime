@@ -5,53 +5,72 @@ SplitTime.Audio = {};
 var AUDIO_ROOT = SLVD.getScriptDirectory() + "audio/";
 var MUSIC_DIR = "music/";
 var SOUND_EFFECT_DIR = "soundeffects/";
-var map = {};
+var registeredSounds = {};
+var activeSounds = {};
 
-var currentAudio;
 // TODO: expose this volume
-var volume = 1;
+var globalVolume = 1;
+
 
 SplitTime.Audio.registerMusic = function(relativePath) {
-    var audio = registerAudio(MUSIC_DIR + relativePath, relativePath);
-    audio.loop = true;
+    registerAudio(MUSIC_DIR + relativePath, relativePath, true);
 };
 
 SplitTime.Audio.registerSoundEffect = function(relativePath) {
-	var audio = registerAudio(SOUND_EFFECT_DIR + relativePath, relativePath);
-	audio.loop = false;
+    registerAudio(SOUND_EFFECT_DIR + relativePath, relativePath, false);
 };
 
-function registerAudio(relativePath, handle) {
-    var audio = document.createElement("audio");
-    audio.setAttribute("src", AUDIO_ROOT + relativePath);
-    audio.setAttribute("id", "audio:" + relativePath.replace("/", ":"));
-    map[handle] = audio;
-    return audio;
-    //document.write('<SplitTime.audio preload src="' + source + '" id="' + iden + '"></SplitTime.audio>');
-    //return document.getElementById(iden);
+function registerAudio(relativePath, handle, loopAudio) {
+    //Set up audio using howler.js API
+    var sound = new Howl({
+        src: [AUDIO_ROOT + relativePath],
+        loop: loopAudio,
+        autoplay: false,
+        volume: globalVolume
+    });   
+    registeredSounds[handle] = sound;
 }
+
+SplitTime.Audio.play = function(handle, boolContinue) {
+    var sound = registeredSounds[handle];
+    //Set volume to current SplitTime.volume
+    sound.volume = globalVolume;
+    if(!boolContinue) {
+        sound.currentTime = 0;
+    }
+    var soundID = sound.play();
+    activeSounds[soundID] = sound;
+};
 
 //Pause current SplitTime.audio
 SplitTime.Audio.pause = function() {
-	currentAudio.pause();
-};
-
-SplitTime.Audio.play = function(handle, boolContinue) {
-	var audio = map[handle];
-	//Set SplitTime.volume to current SplitTime.volume
-    audio.volume = volume;
-	if(!boolContinue) {
-        audio.currentTime = 0;
-	}
-    //audio.play();
-    
-    var sound = new Howl({ src: [audio.src] });
-    sound.play();
-    
-	currentAudio = audio;
+    for(var soundID in activeSounds) {
+        var sound = activeSounds[soundID];
+        if(sound.playing()){
+            sound.pause();
+        } else {
+            //TODO: Remove any inactive sounds that have finished and aren't looping
+        }
+    }
 };
 
 //Resume current SplitTime.audio
 SplitTime.Audio.resume = function() {
-	currentAudio.play();
+    //TODO: this needs to be tested before it gets called from somewhere.
+    for(var soundID in activeSounds) {
+        var sound = activeSounds[soundID];
+        sound.play(soundID);
+    }
 };
+
+//Stop current SplitTime.audio
+SplitTime.Audio.stop = function() {
+    for(var soundID in activeSounds) {
+        var sound = activeSounds[soundID];
+        sound.stop();
+    }
+    //Remove all sounds from activeSounds
+    activeSounds = [];
+};
+
+
