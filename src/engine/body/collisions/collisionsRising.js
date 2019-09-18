@@ -8,6 +8,7 @@ var ZILCH = 0.00001;
  */
 SplitTime.Body.Mover.prototype.zeldaVerticalRise = function(maxDZ) {
     var collisionInfo = this.calculateRise(maxDZ);
+    var levelIdSet = {};
 
     this.body.setZ(collisionInfo.zEnd);
     if(collisionInfo.x >= 0) {
@@ -26,8 +27,21 @@ SplitTime.Body.Mover.prototype.zeldaVerticalRise = function(maxDZ) {
     if(collisionInfo.distanceAllowed > ZILCH && this.body.zVelocity < 0) {
         this.body.zVelocity = 0;
     }
+    
+    //If we have entered a new level by falling into it
+    if(collisionInfo.otherLevels.length > 0){
+        addArrayToSet(collisionInfo.otherLevels, levelIdSet);
+        this.transportLevelIfApplicable(levelIdSet);
+    }
+    
     return collisionInfo.distanceAllowed;
 };
+
+function addArrayToSet(arr, set) {
+    for(var i = 0; i < arr.length; i++) {
+        set[arr[i]] = true;
+    }
+}
 
 /**
  * @param {number} maxDZ (positive)
@@ -47,7 +61,8 @@ SplitTime.Body.Mover.prototype.calculateRise = function(maxDZ) {
         distanceAllowed: maxDZ,
         zBlocked: targetTop,
         zEnd: targetZ,
-        events: []
+        events: [],
+        otherLevels: []
     };
 
     var collisionInfoBodies = this.calculateRiseThroughBodies(
@@ -63,7 +78,10 @@ SplitTime.Body.Mover.prototype.calculateRise = function(maxDZ) {
         z,
         collisionInfoBodies.distanceAllowed
     );
-
+    
+    //TODO: should this line be inside the if/else block below?
+    collisionInfo.otherLevels = collisionInfoTraces.otherLevels;
+    
     if(collisionInfoTraces.distanceAllowed < collisionInfoBodies.distanceAllowed) {
         collisionInfo.x = collisionInfoTraces.x;
         collisionInfo.y = collisionInfoTraces.y;
@@ -98,7 +116,8 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
         distanceAllowed: maxDZ,
         zBlocked: targetTop,
         zEnd: targetZ,
-        events: []
+        events: [],
+        otherLevels: []
     };
 
     var startX = x - this.halfBaseLength;
@@ -113,6 +132,17 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
         //Loop through height of base
         for(var testX = startX; testX < startX + xPixels; testX++) {
             levelTraces.calculatePixelColumnCollisionInfo(originCollisionInfo, testX, testY, top, targetTop);
+            
+            //If we have entered a new level by falling into it
+            if(Object.keys(originCollisionInfo.pointerTraces).length > 0) {
+                //Make sure that the pointer trace will get handled properly
+                var count = 0;
+                for(var levelId in originCollisionInfo.pointerTraces) {
+                    collisionInfo.otherLevels[count] = levelId;
+                    count++;
+                }
+            }
+            
             if(originCollisionInfo.containsSolid && originCollisionInfo.zBlockedTopEx !== collisionInfo.zBlocked) {
                 if(collisionInfo.zBlocked === null || collisionInfo.zBlocked > originCollisionInfo.zBlockedBottom) {
                     collisionInfo.x = testX;

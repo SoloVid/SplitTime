@@ -6,6 +6,7 @@ dependsOn("BodyMover.js");
  */
 SplitTime.Body.Mover.prototype.zeldaVerticalDrop = function(maxDZ) {
     var collisionInfo = this.calculateDrop(maxDZ);
+    var levelIdSet = {};
 
     this.body.setZ(collisionInfo.zBlocked);
     this.bodyExt.previousGroundBody = collisionInfo.body;
@@ -15,8 +16,23 @@ SplitTime.Body.Mover.prototype.zeldaVerticalDrop = function(maxDZ) {
     if(collisionInfo.x >= 0) {
         this.level.runEvents(collisionInfo.events, this.body);
     }
+    
+    //If we have entered a new level by falling into it
+    if(collisionInfo.otherLevels.length > 0){
+        addArrayToSet(collisionInfo.otherLevels, levelIdSet);
+        this.transportLevelIfApplicable(levelIdSet);
+    }
+    
     return -collisionInfo.distanceAllowed;
 };
+
+//TODO: consider making this function only in one place instead of
+//          both here and in collisionsHorizontal.js, collisionsRising.js
+function addArrayToSet(arr, set) {
+    for(var i = 0; i < arr.length; i++) {
+        set[arr[i]] = true;
+    }
+}
 
 /**
  * @param {number} maxDZ (positive)
@@ -33,7 +49,8 @@ SplitTime.Body.Mover.prototype.calculateDrop = function(maxDZ) {
         body: null,
         distanceAllowed: maxDZ,
         zBlocked: targetZ,
-        events: []
+        events: [],
+        otherLevels: []
     };
 
     var groundBody = this.bodyExt.previousGroundBody;
@@ -68,6 +85,7 @@ SplitTime.Body.Mover.prototype.calculateDrop = function(maxDZ) {
         collisionInfo.distanceAllowed = collisionInfoTraces.distanceAllowed;
         collisionInfo.zBlocked = collisionInfoTraces.zBlocked;
         collisionInfo.events = collisionInfoTraces.events;
+        collisionInfo.otherLevels = collisionInfoTraces.otherLevels;
     } else {
         collisionInfo.body = collisionInfoBodies.body;
         collisionInfo.distanceAllowed = collisionInfoBodies.distanceAllowed;
@@ -92,7 +110,8 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
         // positive number
         distanceAllowed: maxDZ,
         zBlocked: targetZ,
-        events: []
+        events: [],
+        otherLevels: []
     };
 
     var startX = x - this.halfBaseLength;
@@ -119,7 +138,12 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
             
             //If we have entered a new level by falling into it
             if(Object.keys(originCollisionInfo.pointerTraces).length > 0) {
-                //TODO: make sure that the pointer trace gets handled properly
+                //Make sure that the pointer trace will get handled properly
+                var count = 0;
+                for(var levelId in originCollisionInfo.pointerTraces) {
+                    collisionInfo.otherLevels[count] = levelId;
+                    count++;
+                }
             }
             
             if(originCollisionInfo.containsSolid && originCollisionInfo.zBlockedTopEx !== collisionInfo.zBlocked) {

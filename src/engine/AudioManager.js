@@ -43,7 +43,11 @@ SplitTime.Audio.play = function(handle, boolContinue) {
 	if(!boolContinue) {
         audio.currentTime = 0;
 	}
-    audio.play();
+    //audio.play();
+    
+    var sound = new Howl({ src: [audio.src] });
+    sound.play();
+    
 	currentAudio = audio;
 };
 
