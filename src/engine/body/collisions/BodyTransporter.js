@@ -26,8 +26,6 @@ SplitTime.Body.Transporter.prototype.transportLevelIfApplicable = function(level
             console.warn("Cyclic pointer traces detected on level " + currentLevel.id + " near (" + this.body.getX() + ", " + this.body.getY() + ", " + this.body.getZ() + ")");
         }
     } else if(whereTo !== null) {
-        SplitTime.Audio.stop();
-        SplitTime.Audio.play("dirge.mp3");
         this.body.put(whereTo.level, whereTo.x, whereTo.y, whereTo.z);
     }
 };

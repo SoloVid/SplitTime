@@ -12,16 +12,20 @@ var activeSounds = {};
 var globalVolume = 1;
 
 
-SplitTime.Audio.registerMusic = function(relativePath) {
-    registerAudio(MUSIC_DIR + relativePath, relativePath, true);
+SplitTime.Audio.registerMusic = function(relativePath, loop) {
+    //loop parameter defaults to true
+    loop = typeof loop !== 'undefined' ?  loop : true;
+    registerAudio(MUSIC_DIR + relativePath, relativePath, loop);
 };
 
-SplitTime.Audio.registerSoundEffect = function(relativePath) {
-    registerAudio(SOUND_EFFECT_DIR + relativePath, relativePath, false);
+SplitTime.Audio.registerSoundEffect = function(relativePath, loop) {
+    //loop parameter defaults to true
+    loop = typeof loop !== 'undefined' ?  loop : false;
+    registerAudio(SOUND_EFFECT_DIR + relativePath, relativePath, loop);
 };
 
 function registerAudio(relativePath, handle, loopAudio) {
-    //Set up audio using howler.js API
+    //Set up the audio file to be used with howler.js API
     var sound = new Howl({
         src: [AUDIO_ROOT + relativePath],
         loop: loopAudio,
@@ -31,11 +35,25 @@ function registerAudio(relativePath, handle, loopAudio) {
     registeredSounds[handle] = sound;
 }
 
-SplitTime.Audio.play = function(handle, boolContinue) {
+/**
+  * @desc plays specified audio
+  * @param string handle - the name of the audio file to be played (e.g. "dirge.mp3")
+  * @param bool loopOverride - Specify true or false to override the default setting for this audio.
+  *                    Defaults to the loop value that was set when registered.
+  * @param bool restartIfPlaying - Defaults to false.  Set to true if the audio should start over
+  *                                if it's currently playing (this is for looping sounds, such as music)
+  */
+SplitTime.Audio.play = function(handle, loopOverride, restartIfPlaying) {
     var sound = registeredSounds[handle];
     //Set volume to current SplitTime.volume
     sound.volume = globalVolume;
-    if(!boolContinue) {
+    
+    //If loop parameter is set, override this sound's loop setting
+    if (typeof loopOverride !== 'undefined'){
+        sound.loop(loopOverride);
+    }
+    
+    if(restartIfPlaying) {
         sound.currentTime = 0;
     }
     var soundID = sound.play();
