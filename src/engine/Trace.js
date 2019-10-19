@@ -10,6 +10,10 @@ SplitTime.Trace = function(type) {
 	this.eventId = "";
 };
 
+/**
+ * @param {LevelFileDataTrace} rawTrace
+ * @return {SplitTime.Trace}
+ */
 SplitTime.Trace.fromRaw = function(rawTrace) {
 	var trace = new SplitTime.Trace(rawTrace.type);
 	switch(trace.type) {
@@ -23,6 +27,7 @@ SplitTime.Trace.fromRaw = function(rawTrace) {
             trace.eventId = rawTrace.event;
             break;
         case SplitTime.Trace.Type.POINTER:
+        case SplitTime.Trace.Type.TRANSPORT:
             trace.level = SplitTime.Level.get(rawTrace.level);
             trace.offsetX = +rawTrace.offsetX;
             trace.offsetY = +rawTrace.offsetY;
@@ -30,6 +35,10 @@ SplitTime.Trace.fromRaw = function(rawTrace) {
             break;
 	}
 	return trace;
+};
+
+SplitTime.Trace.prototype.getLocationId = function() {
+    return this.level + ":" + this.offsetX + "," + this.offsetY + "," + this.offsetZ;
 };
 
 SplitTime.Trace.draw = function(traceStr, ctx, type, offsetPos) {
@@ -197,7 +206,8 @@ SplitTime.Trace.Type = {
 	GROUND: "ground",
 	EVENT: "event",
 	PATH: "path",
-	POINTER: "pointer"
+	POINTER: "pointer",
+	TRANSPORT: "transport"
 };
 
 SplitTime.Trace.RColor = {

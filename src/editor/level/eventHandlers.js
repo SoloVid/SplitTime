@@ -142,9 +142,17 @@ $(document).ready(function() {
 		mouseX = event.pageX;
 		mouseY = event.pageY;
 		var levelContainerPos = $("#layers").position();
-		mouseLevelX = mouseX - levelContainerPos.left - EDITOR_PADDING;
-		mouseLevelY = mouseY - levelContainerPos.top - EDITOR_PADDING;
-	});
+		mouseLevelX = Math.round(mouseX - levelContainerPos.left - EDITOR_PADDING);
+		mouseLevelY = Math.round(mouseY - levelContainerPos.top - EDITOR_PADDING);
+
+        var layerIndex = vueApp.activeLayer;
+        var layer = levelObject.layers[layerIndex];
+        if(layer) {
+            vueApp.info.z = layer.z;
+            vueApp.info.x = mouseLevelX;
+            vueApp.info.y = mouseLevelY + vueApp.info.z;
+        }
+    });
 
     $(document.body).on("dblclick", "#layers", function(event) {
     	event.preventDefault();

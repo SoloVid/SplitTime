@@ -52,8 +52,8 @@
 				</select>
 				<br><br>
 				<div id="traceOptions">
-					<h4 title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;
-						&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">Traces</h4>
+					<span title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;
+						&#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">Traces</span>
 					<div v-for="(traceOption) in traceOptions"
 						 class="option"
 						 v-bind:style="{ color: 'white', backgroundColor: traceOption.color }"
@@ -75,6 +75,11 @@
 					></menu-layer>
 				</ul>
 				<div class="option" v-on:click.left="createLayer">Add Layer</div>
+			</div>
+			<div id="infoPane" class="menu" style="left: 0; top: auto; bottom: 0; width: auto;">
+				<span v-for="(value, name) in info">
+					{{ name }}: {{ value }}
+				</span>
 			</div>
 
 		</div>

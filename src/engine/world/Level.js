@@ -103,6 +103,24 @@ SplitTime.Level.prototype.load = function(levelData) {
         // }
     }
 
+    for(var iLayer = 0; iLayer < levelData.layers.length; iLayer++) {
+        var layerTraces = levelData.layers[iLayer].traces;
+        for(var iLayerTrace = 0; iLayerTrace < layerTraces.length; iLayerTrace++) {
+            var rawTrace = layerTraces[iLayerTrace];
+            var type = rawTrace.type;
+            switch(type) {
+                case SplitTime.Trace.Type.TRANSPORT:
+                    var trace = SplitTime.Trace.fromRaw(rawTrace);
+                    var transportTraceId = trace.getLocationId();
+                    this.registerEvent(transportTraceId, (function(trace) {
+                        return function(body) {
+                            body.put(trace.level, body.x + trace.offsetX, body.y + trace.offsetY, body.z + trace.offsetZ);
+                        };
+                    } (trace)));
+            }
+        }
+    }
+
     this.setLoadPromise(levelLoadPromise);
 
     return levelLoadPromise;

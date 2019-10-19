@@ -191,6 +191,14 @@ SplitTime.LevelTraces.prototype.initCanvasData = function() {
                     var pointerColor = SplitTime.Trace.getPointerColor(pointerIntId);
                     SplitTime.Trace.drawColor(trace.vertices, holderCtx, pointerColor);
                     break;
+                case SplitTime.Trace.Type.TRANSPORT:
+                    var transportTrace = SplitTime.Trace.fromRaw(trace);
+                    var transportStringId = transportTrace.getLocationId();
+                    var transportIntId = nextFunctionId++;
+                    this._internalEventIdMap[transportIntId] = transportStringId;
+                    var transportColor = SplitTime.Trace.getEventColor(transportIntId);
+                    SplitTime.Trace.drawColor(trace.vertices, holderCtx, transportColor);
+                    break;
                 default:
                     SplitTime.Trace.draw(layerTraces[iLayerTrace].vertices, holderCtx, type);
             }
