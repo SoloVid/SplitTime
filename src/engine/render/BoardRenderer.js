@@ -133,7 +133,7 @@ SplitTime.BoardRenderer.countBodies = function() {
 dependsOn("BodyRenderer.js");
 var bodyRenderer = new SplitTime.BodyRenderer();
 
-SplitTime.BoardRenderer.SCREEN_LAZY_FACTOR = 0.4;
+SplitTime.BoardRenderer.SCREEN_LAZY_FACTOR = 0.2;
 
 function getScreenMoveSpeed(dx) {
     var MAX_STEP = 100;
