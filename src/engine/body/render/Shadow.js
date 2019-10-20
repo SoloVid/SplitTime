@@ -53,10 +53,8 @@ SplitTime.Body.Shadow.prototype.notifyFrameUpdate = function(delta) {
 };
 
 SplitTime.Body.Shadow.prototype.prepareForRender = function() {
-    this.shadowBody.put(null, this.realBody.x, this.realBody.y, this.realBody.z);
-    var mover = new SplitTime.Body.Mover(this.shadowBody);
-    mover.level = this.realBody.level;
-    var shadowFallInfo = mover.calculateDrop(mover.level.highestLayerZ + 1000);
+    this.shadowBody.put(this.realBody.level, this.realBody.x, this.realBody.y, this.realBody.z);
+    var shadowFallInfo = this.shadowBody.mover.calculateDrop(this.realBody.level.highestLayerZ + 1000);
     this.shadowBody.setZ(shadowFallInfo.zBlocked);
     this.radius = (this.maxRadius - this.minRadius) / (0.05 * shadowFallInfo.distanceAllowed + 1) + this.minRadius;
 };

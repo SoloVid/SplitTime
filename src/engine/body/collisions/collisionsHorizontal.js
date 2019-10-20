@@ -11,7 +11,7 @@ var ZILCH = 0.000001;
  */
 SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
     this.ensureInRegion();
-    var level = this.level;
+    var level = this.body.getLevel();
 
     var dy = -maxDistance * Math.sin(dir * (Math.PI / 2)); //Total y distance to travel
     if(Math.abs(dy) < ZILCH) {
@@ -132,7 +132,7 @@ SplitTime.Body.Mover.prototype.zeldaStep = function(dir, maxDistance) {
         this.zeldaSlide(maxDistance / 2);
     }
 
-    this.level.runEventSet(eventIdSet, this.body);
+    level.runEventSet(eventIdSet, this.body);
     this.transportLevelIfApplicable(levelIdSet);
 
     return SplitTime.Measurement.distanceTrue(oldX, oldY, this.body.getX(), this.body.getY());
@@ -147,8 +147,7 @@ function addArrayToSet(arr, set) {
 SplitTime.Body.Mover.prototype.tryPushOtherBodies = function(bodies, dir) {
     this.bodyExt.pushing = true;
     for(var i = 0; i < bodies.length; i++) {
-        var mover = new SplitTime.Body.Mover(bodies[i]);
-        mover.zeldaBump(1, dir);
+        bodies[i].mover.zeldaBump(1, dir);
     }
     this.bodyExt.pushing = false;
 };

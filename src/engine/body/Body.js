@@ -6,6 +6,7 @@ SplitTime.Body = function(skipInit) {
     if(!skipInit) {
         this.frameUpdateHandlers = new SLVD.RegisterCallbacks(["notifyFrameUpdate"]);
         this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
+        this.mover = new SplitTime.Body.Mover(this);
         // TODO: sort out (throw out) inheritance to make this work right
         this.speechBox = new SplitTime.Body.SpeechBox(this, -42);
     }
@@ -271,8 +272,7 @@ SplitTime.Body.prototype.notifyFrameUpdate = function(delta) {
     this.frameUpdateHandlers.run(delta);
     if(this.baseLength > ZILCH && Math.abs(this.zVelocity) > ZILCH) {
         var expectedDZ = this.zVelocity * delta;
-        var mover = new SplitTime.Body.Mover(this);
-        var actualDZ = mover.zeldaVerticalBump(expectedDZ);
+        var actualDZ = this.mover.zeldaVerticalBump(expectedDZ);
         if(Math.abs(actualDZ) <= ZILCH) {
             this.zVelocity = 0;
         }

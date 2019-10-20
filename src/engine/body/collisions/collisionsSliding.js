@@ -25,7 +25,7 @@ SplitTime.Body.Mover.prototype.zeldaSlide = function(maxDistance) {
     var negativeDiagonal = (Math.round(this.body.dir + 3.9) - 0.5) % 4;
 
     var me = this;
-    var levelTraces = this.level.getLevelTraces();
+    var levelTraces = this.body.getLevel().getLevelTraces();
     function isCornerOpen(direction, howFarAway) {
         var collisionInfo = new SplitTime.LevelTraces.CollisionInfo();
         var testX = x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway);

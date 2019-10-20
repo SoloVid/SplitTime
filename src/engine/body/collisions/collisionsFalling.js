@@ -14,7 +14,7 @@ SplitTime.Body.Mover.prototype.zeldaVerticalDrop = function(maxDZ) {
     this.bodyExt.previousGroundTraceY = collisionInfo.y;
     this.bodyExt.previousGroundTraceZ = collisionInfo.zBlocked;
     if(collisionInfo.x >= 0) {
-        this.level.runEvents(collisionInfo.events, this.body);
+        this.body.getLevel().runEvents(collisionInfo.events, this.body);
     }
     
     //If we have entered a new level by falling into it
@@ -128,7 +128,7 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
         collisionInfo.zBlocked = 0;
     }
 
-    var levelTraces = this.level.getLevelTraces();
+    var levelTraces = this.body.getLevel().getLevelTraces();
     var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
     //Loop through Y width of base
     for(var testY = startY; testY < startY + yPixels; testY++) {
@@ -218,7 +218,7 @@ SplitTime.Body.Mover.prototype.calculateDropThroughBodies = function(x, y, z, ma
             collisionInfo.zBlocked = zBlocked;
         }
     }
-    this.level.getCellGrid().forEachBody(startX, startY, targetZ, startX + xPixels, startY + yPixels, z, handleFoundBody);
+    this.body.getLevel().getCellGrid().forEachBody(startX, startY, targetZ, startX + xPixels, startY + yPixels, z, handleFoundBody);
 
     return collisionInfo;
 };

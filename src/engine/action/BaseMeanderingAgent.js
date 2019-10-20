@@ -11,8 +11,7 @@ SplitTime.Agent.BaseMeandering.prototype.regularMotion = function(person, newSte
 	if(this.pixels > 0) {
 		person.requestStance("walk");
 		var pixelsThisFrame = person.getPixelSpeedForFrame();
-		var mover = new SplitTime.Body.Mover(person);
-		mover.zeldaStep(person.dir, pixelsThisFrame);
+		person.mover.zeldaStep(person.dir, pixelsThisFrame);
 		this.pixels -= pixelsThisFrame;
 		if(this.pixels <= 0) {
 			this.counter = person.getLevel().getRegion().getTimeStabilizer(1000 + SLVD.randomInt(1000));

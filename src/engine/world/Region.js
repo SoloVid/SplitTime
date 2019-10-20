@@ -1,7 +1,9 @@
 SplitTime.Region = function() {
+    /**
+     * @type {SplitTime.Level[]}
+     */
     this.levels = [];
     this.time = new SplitTime.Time();
-    this.mainTimeStabilizer = this.getTimeStabilizer();
 };
 
 SplitTime.Region.prototype.getTime = function() {

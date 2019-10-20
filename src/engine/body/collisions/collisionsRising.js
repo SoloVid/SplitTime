@@ -12,13 +12,12 @@ SplitTime.Body.Mover.prototype.zeldaVerticalRise = function(maxDZ) {
 
     this.body.setZ(collisionInfo.zEnd);
     if(collisionInfo.x >= 0) {
-        this.level.runEvents(collisionInfo.events, this.body);
+        this.body.getLevel().runEvents(collisionInfo.events, this.body);
     }
     if(collisionInfo.body && collisionInfo.distanceAllowed < maxDZ) {
-        var mover = new SplitTime.Body.Mover(collisionInfo.body);
         var howMuchUnmoved = maxDZ - collisionInfo.distanceAllowed;
         var howFarToPushOther = Math.min(howMuchUnmoved, 1);
-        mover.zeldaVerticalRise(howFarToPushOther);
+        collisionInfo.body.mover.zeldaVerticalRise(howFarToPushOther);
         var howMuchMoreICanMove = howMuchUnmoved - howFarToPushOther * 2;
         if(howMuchMoreICanMove > 0) {
             return this.zeldaVerticalRise(howMuchMoreICanMove);
@@ -125,7 +124,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
     var startY = y - this.halfBaseLength;
     var yPixels = this.baseLength;
 
-    var levelTraces = this.level.getLevelTraces();
+    var levelTraces = this.body.getLevel().getLevelTraces();
     var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
     //Loop through width of base
     for(var testY = startY; testY < startY + yPixels; testY++) {
@@ -209,7 +208,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughBodies = function(x, y, z, ma
             collisionInfo.zBlocked = zBlocked;
         }
     }
-    this.level.getCellGrid().forEachBody(startX, startY, top, startX + xPixels, startY + yPixels, targetTop, handleFoundBody);
+    this.body.getLevel().getCellGrid().forEachBody(startX, startY, top, startX + xPixels, startY + yPixels, targetTop, handleFoundBody);
 
     collisionInfo.zEnd = collisionInfo.zBlocked - this.height;
 
