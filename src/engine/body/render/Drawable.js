@@ -3,6 +3,7 @@ dependsOn("../Body.js");
 /**
  * @interface
  * @extends FrameNotified
+ * @extends TimeNotified
  * @constructor
  */
 SplitTime.Body.Drawable = function() {

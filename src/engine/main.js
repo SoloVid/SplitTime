@@ -19,11 +19,19 @@ SplitTime.main = function() {
                 break;
             }
             case SplitTime.main.State.ACTION: {
+                var secondsForFrame = 1/SplitTime.FPS;
+
+                var timeline = SplitTime.Timeline.getCurrent();
+                timeline.notifyFrameUpdate(secondsForFrame);
+
+                SplitTime.performanceCheckpoint("timeline frame update");
+
                 var region = SplitTime.Region.getCurrent();
-                region.notifyFrameUpdate(1/SplitTime.FPS);
+                region.notifyFrameUpdate(secondsForFrame);
+
                 SplitTime.performanceCheckpoint("region frame update");
 
-                SplitTime.BoardRenderer.notifyFrameUpdate(1/SplitTime.FPS);
+                SplitTime.BoardRenderer.notifyFrameUpdate(secondsForFrame);
                 SplitTime.BoardRenderer.renderBoardState(true);
                 SplitTime.performanceCheckpoint("SplitTime.BoardRenderer.renderBoardState");
 
@@ -85,6 +93,6 @@ SplitTime.main.State = {
 function FrameNotified() {}
 
 /**
- * @param delta number of seconds passed (in game time) since last frame
+ * @param delta number of seconds passed (in real time) since last frame
  */
 FrameNotified.prototype.notifyFrameUpdate = function(delta) {};

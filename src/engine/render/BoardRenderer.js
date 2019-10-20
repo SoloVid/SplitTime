@@ -268,7 +268,7 @@ SplitTime.BoardRenderer.renderBoardState = function(forceCalculate) {
     // SplitTime.see.font="12px Verdana";
     // SplitTime.see.fillText(SplitTime.player[SplitTime.currentPlayer].name + ": " + SplitTime.player[SplitTime.currentPlayer].hp + " HP | " + SplitTime.player[SplitTime.currentPlayer].strg + " Strength | " + SplitTime.player[SplitTime.currentPlayer].spd + " Agility", 10, 20);
     //
-    // SplitTime.Time.renderClock(SplitTime.see); //in time.js
+    // SplitTime.Timeline.renderClock(SplitTime.see); //in time.js
 
     //Save screen into snapshot
     SplitTime.see.drawImage(buffer, 0, 0);

@@ -200,6 +200,10 @@ SplitTime.ParticleEmitter.prototype.draw = function(ctx) {
 };
 
 SplitTime.ParticleEmitter.prototype.notifyFrameUpdate = function(delta) {
+    // Do nothing
+};
+
+SplitTime.ParticleEmitter.prototype.notifyTimeAdvance = function(delta) {
     this.advanceTime(delta * 1000);
 };
 

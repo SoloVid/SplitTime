@@ -214,6 +214,10 @@ SplitTime.Sprite.prototype.resetStance = function() {
 };
 
 SplitTime.Sprite.prototype.notifyFrameUpdate = function(delta) {
+    // Don't care about real time
+};
+
+SplitTime.Sprite.prototype.notifyTimeAdvance = function(delta) {
     this._timeMs += delta * 1000;
 };
 

@@ -229,6 +229,12 @@ SplitTime.Level.prototype.notifyFrameUpdate = function(delta) {
     });
 };
 
+SplitTime.Level.prototype.notifyTimeAdvance = function(delta) {
+    this.forEachBody(function(body) {
+        body.notifyTimeAdvance(delta);
+    });
+};
+
 SplitTime.Level.prototype.notifyBodyMoved = function(body) {
     if(this._cellGrid) {
         this._cellGrid.resort(body);

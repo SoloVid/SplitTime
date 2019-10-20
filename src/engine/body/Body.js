@@ -5,6 +5,7 @@ SplitTime.Body = function(skipInit) {
     this.ref = nextRef++;
     if(!skipInit) {
         this.frameUpdateHandlers = new SLVD.RegisterCallbacks(["notifyFrameUpdate"]);
+        this.timeAdvanceListeners = new SLVD.RegisterCallbacks(["notifyTimeAdvance"]);
         this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
         this.mover = new SplitTime.Body.Mover(this);
         // TODO: sort out (throw out) inheritance to make this work right
@@ -265,21 +266,38 @@ SplitTime.Body.prototype.getRegion = function() {
 };
 
 SplitTime.Body.prototype.notifyFrameUpdate = function(delta) {
-    var ZILCH = 0.00001;
-    if(this.baseLength > ZILCH) {
-        this.zVelocity += this.GRAVITY * delta;
-    }
     this.frameUpdateHandlers.run(delta);
-    if(this.baseLength > ZILCH && Math.abs(this.zVelocity) > ZILCH) {
-        var expectedDZ = this.zVelocity * delta;
-        var actualDZ = this.mover.zeldaVerticalBump(expectedDZ);
-        if(Math.abs(actualDZ) <= ZILCH) {
-            this.zVelocity = 0;
-        }
-    }
     try {
         if(this.drawable) {
             this.drawable.notifyFrameUpdate(delta);
+        }
+    } catch(e) {
+        SplitTime.Logger.error(e);
+    }
+};
+
+SplitTime.Body.prototype.notifyTimeAdvance = function(delta) {
+    this.timeAdvanceListeners.run(delta);
+
+    var level = this.getLevel();
+    var region = level ? level.getRegion() : null;
+    if(region === SplitTime.Region.getCurrent()) {
+        var ZILCH = 0.00001;
+        if(this.baseLength > ZILCH) {
+            this.zVelocity += this.GRAVITY * delta;
+        }
+        if(this.baseLength > ZILCH && Math.abs(this.zVelocity) > ZILCH) {
+            var expectedDZ = this.zVelocity * delta;
+            var actualDZ = this.mover.zeldaVerticalBump(expectedDZ);
+            if(Math.abs(actualDZ) <= ZILCH) {
+                this.zVelocity = 0;
+            }
+        }
+    }
+
+    try {
+        if(this.drawable) {
+            this.drawable.notifyTimeAdvance(delta);
         }
     } catch(e) {
         SplitTime.Logger.error(e);
@@ -296,6 +314,13 @@ SplitTime.Body.prototype.notifyPlayerInteract = function() {
  */
 SplitTime.Body.prototype.registerFrameUpdateHandler = function(handler) {
     this.frameUpdateHandlers.register(handler);
+};
+
+/**
+ * @param {function(number)} listener
+ */
+SplitTime.Body.prototype.registerTimeAdvanceListener = function(listener) {
+    this.timeAdvanceListeners.register(listener);
 };
 
 //Function run on ENTER or SPACE

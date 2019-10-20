@@ -1,16 +1,24 @@
-SplitTime.Region = function() {
+SplitTime.Region = function(id) {
+    this.id = id;
     /**
      * @type {SplitTime.Level[]}
      */
     this.levels = [];
-    this.time = new SplitTime.Time();
+    this._timeline = SplitTime.Timeline.getDefault();
+    this._timeline.addRegion(this);
 };
 
-SplitTime.Region.prototype.getTime = function() {
-    return this.time;
+SplitTime.Region.prototype.getTimeline = function() {
+    return this._timeline;
 };
 SplitTime.Region.prototype.getTimeMs = function() {
-    return this.time.getTimeMs();
+    return this._timeline.getTimeMs();
+};
+
+SplitTime.Region.prototype.setTimeline = function(timeline) {
+    this._timeline.removeRegion(this);
+    this._timeline = timeline;
+    this._timeline.addRegion(this);
 };
 
 /**
@@ -58,10 +66,14 @@ SplitTime.Region.getDefault = function() {
 };
 
 SplitTime.Region.prototype.notifyFrameUpdate = function(delta) {
-    this.time.advance(delta);
-
     for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
         this.levels[iLevel].notifyFrameUpdate(delta);
+    }
+};
+
+SplitTime.Region.prototype.notifyTimeAdvance = function(delta) {
+    for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
+        this.levels[iLevel].notifyTimeAdvance(delta);
     }
 };
 

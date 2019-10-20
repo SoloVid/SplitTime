@@ -52,6 +52,10 @@ SplitTime.Body.Shadow.prototype.notifyFrameUpdate = function(delta) {
     // Do nothing
 };
 
+SplitTime.Body.Shadow.prototype.notifyTimeAdvance = function(delta) {
+    // Do nothing
+};
+
 SplitTime.Body.Shadow.prototype.prepareForRender = function() {
     this.shadowBody.put(this.realBody.level, this.realBody.x, this.realBody.y, this.realBody.z);
     var shadowFallInfo = this.shadowBody.mover.calculateDrop(this.realBody.level.highestLayerZ + 1000);

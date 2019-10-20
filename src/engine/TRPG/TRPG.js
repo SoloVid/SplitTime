@@ -134,7 +134,7 @@ SplitTime.TRPGNextTurn = function() //Function run at the end of a character's t
 
 		if(SplitTime.cTeam == SplitTime.player)
 		{
-			SplitTime.Time.advance(12*60*60); //in time.js
+			SplitTime.Timeline.advance(12*60*60); //in time.js
 		}
 	}
 	else
