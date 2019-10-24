@@ -5,8 +5,13 @@ SplitTime.Audio = {};
 var AUDIO_ROOT = SLVD.getScriptDirectory() + "audio/";
 var MUSIC_DIR = "music/";
 var SOUND_EFFECT_DIR = "soundeffects/";
-var registeredSounds = {};
-var activeSounds = {};
+var FADE_DURATION_MS = 2000;
+
+var registeredPaths = {};
+var loadedSounds = {};
+var loadedIDs = {};
+var loopSetting = {};
+var fadeSetting = {};
 
 // TODO: expose this volume
 var globalVolume = 1;
@@ -15,80 +20,101 @@ var globalVolume = 1;
 SplitTime.Audio.registerMusic = function(relativePath, loop) {
     //loop parameter defaults to true
     loop = typeof loop !== 'undefined' ?  loop : true;
-    registerAudio(MUSIC_DIR + relativePath, relativePath, loop);
+    registerAudio(MUSIC_DIR + relativePath, relativePath, loop, true);
 };
 
 SplitTime.Audio.registerSoundEffect = function(relativePath, loop) {
     //loop parameter defaults to true
     loop = typeof loop !== 'undefined' ?  loop : false;
-    registerAudio(SOUND_EFFECT_DIR + relativePath, relativePath, loop);
+    registerAudio(SOUND_EFFECT_DIR + relativePath, relativePath, loop, false);
 };
 
-function registerAudio(relativePath, handle, loopAudio) {
-    //Set up the audio file to be used with howler.js API
-    var sound = new Howl({
-        src: [AUDIO_ROOT + relativePath],
-        loop: loopAudio,
-        autoplay: false,
-        volume: globalVolume
-    });   
-    registeredSounds[handle] = sound;
+function registerAudio(relativePath, handle, loopAudio, fadeAudio) {
+    registeredPaths[handle] = AUDIO_ROOT + relativePath;
+    loopSetting[handle] = loopAudio;
+    fadeSetting[handle] = fadeAudio;
 }
 
 /**
   * @desc plays specified audio
   * @param string handle - the name of the audio file to be played (e.g. "dirge.mp3")
-  * @param bool loopOverride - Specify true or false to override the default setting for this audio.
-  *                    Defaults to the loop value that was set when registered.
+  * @param bool loop - specify true/false to override default loop setting for this audio
+  * @param bool fade - specify true/false to override default fade setting for this audio
   * @param bool restartIfPlaying - Defaults to false.  Set to true if the audio should start over
   *                                if it's currently playing (this is for looping sounds, such as music)
   */
-SplitTime.Audio.play = function(handle, loopOverride, restartIfPlaying) {
-    var sound = registeredSounds[handle];
-    //Set volume to current SplitTime.volume
-    sound.volume = globalVolume;
+SplitTime.Audio.play = function(handle, loop, fade, restartIfPlaying) {
+    var sound = loadedSounds[handle];
+    var soundID = loadedIDs[handle];
+    var currentVolume;
     
-    //If loop parameter is set, override this sound's loop setting
-    if (typeof loopOverride !== 'undefined'){
-        sound.loop(loopOverride);
-    }
+    //If not set, these settings will be set to the default for this audio file.
+    loop = typeof loop !== 'undefined' ?  loop : loopSetting[handle];
+    fade = typeof fade !== 'undefined' ?  fade : fadeSetting[handle];
     
-    if(restartIfPlaying) {
-        sound.currentTime = 0;
+    //TODO: implement fade option
+    
+    if(typeof sound !== 'undefined'){
+        if(restartIfPlaying) {
+            sound.currentTime = 0;
+        }        
+        sound.play(soundID);
+        currentVolume = sound.volume();
+        sound.fade(currentVolume, 1, FADE_DURATION_MS);
+    } else {
+        //Set up the audio file to be used with howler.js API 
+        //(howler.js documentation: https://github.com/goldfire/howler.js#documentation)
+
+        sound = new Howl({
+            src: registeredPaths[handle],
+            autoplay: false,
+            volume: 0,
+            loop: loop,
+            onload: function(){
+                sound.fade(0, 1, FADE_DURATION_MS);
+            },
+            onfade: function(){
+                currentVolume = sound.volume();
+                if(currentVolume == 0){
+                    if(sound.isPausing) {
+                        sound.pause();
+                        sound.isPausing = false;
+                    } else {
+                        sound.stop();
+                    }
+                } 
+            }
+        });
+        
+        soundID = sound.play();
+        loadedSounds[handle] = sound;
+        loadedIDs[handle] = soundID;
     }
-    var soundID = sound.play();
-    activeSounds[soundID] = sound;
 };
 
 //Pause current SplitTime.audio
 SplitTime.Audio.pause = function() {
-    for(var soundID in activeSounds) {
-        var sound = activeSounds[soundID];
+    for(var handle in loadedSounds) {
+        var sound = loadedSounds[handle];
         if(sound.playing()){
-            sound.pause();
-        } else {
-            //TODO: Remove any inactive sounds that have finished and aren't looping
+            var currentVolume = sound.volume();
+            sound.fade(currentVolume, 0, FADE_DURATION_MS);
+            //this will make it so that the audio will pause (rather than stopping)
+            //after the onfade event is triggered (after the fading is finished)
+            sound.isPausing = true;
         }
-    }
-};
-
-//Resume current SplitTime.audio
-SplitTime.Audio.resume = function() {
-    //TODO: this needs to be tested before it gets called from somewhere.
-    for(var soundID in activeSounds) {
-        var sound = activeSounds[soundID];
-        sound.play(soundID);
     }
 };
 
 //Stop current SplitTime.audio
 SplitTime.Audio.stop = function() {
-    for(var soundID in activeSounds) {
-        var sound = activeSounds[soundID];
-        sound.stop();
+    for(var handle in loadedSounds) {
+        var sound = loadedSounds[handle];
+        if(sound.playing()){
+            var currentVolume = sound.volume();
+            sound.fade(currentVolume, 0, FADE_DURATION_MS);
+        } 
     }
-    //Remove all sounds from activeSounds
-    activeSounds = [];
 };
 
 
