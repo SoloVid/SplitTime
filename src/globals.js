@@ -22,7 +22,7 @@ SplitTime.Teams = {};
 SplitTime.process = "hold"; //Input of master setInterval switch-case
 
 SplitTime.SCREENX = 640;
-SplitTime.SCREENY = 480;
+SplitTime.SCREENY = 360;
 
 SplitTime.FPS = 60;
 SplitTime.msPerFrame = (1/SplitTime.FPS)*1000;

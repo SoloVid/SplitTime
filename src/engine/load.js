@@ -75,10 +75,9 @@ SplitTime.launch.createCanvases = function(width, height, parentId) {
 	SplitTime.seeB = document.createElement("canvas");
 	SplitTime.seeB.innerHTML = "Your browser does not support the canvas element this engine relies on. Please get a more modern browser to use this.";
 	SplitTime.seeB.setAttribute("id", "game-window");
-	SplitTime.seeB.setAttribute("class", "center");
-	SplitTime.seeB.setAttribute("width", SplitTime.SCREENX);
-	SplitTime.seeB.setAttribute("height", SplitTime.SCREENY);
-	SplitTime.seeB.setAttribute("style", "display: block; margin: auto; border:1px solid #d3d3d3;");
+	SplitTime.seeB.setAttribute("width", width);
+	SplitTime.seeB.setAttribute("height", height);
+	SplitTime.seeB.setAttribute("style", "display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);");
 	parent.appendChild(SplitTime.seeB);
 	SplitTime.see = SplitTime.seeB.getContext("2d");
 
