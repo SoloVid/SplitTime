@@ -386,7 +386,7 @@ var vueApp = new Vue({
             },
             {
                 type: SplitTime.Trace.Type.TRANSPORT,
-                color: "rgba(200, 20, 50, .8)",
+                color: "rgba(200, 100, 10, .8)",
                 help: "Link to another level regardless of what's on the other side. Note: You'll want to use opposite values for pairs of these traces, but be careful not to overlap the traces and leave enough room for the maximum expected base between."
             }
         ]

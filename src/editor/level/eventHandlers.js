@@ -1,4 +1,5 @@
 var levelObject = {
+    fileName: "",
     type: "",
     region: "",
     layers: [],
@@ -118,6 +119,7 @@ $(document).ready(function() {
                 console.log(contents);
 
                 importLevel(contents);
+                levelObject.fileName = f.name;
 
                 $("#editorTools").show();
 			};

@@ -84,7 +84,7 @@ function imgSrc(fileName) {
 
 function safeGetColor(trace) {
     if(trace.isHighlighted) {
-        return "rgba(255, 255, 0, 1)";
+        return "rgba(255, 255, 0, 0.8)";
     }
     for(var i = 0; i < vueApp.traceOptions.length; i++) {
     	if(vueApp.traceOptions[i].type === trace.type) {
@@ -159,7 +159,10 @@ function clickFileChooser() {
 function downloadFile() {
 	var jsonText = exportLevel();
 
-	var filename = prompt("File name?");
+	var filename = prompt("File name?", levelObject.fileName);
+	if(filename === null) {
+		return;
+	}
 	if(!filename.endsWith(".json")) {
 		filename += ".json";
 	}
