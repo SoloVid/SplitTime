@@ -20,10 +20,6 @@ function BodyExt() {
 SplitTime.Body.Mover = function(body) {
     this.body = body;
     this.bodyExt = new BodyExt();
-
-    this.baseLength = this.body.baseLength;
-    this.halfBaseLength = Math.round(this.baseLength / 2);
-    this.height = this.body.height;
 };
 
 SplitTime.Body.Mover.VERTICAL_FUDGE = 4;

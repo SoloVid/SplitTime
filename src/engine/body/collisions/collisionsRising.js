@@ -50,7 +50,7 @@ SplitTime.Body.Mover.prototype.calculateRise = function(maxDZ) {
     var roundX = Math.floor(this.body.getX());
     var roundY = Math.floor(this.body.getY());
     var z = this.body.getZ();
-    var top = z + this.height;
+    var top = z + this.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
     var collisionInfo = {
@@ -106,7 +106,7 @@ SplitTime.Body.Mover.prototype.calculateRise = function(maxDZ) {
  * @returns {{x: int, y: int, distanceAllowed: number, zBlocked: number, zEnd: number, events: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, maxDZ) {
-    var top = z + this.height;
+    var top = z + this.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
     var collisionInfo = {
@@ -119,10 +119,10 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
         otherLevels: []
     };
 
-    var startX = x - this.halfBaseLength;
-    var xPixels = this.baseLength;
-    var startY = y - this.halfBaseLength;
-    var yPixels = this.baseLength;
+    var startX = x - this.body.halfBaseLength;
+    var xPixels = this.body.baseLength;
+    var startY = y - this.body.halfBaseLength;
+    var yPixels = this.body.baseLength;
 
     var levelTraces = this.body.getLevel().getLevelTraces();
     var originCollisionInfo = new SplitTime.LevelTraces.CollisionInfo();
@@ -172,7 +172,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
     if(collisionInfo.zBlocked < top){
         collisionInfo.zBlocked = top;
     }
-    collisionInfo.zEnd = collisionInfo.zBlocked - this.height;
+    collisionInfo.zEnd = collisionInfo.zBlocked - this.body.height;
 
     return collisionInfo;
 };
@@ -185,7 +185,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
  * @returns {{body: SplitTime.Body|null, distanceAllowed: number, zBlocked: number, zEnd: number}}
  */
 SplitTime.Body.Mover.prototype.calculateRiseThroughBodies = function(x, y, z, maxDZ) {
-    var top = z + this.height;
+    var top = z + this.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
     var collisionInfo = {
@@ -195,10 +195,10 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughBodies = function(x, y, z, ma
         zEnd: targetZ
     };
 
-    var startX = x - this.halfBaseLength;
-    var xPixels = this.baseLength;
-    var startY = y - this.halfBaseLength;
-    var yPixels = this.baseLength;
+    var startX = x - this.body.halfBaseLength;
+    var xPixels = this.body.baseLength;
+    var startY = y - this.body.halfBaseLength;
+    var yPixels = this.body.baseLength;
 
     function handleFoundBody(otherBody) {
         var zBlocked = otherBody.getZ();
@@ -210,7 +210,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughBodies = function(x, y, z, ma
     }
     this.body.getLevel().getCellGrid().forEachBody(startX, startY, top, startX + xPixels, startY + yPixels, targetTop, handleFoundBody);
 
-    collisionInfo.zEnd = collisionInfo.zBlocked - this.height;
+    collisionInfo.zEnd = collisionInfo.zBlocked - this.body.height;
 
     return collisionInfo;
 };

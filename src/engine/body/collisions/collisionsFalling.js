@@ -114,10 +114,10 @@ SplitTime.Body.Mover.prototype.calculateDropThroughTraces = function(x, y, z, ma
         otherLevels: []
     };
 
-    var startX = x - this.halfBaseLength;
-    var xPixels = this.baseLength;
-    var startY = y - this.halfBaseLength;
-    var yPixels = this.baseLength;
+    var startX = x - this.body.halfBaseLength;
+    var xPixels = this.body.baseLength;
+    var startY = y - this.body.halfBaseLength;
+    var yPixels = this.body.baseLength;
 
     if(z <= 0) {
         collisionInfo.distanceAllowed = 0;
@@ -196,10 +196,10 @@ SplitTime.Body.Mover.prototype.calculateDropThroughBodies = function(x, y, z, ma
         zBlocked: targetZ
     };
 
-    var startX = x - this.halfBaseLength;
-    var xPixels = this.baseLength;
-    var startY = y - this.halfBaseLength;
-    var yPixels = this.baseLength;
+    var startX = x - this.body.halfBaseLength;
+    var xPixels = this.body.baseLength;
+    var startY = y - this.body.halfBaseLength;
+    var yPixels = this.body.baseLength;
 
     if(z <= 0) {
         collisionInfo.distanceAllowed = 0;
@@ -234,10 +234,10 @@ SplitTime.Body.Mover.prototype.isPreviousGroundTraceRelevant = function() {
     if(this.bodyExt.previousGroundTraceX >= 0) {
         var roundX = Math.floor(this.body.getX());
         var roundY = Math.floor(this.body.getY());
-        var startX = roundX - this.halfBaseLength;
-        var xPixels = this.baseLength;
-        var startY = roundY - this.halfBaseLength;
-        var yPixels = this.baseLength;
+        var startX = roundX - this.body.halfBaseLength;
+        var xPixels = this.body.baseLength;
+        var startY = roundY - this.body.halfBaseLength;
+        var yPixels = this.body.baseLength;
         return this.body.z === this.bodyExt.previousGroundTraceZ &&
             startX <= this.bodyExt.previousGroundTraceX &&
             this.bodyExt.previousGroundTraceX < startX + xPixels &&

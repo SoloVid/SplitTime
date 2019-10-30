@@ -41,7 +41,7 @@ SplitTime.Body.prototype = {
         this.setLevel(newLevel, true);
     },
     get halfBaseLength() {
-        return Math.round(this.baseLength);
+        return Math.round(this.baseLength / 2);
     }
 };
 

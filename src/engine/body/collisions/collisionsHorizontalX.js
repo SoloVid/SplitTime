@@ -47,7 +47,7 @@ SplitTime.Body.Mover.prototype.calculateXPixelCollisionWithStepUp = function(x, 
  * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[], otherLevels: string[]}}
  */
 SplitTime.Body.Mover.prototype.calculateXPixelCollision = function(level, x, y, z, dx) {
-    var edgeX = dx > 0 ? x + dx + this.halfBaseLength : x + dx - this.halfBaseLength;
-    var top = y - this.halfBaseLength;
-    return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(level, edgeX, 1, top, this.baseLength, Math.round(z), Math.round(this.height));
+    var edgeX = dx > 0 ? x + dx + this.body.halfBaseLength : x + dx - this.body.halfBaseLength;
+    var top = y - this.body.halfBaseLength;
+    return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(level, edgeX, 1, top, this.body.baseLength, Math.round(z), Math.round(this.body.height));
 };
