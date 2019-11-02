@@ -133,7 +133,7 @@ SplitTime.Body.Mover.prototype.calculateRiseThroughTraces = function(x, y, z, ma
         for(var testX = startX; testX < startX + xPixels; testX++) {
             levelTraces.calculatePixelColumnCollisionInfo(originCollisionInfo, testX, testY, top, targetTop);
             
-            //If we have entered a new level by falling into it
+            //If we have entered a new level
             if(Object.keys(originCollisionInfo.pointerTraces).length > 0) {
                 //Make sure that the pointer trace will get handled properly
                 var count = 0;
