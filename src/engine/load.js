@@ -21,8 +21,10 @@ SplitTime.launch = function(width, height, parentId, additionalCanvasClass) {
 
 	SLVD.randomSeed();
 
-	SplitTime.launch.createCanvases(width, height, parentId);
-    SplitTime.Debug.attachDebug(parentId);
+	SplitTime.launch.createCanvases(width, height, parent, additionalCanvasClass);
+	if(SplitTime.Debug.ENABLED) {
+        SplitTime.Debug.attachDebug(parent);
+    }
 
 	document.onkeydown = SplitTime.Keyboard.onKeyDown;
 	document.onkeyup = SplitTime.Keyboard.onKeyUp;

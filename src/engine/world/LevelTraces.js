@@ -137,7 +137,7 @@ SplitTime.LevelTraces.prototype.initCanvasData = function() {
     var holderCtx = holderCanvas.getContext("2d");
 
     var debugTraceCtx;
-    if(SplitTime.Debug.DRAW_TRACES) {
+    if(SplitTime.Debug.ENABLED) {
         this.debugTraceCanvas = document.createElement("canvas");
         this.debugTraceCanvas.width = this.level.width;
         this.debugTraceCanvas.height = this.level.height;
@@ -210,7 +210,7 @@ SplitTime.LevelTraces.prototype.initCanvasData = function() {
 
         this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, holderCanvas.width, holderCanvas.height);
 
-        if(SplitTime.Debug.DRAW_TRACES) {
+        if(SplitTime.Debug.ENABLED) {
             debugTraceCtx.drawImage(holderCanvas, 0, -layerZ);
         }
     }

@@ -70,14 +70,16 @@ SplitTime.main = function() {
         SplitTime.see.fillStyle="#FF0000";
     }
 
-    SplitTime.Debug.update({
-        "FPS": displayFPS,
-        "Board Bodies": SplitTime.BoardRenderer.countBodies(),
-        "Focus point": Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z),
-        "Agents": agentCount,
-        "HUD Layers": SplitTime.HUD.getRendererCount(),
-        "Joystick Direction": SplitTime.Controls.JoyStick.getDirection()
-    });
+    if(SplitTime.Debug.ENABLED) {
+        SplitTime.Debug.setDebugValue("FPS", displayFPS);
+        SplitTime.Debug.setDebugValue("Board Bodies", SplitTime.BoardRenderer.countBodies());
+        SplitTime.Debug.setDebugValue("Focus point", Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z));
+        SplitTime.Debug.setDebugValue("Agents", agentCount);
+        SplitTime.Debug.setDebugValue("HUD Layers", SplitTime.HUD.getRendererCount());
+        SplitTime.Debug.setDebugValue("Joystick Direction", SplitTime.Controls.JoyStick.getDirection());
+
+        SplitTime.Debug.renderCanvas(SplitTime.see);
+    }
 };
 
 SplitTime.main.State = {

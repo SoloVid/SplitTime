@@ -1,42 +1,85 @@
 dependsOn("/time/FrameStabilizer.js");
 
 SplitTime.Debug = {
-    ENABLED: true,
+    ENABLED: true, // Master switch
     DRAW_TRACES: true
 };
 
 var debugDiv = null;
-var debugInfo;
+var debugInfo = {};
 
-SplitTime.Debug.attachDebug = function(parentId) {
-    var parent = document.body;
-    if(parentId) {
-        parent = document.getElementById(parentId);
-    }
-
+SplitTime.Debug.attachDebug = function(parent) {
     debugDiv = document.createElement("div");
     parent.appendChild(debugDiv);
 };
 
-var frameStabilizer = new SplitTime.FrameStabilizer(100);
+var DEBOUNCE = 100;
+var LIFE = 2000;
+var frameStabilizer = new SplitTime.FrameStabilizer(DEBOUNCE);
 
-SplitTime.Debug.update = function(info) {
-    debugInfo = info;
+SplitTime.Debug.setDebugValue = function(key, value) {
+    if(!SplitTime.Debug.ENABLED) {
+        return;
+    }
+
+    if(!debugInfo[key]) {
+        debugInfo[key] = new DebugValue(key);
+    }
+    debugInfo[key].value = value;
+    debugInfo[key].timeUpdated = new Date();
+};
+
+SplitTime.Debug.update = function() {
+    var keys = [];
+    for(var key in debugInfo) {
+        keys.push(key);
+    }
+    for(var i = 0; i < keys.length; i++) {
+        var debugValue = debugInfo[key];
+        if(new Date() - debugValue.timeUpdated > LIFE) {
+            delete debugInfo[key];
+        }
+    }
+};
+
+SplitTime.Debug.renderHTML = function() {
     if(debugDiv === null || !frameStabilizer.isSignaling()) {
         return;
     }
 
     var table = "<table border='1'>";
     table += "<tr>";
-    for(var key in info) {
+    for(var key in debugInfo) {
         table += "<th>" + key + "</th>";
     }
     table += "</tr><tr>";
-    for(key in info) {
-        table += "<td>" + info[key] + "</td>";
+    for(key in debugInfo) {
+        table += "<td>" + debugInfo[key].value + "</td>";
     }
     table += "</tr>";
     table += "</table>";
 
     debugDiv.innerHTML = table;
 };
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ */
+SplitTime.Debug.renderCanvas = function(ctx) {
+    var FONT_SIZE = 16;
+    var SPACING = 5;
+    ctx.font = FONT_SIZE + "px Arial";
+    ctx.fillStyle = "#FFFFFF";
+    var y = 2 * SPACING + FONT_SIZE / 2;
+    for(var key in debugInfo) {
+        var line = key + ": " + debugInfo[key].value;
+        ctx.fillText(line, SPACING, y);
+        y += FONT_SIZE + SPACING;
+    }
+};
+
+function DebugValue(key) {
+    this.key = key;
+    this.value = null;
+    this.timeUpdated = 0;
+}
