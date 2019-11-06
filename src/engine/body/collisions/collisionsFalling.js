@@ -58,9 +58,17 @@ SplitTime.Body.Mover.prototype.calculateDrop = function(maxDZ) {
         collisionInfo.body = groundBody;
         return collisionInfo;
     }
-    if(this.body.z <= 0 || this.isPreviousGroundTraceRelevant()) {
+    if(this.body.z <= 0) {
+        collisionInfo.x = roundX;
+        collisionInfo.y = roundY;
+        collisionInfo.distanceAllowed = 0;
+        collisionInfo.zBlocked = 0;
+        return collisionInfo;
+    }
+    if(this.isPreviousGroundTraceRelevant()) {
         collisionInfo.x = this.bodyExt.previousGroundTraceX;
         collisionInfo.y = this.bodyExt.previousGroundTraceY;
+        collisionInfo.distanceAllowed = 0;
         collisionInfo.zBlocked = this.bodyExt.previousGroundTraceZ;
         return collisionInfo;
     }
