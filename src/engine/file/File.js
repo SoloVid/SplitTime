@@ -11,11 +11,11 @@ SplitTime.File = {};
     };
 
     SplitTime.File.onNew = function(callback) {
-        callbacks.registerCallback(callback);
+        callbacks.register(callback);
     };
 
     SplitTime.File.loadNew = function() {
-        callbacks.runCallbacks();
+        callbacks.run();
         return SLVD.Promise.as();
     };
 
