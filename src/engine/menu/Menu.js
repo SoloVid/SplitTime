@@ -1,11 +1,12 @@
+dependsOn("/player/Controls.js");
+
 SplitTime.showImage = function(file, duration, waitForEnterSpace) {
 	SplitTime.see.drawImage(file, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
 	return SplitTime.delay(duration).then(function() {
 		if(waitForEnterSpace) {
 			var formerProcess = SplitTime.process;
             SplitTime.process = SplitTime.main.State.OTHER;
-            // TODO: don't reach into game global land
-            return G.BUTTON.GUI_CONFIRMATION.waitForAfterUp().then(function() {
+            return SplitTime.Menu.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
             	SplitTime.process = formerProcess;
 			});
 		} else {
@@ -16,6 +17,12 @@ SplitTime.showImage = function(file, duration, waitForEnterSpace) {
 
 SplitTime.Menu = function() {
 	this.point = [];
+};
+
+// These buttons are intended to be wholesale replaced by game-specific settings
+SplitTime.Menu.Button = {
+    GUI_CONFIRMATION: new SplitTime.Controls.Button(),
+    GUI_CANCEL: new SplitTime.Controls.Button()
 };
 
 SplitTime.Menu.prototype.cursor = undefined;
@@ -33,8 +40,7 @@ SplitTime.Menu.prototype.runMenu = function() {
 
 	var promise = new SLVD.Promise();
 	var me = this;
-	// TODO: don't reach into game global land
-    G.BUTTON.GUI_CONFIRMATION.waitForAfterUp().then(function() {
+    SplitTime.Menu.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
 		isRunning = false;
 		SplitTime.HUD.removeRenderer(me);
 		promise.resolve(me.currentPoint);
