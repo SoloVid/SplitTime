@@ -20,9 +20,10 @@ SplitTime.Dialog.AdvanceMethod = {
 	INTERACTION: "INTERACTION",
     HYBRID: "HYBRID"
 };
+SplitTime.Dialog.AdvanceMethod.DEFAULT = SplitTime.Dialog.AdvanceMethod.HYBRID;
 var AdvanceMethod = SplitTime.Dialog.AdvanceMethod;
 
-SplitTime.Dialog.prototype._advanceMethod = SplitTime.Dialog.AdvanceMethod.HYBRID;
+SplitTime.Dialog.prototype._advanceMethod = null;
 /**
  *
  * @type {number}
@@ -42,6 +43,10 @@ SplitTime.Dialog.prototype.getLocation = function() {
 SplitTime.Dialog.prototype.setLocation = function(location) {
     this._location = location;
     this._refreshSignaler();
+};
+
+SplitTime.Dialog.prototype.getAdvanceMethod = function() {
+    return this._advanceMethod || AdvanceMethod.DEFAULT;
 };
 
 SplitTime.Dialog.prototype.setAdvanceMethod = function(advanceMethod, delay) {
@@ -86,7 +91,7 @@ SplitTime.Dialog.prototype.registerDialogEndHandler = function(handler) {
 SplitTime.Dialog.prototype.onPlayerInteract = function() {
 	if(this._playerInteractHandler) {
 		this._playerInteractHandler.onPlayerInteract(this);
-	} else if(this._advanceMethod === AdvanceMethod.INTERACTION || this._advanceMethod === AdvanceMethod.HYBRID) {
+	} else if(this.getAdvanceMethod() === AdvanceMethod.INTERACTION || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
 		this.advance();
 	}
 };
@@ -117,7 +122,7 @@ SplitTime.Dialog.prototype.advance = function() {
 SplitTime.Dialog.prototype.step = function() {
     if(this._charactersDisplayed < this._getCurrentLineLength()) {
         this._charactersDisplayed++;
-    } else if(this._advanceMethod === AdvanceMethod.AUTO || this._advanceMethod === AdvanceMethod.HYBRID) {
+    } else if(this.getAdvanceMethod() === AdvanceMethod.AUTO || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
         if(!this._startDelay) {
             this._startDelay = this._getTimeMs();
         } else if(this._getTimeMs() > this._startDelay + this._delay) {
@@ -134,9 +139,9 @@ SplitTime.Dialog.prototype.close = function() {
          } else if(typeof this._dialogEndHandler.onDialogEnd === "function") {
              this._dialogEndHandler.onDialogEnd(this);
          } else {
-             console.error("Invalid dialog end handler: ", this._dialogEndHandler);
+             SplitTime.Logger.error("Invalid dialog end handler: ", this._dialogEndHandler);
          }
-	 }
+    }
 };
 
 SplitTime.Dialog.prototype.isFinished = function() {

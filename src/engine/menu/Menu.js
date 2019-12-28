@@ -1,20 +1,5 @@
 dependsOn("/player/Controls.js");
 
-SplitTime.showImage = function(file, duration, waitForEnterSpace) {
-	SplitTime.see.drawImage(file, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-	return SplitTime.delay(duration).then(function() {
-		if(waitForEnterSpace) {
-			var formerProcess = SplitTime.process;
-            SplitTime.process = SplitTime.main.State.OTHER;
-            return SplitTime.Menu.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
-            	SplitTime.process = formerProcess;
-			});
-		} else {
-			return SLVD.Promise.as();
-		}
-	});
-};
-
 SplitTime.Menu = function() {
 	this.point = [];
 };
@@ -23,6 +8,14 @@ SplitTime.Menu = function() {
 SplitTime.Menu.Button = {
     GUI_CONFIRMATION: new SplitTime.Controls.Button(),
     GUI_CANCEL: new SplitTime.Controls.Button()
+};
+
+SplitTime.Menu.waitForUser = function() {
+    var formerProcess = SplitTime.process;
+    SplitTime.process = SplitTime.main.State.OTHER;
+    return SplitTime.Menu.Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
+        SplitTime.process = formerProcess;
+    });
 };
 
 SplitTime.Menu.prototype.cursor = undefined;

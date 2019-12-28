@@ -9,7 +9,7 @@ SplitTime.Body = function(skipInit) {
         this.playerInteractHandlers = new SLVD.RegisterCallbacks({onPlayerInteract: null});
         this.mover = new SplitTime.Body.Mover(this);
         // TODO: sort out (throw out) inheritance to make this work right
-        this.speechBox = new SplitTime.Body.SpeechBox(this, -42);
+        this.speechBox = new SplitTime.Body.SpeechBox(this, 42);
     }
 };
 SplitTime.BodyTemplate = {};

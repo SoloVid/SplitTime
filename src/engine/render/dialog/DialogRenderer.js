@@ -38,10 +38,14 @@ SplitTime.Dialog.Renderer.notifyFrameUpdate = function() {
     for(var i = dialogDrawings.length - 1; i >= 0; i--) {
         var drawing = dialogDrawings[i];
         if(drawing.in) {
-        	drawing.visibility = Math.min(drawing.visibility + 0.1, 1);
+        	drawing.visibility = SLVD.approachValue(drawing.visibility, 1, 0.1);
+        	// TODO: remove temporary hackaround bad UX
+			drawing.visibility = 1;
 		} else {
         	drawing.visibility -= 0.1;
-        	if(drawing.visibility < 0) {
+            // TODO: remove temporary hackaround bad UX
+            drawing.visibility = 0;
+        	if(drawing.visibility <= 0) {
         		dialogDrawings.splice(i, 1);
 			}
 		}
