@@ -4,9 +4,9 @@ var nextRef = 10; //reserve first 10
 SplitTime.Body = function(skipInit) {
     this.ref = nextRef++;
     if(!skipInit) {
-        this.frameUpdateHandlers = new SLVD.RegisterCallbacks(["notifyFrameUpdate"]);
-        this.timeAdvanceListeners = new SLVD.RegisterCallbacks(["notifyTimeAdvance"]);
-        this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
+        this.frameUpdateHandlers = new SLVD.RegisterCallbacks({notifyFrameUpdate: null});
+        this.timeAdvanceListeners = new SLVD.RegisterCallbacks({notifyTimeAdvance: null});
+        this.playerInteractHandlers = new SLVD.RegisterCallbacks({onPlayerInteract: null});
         this.mover = new SplitTime.Body.Mover(this);
         // TODO: sort out (throw out) inheritance to make this work right
         this.speechBox = new SplitTime.Body.SpeechBox(this, -42);

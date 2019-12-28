@@ -1,15 +1,20 @@
 dependsOn("SLVD.js");
 
 /**
- * @param {string[]} [allowedObjectMethods]
+ * @param {Object} [allowedObjectMethodsPattern]
  * @class
  */
-SLVD.RegisterCallbacks = function(allowedObjectMethods) {
+SLVD.RegisterCallbacks = function(allowedObjectMethodsPattern) {
     this._handlers = [];
     this._isRunningCallbacks = false;
     this._listAwaitingRegistration = [];
     this._listAwaitingRemoval = [];
-    this._allowedObjectMethods = allowedObjectMethods || [];
+    this._allowedObjectMethods = [];
+    if(allowedObjectMethodsPattern) {
+        for(var methodName in allowedObjectMethodsPattern) {
+            this._allowedObjectMethods.push(methodName);
+        }
+    }
 };
 
 SLVD.RegisterCallbacks.prototype.clear = function() {

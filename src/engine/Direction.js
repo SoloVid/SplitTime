@@ -37,6 +37,13 @@ SplitTime.Direction.toString = function(numDir) {
 };
 
 //Get direction from one point to another (both in Maven orientation)
+/**
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @return {number}
+ */
 SplitTime.Direction.fromTo = function(fromX, fromY, toX, toY) {
 	if(fromX == toX) {
 		if(fromY < toY) return 3;
