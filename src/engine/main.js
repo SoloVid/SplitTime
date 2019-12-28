@@ -1,7 +1,7 @@
+var nextMainTimeoutId = null;
+
 SplitTime.main = function() {
     var startTime = new Date().getTime();
-
-    var agentCount = 0;
 
     SplitTime.performanceCheckpoint("start", 999999);
 
@@ -61,10 +61,10 @@ SplitTime.main = function() {
 
     var displayFPS = SplitTime.FPS;
     if(msElapsed < SplitTime.msPerFrame) {
-        setTimeout(SplitTime.main, SplitTime.msPerFrame - msElapsed);
+        nextMainTimeoutId = setTimeout(SplitTime.main, SplitTime.msPerFrame - msElapsed);
         SplitTime.see.fillStyle="#00FF00";
     } else {
-        setTimeout(SplitTime.main, 2); //give browser a quick breath
+        nextMainTimeoutId = setTimeout(SplitTime.main, 2); //give browser a quick breath
         var secondsElapsed = msElapsed/1000;
         displayFPS = Math.round(1/secondsElapsed);
         SplitTime.see.fillStyle="#FF0000";
@@ -74,9 +74,6 @@ SplitTime.main = function() {
         SplitTime.Debug.setDebugValue("FPS", displayFPS);
         SplitTime.Debug.setDebugValue("Board Bodies", SplitTime.BoardRenderer.countBodies());
         SplitTime.Debug.setDebugValue("Focus point", Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z));
-        SplitTime.Debug.setDebugValue("Agents", agentCount);
-        SplitTime.Debug.setDebugValue("HUD Layers", SplitTime.HUD.getRendererCount());
-        SplitTime.Debug.setDebugValue("Joystick Direction", SplitTime.Controls.JoyStick.getDirection());
 
         SplitTime.Debug.renderCanvas(SplitTime.see);
     }
@@ -87,6 +84,17 @@ SplitTime.main.State = {
     ACTION: "action",
     OVERWORLD: "overworld",
     OTHER: "other"
+};
+
+SplitTime.main.start = function() {
+    if(nextMainTimeoutId === null) {
+        SplitTime.main();
+    }
+};
+
+SplitTime.main.stop = function() {
+    clearTimeout(nextMainTimeoutId);
+    nextMainTimeoutId = null;
 };
 
 /**
