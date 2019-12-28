@@ -4,7 +4,7 @@ SplitTime.Audio = {};
 
 var AUDIO_ROOT = SLVD.getScriptDirectory() + "audio/";
 var MUSIC_DIR = "music/";
-var SOUND_EFFECT_DIR = "soundeffects/";
+var SOUND_EFFECT_DIR = "fx/";
 var registeredSounds = {};
 var activeSounds = {};
 

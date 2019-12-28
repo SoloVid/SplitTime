@@ -45,14 +45,16 @@ The directories within each project should be
 
 - ``audio/``
     - ``music/`` for music (looping)
-    - ``soundeffects/`` for sound effects (non-looping)
+    - ``fx/`` for sound effects (non-looping)
 - ``src/`` for all JS files which will be compiled into one file with engine code
 - ``dist/`` for Grunt-generated files
 - ``images/`` for image assets
     - ``preloaded/`` for image assets that will be loaded into memory at engine startup
 - ``levels/`` for level files
 
-The launch point of the game should be some HTML file in the project home directory. This file should include ``<script src="dist/game.js"></script>`` and later call ``SplitTime.launch(startUpCallback, XRES, YRES);``. Note that all JS files in ``src/`` will be included within ``dist/game.js``. No ordering of project JS files should be assumed. (However, you may use ``dependsOn("path/to/script")`` to ensure that one script loads before another.) Currently, the body of the HTML file should be essentially empty.
+The launch point of the game should be some HTML file in the project home directory. This file should include ``<script src="dist/game.js"></script>`` and later call ``SplitTime.launch(XRES, YRES);``. After primary assets are loaded, the launch sequence will call ``G.launch();`` as defined somewhere in the game's source files.
+
+Note that all JS files in ``src/`` will be included within ``dist/game.js``. No ordering of project JS files should be assumed. (However, you may use ``dependsOn("path/to/script")`` to ensure that one script loads before another.)
 
 Within the game, all resources should be referenced relative to their asset type directory as specified in the enumeration above.
 

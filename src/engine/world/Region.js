@@ -1,3 +1,4 @@
+// A region is a logical unit of levels that are loaded together and share a common timeline
 SplitTime.Region = function(id) {
     this.id = id;
     /**
