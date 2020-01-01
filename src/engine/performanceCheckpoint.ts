@@ -1,11 +1,8 @@
+namespace SplitTime {
 var lastPerformanceCheck = null;
 
-SplitTime.performanceCheckpoint = function(debugName, allow) {
-    if(!allow) {
-        allow = 5;
-    }
-
-    if(SplitTime.Debug.ENABLED) {
+export function performanceCheckpoint(debugName, allow = 5) {
+    if(SplitTime.debug.ENABLED) {
         var now = new Date();
         if(lastPerformanceCheck) {
             var timePassed = now.getMilliseconds() - lastPerformanceCheck.getMilliseconds();
@@ -15,3 +12,4 @@ SplitTime.performanceCheckpoint = function(debugName, allow) {
         }
     }
 };
+}

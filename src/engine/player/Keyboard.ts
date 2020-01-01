@@ -1,29 +1,29 @@
-SplitTime.Keyboard = {};
+namespace SplitTime.keyboard {
 
-SplitTime.Keyboard.A = 65;
-SplitTime.Keyboard.S = 83;
-SplitTime.Keyboard.D = 68;
-SplitTime.Keyboard.W = 87;
+export var A = 65;
+export var S = 83;
+export var D = 68;
+export var W = 87;
 
-SplitTime.Keyboard.LEFT = 37;
-SplitTime.Keyboard.DOWN = 40;
-SplitTime.Keyboard.RIGHT = 39;
-SplitTime.Keyboard.UP = 38;
+export var LEFT = 37;
+export var DOWN = 40;
+export var RIGHT = 39;
+export var UP = 38;
 
-SplitTime.Keyboard.J = 74;
-SplitTime.Keyboard.K = 75;
-SplitTime.Keyboard.L = 76;
-SplitTime.Keyboard.I = 73;
+export var J = 74;
+export var K = 75;
+export var L = 76;
+export var I = 73;
 
-SplitTime.Keyboard.SPACE = 32;
-SplitTime.Keyboard.ENTER = 13;
+export var SPACE = 32;
+export var ENTER = 13;
 
-SplitTime.Keyboard.Q = 81;
-SplitTime.Keyboard.E = 69;
+export var Q = 81;
+export var E = 69;
 
-SplitTime.Keyboard.Z = 90;
-SplitTime.Keyboard.X = 88;
-SplitTime.Keyboard.C = 67;
+export var Z = 90;
+export var X = 88;
+export var C = 67;
 
 var keyDown = {};
 
@@ -42,35 +42,35 @@ function getUpCallbacks(keyCode) {
     return upCallbacks[keyCode];
 }
 
-SplitTime.Keyboard.isKeyDown = function(keyCode) {
+export function isKeyDown(keyCode) {
     return !!keyDown[keyCode];
 };
 
-SplitTime.Keyboard.waitForDown = function(keyCode) {
+export function waitForDown(keyCode) {
     return getDownCallbacks(keyCode).waitForOnce();
 };
-SplitTime.Keyboard.onDown = function(keyCode, callback) {
+export function onDown(keyCode, callback) {
     getDownCallbacks(keyCode).register(callback);
 };
 
-SplitTime.Keyboard.waitForUp = function(keyCode) {
+export function waitForUp(keyCode) {
     return getUpCallbacks(keyCode).waitForOnce();
 };
-SplitTime.Keyboard.afterUp = function(keyCode, callback) {
+export function afterUp(keyCode, callback) {
     getUpCallbacks(keyCode).register(callback);
 };
 
 //Sets variables useful for determining what keys are down at any time.
-SplitTime.Keyboard.onKeyDown = function(e) {
+export function onKeyDown(e) {
     var keyCode = e.which || e.keyCode;
 
     //Prevent scrolling with arrows
     if([
-            SplitTime.Keyboard.SPACE,
-            SplitTime.Keyboard.DOWN,
-            SplitTime.Keyboard.UP,
-            SplitTime.Keyboard.LEFT,
-            SplitTime.Keyboard.RIGHT
+            SplitTime.keyboard.SPACE,
+            SplitTime.keyboard.DOWN,
+            SplitTime.keyboard.UP,
+            SplitTime.keyboard.LEFT,
+            SplitTime.keyboard.RIGHT
         ].indexOf(keyCode) > -1) {
         e.preventDefault();
     }
@@ -88,9 +88,10 @@ SplitTime.Keyboard.onKeyDown = function(e) {
 };
 
 //The clean-up of the above function.
-SplitTime.Keyboard.onKeyUp = function(e) {
+export function onKeyUp(e) {
     var keyCode = e.which || e.keyCode;
     keyDown[keyCode] = false;
 
     getUpCallbacks(keyCode).run();
 };
+}

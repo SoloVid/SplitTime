@@ -1,10 +1,3 @@
-/**
- *
- * @interface
- */
-function DialogEndHandler() {}
-
-/**
- *
- */
-DialogEndHandler.prototype.onDialogEnd = function() {};
+interface DialogEndHandler {
+    onDialogEnd();
+}

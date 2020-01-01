@@ -1,10 +1,3 @@
-/**
- *
- * @interface
- */
-function PlayerExitLevelHandler() {}
-
-/**
- *
- */
-PlayerExitLevelHandler.prototype.onPlayerExitLevel = function() {};
+interface PlayerExitLevelHandler {
+    onPlayerExitLevel();
+}

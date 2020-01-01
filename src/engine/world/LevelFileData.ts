@@ -1,33 +1,32 @@
-// Currently, this class isn't intended to be used but to provide JSDoc for level file format JSON
-SplitTime.LevelFileData = function() {
-    this.type = "action";
-    this.region = "";
-    this.background = "";
-    /** @type {LevelFileDataLayer[]} */
-    this.layers = [];
-    this.props = [];
-    this.positions = [];
-};
-
-function LevelFileDataLayer() {
-    this.id = "";
-    /**
-     * @type {int}
-     */
-    this.z = 0;
-    /** @type {LevelFileDataTrace[]} */
-    this.traces = [];
-}
-
-function LevelFileDataTrace() {
-    this.id = "";
-    this.type = "";
-    this.vertices = "";
-    this.height = ""; // for solid
-    this.direction = ""; // for stairs
-    this.event = ""; // for events
-    this.level = ""; // for pointers
-    this.offsetX = ""; // for pointers
-    this.offsetY = ""; // for pointers
-    this.offsetZ = ""; // for pointers
+namespace SplitTime.level {
+    export interface FileData {
+        type: "action";
+        region: string;
+        background: string;
+        layers: file_data.Layer[];
+        props: any[];
+        positions: any[];
+    }
+    
+    namespace file_data {
+        
+        export interface Layer {
+            id: string;
+            z: number;
+            traces: Trace[];
+        }
+        
+        export interface Trace {
+            id: string;
+            type: string;
+            vertices: string;
+            height: string; // for solid
+            direction: string; // for stairs
+            event: string; // for events
+            level: string; // for pointers
+            offsetX: string; // for pointers
+            offsetY: string; // for pointers
+            offsetZ: string; // for pointers
+        }
+    }
 }

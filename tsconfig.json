@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "none",
+    "outDir": "./build/tsjs",
+    "target": "es5",
+    "declaration" : true,
+    "declarationMap": true,
+    "declarationDir": "./build/@types/SplitTime"
+  },
+  "include": [
+    "./src/**/*.ts"
+  ]
+}

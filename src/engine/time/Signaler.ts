@@ -1,10 +1,3 @@
-/**
- *
- * @interface
- */
-function Signaler() {}
-
-/**
- *
- */
-Signaler.prototype.isSignaling = function() {};
+interface Signaler {
+    isSignaling(): boolean;
+}

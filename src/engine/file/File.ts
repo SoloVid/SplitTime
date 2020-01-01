@@ -1,29 +1,25 @@
-dependsOn("/SLVD/RegisterCallbacks.js");
-
-SplitTime.File = {};
-
-(function() {
+namespace SplitTime.file {
     var callbacks = new SLVD.RegisterCallbacks();
     var gameId;
 
-    SplitTime.File.setGameId = function(id) {
+    export function setGameId(id) {
         gameId = id;
     };
 
-    SplitTime.File.onNew = function(callback) {
+    export function onNew(callback) {
         callbacks.registerCallback(callback);
     };
 
-    SplitTime.File.loadNew = function() {
+    export function loadNew() {
         callbacks.runCallbacks();
         return SLVD.Promise.as();
     };
 
-    SplitTime.File.load = function(fileName) {
+    export function load(fileName) {
         // TODO: implement
     };
 
-    SplitTime.File.saveAs = function(fileName) {
+    export function saveAs(fileName) {
         // TODO: implement
     };
-} ());
+}

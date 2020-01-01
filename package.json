@@ -13,9 +13,11 @@
     "grunt-injector": "^1.1.0",
     "grunt-ordered-concat": "^1.0.0",
     "grunt-sync": "^0.8.1",
-    "vue": "^2.6.10"
+    "grunt-ts": "^6.0.0-beta.22",
+    "typescript": "^3.7.4",
+    "vue": "^2.6.11"
   },
   "dependencies": {
-    "howler": "^2.1.2"
+    "howler": "^2.1.3"
   }
 }

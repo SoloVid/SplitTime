@@ -1,8 +1,5 @@
-dependsOn("../HUDRenderer.js");
-dependsOn("Dialog.js");
-
-SplitTime.Dialog.Renderer = {};
-var CONFIG = {
+namespace SplitTime.dialog.renderer{
+const CONFIG = {
 	OUTLINE_STYLE: "rgba(255, 255, 255, .8)",
 	OUTLINE_WIDTH: 3,
 	BACKGROUND_STYLE: "rgba(50, 100, 150, .4)",
@@ -13,20 +10,21 @@ var CONFIG = {
 	FONT: "Verdana",
 	SPEAKER_NAMES_ENABLED: false
 };
-SplitTime.Dialog.Renderer.Configuration = CONFIG;
+export const Configuration = CONFIG;
 
-SplitTime.HUD.pushRenderer(SplitTime.Dialog.Renderer);
+// TODO: This is a runtime thing!!!!
+SplitTime.hud.pushRenderer(SplitTime.dialog.renderer);
 
 /**
  * @type {DialogDrawing[]}
  */
 var dialogDrawings = [];
 
-SplitTime.Dialog.Renderer.show = function(dialog) {
+export function show(dialog) {
     dialogDrawings.push(new DialogDrawing(dialog));
 };
 
-SplitTime.Dialog.Renderer.hide = function(dialog) {
+export function hide(dialog) {
 	for(var i = 0; i < dialogDrawings.length; i++) {
 		if(dialogDrawings[i].dialog === dialog) {
 			dialogDrawings[i].in = false;
@@ -34,7 +32,7 @@ SplitTime.Dialog.Renderer.hide = function(dialog) {
 	}
 };
 
-SplitTime.Dialog.Renderer.notifyFrameUpdate = function() {
+export function notifyFrameUpdate() {
     for(var i = dialogDrawings.length - 1; i >= 0; i--) {
         var drawing = dialogDrawings[i];
         if(drawing.in) {
@@ -51,7 +49,7 @@ SplitTime.Dialog.Renderer.notifyFrameUpdate = function() {
 /**
  * @param {CanvasRenderingContext2D} ctx
  */
-SplitTime.Dialog.Renderer.render = function(ctx) {
+export function render(ctx) {
     for(var i = 0; i < dialogDrawings.length; i++) {
         // TODO: visibility
 		var drawing = dialogDrawings[i];
@@ -81,7 +79,7 @@ function DialogDrawing(dialog) {
  * @param {number} [pointX]
  * @param {number} [pointY]
  */
-function drawAwesomeRect(left, top, right, bottom, ctx, pointX, pointY) {
+function drawAwesomeRect(left, top, right, bottom, ctx, pointX?, pointY?) {
 	var CURVE_RADIUS = 10;
 	var TRI_CURVE_BUFFER = 2*CURVE_RADIUS;
 	var TRI_BASE_HALF = 10;
@@ -378,4 +376,5 @@ function getLinesFromMessage(fullMessage, displayedMessage, ctx, maxRowLength) {
  */
 function getLineHeight(ctx) {
    return CONFIG.FONT_SIZE;
+}
 }

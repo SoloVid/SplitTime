@@ -1,42 +1,39 @@
-dependsOn("Body.js");
-
-/**
- *
- * @param {SplitTime.Body} body
- * @param {number} [offsetZ]
- * @param {number} [offsetX]
- * @param {number} [offsetY]
- * @class
- * @implements LevelLocation
- */
-SplitTime.Body.SpeechBox = function(body, offsetZ, offsetX, offsetY) {
-    this.body = body;
-    this.offsetX = offsetX || 0;
-    this.offsetY = offsetY || 0;
-    this.offsetZ = offsetZ || 0;
-};
-
-/**
- * @return number
- */
-SplitTime.Body.SpeechBox.prototype.getX = function() {
-    return this.body.getX() + this.offsetX;
-};
-/**
- * @return number
- */
-SplitTime.Body.SpeechBox.prototype.getY = function() {
-    return this.body.getY() + this.offsetY;
-};
-/**
- * @return number
- */
-SplitTime.Body.SpeechBox.prototype.getZ = function() {
-    return this.body.getZ() + this.offsetZ;
-};
-/**
- * @return SplitTime.Level
- */
-SplitTime.Body.SpeechBox.prototype.getLevel = function() {
-    return this.body.getLevel();
-};
+namespace SplitTime.body {
+    export class SpeechBox implements LevelLocation {
+        body: Body;
+        offsetX: number;
+        offsetY: number;
+        offsetZ: number;
+        constructor(body: SplitTime.Body, offsetZ: number = 0, offsetX: number = 0, offsetY: number = 0) {
+            this.body = body;
+            this.offsetX = offsetX;
+            this.offsetY = offsetY;
+            this.offsetZ = offsetZ;
+        };
+        
+        /**
+        * @return number
+        */
+        getX() {
+            return this.body.getX() + this.offsetX;
+        };
+        /**
+        * @return number
+        */
+        getY() {
+            return this.body.getY() + this.offsetY;
+        };
+        /**
+        * @return number
+        */
+        getZ() {
+            return this.body.getZ() + this.offsetZ;
+        };
+        /**
+        * @return SplitTime.Level
+        */
+        getLevel() {
+            return this.body.getLevel();
+        };
+    }
+}

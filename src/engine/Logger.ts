@@ -1,11 +1,11 @@
-SplitTime.Logger = {
-    debug: function() {
+namespace SplitTime.Logger {
+    export function debug(...args) {
         console.log.apply(null, arguments);
-    },
-    warn: function() {
+    }
+    export function warn(...args) {
         console.warn.apply(null, arguments);
-    },
-    error: function() {
+    }
+    export function error(...args) {
         console.error.apply(null, arguments);
     }
-};
+}

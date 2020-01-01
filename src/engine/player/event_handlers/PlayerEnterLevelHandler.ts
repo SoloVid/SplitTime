@@ -1,10 +1,3 @@
-/**
- *
- * @interface
- */
-function PlayerEnterLevelHandler() {}
-
-/**
- *
- */
-PlayerEnterLevelHandler.prototype.onPlayerEnterLevel = function() {};
+interface PlayerEnterLevelHandler {
+    onPlayerEnterLevel();
+}

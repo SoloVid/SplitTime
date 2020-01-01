@@ -1,19 +1,18 @@
-SplitTime.Direction = {
-	E: 0,
-	N: 1,
-	W: 2,
-	S: 3,
-	NE: 0.5,
-	EN: 0.5,
-	NW: 1.5,
-	WN: 1.5,
-	SW: 2.5,
-	WS: 2.5,
-	SE: 3.5,
-	ES: 3.5
-};
+namespace SplitTime.Direction {
+	export const E = 0;
+	export const N = 1;
+	export const W = 2;
+	export const S = 3;
+	export const NE = 0.5;
+	export const EN = NE;
+	export const NW = 1.5;
+	export const WN = NW;
+	export const SW = 2.5;
+	export const WS = SW;
+	export const SE = 3.5;
+	export const ES = SE;
 
-SplitTime.Direction.fromString = function(stringDir) {
+export function fromString(stringDir) {
 	if(stringDir in SplitTime.Direction) {
 		return SplitTime.Direction[stringDir];
 	} else {
@@ -21,7 +20,7 @@ SplitTime.Direction.fromString = function(stringDir) {
         return -1;
 	}
 };
-SplitTime.Direction.toString = function(numDir) {
+export function toString(numDir) {
 	var modDir = SLVD.mod(Math.round(numDir), 4);
 	switch(modDir) {
 		case 0: return "E";
@@ -37,7 +36,7 @@ SplitTime.Direction.toString = function(numDir) {
 };
 
 //Get direction from one point to another (both in Maven orientation)
-SplitTime.Direction.fromTo = function(fromX, fromY, toX, toY) {
+export function fromTo(fromX, fromY, toX, toY) {
 	if(fromX == toX) {
 		if(fromY < toY) return 3;
 		else return 1;
@@ -54,14 +53,14 @@ SplitTime.Direction.fromTo = function(fromX, fromY, toX, toY) {
 };
 
 //Get direction from one thing to another (both in Maven orientation)
-SplitTime.Direction.fromToThing = function(fromThing, toThing) {
+export function fromToThing(fromThing, toThing) {
 	if(typeof fromThing.getX === "function") {
         return SplitTime.Direction.fromTo(fromThing.getX(), fromThing.getY(), toThing.getX(), toThing.getY());
     }
 	return SplitTime.Direction.fromTo(fromThing.x, fromThing.y, toThing.x, toThing.y);
 };
 
-SplitTime.Direction.simplifyToCardinal = function(realDir) {
+export function simplifyToCardinal(realDir) {
 	if(realDir === null) {
 		return null;
 	}
@@ -73,24 +72,24 @@ SplitTime.Direction.simplifyToCardinal = function(realDir) {
 	return SLVD.mod(Math.round(realDir), 4);
 };
 
-SplitTime.Direction.getRandom = function() {
+export function getRandom() {
     return (SLVD.randomInt(16) - 1) / 4;
 };
-SplitTime.Direction.getRandomCardinal = function() {
+export function getRandomCardinal() {
     return SLVD.randomInt(4) - 1;
 };
-SplitTime.Direction.getRandomOctal = function() {
+export function getRandomOctal() {
     return (SLVD.randomInt(8) - 1) / 2;
 };
 
-SplitTime.Direction.getXMagnitude = function(direction) {
+export function getXMagnitude(direction) {
     if(typeof direction === "string") {
         return SplitTime.Direction.getXMagnitude(SplitTime.Direction.fromString(direction));
     }
 
     return Math.cos((direction)*(Math.PI/2));
 };
-SplitTime.Direction.getXSign = function(direction) {
+export function getXSign(direction) {
     var magnitude = SplitTime.Direction.getXMagnitude(direction);
     if(magnitude > 0.1) {
         return 1;
@@ -100,14 +99,14 @@ SplitTime.Direction.getXSign = function(direction) {
     return 0;
 };
 
-SplitTime.Direction.getYMagnitude = function(direction) {
+export function getYMagnitude(direction) {
     if(typeof direction === "string") {
         return SplitTime.Direction.getYMagnitude(SplitTime.Direction.fromString(direction));
     }
 
     return -Math.sin((direction)*(Math.PI/2));
 };
-SplitTime.Direction.getYSign = function(direction) {
+export function getYSign(direction) {
     var magnitude = SplitTime.Direction.getYMagnitude(direction);
     if(magnitude > 0.1) {
         return 1;
@@ -124,8 +123,9 @@ SplitTime.Direction.getYSign = function(direction) {
  * @param {int} [howMany90Degrees]
  * @return {boolean}
  */
-SplitTime.Direction.areWithin90Degrees = function(dir1, dir2, howMany90Degrees) {
+export function areWithin90Degrees(dir1, dir2, howMany90Degrees) {
 	howMany90Degrees = howMany90Degrees || 1;
     var dDir = Math.abs(dir1 - dir2);
     return dDir < howMany90Degrees || dDir > (4 - howMany90Degrees);
 };
+}
