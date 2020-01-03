@@ -1,3 +1,5 @@
+type int = number;
+
 namespace SplitTime {
     //implied SplitTime.SAVE object from load.js
     export var SAVE = {};

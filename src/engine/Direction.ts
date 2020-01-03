@@ -116,15 +116,8 @@ export function getYSign(direction) {
     return 0;
 };
 
-/**
- *
- * @param {number} dir1
- * @param {number} dir2
- * @param {int} [howMany90Degrees]
- * @return {boolean}
- */
-export function areWithin90Degrees(dir1, dir2, howMany90Degrees) {
-	howMany90Degrees = howMany90Degrees || 1;
+export function areWithin90Degrees(dir1: number, dir2: number, howMany90Degrees: int = 1): boolean {
+	howMany90Degrees = howMany90Degrees;
     var dDir = Math.abs(dir1 - dir2);
     return dDir < howMany90Degrees || dDir > (4 - howMany90Degrees);
 };

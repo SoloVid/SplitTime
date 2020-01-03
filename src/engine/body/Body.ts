@@ -7,7 +7,7 @@ namespace SplitTime {
         private timeAdvanceListeners: SLVD.RegisterCallbacks;
         private playerInteractHandlers: SLVD.RegisterCallbacks;
         mover: SplitTime.body.Mover;
-        private speechBox;
+        speechBox;
         
         // TODO: remove parameter when moving templates elsewhere
         constructor(skipInit = false) {
@@ -207,11 +207,15 @@ namespace SplitTime {
             return this.getLevel() === SplitTime.Level.getCurrent();
         };
         
-        put(level, x, y, z, includeChildren = false) {
+        put(level: Level, x: number, y: number, z: number, includeChildren = false) {
             this.setLevel(level, includeChildren);
             this.setX(x, includeChildren);
             this.setY(y, includeChildren);
             this.setZ(z, includeChildren);
+        };
+        
+        putLocation(location: LevelLocation, includeChildren = false) {
+            this.put(location.getLevel(), location.getX(), location.getY(), location.getZ(), includeChildren);
         };
         
         /**

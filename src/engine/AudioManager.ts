@@ -35,7 +35,7 @@ namespace SplitTime.audio {
     * @param bool restartIfPlaying - Defaults to false.  Set to true if the audio should start over
     *                                if it's currently playing (this is for looping sounds, such as music)
     */
-    export function play(handle, loop, restartIfPlaying) {
+    export function play(handle, loop?, restartIfPlaying?) {
         var sound = loadedSounds[handle];
         var soundID = loadedIDs[handle];
         var currentVolume;

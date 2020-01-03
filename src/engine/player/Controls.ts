@@ -31,12 +31,7 @@ namespace SplitTime.controls {
             this.isDown = isDown || function() { return false; };
         };
         
-        setKeyboardBindings(/* keyCodes...*/) {
-            var keyCodes = [];
-            for(var iArg = 0; iArg < arguments.length; iArg++) {
-                keyCodes.push(arguments[iArg]);
-            }
-            
+        setKeyboardBindings(...keyCodes: int[]) {
             this._bindings.obsolete = true;
             this._bindings = {
                 obsolete: false

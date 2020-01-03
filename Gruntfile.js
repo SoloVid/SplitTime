@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     var MUSIC_DIRECTORY = AUDIO_DIRECTORY + "music/";
     var SOUND_EFFECT_DIRECTORY = AUDIO_DIRECTORY + "fx/";
     var TASK_DATA_GEN = 'generate-data-js';
+    var TASK_DECL_GEN = 'generate-index-d-ts';
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -99,7 +100,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('build', 'Build game project or just engine', function(projectName) {
         if(!projectName) {
-            grunt.task.run(['ts:engine', 'concat:engine']);
+            grunt.task.run(['ts:engine', TASK_DECL_GEN, 'concat:engine']);
         }
         else {
             grunt.config("project", projectName);
@@ -151,5 +152,25 @@ module.exports = function(grunt) {
         var dataFileContents = "SplitTime._GAME_DATA = " + JSON.stringify(gameData) + ";";
         grunt.verbose.writeln("Writing data JS file");
         grunt.file.write(path.join(projectRoot, "build/generated/data.js"), dataFileContents);
+    });
+
+    grunt.registerTask(TASK_DECL_GEN, 'Create index.d.ts for SplitTime .d.ts files', function() {
+        grunt.log.writeln("Generating index.d.ts for SplitTime");
+        var declRefs = [];
+        grunt.file.recurse("build/@types/SplitTime/", function(absPath, rootDir, subDir, fileName) {
+            if(/index\.d\.ts$/.test(fileName)) {
+                // Skip index.d.ts
+            } else if(/\.d\.ts$/.test(fileName)) {
+                grunt.verbose.writeln("Detected " + fileName);
+                var filePath = join(subDir, fileName).replace("\\", "/");
+                declRefs.push('/// <reference path="./' + filePath + '" />');
+            } else {
+                // Skip non-definition files
+            }
+        });
+
+        var indexFileContents = declRefs.join("\n");
+        grunt.verbose.writeln("Writing index.d.ts file");
+        grunt.file.write("build/@types/SplitTime/index.d.ts", indexFileContents);
     });
 };
