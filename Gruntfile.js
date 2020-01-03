@@ -7,39 +7,41 @@ module.exports = function(grunt) {
     var AUDIO_DIRECTORY = "audio/";
     var MUSIC_DIRECTORY = AUDIO_DIRECTORY + "music/";
     var SOUND_EFFECT_DIRECTORY = AUDIO_DIRECTORY + "fx/";
-    var TEMP_DIRECTORY = "tmp/";
-    var TEMP_SOURCE_DIRECTORY = TEMP_DIRECTORY + "src/";
-    var DATA_SCRIPT = TEMP_SOURCE_DIRECTORY + "data.js";
     var TASK_DATA_GEN = 'generate-data-js';
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        oconcat: {
+        ts: {
             options: {
-                separator: ';\n',
-                process: function(src, filepath) {
-                    return '(function() {\n' + src + '\n} ());';
-                }
+                tsCacheDir: 'build/.tscache'
             },
             engine: {
-                options: {
-                    root: 'src/engine'
-                },
-                src: [
-                    'node_modules/howler/dist/howler.min.js',
-                    'src/globals.js', //first in file to avoid null pointers
-                    'src/engine/**/*.js'
-                ],
-                dest: 'dist/engine.js'
+                tsconfig: './tsconfig.json'
             },
             project: {
-                options: {
-                    root: '<%= grunt.config("projectPath") %>src'
-                },
+                tsconfig: '<%= grunt.config("projectPath") %>tsconfig.json'
+            }
+        },
+        concat: {
+            options: {
+                separator: ';\n',
+                sourceMap: true
+            },
+            engine: {
                 src: [
-                    'dist/engine.js',
-                    '<%= grunt.config("projectPath") %>src/**/*.js',
-                    '<%= grunt.config("projectPath") %>' + TEMP_SOURCE_DIRECTORY + "**/*.js"
+                    'node_modules/howler/dist/howler.min.js',
+                    'build/tsjs/defer.def.js',
+                    'build/tsjs/globals.js', //first in file to avoid null pointers
+                    'build/tsjs/engine/**/*.js'
+                ],
+                dest: 'build/engine.js'
+            },
+            project: {
+                src: [
+                    'build/engine.js',
+                    '<%= grunt.config("projectPath") %>build/tsjs/**/*.js',
+                    '<%= grunt.config("projectPath") %>build/generated/**/*.js',
+                    'build/tsjs/defer.run.js'
                 ],
                 dest: '<%= grunt.config("projectPath") %>dist/game.js'//'dist/<%= pkg.name %>.js'
             }
@@ -49,20 +51,13 @@ module.exports = function(grunt) {
                 files: [{
                     cwd: '<%= grunt.config("projectPath") %>',
                     src: [
-                        // 'levels/**'
-                        // 'projects/maven/levels/**'
                         'images/**',
                         'audio/**'
-                        // '<%= grunt.config("projectPath") %>images/**',
-                        // '<%= grunt.config("projectPath") %>audio/**'
-                        // '!**/*.txt' /* but exclude txt files */
                     ],
                     dest: '<%= grunt.config("projectPath") %>dist'
-                    // dest: '<%= grunt.config("projectPath") %>dist',
                 }],
                 ignoreInDest: 'game.js',
                 updateAndDelete: true,
-                // pretend: true, // Don't do any IO. Before you run the task with `updateAndDelete` PLEASE MAKE SURE it doesn't remove too much.
                 verbose: true // Display log messages when copying files
             }
         },
@@ -80,67 +75,36 @@ module.exports = function(grunt) {
         jshint: {
             options: {
                 // options here to override JSHint defaults
-                '-W061': true, //ignore "eval can be harmful"
-                '-W054': true, //ignore "the Function constructor is a form of eval"
-                '-W069': true, //ignore dot operator preference over brackets
+                // '-W061': true, //ignore "eval can be harmful"
+                // '-W054': true, //ignore "the Function constructor is a form of eval"
+                // '-W069': true, //ignore dot operator preference over brackets
                 globals: {
                     jQuery: true,
                     console: true,
-                    module: true,
                     document: true,
                     SLVD: true,
-                    SplitTime: true,
-                    t: true
+                    SplitTime: true
                 },
                 reporterOutput: ""
             },
-            engine: ['Gruntfile.js', 'src/editor/**/*.js', 'src/globals.js', 'src/engine/**/*.js'],
-            project: ['<%= grunt.config("projectPath") %>src/**/*.js']
-        },
-        watch: {
-            options: {
-                atBegin: true
-            },
-            engine: {
-                files: ['<%= jshint.engine %>'],
-                tasks: ['jshint:engine', 'oconcat:engine']
-            },
-            project: {
-                files: ['dist/engine.js', '<%= grunt.config("projectPath") %>src/**/*.js', '<%= grunt.config("projectPath") %>/levels/**/*.xml'],
-                tasks: [
-                    'build:<%= grunt.config("project") %>'
-                ]
-            }
+            default: ['Gruntfile.js', 'src/editor/**/*.js'],
         }
     });
 
+    grunt.loadNpmTasks('grunt-ts');
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-ordered-concat');
     grunt.loadNpmTasks('grunt-sync');
 
-    grunt.registerTask('default', 'spin');
-
-    grunt.registerTask('spin', 'Handle Grunt tasks for a project with watch', function(projectName) {
+    grunt.registerTask('build', 'Build game project or just engine', function(projectName) {
         if(!projectName) {
-            grunt.task.run(['jshint:engine', 'oconcat:engine', 'watch:engine']);
+            grunt.task.run(['ts:engine', 'concat:engine']);
         }
         else {
             grunt.config("project", projectName);
             grunt.config("projectPath", "projects/" + projectName + "/");
-            grunt.task.run(['build:' + projectName, 'watch:project']);
-        }
-    });
-
-    grunt.registerTask('build', 'Handle Grunt tasks for a project without watch', function(projectName) {
-        if(!projectName) {
-            grunt.task.run(['jshint:engine', 'oconcat:engine']);
-        }
-        else {
-            grunt.config("project", projectName);
-            grunt.config("projectPath", "projects/" + projectName + "/");
-            grunt.task.run(['jshint:project', TASK_DATA_GEN + ":" + projectName, 'oconcat:project', 'sync:project']);
+            grunt.task.run(['ts:project', TASK_DATA_GEN + ":" + projectName, 'concat:project', 'sync:project']);
             if(grunt.option('min')) {
                 grunt.task.run('uglify:project');
             }
@@ -186,6 +150,6 @@ module.exports = function(grunt) {
 
         var dataFileContents = "SplitTime._GAME_DATA = " + JSON.stringify(gameData) + ";";
         grunt.verbose.writeln("Writing data JS file");
-        grunt.file.write(path.join(projectRoot, DATA_SCRIPT), dataFileContents);
+        grunt.file.write(path.join(projectRoot, "build/generated/data.js"), dataFileContents);
     });
 };

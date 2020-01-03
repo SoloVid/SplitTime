@@ -25,7 +25,6 @@ namespace SplitTime.menu {
 			this.currentPoint = 0;
 			var isRunning = true;
 			
-			// TODO: dynamic line!!!
 			SplitTime.hud.pushRenderer(this);
 			
 			var promise = new SLVD.Promise();

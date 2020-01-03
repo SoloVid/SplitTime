@@ -12,8 +12,9 @@ const CONFIG = {
 };
 export const Configuration = CONFIG;
 
-// TODO: This is a runtime thing!!!!
-SplitTime.hud.pushRenderer(SplitTime.dialog.renderer);
+defer(() => {
+	SplitTime.hud.pushRenderer(SplitTime.dialog.renderer);
+});
 
 /**
  * @type {DialogDrawing[]}
