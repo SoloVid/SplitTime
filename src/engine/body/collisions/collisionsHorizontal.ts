@@ -28,7 +28,7 @@ namespace SplitTime.body.collisions {
         */
         zeldaStep(dir, maxDistance) {
             this.mover.ensureInRegion();
-            var level = this.mover.level;
+            var level = this.mover.body.level;
             
             var dy = -maxDistance * Math.sin(dir * (Math.PI / 2)); //Total y distance to travel
             if(Math.abs(dy) < ZILCH) {
@@ -149,7 +149,7 @@ namespace SplitTime.body.collisions {
                 this.sliding.zeldaSlide(maxDistance / 2);
             }
             
-            this.mover.level.runEventSet(eventIdSet, this.mover.body);
+            this.mover.body.level.runEventSet(eventIdSet, this.mover.body);
             this.mover.transportLevelIfApplicable(levelIdSet);
             
             return SplitTime.Measurement.distanceTrue(oldX, oldY, this.mover.body.getX(), this.mover.body.getY());
@@ -158,8 +158,7 @@ namespace SplitTime.body.collisions {
         tryPushOtherBodies(bodies, dir) {
             this.mover.bodyExt.pushing = true;
             for(var i = 0; i < bodies.length; i++) {
-                var mover = new SplitTime.body.Mover(bodies[i]);
-                mover.zeldaBump(1, dir);
+                bodies[i].mover.zeldaBump(1, dir);
             }
             this.mover.bodyExt.pushing = false;
         };

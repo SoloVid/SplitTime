@@ -21,7 +21,7 @@ namespace SplitTime {
 			this.eventId = "";
 		};
 		
-		static fromRaw(rawTrace) {
+		static fromRaw(rawTrace: SplitTime.level.file_data.Trace): SplitTime.Trace {
 			var trace = new SplitTime.Trace(rawTrace.type);
 			switch(trace.type) {
 				case SplitTime.Trace.Type.SOLID:
@@ -34,6 +34,7 @@ namespace SplitTime {
 				trace.eventId = rawTrace.event;
 				break;
 				case SplitTime.Trace.Type.POINTER:
+				case SplitTime.Trace.Type.TRANSPORT:
 				trace.level = SplitTime.Level.get(rawTrace.level);
 				trace.offsetX = +rawTrace.offsetX;
 				trace.offsetY = +rawTrace.offsetY;
@@ -42,6 +43,10 @@ namespace SplitTime {
 			}
 			return trace;
 		};
+
+		getLocationId() {
+			return this.level + ":" + this.offsetX + "," + this.offsetY + "," + this.offsetZ;
+		}
 		
 		static draw(traceStr, ctx, type, offsetPos?) {
 			var color = SplitTime.Trace.getColor(type);
@@ -205,7 +210,8 @@ namespace SplitTime {
 			GROUND: "ground",
 			EVENT: "event",
 			PATH: "path",
-			POINTER: "pointer"
+			POINTER: "pointer",
+			TRANSPORT: "transport"
 		};
 		
 		static RColor = {

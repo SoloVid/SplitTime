@@ -6,12 +6,17 @@ namespace SLVD{
         _listAwaitingRegistration: any[];
         _listAwaitingRemoval: any[];
         _allowedObjectMethods: any;
-        constructor(allowedObjectMethods?: string[]) {
+        constructor(allowedObjectMethodsPattern?: any) {
             this._handlers = [];
             this._isRunningCallbacks = false;
             this._listAwaitingRegistration = [];
             this._listAwaitingRemoval = [];
-            this._allowedObjectMethods = allowedObjectMethods || [];
+            this._allowedObjectMethods = [];
+            if(allowedObjectMethodsPattern) {
+                for(var methodName in allowedObjectMethodsPattern) {
+                    this._allowedObjectMethods.push(methodName);
+                }
+            }        
         };
         
         clear() {
@@ -74,12 +79,13 @@ namespace SLVD{
             this._isRunningCallbacks = true;
             for(var i = this._handlers.length - 1; i >= 0; i--) {
                 // Default to true so exceptions don't continue
-                var done = true;
+                // var done = true;
+                var done = false;
                 try {
                     done = this._callFunction(this._handlers[i], data);
                 } catch(ex) {
                     console.error(ex);
-                    console.warn("callback will be removed");
+                    // console.warn("callback will be removed");
                 }
                 if(done) {
                     this._handlers.splice(i, 1);

@@ -31,7 +31,7 @@ namespace SplitTime.body.collisions {
             var negativeDiagonal = (Math.round(this.mover.body.dir + 3.9) - 0.5) % 4;
             
             var me = this;
-            var levelTraces = this.mover.level.getLevelTraces();
+            var levelTraces = this.mover.body.getLevel().getLevelTraces();
             function isCornerOpen(direction, howFarAway) {
                 var collisionInfo = new SplitTime.level.traces.CollisionInfo();
                 var testX = x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway);

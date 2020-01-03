@@ -36,7 +36,7 @@ export function toString(numDir) {
 };
 
 //Get direction from one point to another (both in Maven orientation)
-export function fromTo(fromX, fromY, toX, toY) {
+export function fromTo(fromX: number, fromY: number, toX: number, toY: number): number {
 	if(fromX == toX) {
 		if(fromY < toY) return 3;
 		else return 1;

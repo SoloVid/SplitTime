@@ -3,16 +3,20 @@ namespace SplitTime {
     
     export class Body {
         ref: number;
-        private frameUpdateHandlers;
-        private playerInteractHandlers;
+        private frameUpdateHandlers: SLVD.RegisterCallbacks;
+        private timeAdvanceListeners: SLVD.RegisterCallbacks;
+        private playerInteractHandlers: SLVD.RegisterCallbacks;
+        mover: SplitTime.body.Mover;
         private speechBox;
         
         // TODO: remove parameter when moving templates elsewhere
         constructor(skipInit = false) {
             this.ref = nextRef++;
             if(!skipInit) {
-                this.frameUpdateHandlers = new SLVD.RegisterCallbacks(["notifyFrameUpdate"]);
-                this.playerInteractHandlers = new SLVD.RegisterCallbacks(["onPlayerInteract"]);
+                this.frameUpdateHandlers = new SLVD.RegisterCallbacks({notifyFrameUpdate: null});
+                this.timeAdvanceListeners = new SLVD.RegisterCallbacks({notifyTimeAdvance: null});
+                this.playerInteractHandlers = new SLVD.RegisterCallbacks({onPlayerInteract: null});
+                this.mover = new SplitTime.body.Mover(this);
                 // TODO: sort out (throw out) inheritance to make this work right
                 this.speechBox = new SplitTime.body.SpeechBox(this, -42);
             }
@@ -42,7 +46,7 @@ namespace SplitTime {
             this.setLevel(newLevel, true);
         }
         get halfBaseLength() {
-            return Math.round(this.baseLength);
+            return Math.round(this.baseLength / 2);
         }
         
         /**
@@ -266,19 +270,7 @@ namespace SplitTime {
         };
         
         notifyFrameUpdate(delta) {
-            var ZILCH = 0.00001;
-            if(this.baseLength > ZILCH) {
-                this.zVelocity += this.GRAVITY * delta;
-            }
             this.frameUpdateHandlers.run(delta);
-            if(this.baseLength > ZILCH && Math.abs(this.zVelocity) > ZILCH) {
-                var expectedDZ = this.zVelocity * delta;
-                var mover = new SplitTime.body.Mover(this);
-                var actualDZ = mover.zeldaVerticalBump(expectedDZ);
-                if(Math.abs(actualDZ) <= ZILCH) {
-                    this.zVelocity = 0;
-                }
-            }
             try {
                 if(this.drawable) {
                     this.drawable.notifyFrameUpdate(delta);
@@ -286,8 +278,36 @@ namespace SplitTime {
             } catch(e) {
                 SplitTime.Logger.error(e);
             }
-        };
+        }
         
+        notifyTimeAdvance(delta) {
+            this.timeAdvanceListeners.run(delta);
+        
+            var level = this.getLevel();
+            var region = level ? level.getRegion() : null;
+            if(region === SplitTime.Region.getCurrent()) {
+                var ZILCH = 0.00001;
+                if(this.baseLength > ZILCH) {
+                    this.zVelocity += this.GRAVITY * delta;
+                }
+                if(this.baseLength > ZILCH && Math.abs(this.zVelocity) > ZILCH) {
+                    var expectedDZ = this.zVelocity * delta;
+                    var actualDZ = this.mover.zeldaVerticalBump(expectedDZ);
+                    if(Math.abs(actualDZ) <= ZILCH) {
+                        this.zVelocity = 0;
+                    }
+                }
+            }
+        
+            try {
+                if(this.drawable) {
+                    this.drawable.notifyTimeAdvance(delta);
+                }
+            } catch(e) {
+                SplitTime.Logger.error(e);
+            }
+        }
+
         notifyPlayerInteract() {
             this.playerInteractHandlers.run();
         };
@@ -298,6 +318,13 @@ namespace SplitTime {
         */
         registerFrameUpdateHandler(handler) {
             this.frameUpdateHandlers.register(handler);
+        };
+
+        /**
+        * @param {function(number)} handler
+        */
+        registerTimeAdvanceListener(handler) {
+            this.timeAdvanceListeners.register(handler);
         };
         
         //Function run on ENTER or SPACE

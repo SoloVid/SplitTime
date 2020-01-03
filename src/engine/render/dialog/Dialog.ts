@@ -27,13 +27,14 @@ namespace SplitTime {
             this._isFinished = false;
         };
         
-        static readonly AdvanceMethod = {
+        static AdvanceMethod = {
+            DEFAULT: "DEFAULT",
             AUTO: "AUTO",
             INTERACTION: "INTERACTION",
             HYBRID: "HYBRID"
         };
         
-        _advanceMethod = SplitTime.Dialog.AdvanceMethod.HYBRID;
+        _advanceMethod = null;
         _delay: number = 2000;
         _speed = 25;
         
@@ -51,6 +52,10 @@ namespace SplitTime {
             this._refreshSignaler();
         };
         
+        getAdvanceMethod() {
+            return this._advanceMethod || AdvanceMethod.DEFAULT;
+        }
+
         setAdvanceMethod(advanceMethod, delay) {
             this._advanceMethod = advanceMethod;
             this._delay = delay || this._delay;
@@ -93,7 +98,7 @@ namespace SplitTime {
         onPlayerInteract() {
             if(this._playerInteractHandler) {
                 this._playerInteractHandler.onPlayerInteract(this);
-            } else if(this._advanceMethod === AdvanceMethod.INTERACTION || this._advanceMethod === AdvanceMethod.HYBRID) {
+            } else if(this.getAdvanceMethod() === AdvanceMethod.INTERACTION || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
                 this.advance();
             }
         };
@@ -124,7 +129,7 @@ namespace SplitTime {
         step() {
             if(this._charactersDisplayed < this._getCurrentLineLength()) {
                 this._charactersDisplayed++;
-            } else if(this._advanceMethod === AdvanceMethod.AUTO || this._advanceMethod === AdvanceMethod.HYBRID) {
+            } else if(this.getAdvanceMethod() === AdvanceMethod.AUTO || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
                 if(!this._startDelay) {
                     this._startDelay = this._getTimeMs();
                 } else if(this._getTimeMs() > this._startDelay + this._delay) {
@@ -141,7 +146,7 @@ namespace SplitTime {
                 } else if(typeof this._dialogEndHandler.onDialogEnd === "function") {
                     this._dialogEndHandler.onDialogEnd(this);
                 } else {
-                    console.error("Invalid dialog end handler: ", this._dialogEndHandler);
+                    SplitTime.Logger.error("Invalid dialog end handler: ", this._dialogEndHandler);
                 }
             }
         };
@@ -174,5 +179,6 @@ namespace SplitTime {
             return this._lines[this._currentLine].length;
         };
     }
+    SplitTime.Dialog.AdvanceMethod.DEFAULT = SplitTime.Dialog.AdvanceMethod.HYBRID;
     var AdvanceMethod = SplitTime.Dialog.AdvanceMethod;
 }

@@ -25,13 +25,12 @@ zeldaVerticalRise(maxDZ) {
 
     this.mover.body.setZ(collisionInfo.zEnd);
     if(collisionInfo.x >= 0) {
-        this.mover.level.runEvents(collisionInfo.events, this.mover.body);
+        this.mover.body.level.runEvents(collisionInfo.events, this.mover.body);
     }
     if(collisionInfo.body && collisionInfo.distanceAllowed < maxDZ) {
-        var mover = new SplitTime.body.Mover(collisionInfo.body);
         var howMuchUnmoved = maxDZ - collisionInfo.distanceAllowed;
         var howFarToPushOther = Math.min(howMuchUnmoved, 1);
-        mover.rising.zeldaVerticalRise(howFarToPushOther);
+        collisionInfo.body.mover.zeldaVerticalRise(howFarToPushOther);
         var howMuchMoreICanMove = howMuchUnmoved - howFarToPushOther * 2;
         if(howMuchMoreICanMove > 0) {
             return this.zeldaVerticalRise(howMuchMoreICanMove);
@@ -58,7 +57,7 @@ calculateRise(maxDZ) {
     var roundX = Math.floor(this.mover.body.getX());
     var roundY = Math.floor(this.mover.body.getY());
     var z = this.mover.body.getZ();
-    var top = z + this.mover.height;
+    var top = z + this.mover.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
     var collisionInfo = {
@@ -114,7 +113,7 @@ calculateRise(maxDZ) {
  * @returns {{x: int, y: int, distanceAllowed: number, zBlocked: number, zEnd: number, events: string[]}}
  */
 calculateRiseThroughTraces(x, y, z, maxDZ) {
-    var top = z + this.mover.height;
+    var top = z + this.mover.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
     var collisionInfo = {
@@ -127,12 +126,12 @@ calculateRiseThroughTraces(x, y, z, maxDZ) {
         otherLevels: []
     };
 
-    var startX = x - this.mover.halfBaseLength;
-    var xPixels = this.mover.baseLength;
-    var startY = y - this.mover.halfBaseLength;
-    var yPixels = this.mover.baseLength;
+    var startX = x - this.mover.body.halfBaseLength;
+    var xPixels = this.mover.body.baseLength;
+    var startY = y - this.mover.body.halfBaseLength;
+    var yPixels = this.mover.body.baseLength;
 
-    var levelTraces = this.mover.level.getLevelTraces();
+    var levelTraces = this.mover.body.level.getLevelTraces();
     var originCollisionInfo = new SplitTime.level.traces.CollisionInfo();
     //Loop through width of base
     for(var testY = startY; testY < startY + yPixels; testY++) {
@@ -180,7 +179,7 @@ calculateRiseThroughTraces(x, y, z, maxDZ) {
     if(collisionInfo.zBlocked < top){
         collisionInfo.zBlocked = top;
     }
-    collisionInfo.zEnd = collisionInfo.zBlocked - this.mover.height;
+    collisionInfo.zEnd = collisionInfo.zBlocked - this.mover.body.height;
 
     return collisionInfo;
 };
@@ -193,7 +192,7 @@ calculateRiseThroughTraces(x, y, z, maxDZ) {
  * @returns {{body: SplitTime.Body|null, distanceAllowed: number, zBlocked: number, zEnd: number}}
  */
 calculateRiseThroughBodies(x, y, z, maxDZ) {
-    var top = z + this.mover.height;
+    var top = z + this.mover.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
     var collisionInfo = {
@@ -203,10 +202,10 @@ calculateRiseThroughBodies(x, y, z, maxDZ) {
         zEnd: targetZ
     };
 
-    var startX = x - this.mover.halfBaseLength;
-    var xPixels = this.mover.baseLength;
-    var startY = y - this.mover.halfBaseLength;
-    var yPixels = this.mover.baseLength;
+    var startX = x - this.mover.body.halfBaseLength;
+    var xPixels = this.mover.body.baseLength;
+    var startY = y - this.mover.body.halfBaseLength;
+    var yPixels = this.mover.body.baseLength;
 
     function handleFoundBody(otherBody) {
         var zBlocked = otherBody.getZ();
@@ -216,9 +215,9 @@ calculateRiseThroughBodies(x, y, z, maxDZ) {
             collisionInfo.zBlocked = zBlocked;
         }
     }
-    this.mover.level.getCellGrid().forEachBody(startX, startY, top, startX + xPixels, startY + yPixels, targetTop, handleFoundBody);
+    this.mover.body.level.getCellGrid().forEachBody(startX, startY, top, startX + xPixels, startY + yPixels, targetTop, handleFoundBody);
 
-    collisionInfo.zEnd = collisionInfo.zBlocked - this.mover.height;
+    collisionInfo.zEnd = collisionInfo.zBlocked - this.mover.body.height;
 
     return collisionInfo;
 };

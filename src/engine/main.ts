@@ -1,9 +1,7 @@
-namespace SplitTime {
-    export function mainFunc() {
+namespace SplitTime.main {
+    function mainFuncLoopBody() {
         var startTime = new Date().getTime();
-        
-        var agentCount = 0;
-        
+                
         SplitTime.performanceCheckpoint("start", 999999);
         
         try {
@@ -20,11 +18,19 @@ namespace SplitTime {
                     break;
                 }
                 case SplitTime.main.State.ACTION: {
+                    var secondsForFrame = 1/SplitTime.FPS;
+
+                    var timeline = SplitTime.Timeline.getCurrent();
+                    timeline.notifyFrameUpdate(secondsForFrame);
+    
+                    SplitTime.performanceCheckpoint("timeline frame update");
+    
                     var region = SplitTime.Region.getCurrent();
-                    region.notifyFrameUpdate(1/SplitTime.FPS);
+                    region.notifyFrameUpdate(secondsForFrame);
+    
                     SplitTime.performanceCheckpoint("region frame update");
-                    
-                    SplitTime.BoardRenderer.notifyFrameUpdate(1/SplitTime.FPS);
+    
+                    SplitTime.BoardRenderer.notifyFrameUpdate(secondsForFrame);
                     SplitTime.BoardRenderer.renderBoardState(true);
                     SplitTime.performanceCheckpoint("SplitTime.BoardRenderer.renderBoardState");
                     
@@ -54,40 +60,48 @@ namespace SplitTime {
         
         var displayFPS = SplitTime.FPS;
         if(msElapsed < SplitTime.msPerFrame) {
-            setTimeout(SplitTime.mainFunc, SplitTime.msPerFrame - msElapsed);
+            setTimeout(mainFuncLoopBody, SplitTime.msPerFrame - msElapsed);
             SplitTime.see.fillStyle="#00FF00";
         } else {
-            setTimeout(SplitTime.mainFunc, 2); //give browser a quick breath
+            setTimeout(mainFuncLoopBody, 2); //give browser a quick breath
             var secondsElapsed = msElapsed/1000;
             displayFPS = Math.round(1/secondsElapsed);
             SplitTime.see.fillStyle="#FF0000";
         }
         
-        SplitTime.debug.update({
-            "FPS": displayFPS,
-            "Board Bodies": SplitTime.BoardRenderer.countBodies(),
-            "Focus point": Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z),
-            "Agents": agentCount,
-            "HUD Layers": SplitTime.hud.getRendererCount(),
-            "Joystick Direction": SplitTime.controls.JoyStick.getDirection()
-        });
+        if(SplitTime.debug.ENABLED) {
+            SplitTime.debug.setDebugValue("FPS", displayFPS);
+            SplitTime.debug.setDebugValue("Board Bodies", SplitTime.BoardRenderer.countBodies());
+            SplitTime.debug.setDebugValue("Focus point", Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z));
+    
+            SplitTime.debug.renderCanvas(SplitTime.see);
+        }
+    };
+
+    export const State = {
+        LOADING: "loading",
+        ACTION: "action",
+        OVERWORLD: "overworld",
+        OTHER: "other"
     };
     
-    export namespace main {
-        
-        export const State = {
-            LOADING: "loading",
-            ACTION: "action",
-            OVERWORLD: "overworld",
-            OTHER: "other"
-        };
-        
-        export interface FrameNotified {
-            /**
-            * @param delta number of seconds passed (in game time) since last frame
-            */
-            notifyFrameUpdate(delta);
+    var nextMainTimeoutId = null;
+
+    export function start() {
+        if(nextMainTimeoutId === null) {
+            mainFuncLoopBody();
         }
-        
+    };
+    
+    export function stop() {
+        clearTimeout(nextMainTimeoutId);
+        nextMainTimeoutId = null;
+    };
+    
+    export interface FrameNotified {
+        /**
+        * @param delta number of seconds passed (in real time) since last frame
+        */
+        notifyFrameUpdate(delta);
     }
 }

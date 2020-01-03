@@ -13,7 +13,7 @@ namespace SplitTime.controls {
         onDown: any;
         onUp: any;
         isDown: any;
-        constructor(onDown, onUp, isDown) {
+        constructor(onDown?, onUp?, isDown?) {
             this._bindings = {
                 obsolete: true
             };

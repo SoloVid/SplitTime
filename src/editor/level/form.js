@@ -245,6 +245,7 @@ function showEditorTrace(trace) {
             fields.push({key: "event"});
             break;
         case SplitTime.Trace.Type.POINTER:
+        case SplitTime.Trace.Type.TRANSPORT:
             fields.push({key: "level"});
             fields.push({key: "offsetX"});
             fields.push({key: "offsetY"});

@@ -26,7 +26,7 @@ namespace SplitTime.body.collisions {
             this.mover.bodyExt.previousGroundTraceY = collisionInfo.y;
             this.mover.bodyExt.previousGroundTraceZ = collisionInfo.zBlocked;
             if(collisionInfo.x >= 0) {
-                this.mover.level.runEvents(collisionInfo.events, this.mover.body);
+                this.mover.body.level.runEvents(collisionInfo.events, this.mover.body);
             }
             
             //If we have entered a new level by falling into it
@@ -62,9 +62,17 @@ namespace SplitTime.body.collisions {
                 collisionInfo.body = groundBody;
                 return collisionInfo;
             }
-            if(this.mover.body.z <= 0 || this.isPreviousGroundTraceRelevant()) {
+            if(this.mover.body.z <= 0) {
+                collisionInfo.x = roundX;
+                collisionInfo.y = roundY;
+                collisionInfo.distanceAllowed = 0;
+                collisionInfo.zBlocked = 0;
+                return collisionInfo;
+            }
+            if(this.isPreviousGroundTraceRelevant()) {
                 collisionInfo.x = this.mover.bodyExt.previousGroundTraceX;
                 collisionInfo.y = this.mover.bodyExt.previousGroundTraceY;
+                collisionInfo.distanceAllowed = 0;
                 collisionInfo.zBlocked = this.mover.bodyExt.previousGroundTraceZ;
                 return collisionInfo;
             }
@@ -118,10 +126,10 @@ namespace SplitTime.body.collisions {
                 otherLevels: []
             };
             
-            var startX = x - this.mover.halfBaseLength;
-            var xPixels = this.mover.baseLength;
-            var startY = y - this.mover.halfBaseLength;
-            var yPixels = this.mover.baseLength;
+            var startX = x - this.mover.body.halfBaseLength;
+            var xPixels = this.mover.body.baseLength;
+            var startY = y - this.mover.body.halfBaseLength;
+            var yPixels = this.mover.body.baseLength;
             
             if(z <= 0) {
                 collisionInfo.distanceAllowed = 0;
@@ -132,7 +140,7 @@ namespace SplitTime.body.collisions {
                 collisionInfo.zBlocked = 0;
             }
             
-            var levelTraces = this.mover.level.getLevelTraces();
+            var levelTraces = this.mover.body.level.getLevelTraces();
             var originCollisionInfo = new SplitTime.level.traces.CollisionInfo();
             //Loop through Y width of base
             for(var testY = startY; testY < startY + yPixels; testY++) {
@@ -200,10 +208,10 @@ namespace SplitTime.body.collisions {
                 zBlocked: targetZ
             };
             
-            var startX = x - this.mover.halfBaseLength;
-            var xPixels = this.mover.baseLength;
-            var startY = y - this.mover.halfBaseLength;
-            var yPixels = this.mover.baseLength;
+            var startX = x - this.mover.body.halfBaseLength;
+            var xPixels = this.mover.body.baseLength;
+            var startY = y - this.mover.body.halfBaseLength;
+            var yPixels = this.mover.body.baseLength;
             
             if(z <= 0) {
                 collisionInfo.distanceAllowed = 0;
@@ -222,7 +230,7 @@ namespace SplitTime.body.collisions {
                     collisionInfo.zBlocked = zBlocked;
                 }
             }
-            this.mover.level.getCellGrid().forEachBody(startX, startY, targetZ, startX + xPixels, startY + yPixels, z, handleFoundBody);
+            this.mover.body.level.getCellGrid().forEachBody(startX, startY, targetZ, startX + xPixels, startY + yPixels, z, handleFoundBody);
             
             return collisionInfo;
         };
@@ -238,10 +246,10 @@ namespace SplitTime.body.collisions {
             if(this.mover.bodyExt.previousGroundTraceX >= 0) {
                 var roundX = Math.floor(this.mover.body.getX());
                 var roundY = Math.floor(this.mover.body.getY());
-                var startX = roundX - this.mover.halfBaseLength;
-                var xPixels = this.mover.baseLength;
-                var startY = roundY - this.mover.halfBaseLength;
-                var yPixels = this.mover.baseLength;
+                var startX = roundX - this.mover.body.halfBaseLength;
+                var xPixels = this.mover.body.baseLength;
+                var startY = roundY - this.mover.body.halfBaseLength;
+                var yPixels = this.mover.body.baseLength;
                 return this.mover.body.z === this.mover.bodyExt.previousGroundTraceZ &&
                 startX <= this.mover.bodyExt.previousGroundTraceX &&
                 this.mover.bodyExt.previousGroundTraceX < startX + xPixels &&

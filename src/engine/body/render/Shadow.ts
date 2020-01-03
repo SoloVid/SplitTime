@@ -51,11 +51,14 @@ namespace SplitTime.body {
             // Do nothing
         };
         
+        notifyTimeAdvance(delta) {
+            // Do nothing
+        };
+        
         prepareForRender() {
-            this.shadowBody.put(null, this.realBody.x, this.realBody.y, this.realBody.z);
-            var mover = new SplitTime.body.Mover(this.shadowBody);
-            mover.level = this.realBody.level;
-            var shadowFallInfo = mover.falling.calculateDrop(mover.level.highestLayerZ + 1000);
+            this.shadowBody.put(this.realBody.level, this.realBody.x, this.realBody.y, this.realBody.z);
+            var shadowFallInfo = this.shadowBody.mover.falling.calculateDrop(this.realBody.level.highestLayerZ + 1000);
+            this.shadowBody.setLevel(null);
             this.shadowBody.setZ(shadowFallInfo.zBlocked);
             this.radius = (this.maxRadius - this.minRadius) / (0.05 * shadowFallInfo.distanceAllowed + 1) + this.minRadius;
         };

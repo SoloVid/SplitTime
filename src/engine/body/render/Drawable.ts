@@ -2,6 +2,7 @@ namespace SplitTime.body {
     /**
     * @interface
     * @extends FrameNotified
+    * @extends TimeNotified
     * @constructor
     */
     export class Drawable {

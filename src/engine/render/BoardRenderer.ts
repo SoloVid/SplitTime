@@ -132,7 +132,7 @@ namespace SplitTime.BoardRenderer {
     
     var bodyRenderer = new SplitTime.body.Renderer();
     
-    export var SCREEN_LAZY_FACTOR = 0.4;
+    export var SCREEN_LAZY_FACTOR = 0.25;
     
     function getScreenMoveSpeed(dx) {
         var MAX_STEP = 100;
@@ -267,7 +267,7 @@ namespace SplitTime.BoardRenderer {
         // SplitTime.see.font="12px Verdana";
         // SplitTime.see.fillText(SplitTime.player[SplitTime.currentPlayer].name + ": " + SplitTime.player[SplitTime.currentPlayer].hp + " HP | " + SplitTime.player[SplitTime.currentPlayer].strg + " Strength | " + SplitTime.player[SplitTime.currentPlayer].spd + " Agility", 10, 20);
         //
-        // SplitTime.Time.renderClock(SplitTime.see); //in time.js
+        // SplitTime.Timeline.renderClock(SplitTime.see); //in time.js
         
         //Save screen into snapshot
         SplitTime.see.drawImage(buffer, 0, 0);

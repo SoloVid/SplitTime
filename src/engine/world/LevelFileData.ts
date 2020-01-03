@@ -8,7 +8,7 @@ namespace SplitTime.level {
         positions: any[];
     }
     
-    namespace file_data {
+    export namespace file_data {
         
         export interface Layer {
             id: string;

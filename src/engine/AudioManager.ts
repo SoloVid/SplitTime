@@ -1,7 +1,7 @@
 namespace SplitTime.audio {
     var AUDIO_ROOT = SLVD.getScriptDirectory() + "audio/";
     var MUSIC_DIR = "music/";
-    var SOUND_EFFECT_DIR = "soundeffects/";
+    var SOUND_EFFECT_DIR = "fx/";
     var FADE_DURATION_MS = 2000;
     
     var registeredPaths = {};

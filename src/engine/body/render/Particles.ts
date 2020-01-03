@@ -232,8 +232,12 @@ namespace SplitTime.particles {
         };
         
         notifyFrameUpdate(delta) {
+            // Do nothing
+        }
+        
+        notifyTimeAdvance(delta) {
             this.advanceTime(delta * 1000);
-        };
+        }
         
         prepareForRender() {
             // TODO maybe

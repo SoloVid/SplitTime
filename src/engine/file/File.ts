@@ -7,11 +7,11 @@ namespace SplitTime.file {
     };
 
     export function onNew(callback) {
-        callbacks.registerCallback(callback);
+        callbacks.register(callback);
     };
 
     export function loadNew() {
-        callbacks.runCallbacks();
+        callbacks.run();
         return SLVD.Promise.as();
     };
 

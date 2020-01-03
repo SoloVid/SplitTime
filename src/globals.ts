@@ -17,7 +17,7 @@ namespace SplitTime {
     export var process = "hold"; //Input of master setInterval switch-case
     
     export var SCREENX = 640;
-    export var SCREENY = 480;
+    export var SCREENY = 360;
     
     export var FPS = 60;
     export var msPerFrame = (1/SplitTime.FPS)*1000;

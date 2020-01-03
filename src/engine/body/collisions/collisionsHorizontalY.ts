@@ -52,9 +52,9 @@ namespace SplitTime.body.collisions {
         * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[]}}
         */
         calculateYPixelCollision(level, x, y, z, dy) {
-            var edgeY = dy > 0 ? y + dy + this.mover.halfBaseLength : y + dy - this.mover.halfBaseLength;
-            var left = x - this.mover.halfBaseLength;
-            return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(level, left, this.mover.baseLength, edgeY, 1, Math.round(z), Math.round(this.mover.height));
+            var edgeY = dy > 0 ? y + dy + this.mover.body.halfBaseLength : y + dy - this.mover.body.halfBaseLength;
+            var left = x - this.mover.body.halfBaseLength;
+            return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(level, left, this.mover.body.baseLength, edgeY, 1, Math.round(z), Math.round(this.mover.body.height));
         };
     }
 }

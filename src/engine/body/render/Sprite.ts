@@ -83,29 +83,6 @@ namespace SplitTime {
         * @param {CanvasRenderingContext2D} ctx
         */
         _drawSimple(ctx) {
-            // var
-            //     // Radii of the white glow.
-            //     innerRadius = 2,
-            //     outerRadius = 16,
-            //     // Radius of the entire circle.
-            //     radius = 16;
-            //
-            // var gradient = ctx.createRadialGradient(0, 0, innerRadius, 0, 0, outerRadius);
-            // gradient.addColorStop(0, 'rgba(0, 0, 0, .7)');
-            // gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-            //
-            // ctx.scale(1, 0.5);
-            //
-            // ctx.beginPath();
-            // ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-            //
-            // ctx.fillStyle = gradient;
-            // ctx.fill();
-            //
-            // ctx.scale(1, 2);
-            // // ctx.restore();
-            // // ctx.setTransform(1, 0, 0, 1, 0, 0);
-            
             var tImg = this.getImage();
             
             var crop = this.getAnimationFrameCrop(this.dir, this.stance, this.frame);
@@ -212,6 +189,10 @@ namespace SplitTime {
         };
         
         notifyFrameUpdate(delta) {
+            // Don't care about real time
+        };
+        
+        notifyTimeAdvance(delta) {
             this._timeMs += delta * 1000;
         };
         

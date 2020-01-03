@@ -12,9 +12,10 @@ namespace SplitTime {
     * @param {int} yPixels
     * @param {int} startZ
     * @param {int} zPixels
+    * @param {SplitTime.Body} [ignoreBody]
     * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[], otherLevels: string[]}}
     */
-    CollisionCalculator.prototype.calculateVolumeCollision = function(level, startX, xPixels, startY, yPixels, startZ, zPixels) {
+    CollisionCalculator.prototype.calculateVolumeCollision = function(level, startX, xPixels, startY, yPixels, startZ, zPixels, ignoreBody) {
         var collisionInfo = {
             blocked: false,
             bodies: [],
@@ -23,9 +24,11 @@ namespace SplitTime {
             otherLevels: []
         };
         function handleFoundBody(otherBody) {
-            collisionInfo.blocked = true;
-            collisionInfo.bodies.push(otherBody);
-            collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - startZ;
+            if(otherBody !== ignoreBody) {
+                collisionInfo.blocked = true;
+                collisionInfo.bodies.push(otherBody);
+                collisionInfo.vStepUpEstimate = otherBody.getZ() + otherBody.height - startZ;
+            }
         }
         level.getCellGrid().forEachBody(startX, startY, startZ, startX + xPixels, startY + yPixels, startZ + zPixels, handleFoundBody);
         

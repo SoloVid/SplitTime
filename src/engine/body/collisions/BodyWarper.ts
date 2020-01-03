@@ -46,14 +46,15 @@ namespace SplitTime.body {
             
             var toX = null;
             var toY = null;
+            var events = [];
             var otherLevelId = null;
             
             var me = this;
             SLVD.bresenham.forEachPoint(furthestX, furthestY, startX, startY, function(x, y) {
-                if(x >= me.level.width || x < 0) {
+                if(x + me.halfBaseLength >= me.level.width || x - me.halfBaseLength < 0) {
                     return false;
                 }
-                if(y >= me.level.yWidth || y < 0) {
+                if(y + me.halfBaseLength >= me.level.yWidth || y - me.halfBaseLength < 0) {
                     return false;
                 }
                 var collisionInfo = me._getCollisionInfoAt(x, y, z);
@@ -61,6 +62,7 @@ namespace SplitTime.body {
                     if(toX === null) {
                         toX = x;
                         toY = y;
+                        events = collisionInfo.events;
                         if(collisionInfo.otherLevels.length === 1) {
                             otherLevelId = collisionInfo.otherLevels[0];
                         }
@@ -71,6 +73,7 @@ namespace SplitTime.body {
             
             if(toX !== null && toY !== null && (Math.abs(toX - startX) > this.baseLength || Math.abs(toY - startY) > this.baseLength)) {
                 this.body.put(this.level, toX, toY, z);
+                this.level.runEvents(events, this.body);
                 if(otherLevelId !== null) {
                     var transporter = new SplitTime.body.Transporter(this.body);
                     transporter.transportLevelIfApplicable(otherLevelId);
@@ -85,14 +88,14 @@ namespace SplitTime.body {
         * @param x
         * @param y
         * @param z
-        * @return {{blocked: boolean, otherLevels: string[]}}
+        * @return {{blocked: boolean, events: string[], otherLevels: string[]}}
         * @private
         */
         _getCollisionInfoAt(x, y, z) {
             var left = x - this.halfBaseLength;
             var top = y - this.halfBaseLength;
             
-            return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(this.level, left, this.baseLength, top, this.baseLength, z, this.height);
+            return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(this.level, left, this.baseLength, top, this.baseLength, z, this.body.height, this.body);
         };
     }
 }

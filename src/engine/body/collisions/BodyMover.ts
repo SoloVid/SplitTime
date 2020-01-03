@@ -1,14 +1,8 @@
-namespace SplitTime.body {
+namespace SplitTime.body {    
     /**
-    * @type {Object.<int, BodyExt>}
-    */
-    var bodyMap = {};
-    
-    /**
-    * @param {SplitTime.Body} body
     * @constructor
     */
-    function BodyExt(body) {
+    function BodyExt() {
         this.bumped = false;
         this.pushing = false;
         this.sliding = false;
@@ -20,41 +14,19 @@ namespace SplitTime.body {
     
     /**
     * @param {SplitTime.Body} body
-    * @returns {BodyExt}
-    */
-    function getBodyExt(body) {
-        if(!(body.ref in bodyMap)) {
-            bodyMap[body.ref] = new BodyExt(body);
-        }
-        
-        return bodyMap[body.ref];
-    }
-    
-    /**
-    * @param {SplitTime.Body} body
     * @constructor
     */
     export class Mover {
         body: SplitTime.Body;
-        level: SplitTime.Level;
         bodyExt: any;
-        baseLength: number;
-        halfBaseLength: number;
-        height: number;
         dir: any;
         horizontal: collisions.Horizontal;
         rising: collisions.Rising;
         falling: collisions.Falling;
         constructor(body) {
             this.body = body;
-            /** @type {SplitTime.Level} */
-            this.level = body.getLevel();
-            this.bodyExt = getBodyExt(this.body);
+            this.bodyExt = new BodyExt();
             
-            this.baseLength = this.body.baseLength;
-            this.halfBaseLength = Math.round(this.baseLength / 2);
-            this.height = this.body.height;
-
             this.horizontal = new collisions.Horizontal(this);
             this.rising = new collisions.Rising(this);
             this.falling = new collisions.Falling(this);

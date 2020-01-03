@@ -149,7 +149,7 @@ namespace SplitTime.level {
             var holderCtx = holderCanvas.getContext("2d");
             
             var debugTraceCtx;
-            if(SplitTime.debug.DRAW_TRACES) {
+            if(SplitTime.debug.ENABLED) {
                 this.debugTraceCanvas = document.createElement("canvas");
                 this.debugTraceCanvas.width = this.level.width;
                 this.debugTraceCanvas.height = this.level.height;
@@ -203,6 +203,14 @@ namespace SplitTime.level {
                         var pointerColor = SplitTime.Trace.getPointerColor(pointerIntId);
                         SplitTime.Trace.drawColor(trace.vertices, holderCtx, pointerColor);
                         break;
+                        case SplitTime.Trace.Type.TRANSPORT:
+                            var transportTrace = SplitTime.Trace.fromRaw(trace);
+                            var transportStringId = transportTrace.getLocationId();
+                            var transportIntId = nextFunctionId++;
+                            this._internalEventIdMap[transportIntId] = transportStringId;
+                            var transportColor = SplitTime.Trace.getEventColor(transportIntId);
+                            SplitTime.Trace.drawColor(trace.vertices, holderCtx, transportColor);
+                            break;
                         default:
                         SplitTime.Trace.draw(layerTraces[iLayerTrace].vertices, holderCtx, type);
                     }
@@ -214,7 +222,7 @@ namespace SplitTime.level {
                 
                 this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, holderCanvas.width, holderCanvas.height);
                 
-                if(SplitTime.debug.DRAW_TRACES) {
+                if(SplitTime.debug.ENABLED) {
                     debugTraceCtx.drawImage(holderCanvas, 0, -layerZ);
                 }
             }

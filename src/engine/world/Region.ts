@@ -2,22 +2,30 @@ namespace SplitTime {
     
     var regionMap = {};
     
+    // A region is a logical unit of levels that are loaded together and share a common timeline
     export class Region {
+        id;
         levels: SplitTime.Level[];
-        time: SplitTime.Time;
-        mainTimeStabilizer: any;
-        constructor() {
+        _timeline: SplitTime.Timeline;
+        constructor(id) {
+            this.id = id;
             this.levels = [];
-            this.time = new SplitTime.Time();
-            this.mainTimeStabilizer = this.getTimeStabilizer();
+            this._timeline = new SplitTime.Timeline();
+            this._timeline.addRegion(this);
         };
         
-        getTime() {
-            return this.time;
+        getTimeline() {
+            return this._timeline;
         };
         getTimeMs() {
-            return this.time.getTimeMs();
+            return this._timeline.getTimeMs();
         };
+
+        setTimeline(timeline) {
+            this._timeline.removeRegion(this);
+            this._timeline = timeline;
+            this._timeline.addRegion(this);
+        }
         
         /**
         *
@@ -39,7 +47,7 @@ namespace SplitTime {
         
         static get(regionId) {
             if(!regionMap[regionId]) {
-                regionMap[regionId] = new SplitTime.Region();
+                regionMap[regionId] = new SplitTime.Region(regionId);
             }
             return regionMap[regionId];
         };
@@ -61,10 +69,14 @@ namespace SplitTime {
         };
         
         notifyFrameUpdate(delta) {
-            this.time.advance(delta);
-            
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyFrameUpdate(delta);
+            }
+        };
+        
+        notifyTimeAdvance(delta) {
+            for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
+                this.levels[iLevel].notifyTimeAdvance(delta);
             }
         };
         
@@ -82,5 +94,5 @@ namespace SplitTime {
             }
         };
     }
-    var defaultRegion = new SplitTime.Region();
+    var defaultRegion = new SplitTime.Region("!!!DEFAULT!!!");
 }
