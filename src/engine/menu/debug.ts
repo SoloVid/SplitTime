@@ -12,7 +12,10 @@ namespace SplitTime.debug {
     
     var DEBOUNCE = 100;
     var LIFE = 2000;
-    var frameStabilizer = new SplitTime.FrameStabilizer(DEBOUNCE);
+    var frameStabilizer: FrameStabilizer;
+    defer(() => {
+        frameStabilizer = new SplitTime.FrameStabilizer(DEBOUNCE);
+    });
     
     export function setDebugValue(key, value) {
         if(!SplitTime.debug.ENABLED) {

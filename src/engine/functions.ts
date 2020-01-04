@@ -5,6 +5,7 @@ namespace SplitTime {
 		var promise = new SLVD.Promise();
 		setTimeout(function() {
 			SplitTime.process = formerProcess;
+			promise.resolve();
 		}, seconds * 1000);
 		return promise;
 	};

@@ -32,13 +32,23 @@ module.exports = function(grunt) {
         concat: {
             options: {
                 separator: ';\n',
-                sourceMap: true
+                sourceMap: true,
+                process: function(src, filepath) {
+                    var isOneLinerComment = !/\n/.test(src) && /\/\//.test(src);
+                    if(isOneLinerComment) {
+                        // There appears to be an issue with concatenating empty files with source maps
+                        return "";
+                        // return src.replace(/./g, "/");
+                    }
+                    return src;
+                }
             },
             engine: {
                 src: [
                     'node_modules/howler/dist/howler.min.js',
                     'build/tsjs/defer.def.js',
-                    'build/tsjs/engine/**/*.js'
+                    'build/tsjs/engine/**/*.js',
+                    'build/tsjs/defer.run.js'
                 ],
                 dest: 'build/engine.js'
             },
@@ -49,7 +59,7 @@ module.exports = function(grunt) {
                     '<%= grunt.config("projectPath") %>build/generated/**/*.js',
                     'build/tsjs/defer.run.js'
                 ],
-                dest: '<%= grunt.config("projectPath") %>dist/game.js'//'dist/<%= pkg.name %>.js'
+                dest: '<%= grunt.config("projectPath") %>dist/game.js'
             }
         },
         sync: {
@@ -62,7 +72,7 @@ module.exports = function(grunt) {
                     ],
                     dest: '<%= grunt.config("projectPath") %>dist'
                 }],
-                ignoreInDest: 'game.js',
+                ignoreInDest: 'game.js*',
                 updateAndDelete: true,
                 verbose: true // Display log messages when copying files
             }

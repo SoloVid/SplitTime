@@ -1,5 +1,8 @@
 namespace SplitTime.file {
-    var callbacks = new SLVD.RegisterCallbacks();
+    var callbacks: SLVD.RegisterCallbacks;
+    defer(() => {
+        callbacks = new SLVD.RegisterCallbacks();
+    });
     var gameId;
 
     export function setGameId(id) {

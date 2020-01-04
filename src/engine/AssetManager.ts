@@ -1,5 +1,8 @@
 namespace SplitTime.image {
-    var ROOT = SLVD.getScriptDirectory() + "images/";
+    var ROOT: string;
+    defer(() => {
+        ROOT = SLVD.getScriptDirectory() + "images/";
+    });
     var map = {};
     var loadingPromises = {};
     

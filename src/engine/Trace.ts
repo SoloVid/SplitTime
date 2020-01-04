@@ -220,33 +220,33 @@ namespace SplitTime {
 			POINTER: 20
 		};
 		static typeToColor = {
-			"solid": [SplitTime.Trace.RColor.SOLID, 0, 0, 1],
-			"event": [SplitTime.Trace.RColor.EVENT, 0, 0, 1],
+			"solid": [Trace.RColor.SOLID, 0, 0, 1],
+			"event": [Trace.RColor.EVENT, 0, 0, 1],
 			"path": [0, 0, 0, 1],
 			"stairs": [0, 255, 0, 1]
 		};
 		static colorToType = {};
 		
 		static getColor(type) {
-			return "rgba(" + SplitTime.Trace.typeToColor[type].join(", ") + ")";
+			return "rgba(" + Trace.typeToColor[type].join(", ") + ")";
 		};
 		static getType(r, g, b, a) {
 			if(a === undefined) {
 				a = 1;
 			}
-			return SplitTime.Trace.colorToType[r + "," + g + "," + b + "," + a];
+			return Trace.colorToType[r + "," + g + "," + b + "," + a];
 		};
 		
 		static getSolidColor(height) {
 			var g = Math.min(Math.max(0, +height), 255);
 			var b = 4 * g;
-			return "rgba(" + SplitTime.Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)";
+			return "rgba(" + Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)";
 		};
 		
 		static getEventColor(id) {
 			var b = id % 256;
 			var g = Math.floor(id / 256);
-			return "rgba(" + SplitTime.Trace.RColor.EVENT + ", " + g + ", " + b + ", 1)";
+			return "rgba(" + Trace.RColor.EVENT + ", " + g + ", " + b + ", 1)";
 		};
 		
 		static getEventIdFromColor(r, g, b, a) {
@@ -256,14 +256,15 @@ namespace SplitTime {
 		static getPointerColor(id) {
 			var b = id % 256;
 			var g = Math.floor(id / 256);
-			return "rgba(" + SplitTime.Trace.RColor.POINTER + ", " + g + ", " + b + ", 1)";
+			return "rgba(" + Trace.RColor.POINTER + ", " + g + ", " + b + ", 1)";
 		};
 		
 		static getPointerIdFromColor(r, g, b, a) {
 			return b + 256 * g;
 		};
 	}
-}
-for(var color in SplitTime.Trace.typeToColor) {
-	SplitTime.Trace.colorToType[SplitTime.Trace.typeToColor[color].join(",")] = color;
+
+	for(var color in Trace.typeToColor) {
+		Trace.colorToType[Trace.typeToColor[color].join(",")] = color;
+	}
 }

@@ -1,15 +1,15 @@
 namespace SLVD {
 	//Promises for SplitTime
 	export class Promise {
-		construtor() {
+		callBacks: Function[];
+		babyPromises: Promise[];
+		resolved: boolean;
+		data: any;
+		constructor() {
 			this.callBacks = [];
 			this.babyPromises = [];
-		};
-		callBacks: any;
-		babyPromises: any;
-		resolved: any;
-		data: any;
-		then(callBack) {
+		}
+		then(callBack: Function) {
 			if(!(callBack instanceof Function)) {
 				console.warn("callBack is not a function");
 				return;

@@ -1,8 +1,11 @@
 namespace SplitTime {
     var COUNTER_BASE = 25600;
     // TODO: might want to use region time rather than real time
-    var frameStabilizer = new SplitTime.IntervalStabilizer(SplitTime.msPerFrame, COUNTER_BASE, function() {
-        return new Date();
+    var frameStabilizer: IntervalStabilizer;
+    defer(() => {
+        frameStabilizer = new SplitTime.IntervalStabilizer(SplitTime.msPerFrame, COUNTER_BASE, function() {
+            return new Date();
+        });
     });
     
     /** @type {int} */

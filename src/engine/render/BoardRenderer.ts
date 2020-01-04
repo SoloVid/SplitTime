@@ -130,7 +130,10 @@ namespace SplitTime.BoardRenderer {
         return currentLevel.getBodies().length;
     };
     
-    var bodyRenderer = new SplitTime.body.Renderer();
+    var bodyRenderer: body.Renderer;
+    defer(() => {
+        bodyRenderer = new SplitTime.body.Renderer();
+    });
     
     export var SCREEN_LAZY_FACTOR = 0.25;
     
