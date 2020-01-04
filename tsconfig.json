@@ -1,7 +1,6 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "rootDir": "./src",
     "outDir": "./build/tsjs",
     "target": "es5",
     "module": "none",

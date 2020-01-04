@@ -17,10 +17,16 @@ module.exports = function(grunt) {
                 tsCacheDir: 'build/.tscache'
             },
             engine: {
-                tsconfig: './tsconfig.json'
+                tsconfig: 'tsconfig.json',
+                options: {
+                    rootDir: 'src'
+                }
             },
             project: {
-                tsconfig: '<%= grunt.config("projectPath") %>tsconfig.json'
+                tsconfig: '<%= grunt.config("projectPath") %>tsconfig.json',
+                options: {
+                    rootDir: '<%= grunt.config("projectPath") %>src'
+                }
             }
         },
         concat: {
@@ -32,7 +38,6 @@ module.exports = function(grunt) {
                 src: [
                     'node_modules/howler/dist/howler.min.js',
                     'build/tsjs/defer.def.js',
-                    'build/tsjs/globals.js', //first in file to avoid null pointers
                     'build/tsjs/engine/**/*.js'
                 ],
                 dest: 'build/engine.js'

@@ -1,4 +1,14 @@
 namespace SplitTime {
+	export function delay(seconds) {
+		var formerProcess = SplitTime.process;
+		SplitTime.process = SplitTime.main.State.OTHER;
+		var promise = new SLVD.Promise();
+		setTimeout(function() {
+			SplitTime.process = formerProcess;
+		}, seconds * 1000);
+		return promise;
+	};
+	
 	//Black out canvas
 	export function canvasBlackout(canv) {
 		canv.fillStyle="#000000";

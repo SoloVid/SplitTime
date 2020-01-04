@@ -1,11 +1,25 @@
 namespace SplitTime.menu {
-	
 	// These buttons are intended to be wholesale replaced by game-specific settings
 	export const Button = {
 		GUI_CONFIRMATION: new SplitTime.controls.Button(),
 		GUI_CANCEL: new SplitTime.controls.Button()
 	};
 
+	export function showImage (file: CanvasImageSource, duration: number, waitForEnterSpace: boolean): SLVD.Promise {
+		SplitTime.see.drawImage(file, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
+		return SplitTime.delay(duration).then(function() {
+			if(waitForEnterSpace) {
+				var formerProcess = SplitTime.process;
+				SplitTime.process = SplitTime.main.State.OTHER;
+				return Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
+					SplitTime.process = formerProcess;
+				});
+			} else {
+				return SLVD.Promise.as();
+			}
+		});
+	};
+	
 	export class Menu {
 		point: any[];
 		currentPoint: number;

@@ -1,21 +1,12 @@
 type int = number;
 
 namespace SplitTime {
-    //implied SplitTime.SAVE object from load.js
-    export var SAVE = {};
-    
-    //var SplitTime.seeB, SplitTime.see;
-    
     export var location = {
         images: "images/",
         audio: "audio/",
         levels: "levels/"
     };
-    
-    export var player = [];
-    export var Actor = [];
-    export var Teams = {};
-    
+
     export var process = "hold"; //Input of master setInterval switch-case
     
     export var SCREENX = 640;
