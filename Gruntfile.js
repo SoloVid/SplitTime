@@ -2,6 +2,7 @@ var fs = require("fs");
 var path = require("path");
 var childProcess = require("child_process");
 var Concat = require("concat-with-sourcemaps");
+var convertSourceMap = require("convert-source-map");
 
 module.exports = function(grunt) {
 
@@ -12,61 +13,9 @@ module.exports = function(grunt) {
     var SOUND_EFFECT_DIRECTORY = AUDIO_DIRECTORY + "fx/";
     var TASK_DATA_GEN = 'generate-data-js';
     var TASK_DECL_GEN = 'generate-index-d-ts';
-    var TASK_ENSURE_NEWLINES = 'ensure-newlines';
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        ts: {
-            options: {
-                tsCacheDir: 'build/.tscache',
-                // fast: "always"
-            },
-            engine: {
-                tsconfig: 'tsconfig.json',
-                options: {
-                    rootDir: 'src'
-                }
-            },
-            project: {
-                tsconfig: '<%= grunt.config("projectPath") %>tsconfig.json',
-                options: {
-                    rootDir: '<%= grunt.config("projectPath") %>src'
-                }
-            }
-        },
-        concat: {
-            options: {
-                separator: ';\n',
-                sourceMap: true,
-                process: function(src, filepath) {
-                    var isOneLinerComment = !/\n/.test(src) && /\/\//.test(src);
-                    if(isOneLinerComment) {
-                        // There appears to be an issue with concatenating empty files with source maps
-                        return "";
-                        // return src.replace(/./g, "/");
-                    }
-                    return src;
-                }
-            },
-            engine: {
-                src: [
-                    'node_modules/howler/dist/howler.min.js',
-                    'build/tsjs/defer.def.js',
-                    'build/tsjs/engine/**/*.js',
-                    'build/tsjs/defer.run.js'
-                ],
-                dest: 'build/engine.js'
-            },
-            project: {
-                src: [
-                    'build/engine.js',
-                    '<%= grunt.config("projectPath") %>build/tsjs/**/*.js',
-                    '<%= grunt.config("projectPath") %>build/generated/**/*.js',
-                    'build/tsjs/defer.run.js'
-                ],
-                dest: '<%= grunt.config("projectPath") %>dist/game.js'
-            }
-        },
         sync: {
             project: {
                 files: [{
@@ -112,8 +61,6 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks('grunt-ts');
-    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-sync');
@@ -169,7 +116,7 @@ module.exports = function(grunt) {
                 projectRoot + '/build/generated/**/*.js',
                 'build/tsjs/defer.run.js'
             ];
-            concatFilesWithSourceMaps(files, projectRoot + '/build/game.js');
+            concatFilesWithSourceMaps(files, projectRoot + '/dist/game.js');
         } else {
             files = [
                 'node_modules/howler/dist/howler.min.js',
@@ -247,24 +194,31 @@ module.exports = function(grunt) {
         return path.join(ownRoot, binSub);
     }
 
+    function transposeRelativePath(originalRelativePath, originalReferenceFile, targetReferenceFile) {
+        var absoluteFilePath = path.resolve(path.dirname(originalReferenceFile), originalRelativePath);
+        var targetDir = path.resolve(path.dirname(targetReferenceFile));
+        return path.relative(targetDir, absoluteFilePath).replace(/\\\\?/g, "/");
+    }
+
     function concatFilesWithSourceMaps(filePatterns, outputFilePath) {
-        // var origDir = process.cwd();
         var outputFileDir = path.dirname(outputFilePath);
         var outputFileName = path.basename(outputFilePath);
         var files = grunt.file.expand(filePatterns);
-        var concat;
-        // inDir(outputFileDir, function() {
-            concat = new Concat(true, outputFileName, ';\n');
-        // });
+        var concat = new Concat(true, outputFileName, ';\n');
         files.forEach(function(file) {
             var fileInfo = readFileWithSourceMap(file);
-            // inDir(outputFileDir, function() {
-                concat.add(file, fileInfo.content, fileInfo.sourceMap);
-            // });
+            var sourceMap;
+            if(fileInfo.sourceMap) {
+                var jsonSourceMap = convertSourceMap.fromJSON(fileInfo.sourceMap).toObject();
+                for(var i = 0; i < jsonSourceMap.sources.length; i++) {
+                    jsonSourceMap.sources[i] = transposeRelativePath(jsonSourceMap.sources[i], file, outputFilePath);
+                }
+                sourceMap = convertSourceMap.fromObject(jsonSourceMap).toJSON();
+            }
+            concat.add(file, fileInfo.content, sourceMap);
         });
         var sourceMapFileName = outputFileName + ".map";
         concat.add(null, "//# sourceMappingURL=" + sourceMapFileName);
-        // process.chdir(origDir);
         var sourceMapPath = path.join(outputFileDir, sourceMapFileName);
         grunt.file.write(outputFilePath, concat.content);
         grunt.file.write(sourceMapPath, concat.sourceMap);
@@ -279,10 +233,8 @@ module.exports = function(grunt) {
             var matches = line.match(/\/\/# sourceMappingURL=(.+\.js\.map)/);
             if(matches) {
                 var relSourceMapPath = matches[1];
-                // console.log("Found source map: " + relSourceMapPath);
                 var absSourceMapPath = path.join(path.resolve(path.dirname(filePath)), relSourceMapPath);
                 sourceMap = grunt.file.read(absSourceMapPath);
-                // console.log(sourceMap);
                 fileLinesWithoutSourceMaps.push(line.replace(/./g, "/"));
             } else {
                 fileLinesWithoutSourceMaps.push(line);
