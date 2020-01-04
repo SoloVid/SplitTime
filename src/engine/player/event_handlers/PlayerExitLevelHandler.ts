@@ -1,0 +1,3 @@
+interface PlayerExitLevelHandler {
+    onPlayerExitLevel();
+}

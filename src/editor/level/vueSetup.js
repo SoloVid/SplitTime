@@ -344,6 +344,11 @@ Vue.component("rendered-layer", {
 var vueApp = new Vue({
 	el: '#app',
 	data: {
+	    info: {
+	        x: undefined,
+            y: undefined,
+            z: undefined
+        },
 		level: levelObject,
 		levelWidth: 0,
 		levelHeight: 0,
@@ -378,6 +383,11 @@ var vueApp = new Vue({
                 type: SplitTime.Trace.Type.POINTER,
                 color: "rgba(100, 50, 100, .8)",
                 help: "Link to another level. Traces from that level will affect this area, and a body fully moved into the pointer trace will be transported to that level."
+            },
+            {
+                type: SplitTime.Trace.Type.TRANSPORT,
+                color: "rgba(200, 100, 10, .8)",
+                help: "Link to another level regardless of what's on the other side. Note: You'll want to use opposite values for pairs of these traces, but be careful not to overlap the traces and leave enough room for the maximum expected base between."
             }
         ]
 	},

@@ -1,0 +1,3 @@
+interface PlayerEnterLevelHandler {
+    onPlayerEnterLevel();
+}

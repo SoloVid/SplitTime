@@ -1,0 +1,3 @@
+interface Signaler {
+    isSignaling(): boolean;
+}

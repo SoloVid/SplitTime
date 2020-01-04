@@ -1,0 +1,3 @@
+interface DialogEndHandler {
+    onDialogEnd();
+}
