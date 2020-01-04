@@ -56,7 +56,7 @@ namespace SplitTime {
             return this._advanceMethod || AdvanceMethod.DEFAULT;
         }
 
-        setAdvanceMethod(advanceMethod, delay) {
+        setAdvanceMethod(advanceMethod, delay?) {
             this._advanceMethod = advanceMethod;
             this._delay = delay || this._delay;
         };

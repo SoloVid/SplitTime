@@ -18,7 +18,7 @@ namespace SplitTime {
                 this.playerInteractHandlers = new SLVD.RegisterCallbacks({onPlayerInteract: null});
                 this.mover = new SplitTime.body.Mover(this);
                 // TODO: sort out (throw out) inheritance to make this work right
-                this.speechBox = new SplitTime.body.SpeechBox(this, -42);
+                this.speechBox = new SplitTime.body.SpeechBox(this, 42);
             }
         }
         get x() {
