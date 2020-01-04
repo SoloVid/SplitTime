@@ -10,7 +10,7 @@ namespace SplitTime {
         constructor(id) {
             this.id = id;
             this.levels = [];
-            this._timeline = new SplitTime.Timeline();
+            this._timeline = SplitTime.Timeline.getDefault();
             this._timeline.addRegion(this);
         };
         
@@ -54,9 +54,8 @@ namespace SplitTime {
         
         /**
         * Get the region currently in play.
-        * @returns {SplitTime.Region|null}
         */
-        static getCurrent() {
+        static getCurrent(): SplitTime.Region | null {
             var currentLevel = SplitTime.Level.getCurrent();
             if(currentLevel === null) {
                 return null;

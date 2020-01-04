@@ -178,7 +178,7 @@ namespace SplitTime {
             this.dir = this.requestedDir;
         };
         
-        requestStance(stance, dir, forceReset) {
+        requestStance(stance, dir, forceReset = false) {
             this.requestedStance = stance;
             this.requestedDir = dir;
             this.requestedFrameReset = forceReset;

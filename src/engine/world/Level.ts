@@ -7,10 +7,10 @@ namespace SplitTime {
     
     var inTransition = false;
     /** @type {SLVD.Promise} */
-    var transitionPromise = null;
+    var transitionPromise: SLVD.Promise = null;
     
     /** @type {SplitTime.Level|null} */
-    var nextLevel = null;
+    var nextLevel: SplitTime.Level | null = null;
     
     export class Level {
         id: any;
@@ -27,17 +27,17 @@ namespace SplitTime {
         _props: any[];
         fileData: any;
         type: any;
-        width: any;
-        height: any;
-        yWidth: any;
-        highestLayerZ: number;
+        width: int = 0;
+        height: int = 0;
+        yWidth: int = 0;
+        highestLayerZ: int;
         _levelTraces: any;
         /**
         * @param {string} levelId
         * @constructor
         * @property {ImageData[]} layerFuncData
         */
-        constructor(levelId) {
+        constructor(levelId: string) {
             this.id = levelId;
             this.events = {};
             this.positions = {};
@@ -71,16 +71,16 @@ namespace SplitTime {
         * @param {SplitTime.LevelFileData} levelData
         * @return {SLVD.Promise.Collection}
         */
-        load(levelData) {
+        load(levelData: SplitTime.level.FileData): SLVD.PromiseCollection {
             var levelLoadPromise = new SLVD.PromiseCollection();
             
             SplitTime.Region.get(levelData.region).addLevel(this);
             
             this.fileData = levelData;
             this.type = levelData.type;
-            this.width = levelData.width || 0;
-            this.height = levelData.height || 0;
-            this.yWidth = levelData.yWidth || 0;
+            // this.width = levelData.width || 0;
+            // this.height = levelData.height || 0;
+            // this.yWidth = levelData.yWidth || 0;
             
             this.highestLayerZ = 0;
             if(levelData.layers.length > 0) {
@@ -168,24 +168,15 @@ namespace SplitTime {
                 return this.loadPromise;
             };
             
-            /**
-            * @return {SplitTime.Level.CellGrid}
-            */
-            getCellGrid() {
+            getCellGrid(): SplitTime.level.CellGrid {
                 return this._cellGrid;
             };
             
-            /**
-            * @return {SplitTime.LevelTraces}
-            */
-            getLevelTraces() {
+            getLevelTraces(): SplitTime.level.Traces {
                 return this._levelTraces;
             };
             
-            /**
-            * @return {HTMLImageElement}
-            */
-            getBackgroundImage() {
+            getBackgroundImage(): HTMLImageElement {
                 if(!this.background) {
                     return null;
                 }
@@ -196,10 +187,7 @@ namespace SplitTime {
                 return this._levelTraces.getDebugTraceCanvas();
             };
             
-            /**
-            * @return {SplitTime.Region}
-            */
-            getRegion() {
+            getRegion(): SplitTime.Region {
                 if(!this.region) {
                     console.warn("Level \"" + this.id + "\" is not assigned to a region");
                     this.region = SplitTime.Region.getDefault();
@@ -207,11 +195,7 @@ namespace SplitTime {
                 return this.region;
             };
             
-            /**
-            * @param {string} positionId
-            * @return {SplitTime.Position}
-            */
-            getPosition(positionId) {
+            getPosition(positionId: string): SplitTime.Position {
                 if(!this.positions[positionId]) {
                     console.warn("Level \"" + this.id + "\" does not contain the position \"" + positionId + "\"");
                     this.positions[positionId] = new SplitTime.Position(this, 0, 0, 0, SplitTime.Direction.S, "default");
@@ -272,20 +256,13 @@ namespace SplitTime {
                 }
             };
             
-            /**
-            *
-            * @param {function(SplitTime.Body)} callback
-            */
-            forEachBody(callback) {
+            forEachBody(callback: (body: SplitTime.Body) => any) {
                 for(var i = 0; i < this.bodies.length; i++) {
                     callback(this.bodies[i]);
                 }
             };
             
-            /**
-            * @returns {SplitTime.Body[]}
-            */
-            getBodies() {
+            getBodies(): SplitTime.Body[] {
                 return this.bodies;
             };
             
@@ -321,9 +298,8 @@ namespace SplitTime {
             
             /**
             * @deprecated Used to be related to rendering; not sure interface is still appropriate
-            * @param {SplitTime.Body} body
             */
-            insertBody(body) {
+            insertBody(body: SplitTime.Body) {
                 if(this.bodies.indexOf(body) < 0) {
                     this.bodies.push(body);
                     if(this._addingProps) {
@@ -337,9 +313,8 @@ namespace SplitTime {
             
             /**
             * @deprecated Used to be related to rendering; not sure interface is still appropriate
-            * @param {SplitTime.Body} body
             */
-            removeBody(body) {
+            removeBody(body: SplitTime.Body) {
                 if(this._cellGrid) {
                     this._cellGrid.removeBody(body);
                 }
@@ -372,11 +347,7 @@ namespace SplitTime {
                 this._props = [];
             };
             
-            /**
-            * @param {string} levelId
-            * @returns {SplitTime.Level}
-            */
-            static get(levelId) {
+            static get(levelId: string): SplitTime.Level {
                 if(!levelMap[levelId]) {
                     levelMap[levelId] = new SplitTime.Level(levelId);
                 }
@@ -422,11 +393,7 @@ namespace SplitTime {
                 });
             };
             
-            /**
-            * @param {SplitTime.Level|string} level
-            * @return {SLVD.Promise}
-            */
-            static transition(level) {
+            static transition(level: SplitTime.Level | string): SLVD.Promise {
                 if(typeof level === "string") {
                     level = SplitTime.Level.get(level);
                 }
@@ -445,10 +412,7 @@ namespace SplitTime {
                 return transitionPromise;
             };
             
-            /**
-            * @returns {SplitTime.Level}
-            */
-            static getCurrent() {
+            static getCurrent(): SplitTime.Level {
                 return currentLevel;
             };
         }

@@ -28,21 +28,21 @@ namespace SplitTime.agent {
         }
         setStopped() {
             this.resetTarget();
-            if(this.body.drawable && typeof this.body.drawable.defaultStance === "function") {
-                this.body.drawable.defaultStance();
+            if(this.sprite) {
+                this.sprite.defaultStance();
             }
         }
         notifyFrameUpdate(delta) {
             var walkingDir = this.getWalkingDirection();
             if(walkingDir !== null) {
                 this.body.dir = walkingDir;
-                if(this.body.drawable && typeof this.body.drawable.requestStance === "function") {
-                    this.body.drawable.requestStance("walk", this.body.dir);
+                if(this.sprite) {
+                    this.sprite.requestStance("walk", this.body.dir);
                 }
                 this.body.mover.horizontal.zeldaStep(this.body.dir, this.body.spd * delta);
             } else {
-                if(this.body.drawable && typeof this.body.drawable.defaultStance === "function") {
-                    this.body.drawable.defaultStance();
+                if(this.sprite) {
+                    this.sprite.defaultStance();
                 }
             }
         }
@@ -64,6 +64,13 @@ namespace SplitTime.agent {
             } else if(this.targetScreenX !== null && this.targetScreenY !== null) {
                 // TODO: some other calculation
                 return 0;
+            }
+            return null;
+        }
+
+        private get sprite(): SplitTime.Sprite | null {
+            if (this.body.drawable instanceof SplitTime.Sprite) {
+                return this.body.drawable;
             }
             return null;
         }

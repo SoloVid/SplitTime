@@ -49,10 +49,7 @@ namespace SplitTime {
             return Math.round(this.baseLength / 2);
         }
         
-        /**
-        * @type {SplitTime.Body.Drawable|null}
-        */
-        drawable = null;
+        drawable: SplitTime.body.Drawable | null = null;
         lightIntensity = 0;
         lightRadius = 150;
         shadow = false;
@@ -98,8 +95,6 @@ namespace SplitTime {
         staticTrace = [];
         /**
         * @deprecated should be moved to Prop class or something
-        * @param traceStr
-        * @param type
         */
         addStaticTrace(traceStr, type) {
             if(this.staticTrace.length === 0) {
@@ -120,11 +115,7 @@ namespace SplitTime {
             }
         };
         
-        /**
-        * @type {SplitTime.Level}
-        * @private
-        */
-        _level = null;
+        private _level: SplitTime.Level = null;
         _x = 0;
         getX() {
             return this._x;
@@ -185,25 +176,18 @@ namespace SplitTime {
         
         dir = 3;
         
-        /**
-        * @return {number}
-        */
-        getLeft() {
+        getLeft(): number {
             return this.getX() - this.baseLength / 2;
         };
         
-        /**
-        * @return {number}
-        */
-        getTopY() {
+        getTopY(): number {
             return this.getY() - this.baseLength / 2;
         };
         
         /**
         * @deprecated
-        * @return {boolean}
         */
-        isInCurrentLevel() {
+        isInCurrentLevel(): boolean {
             return this.getLevel() === SplitTime.Level.getCurrent();
         };
         
@@ -218,11 +202,7 @@ namespace SplitTime {
             this.put(location.getLevel(), location.getX(), location.getY(), location.getZ(), includeChildren);
         };
         
-        /**
-        * @param {string|SplitTime.Level} level
-        * @param {boolean} [includeChildren]
-        */
-        setLevel(level, includeChildren = false) {
+        setLevel(level: string | SplitTime.Level, includeChildren: boolean = false) {
             if(typeof level === "string") {
                 level = SplitTime.Level.get(level);
             }
@@ -255,17 +235,13 @@ namespace SplitTime {
                 SplitTime.Level.transition(this._level);
             }
         };
-        /**
-        * @return {SplitTime.Level}
-        */
-        getLevel() {
+        getLevel(): SplitTime.Level {
             return this._level;
         };
         /**
         * @deprecated perhaps too much clog
-        * @return {SplitTime.Region}
         */
-        getRegion() {
+        getRegion(): SplitTime.Region {
             var level = this.getLevel();
             if(!level) {
                 return SplitTime.Region.getDefault();
@@ -276,7 +252,7 @@ namespace SplitTime {
         notifyFrameUpdate(delta) {
             this.frameUpdateHandlers.run(delta);
             try {
-                if(this.drawable) {
+                if(this.drawable && SplitTime.instanceOf.FrameNotified(this.drawable)) {
                     this.drawable.notifyFrameUpdate(delta);
                 }
             } catch(e) {
@@ -304,7 +280,7 @@ namespace SplitTime {
             }
         
             try {
-                if(this.drawable) {
+                if(this.drawable && SplitTime.instanceOf.TimeNotified(this.drawable)) {
                     this.drawable.notifyTimeAdvance(delta);
                 }
             } catch(e) {
@@ -317,17 +293,11 @@ namespace SplitTime {
         };
         
         //Function run every frame
-        /**
-        * @param {function(number)} handler
-        */
-        registerFrameUpdateHandler(handler) {
+        registerFrameUpdateHandler(handler: ((delta: number) => any) | SplitTime.main.FrameNotified) {
             this.frameUpdateHandlers.register(handler);
         };
 
-        /**
-        * @param {function(number)} handler
-        */
-        registerTimeAdvanceListener(handler) {
+        registerTimeAdvanceListener(handler: ((delta: number) => any) | SplitTime.TimeNotified) {
             this.timeAdvanceListeners.register(handler);
         };
         

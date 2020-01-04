@@ -105,3 +105,9 @@ namespace SplitTime.main {
         notifyFrameUpdate(delta);
     }
 }
+
+namespace SplitTime.instanceOf {
+    export function FrameNotified(obj: any): obj is SplitTime.main.FrameNotified {
+        return typeof obj.notifyFrameUpdate === "function";
+    }
+}

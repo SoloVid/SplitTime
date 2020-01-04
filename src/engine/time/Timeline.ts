@@ -27,9 +27,8 @@ namespace SplitTime {
         
         /**
         * Get the time object currently in play.
-        * @returns {SplitTime.Timeline|null}
         */
-        static getCurrent() {
+        static getCurrent(): SplitTime.Timeline | null {
             var currentLevel = SplitTime.Level.getCurrent();
             if(currentLevel === null) {
                 return null;
@@ -37,7 +36,7 @@ namespace SplitTime {
             return currentLevel.getRegion().getTimeline();
         };
         
-        static getDefault() {
+        static getDefault(): SplitTime.Timeline {
             return defaultTime;
         };
         
@@ -116,8 +115,8 @@ namespace SplitTime {
         };
     }
     
-    var timeMap = {};
-    var defaultTime = new SplitTime.Timeline();
+    const timeMap = {};
+    const defaultTime = new SplitTime.Timeline();
     
     export interface TimeNotified {
         /**
@@ -125,4 +124,10 @@ namespace SplitTime {
         */
         notifyTimeAdvance(delta: number);
     }
+
+    export namespace instanceOf {
+        export function TimeNotified(obj: any): obj is TimeNotified {
+            return typeof obj.notifyTimeAdvance === "function";
+        }
+    }    
 }
