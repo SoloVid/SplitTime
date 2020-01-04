@@ -1,4 +1,7 @@
+var fs = require("fs");
 var path = require("path");
+var childProcess = require("child_process");
+var Concat = require("concat-with-sourcemaps");
 
 module.exports = function(grunt) {
 
@@ -9,12 +12,14 @@ module.exports = function(grunt) {
     var SOUND_EFFECT_DIRECTORY = AUDIO_DIRECTORY + "fx/";
     var TASK_DATA_GEN = 'generate-data-js';
     var TASK_DECL_GEN = 'generate-index-d-ts';
+    var TASK_ENSURE_NEWLINES = 'ensure-newlines';
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         ts: {
             options: {
-                tsCacheDir: 'build/.tscache'
+                tsCacheDir: 'build/.tscache',
+                // fast: "always"
             },
             engine: {
                 tsconfig: 'tsconfig.json',
@@ -115,12 +120,12 @@ module.exports = function(grunt) {
 
     grunt.registerTask('build', 'Build game project or just engine', function(projectName) {
         if(!projectName) {
-            grunt.task.run(['ts:engine', TASK_DECL_GEN, 'concat:engine']);
+            grunt.task.run(['tsc', TASK_DECL_GEN, 'concat-mapped']);
         }
         else {
             grunt.config("project", projectName);
             grunt.config("projectPath", "projects/" + projectName + "/");
-            grunt.task.run(['ts:project', TASK_DATA_GEN + ":" + projectName, 'concat:project', 'sync:project']);
+            grunt.task.run(['tsc:' + projectName, TASK_DATA_GEN + ":" + projectName, 'concat-mapped:' + projectName, 'sync:project']);
             if(grunt.option('min')) {
                 grunt.task.run('uglify:project');
             }
@@ -134,6 +139,47 @@ module.exports = function(grunt) {
         }
         return path.join.apply(path, args).replace(/\\/, "/");
     }
+
+    grunt.registerTask('tsc', function(projectName) {
+        var done = this.async();
+        var tscPath = getPathInNodeModules(path.join("typescript", "bin", "tsc"));
+        grunt.verbose.writeln("Found tsc: " + tscPath);
+        var tsconfigRoot = projectName ? "projects/" + projectName : ".";
+        grunt.verbose.writeln("Running in " + tsconfigRoot);
+        var process = childProcess.fork(tscPath, [], {
+            cwd: tsconfigRoot
+        });
+        process.on('error', function(err) {
+            done(false);
+        });
+        process.on('exit', function(code) {
+            if(code === 0) {
+                done();
+            }
+        });
+    });
+
+    grunt.registerTask('concat-mapped', function(projectName) {
+        var files;
+        if(projectName) {
+            var projectRoot = "projects/" + projectName;
+            files = [
+                'build/engine.js',
+                projectRoot + '/build/tsjs/**/*.js',
+                projectRoot + '/build/generated/**/*.js',
+                'build/tsjs/defer.run.js'
+            ];
+            concatFilesWithSourceMaps(files, projectRoot + '/build/game.js');
+        } else {
+            files = [
+                'node_modules/howler/dist/howler.min.js',
+                'build/tsjs/defer.def.js',
+                'build/tsjs/engine/**/*.js',
+                'build/tsjs/defer.run.js'
+            ];
+            concatFilesWithSourceMaps(files, 'build/engine.js');
+        }
+    });
 
     grunt.registerTask(TASK_DATA_GEN, 'Construct JS of assets', function(projectName) {
         grunt.log.writeln("Generating JSON for " + projectName);
@@ -188,4 +234,70 @@ module.exports = function(grunt) {
         grunt.verbose.writeln("Writing index.d.ts file");
         grunt.file.write("build/@types/SplitTime/index.d.ts", indexFileContents);
     });
+
+    function getPathInNodeModules(pathPart) {
+        var ownRoot = path.resolve(path.dirname((module).filename), '.');
+        var userRoot = path.resolve(ownRoot, '..', '..');
+        var binSub = path.join('node_modules', pathPart);
+    
+        if (fs.existsSync(path.join(userRoot, binSub))) {
+            // Using project override
+            return path.join(userRoot, binSub);
+        }
+        return path.join(ownRoot, binSub);
+    }
+
+    function concatFilesWithSourceMaps(filePatterns, outputFilePath) {
+        // var origDir = process.cwd();
+        var outputFileDir = path.dirname(outputFilePath);
+        var outputFileName = path.basename(outputFilePath);
+        var files = grunt.file.expand(filePatterns);
+        var concat;
+        // inDir(outputFileDir, function() {
+            concat = new Concat(true, outputFileName, ';\n');
+        // });
+        files.forEach(function(file) {
+            var fileInfo = readFileWithSourceMap(file);
+            // inDir(outputFileDir, function() {
+                concat.add(file, fileInfo.content, fileInfo.sourceMap);
+            // });
+        });
+        var sourceMapFileName = outputFileName + ".map";
+        concat.add(null, "//# sourceMappingURL=" + sourceMapFileName);
+        // process.chdir(origDir);
+        var sourceMapPath = path.join(outputFileDir, sourceMapFileName);
+        grunt.file.write(outputFilePath, concat.content);
+        grunt.file.write(sourceMapPath, concat.sourceMap);
+    }
+
+    function readFileWithSourceMap(filePath) {
+        var fileContents = grunt.file.read(filePath);
+        var fileLines = fileContents.split("\n");
+        var fileLinesWithoutSourceMaps = [];
+        var sourceMap;
+        fileLines.forEach(function(line) {
+            var matches = line.match(/\/\/# sourceMappingURL=(.+\.js\.map)/);
+            if(matches) {
+                var relSourceMapPath = matches[1];
+                // console.log("Found source map: " + relSourceMapPath);
+                var absSourceMapPath = path.join(path.resolve(path.dirname(filePath)), relSourceMapPath);
+                sourceMap = grunt.file.read(absSourceMapPath);
+                // console.log(sourceMap);
+                fileLinesWithoutSourceMaps.push(line.replace(/./g, "/"));
+            } else {
+                fileLinesWithoutSourceMaps.push(line);
+            }
+        });
+        return {
+            content: fileLinesWithoutSourceMaps.join("\n"),
+            sourceMap: sourceMap
+        };
+    }
+
+    function inDir(dir, callback) {
+        var origDir = process.cwd();
+        process.chdir(dir);
+        callback();
+        process.chdir(origDir);
+    }
 };
