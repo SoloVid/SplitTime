@@ -8,8 +8,9 @@ namespace SplitTime {
         _isFinished: boolean;
         _location: any;
         _signaler: any;
-        _playerInteractHandler: any;
-        _dialogEndHandler: any;
+        _playerInteractHandler: PlayerInteractHandler | Function;
+        _dismissHandler: Function;
+        _dialogEndHandler: DialogEndHandler | Function;
         /**
         *
         * @param {string} speaker
@@ -81,27 +82,37 @@ namespace SplitTime {
         
         /**
         * TODO: potentially support multiple
-        * @param {PlayerInteractHandler} handler
         */
-        registerPlayerInteractHandler(handler) {
+        registerPlayerInteractHandler(handler: PlayerInteractHandler | Function) {
             this._playerInteractHandler = handler;
+        };
+        
+        registerDismissHandler(handler: Function) {
+            this._dismissHandler = handler;
         };
         
         /**
         * TODO: potentially support multiple
-        * @param {DialogEndHandler|function} handler
         */
-        registerDialogEndHandler(handler) {
+        registerDialogEndHandler(handler: DialogEndHandler | Function) {
             this._dialogEndHandler = handler;
         };
-        
+
         onPlayerInteract() {
-            if(this._playerInteractHandler) {
-                this._playerInteractHandler.onPlayerInteract(this);
+            if(typeof this._playerInteractHandler === "function") {
+                this._playerInteractHandler();
+            } else if(this._playerInteractHandler) {
+                this._playerInteractHandler.onPlayerInteract();
             } else if(this.getAdvanceMethod() === AdvanceMethod.INTERACTION || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
                 this.advance();
             }
         };
+
+        onDismiss() {
+            if(this._dismissHandler) {
+                this._dismissHandler();
+            }
+        }
         
         start() {
             SplitTime.dialog.submit(this);

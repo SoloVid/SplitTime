@@ -1,3 +1,3 @@
 interface PlayerInteractHandler {
-    onPlayerInteract();
+    onPlayerInteract(): void;
 }

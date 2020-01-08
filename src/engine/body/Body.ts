@@ -7,7 +7,7 @@ namespace SplitTime {
         private timeAdvanceListeners: SLVD.RegisterCallbacks;
         private playerInteractHandlers: SLVD.RegisterCallbacks;
         mover: SplitTime.body.Mover;
-        speechBox;
+        speechBox: SplitTime.body.SpeechBox;
         
         // TODO: remove parameter when moving templates elsewhere
         constructor(skipInit = false) {
@@ -304,6 +304,9 @@ namespace SplitTime {
         //Function run on ENTER or SPACE
         registerPlayerInteractHandler(handler) {
             this.playerInteractHandlers.register(handler);
+        };
+        deregisterPlayerInteractHandler(handler) {
+            this.playerInteractHandlers.remove(handler);
         };
 
         // Generally equates to pixels per second (game time)

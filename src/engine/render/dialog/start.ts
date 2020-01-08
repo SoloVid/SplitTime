@@ -1,0 +1,192 @@
+namespace SplitTime.dialog {
+    export async function start(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
+        const orchestrationHelper = new OrchestrationHelper();
+        const topLevelSection = new Section(null, orchestrationHelper, () => {
+            orchestrator(orchestrationHelper);
+        });
+        return await topLevelSection.run();
+    }
+
+    type DialogOutcomeHandler = (result: DialogOutcome) => any;
+
+    class Section implements Runnable {
+        parts: Runnable[];
+        nextPartToRunIndex: int = 0;
+        markedCancelable: boolean = false;
+        interruptibles: Interruptible[] = [];
+        selfInterruptTriggered: boolean = false;
+        promise: Promise<DialogOutcome>;
+        resolve: (value?: DialogOutcome | PromiseLike<DialogOutcome>) => void;
+
+        constructor(private readonly parentSection: Section | null, private readonly helper: OrchestrationHelper, private readonly setup: Function) {
+            this.promise = new Promise((resolve, reject) => {
+                this.resolve = resolve;
+            });
+        }
+
+        get cancelable(): boolean {
+            if(this.parentSection == null) {
+                return this.markedCancelable;
+            }
+            return this.markedCancelable || this.parentSection.cancelable;
+        }
+
+        get interruptTriggered(): boolean {
+            if(this.parentSection == null) {
+                return this.interruptTriggered;
+            }
+            return this.interruptTriggered || this.parentSection.interruptTriggered;
+        }
+
+        triggerInterrupt(): boolean {
+            for(const interruptible of this.interruptibles) {
+                if(interruptible.active) {
+                    interruptible.trigger();
+                    this.selfInterruptTriggered = true;
+                    return true;
+                }
+            }
+            if(this.parentSection !== null) {
+                return this.parentSection.triggerInterrupt();
+            }
+        }
+
+        async run(): Promise<DialogOutcome> {
+            const previousSection = this.helper.parentSection;
+            try {
+                this.helper.parentSection = this;
+                this.setup();
+
+                let sectionOutcome: DialogOutcome = new DialogOutcome();
+                while(this.nextPartToRunIndex != this.parts.length) {
+                    const outcome = await this.parts[this.nextPartToRunIndex++].run();
+                    if((outcome.canceled && this.cancelable) || (outcome.interrupted && this.interruptTriggered)) {
+                        sectionOutcome = outcome;
+                        break;
+                    }
+                }
+                await this.resolve(sectionOutcome);
+                return sectionOutcome;
+            } finally {
+                this.helper.parentSection = previousSection;
+            }
+        }
+
+        then(callback: (value: DialogOutcome) => DialogOutcome | PromiseLike<DialogOutcome>): Promise<DialogOutcome> {
+            return this.promise.then(callback);
+        }
+    }
+
+    class Line implements Runnable {
+
+        constructor(private readonly parentSection: Section, private readonly helper: OrchestrationHelper, public readonly speaker: Speaker, public readonly line: string, public readonly callback: DialogOutcomeHandler) {
+
+        }
+
+        run(): Promise<DialogOutcome> {
+            return new Promise((resolve, reject) => {
+                const dialog = new SplitTime.Dialog(this.speaker.name, [this.line], this.speaker.speechBox);
+                dialog.setAdvanceMethod(SplitTime.Dialog.AdvanceMethod.AUTO);
+
+                const onInteract = () => {
+                    if(this.parentSection.triggerInterrupt()) {
+                        resolveWithCleanup(new DialogOutcome(false, true));
+                        dialog.close();
+                    }
+                };
+                const onDismiss = () => {
+                    if(this.parentSection.cancelable) {
+                        resolveWithCleanup(new DialogOutcome(true, false));
+                        dialog.close();
+                    }
+                };
+                const resolveWithCleanup = (outcome: DialogOutcome) => {
+                    resolve(outcome);
+                    this.speaker.body.deregisterPlayerInteractHandler(onInteract);
+                };
+
+                this.speaker.body.registerPlayerInteractHandler(onInteract);
+                dialog.registerPlayerInteractHandler(onInteract);
+                dialog.registerDismissHandler(onDismiss);
+                dialog.registerDialogEndHandler(() => {
+                    resolveWithCleanup(new DialogOutcome());
+                });
+                dialog.start();
+            });
+        }
+    }
+
+    interface Runnable {
+        run(): Promise<DialogOutcome>;
+    }
+
+    class OrchestrationHelper {
+        parentSection: Section;
+
+        say(speaker: Speaker, line: string): Promise<DialogOutcome> {
+            return new Promise((resolve, reject) => {
+                this.parentSection.parts.push(new Line(this.parentSection, this, speaker, line, resolve));
+            });
+        }
+
+        section(setup: Function): SectionReturn {
+            const newSection = new Section(this.parentSection, this, setup);
+            this.parentSection.parts.push(newSection);
+            return new SectionReturn(this.parentSection);
+        }
+    }
+
+    class DialogOutcome {
+        constructor(private _canceled = false, private _interrupted = false) {
+
+        }
+
+        get canceled(): boolean {
+            return this._canceled;
+        }
+        get interrupted(): boolean {
+            return this._interrupted;
+        }
+    }
+
+    class SectionReturn {
+        constructor(private section: Section) {
+
+        }
+
+        cancelable(): SectionReturn {
+            this.section.markedCancelable = true;
+            return this;
+        }
+
+        interruptible(condition: any, callback: Function): SectionReturn {
+            this.section.interruptibles.push(new Interruptible(condition, callback));
+            return this;
+        }
+
+        then(callback: (result: DialogOutcome) => any): Promise<DialogOutcome> {
+            return this.section.then(callback);
+        }
+    }
+
+    class Interruptible {
+        constructor(private condition: any, private callback: Function) {
+
+        }
+
+        get active(): boolean {
+            if(typeof this.condition === "function") {
+                return this.condition();
+            } else if(this.condition === true) {
+                return true;
+            } else {
+                // TODO: add in mappy thing
+                return false;
+            }
+        }
+
+        trigger(): void {
+            this.callback();
+        }
+    }
+}

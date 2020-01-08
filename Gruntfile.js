@@ -119,6 +119,7 @@ module.exports = function(grunt) {
             concatFilesWithSourceMaps(files, projectRoot + '/dist/game.js');
         } else {
             files = [
+                'node_modules/es6-promise/dist/es6-promise.auto.min.js',
                 'node_modules/howler/dist/howler.min.js',
                 'build/tsjs/defer.def.js',
                 'build/tsjs/engine/**/*.js',
