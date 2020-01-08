@@ -8,9 +8,9 @@ namespace SplitTime {
         _isFinished: boolean;
         _location: any;
         _signaler: any;
-        _playerInteractHandler: PlayerInteractHandler | Function;
-        _dismissHandler: Function;
-        _dialogEndHandler: DialogEndHandler | Function;
+        _playerInteractHandler: PlayerInteractHandler | Function | null = null;
+        _dismissHandler: Function | null = null;
+        _dialogEndHandler: DialogEndHandler | Function | null = null;
         /**
         *
         * @param {string} speaker
@@ -103,7 +103,8 @@ namespace SplitTime {
                 this._playerInteractHandler();
             } else if(this._playerInteractHandler) {
                 this._playerInteractHandler.onPlayerInteract();
-            } else if(this.getAdvanceMethod() === AdvanceMethod.INTERACTION || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
+            }
+            if(this.getAdvanceMethod() === AdvanceMethod.INTERACTION || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
                 this.advance();
             }
         };
@@ -155,11 +156,14 @@ namespace SplitTime {
                 if(typeof this._dialogEndHandler === "function") {
                     this._dialogEndHandler(this);
                 } else if(typeof this._dialogEndHandler.onDialogEnd === "function") {
-                    this._dialogEndHandler.onDialogEnd(this);
+                    this._dialogEndHandler.onDialogEnd();
                 } else {
                     SplitTime.Logger.error("Invalid dialog end handler: ", this._dialogEndHandler);
                 }
             }
+            this._playerInteractHandler = null;
+            this._dismissHandler = null;
+            this._dialogEndHandler = null;
         };
         
         isFinished() {

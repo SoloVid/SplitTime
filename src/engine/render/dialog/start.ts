@@ -1,16 +1,16 @@
 namespace SplitTime.dialog {
-    export async function start(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
+    export function start(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
         const orchestrationHelper = new OrchestrationHelper();
         const topLevelSection = new Section(null, orchestrationHelper, () => {
             orchestrator(orchestrationHelper);
         });
-        return await topLevelSection.run();
+        return Promise.resolve().then(() => { return topLevelSection.run(); });
     }
 
     type DialogOutcomeHandler = (result: DialogOutcome) => any;
 
     class Section implements Runnable {
-        parts: Runnable[];
+        parts: Runnable[] = [];
         nextPartToRunIndex: int = 0;
         markedCancelable: boolean = false;
         interruptibles: Interruptible[] = [];
@@ -18,7 +18,7 @@ namespace SplitTime.dialog {
         promise: Promise<DialogOutcome>;
         resolve: (value?: DialogOutcome | PromiseLike<DialogOutcome>) => void;
 
-        constructor(private readonly parentSection: Section | null, private readonly helper: OrchestrationHelper, private readonly setup: Function) {
+        constructor(public readonly parentSection: Section | null, private readonly helper: OrchestrationHelper, private readonly setup: Function) {
             this.promise = new Promise((resolve, reject) => {
                 this.resolve = resolve;
             });
@@ -33,14 +33,14 @@ namespace SplitTime.dialog {
 
         get interruptTriggered(): boolean {
             if(this.parentSection == null) {
-                return this.interruptTriggered;
+                return this.selfInterruptTriggered;
             }
-            return this.interruptTriggered || this.parentSection.interruptTriggered;
+            return this.selfInterruptTriggered || this.parentSection.interruptTriggered;
         }
 
         triggerInterrupt(): boolean {
             for(const interruptible of this.interruptibles) {
-                if(interruptible.active) {
+                if(interruptible.conditionMet) {
                     interruptible.trigger();
                     this.selfInterruptTriggered = true;
                     return true;
@@ -101,6 +101,7 @@ namespace SplitTime.dialog {
                     }
                 };
                 const resolveWithCleanup = (outcome: DialogOutcome) => {
+                    this.callback(outcome);
                     resolve(outcome);
                     this.speaker.body.deregisterPlayerInteractHandler(onInteract);
                 };
@@ -132,7 +133,11 @@ namespace SplitTime.dialog {
         section(setup: Function): SectionReturn {
             const newSection = new Section(this.parentSection, this, setup);
             this.parentSection.parts.push(newSection);
-            return new SectionReturn(this.parentSection);
+            return new SectionReturn(newSection, this);
+        }
+
+        cancelable(setup: Function): SectionReturn {
+            return this.section(setup).cancelable();
         }
     }
 
@@ -150,7 +155,7 @@ namespace SplitTime.dialog {
     }
 
     class SectionReturn {
-        constructor(private section: Section) {
+        constructor(private section: Section, private helper: OrchestrationHelper) {
 
         }
 
@@ -159,8 +164,16 @@ namespace SplitTime.dialog {
             return this;
         }
 
-        interruptible(condition: any, callback: Function): SectionReturn {
-            this.section.interruptibles.push(new Interruptible(condition, callback));
+        interruptible(condition: any = true, callback: Function = () => {}): SectionReturn {
+            // FTODO: make this less hacky (reaching into parent section of section)
+            const interruptible = new Interruptible(condition, callback);
+            const interruptibleSection = new Section(this.section.parentSection, this.helper, () => {
+                if(interruptible.triggered) {
+                    interruptible.runCallback();
+                }
+            });
+            this.section.interruptibles.push(interruptible);
+            this.section.parentSection.parts.push(interruptibleSection)
             return this;
         }
 
@@ -170,11 +183,17 @@ namespace SplitTime.dialog {
     }
 
     class Interruptible {
+        private _triggered: boolean = false;
+
         constructor(private condition: any, private callback: Function) {
 
         }
 
-        get active(): boolean {
+        get triggered(): boolean {
+            return this._triggered;
+        }
+
+        get conditionMet(): boolean {
             if(typeof this.condition === "function") {
                 return this.condition();
             } else if(this.condition === true) {
@@ -186,6 +205,10 @@ namespace SplitTime.dialog {
         }
 
         trigger(): void {
+            this._triggered = true;
+        }
+
+        runCallback(): void {
             this.callback();
         }
     }
