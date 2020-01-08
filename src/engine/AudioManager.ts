@@ -77,39 +77,38 @@ namespace SplitTime.audio {
             
             var startVolume = 1;
             
-            // TODO: get Howler TypeScript types
-            // sound = new Howl({
-            //     src: registeredPaths[handle],
-            //     autoplay: false,
-            //     volume: startVolume,
-            //     loop: loop,
-            //     onload: function(){
-            //         //Music files will be considered to be in the same group if the file names share the first 5 chars
-            //         sound.musicGroup = handle.substr(0, 5);
-            //         if(loop){  //Note: this assumes we only have one looping background track at a time.
-            //             fadeIn = crossFadeSimilar(sound);
-            //         }
+            sound = new Howl({
+                src: registeredPaths[handle],
+                autoplay: false,
+                volume: startVolume,
+                loop: loop,
+                onload: function(){
+                    //Music files will be considered to be in the same group if the file names share the first 5 chars
+                    sound.musicGroup = handle.substr(0, 5);
+                    if(loop){  //Note: this assumes we only have one looping background track at a time.
+                        fadeIn = crossFadeSimilar(sound);
+                    }
                     
-            //         if(fadeIn){
-            //             sound.volume(0);
-            //             sound.fade(startVolume, 1, FADE_DURATION_MS);
-            //         }
-            //     },
-            //     onfade: function(){
-            //         currentVolume = sound.volume();
-            //         if(currentVolume == 0){
-            //             if(sound.isPausing) {
-            //                 sound.pause();
-            //                 sound.isPausing = false;
-            //             } else {
-            //                 sound.stop();
-            //             }
-            //         } 
-            //     }
-            // });
-            // soundID = sound.play();
-            // loadedSounds[handle] = sound;
-            // loadedIDs[handle] = soundID;
+                    if(fadeIn){
+                        sound.volume(0);
+                        sound.fade(startVolume, 1, FADE_DURATION_MS);
+                    }
+                },
+                onfade: function(){
+                    currentVolume = sound.volume();
+                    if(currentVolume == 0){
+                        if(sound.isPausing) {
+                            sound.pause();
+                            sound.isPausing = false;
+                        } else {
+                            sound.stop();
+                        }
+                    } 
+                }
+            });
+            soundID = sound.play();
+            loadedSounds[handle] = sound;
+            loadedIDs[handle] = soundID;
         }
     };
     

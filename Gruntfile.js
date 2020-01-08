@@ -204,7 +204,7 @@ module.exports = function(grunt) {
         var outputFileDir = path.dirname(outputFilePath);
         var outputFileName = path.basename(outputFilePath);
         var files = grunt.file.expand(filePatterns);
-        var concat = new Concat(true, outputFileName, ';\n');
+        var concat = new Concat(true, outputFileName, '\n\n;\n\n');
         files.forEach(function(file) {
             var fileInfo = readFileWithSourceMap(file);
             var sourceMap;
