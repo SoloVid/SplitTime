@@ -2,6 +2,7 @@
   "name": "SplitTimeEngine",
   "version": "0.1.0",
   "devDependencies": {
+    "@types/howler": "^2.1.2",
     "concat-with-sourcemaps": "^1.1.0",
     "convert-source-map": "^1.7.0",
     "es6-promise": "^4.2.8",
