@@ -1,56 +1,42 @@
-namespace SplitTime {
-    export class Dialog {
-        _speaker: any;
-        _lines: string[];
-        _currentLine: any;
+namespace SplitTime.dialog {
+    export class SpeechBubble {
+        // can be cut short
+        _effectiveLine: string;
         _charactersDisplayed: number;
-        _startDelay: any;
+        _startDelay: number | null = null;
         _isFinished: boolean;
-        _location: any;
-        _signaler: any;
+        _location: LevelLocation;
+        _timeline: SplitTime.Timeline | null = null;
+        _lastStepMs: number = 0;
         _playerInteractHandler: PlayerInteractHandler | Function | null = null;
         _dismissHandler: Function | null = null;
         _dialogEndHandler: DialogEndHandler | Function | null = null;
-        /**
-        *
-        * @param {string} speaker
-        * @param {string[]} lines
-        * @param {LevelLocation} [location]
-        * @constructor
-        */
-        constructor(speaker, lines, location) {
-            this._speaker = speaker;
-            this._lines = lines;
+
+        constructor(public readonly conversation: Conversation, public readonly speaker: string, private _line: string, location: LevelLocation) {
+            for(const conversion of CONVERSIONS) {
+                this._line = conversion.apply(this._line);
+            }
             this.setLocation(location);
-            this._currentLine = 0;
+            this._effectiveLine = this._line;
             this._charactersDisplayed = 0;
             this._startDelay = null;
             this._isFinished = false;
         };
-        
-        static AdvanceMethod = {
-            DEFAULT: "DEFAULT",
-            AUTO: "AUTO",
-            INTERACTION: "INTERACTION",
-            HYBRID: "HYBRID"
-        };
+
+        get line(): string {
+            return this._effectiveLine + this._line.substring(this._effectiveLine.length);
+        }
         
         _advanceMethod = null;
-        _delay: number = 2000;
-        _speed = 25;
+        _delay: number = DEFAULT_DELAY_MS;
+        _msPerChar = DEFAULT_MS_PER_CHAR;
         
-        /**
-        * @return {LevelLocation}
-        */
-        getLocation() {
+        getLocation(): LevelLocation {
             return this._location;
         };
-        /**
-        * @param {LevelLocation} location
-        */
-        setLocation(location) {
+        setLocation(location: LevelLocation) {
             this._location = location;
-            this._refreshSignaler();
+            this._lastStepMs = 0;
         };
         
         getAdvanceMethod() {
@@ -62,23 +48,29 @@ namespace SplitTime {
             this._delay = delay || this._delay;
         };
         
-        getSpeaker() {
-            return this._speaker;
-        };
-        
-        getFullCurrentLine() {
-            return this._lines[this._currentLine];
-        };
-        
         getDisplayedCurrentLine() {
-            return this.getFullCurrentLine().substr(0, this._charactersDisplayed);
+            return this._effectiveLine.substr(0, this._charactersDisplayed);
         };
         
         notifyFrameUpdate() {
-            if(this._signaler.isSignaling()) {
+            const msSinceLastStep = this._getTimeMs() - this._lastStepMs;
+            if(this._charactersDisplayed === 0) {
+                this.step();
+            } else if(msSinceLastStep > this._howLongForChar(this.line[this._charactersDisplayed - 1])) {
                 this.step();
             }
         };
+
+        private _howLongForChar(char: string): number {
+            if(char === SPACE) {
+                return this._msPerChar + EXTRA_MS_PER_SPACE;
+            } else if(SHORT_BREAK_PUNCTUATION.indexOf(char) >= 0) {
+                return this._msPerChar + EXTRA_MS_PER_SHORT_BREAK_PUNCTUATION;
+            } else if(LONG_BREAK_PUNCTUATION.indexOf(char) >= 0) {
+                return this._msPerChar + EXTRA_MS_PER_LONG_BREAK_PUNCTUATION;
+            }
+            return this._msPerChar;
+        }
         
         /**
         * TODO: potentially support multiple
@@ -121,17 +113,11 @@ namespace SplitTime {
         
         advance() {
             this._startDelay = null;
-            if(this._isFinished) {
-                this.close();
-            } else if(this._charactersDisplayed < this._getCurrentLineLength()) {
-                this._charactersDisplayed = this._getCurrentLineLength();
+            if(this._charactersDisplayed < this._effectiveLine.length) {
+                this._charactersDisplayed = this._effectiveLine.length;
             } else {
-                if(this._currentLine + 1 < this._lines.length) {
-                    this._currentLine++;
-                    this._charactersDisplayed = 0;
-                } else {
-                    this._isFinished = true;
-                }
+                this._isFinished = true;
+                this.close();
             }
         };
         
@@ -139,7 +125,8 @@ namespace SplitTime {
         * Move forward one frame relative to the dialog speed
         */
         step() {
-            if(this._charactersDisplayed < this._getCurrentLineLength()) {
+            this._lastStepMs = this._getTimeMs();
+            if(this._charactersDisplayed < this._effectiveLine.length) {
                 this._charactersDisplayed++;
             } else if(this.getAdvanceMethod() === AdvanceMethod.AUTO || this.getAdvanceMethod() === AdvanceMethod.HYBRID) {
                 if(!this._startDelay) {
@@ -169,14 +156,14 @@ namespace SplitTime {
         isFinished() {
             return this._isFinished;
         };
-        
-        _refreshSignaler() {
-            if(this._location) {
-                this._signaler = this._location.getLevel().getRegion().getTimeStabilizer(this._getMsPerStep());
-            } else {
-                this._signaler = new SplitTime.FrameStabilizer(this._getMsPerStep());
+
+        cutOff() {
+            if(this._charactersDisplayed > this.line.length - 1.5 * DASH.length) {
+                this.advance();
+            } else if(this._effectiveLine === this.line) {
+                this._effectiveLine = this.getDisplayedCurrentLine() + DASH;
             }
-        };
+        }
         
         _getTimeMs() {
             if(this._location) {
@@ -185,15 +172,5 @@ namespace SplitTime {
                 return +(new Date());
             }
         };
-        
-        _getMsPerStep() {
-            return Math.round(1000 / this._speed);
-        };
-        
-        _getCurrentLineLength() {
-            return this._lines[this._currentLine].length;
-        };
     }
-    SplitTime.Dialog.AdvanceMethod.DEFAULT = SplitTime.Dialog.AdvanceMethod.HYBRID;
-    var AdvanceMethod = SplitTime.Dialog.AdvanceMethod;
 }

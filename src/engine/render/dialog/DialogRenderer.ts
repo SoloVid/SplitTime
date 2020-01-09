@@ -1,6 +1,6 @@
 namespace SplitTime.dialog.renderer {
 	class DialogDrawing {
-		constructor(public dialog: SplitTime.Dialog, public incoming: boolean = true, public visibility: number = 0) {
+		constructor(public dialog: SpeechBubble, public incoming: boolean = true, public visibility: number = 0) {
 
 		}
 	}
@@ -65,7 +65,7 @@ namespace SplitTime.dialog.renderer {
 			var dialog = drawing.dialog;
 			var location = dialog.getLocation();
 			sayFromBoardFocalPoint(ctx, {x: location.getX(), y: location.getY(), z: location.getZ()},
-				dialog.getFullCurrentLine(), dialog.getDisplayedCurrentLine(), dialog.getSpeaker());
+				dialog.line, dialog.getDisplayedCurrentLine(), dialog.speaker);
 		}
 	}
 
@@ -81,7 +81,7 @@ namespace SplitTime.dialog.renderer {
 	function drawAwesomeRect(left, top, right, bottom, ctx, pointX?, pointY?) {
 		var CURVE_RADIUS = 10;
 		var TRI_CURVE_BUFFER = 2*CURVE_RADIUS;
-		var TRI_BASE_HALF = 10;
+		var TRI_BASE_HALF = (IDEAL_TAIL_LENGTH * TRI_BASE_TO_TAIL_LENGTH) / 2;
 		var horizontalMid = SLVD.constrain((2*pointX + left + right)/4, left + TRI_CURVE_BUFFER, right - TRI_CURVE_BUFFER);
 		var verticalMid = SLVD.constrain((2*pointY + top + bottom)/4, top + TRI_CURVE_BUFFER, bottom - TRI_CURVE_BUFFER);
 
@@ -160,7 +160,8 @@ namespace SplitTime.dialog.renderer {
 	var MAX_ROW_LENGTH = 500;
 	var MIN_ROW_LENGTH_SPLIT = 100;
 	var LINE_SPACING = 2;
-	var IDEAL_TAIL_LENGTH = 32;
+	export var IDEAL_TAIL_LENGTH = 16;
+	export var TRI_BASE_TO_TAIL_LENGTH = 2/3;
 	var TEXT_BOX_PADDING = 10;
 	var IDEAL_HEIGHT_TO_WIDTH = 7/16;
 	var FOCAL_MARGIN = 20;

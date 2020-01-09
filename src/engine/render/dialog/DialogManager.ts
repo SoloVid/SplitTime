@@ -8,17 +8,17 @@ namespace SplitTime.dialog {
     * - Delegate screen interactions from the player to appropriate Dialog objects.
     */
     
-    var dialogs: SplitTime.Dialog[] = [];
+    var dialogs: SpeechBubble[] = [];
     
     /**
     * If a dialog has been engaged, it will be stored here.
     */
-    var engagedDialog: SplitTime.Dialog|null = null;
+    var engagedDialog: SpeechBubble|null = null;
     
     /**
     * Allow dialog manager to start managing the dialog.
     */
-    export function submit(dialog: SplitTime.Dialog) {
+    export function submit(dialog: SpeechBubble) {
         if(dialogs.indexOf(dialog) < 0) {
             dialogs.push(dialog);
         }
@@ -27,7 +27,7 @@ namespace SplitTime.dialog {
     /**
     * Stop dialog manager from managing the dialog.
     */
-    export function remove(dialog: SplitTime.Dialog) {
+    export function remove(dialog: SpeechBubble) {
         for(var i = dialogs.length - 1; i >= 0; i--) {
             if(dialogs[i] === dialog) {
                 dialogs.splice(i, 1);
@@ -86,10 +86,7 @@ namespace SplitTime.dialog {
         SplitTime.dialog.renderer.notifyFrameUpdate();
     };
     
-    /**
-    * @param {SplitTime.Dialog} dialog
-    */
-    function calculateDialogImportanceScore(dialog: SplitTime.Dialog) {
+    function calculateDialogImportanceScore(dialog: SpeechBubble) {
         if(dialog.getLocation().getLevel() !== SplitTime.Level.getCurrent()) {
             return MIN_SCORE - 1;
         }
@@ -98,6 +95,12 @@ namespace SplitTime.dialog {
         var location = dialog.getLocation();
         
         var distance = SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, location.getX(), location.getY());
+        // If we've engaged in a dialog, we don't want to accidentally stop tracking the conversation just because the speaker changed.
+        if(dialog === engagedDialog) {
+            distance = dialog.conversation.speakers
+                .map(s => SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, s.body.getX(), s.body.getY()))
+                .reduce((tempMin, tempDist) => Math.min(tempMin, tempDist), SLVD.MAX_SAFE_INTEGER);
+        }
         var distanceScore = ((SplitTime.SCREENX / 3) / distance);
         
         if(dialog === engagedDialog) {

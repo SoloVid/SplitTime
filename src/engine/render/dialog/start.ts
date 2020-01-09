@@ -10,6 +10,7 @@ namespace SplitTime.dialog {
     type DialogOutcomeHandler = (result: DialogOutcome) => any;
 
     class Section implements Runnable {
+        conversation: Conversation;
         parts: Runnable[] = [];
         nextPartToRunIndex: int = 0;
         markedCancelable: boolean = false;
@@ -19,6 +20,8 @@ namespace SplitTime.dialog {
         resolve: (value?: DialogOutcome | PromiseLike<DialogOutcome>) => void;
 
         constructor(public readonly parentSection: Section | null, private readonly helper: OrchestrationHelper, private readonly setup: Function) {
+            this.conversation = this.parentSection === null ? new Conversation() : this.parentSection.conversation;
+
             this.promise = new Promise((resolve, reject) => {
                 this.resolve = resolve;
             });
@@ -52,6 +55,7 @@ namespace SplitTime.dialog {
         }
 
         async run(): Promise<DialogOutcome> {
+            const previousConversationSpeakers = this.conversation.speakers.slice();
             const previousSection = this.helper.parentSection;
             try {
                 this.helper.parentSection = this;
@@ -69,6 +73,7 @@ namespace SplitTime.dialog {
                 return sectionOutcome;
             } finally {
                 this.helper.parentSection = previousSection;
+                this.conversation.speakers = previousConversationSpeakers;
             }
         }
 
@@ -85,33 +90,41 @@ namespace SplitTime.dialog {
 
         run(): Promise<DialogOutcome> {
             return new Promise((resolve, reject) => {
-                const dialog = new SplitTime.Dialog(this.speaker.name, [this.line], this.speaker.speechBox);
-                dialog.setAdvanceMethod(SplitTime.Dialog.AdvanceMethod.AUTO);
-
+                const dialog = new SplitTime.dialog.SpeechBubble(this.parentSection.conversation, this.speaker.name, this.line, this.speaker.speechBox);
+                let interrupted = true;
+                let canceled = false;
                 const onInteract = () => {
                     if(this.parentSection.triggerInterrupt()) {
-                        resolveWithCleanup(new DialogOutcome(false, true));
-                        dialog.close();
+                        interrupted = true;
+                        dialog.cutOff();
+                    } else {
+                        dialog.advance();
                     }
                 };
                 const onDismiss = () => {
                     if(this.parentSection.cancelable) {
-                        resolveWithCleanup(new DialogOutcome(true, false));
+                        canceled = true;
+                        // TODO: keep or remove?
+                        resolveWithCleanup();
                         dialog.close();
                     }
                 };
-                const resolveWithCleanup = (outcome: DialogOutcome) => {
+                const resolveWithCleanup = () => {
+                    const outcome = new DialogOutcome(canceled, interrupted);
                     this.callback(outcome);
                     resolve(outcome);
-                    this.speaker.body.deregisterPlayerInteractHandler(onInteract);
+                    for(const speaker of this.parentSection.conversation.speakers) {
+                        speaker.body.deregisterPlayerInteractHandler(onInteract);
+                    }
                 };
 
-                this.speaker.body.registerPlayerInteractHandler(onInteract);
+                // FTODO: Try to push this up the chain so that we don't attach and detach so often
+                for(const speaker of this.parentSection.conversation.speakers) {
+                    speaker.body.registerPlayerInteractHandler(onInteract);
+                }
                 dialog.registerPlayerInteractHandler(onInteract);
                 dialog.registerDismissHandler(onDismiss);
-                dialog.registerDialogEndHandler(() => {
-                    resolveWithCleanup(new DialogOutcome());
-                });
+                dialog.registerDialogEndHandler(resolveWithCleanup);
                 dialog.start();
             });
         }
@@ -125,6 +138,9 @@ namespace SplitTime.dialog {
         parentSection: Section;
 
         say(speaker: Speaker, line: string): Promise<DialogOutcome> {
+            if(this.parentSection.conversation.speakers.indexOf(speaker) < 0) {
+                this.parentSection.conversation.speakers.push(speaker);
+            }
             return new Promise((resolve, reject) => {
                 this.parentSection.parts.push(new Line(this.parentSection, this, speaker, line, resolve));
             });
