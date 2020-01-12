@@ -7,6 +7,14 @@ namespace SplitTime.dialog {
         return Promise.resolve().then(() => { return topLevelSection.run(); });
     }
 
+    export function startCancelable(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
+        return start(d => {
+            d.cancelable(() => {
+                orchestrator(d);
+            })
+        });
+    }
+
     type DialogOutcomeHandler = (result: DialogOutcome) => any;
 
     class Section implements Runnable {
@@ -57,11 +65,11 @@ namespace SplitTime.dialog {
         async run(): Promise<DialogOutcome> {
             const previousConversationSpeakers = this.conversation.speakers.slice();
             const previousSection = this.helper.parentSection;
+            let sectionOutcome: DialogOutcome = new DialogOutcome();
             try {
                 this.helper.parentSection = this;
                 this.setup();
 
-                let sectionOutcome: DialogOutcome = new DialogOutcome();
                 while(this.nextPartToRunIndex != this.parts.length) {
                     const outcome = await this.parts[this.nextPartToRunIndex++].run();
                     if((outcome.canceled && this.cancelable) || (outcome.interrupted && this.interruptTriggered)) {
@@ -69,12 +77,12 @@ namespace SplitTime.dialog {
                         break;
                     }
                 }
-                await this.resolve(sectionOutcome);
-                return sectionOutcome;
             } finally {
                 this.helper.parentSection = previousSection;
                 this.conversation.speakers = previousConversationSpeakers;
             }
+            await this.resolve(sectionOutcome);
+            return sectionOutcome;
         }
 
         then(callback: (value: DialogOutcome) => DialogOutcome | PromiseLike<DialogOutcome>): Promise<DialogOutcome> {
@@ -83,9 +91,10 @@ namespace SplitTime.dialog {
     }
 
     class Line implements Runnable {
+        private initialSpeakers: Speaker[] = [];
 
         constructor(private readonly parentSection: Section, private readonly helper: OrchestrationHelper, public readonly speaker: Speaker, public readonly line: string, public readonly callback: DialogOutcomeHandler) {
-
+            this.initialSpeakers = this.parentSection.conversation.speakers.slice();
         }
 
         run(): Promise<DialogOutcome> {
@@ -109,17 +118,23 @@ namespace SplitTime.dialog {
                         dialog.close();
                     }
                 };
+                const speakers = this.initialSpeakers.slice();
+                for(const speaker of this.parentSection.conversation.speakers) {
+                    if(speakers.indexOf(speaker) < 0) {
+                        speakers.push(speaker);
+                    }
+                }
                 const resolveWithCleanup = () => {
                     const outcome = new DialogOutcome(canceled, interrupted);
                     this.callback(outcome);
                     resolve(outcome);
-                    for(const speaker of this.parentSection.conversation.speakers) {
+                    for(const speaker of speakers) {
                         speaker.body.deregisterPlayerInteractHandler(onInteract);
                     }
                 };
 
                 // FTODO: Try to push this up the chain so that we don't attach and detach so often
-                for(const speaker of this.parentSection.conversation.speakers) {
+                for(const speaker of speakers) {
                     speaker.body.registerPlayerInteractHandler(onInteract);
                 }
                 dialog.registerPlayerInteractHandler(onInteract);
@@ -134,7 +149,13 @@ namespace SplitTime.dialog {
         run(): Promise<DialogOutcome>;
     }
 
-    class OrchestrationHelper {
+    export interface DialogDsl {
+        say(speaker: Speaker, line: string): Promise<DialogOutcome>;
+        section(setup: Function): SectionReturn;
+        cancelable(setup: Function): SectionReturn;
+    }
+
+    class OrchestrationHelper implements DialogDsl {
         parentSection: Section;
 
         say(speaker: Speaker, line: string): Promise<DialogOutcome> {
@@ -194,7 +215,12 @@ namespace SplitTime.dialog {
         }
 
         then(callback: (result: DialogOutcome) => any): Promise<DialogOutcome> {
-            return this.section.then(callback);
+            return this.section.then(async result2 => {
+                const newSection = new Section(this.section.parentSection, this.helper, () => {
+                    callback(result2);
+                });
+                return await newSection.run();
+            });
         }
     }
 
