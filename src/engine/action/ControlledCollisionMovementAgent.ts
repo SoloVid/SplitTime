@@ -28,9 +28,6 @@ namespace SplitTime.agent {
         }
         setStopped() {
             this.resetTarget();
-            if(this.sprite) {
-                this.sprite.defaultStance();
-            }
         }
         notifyFrameUpdate(delta) {
             var walkingDir = this.getWalkingDirection();
@@ -40,10 +37,6 @@ namespace SplitTime.agent {
                     this.sprite.requestStance("walk", this.body.dir);
                 }
                 this.body.mover.horizontal.zeldaStep(this.body.dir, this.body.spd * delta);
-            } else {
-                if(this.sprite) {
-                    this.sprite.defaultStance();
-                }
             }
         }
         

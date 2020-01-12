@@ -5,52 +5,27 @@ namespace SplitTime.body {
     * @extends TimeNotified
     * @constructor
     */
-    export class Drawable {
+    export interface Drawable {
         
-        playerOcclusionFadeFactor = 0;
+        playerOcclusionFadeFactor: number;
         
-        /**
-        * @param {number} x
-        * @param {number} y
-        * @param {number} z
-        * @return {SplitTime.body.CanvasRequirements}
-        */
-        getCanvasRequirements(x, y, z) {
-            return new SplitTime.body.CanvasRequirements(Math.round(x), Math.round(y), Math.round(z), 640, 480);
-        };
+        getCanvasRequirements(x: number, y: number, z: number): SplitTime.body.CanvasRequirements;
         
-        /**
-        * @param {CanvasRenderingContext2D} ctx
-        */
-        draw(ctx) {
-            
-        };
+        draw(ctx: CanvasRenderingContext2D);
         
-        prepareForRender() {
-            
-        };
-        cleanupAfterRender() {
-            
-        };
+        prepareForRender();
+        cleanupAfterRender();
     }
     
-    /**
-    * @param {int} x
-    * @param {int} y
-    * @param {int} z
-    * @param {int} width
-    * @param {int} height
-    * @constructor
-    */
     export class CanvasRequirements {
-        x: number;
-        y: number;
-        z: number;
-        width: number;
-        height: number;
+        x: int;
+        y: int;
+        z: int;
+        width: int;
+        height: int;
         isCleared: boolean;
         translateOrigin: boolean;
-        constructor(x, y, z, width, height) {
+        constructor(x: int, y: int, z: int, width: int, height: int) {
             // Level location for center of canvas
             this.x = x;
             this.y = y;

@@ -1,19 +1,14 @@
 namespace SplitTime {
     export class Sprite implements SplitTime.body.Drawable {
-        img: string;
-        _timeMs: number;
-        _frameSignaler: IntervalStabilizer;
+        private img: string;
+        private _timeMs: number;
+        private _frameSignaler: Signaler;
         ref: string;
         constructor(img: string) {
             this.img = img;
             this._timeMs = 0;
-            var that = this;
-            /**
-            * @type {Signaler}
-            * @private
-            */
-            this._frameSignaler = new SplitTime.IntervalStabilizer(200, 1, function() {
-                return that._timeMs;
+            this._frameSignaler = new SplitTime.IntervalStabilizer(200, 1, () => {
+                return this._timeMs;
             });
         };
         
@@ -37,8 +32,8 @@ namespace SplitTime {
         dir = SplitTime.Direction.S;
         requestedDir = SplitTime.Direction.S;
         
-        stances = {
-            "default": {
+        stances: { [x: string]: ({ "S": number; "N": number; "E": number; "W": number; }) | number; } = {
+            [Sprite.DEFAULT_STANCE]: {
                 "S": 0,
                 "N": 1,
                 "E": 2,
@@ -54,14 +49,7 @@ namespace SplitTime {
             return new SplitTime.body.CanvasRequirements(Math.round(x), Math.round(y), Math.round(z), this.xres, this.yres);
         };
         
-        defaultStance() {
-            this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, true);
-        };
-        
-        /**
-        * @param {CanvasRenderingContext2D} ctx
-        */
-        draw(ctx) {
+        draw(ctx: CanvasRenderingContext2D) {
             // if(!this.canSee) {return;}
             
             ctx.rotate(this.rotate);
@@ -79,10 +67,7 @@ namespace SplitTime {
             this.rotate = 0;
         };
         
-        /**
-        * @param {CanvasRenderingContext2D} ctx
-        */
-        _drawSimple(ctx) {
+        _drawSimple(ctx: CanvasRenderingContext2D) {
             var tImg = this.getImage();
             
             var crop = this.getAnimationFrameCrop(this.dir, this.stance, this.frame);
@@ -94,7 +79,7 @@ namespace SplitTime {
             ctx.drawImage(tImg, crop.sx, crop.sy, crop.xres, crop.yres, x, y, crop.xres, crop.yres);
         };
         
-        getAnimationFrameCrop(numDir, stance, frame) {
+        getAnimationFrameCrop(numDir: number, stance: string, frame: int) {
             var crop = {
                 xres: this.xres,
                 yres: this.yres,
@@ -117,7 +102,7 @@ namespace SplitTime {
             
             var dirMap = this.stances[stance];
             if(!(dirMap instanceof Object)) {
-                column = this.stances[stance];
+                column = dirMap;
             } else {
                 //If shorten intermediate directions to cardinal if they are not specified
                 if(dir in dirMap) {
@@ -134,30 +119,28 @@ namespace SplitTime {
             return crop;
         };
         
-        // TODO: abstract this?
-        hasIdleAnimation = false;
         finalizeFrame() {
-            if(isNaN(this.frame) || this.hasIdleAnimation && this.stance != this.requestedStance || this.requestedFrameReset) {
+            if(this.stance != this.requestedStance || this.requestedFrameReset) {
                 this.frame = 0;
             } else {
-                //TODO: don't rely on global time passing since we might skip frames at some point
-                //i.e. ^^ instantiate a Stabilizer rather than using static method
                 //Only update on frame tick
                 if(this._frameSignaler.isSignaling()) {
                     var mod = this.getAnimationFramesAvailable();
-                    if(!isNaN(mod) && mod > 0) {
+                    if(mod > 0) {
                         this.frame++;
                         this.frame %= mod;
+                    } else {
+                        this.frame = 0;
                     }
                 }
             }
         };
         
-        getAnimationFramesAvailable() {
+        getAnimationFramesAvailable(): int {
             var calculation = Math.floor(this.getImage().height / this.yres);
             if(isNaN(calculation)) {
                 if(SplitTime.debug.ENABLED) {
-                    console.warn(this.img + " not loaded yet for frame count calculation for " + this.ref);
+                    SplitTime.Logger.warn(this.img + " not loaded yet for frame count calculation for " + this.ref);
                 }
                 return 1;
             } else {
@@ -178,14 +161,14 @@ namespace SplitTime {
             this.dir = this.requestedDir;
         };
         
-        requestStance(stance, dir, forceReset = false) {
+        requestStance(stance: string, dir: number, forceReset = false) {
             this.requestedStance = stance;
             this.requestedDir = dir;
             this.requestedFrameReset = forceReset;
         };
         
-        resetStance() {
-            this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, false);
+        private resetStance() {
+            this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, true);
         };
         
         notifyFrameUpdate(delta) {
@@ -199,16 +182,12 @@ namespace SplitTime {
         prepareForRender() {
             this.finalizeStance();
             this.finalizeFrame();
-            // TODO: do things like lights
         };
         cleanupAfterRender() {
             this.resetStance();
         };
         
-        /**
-        * @return {SplitTime.Sprite}
-        */
-        clone() {
+        clone(): SplitTime.Sprite {
             var clone = new SplitTime.Sprite(this.img);
             clone.xres = this.xres;
             clone.yres = this.yres;

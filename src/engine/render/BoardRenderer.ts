@@ -4,34 +4,27 @@ namespace SplitTime.BoardRenderer {
     * Cached screen coordinates
     * @type {{x: number, y: number}}
     */
-    var screen;
+    var screen: { x: number; y: number; };
     
-    /** @type {int} */
-    var SCREEN_WIDTH;
-    /** @type {int} */
-    var SCREEN_HEIGHT;
+    var SCREEN_WIDTH: int;
+    var SCREEN_HEIGHT: int;
     
-    /** @type {HTMLCanvasElement} */
-    var buffer;
-    /** @type {CanvasRenderingContext2D} */
-    var bufferCtx;
-    /** @type {HTMLCanvasElement} */
-    var snapshot;
-    /** @type {CanvasRenderingContext2D} */
-    var snapshotCtx;
+    var buffer: HTMLCanvasElement;
+    var bufferCtx: CanvasRenderingContext2D;
+    var snapshot: HTMLCanvasElement;
+    var snapshotCtx: CanvasRenderingContext2D;
     
     /** @type {{x: number, y: number, z: number}} */
-    var actualFocusPoint = {
+    var actualFocusPoint: { x: number; y: number; z: number; } = {
         x: 0,
         y: 0,
         z: 0
     };
     
-    /** @type {SplitTime.Level} */
-    var currentLevel = null;
+    var currentLevel: SplitTime.Level = null;
     
     /** @type {{x: number, y: number, z: number}[]} */
-    var focusPoints = [];
+    var focusPoints: { x: number; y: number; z: number; }[] = [];
     
     export function focusCameraOnPlayerBody() {
         SplitTime.BoardRenderer.setFocusPoint(SplitTime.playerBody);
@@ -43,19 +36,19 @@ namespace SplitTime.BoardRenderer {
     /**
     * @param {{x: number, y: number, z: number}} point
     */
-    export function setFocusPoint(point) {
+    export function setFocusPoint(point: { x: number; y: number; z: number; }) {
         focusPoints = [point];
     };
     /**
     * @param {{x: number, y: number, z: number}} point
     */
-    export function addFocusPoint(point) {
+    export function addFocusPoint(point: { x: number; y: number; z: number; }) {
         focusPoints.push(point);
     };
     /**
     * @param {{x: number, y: number, z: number}} point
     */
-    export function removeFocusPoint(point) {
+    export function removeFocusPoint(point: { x: number; y: number; z: number; }) {
         for(var i = 0; i < focusPoints.length; i++) {
             if(point === focusPoints[i]) {
                 focusPoints.splice(i, 1);
@@ -68,7 +61,7 @@ namespace SplitTime.BoardRenderer {
     * @param {{x: number, y: number, z: number}} thing
     * @return {{x: number, y: number}}
     */
-    export function getRelativeToScreen(thing) {
+    export function getRelativeToScreen(thing: { x: number; y: number; z: number; }): { x: number; y: number; } {
         var screen = SplitTime.BoardRenderer.getScreenCoordinates();
         return {
             x: thing.x - screen.x,
@@ -80,7 +73,7 @@ namespace SplitTime.BoardRenderer {
     * Get the coordinates of the screen relative to the board (determined by the body in focus)
     * @returns {{x: number, y: number}}
     */
-    export function getScreenCoordinates() {
+    export function getScreenCoordinates(): { x: number; y: number; } {
         var screen = {
             // fallback case if focused body is close to close edge of board
             x: 0,
@@ -171,7 +164,7 @@ namespace SplitTime.BoardRenderer {
     /**
     * @param {boolean} forceCalculate
     */
-    export function renderBoardState(forceCalculate) {
+    export function renderBoardState(forceCalculate: boolean) {
         if(!forceCalculate) {
             SplitTime.see.drawImage(snapshot, 0, 0);
             return;
@@ -290,18 +283,18 @@ namespace SplitTime.BoardRenderer {
     * @param {int} width
     * @param {int} height
     */
-    export function createCanvases(width, height) {
+    export function createCanvases(width: int, height: int) {
         SCREEN_WIDTH = width;
         SCREEN_HEIGHT = height;
         
         buffer = document.createElement("canvas");
-        buffer.setAttribute("width", SCREEN_WIDTH);
-        buffer.setAttribute("height", SCREEN_HEIGHT);
+        buffer.setAttribute("width", "" + SCREEN_WIDTH);
+        buffer.setAttribute("height", "" + SCREEN_HEIGHT);
         bufferCtx = buffer.getContext("2d");
         
         snapshot = document.createElement("canvas");
-        snapshot.setAttribute("width", SCREEN_WIDTH);
-        snapshot.setAttribute("height", SCREEN_HEIGHT);
+        snapshot.setAttribute("width", "" + SCREEN_WIDTH);
+        snapshot.setAttribute("height", "" + SCREEN_HEIGHT);
         snapshotCtx = snapshot.getContext("2d");
     };
 }

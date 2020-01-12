@@ -26,9 +26,9 @@ namespace SplitTime.dialog {
     ];
 
     export let DEFAULT_MS_PER_CHAR = 40;
-    export let EXTRA_MS_PER_SPACE = 0;
+    export let EXTRA_MS_PER_SPACE = -DEFAULT_MS_PER_CHAR;
     export let EXTRA_MS_PER_SHORT_BREAK_PUNCTUATION = 8 * DEFAULT_MS_PER_CHAR;
     export let EXTRA_MS_PER_LONG_BREAK_PUNCTUATION = 16 * DEFAULT_MS_PER_CHAR;
 
-    export let DEFAULT_DELAY_MS = 500;
+    export let DEFAULT_DELAY_MS = 200;
 }
