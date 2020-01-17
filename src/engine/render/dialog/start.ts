@@ -150,13 +150,13 @@ namespace SplitTime.dialog {
         run(): Promise<DialogOutcome>;
     }
 
-    export interface DialogDsl {
+    export interface DSL {
         say(speaker: Speaker, line: string): Promise<DialogOutcome>;
         section(setup: Function): SectionReturn;
         cancelable(setup: Function): SectionReturn;
     }
 
-    class OrchestrationHelper implements DialogDsl {
+    class OrchestrationHelper implements DSL {
         _parentSection: Section | null = null;
 
         get parentSection() {

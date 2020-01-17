@@ -14,6 +14,8 @@ namespace SplitTime.dialog {
     * If a dialog has been engaged, it will be stored here.
     */
     var engagedDialog: SpeechBubble|null = null;
+
+    var engagedConversation: Conversation|null = null;
     
     /**
     * Allow dialog manager to start managing the dialog.
@@ -36,6 +38,7 @@ namespace SplitTime.dialog {
         }
         if(dialog === engagedDialog) {
             engagedDialog = null;
+            engagedConversation = null;
         }
     };
     
@@ -45,6 +48,7 @@ namespace SplitTime.dialog {
     */
     export function disengageAllDialogs() {
         engagedDialog = null;
+        engagedConversation = null;
     };
     
     var MIN_SCORE = 1;
@@ -76,10 +80,12 @@ namespace SplitTime.dialog {
         if(engagedDialog && winningScore > engagedScore) {
             SplitTime.dialog.renderer.hide(engagedDialog);
             engagedDialog = null;
+            engagedConversation = null;
         }
         
         if(usurper !== null) {
             engagedDialog = usurper;
+            engagedConversation = engagedDialog.conversation;
             SplitTime.dialog.renderer.show(engagedDialog);
         }
         
@@ -96,14 +102,17 @@ namespace SplitTime.dialog {
         
         var distance = SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, location.getX(), location.getY());
         // If we've engaged in a dialog, we don't want to accidentally stop tracking the conversation just because the speaker changed.
-        if(dialog === engagedDialog) {
-            distance = dialog.conversation.speakers
-                .map(s => SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, s.body.getX(), s.body.getY()))
-                .reduce((tempMin, tempDist) => Math.min(tempMin, tempDist), SLVD.MAX_SAFE_INTEGER);
+        if(dialog.conversation === engagedConversation) {
+            const speakersExcludingPlayer = dialog.conversation.speakers.filter(s => s.body !== SplitTime.playerBody);
+            if(speakersExcludingPlayer.length > 0) {
+                distance = speakersExcludingPlayer
+                    .map(s => SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, s.body.getX(), s.body.getY()))
+                    .reduce((tempMin, tempDist) => Math.min(tempMin, tempDist), SLVD.MAX_SAFE_INTEGER);
+            }
         }
-        var distanceScore = ((SplitTime.SCREENX / 3) / distance);
+        var distanceScore = ((SplitTime.SCREENX / 3) / Math.max(distance, 0.0001));
         
-        if(dialog === engagedDialog) {
+        if(dialog.conversation === engagedConversation) {
             return distanceScore * 1.5;
         }
         return distanceScore;
