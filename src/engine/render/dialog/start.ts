@@ -15,6 +15,14 @@ namespace SplitTime.dialog {
         });
     }
 
+    export function startInterruptible(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
+        return start(d => {
+            d.section(() => {
+                orchestrator(d);
+            }).interruptible();
+        });
+    }
+
     type DialogOutcomeHandler = (result: DialogOutcome) => any;
 
     class Section implements Runnable {
