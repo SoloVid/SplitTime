@@ -170,7 +170,7 @@ namespace SplitTime {
             this.requestedStance = stance;
             this.requestedDir = dir;
             this.requestedFrameReset = forceReset;
-            this.autoReset = hold;
+            this.autoReset = !hold;
         };
         
         private resetStance() {

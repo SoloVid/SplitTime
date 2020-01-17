@@ -265,7 +265,7 @@ namespace SplitTime {
         notifyTimeAdvance(delta: number) {
             this.timeAdvanceListeners.run(delta);
         
-            var level = this.getLevel();
+            var level = this._level;
             var region = level ? level.getRegion() : null;
             if(region === SplitTime.Region.getCurrent()) {
                 var ZILCH = 0.00001;

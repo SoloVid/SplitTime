@@ -246,11 +246,4 @@ module.exports = function(grunt) {
             sourceMap: sourceMap
         };
     }
-
-    function inDir(dir, callback) {
-        var origDir = process.cwd();
-        process.chdir(dir);
-        callback();
-        process.chdir(origDir);
-    }
 };

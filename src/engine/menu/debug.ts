@@ -26,7 +26,7 @@ namespace SplitTime.debug {
             debugInfo[key] = new DebugValue(key);
         }
         debugInfo[key].value = value;
-        debugInfo[key].timeUpdated = new Date().getDate();
+        debugInfo[key].timeUpdated = new Date().getTime();
     };
     
     export function update() {

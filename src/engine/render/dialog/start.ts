@@ -65,7 +65,7 @@ namespace SplitTime.dialog {
 
         async run(): Promise<DialogOutcome> {
             const previousConversationSpeakers = this.conversation.speakers.slice();
-            const previousSection = this.helper.parentSection;
+            const previousSection = this.helper._parentSection;
             let sectionOutcome: DialogOutcome = new DialogOutcome();
             try {
                 this.helper.parentSection = this;
@@ -79,9 +79,10 @@ namespace SplitTime.dialog {
                     }
                 }
             } finally {
-                this.helper.parentSection = previousSection;
+                this.helper._parentSection = previousSection;
                 this.conversation.speakers = previousConversationSpeakers;
             }
+            // FTODO: address warning here
             await this.resolve(sectionOutcome);
             return sectionOutcome;
         }
@@ -159,7 +160,7 @@ namespace SplitTime.dialog {
     class OrchestrationHelper implements DSL {
         _parentSection: Section | null = null;
 
-        get parentSection() {
+        get parentSection(): Section {
             if(!this._parentSection) {
                 throw new Error("No conversation context available");
             }

@@ -1,6 +1,6 @@
 namespace SplitTime.controls {
     export const JoyStick = {
-        getDirection: function() {
+        getDirection: function(): number | null {
             return null;
         },
         onTilt: function(callback: () => SLVD.CallbackResult) {}

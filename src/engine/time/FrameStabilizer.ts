@@ -4,7 +4,7 @@ namespace SplitTime {
         
         constructor(msPerFrame: number, maxCounter: number = 1) {
             this._internalStabilizer = new SplitTime.IntervalStabilizer(msPerFrame || SplitTime.msPerFrame, maxCounter, function() {
-                return new Date().getDate();
+                return new Date().getTime();
             });
         };
         isSignaling() {

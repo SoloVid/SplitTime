@@ -37,6 +37,9 @@ namespace SplitTime.main {
                     SplitTime.dialog.notifyFrameUpdate();
                     SplitTime.performanceCheckpoint("SplitTime.DialogManager.notifyFrameUpdate");
                     
+                    SplitTime.debug.setDebugValue("Board Bodies", SplitTime.BoardRenderer.countBodies());
+                    SplitTime.debug.setDebugValue("Focus point", Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z));
+
                     break;
                 }
                 default: {
@@ -68,12 +71,9 @@ namespace SplitTime.main {
             displayFPS = Math.round(1/secondsElapsed);
             SplitTime.see.fillStyle="#FF0000";
         }
+        SplitTime.debug.setDebugValue("FPS", displayFPS);
         
         if(SplitTime.debug.ENABLED) {
-            SplitTime.debug.setDebugValue("FPS", displayFPS);
-            SplitTime.debug.setDebugValue("Board Bodies", SplitTime.BoardRenderer.countBodies());
-            SplitTime.debug.setDebugValue("Focus point", Math.round(SplitTime.BoardRenderer.getFocusPoint().x) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().y) + "," + Math.round(SplitTime.BoardRenderer.getFocusPoint().z));
-    
             SplitTime.debug.renderCanvas(SplitTime.see);
         }
     };

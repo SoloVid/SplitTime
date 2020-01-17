@@ -326,11 +326,11 @@ namespace SplitTime {
 
                 await currentLevel.waitForLoadAssets();
 
-                this.refetchBodies();
-                if(this.fileData === null) {
-                    throw new Error("this.fileData is null");
-                }
-                this._levelTraces = new SplitTime.level.Traces(this, this.fileData);
+                    this.refetchBodies();
+                    if(this.fileData === null) {
+                        throw new Error("this.fileData is null");
+                    }
+                    this._levelTraces = new SplitTime.level.Traces(this, this.fileData);
             };
             
             unload() {
@@ -359,14 +359,15 @@ namespace SplitTime {
             * STOP!!! This method should ONLY be called by the main game loop.
             */
             static async applyTransition() {
-                if(!transitionPromise) {
+                if(nextLevel === null) {
+                    // nothing to do
                     return;
                 }
-
-                if(nextLevel === null) {
-                    throw new Error("nextLevel is null when applyTransition is called!?!");
-                }
                 
+                if(!transitionPromise) {
+                    throw new Error("transitionPromise is null when applyTransition is called!?!");
+                }
+
                 var exitingLevel = currentLevel;
                 currentLevel = nextLevel;
                 nextLevel = null;
@@ -398,6 +399,7 @@ namespace SplitTime {
                     enteringLevel.runEvent(ENTER_LEVEL_FUNCTION_ID);
                 }
                 transitionPromise.resolve();
+                transitionPromise = null;
             };
             
             static async transition(level: SplitTime.Level | string): Promise<any> {

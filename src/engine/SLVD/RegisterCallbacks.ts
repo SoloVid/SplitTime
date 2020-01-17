@@ -120,9 +120,8 @@ namespace SLVD{
             
             for(var i = 0; i < this._allowedObjectMethods.length; i++) {
                 var allowedMethod = this._allowedObjectMethods[i];
-                const possibleMethod = registered[allowedMethod];
-                if(typeof possibleMethod === "function") {
-                    return possibleMethod(data);
+                if(typeof registered[allowedMethod] === "function") {
+                    return registered[allowedMethod](data);
                 }
             }
             

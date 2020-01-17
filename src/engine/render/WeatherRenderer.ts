@@ -4,7 +4,7 @@ namespace SplitTime {
     var frameStabilizer: IntervalStabilizer;
     defer(() => {
         frameStabilizer = new SplitTime.IntervalStabilizer(SplitTime.msPerFrame, COUNTER_BASE, function() {
-            return new Date().getDate();
+            return new Date().getTime();
         });
     });
     
