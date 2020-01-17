@@ -1,18 +1,23 @@
 namespace SplitTime {
+    let nextRef = 10;
+
     export class Sprite implements SplitTime.body.Drawable {
         private img: string;
         private _timeMs: number;
         private _frameSignaler: Signaler;
-        ref: string;
+        ref: int;
         constructor(img: string) {
             this.img = img;
             this._timeMs = 0;
             this._frameSignaler = new SplitTime.IntervalStabilizer(200, 1, () => {
                 return this._timeMs;
             });
+            this.ref = nextRef++;
         };
         
         static DEFAULT_STANCE = "default";
+
+        private autoReset: boolean = true;
         
         xres = 32;
         yres = 64;
@@ -45,7 +50,7 @@ namespace SplitTime {
             return SplitTime.image.get(this.img);
         };
         
-        getCanvasRequirements(x, y, z) {
+        getCanvasRequirements(x: number, y: number, z: number) {
             return new SplitTime.body.CanvasRequirements(Math.round(x), Math.round(y), Math.round(z), this.xres, this.yres);
         };
         
@@ -106,11 +111,11 @@ namespace SplitTime {
             } else {
                 //If shorten intermediate directions to cardinal if they are not specified
                 if(dir in dirMap) {
-                    column = dirMap[dir];
-                } else if(simpleDir in dirMap) {
-                    column = dirMap[simpleDir];
+                    column = (dirMap as any)[dir];
+                } else if(simpleDir && simpleDir in dirMap) {
+                    column = (dirMap as any)[simpleDir];
                 } else {
-                    console.warn("Stance " + stance + " missing direction " + dir);
+                    Logger.warn("Stance " + stance + " missing direction " + dir);
                     column = 0;
                 }
             }
@@ -161,21 +166,22 @@ namespace SplitTime {
             this.dir = this.requestedDir;
         };
         
-        requestStance(stance: string, dir: number, forceReset = false) {
+        requestStance(stance: string, dir: number, forceReset = false, hold: boolean = false) {
             this.requestedStance = stance;
             this.requestedDir = dir;
             this.requestedFrameReset = forceReset;
+            this.autoReset = hold;
         };
         
         private resetStance() {
             this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, true);
         };
         
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: number) {
             // Don't care about real time
         };
         
-        notifyTimeAdvance(delta) {
+        notifyTimeAdvance(delta: number) {
             this._timeMs += delta * 1000;
         };
         
@@ -184,7 +190,9 @@ namespace SplitTime {
             this.finalizeFrame();
         };
         cleanupAfterRender() {
-            this.resetStance();
+            if(this.autoReset) {
+                this.resetStance();
+            }
         };
         
         clone(): SplitTime.Sprite {

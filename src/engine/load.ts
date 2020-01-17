@@ -3,18 +3,22 @@ namespace SplitTime {
 	export var seeB: HTMLCanvasElement;
 	export var see: CanvasRenderingContext2D;
 	
-	function createCanvases(width, height, parent, additionalCanvasClass) {
+	function createCanvases(width: int, height: int, parent: HTMLElement, additionalCanvasClass: string) {
 		SplitTime.seeB = document.createElement("canvas");
 		SplitTime.seeB.innerHTML = "Your browser does not support the canvas element this engine relies on. Please get a more modern browser to use this.";
 		SplitTime.seeB.setAttribute("id", "game-window");
-		SplitTime.seeB.setAttribute("width", width);
-		SplitTime.seeB.setAttribute("height", height);
+		SplitTime.seeB.setAttribute("width", "" + width);
+		SplitTime.seeB.setAttribute("height", "" + height);
 		SplitTime.seeB.setAttribute("style", "display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);");
 		if(additionalCanvasClass) {
 			SplitTime.seeB.setAttribute("class", additionalCanvasClass);
 		}
 		parent.appendChild(SplitTime.seeB);
-		SplitTime.see = SplitTime.seeB.getContext("2d");
+		const tempSee = SplitTime.seeB.getContext("2d");
+		if(tempSee === null) {
+			throw new Error("Failed to initialize main see context");
+		}
+		SplitTime.see = tempSee;
 	
 		SplitTime.see.font="20px Arial";
 		SplitTime.see.fillText("If this message persists for more than a few seconds,", 10, 30);
@@ -33,7 +37,7 @@ namespace SplitTime {
 	 *                       If unspecified, parent element will be document.body
 	 * @param {string} [additionalCanvasClass] CSS class string to apply to game canvas element (e.g. for stretching)
 	 */
-	export function launch(width, height, parentId, additionalCanvasClass) {
+	export function launch(width: int, height: int, parentId?: string, additionalCanvasClass: string = "") {
 		if(width && height) {
 			SplitTime.SCREENX = width;
 			SplitTime.SCREENY = height;
@@ -41,7 +45,11 @@ namespace SplitTime {
 		
 		var parent = document.body;
 		if(parentId) {
-			parent = document.getElementById(parentId);
+			const foundParent = document.getElementById(parentId);
+			if(!foundParent) {
+				throw new Error("Failed to find element \"" + parentId + "\" to attach game window");
+			}
+			parent = foundParent;
 		}
 	
 		SLVD.randomSeed();
@@ -57,7 +65,7 @@ namespace SplitTime {
 		var masterData = SplitTime._GAME_DATA;
 		var itemsToLoad = masterData.levels.length + masterData.preloadedImageFiles.length;
 		var itemsLoaded = 0;
-		var promiseCollection = new SLVD.PromiseCollection();
+		var promiseCollection: PromiseLike<any>[] = [];
 		
 		function incrementAndUpdateLoading() {
 			itemsLoaded++;
@@ -80,7 +88,7 @@ namespace SplitTime {
 		var i, fileName;
 		for(i = 0; i < masterData.preloadedImageFiles.length; i++) {
 			fileName = masterData.preloadedImageFiles[i];
-			promiseCollection.add(SplitTime.image.load("preloaded/" + fileName, fileName, true).then(incrementAndUpdateLoading));
+			promiseCollection.push(SplitTime.image.load("preloaded/" + fileName, fileName, true).then(incrementAndUpdateLoading));
 		}
 		
 		for(i = 0; i < masterData.musicFiles.length; i++) {
@@ -94,16 +102,16 @@ namespace SplitTime {
 		
 		for(i = 0; i < masterData.levels.length; i++) {
 			var levelData = masterData.levels[i];
-			promiseCollection.add(SplitTime.Level.load(levelData).then(incrementAndUpdateLoading));
+			promiseCollection.push(SplitTime.Level.load(levelData).then(incrementAndUpdateLoading));
 		}
 		
 		//Begin recursion
-		promiseCollection.then(function() {
+		Promise.all(promiseCollection).then(function() {
 			//Begin main loop
 			SplitTime.main.start();
 			
 			//If done SplitTime.loading, launch game-defined launch script
-			if(typeof(launchCallback === "function")) {
+			if(typeof launchCallback === "function") {
 				launchCallback();
 			} else if(SplitTime.debug.ENABLED) {
 				SplitTime.Logger.warn("Game launch callback not set. (You should probably call SplitTIme.onGameEngineLoaded().)");
@@ -111,7 +119,7 @@ namespace SplitTime {
 		});
 	};
 
-	var launchCallback = null;
+	var launchCallback: Function | null = null;
 	export function onGameEngineLoaded(callback: () => void) {
 		launchCallback = callback;
 	}

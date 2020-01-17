@@ -1,35 +1,35 @@
 namespace SplitTime.agent {
     export class ControlledCollisionMovement {
         private body: SplitTime.Body;
-        private targetBoardX: number;
-        private targetBoardY: number;
-        private targetScreenX: number;
-        private targetScreenY: number;
-        private targetDirection;
+        private targetBoardX: number | null = null;
+        private targetBoardY: number | null = null;
+        private targetScreenX: number | null = null;
+        private targetScreenY: number | null = null;
+        private targetDirection: number | null = null;
         
         public constructor(body: SplitTime.Body) {
-            this.setBody(body);
+            this.body = body;
         }
-        setBody(body) {
+        setBody(body: Body) {
             this.body = body;
             this.resetTarget();
         }
         
-        setWalkingTowardBoardLocation(x, y) {
+        setWalkingTowardBoardLocation(x: number, y: number) {
             this.targetBoardX = x;
             this.targetBoardY = y;
         }
-        setWalkingTowardScreenLocation(x, y) {
+        setWalkingTowardScreenLocation(x: number, y: number) {
             this.targetScreenX = x;
             this.targetScreenY = y;
         }
-        setWalkingDirection(dir) {
+        setWalkingDirection(dir: number) {
             this.targetDirection = dir;
         }
         setStopped() {
             this.resetTarget();
         }
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: number) {
             var walkingDir = this.getWalkingDirection();
             if(walkingDir !== null) {
                 this.body.dir = walkingDir;

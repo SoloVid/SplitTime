@@ -1,25 +1,32 @@
 namespace SplitTime.body.collisions {
     var ZILCH = 0.00001;
 
-    //TODO: consider making this function only in one place instead of
-    //          both here and in collisionsHorizontal.js, collisionsRising.js
-    function addArrayToSet(arr, set) {
-        for(var i = 0; i < arr.length; i++) {
-            set[arr[i]] = true;
+    class CollisionInfo {
+        x: int = -1;
+        y: int = -1;
+        body: Body | null = null;
+        distanceAllowed: number;
+        zBlocked: int;
+        zEnd: int;
+        events: string[] = [];
+        otherLevels: string[] = [];
+
+        constructor(distanceAllowed: number, zBlocked: int, zEnd: int) {
+            this.distanceAllowed = distanceAllowed;
+            this.zBlocked = zBlocked;
+            this.zEnd = zEnd;
         }
     }
-    
+
     export class Rising {
-        mover: Mover;
-        constructor(mover: SplitTime.body.Mover) {
-            this.mover = mover;
+        constructor(private readonly mover: SplitTime.body.Mover) {
         }
 
 /**
  * @param {number} maxDZ (positive)
  * @returns {number} Z pixels moved (non-negative)
  */
-zeldaVerticalRise(maxDZ) {
+zeldaVerticalRise(maxDZ: number): number {
     var collisionInfo = this.calculateRise(maxDZ);
     var levelIdSet = {};
 
@@ -30,7 +37,7 @@ zeldaVerticalRise(maxDZ) {
     if(collisionInfo.body && collisionInfo.distanceAllowed < maxDZ) {
         var howMuchUnmoved = maxDZ - collisionInfo.distanceAllowed;
         var howFarToPushOther = Math.min(howMuchUnmoved, 1);
-        collisionInfo.body.mover.zeldaVerticalRise(howFarToPushOther);
+        collisionInfo.body.mover.rising.zeldaVerticalRise(howFarToPushOther);
         var howMuchMoreICanMove = howMuchUnmoved - howFarToPushOther * 2;
         if(howMuchMoreICanMove > 0) {
             return this.zeldaVerticalRise(howMuchMoreICanMove);
@@ -50,26 +57,16 @@ zeldaVerticalRise(maxDZ) {
 };
 
 /**
- * @param {number} maxDZ (positive)
- * @returns {{x: int, y: int, body: SplitTime.Body|null, distanceAllowed: number, zBlocked: number, zEnd: number, events: string[]}}
+ * @param maxDZ (positive)
  */
-calculateRise(maxDZ) {
+calculateRise(maxDZ: number): CollisionInfo {
     var roundX = Math.floor(this.mover.body.getX());
     var roundY = Math.floor(this.mover.body.getY());
     var z = this.mover.body.getZ();
     var top = z + this.mover.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
-    var collisionInfo = {
-        x: -1,
-        y: -1,
-        body: null,
-        distanceAllowed: maxDZ,
-        zBlocked: targetTop,
-        zEnd: targetZ,
-        events: [],
-        otherLevels: []
-    };
+    var collisionInfo = new CollisionInfo(maxDZ, targetTop, targetZ);
 
     var collisionInfoBodies = this.calculateRiseThroughBodies(
         roundX,
@@ -112,19 +109,11 @@ calculateRise(maxDZ) {
  * @param {number} maxDZ (positive)
  * @returns {{x: int, y: int, distanceAllowed: number, zBlocked: number, zEnd: number, events: string[]}}
  */
-calculateRiseThroughTraces(x, y, z, maxDZ) {
+calculateRiseThroughTraces(x: int, y: int, z: number, maxDZ: number): CollisionInfo {
     var top = z + this.mover.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
-    var collisionInfo = {
-        x: -1,
-        y: -1,
-        distanceAllowed: maxDZ,
-        zBlocked: targetTop,
-        zEnd: targetZ,
-        events: [],
-        otherLevels: []
-    };
+    var collisionInfo = new CollisionInfo(maxDZ, targetTop, targetZ);
 
     var startX = x - this.mover.body.halfBaseLength;
     var xPixels = this.mover.body.baseLength;
@@ -189,25 +178,19 @@ calculateRiseThroughTraces(x, y, z, maxDZ) {
  * @param {int} y
  * @param {number} z
  * @param {number} maxDZ (positive)
- * @returns {{body: SplitTime.Body|null, distanceAllowed: number, zBlocked: number, zEnd: number}}
  */
-calculateRiseThroughBodies(x, y, z, maxDZ) {
+calculateRiseThroughBodies(x: int, y: int, z: number, maxDZ: number): CollisionInfo {
     var top = z + this.mover.body.height;
     var targetZ = z + maxDZ;
     var targetTop = top + maxDZ;
-    var collisionInfo = {
-        body: null,
-        distanceAllowed: maxDZ,
-        zBlocked: targetTop,
-        zEnd: targetZ
-    };
+    var collisionInfo = new CollisionInfo(maxDZ, targetTop, targetZ);
 
     var startX = x - this.mover.body.halfBaseLength;
     var xPixels = this.mover.body.baseLength;
     var startY = y - this.mover.body.halfBaseLength;
     var yPixels = this.mover.body.baseLength;
 
-    function handleFoundBody(otherBody) {
+    function handleFoundBody(otherBody: Body) {
         var zBlocked = otherBody.getZ();
         if(zBlocked < collisionInfo.zBlocked && zBlocked + otherBody.height / 2 >= top) {
             collisionInfo.body = otherBody;

@@ -5,7 +5,7 @@ namespace SplitTime.level {
     * @param {BodiesSortedByOneValue} bodiesSortHolder
     * @return {boolean}
     */
-    function forEachBodyAtValue(value, callback, bodiesSortHolder) {
+    function forEachBodyAtValue(value: int, callback: (arg0: SplitTime.Body) => any, bodiesSortHolder: BodiesSortedByOneValue): boolean {
         if(!bodiesSortHolder) {
             console.warn("Attempting to use BodyOrganizer before initialized");
             return false;
@@ -29,7 +29,7 @@ namespace SplitTime.level {
                     return true;
                 }
                 foundBody = true;
-                callback(sortedItem.body);
+                callback(sortedItem.body as Body);
                 // } else if(sortedItem.value > value) {
                 //     // Will this optimization help?
                 //     return foundBody;
@@ -43,7 +43,7 @@ namespace SplitTime.level {
     export class BodyOrganizer {
         _initialized: boolean;
         _bodies: any[];
-        _bodySet: {};
+        _bodySet: { [ref: number]: boolean };
         _sortedByXLeft: any;
         _sortedByXRight: any;
         _sortedByYTop: any;
@@ -56,7 +56,7 @@ namespace SplitTime.level {
         * @constructor
         * @alias SplitTime.Level.BodyOrganizer
         */
-        constructor(level) {
+        constructor(level: SplitTime.Level) {
             this._initialized = false;
             /** @type {SplitTime.Body[]} */
             this._bodies = [];
@@ -70,7 +70,7 @@ namespace SplitTime.level {
         /**
         * @param {SplitTime.Level} level
         */
-        initialize(level) {
+        initialize(level: SplitTime.Level) {
             var maxX32 = Math.ceil(level.width / 32);
             var maxY32 = Math.ceil(level.yWidth / 32);
             var maxZ32 = Math.ceil(level.highestLayerZ / 32);
@@ -90,7 +90,7 @@ namespace SplitTime.level {
         /**
         * @return {SplitTime.Body[]}
         */
-        getBodies() {
+        getBodies(): SplitTime.Body[] {
             return this._bodies;
         };
         
@@ -98,7 +98,7 @@ namespace SplitTime.level {
         * Register a body with the organizer (such as on level entrance)
         * @param {SplitTime.Body} body
         */
-        addBody(body) {
+        addBody(body: SplitTime.Body) {
             if(this._bodySet[body.ref]) {
                 return;
             }
@@ -123,7 +123,7 @@ namespace SplitTime.level {
         * Deregister a body from the organizer (such as on level exit)
         * @param {SplitTime.Body} body
         */
-        removeBody(body) {
+        removeBody(body: SplitTime.Body) {
             for(var i = this._bodies.length - 1; i >= 0; i++) {
                 this._bodies.splice(i, 1);
             }
@@ -147,7 +147,7 @@ namespace SplitTime.level {
         * Should be called every time coordinates of body change.
         * @param {SplitTime.Body} body
         */
-        resort(body) {
+        resort(body: SplitTime.Body) {
             if(!this._initialized) {
                 return;
             }
@@ -173,27 +173,27 @@ namespace SplitTime.level {
         * @param {function(SplitTime.Body)} [callback]
         * @return {boolean} whether any bodies were found
         */
-        forEachXLeft(x, callback) {
+        forEachXLeft(x: int, callback: (body: SplitTime.Body) => any): boolean {
             return forEachBodyAtValue(x, callback, this._sortedByXLeft);
         };
         
-        forEachXRight(x, callback) {
+        forEachXRight(x: int, callback: (body: SplitTime.Body) => any) {
             return forEachBodyAtValue(x, callback, this._sortedByXRight);
         };
         
-        forEachYTop(y, callback) {
+        forEachYTop(y: int, callback: (body: SplitTime.Body) => any) {
             return forEachBodyAtValue(y, callback, this._sortedByYTop);
         };
         
-        forEachYBottom(y, callback) {
+        forEachYBottom(y: int, callback: (body: SplitTime.Body) => any) {
             return forEachBodyAtValue(y, callback, this._sortedByYBottom);
         };
         
-        forEachZTop(z, callback) {
+        forEachZTop(z: int, callback: (body: SplitTime.Body) => any) {
             return forEachBodyAtValue(z, callback, this._sortedByZTop);
         };
         
-        forEachZBottom(z, callback) {
+        forEachZBottom(z: int, callback: (body: SplitTime.Body) => any) {
             return forEachBodyAtValue(z, callback, this._sortedByZBottom);
         };
     }
@@ -201,7 +201,7 @@ namespace SplitTime.level {
     class BodiesSortedByOneValue {
         max32Value: number;
         valueLookup32: any[];
-        sortedByValue: { value: number; body: { ref: number; }; }[];
+        sortedByValue: { value: number; body: Body | { ref: int }; }[];
         reverseSortLookup: number[];
         
         constructor(max32Value: number) {
@@ -226,7 +226,7 @@ namespace SplitTime.level {
             return this.max32Value * 32 + BUFFER;
         };
         
-        addBody(body) {
+        addBody(body: Body) {
             this.sortedByValue.push({
                 value: this._getBeyondMaxValue(),
                 body: body
@@ -234,13 +234,13 @@ namespace SplitTime.level {
             this.reverseSortLookup[body.ref] = this.sortedByValue.length - 1;
         };
         
-        removeBody(body) {
+        removeBody(body: Body) {
             this.resortBody(body, this._getBeyondMaxValue());
             this.sortedByValue.splice(this.reverseSortLookup[body.ref], 1);
             delete this.reverseSortLookup[body.ref];
         };
         
-        resortBody(body, value) {
+        resortBody(body: Body, value: number) {
             if(Math.floor(value) !== value) {
                 console.warn("Non-integer value: " + value);
             }
@@ -257,7 +257,7 @@ namespace SplitTime.level {
             }
         };
         
-        resortBodyUpward(body, value) {
+        resortBodyUpward(body: Body, value: number) {
             var currentIndex = this.reverseSortLookup[body.ref];
             var oldValue = this.sortedByValue[currentIndex].value;
             
@@ -280,7 +280,7 @@ namespace SplitTime.level {
             }
         };
         
-        resortBodyDownward(body, value) {
+        resortBodyDownward(body: Body, value: number) {
             var currentIndex = this.reverseSortLookup[body.ref];
             var oldValue = this.sortedByValue[currentIndex].value;
             

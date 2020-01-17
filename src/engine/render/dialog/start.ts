@@ -25,12 +25,12 @@ namespace SplitTime.dialog {
         interruptibles: Interruptible[] = [];
         selfInterruptTriggered: boolean = false;
         promise: Promise<DialogOutcome>;
-        resolve: (value?: DialogOutcome | PromiseLike<DialogOutcome>) => void;
+        resolve: (value?: DialogOutcome | PromiseLike<DialogOutcome>) => void = () => {};
 
         constructor(public readonly parentSection: Section | null, private readonly helper: OrchestrationHelper, private readonly setup: Function) {
             this.conversation = this.parentSection === null ? new Conversation() : this.parentSection.conversation;
 
-            this.promise = new Promise((resolve, reject) => {
+            this.promise = new Promise(resolve => {
                 this.resolve = resolve;
             });
         }
@@ -60,6 +60,7 @@ namespace SplitTime.dialog {
             if(this.parentSection !== null) {
                 return this.parentSection.triggerInterrupt();
             }
+            return false;
         }
 
         async run(): Promise<DialogOutcome> {
@@ -156,7 +157,18 @@ namespace SplitTime.dialog {
     }
 
     class OrchestrationHelper implements DialogDsl {
-        parentSection: Section;
+        _parentSection: Section | null = null;
+
+        get parentSection() {
+            if(!this._parentSection) {
+                throw new Error("No conversation context available");
+            }
+            return this._parentSection;
+        }
+
+        set parentSection(section: Section) {
+            this._parentSection = section;
+        }
 
         say(speaker: Speaker, line: string): Promise<DialogOutcome> {
             if(this.parentSection.conversation.speakers.indexOf(speaker) < 0) {
@@ -203,14 +215,15 @@ namespace SplitTime.dialog {
 
         interruptible(condition: any = true, callback: Function = () => {}): SectionReturn {
             // FTODO: make this less hacky (reaching into parent section of section)
+            const parentSection = this.section.parentSection as Section;
             const interruptible = new Interruptible(condition, callback);
-            const interruptibleSection = new Section(this.section.parentSection, this.helper, () => {
+            const interruptibleSection = new Section(parentSection, this.helper, () => {
                 if(interruptible.triggered) {
                     interruptible.runCallback();
                 }
             });
             this.section.interruptibles.push(interruptible);
-            this.section.parentSection.parts.push(interruptibleSection)
+            parentSection.parts.push(interruptibleSection)
             return this;
         }
 

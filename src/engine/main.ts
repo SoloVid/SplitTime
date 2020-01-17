@@ -85,24 +85,24 @@ namespace SplitTime.main {
         OTHER: "other"
     };
     
-    var nextMainTimeoutId = null;
+    var nextMainTimeoutId: number | undefined = undefined;
 
     export function start() {
-        if(nextMainTimeoutId === null) {
+        if(!nextMainTimeoutId) {
             mainFuncLoopBody();
         }
     };
     
     export function stop() {
         clearTimeout(nextMainTimeoutId);
-        nextMainTimeoutId = null;
+        nextMainTimeoutId = undefined;
     };
     
     export interface FrameNotified {
         /**
         * @param delta number of seconds passed (in real time) since last frame
         */
-        notifyFrameUpdate(delta);
+        notifyFrameUpdate(delta: number): void;
     }
 }
 

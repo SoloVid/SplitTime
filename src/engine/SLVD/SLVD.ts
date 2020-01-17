@@ -12,10 +12,10 @@ namespace SLVD {
 	};
 	
 	//Get text from file; returns SLVD promise
-	export function getTXT(fil) {
+	export function getTXT(fil: string) {
 		var promise = new SLVD.Promise();
 		
-		var xmlhttp;
+		var xmlhttp: XMLHttpRequest;
 		if (window.XMLHttpRequest)
 		{// code for IE7+, Firefox, Chrome, Opera, Safari
 			xmlhttp=new XMLHttpRequest();
@@ -31,10 +31,10 @@ namespace SLVD {
 	};
 	
 	//Get XML DOM from file; returns SLVD promise
-	export function getXML(fil) {
+	export function getXML(fil: string) {
 		var promise = new SLVD.Promise();
 		
-		var xmlhttp;
+		var xmlhttp: XMLHttpRequest;
 		if (window.XMLHttpRequest)
 		{// code for IE7+, Firefox, Chrome, Opera, Safari
 			xmlhttp=new XMLHttpRequest();
@@ -56,21 +56,21 @@ namespace SLVD {
 	/**
 	* random integer between 1 and num
 	*/
-	export function randomInt(num) {
+	export function randomInt(num: number) {
 		return Math.floor((Math.random() * num) + 1);
 	};
 	
 	/**
 	* random integer between 1 and num
 	*/
-	export function randomRangedInt(min, max) {
+	export function randomRangedInt(min: number, max: number) {
 		return Math.round((Math.random() * (max - min))) + min;
 	};
 	
 	/**
 	* random integer between 1 and num
 	*/
-	export function randomRanged(min, max) {
+	export function randomRanged(min: number, max: number) {
 		return (Math.random() * (max - min)) + min;
 	};
 	
@@ -82,7 +82,7 @@ namespace SLVD {
 		}
 	};
 	
-	export function approachValue(oldValue, targetValue, step) {
+	export function approachValue(oldValue: number, targetValue: number, step: number) {
 		if(oldValue < targetValue) {
 			return Math.min(oldValue + step, targetValue);
 		} else {
@@ -90,40 +90,11 @@ namespace SLVD {
 		}
 	};
 	
-	export function constrain(num, min, max) {
+	export function constrain(num: number, min: number, max: number) {
 		return Math.max(min, Math.min(num, max));
 	};
 	
-	export function mod(n, base) {
+	export function mod(n: number, base: number) {
 		return ((n % base) + base) % base;
-	};
-	
-	export function strNthIndexOf(str, n, pattern) {
-		var i = -1;
-		
-		while (n-- && i++ < str.length) {
-			i = str.indexOf(pattern, i);
-			if (i < 0) break;
-		}
-		
-		return i;
-	};
-	
-	export function strReplaceNth(str, n, regex, replacement) {
-		var nth = 0;
-		return str.replace(regex, function(match) {
-			if(nth++ == n) {
-				if(replacement instanceof Function)
-				{
-					return replacement.apply(this, Array.prototype.slice.call(arguments));
-				}
-				else {
-					return replacement;
-				}
-			}
-			else {
-				return match;
-			}
-		});
 	};
 }

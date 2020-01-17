@@ -16,60 +16,70 @@ namespace SplitTime.audio {
     var MUSIC_DIR = "music/";
     var SOUND_EFFECT_DIR = "fx/";
     var FADE_DURATION_MS = 2000;
+
+    class HowlContainer {
+        howl: Howl | null = null;
+        soundId: any;
+        isLoaded: boolean = false;
+        isPausing: boolean = false;
+        musicGroup: string;
+        constructor(public readonly relativePath: string, public readonly handle: string, public readonly isLooping: boolean) {
+            //Music files will be considered to be in the same group if the file names share the first 5 chars
+            this.musicGroup = handle.substr(0, 5);
+        }
+    }
     
-    var registeredPaths = {};
-    var loadedSounds = {};
-    var loadedIDs = {};
-    var loopSetting = {};
-    var musicGroup = {};
-    var currentBkgSound;
+    var sounds: { [handle: string]: HowlContainer } = {};
+    var currentBkgSound: HowlContainer;
     
-    // TODO: expose this volume
-    var globalVolume = 1;
+    export var globalVolume = 1;
     
     
-    export function registerMusic(relativePath, loop = true) {
+    export function registerMusic(relativePath: string, loop = true) {
         registerAudio(MUSIC_DIR + relativePath, relativePath, loop);
     };
     
-    export function registerSoundEffect(relativePath, loop = false) {
+    export function registerSoundEffect(relativePath: string, loop = false) {
         registerAudio(SOUND_EFFECT_DIR + relativePath, relativePath, loop);
     };
     
-    function registerAudio(relativePath, handle, loopAudio) {
-        registeredPaths[handle] = AUDIO_ROOT + relativePath;
-        loopSetting[handle] = loopAudio;
+    function registerAudio(relativePath: string, handle: string, loopAudio: boolean) {
+        sounds[handle] = new HowlContainer(relativePath, handle, loopAudio);
     }
     
     /**
     * @desc plays specified audio
-    * @param string handle - the name of the audio file to be played (e.g. "dirge.mp3")
-    * @param bool loop - specify true/false to override default loop setting for this audio
-    * @param bool restartIfPlaying - Defaults to false.  Set to true if the audio should start over
+    * @param handle - the name of the audio file to be played (e.g. "dirge.mp3")
+    * @param loop - specify true/false to override default loop setting for this audio
+    * @param restartIfPlaying - Defaults to false.  Set to true if the audio should start over
     *                                if it's currently playing (this is for looping sounds, such as music)
     */
-    export function play(handle, loop?, restartIfPlaying?) {
-        var sound = loadedSounds[handle];
-        var soundID = loadedIDs[handle];
+    export function play(handle: string, loop?: boolean, restartIfPlaying?: boolean) {
+        if(!(handle in sounds)) {
+            throw new Error("Sound " + handle + " is not recognized");
+        }
+
+        var sound = sounds[handle];
+        var soundID = sound.soundId;
         var currentVolume;
         var fadeIn = false;
         
         //If not set, this will be set to the default for this audio file.
-        loop = typeof loop !== 'undefined' ?  loop : loopSetting[handle];
+        loop = typeof loop !== 'undefined' ?  loop : sound.isLooping;
         
-        if(typeof sound !== 'undefined'){
+        if(sound.howl){
             if(restartIfPlaying) {
-                sound.currentTime = 0;
+                sound.howl.seek(0, sound.soundId);
             }
             if(loop){  //Note: this assumes we only have one looping background track at a time.
                 fadeIn = crossFadeSimilar(sound);
             }
-            sound.play(soundID);
+            sound.howl.play(soundID);
             if(fadeIn){
-                currentVolume = sound.volume();
-                sound.fade(currentVolume, 1, FADE_DURATION_MS);
+                currentVolume = sound.howl?.volume() || 0;
+                sound.howl.fade(currentVolume, 1, FADE_DURATION_MS);
             } else {
-                sound.volume(1);
+                sound.howl.volume(1);
             }
         } else {
             //Set up the audio file to be used with howler.js API 
@@ -77,49 +87,47 @@ namespace SplitTime.audio {
             
             var startVolume = 1;
             
-            sound = new Howl({
-                src: registeredPaths[handle],
+            const howl = new Howl({
+                src: AUDIO_ROOT + sound.relativePath,
                 autoplay: false,
                 volume: startVolume,
                 loop: loop,
                 onload: function(){
-                    //Music files will be considered to be in the same group if the file names share the first 5 chars
-                    sound.musicGroup = handle.substr(0, 5);
+                    sound.isLoaded = true;
                     if(loop){  //Note: this assumes we only have one looping background track at a time.
                         fadeIn = crossFadeSimilar(sound);
                     }
                     
                     if(fadeIn){
-                        sound.volume(0);
-                        sound.fade(startVolume, 1, FADE_DURATION_MS);
+                        howl.volume(0);
+                        howl.fade(startVolume, 1, FADE_DURATION_MS);
                     }
                 },
                 onfade: function(){
-                    currentVolume = sound.volume();
+                    currentVolume = howl.volume();
                     if(currentVolume == 0){
                         if(sound.isPausing) {
-                            sound.pause();
+                            howl.pause();
                             sound.isPausing = false;
                         } else {
-                            sound.stop();
+                            howl.stop();
                         }
                     } 
                 }
             });
-            soundID = sound.play();
-            loadedSounds[handle] = sound;
-            loadedIDs[handle] = soundID;
+            sound.howl = howl;
+            soundID = howl.play();
         }
     };
     
     //Cross-fade settings for similar background themes: start where we left off
     //Returns true if new sound is similar to the currently playing sound
-    function crossFadeSimilar(sound) {
+    function crossFadeSimilar(sound: HowlContainer) {
         var similar = false;
         if(typeof currentBkgSound !== 'undefined' && sound.musicGroup == currentBkgSound.musicGroup){
             similar = true;
-            var timeOffset = currentBkgSound.seek();
-            sound.seek(timeOffset);
+            var timeOffset = currentBkgSound.howl?.seek() as number || 0;
+            sound.howl?.seek(timeOffset);
         }
         currentBkgSound = sound;
         return similar;
@@ -127,11 +135,11 @@ namespace SplitTime.audio {
     
     //Pause current SplitTime.audio
     export function pause() {
-        for(var handle in loadedSounds) {
-            var sound = loadedSounds[handle];
-            if(sound.playing()){
-                var currentVolume = sound.volume();
-                sound.fade(currentVolume, 0, FADE_DURATION_MS);
+        for(var handle in sounds) {
+            var sound = sounds[handle];
+            if(sound.isLoaded && sound.howl?.playing()){
+                var currentVolume = sound.howl.volume();
+                sound.howl.fade(currentVolume, 0, FADE_DURATION_MS);
                 //this will make it so that the audio will pause (rather than stopping)
                 //after the onfade event is triggered (after the fading is finished)
                 sound.isPausing = true;
@@ -141,11 +149,11 @@ namespace SplitTime.audio {
     
     //Stop current SplitTime.audio
     export function stop() {
-        for(var handle in loadedSounds) {
-            var sound = loadedSounds[handle];
-            if(sound.playing()){
-                var currentVolume = sound.volume();
-                sound.fade(currentVolume, 0, FADE_DURATION_MS);
+        for(var handle in sounds) {
+            var sound = sounds[handle];
+            if(sound.isLoaded && sound.howl?.playing()){
+                var currentVolume = sound.howl.volume();
+                sound.howl.fade(currentVolume, 0, FADE_DURATION_MS);
             } 
         }
     };

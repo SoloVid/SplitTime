@@ -1,17 +1,10 @@
 namespace SplitTime.body {
-    /**
-    * @param {SplitTime.Body} body
-    * @constructor
-    */
     export class Warper {
-        body: SplitTime.Body;
         level: SplitTime.Level;
         baseLength: number;
         halfBaseLength: number;
         height: number;
-        constructor(body) {
-            this.body = body;
-            /** @type {SplitTime.Level} */
+       constructor(public readonly body: SplitTime.Body) {
             this.level = body.getLevel();
             
             this.baseLength = this.body.baseLength;
@@ -35,7 +28,7 @@ namespace SplitTime.body {
         * @param {number} maxDistance
         * @returns {number} distance actually moved
         */
-        warp(dir, maxDistance) {
+        warp(dir: number, maxDistance: number): number {
             this.ensureInRegion();
             
             var startX = Math.round(this.body.x);
@@ -44,18 +37,18 @@ namespace SplitTime.body {
             var furthestX = Math.round(this.body.x + maxDistance * SplitTime.Direction.getXMagnitude(dir));
             var furthestY = Math.round(this.body.y + maxDistance * SplitTime.Direction.getYMagnitude(dir));
             
-            var toX = null;
-            var toY = null;
-            var events = [];
-            var otherLevelId = null;
+            var toX: number | null = null;
+            var toY: number | null = null;
+            var events: string[] = [];
+            var otherLevelId: string | null = null;
             
             var me = this;
-            SLVD.bresenham.forEachPoint(furthestX, furthestY, startX, startY, function(x, y) {
+            SLVD.bresenham.forEachPoint(furthestX, furthestY, startX, startY, (x, y) => {
                 if(x + me.halfBaseLength >= me.level.width || x - me.halfBaseLength < 0) {
-                    return false;
+                    return;
                 }
                 if(y + me.halfBaseLength >= me.level.yWidth || y - me.halfBaseLength < 0) {
-                    return false;
+                    return;
                 }
                 var collisionInfo = me._getCollisionInfoAt(x, y, z);
                 if(!collisionInfo.blocked) {
@@ -67,8 +60,9 @@ namespace SplitTime.body {
                             otherLevelId = collisionInfo.otherLevels[0];
                         }
                     }
-                    return true;
+                    return SLVD.bresenham.ReturnCode.EXIT_EARLY;
                 }
+                return;
             });
             
             if(toX !== null && toY !== null && (Math.abs(toX - startX) > this.baseLength || Math.abs(toY - startY) > this.baseLength)) {
@@ -84,14 +78,7 @@ namespace SplitTime.body {
             }
         };
         
-        /**
-        * @param x
-        * @param y
-        * @param z
-        * @return {{blocked: boolean, events: string[], otherLevels: string[]}}
-        * @private
-        */
-        _getCollisionInfoAt(x, y, z) {
+        private _getCollisionInfoAt(x: int, y: int, z: int): { blocked: boolean; events: string[]; otherLevels: string[]; } {
             var left = x - this.halfBaseLength;
             var top = y - this.halfBaseLength;
             

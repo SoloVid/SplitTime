@@ -1,22 +1,27 @@
 
 namespace SplitTime.level {
     export namespace traces {
-        export function ZRange(minZ, exMaxZ) {
-            this.minZ = minZ;
-            this.exMaxZ = exMaxZ;
+        export class ZRange {
+            // FTODO: int?
+            constructor(public minZ: number, public exMaxZ: number) {
+
+            }
         }
-        
-        export function CollisionInfo() {
-            this.containsSolid = false;
-            /** @type {Object.<string, SplitTime.Trace>} */
-            this.pointerTraces = {};
-            /** @type {int} */
-            this.zBlockedTopEx = 0;
-            /** @type {int} */
-            this.zBlockedBottom = SLVD.MAX_SAFE_INTEGER;
-            /** @type {Object.<string, ZRange>} */
-            this.events = {};
-        };
+
+        export class CollisionInfo {
+            containsSolid: boolean;
+            pointerTraces: { [levelId: string]: SplitTime.Trace };
+            zBlockedTopEx: int;
+            zBlockedBottom: int;
+            events: { [eventId: string]: ZRange };
+            constructor() {
+                this.containsSolid = false;
+                this.pointerTraces = {};
+                this.zBlockedTopEx = 0;
+                this.zBlockedBottom = SLVD.MAX_SAFE_INTEGER;
+                this.events = {};
+            }
+        }
     }
     
     export class Traces {
@@ -25,24 +30,17 @@ namespace SplitTime.level {
         layerFuncData: ImageData[];
         _internalEventIdMap: any;
         _internalPointerTraceMap: any;
-        debugTraceCanvas: HTMLCanvasElement;
+        debugTraceCanvas: HTMLCanvasElement | null = null;
         
-        /**
-        * @constructor
-        * @property {ImageData[]} layerFuncData
-        * @param {SplitTime.Level} level
-        * @param {SplitTime.LevelFileData} levelFileData
-        */
         constructor(level: SplitTime.Level, levelFileData: SplitTime.level.FileData) {
             this.level = level;
             this.levelFileData = levelFileData;
-            /** @type ImageData[] */
             this.layerFuncData = [];
             
             this.initCanvasData();
         };
         
-        getEventIdFromPixel(r, g, b, a) {
+        getEventIdFromPixel(r: number, g: number, b: number, a: number) {
             var eventIntId = SplitTime.Trace.getEventIdFromColor(r, g, b, a);
             return this._internalEventIdMap[eventIntId];
         };
@@ -50,22 +48,16 @@ namespace SplitTime.level {
         /**
         * @return {SplitTime.Trace}
         */
-        getPointerTraceFromPixel(r, g, b, a) {
+        getPointerTraceFromPixel(r: number, g: number, b: number, a: number): SplitTime.Trace {
             var pointerIntId = SplitTime.Trace.getPointerIdFromColor(r, g, b, a);
             return this._internalPointerTraceMap[pointerIntId];
         };
         
         /**
         * Check that the volume is open in level collision canvas data.
-        * @param {SplitTime.LevelTraces.CollisionInfo} collisionInfo
-        * @param {int} startX
-        * @param {int} xPixels
-        * @param {int} startY
-        * @param {int} yPixels
-        * @param {number} minZ
-        * @param {number} exMaxZ (positive)
+        * @param exMaxZ (positive)
         */
-        calculateVolumeCollision(collisionInfo, startX, xPixels, startY, yPixels, minZ, exMaxZ) {
+        calculateVolumeCollision(collisionInfo: traces.CollisionInfo, startX: int, xPixels: int, startY: int, yPixels: int, minZ: number, exMaxZ: number) {
             for(var y = startY; y < startY + yPixels; y++) {
                 for(var x = startX; x < startX + xPixels; x++) {
                     this.calculatePixelColumnCollisionInfo(collisionInfo, x, y, minZ, exMaxZ);
@@ -75,13 +67,9 @@ namespace SplitTime.level {
         
         /**
         * Check that the pixel is open in level collision canvas data.
-        * @param {SplitTime.LevelTraces.CollisionInfo} collisionInfo
-        * @param {int} x
-        * @param {int} y
-        * @param {number} minZ
-        * @param {number} exMaxZ (positive)
+        * @param exMaxZ (positive)
         */
-        calculatePixelColumnCollisionInfo(collisionInfo, x, y, minZ, exMaxZ) {
+        calculatePixelColumnCollisionInfo(collisionInfo: traces.CollisionInfo, x: int, y: int, minZ: number, exMaxZ: number) {
             for(var iLayer = 0; iLayer < this.levelFileData.layers.length; iLayer++) {
                 var layerZ = this.levelFileData.layers[iLayer].z;
                 var nextLayer = this.levelFileData.layers[iLayer + 1];
@@ -92,18 +80,7 @@ namespace SplitTime.level {
             }
         };
         
-        /**
-        *
-        * @param {SplitTime.LevelTraces.CollisionInfo} collisionInfo
-        * @param {int} x
-        * @param {int} y
-        * @param {int} layer
-        * @param layerZ
-        * @param minZ
-        * @param exMaxZ
-        * @private
-        */
-        _calculatePixelCollision(collisionInfo, x, y, layer, layerZ, minZ, exMaxZ) {
+        private _calculatePixelCollision(collisionInfo: traces.CollisionInfo, x: int, y: int, layer: int, layerZ: number, minZ: number, exMaxZ: number) {
             var imageData = this.layerFuncData[layer];
             var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
             var r = imageData.data[dataIndex++];
@@ -131,6 +108,9 @@ namespace SplitTime.level {
                     break;
                     case SplitTime.Trace.RColor.POINTER:
                     var trace = this.getPointerTraceFromPixel(r, g, b, a);
+                    if(!trace.level) {
+                        throw new Error("Pointer trace has no level");
+                    }
                     collisionInfo.pointerTraces[trace.level.id] = trace;
                     break;
                 }
@@ -147,13 +127,20 @@ namespace SplitTime.level {
             holderCanvas.width = this.level.width/(this.level.type === SplitTime.main.State.OVERWORLD ? 32 : 1);
             holderCanvas.height = this.level.yWidth/(this.level.type === SplitTime.main.State.OVERWORLD ? 32 : 1);
             var holderCtx = holderCanvas.getContext("2d");
+
+            if(holderCtx === null) {
+                throw new Error("Unable to initialize holderCtx");
+            }
             
-            var debugTraceCtx;
+            var debugTraceCtx = null;
             if(SplitTime.debug.ENABLED) {
                 this.debugTraceCanvas = document.createElement("canvas");
                 this.debugTraceCanvas.width = this.level.width;
                 this.debugTraceCanvas.height = this.level.height;
                 debugTraceCtx = this.debugTraceCanvas.getContext("2d");
+                if(debugTraceCtx === null) {
+                    throw new Error("Unable to initialize debugTraceCtx");
+                }
                 debugTraceCtx.clearRect(0, 0, this.debugTraceCanvas.width, this.debugTraceCanvas.height);
             }
             
@@ -183,7 +170,7 @@ namespace SplitTime.level {
                         SplitTime.Trace.drawColor(trace.vertices, holderCtx, functionColor);
                         break;
                         case SplitTime.Trace.Type.SOLID:
-                        var height = trace.height || layerHeight;
+                        var height = +trace.height || layerHeight;
                         SplitTime.Trace.drawColor(trace.vertices, holderCtx, SplitTime.Trace.getSolidColor(height));
                         break;
                         case SplitTime.Trace.Type.GROUND:
@@ -222,7 +209,7 @@ namespace SplitTime.level {
                 
                 this.layerFuncData[iLayer] = holderCtx.getImageData(0, 0, holderCanvas.width, holderCanvas.height);
                 
-                if(SplitTime.debug.ENABLED) {
+                if(SplitTime.debug.ENABLED && debugTraceCtx !== null) {
                     debugTraceCtx.drawImage(holderCanvas, 0, -layerZ);
                 }
             }

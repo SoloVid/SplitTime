@@ -1,34 +1,26 @@
 namespace SplitTime.hud {
     
-    /** @type {int} */
-    var SCREEN_WIDTH;
-    /** @type {int} */
-    var SCREEN_HEIGHT;
+    var SCREEN_WIDTH: int;
+    var SCREEN_HEIGHT: int;
     
-    /** @type {HTMLCanvasElement} */
-    var buffer;
-    /** @type {CanvasRenderingContext2D} */
-    var bufferCtx;
-    /** @type {HTMLCanvasElement} */
-    var snapshot;
-    /** @type {CanvasRenderingContext2D} */
-    var snapshotCtx;
+    var buffer: SLVD.Canvas;
+    var snapshot: SLVD.Canvas;
     
-    var renderCallbacks = [];
+    var renderCallbacks: any[] = [];
     
     export function getRendererCount() {
         return renderCallbacks.length;
     };
     
-    export function pushRenderer(callback) {
+    export function pushRenderer(callback: any) {
         renderCallbacks.push(callback);
     };
     
-    export function unshiftRenderer(callback) {
+    export function unshiftRenderer(callback: any) {
         renderCallbacks.unshift(callback);
     };
     
-    export function removeRenderer(callback) {
+    export function removeRenderer(callback: any) {
         for(var i = renderCallbacks.length - 1; i >= 0 ; i--) {
             if(renderCallbacks[i] === callback) {
                 renderCallbacks.splice(i, 1);
@@ -36,10 +28,7 @@ namespace SplitTime.hud {
         }
     };
     
-    /**
-    * @param {CanvasRenderingContext2D} ctx
-    */
-    export function render(ctx) {
+    export function render(ctx: CanvasRenderingContext2D) {
         for(var i = 0; i < renderCallbacks.length; i++) {
             var renderer = renderCallbacks[i];
             if(typeof renderer === "function") {
@@ -54,18 +43,11 @@ namespace SplitTime.hud {
         }
     };
     
-    export function createCanvases(width, height) {
+    export function createCanvases(width: int, height: int) {
         SCREEN_WIDTH = width;
         SCREEN_HEIGHT = height;
         
-        buffer = document.createElement("canvas");
-        buffer.setAttribute("width", SCREEN_WIDTH);
-        buffer.setAttribute("height", SCREEN_HEIGHT);
-        bufferCtx = buffer.getContext("2d");
-        
-        snapshot = document.createElement("canvas");
-        snapshot.setAttribute("width", SCREEN_WIDTH);
-        snapshot.setAttribute("height", SCREEN_HEIGHT);
-        snapshotCtx = snapshot.getContext("2d");
+        buffer = new SLVD.Canvas(width, height);
+        snapshot = new SLVD.Canvas(width, height);
     };
 }

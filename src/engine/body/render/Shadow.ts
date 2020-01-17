@@ -19,14 +19,11 @@ namespace SplitTime.body {
         opacity = 1;
         playerOcclusionFadeFactor = 0;
         
-        getCanvasRequirements(x, y, z) {
+        getCanvasRequirements(x: number, y: number, z: number) {
             return new SplitTime.body.CanvasRequirements(Math.round(x), Math.round(y), Math.round(z), this.radius, this.radius);
         };
         
-        /**
-        * @param {CanvasRenderingContext2D} ctx
-        */
-        draw(ctx) {
+        draw(ctx: CanvasRenderingContext2D) {
             var
             // Radii of the white glow.
             innerRadius = 2,
@@ -47,11 +44,11 @@ namespace SplitTime.body {
             ctx.fill();
         };
         
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: number) {
             // Do nothing
         };
         
-        notifyTimeAdvance(delta) {
+        notifyTimeAdvance(delta: number) {
             // Do nothing
         };
         

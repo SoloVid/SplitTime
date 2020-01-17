@@ -1,19 +1,9 @@
 namespace SplitTime.body {
-    /**
-    * @param {SplitTime.Body} body
-    * @constructor
-    */
     export class Transporter {
-        body: SplitTime.Body;
-        constructor(body) {
-            this.body = body;
+        constructor(public readonly body: Body) {
         };
         
-        /**
-        *
-        * @param {string} levelId
-        */
-        transportLevelIfApplicable(levelId) {
+        transportLevelIfApplicable(levelId: string) {
             var currentLevel = this.body.getLevel();
             var whereToNext = this._theNextTransport(currentLevel, levelId, this.body.getX(), this.body.getY(), this.body.getZ());
             var whereTo = null;
@@ -31,15 +21,7 @@ namespace SplitTime.body {
             }
         };
         
-        /**
-        * @param {SplitTime.Level} levelFrom
-        * @param {string|null} levelIdTo
-        * @param {number} x
-        * @param {number} y
-        * @param {number} z
-        * @returns {{level: SplitTime.Level, x: number, y: number, z: number}|null}
-        */
-        _theNextTransport(levelFrom, levelIdTo, x, y, z) {
+        private _theNextTransport(levelFrom: SplitTime.Level, levelIdTo: string | null, x: number, y: number, z: number): { level: SplitTime.Level; x: number; y: number; z: number; } | null {
             var levelTraces = levelFrom.getLevelTraces();
             var cornerCollisionInfos = [new SplitTime.level.traces.CollisionInfo(), new SplitTime.level.traces.CollisionInfo(), new SplitTime.level.traces.CollisionInfo(), new SplitTime.level.traces.CollisionInfo()];
             var left = Math.round(x - this.body.baseLength / 2);
@@ -63,7 +45,14 @@ namespace SplitTime.body {
                     return null;
                 }
             }
+            if(!levelIdTo) {
+                return null;
+            }
             var pointerTrace = cornerCollisionInfos[0].pointerTraces[levelIdTo];
+            if(!pointerTrace.level) {
+                // FTODO: re-evaluate
+                return null;
+            }
             return {
                 level: pointerTrace.level,
                 x: x + pointerTrace.offsetX,

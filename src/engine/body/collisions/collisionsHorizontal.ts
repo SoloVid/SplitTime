@@ -2,19 +2,11 @@ namespace SplitTime.body.collisions {
     
     var ZILCH = 0.000001;
     
-    function addArrayToSet(arr, set) {
-        for(var i = 0; i < arr.length; i++) {
-            set[arr[i]] = true;
-        }
-    }
-    
     export class Horizontal {
-        mover: Mover;
         horizontalX: HorizontalX;
         horizontalY: HorizontalY;
         sliding: Sliding;
-        constructor(mover: SplitTime.body.Mover) {
-            this.mover = mover;
+        constructor(private readonly mover: SplitTime.body.Mover) {
             this.horizontalX = new HorizontalX(mover);
             this.horizontalY = new HorizontalY(mover);
             this.sliding = new Sliding(mover);
@@ -22,11 +14,9 @@ namespace SplitTime.body.collisions {
         /**
         * Advances SplitTime.Body up to maxDistance pixels as far as is legal.
         * Includes pushing other Bodys out of the way
-        * @param {number} dir
-        * @param {number} maxDistance
-        * @returns {number} distance actually moved
+        * @returns distance actually moved
         */
-        zeldaStep(dir, maxDistance) {
+        zeldaStep(dir: number, maxDistance: number): number {
             this.mover.ensureInRegion();
             var level = this.mover.body.level;
             
@@ -45,8 +35,8 @@ namespace SplitTime.body.collisions {
             var adx = Math.abs(dxRounded);
             
             //-1 for negative movement on the axis, 1 for positive
-            var jHat = dy === 0 ? 0 : dyRounded / ady;
-            var iHat = dx === 0 ? 0 : dxRounded / adx;
+            var jHat = (dy === 0 ? 0 : dyRounded / ady) as unitOrZero;
+            var iHat = (dx === 0 ? 0 : dxRounded / adx) as unitOrZero;
             
             var maxIterations = adx + ady;
             var xPixelsRemaining = adx;
@@ -80,7 +70,7 @@ namespace SplitTime.body.collisions {
                     if(newRoundX + halfLength >= level.width || newRoundX - halfLength < 0) {
                         outX = true;
                     } else {
-                        var xCollisionInfo = this.horizontalX.calculateXPixelCollisionWithStepUp(roundX, roundY, currentZ, iHat);
+                        var xCollisionInfo = this.horizontalX.calculateXPixelCollisionWithStepUp(roundX, roundY, currentZ, iHat as unit);
                         if(xCollisionInfo.blocked) {
                             stoppedX = true;
                             if(xCollisionInfo.bodies.length > 0) {
@@ -106,7 +96,7 @@ namespace SplitTime.body.collisions {
                         outY = true;
                     } else {
                         
-                        var yCollisionInfo = this.horizontalY.calculateYPixelCollisionWithStepUp(roundX, roundY, currentZ, jHat);
+                        var yCollisionInfo = this.horizontalY.calculateYPixelCollisionWithStepUp(roundX, roundY, currentZ, jHat as unit);
                         if(yCollisionInfo.blocked) {
                             stoppedY = true;
                             if(yCollisionInfo.bodies.length > 0) {
@@ -155,7 +145,7 @@ namespace SplitTime.body.collisions {
             return SplitTime.Measurement.distanceTrue(oldX, oldY, this.mover.body.getX(), this.mover.body.getY());
         };
         
-        tryPushOtherBodies(bodies, dir) {
+        tryPushOtherBodies(bodies: Body[], dir: number) {
             this.mover.bodyExt.pushing = true;
             for(var i = 0; i < bodies.length; i++) {
                 bodies[i].mover.zeldaBump(1, dir);

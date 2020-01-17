@@ -1,18 +1,17 @@
 namespace SLVD {
 	//Promises for SplitTime
-	export class Promise {
+	export class Promise implements PromiseLike<any> {
 		callBacks: Function[];
 		babyPromises: Promise[];
-		resolved: boolean;
+		resolved: boolean = false;
 		data: any;
 		constructor() {
 			this.callBacks = [];
 			this.babyPromises = [];
 		}
-		then(callBack: Function) {
+		then(callBack?: (data?: any) => (any | PromiseLike<any>), onRejected?: any): PromiseLike<any> {
 			if(!(callBack instanceof Function)) {
-				console.warn("callBack is not a function");
-				return;
+				throw new Error("callBack is not a function");
 			}
 			
 			if(this.isResolved()) {
@@ -32,7 +31,7 @@ namespace SLVD {
 			}
 		}
 		
-		resolve(data?) {
+		resolve(data?: any) {
 			if(this.resolved) {
 				console.warn("Promise already resolved");
 				return;
@@ -42,8 +41,8 @@ namespace SLVD {
 			this.data = data;
 			
 			while(this.callBacks.length > 0) {
-				var callBack = this.callBacks.shift();
-				var babyPromise = this.babyPromises.shift();
+				var callBack = this.callBacks.shift() as Function;
+				var babyPromise = this.babyPromises.shift() as SLVD.Promise;
 				
 				var result = callBack(data);
 				
@@ -54,8 +53,8 @@ namespace SLVD {
 					}
 					else { //callback returned unresolved promise
 						while(babyPromise.callBacks.length > 0) {
-							tPromise.callBacks.push(babyPromise.callBacks.shift());
-							tPromise.babyPromises.push(babyPromise.babyPromises.shift());
+							tPromise.callBacks.push(babyPromise.callBacks.shift() as Function);
+							tPromise.babyPromises.push(babyPromise.babyPromises.shift() as SLVD.Promise);
 						}
 					}
 				}
@@ -68,12 +67,12 @@ namespace SLVD {
 			return this.resolved;
 		};
 		
-		static as(data?) {
+		static as(data?: any) {
 			var prom = new SLVD.Promise();
 			prom.resolve(data);
 			return prom;
 		};
-		static when(arr) {
+		static when(arr: SLVD.Promise[]): PromiseLike<any> {
 			if(!Array.isArray(arr)) {
 				var newArr = new Array(arguments.length);
 				for(var i = 0; i < arguments.length; i++) {
@@ -83,9 +82,9 @@ namespace SLVD {
 			}
 			
 			var prom = new SLVD.Promise();
-			var results = [];
+			var results: any[] = [];
 			
-			function addResult(index, data) {
+			function addResult(index: number, data: any) {
 				results[index] = data;
 			}
 			
@@ -99,8 +98,8 @@ namespace SLVD {
 				return true;
 			}
 			
-			function makeSingleResolveHandler(index) {
-				return function(data) {
+			function makeSingleResolveHandler(index: number) {
+				return function(data: any) {
 					addResult(index, data);
 					checkResolve();
 				};
@@ -111,7 +110,7 @@ namespace SLVD {
 			}
 			return prom;
 		};
-		static whenAny(arr) {
+		static whenAny(arr: SLVD.Promise[]): SLVD.Promise {
 			if(!Array.isArray(arr)) {
 				var newArr = new Array(arguments.length);
 				for(var i = 0; i < arguments.length; i++) {
@@ -123,7 +122,7 @@ namespace SLVD {
 			var prom = new SLVD.Promise();
 			var isResolved = false;
 			
-			function callback(data) {
+			function callback(data: any) {
 				if(!isResolved) {
 					isResolved = true;
 					prom.resolve(data);
@@ -142,14 +141,14 @@ namespace SLVD {
 		constructor() {
 			this.promises = [];
 		};
-		add(prom) {
+		add(prom: SLVD.Promise) {
 			this.promises.push(prom);
 		};
-		then(callBack) {
+		then(callBack: { (): void; (): void; (): void; (): void; }) {
 			return SLVD.Promise.when(this.promises).then(callBack);
 		};
 		
-		static wait(ms) {
+		static wait(ms: number | undefined) {
 			var promise = new SLVD.Promise();
 			setTimeout(function() {
 				promise.resolve();

@@ -2,10 +2,10 @@ namespace SplitTime.debug {
     export var ENABLED = true; // Master switch
     export var DRAW_TRACES = true;
     
-    var debugDiv = null;
-    var debugInfo = {};
+    var debugDiv: HTMLElement | null = null;
+    var debugInfo: { [key: string]: DebugValue } = {};
     
-    export function attachDebug(parent) {
+    export function attachDebug(parent: HTMLElement) {
         debugDiv = document.createElement("div");
         parent.appendChild(debugDiv);
     };
@@ -17,7 +17,7 @@ namespace SplitTime.debug {
         frameStabilizer = new SplitTime.FrameStabilizer(DEBOUNCE);
     });
     
-    export function setDebugValue(key, value) {
+    export function setDebugValue(key: string, value: any) {
         if(!SplitTime.debug.ENABLED) {
             return;
         }
@@ -26,15 +26,16 @@ namespace SplitTime.debug {
             debugInfo[key] = new DebugValue(key);
         }
         debugInfo[key].value = value;
-        debugInfo[key].timeUpdated = new Date();
+        debugInfo[key].timeUpdated = new Date().getDate();
     };
     
     export function update() {
         var keys = [];
-        for(var key in debugInfo) {
+        for(let key in debugInfo) {
             keys.push(key);
         }
         for(var i = 0; i < keys.length; i++) {
+            let key = keys[i];
             var debugValue = debugInfo[key];
             if(new Date().getTime() - debugValue.timeUpdated > LIFE) {
                 delete debugInfo[key];
@@ -62,10 +63,7 @@ namespace SplitTime.debug {
         debugDiv.innerHTML = table;
     };
     
-    /**
-    * @param {CanvasRenderingContext2D} ctx
-    */
-    export function renderCanvas(ctx) {
+    export function renderCanvas(ctx: CanvasRenderingContext2D) {
         var FONT_SIZE = 16;
         var SPACING = 5;
         ctx.font = FONT_SIZE + "px Arial";
@@ -78,9 +76,10 @@ namespace SplitTime.debug {
         }
     };
     
-    function DebugValue(key) {
-        this.key = key;
-        this.value = null;
-        this.timeUpdated = 0;
+    class DebugValue {
+        value: any = null;
+        timeUpdated: number = 0;
+        constructor(public readonly key: string) {
+        }
     }
 }

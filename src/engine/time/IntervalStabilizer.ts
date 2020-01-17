@@ -5,9 +5,9 @@ namespace SplitTime {
         currentTimeGetter: any;
         _counterSetAt: any;
         _previousCounterSetAt: any;
-        _counter: number;
-        _isClockFrame: boolean;
-        constructor(msPerFrame = 100, maxCounter = 1, currentTimeGetter) {
+        _counter: number = 0;
+        _isClockFrame: boolean = false;
+        constructor(msPerFrame = 100, maxCounter = 1, currentTimeGetter: () => number) {
             this.msPerFrame = msPerFrame || 100;
             this.maxCounter = maxCounter || 1;
             this.currentTimeGetter = currentTimeGetter;

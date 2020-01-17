@@ -1,45 +1,24 @@
 namespace SplitTime.level {
     const PARTITION_SIZE = 32;
     
+    /**
+    * A class for arranging bodies for collisions
+    */
     export class CellGrid {
-        _initialized: boolean;
-        _waitingBodies: SplitTime.Body[];
-        _whereAreBodies: {};
-        _grids: SplitTime.Body[][][];
+        private _initialized: boolean;
+        private _waitingBodies: SplitTime.Body[];
+        private _whereAreBodies: { [bodyRef: number]: WhereIsBody | undefined };
+        private _grids: SplitTime.Body[][][];
         _xCells: number;
         _yCells: number;
         _zCells: number;
         
-        /**
-        * A class for arranging bodies for collisions
-        * @param {SplitTime.Level} [level]
-        * @constructor
-        * @alias SplitTime.Level.CellGrid
-        */
-        constructor(level) {
+        constructor(level: SplitTime.Level) {
             this._initialized = false;
             this._waitingBodies = [];
-            /**
-            * @type {Object.<int, WhereIsBody>}
-            * @private
-            */
             this._whereAreBodies = {};
-            
-            /**
-            * @type {SplitTime.Body[][][]}
-            * @private
-            */
             this._grids = [];
             
-            if(level) {
-                this.initialize(level);
-            }
-        }
-        
-        /**
-        * @param {SplitTime.Level} level
-        */
-        initialize(level) {
             this._xCells = Math.ceil(level.width / PARTITION_SIZE);
             this._yCells = Math.ceil(level.yWidth / PARTITION_SIZE);
             this._zCells = Math.ceil(level.highestLayerZ / PARTITION_SIZE) + 1;
@@ -54,13 +33,12 @@ namespace SplitTime.level {
             for(var i = 0; i < this._waitingBodies.length; i++) {
                 this.addBody(this._waitingBodies[i]);
             }
-        };
+        }
         
         /**
         * Register a body with the organizer (such as on level entrance)
-        * @param {SplitTime.Body} body
         */
-        addBody(body) {
+        addBody(body: SplitTime.Body) {
             if(this._whereAreBodies[body.ref]) {
                 return;
             }
@@ -89,13 +67,12 @@ namespace SplitTime.level {
                 }
             }
             this._whereAreBodies[body.ref] = whereIsBodyNow;
-        };
+        }
         
         /**
         * Deregister a body from the organizer (such as on level exit)
-        * @param {SplitTime.Body} body
         */
-        removeBody(body) {
+        removeBody(body: SplitTime.Body) {
             if(!this._initialized) {
                 for(var iBody = this._waitingBodies.length - 1; iBody >= 0; iBody--) {
                     this._waitingBodies.splice(iBody, 1);
@@ -104,6 +81,9 @@ namespace SplitTime.level {
             }
             
             var whereWasBody = this._whereAreBodies[body.ref];
+            if(!whereWasBody) {
+                return;
+            }
             
             for(var iZ = whereWasBody.minZCellIndex; iZ < whereWasBody.exMaxZCellIndex; iZ++) {
                 for(var iY = whereWasBody.minYCellIndex; iY < whereWasBody.exMaxYCellIndex; iY++) {
@@ -120,7 +100,7 @@ namespace SplitTime.level {
             }
             
             this._whereAreBodies[body.ref] = undefined;
-        };
+        }
         
         /**
         * Force the organizer to resort the body in question.
@@ -128,7 +108,7 @@ namespace SplitTime.level {
         * Should be called every time coordinates of body change.
         * @param {SplitTime.Body} body
         */
-        resort(body) {
+        resort(body: SplitTime.Body) {
             if(!this._initialized) {
                 return;
             }
@@ -137,7 +117,7 @@ namespace SplitTime.level {
             var whereIsBodyNow = new WhereIsBody(this, body);
             
             var me = this;
-            function removeFromCell(body, x, y, z) {
+            function removeFromCell(body: Body, x: int, y: int, z: int) {
                 var cell = me._grids[z][y*me._xCells + x];
                 for(var i = 0; i < cell.length; i++) {
                     if(cell[i] === body) {
@@ -147,7 +127,7 @@ namespace SplitTime.level {
                 }
             }
             
-            function addToCell(body, x, y, z) {
+            function addToCell(body: Body, x: int, y: int, z: int) {
                 var cell = me._grids[z][y*me._xCells + x];
                 if(SplitTime.debug.ENABLED) {
                     for(var i = 0; i < cell.length; i++) {
@@ -164,18 +144,15 @@ namespace SplitTime.level {
             this._adjustCellClaims(body, whereIsBodyNow, whereWasBody, addToCell);
             
             this._whereAreBodies[body.ref] = whereIsBodyNow;
-        };
+        }
         
         /**
         * Visit all cells in whitelistArea that are not in blacklistArea, calling callback with body and coordinates for each.
         *
-        * @param {SplitTime.Body} body
-        * @param {WhereIsBody} whitelistArea cells to visit
-        * @param {WhereIsBody} blacklistArea cells to ignore
-        * @param {function(SplitTime.Body, int, int, int)} callback
-        * @private
+        * @param whitelistArea cells to visit
+        * @param blacklistArea cells to ignore
         */
-        _adjustCellClaims(body, whitelistArea, blacklistArea, callback) {
+        private _adjustCellClaims(body: SplitTime.Body, whitelistArea: WhereIsBody, blacklistArea: WhereIsBody, callback: (body: SplitTime.Body, x: int, y: int, z: int) => any) {
             var iX, iY, iZ;
             
             var whitelistAreaLeftBlacklistExMaxXCellIndex = Math.min(whitelistArea.exMaxXCellIndex, blacklistArea.minXCellIndex);
@@ -228,20 +205,10 @@ namespace SplitTime.level {
                     // We should have hit all cases at this point; so don't need the last loop like the other dimensions
                 }
             }
-        };
-        
-        /**
-        *
-        * @param {int} minX
-        * @param {int} minY
-        * @param {int} minZ
-        * @param {int} exMaxX
-        * @param {int} exMaxY
-        * @param {int} exMaxZ
-        * @param {function(SplitTime.Body)} [callback]
-        */
-        forEachBody(minX, minY, minZ, exMaxX, exMaxY, exMaxZ, callback) {
-            var bodiesHit = {};
+        }
+
+        forEachBody(minX: int, minY: int, minZ: int, exMaxX: int, exMaxY: int, exMaxZ: int, callback: (arg0: SplitTime.Body) => any) {
+            var bodiesHit: { [bodyRef: number]: true } = {};
             for(var iCellZ = this.getZIndex(minZ); iCellZ <= this.getZIndex(exMaxZ - 1); iCellZ++) {
                 for(var iCellY = this.getYIndex(minY); iCellY <= this.getYIndex(exMaxY - 1); iCellY++) {
                     for(var iCellX = this.getXIndex(minX); iCellX <= this.getXIndex(exMaxX - 1); iCellX++) {
@@ -258,14 +225,14 @@ namespace SplitTime.level {
                     }
                 }
             }
-        };
+        }
         
         /**
         * Map real x coordinate to cell x-coordinate
         * @param {int} x
         * @return {int}
         */
-        getXIndex(x) {
+        getXIndex(x: int): int {
             return Math.min(Math.max(0, Math.floor(x / PARTITION_SIZE)), this._xCells - 1);
         };
         /**
@@ -273,7 +240,7 @@ namespace SplitTime.level {
         * @param {int} y
         * @return {int}
         */
-        getYIndex(y) {
+        getYIndex(y: int): int {
             return Math.min(Math.max(0, Math.floor(y / PARTITION_SIZE)), this._yCells - 1);
         };
         /**
@@ -281,7 +248,7 @@ namespace SplitTime.level {
         * @param {int} z
         * @return {int}
         */
-        getZIndex(z) {
+        getZIndex(z: int): int {
             return Math.min(Math.max(0, Math.floor(z / PARTITION_SIZE)), this._zCells - 1);
         };
     }
@@ -320,19 +287,19 @@ namespace SplitTime.level {
         }
     }
     
-    function isXOverlap(minX, exMaxX, body) {
+    function isXOverlap(minX: int, exMaxX: int, body: Body) {
         var bodyLeft = Math.round(body.getLeft());
         var noOverlap = exMaxX <= bodyLeft || bodyLeft + Math.round(body.baseLength) <= minX;
         return !noOverlap;
     }
     
-    function isYOverlap(minY, exMaxY, body) {
+    function isYOverlap(minY: int, exMaxY: int, body: Body) {
         var bodyTop = Math.round(body.getTopY());
         var noOverlap = exMaxY <= bodyTop || bodyTop + Math.round(body.baseLength) <= minY;
         return !noOverlap;
     }
     
-    function isZOverlap(minZ, exMaxZ, body) {
+    function isZOverlap(minZ: int, exMaxZ: int, body: Body) {
         var bodyBottom = Math.round(body.z);
         var noOverlap = exMaxZ <= body.z || bodyBottom + Math.round(body.height) <= minZ;
         return !noOverlap;

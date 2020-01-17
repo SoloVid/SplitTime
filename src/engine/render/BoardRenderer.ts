@@ -2,52 +2,41 @@ namespace SplitTime.BoardRenderer {
     
     /**
     * Cached screen coordinates
-    * @type {{x: number, y: number}}
     */
     var screen: { x: number; y: number; };
     
     var SCREEN_WIDTH: int;
     var SCREEN_HEIGHT: int;
     
-    var buffer: HTMLCanvasElement;
-    var bufferCtx: CanvasRenderingContext2D;
-    var snapshot: HTMLCanvasElement;
-    var snapshotCtx: CanvasRenderingContext2D;
+    var buffer: SLVD.Canvas;
+    var snapshot: SLVD.Canvas;
     
-    /** @type {{x: number, y: number, z: number}} */
     var actualFocusPoint: { x: number; y: number; z: number; } = {
         x: 0,
         y: 0,
         z: 0
     };
     
-    var currentLevel: SplitTime.Level = null;
+    var currentLevel: SplitTime.Level | null = null;
     
     /** @type {{x: number, y: number, z: number}[]} */
     var focusPoints: { x: number; y: number; z: number; }[] = [];
     
     export function focusCameraOnPlayerBody() {
-        SplitTime.BoardRenderer.setFocusPoint(SplitTime.playerBody);
+        if(SplitTime.playerBody) {
+            SplitTime.BoardRenderer.setFocusPoint(SplitTime.playerBody);
+        }
     };
     
     export function getFocusPoint() {
         return actualFocusPoint;
-    };
-    /**
-    * @param {{x: number, y: number, z: number}} point
-    */
+    }
     export function setFocusPoint(point: { x: number; y: number; z: number; }) {
         focusPoints = [point];
-    };
-    /**
-    * @param {{x: number, y: number, z: number}} point
-    */
+    }
     export function addFocusPoint(point: { x: number; y: number; z: number; }) {
         focusPoints.push(point);
-    };
-    /**
-    * @param {{x: number, y: number, z: number}} point
-    */
+    }
     export function removeFocusPoint(point: { x: number; y: number; z: number; }) {
         for(var i = 0; i < focusPoints.length; i++) {
             if(point === focusPoints[i]) {
@@ -57,10 +46,6 @@ namespace SplitTime.BoardRenderer {
         }
     };
     
-    /**
-    * @param {{x: number, y: number, z: number}} thing
-    * @return {{x: number, y: number}}
-    */
     export function getRelativeToScreen(thing: { x: number; y: number; z: number; }): { x: number; y: number; } {
         var screen = SplitTime.BoardRenderer.getScreenCoordinates();
         return {
@@ -71,7 +56,6 @@ namespace SplitTime.BoardRenderer {
     
     /**
     * Get the coordinates of the screen relative to the board (determined by the body in focus)
-    * @returns {{x: number, y: number}}
     */
     export function getScreenCoordinates(): { x: number; y: number; } {
         var screen = {
@@ -121,7 +105,7 @@ namespace SplitTime.BoardRenderer {
             return 0;
         }
         return currentLevel.getBodies().length;
-    };
+    }
     
     var bodyRenderer: body.Renderer;
     defer(() => {
@@ -130,13 +114,13 @@ namespace SplitTime.BoardRenderer {
     
     export var SCREEN_LAZY_FACTOR = 0.25;
     
-    function getScreenMoveSpeed(dx) {
+    function getScreenMoveSpeed(dx: number) {
         var MAX_STEP = 100;
         var curveValue = Math.abs(Math.pow(dx / (MAX_STEP * SplitTime.BoardRenderer.SCREEN_LAZY_FACTOR), 2));
         return Math.min(curveValue + 0.4, MAX_STEP);
     }
     
-    export function notifyFrameUpdate(delta) {
+    export function notifyFrameUpdate(delta: number) {
         var existingLevel = currentLevel;
         currentLevel = SplitTime.Level.getCurrent();
         
@@ -159,24 +143,26 @@ namespace SplitTime.BoardRenderer {
             actualFocusPoint.y = SLVD.approachValue(actualFocusPoint.y, targetFocus.y, getScreenMoveSpeed(targetFocus.y - actualFocusPoint.y));
             actualFocusPoint.z = SLVD.approachValue(actualFocusPoint.z, targetFocus.z, getScreenMoveSpeed(targetFocus.z - actualFocusPoint.z));
         }
-    };
+    }
     
-    /**
-    * @param {boolean} forceCalculate
-    */
     export function renderBoardState(forceCalculate: boolean) {
         if(!forceCalculate) {
-            SplitTime.see.drawImage(snapshot, 0, 0);
+            SplitTime.see.drawImage(snapshot.element, 0, 0);
             return;
         }
+
+        if(!currentLevel) {
+            throw new Error("currentLevel is not initialized");
+        }
+
         var weatherRenderer = currentLevel.weatherRenderer;
         screen = SplitTime.BoardRenderer.getScreenCoordinates();
         
         //Black out screen (mainly for the case of board being smaller than the screen)
-        bufferCtx.fillStyle = "#000000";
-        bufferCtx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        buffer.context.fillStyle = "#000000";
+        buffer.context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         
-        bodyRenderer.notifyNewFrame(screen, snapshotCtx);
+        bodyRenderer.notifyNewFrame(screen, snapshot.context);
         var bodies = currentLevel.getBodies();
         var lights = [];
         
@@ -200,8 +186,8 @@ namespace SplitTime.BoardRenderer {
         weatherRenderer.setLights(lights);
         
         //Rendering sequence
-        // bufferCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        snapshotCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        // buffer.context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        snapshot.context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         
         // if(SplitTime.process == "TRPG")
         // {
@@ -218,7 +204,7 @@ namespace SplitTime.BoardRenderer {
         // }
         
         bodyRenderer.render();
-        snapshotCtx.globalAlpha = 1;
+        snapshot.context.globalAlpha = 1;
         
         //Work out details of smaller-than-screen dimensions
         var xBackShift, yBackShift;
@@ -227,11 +213,11 @@ namespace SplitTime.BoardRenderer {
         if(screen.y < 0) yBackShift = -screen.y;
         else yBackShift = 0;
         
-        snapshotCtx.globalCompositeOperation = "destination-over";
+        snapshot.context.globalCompositeOperation = "destination-over";
         
         if(currentLevel.getBackgroundImage()) {
             //Note: this single call on a perform test is a huge percentage of CPU usage.
-            snapshotCtx.drawImage(
+            snapshot.context.drawImage(
                 currentLevel.getBackgroundImage(),
                 screen.x + xBackShift, screen.y + yBackShift,
                 SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift,
@@ -240,23 +226,23 @@ namespace SplitTime.BoardRenderer {
             );
         }
             
-        snapshotCtx.globalCompositeOperation = "source-over";
+        snapshot.context.globalCompositeOperation = "source-over";
         
         if(SplitTime.debug.ENABLED && SplitTime.debug.DRAW_TRACES) {
-            snapshotCtx.globalAlpha = 0.5;
-            snapshotCtx.drawImage(
+            snapshot.context.globalAlpha = 0.5;
+            snapshot.context.drawImage(
                 currentLevel.getDebugTraceCanvas(),
                 screen.x + xBackShift, screen.y + yBackShift,
                 SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift,
                 xBackShift, yBackShift,
                 SCREEN_WIDTH - 2 * xBackShift, SCREEN_HEIGHT - 2 * yBackShift
             );
-            snapshotCtx.globalAlpha = 1;
+            snapshot.context.globalAlpha = 1;
         }
                 
-        bufferCtx.drawImage(snapshot, 0, 0);
+        buffer.context.drawImage(snapshot.element, 0, 0);
         
-        weatherRenderer.render(bufferCtx);
+        weatherRenderer.render(buffer.context);
         
         //Display current SplitTime.player stats
         // SplitTime.see.fillStyle="#FFFFFF";
@@ -266,8 +252,8 @@ namespace SplitTime.BoardRenderer {
         // SplitTime.Timeline.renderClock(SplitTime.see); //in time.js
         
         //Save screen into snapshot
-        SplitTime.see.drawImage(buffer, 0, 0);
-        snapshotCtx.drawImage(buffer, 0, 0);
+        SplitTime.see.drawImage(buffer.element, 0, 0);
+        snapshot.context.drawImage(buffer.element, 0, 0);
         
         for(iBody = 0; iBody < bodies.length; iBody++) {
             var drawable = bodies[iBody].drawable;
@@ -276,25 +262,13 @@ namespace SplitTime.BoardRenderer {
             }
             // TODO: maybe cleanup shadows?
         }
-    };
+    }
     
-    /**
-    
-    * @param {int} width
-    * @param {int} height
-    */
     export function createCanvases(width: int, height: int) {
         SCREEN_WIDTH = width;
         SCREEN_HEIGHT = height;
         
-        buffer = document.createElement("canvas");
-        buffer.setAttribute("width", "" + SCREEN_WIDTH);
-        buffer.setAttribute("height", "" + SCREEN_HEIGHT);
-        bufferCtx = buffer.getContext("2d");
-        
-        snapshot = document.createElement("canvas");
-        snapshot.setAttribute("width", "" + SCREEN_WIDTH);
-        snapshot.setAttribute("height", "" + SCREEN_HEIGHT);
-        snapshotCtx = snapshot.getContext("2d");
-    };
+        buffer = new SLVD.Canvas(width, height);
+        snapshot = new SLVD.Canvas(width, height);
+    }
 }

@@ -1,11 +1,5 @@
 namespace SplitTime.Logger {
-    export function debug(...args) {
-        console.log.apply(null, arguments);
-    }
-    export function warn(...args) {
-        console.warn.apply(null, arguments);
-    }
-    export function error(...args) {
-        console.error.apply(null, arguments);
-    }
+    export const debug = console.log.bind(window.console);
+    export const warn = console.warn.bind(window.console);
+    export const error = console.error.bind(window.console);
 }

@@ -1,7 +1,7 @@
 namespace SplitTime {
-var lastPerformanceCheck = null;
+var lastPerformanceCheck: Date | null = null;
 
-export function performanceCheckpoint(debugName, allow = 5) {
+export function performanceCheckpoint(debugName: string, allow = 5) {
     if(SplitTime.debug.ENABLED) {
         var now = new Date();
         if(lastPerformanceCheck) {

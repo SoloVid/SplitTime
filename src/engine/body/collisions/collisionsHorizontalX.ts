@@ -2,28 +2,27 @@
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
 namespace SplitTime.body.collisions {
+    class CollisionInfo {
+        blocked: boolean = false;
+        bodies: Body[] = [];
+        adjustedZ: number;
+        events: string[] = [];
+        otherLevels: string[] = [];
+
+        constructor(z: number) {
+            this.adjustedZ = z;
+        }
+    }
+
     export class HorizontalX {
-        mover: Mover;
-        constructor(mover: SplitTime.body.Mover) {
-            this.mover = mover;
+        constructor(private readonly mover: SplitTime.body.Mover) {
         }
         
         /**
         * Check that dx can be accomplished, potentially with vertical adjustment.
-        * @param {int} x
-        * @param {int} y
-        * @param {number} z
-        * @param {int} dx should be -1 or 1
-        * @returns {{blocked: boolean, bodies: SplitTime.Body[], adjustedZ: number, events: string[], otherLevels: string[]}}
         */
-        calculateXPixelCollisionWithStepUp(x, y, z, dx) {
-            var collisionInfo = {
-                blocked: false,
-                bodies: [],
-                adjustedZ: z,
-                events: [],
-                otherLevels: []
-            };
+        calculateXPixelCollisionWithStepUp(x: int, y: int, z: number, dx: unit): CollisionInfo {
+            var collisionInfo = new CollisionInfo(z);
             
             var simpleCollisionInfo = this.calculateXPixelCollision(this.mover.body.getLevel(), x, y, z, dx);
             if(simpleCollisionInfo.blocked && simpleCollisionInfo.vStepUpEstimate <= SplitTime.body.Mover.VERTICAL_FUDGE) {
@@ -44,14 +43,8 @@ namespace SplitTime.body.collisions {
         
         /**
         * Check that dx can be accomplished.
-        * @param {SplitTime.Level} level
-        * @param {int} x
-        * @param {int} y
-        * @param {number} z
-        * @param {int} dx should be -1 or 1
-        * @returns {{blocked: boolean, bodies: SplitTime.Body[], vStepUpEstimate: number, events: string[], otherLevels: string[]}}
         */
-        calculateXPixelCollision(level, x, y, z, dx) {
+        calculateXPixelCollision(level: SplitTime.Level, x: int, y: int, z: number, dx: unit): { blocked: boolean; bodies: SplitTime.Body[]; vStepUpEstimate: number; events: string[]; otherLevels: string[]; } {
             var edgeX = dx > 0 ? x + dx + this.mover.body.halfBaseLength : x + dx - this.mover.body.halfBaseLength;
             var top = y - this.mover.body.halfBaseLength;
             return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(level, edgeX, 1, top, this.mover.body.baseLength, Math.round(z), Math.round(this.mover.body.height));

@@ -1,10 +1,4 @@
 namespace SplitTime.particles {
-    /**
-    * @param {SplitTime.Vector2D} [posVec]
-    * @param {SplitTime.Vector2D} [vVec]
-    * @param {SplitTime.Vector2D} [accVec]
-    * @constructor
-    */
     export class Particle {
         seed: number;
         age: number;
@@ -23,7 +17,8 @@ namespace SplitTime.particles {
         colorShiftB: number;
         opacity: number;
         opacityShift: number;
-        constructor(posVec, vVec, accVec) {
+
+        constructor(posVec: SplitTime.Vector2D, vVec: SplitTime.Vector2D, accVec: SplitTime.Vector2D) {
             this.seed = Math.random();
             this.age = 0; // milliseconds
             this.x = posVec ? posVec.x : 0;
@@ -54,7 +49,7 @@ namespace SplitTime.particles {
             return "rgb(" + this.r + "," + this.g + "," + this.b + ")";
         };
         
-        advanceTime(emitter, msPassed) {
+        advanceTime(emitter: ParticleEmitter, msPassed: number) {
             SplitTime.particles.applyBasicPhysics(emitter, this, msPassed);
             SplitTime.particles.applyLazyEffect(emitter, this, msPassed);
             SplitTime.particles.applyColorShift(emitter, this, msPassed);
@@ -62,13 +57,13 @@ namespace SplitTime.particles {
             // this.updateHandler(emitter, this, msPassed);
         };
         
-        isOccasion(howOften, msPassed) {
+        isOccasion(howOften: number, msPassed: number) {
             var ageOffset = howOften * this.seed;
             return Math.floor((this.age + ageOffset) / howOften) !== Math.floor((this.age + ageOffset - msPassed / howOften));
         };
     }
     
-    export function applyBasicPhysics(emitter, particle, msPassed) {
+    export function applyBasicPhysics(emitter: ParticleEmitter, particle: Particle, msPassed: number) {
         var seconds = msPassed / 1000;
         particle.x += particle.vx * seconds;
         particle.y += particle.vy * seconds;
@@ -77,7 +72,7 @@ namespace SplitTime.particles {
         particle.age += msPassed;
     };
     
-    export function applyLazyEffect(emitter, particle, msPassed) {
+    export function applyLazyEffect(emitter: ParticleEmitter, particle: Particle, msPassed: number) {
         var HOW_OFTEN = emitter.lazyIntervalMs;
         var HOW_DRASTIC = emitter.lazyMagnitude;
         if(particle.isOccasion(HOW_OFTEN, msPassed)) {
@@ -86,7 +81,7 @@ namespace SplitTime.particles {
         }
     };
     
-    export function applyColorShift(emitter, particle, msPassed) {
+    export function applyColorShift(emitter: ParticleEmitter, particle: Particle, msPassed: number) {
         var HOW_OFTEN = emitter.colorShiftIntervalMs;
         var HOW_DRASTIC = emitter.colorShiftMagnitude;
         if(particle.isOccasion(HOW_OFTEN, msPassed)) {
@@ -99,7 +94,7 @@ namespace SplitTime.particles {
         particle.b = SLVD.constrain(particle.b + particle.colorShiftB, 0, 255);
     };
     
-    export function applyOpacityShift(emitter, particle, msPassed) {
+    export function applyOpacityShift(emitter: ParticleEmitter, particle: Particle, msPassed: number) {
         var HOW_OFTEN = emitter.opacityShiftIntervalMs;
         var HOW_DRASTIC = emitter.opacityShiftMagnitude;
         if(particle.isOccasion(HOW_OFTEN, msPassed)) {
@@ -108,11 +103,7 @@ namespace SplitTime.particles {
         particle.opacity = SLVD.constrain(particle.opacity + particle.opacityShift, 0, 1);
     };
     
-    /**
-    * @param {SplitTime.ParticleEmitter} emitter
-    * @return {SplitTime.Particle}
-    */
-    export function generateDefaultParticle(emitter) {
+    export function generateDefaultParticle(emitter: ParticleEmitter): Particle {
         return new SplitTime.particles.Particle(
             new SplitTime.Vector2D(emitter.location.x + Math.random() * 32 - 16, emitter.location.y - emitter.location.z + Math.random() * 32 - 16),
             SplitTime.Vector2D.angular(SLVD.randomRanged(0, 2 * Math.PI), Math.random() * 16),
@@ -138,7 +129,7 @@ namespace SplitTime.particles {
         opacityShiftMagnitude: number;
         colorShiftIntervalMs: number;
         colorShiftMagnitude: number;
-        constructor(location, particleGenerator) {
+        constructor(location: any, particleGenerator: (emitter: ParticleEmitter) => Particle) {
             this._particles = [];
             this._lastParticleGenerated = -1000;
             this._currentTime = 0;
@@ -165,7 +156,7 @@ namespace SplitTime.particles {
         
         playerOcclusionFadeFactor = 0.3;
         
-        spawn(n) {
+        spawn(n: number) {
             n = n || 1;
             for(var i = 0; i < n; i++) {
                 this._particles.push(this.generateParticle(this));
@@ -173,7 +164,7 @@ namespace SplitTime.particles {
             }
         };
         
-        advanceTime(msPassed) {
+        advanceTime(msPassed: number) {
             var STEP = 40;
             for(var i = 0; i < msPassed; i += STEP) {
                 this._advanceTimeStep(STEP);
@@ -181,7 +172,7 @@ namespace SplitTime.particles {
             this._advanceTimeStep(msPassed % STEP);
         };
         
-        _advanceTimeStep(msPassed) {
+        _advanceTimeStep(msPassed: number) {
             this._currentTime += msPassed;
             // var regenerateCount = 0;
             for(var iParticle = 0; iParticle < this._particles.length; iParticle++) {
@@ -209,7 +200,7 @@ namespace SplitTime.particles {
             }
         };
         
-        getCanvasRequirements(x, y, z) {
+        getCanvasRequirements(x: number, y: number, z: number) {
             var canvReq = new SplitTime.body.CanvasRequirements(Math.round(x), Math.round(y), Math.round(z), this.xres, this.yres);
             canvReq.translateOrigin = false;
             return canvReq;
@@ -218,7 +209,7 @@ namespace SplitTime.particles {
         /**
         * @param {CanvasRenderingContext2D} ctx
         */
-        draw(ctx) {
+        draw(ctx: CanvasRenderingContext2D) {
             var initialOpacity = ctx.globalAlpha;
             for(var iParticle = 0; iParticle < this._particles.length; iParticle++) {
                 var particle = this._particles[iParticle];
@@ -231,11 +222,11 @@ namespace SplitTime.particles {
             }
         };
         
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: number) {
             // Do nothing
         }
         
-        notifyTimeAdvance(delta) {
+        notifyTimeAdvance(delta: number) {
             this.advanceTime(delta * 1000);
         }
         
@@ -246,14 +237,14 @@ namespace SplitTime.particles {
             // TODO maybe
         };
         
-        registerParticlesGoneHandler(handler) {
+        registerParticlesGoneHandler(handler: any) {
             this._particlesGoneHandlers.register(handler);
         };
         
         /**
         * @param {SplitTime.Level} level
         */
-        put(level) {
+        put(level: SplitTime.Level) {
             var tempBody = new SplitTime.Body();
             tempBody.baseLength = 0;
             tempBody.put(level, this.location.x, this.location.y, this.location.z);

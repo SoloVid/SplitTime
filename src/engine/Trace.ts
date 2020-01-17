@@ -1,7 +1,7 @@
 namespace SplitTime {
 	export class Trace {
-		type: any;
-		level: any;
+		type: string;
+		level: SplitTime.Level | null;
 		offsetX: number;
 		offsetY: number;
 		offsetZ: number;
@@ -9,9 +9,8 @@ namespace SplitTime {
 		direction: string;
 		eventId: string;
 		
-		constructor(type) {
+		constructor(type: string) {
 			this.type = type;
-			/** @type {SplitTime.Level|null} */
 			this.level = null;
 			this.offsetX = 0;
 			this.offsetY = 0;
@@ -48,13 +47,16 @@ namespace SplitTime {
 			return this.level + ":" + this.offsetX + "," + this.offsetY + "," + this.offsetZ;
 		}
 		
-		static draw(traceStr, ctx, type, offsetPos?) {
+		static draw(traceStr: string, ctx: CanvasRenderingContext2D, type: string, offsetPos?: { x: number; y: number; } | undefined) {
 			var color = SplitTime.Trace.getColor(type);
 			return SplitTime.Trace.drawColor(traceStr, ctx, color, offsetPos);
 		};
 		
-		static extractArray(traceStr) {
-			var pointsArr = [];
+		static extractArray(traceStr: string): ({
+			x: number;
+			y: number;
+		} | null)[] {
+			const pointsArr = [];
 			var regex = /\([^\)]+\)/g;
 			var xRegex = /\(([-]?[\d]+),/;
 			var yRegex = /,[\s]*([-]?[\d]+)\)/;
@@ -62,9 +64,8 @@ namespace SplitTime {
 			var points = traceStr.match(regex);
 			//console.log(points.length + "|" + points + "|");
 			
-			if(points.length === 0) {
-				console.warn("Empty trace string: " + traceStr);
-				return;
+			if(!points || points.length === 0) {
+				throw new Error("Empty trace string: " + traceStr);
 			}
 			
 			for(var i = 0; i < points.length; i++) {
@@ -87,7 +88,7 @@ namespace SplitTime {
 			return pointsArr;
 		};
 		
-		static drawColor(traceStr, ctx, color, offsetPos = {x: 0, y: 0}) {
+		static drawColor(traceStr: string, ctx: CanvasRenderingContext2D, color: string | CanvasGradient, offsetPos = {x: 0, y: 0}) {
 			ctx.strokeStyle = color;
 			ctx.fillStyle = ctx.strokeStyle;
 			
@@ -96,8 +97,8 @@ namespace SplitTime {
 			
 			ctx.beginPath();
 			
-			if(pointsArray.length === 0 || pointsArray[0] === null) {
-				console.error("Trace string \"" + traceStr + "\" doesn't have a valid point to begin with");
+			if(!pointsArray || pointsArray.length === 0 || pointsArray[0] === null) {
+				throw new Error("Trace string \"" + traceStr + "\" doesn't have a valid point to begin with");
 			}
 			
 			newX = pointsArray[0].x + offsetPos.x;
@@ -109,13 +110,14 @@ namespace SplitTime {
 			ctx.fillRect(newX - 1, newY - 1, 1, 1);
 			
 			for(var k = 1; k < pointsArray.length; k++) {
-				if(pointsArray[k] === null) {
+				const point = pointsArray[k];
+				if(point === null) {
 					ctx.closePath();
 					// ctx.stroke();
 					ctx.fill();
 				} else {
-					newX = pointsArray[k].x + offsetPos.x;
-					newY = pointsArray[k].y + offsetPos.y;
+					newX = point.x + offsetPos.x;
+					newY = point.y + offsetPos.y;
 					
 					ctx.lineTo(newX, newY);
 					// ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
@@ -125,14 +127,7 @@ namespace SplitTime {
 			ctx.stroke();
 		};
 		
-		/**
-		*
-		* @param traceStr
-		* @param {CanvasRenderingContext2D} ctx
-		* @param direction
-		* @returns {CanvasGradient}
-		*/
-		static calculateGradient(traceStr, ctx, direction) {
+		static calculateGradient(traceStr: string, ctx: CanvasRenderingContext2D, direction: string): CanvasGradient {
 			var pointsArray = SplitTime.Trace.extractArray(traceStr);
 			var minX = 100000;
 			var minY = 100000;
@@ -190,7 +185,7 @@ namespace SplitTime {
 						y0 = checkingY;
 					}
 				} else {
-					if(x0 !== null) {
+					if(x0 !== null && y0 !== null) {
 						x1 = checkingX;
 						y1 = checkingY;
 						return ctx.createLinearGradient(x0, y0, x1, y1);
@@ -201,7 +196,7 @@ namespace SplitTime {
 				checkingY += yUnit;
 			}
 			
-			return null;
+			throw new Error("Could not create gradient");
 		};
 		
 		static Type = {
@@ -219,47 +214,47 @@ namespace SplitTime {
 			EVENT: 100,
 			POINTER: 20
 		};
-		static typeToColor = {
+		static typeToColor: { [type: string]: number[] } = {
 			"solid": [Trace.RColor.SOLID, 0, 0, 1],
 			"event": [Trace.RColor.EVENT, 0, 0, 1],
 			"path": [0, 0, 0, 1],
 			"stairs": [0, 255, 0, 1]
 		};
-		static colorToType = {};
+		static colorToType: { [colorString: string]: string } = {};
 		
-		static getColor(type) {
+		static getColor(type: string ) {
 			return "rgba(" + Trace.typeToColor[type].join(", ") + ")";
 		};
-		static getType(r, g, b, a) {
+		static getType(r: number, g: number, b: number, a?: number) {
 			if(a === undefined) {
 				a = 1;
 			}
 			return Trace.colorToType[r + "," + g + "," + b + "," + a];
 		};
 		
-		static getSolidColor(height) {
+		static getSolidColor(height: number) {
 			var g = Math.min(Math.max(0, +height), 255);
 			var b = 4 * g;
 			return "rgba(" + Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)";
 		};
 		
-		static getEventColor(id) {
+		static getEventColor(id: number) {
 			var b = id % 256;
 			var g = Math.floor(id / 256);
 			return "rgba(" + Trace.RColor.EVENT + ", " + g + ", " + b + ", 1)";
 		};
 		
-		static getEventIdFromColor(r, g, b, a) {
+		static getEventIdFromColor(r: number, g: number, b: number, a: number) {
 			return b + 256 * g;
 		};
 		
-		static getPointerColor(id) {
+		static getPointerColor(id: number) {
 			var b = id % 256;
 			var g = Math.floor(id / 256);
 			return "rgba(" + Trace.RColor.POINTER + ", " + g + ", " + b + ", 1)";
 		};
 		
-		static getPointerIdFromColor(r, g, b, a) {
+		static getPointerIdFromColor(r: number, g: number, b: number, a: number) {
 			return b + 256 * g;
 		};
 	}

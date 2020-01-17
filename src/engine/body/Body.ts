@@ -2,7 +2,8 @@ namespace SplitTime {
     var nextRef = 10; //reserve first 10
     
     export class Body {
-        ref: number;
+        id: string = "NOT SET";
+        ref: int;
         private frameUpdateHandlers: SLVD.RegisterCallbacks;
         private timeAdvanceListeners: SLVD.RegisterCallbacks;
         private playerInteractHandlers: SLVD.RegisterCallbacks;
@@ -10,16 +11,14 @@ namespace SplitTime {
         speechBox: SplitTime.body.SpeechBox;
         
         // TODO: remove parameter when moving templates elsewhere
-        constructor(skipInit = false) {
+        constructor() {
             this.ref = nextRef++;
-            if(!skipInit) {
-                this.frameUpdateHandlers = new SLVD.RegisterCallbacks({notifyFrameUpdate: null});
-                this.timeAdvanceListeners = new SLVD.RegisterCallbacks({notifyTimeAdvance: null});
-                this.playerInteractHandlers = new SLVD.RegisterCallbacks({onPlayerInteract: null});
-                this.mover = new SplitTime.body.Mover(this);
-                // TODO: sort out (throw out) inheritance to make this work right
-                this.speechBox = new SplitTime.body.SpeechBox(this, 42);
-            }
+            this.frameUpdateHandlers = new SLVD.RegisterCallbacks({notifyFrameUpdate: null});
+            this.timeAdvanceListeners = new SLVD.RegisterCallbacks({notifyTimeAdvance: null});
+            this.playerInteractHandlers = new SLVD.RegisterCallbacks({onPlayerInteract: null});
+            this.mover = new SplitTime.body.Mover(this);
+            // TODO: sort out (throw out) inheritance to make this work right
+            this.speechBox = new SplitTime.body.SpeechBox(this, 42);
         }
         get x() {
             return this.getX();
@@ -54,9 +53,9 @@ namespace SplitTime {
         lightRadius = 150;
         shadow = false;
         
-        childrenBolted = [];
-        childrenLoose = [];
-        addChild(child, isBolted) {
+        childrenBolted: Body[] = [];
+        childrenLoose: Body[] = [];
+        addChild(child: Body, isBolted: boolean) {
             if(isBolted) {
                 if(this.childrenBolted.length === 0) {
                     this.childrenBolted = [];
@@ -69,7 +68,7 @@ namespace SplitTime {
                 this.childrenLoose.push(child);
             }
         };
-        removeChild(child) {
+        removeChild(child: Body) {
             var i;
             for(i = 0; i < this.childrenBolted.length; i++) {
                 if(this.childrenBolted[i] == child) {
@@ -84,7 +83,7 @@ namespace SplitTime {
                 }
             }
         };
-        getChildren() {
+        getChildren(): Body[] {
             return this.childrenBolted.concat(this.childrenLoose);
         };
         
@@ -92,11 +91,11 @@ namespace SplitTime {
             return this === SplitTime.playerBody;
         };
         
-        staticTrace = [];
+        staticTrace: {traceStr: string, type: string}[] = [];
         /**
         * @deprecated should be moved to Prop class or something
         */
-        addStaticTrace(traceStr, type) {
+        addStaticTrace(traceStr: string, type: string) {
             if(this.staticTrace.length === 0) {
                 this.staticTrace = [];
             }
@@ -115,12 +114,12 @@ namespace SplitTime {
             }
         };
         
-        private _level: SplitTime.Level = null;
+        private _level: SplitTime.Level | null = null;
         _x = 0;
         getX() {
             return this._x;
         };
-        setX(x, includeChildren = false) {
+        setX(x: number, includeChildren = false) {
             if(includeChildren) {
                 var children = this.getChildren();
                 for(var i = 0; i < children.length; i++) {
@@ -138,7 +137,7 @@ namespace SplitTime {
         getY() {
             return this._y;
         };
-        setY(y, includeChildren = false) {
+        setY(y: number, includeChildren = false) {
             if(includeChildren) {
                 var children = this.getChildren();
                 for(var i = 0; i < children.length; i++) {
@@ -156,7 +155,7 @@ namespace SplitTime {
         getZ() {
             return this._z;
         };
-        setZ(z, includeChildren = false) {
+        setZ(z: number, includeChildren = false) {
             if(includeChildren) {
                 var children = this.getChildren();
                 for(var i = 0; i < children.length; i++) {
@@ -202,7 +201,7 @@ namespace SplitTime {
             this.put(location.getLevel(), location.getX(), location.getY(), location.getZ(), includeChildren);
         };
         
-        setLevel(level: string | SplitTime.Level, includeChildren: boolean = false) {
+        setLevel(level: string | SplitTime.Level | null, includeChildren: boolean = false) {
             if(typeof level === "string") {
                 level = SplitTime.Level.get(level);
             }
@@ -232,10 +231,13 @@ namespace SplitTime {
             }
             
             if(this.isPlayer()) {
-                SplitTime.Level.transition(this._level);
+                SplitTime.Level.transition(this.getLevel());
             }
         };
         getLevel(): SplitTime.Level {
+            if(!this._level) {
+                throw new Error("Body is not in a Level");
+            }
             return this._level;
         };
         /**
@@ -249,7 +251,7 @@ namespace SplitTime {
             return level.getRegion();
         };
         
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: number) {
             this.frameUpdateHandlers.run(delta);
             try {
                 if(this.drawable && SplitTime.instanceOf.FrameNotified(this.drawable)) {
@@ -260,7 +262,7 @@ namespace SplitTime {
             }
         }
         
-        notifyTimeAdvance(delta) {
+        notifyTimeAdvance(delta: number) {
             this.timeAdvanceListeners.run(delta);
         
             var level = this.getLevel();
@@ -302,10 +304,10 @@ namespace SplitTime {
         };
         
         //Function run on ENTER or SPACE
-        registerPlayerInteractHandler(handler) {
+        registerPlayerInteractHandler(handler: () => void) {
             this.playerInteractHandlers.register(handler);
         };
-        deregisterPlayerInteractHandler(handler) {
+        deregisterPlayerInteractHandler(handler: () => void) {
             this.playerInteractHandlers.remove(handler);
         };
 

@@ -3,26 +3,26 @@ namespace SplitTime.file {
     defer(() => {
         callbacks = new SLVD.RegisterCallbacks();
     });
-    var gameId;
+    var gameId: string | number;
 
-    export function setGameId(id) {
+    export function setGameId(id: string | number) {
         gameId = id;
     };
 
-    export function onNew(callback) {
+    export function onNew(callback: () => void) {
         callbacks.register(callback);
     };
 
-    export function loadNew() {
+    export function loadNew(): Promise<void> {
         callbacks.run();
-        return SLVD.Promise.as();
+        return Promise.resolve();
     };
 
-    export function load(fileName) {
+    export function load(fileName: string) {
         // TODO: implement
     };
 
-    export function saveAs(fileName) {
+    export function saveAs(fileName: string) {
         // TODO: implement
     };
 }

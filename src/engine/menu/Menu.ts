@@ -1,8 +1,8 @@
 namespace SplitTime.menu {
 	// These buttons are intended to be wholesale replaced by game-specific settings
-	export const Button = {
-		GUI_CONFIRMATION: null,
-		GUI_CANCEL: null
+	export const Button = {} as {
+		GUI_CONFIRMATION: SplitTime.controls.Button,
+		GUI_CANCEL: SplitTime.controls.Button
 	};
 
 	defer(() => {
@@ -10,40 +10,37 @@ namespace SplitTime.menu {
 		Button.GUI_CANCEL = new SplitTime.controls.Button();
 	});
 
-	export function showImage(file: CanvasImageSource, duration: number, waitForEnterSpace: boolean): SLVD.Promise {
+	export async function showImage(file: CanvasImageSource, duration: number, waitForEnterSpace: boolean): Promise<void> {
 		SplitTime.see.drawImage(file, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-		return SplitTime.delay(duration).then(function() {
-			if(waitForEnterSpace) {
-				var formerProcess = SplitTime.process;
-				SplitTime.process = SplitTime.main.State.OTHER;
-				return Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
-					SplitTime.process = formerProcess;
-				});
-			} else {
-				return SLVD.Promise.as();
-			}
-		});
+		await SplitTime.delay(duration);
+		if(waitForEnterSpace) {
+			var formerProcess = SplitTime.process;
+			SplitTime.process = SplitTime.main.State.OTHER;
+			await Button.GUI_CONFIRMATION.waitForAfterUp();
+			SplitTime.process = formerProcess;
+		} else {
+			return Promise.resolve();
+		}
 	};
 	
-	export function waitForUser(): SLVD.Promise {
+	export async function waitForUser(): Promise<void> {
 		var formerProcess = SplitTime.process;
 		SplitTime.process = SplitTime.main.State.OTHER;
-		return Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
-			SplitTime.process = formerProcess;
-		});
+		await Button.GUI_CONFIRMATION.waitForAfterUp();
+		SplitTime.process = formerProcess;
 	};
 	
 	export class Menu {
-		point: any[];
-		currentPoint: number;
-		background: CanvasImageSource;
+		point: {x: int, y: int}[];
+		currentPoint: int = 0;
+		background: CanvasImageSource | null = null;
+		cursor: CanvasImageSource | null = null;
 		constructor() {
 			this.point = [];
 		};
 		
-		cursor = undefined;
 		
-		addPoint(x, y) {
+		addPoint(x: int, y: int) {
 			var index = this.point.length;
 			this.point[index] = { x: x, y: y };
 		};
@@ -64,9 +61,10 @@ namespace SplitTime.menu {
 			
 			SplitTime.controls.JoyStick.onTilt(function() {
 				if(!isRunning) {
-					return true;
+					return SLVD.STOP_CALLBACKS;
 				}
 				me.handleMenu();
+				return;
 			});
 			
 			return promise;
@@ -85,9 +83,13 @@ namespace SplitTime.menu {
 			this.update();
 			
 			//Draw SplitTime.Menu background
-			SplitTime.see.drawImage(this.background, 0, 0);
+			if(this.background) {
+				SplitTime.see.drawImage(this.background, 0, 0);
+			}
 			//Draw cursor
-			SplitTime.see.drawImage(this.cursor, this.point[this.currentPoint].x, this.point[this.currentPoint].y);
+			if(this.cursor) {
+				SplitTime.see.drawImage(this.cursor, this.point[this.currentPoint].x, this.point[this.currentPoint].y);
+			}
 		}
 		
 		handleMenu() {

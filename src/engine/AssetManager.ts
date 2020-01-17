@@ -3,51 +3,39 @@ namespace SplitTime.image {
     defer(() => {
         ROOT = SLVD.getScriptDirectory() + "images/";
     });
-    var map = {};
-    var loadingPromises = {};
+    var map: { [relativePath: string]: HTMLImageElement } = {};
+    var loadingPromises: { [relativePath: string]: Promise<HTMLImageElement> } = {};
     
-    /**
-    * @param {string} relativePath
-    * @param {string} [alias]
-    * @param {boolean} [isPermanent]
-    * @returns {SLVD.Promise}
-    */
-    export function load(relativePath, alias?, isPermanent = false) {
+    export function load(relativePath: string, alias?: string, isPermanent: boolean = false): Promise<HTMLImageElement> {
         if(relativePath in loadingPromises) {
             return loadingPromises[relativePath];
         }
-        
-        var promise = new SLVD.Promise();
-        var loadingImage;
-        
-        function onLoad() {
-            if(loadingImage.complete) {
-                loadingImage.removeEventListener("load", onLoad);
-                promise.resolve(loadingImage);
+        var promise = new Promise<HTMLImageElement>(resolve => {
+            function onLoad() {
+                if(loadingImage.complete) {
+                    loadingImage.removeEventListener("load", onLoad);
+                    resolve(loadingImage);
+                }
             }
-        }
-        
-        if(!(relativePath in loadingPromises)) {
-            loadingImage = new Image();
+            
+            const loadingImage = new Image();
             loadingImage.addEventListener("load", onLoad);
             loadingImage.src = ROOT + relativePath;
-            loadingPromises[relativePath] = promise;
             map[relativePath] = loadingImage;
             if(alias) {
                 map[alias] = loadingImage;
             }
-        }
-        
+        });
+
+        loadingPromises[relativePath] = promise;
+    
         return promise;
     };
     
-    /**
-    * @param {string} name
-    * @returns {HTMLImageElement}
-    */
-    export function get(name) {
+    export function get(name: string): HTMLImageElement {
         if(!map[name]) {
             SplitTime.image.load(name);
+            // TODO: throw exception?
         }
         return map[name];
     };

@@ -1,20 +1,14 @@
 namespace SplitTime.body {
-    /**
-    * @interface
-    * @extends FrameNotified
-    * @extends TimeNotified
-    * @constructor
-    */
-    export interface Drawable {
+    export interface Drawable extends main.FrameNotified, TimeNotified {
         
         playerOcclusionFadeFactor: number;
         
         getCanvasRequirements(x: number, y: number, z: number): SplitTime.body.CanvasRequirements;
         
-        draw(ctx: CanvasRenderingContext2D);
+        draw(ctx: CanvasRenderingContext2D): void;
         
-        prepareForRender();
-        cleanupAfterRender();
+        prepareForRender(): void;
+        cleanupAfterRender(): void;
     }
     
     export class CanvasRequirements {

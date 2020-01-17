@@ -16,7 +16,8 @@ namespace SplitTime.dialog {
             for(const conversion of CONVERSIONS) {
                 this._line = conversion.apply(this._line);
             }
-            this.setLocation(location);
+            this._location = location;
+            this._lastStepMs = 0;
             this._effectiveLine = this._line;
             this._charactersDisplayed = 0;
             this._startDelay = null;
@@ -27,7 +28,7 @@ namespace SplitTime.dialog {
             return this._effectiveLine + this._line.substring(this._effectiveLine.length);
         }
         
-        _advanceMethod = null;
+        _advanceMethod: string | null = null;
         _delay: number = DEFAULT_DELAY_MS;
         _msPerChar = DEFAULT_MS_PER_CHAR;
         
@@ -43,7 +44,7 @@ namespace SplitTime.dialog {
             return this._advanceMethod || AdvanceMethod.DEFAULT;
         }
 
-        setAdvanceMethod(advanceMethod, delay?) {
+        setAdvanceMethod(advanceMethod: string | null, delay?: number) {
             this._advanceMethod = advanceMethod;
             this._delay = delay || this._delay;
         };

@@ -1,5 +1,10 @@
 namespace SLVD{
-    
+    export const STOP_CALLBACKS = "SC";
+    export type CallbackResult = void | "SC";
+    type CallbackFunction = (data?: any) => CallbackResult;
+    type CallbackObject = {[method: string]: (data?: any) => CallbackResult} | any;
+    type Callback = CallbackFunction | CallbackObject;
+
     export class RegisterCallbacks {
         _handlers: any[];
         _isRunningCallbacks: boolean;
@@ -26,7 +31,7 @@ namespace SLVD{
         waitForOnce() {
             var promise = new SLVD.Promise();
             
-            this.register(function(data) {
+            this.register(function(data: any) {
                 promise.resolve(data);
                 return true;
             });
@@ -37,11 +42,11 @@ namespace SLVD{
         /**
         * @deprecated use {@link SLVD.RegisterCallbacks#register} instead
         */
-        registerCallback(callback) {
+        registerCallback(callback: Callback) {
             this.register(callback);
         };
         
-        register(handler) {
+        register(handler: Callback) {
             if(this._isRunningCallbacks) {
                 this._listAwaitingRegistration.push(handler);
             } else {
@@ -52,11 +57,11 @@ namespace SLVD{
         /**
         * @deprecated use {@link SLVD.RegisterCallbacks#remove} instead
         */
-        removeCallback(callback) {
+        removeCallback(callback: Callback) {
             this.remove(callback);
         };
         
-        remove(handler) {
+        remove(handler: Callback) {
             if(this._isRunningCallbacks) {
                 this._listAwaitingRemoval.push(handler);
             } else {
@@ -71,18 +76,21 @@ namespace SLVD{
         /**
         * @deprecated use {@link SLVD.RegisterCallbacks#run} instead
         */
-        runCallbacks(data?) {
+        runCallbacks(data?: any) {
             this.run(data);
         };
         
-        run(data?) {
+        run(data?: any) {
             this._isRunningCallbacks = true;
             for(var i = this._handlers.length - 1; i >= 0; i--) {
                 // Default to true so exceptions don't continue
                 // var done = true;
                 var done = false;
                 try {
-                    done = this._callFunction(this._handlers[i], data);
+                    const result = this._callFunction(this._handlers[i], data);
+                    if(result === STOP_CALLBACKS) {
+                        done = true;
+                    }
                 } catch(ex) {
                     console.error(ex);
                     // console.warn("callback will be removed");
@@ -105,15 +113,16 @@ namespace SLVD{
             return this._handlers.length;
         };
         
-        _callFunction(registered, data) {
+        _callFunction(registered: Callback, data: any) {
             if(typeof registered === "function") {
                 return registered(data);
             }
             
             for(var i = 0; i < this._allowedObjectMethods.length; i++) {
                 var allowedMethod = this._allowedObjectMethods[i];
-                if(typeof registered[allowedMethod] === "function") {
-                    return registered[allowedMethod](data);
+                const possibleMethod = registered[allowedMethod];
+                if(typeof possibleMethod === "function") {
+                    return possibleMethod(data);
                 }
             }
             

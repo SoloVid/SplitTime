@@ -4,8 +4,8 @@ namespace SplitTime {
         x: number;
         y: number;
         z: number;
-        dir;
-        stance;
+        dir: number;
+        stance: string;
         constructor(level: Level, x: number, y: number, z: number, dir: number, stance: string) {
             this.level = level;
             this.x = x;

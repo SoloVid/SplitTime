@@ -24,11 +24,11 @@ namespace SplitTime.dialog.renderer {
 
 	var dialogDrawings: DialogDrawing[] = [];
 
-	export function show(dialog) {
+	export function show(dialog: SpeechBubble) {
 		dialogDrawings.push(new DialogDrawing(dialog));
 	};
 
-	export function hide(dialog) {
+	export function hide(dialog: SpeechBubble) {
 		for(var i = 0; i < dialogDrawings.length; i++) {
 			if(dialogDrawings[i].dialog === dialog) {
 				dialogDrawings[i].incoming = false;
@@ -58,7 +58,7 @@ namespace SplitTime.dialog.renderer {
 	/**
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
-	export function render(ctx) {
+	export function render(ctx: CanvasRenderingContext2D) {
 		for(var i = 0; i < dialogDrawings.length; i++) {
 			// TODO: visibility
 			var drawing = dialogDrawings[i];
@@ -69,16 +69,7 @@ namespace SplitTime.dialog.renderer {
 		}
 	}
 
-	/**
-	 * @param {number} left
-	 * @param {number} top
-	 * @param {number} right
-	 * @param {number} bottom
-	 * @param {CanvasRenderingContext2D} ctx
-	 * @param {number} [pointX]
-	 * @param {number} [pointY]
-	 */
-	function drawAwesomeRect(left, top, right, bottom, ctx, pointX?, pointY?) {
+	function drawAwesomeRect(left: number, top: number, right: number, bottom: number, ctx: CanvasRenderingContext2D, pointX: number = -1, pointY: number = -1) {
 		var CURVE_RADIUS = 10;
 		var TRI_CURVE_BUFFER = 2*CURVE_RADIUS;
 		var TRI_BASE_HALF = (IDEAL_TAIL_LENGTH * TRI_BASE_TO_TAIL_LENGTH) / 2;
@@ -145,14 +136,7 @@ namespace SplitTime.dialog.renderer {
 		ctx.fill();
 	}
 
-	/**
-	 * @param {CanvasRenderingContext2D} ctx
-	 * @param {{x: number, y: number, z: number}} focalPoint
-	 * @param {string} fullMessage
-	 * @param {string} displayedMessage
-	 * @param {string} speakerName
-	 */
-	function sayFromBoardFocalPoint(ctx, focalPoint, fullMessage, displayedMessage, speakerName) {
+	function sayFromBoardFocalPoint(ctx: CanvasRenderingContext2D, focalPoint: { x: number; y: number; z: number; }, fullMessage: string, displayedMessage: string, speakerName: string) {
 		var pointRelativeToScreen = SplitTime.BoardRenderer.getRelativeToScreen(focalPoint);
 		drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointRelativeToScreen.x, pointRelativeToScreen.y);
 	}
@@ -166,15 +150,7 @@ namespace SplitTime.dialog.renderer {
 	var IDEAL_HEIGHT_TO_WIDTH = 7/16;
 	var FOCAL_MARGIN = 20;
 
-	/**
-	 * @param {CanvasRenderingContext2D} ctx
-	 * @param {string} fullMessage
-	 * @param {string} displayedMessage
-	 * @param {string} [speakerName]
-	 * @param {number} [pointX]
-	 * @param {number} [pointY]
-	 */
-	function drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointX, pointY) {
+	function drawSpeechBubble(ctx: CanvasRenderingContext2D, fullMessage: string, displayedMessage: string, speakerName: string, pointX: number, pointY: number) {
 		// TODO: isn't top what we want here? but it looks funny
 		ctx.textBaseline = "hanging";
 		ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT;
@@ -222,7 +198,7 @@ namespace SplitTime.dialog.renderer {
 		}
 	}
 
-	function drawText(ctx, text, x, y) {
+	function drawText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
 		ctx.strokeStyle = CONFIG.TEXT_OUTLINE_COLOR;
 		ctx.lineWidth = CONFIG.TEXT_OUTLINE_WIDTH;
 		ctx.lineJoin="round";
@@ -232,15 +208,7 @@ namespace SplitTime.dialog.renderer {
 		ctx.fillText(text, x, y);
 	}
 
-	/**
-	 *
-	 * @param {CanvasRenderingContext2D} ctx
-	 * @param {string} fullMessage
-	 * @param {number} lineHeight
-	 * @param {number} nameWidth
-	 * @return {number}
-	 */
-	function calculateIdealizedMaxWidth(ctx, fullMessage, lineHeight, nameWidth) {
+	function calculateIdealizedMaxWidth(ctx: CanvasRenderingContext2D, fullMessage: string, lineHeight: number, nameWidth: number): number {
 		var singleLineWidth = ctx.measureText(fullMessage).width;
 		var singleLineArea = singleLineWidth * lineHeight;
 		var proposedWidth = Math.sqrt(singleLineArea / IDEAL_HEIGHT_TO_WIDTH) + 3*lineHeight;
@@ -249,14 +217,7 @@ namespace SplitTime.dialog.renderer {
 
 	var MIN_SCREEN_MARGIN = 10;
 
-	/**
-	 * @param {number} areaWidth
-	 * @param {number} areaHeight
-	 * @param {number} focalPointX
-	 * @param {number} focalPointY
-	 * @return {{left: number, top: number triPointX: number, triPointY: number}}
-	 */
-	function calculateDialogPosition(areaWidth, areaHeight, focalPointX, focalPointY) {
+	function calculateDialogPosition(areaWidth: number, areaHeight: number, focalPointX: number, focalPointY: number): { left: number; top: number; triPointX: number; triPointY: number; } {
 		// Start centered (around focal point) horizontally
 		var idealLeft = SLVD.constrain(
 			focalPointX - areaWidth/2, // ideal
@@ -313,27 +274,17 @@ namespace SplitTime.dialog.renderer {
 		};
 	}
 
-	/**
-	 * @param {string} fullMessage
-	 * @param {string} displayedMessage
-	 * @param {CanvasRenderingContext2D} ctx
-	 * @param {number} maxRowLength
-	 * @return {{maxWidth: number, all: string[], displayed: string[]}}
-	 */
-	function getLinesFromMessage(fullMessage, displayedMessage, ctx, maxRowLength) {
+	function getLinesFromMessage(fullMessage: string, displayedMessage: string, ctx: CanvasRenderingContext2D, maxRowLength: number): { maxWidth: number; all: string[]; displayed: string[]; } {
 		var initialFont = ctx.font;
 		ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT;
 
-		function getLine(str) {
-			if(!str) {
-				return null;
-			}
+		function getLine(str: string) {
 			var words = str.split(" ");
-			var nextWord = words.shift();
+			var nextWord = words.shift() as string;
 			var line = nextWord;
 			var width = ctx.measureText(line).width;
 			while(words.length > 0 && width < maxRowLength) {
-				nextWord = words.shift();
+				nextWord = words.shift() as string;
 				line += " " + nextWord;
 				width = ctx.measureText(line).width;
 			}
@@ -353,7 +304,7 @@ namespace SplitTime.dialog.renderer {
 		var remainingFullMessage = fullMessage;
 		var remainingDisplayedMessage = displayedMessage;
 		while(remainingFullMessage.length > 0) {
-			var i = allLines.length;
+			const i: int = allLines.length;
 			allLines[i] = getLine(remainingFullMessage);
 			displayedLines[i] = allLines[i].substring(0, remainingDisplayedMessage.length);
 			remainingFullMessage = remainingFullMessage.substring(allLines[i].length).trim();
@@ -374,7 +325,7 @@ namespace SplitTime.dialog.renderer {
 	 * @param {CanvasRenderingContext2D} ctx
 	 * @return {number}
 	 */
-	function getLineHeight(ctx) {
+	function getLineHeight(ctx: CanvasRenderingContext2D): number {
 		return CONFIG.FONT_SIZE;
 	}
 }

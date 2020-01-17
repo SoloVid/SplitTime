@@ -1,11 +1,7 @@
 namespace SplitTime.body {
-	var templates = {};
+	var templates: { [templateName: string]: () => SplitTime.Body } = {};
 
-	/**
-	 * @param {string} templateName
-	 * @param {function():SplitTime.Body} callback
-	 */
-	export function registerTemplate(templateName, callback) {
+	export function registerTemplate(templateName: string, callback: () => SplitTime.Body) {
 		// Test function
 		if(!(callback() instanceof SplitTime.Body)) {
 			throw new Error("Callback for Body template \"" + templateName + "\" doesn't return a Body");
@@ -13,14 +9,9 @@ namespace SplitTime.body {
 		templates[templateName] = callback;
 	};
 
-	/**
-	 *
-	 * @param {string} templateName
-	 * @return {SplitTime.Body}
-	 */
-	export function getTemplateInstance(templateName) {
+	export function getTemplateInstance(templateName: string): SplitTime.Body {
 		if(!templates[templateName]) {
-			return null;
+			throw new Error("Body template " + templateName + " not found");
 		}
 		return templates[templateName]();
 	};

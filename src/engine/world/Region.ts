@@ -1,14 +1,12 @@
 namespace SplitTime {
     
-    var regionMap = {};
+    var regionMap: { [id: string]: Region } = {};
     
     // A region is a logical unit of levels that are loaded together and share a common timeline
     export class Region {
-        id;
         levels: SplitTime.Level[];
         _timeline: SplitTime.Timeline;
-        constructor(id) {
-            this.id = id;
+        constructor(public readonly id: string) {
             this.levels = [];
             this._timeline = SplitTime.Timeline.getDefault();
             this._timeline.addRegion(this);
@@ -21,31 +19,25 @@ namespace SplitTime {
             return this._timeline.getTimeMs();
         };
 
-        setTimeline(timeline) {
+        setTimeline(timeline: Timeline) {
             this._timeline.removeRegion(this);
             this._timeline = timeline;
             this._timeline.addRegion(this);
         }
         
-        /**
-        *
-        * @param msPerStep
-        * @param maxCounter
-        * @return {Signaler}
-        */
-        getTimeStabilizer(msPerStep?, maxCounter?) {
+        getTimeStabilizer(msPerStep?: number, maxCounter?: number): Signaler {
             var that = this;
             return new SplitTime.IntervalStabilizer(msPerStep, maxCounter, function() {
                 return that.getTimeMs();
             });
         };
         
-        addLevel(level) {
+        addLevel(level: Level) {
             this.levels.push(level);
             level.region = this;
         };
         
-        static get(regionId) {
+        static get(regionId: string) {
             if(!regionMap[regionId]) {
                 regionMap[regionId] = new SplitTime.Region(regionId);
             }
@@ -55,11 +47,8 @@ namespace SplitTime {
         /**
         * Get the region currently in play.
         */
-        static getCurrent(): SplitTime.Region | null {
+        static getCurrent(): SplitTime.Region {
             var currentLevel = SplitTime.Level.getCurrent();
-            if(currentLevel === null) {
-                return null;
-            }
             return currentLevel.getRegion();
         };
         
@@ -67,24 +56,24 @@ namespace SplitTime {
             return defaultRegion;
         };
         
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: number) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyFrameUpdate(delta);
             }
         };
         
-        notifyTimeAdvance(delta) {
+        notifyTimeAdvance(delta: number) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyTimeAdvance(delta);
             }
         };
         
-        loadForPlay() {
-            var promises = new SLVD.PromiseCollection();
+        loadForPlay(): PromiseLike<any> {
+            var promises = [];
             for(var i = 0; i < this.levels.length; i++) {
-                promises.add(this.levels[i].loadForPlay());
+                promises.push(this.levels[i].loadForPlay());
             }
-            return promises;
+            return Promise.all(promises);
         };
         
         unloadLevels() {

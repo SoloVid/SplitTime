@@ -1,23 +1,24 @@
 namespace SplitTime {
-	export function delay(seconds) {
+	export function delay(seconds: number): Promise<unknown> {
 		var formerProcess = SplitTime.process;
 		SplitTime.process = SplitTime.main.State.OTHER;
-		var promise = new SLVD.Promise();
-		setTimeout(function() {
-			SplitTime.process = formerProcess;
-			promise.resolve();
-		}, seconds * 1000);
+		var promise = new Promise(resolve => {
+			setTimeout(function() {
+				SplitTime.process = formerProcess;
+				resolve();
+			}, seconds * 1000);
+		});
 		return promise;
 	};
 	
 	//Black out canvas
-	export function canvasBlackout(canv) {
+	export function canvasBlackout(canv: CanvasRenderingContext2D) {
 		canv.fillStyle="#000000";
 		canv.fillRect(0, 0, 640, 480);
 	};
 	
 	//Deal damage from, to
-	export function damage(attacker, victim) {
+	export function damage(attacker: { hp: number; strg: number; }, victim: { onHit: undefined; hp: number; strg: number; }) {
 		if(victim.onHit === undefined) {
 			if(attacker.hp) {
 				// var atk = (attacker.hp/attacker.maxHp)*(attacker.strg - attacker.weight) + attacker.atk;
@@ -36,21 +37,21 @@ namespace SplitTime {
 	* @param {ImageData} data Collision canvas data array
 	* @returns {int}
 	*/
-	export function pixCoordToIndex(x,y,data) {
+	export function pixCoordToIndex(x: int,y: int,data: ImageData): int {
 		return (y*data.width + x)*4;
 	};
 	
 	//Functions to convert between actual pixel locations and tile-based locations. All begin with 0, 0 as top left. Rounding is employed to ensure all return values are integers
-	export function xPixToTile(x) {
+	export function xPixToTile(x: number) {
 		return Math.round((x-7)/32);
 	};
-	export function xTileToPix(x) {
+	export function xTileToPix(x: number) {
 		return (x*32)+7;
 	};
-	export function yPixToTile(y) {
+	export function yPixToTile(y: number) {
 		return Math.round((y-21)/32);
 	};
-	export function yTileToPix(y) {
+	export function yTileToPix(y: number) {
 		return (y*32)+21;
 	};
 }

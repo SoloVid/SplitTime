@@ -4,23 +4,17 @@ namespace SplitTime {
     var frameStabilizer: IntervalStabilizer;
     defer(() => {
         frameStabilizer = new SplitTime.IntervalStabilizer(SplitTime.msPerFrame, COUNTER_BASE, function() {
-            return new Date();
+            return new Date().getDate();
         });
     });
     
-    /** @type {int} */
-    var SCREEN_WIDTH;
-    /** @type {int} */
-    var SCREEN_HEIGHT;
+    var SCREEN_WIDTH: int;
+    var SCREEN_HEIGHT: int;
     
-    /** @type {HTMLCanvasElement} */
-    var buffer;
-    /** @type {CanvasRenderingContext2D} */
-    var bufferCtx;
+    var buffer: SLVD.Canvas;
     
     // TODO: add some means to update this
-    /** @type {SplitTime.Body[]} */
-    var lightedThings = [];
+    var lightedThings: SplitTime.Body[] = [];
     
     export class WeatherRenderer {
         isRaining: boolean = false;
@@ -32,50 +26,44 @@ namespace SplitTime {
         // 0-1 not dark to 100% dark
         darkness: number = 0;
         
-        /**
-        * @param {SplitTime.Body[]} things
-        */
-        setLights(things) {
+        setLights(things: SplitTime.Body[]) {
             lightedThings = things;
         };
         
-        /**
-        * @param {CanvasRenderingContext2D} ctx
-        */
-        render(ctx) {
+        render(ctx: CanvasRenderingContext2D) {
             var screen = SplitTime.BoardRenderer.getScreenCoordinates();
             
             var counter = frameStabilizer.getCounter();
             //Light in dark
             if(this.darkness > 0) {
                 //Transparentize buffer
-                bufferCtx.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                buffer.context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                 
                 //Put lighted things on the buffer as white radial gradients with opaque centers and transparent edges
                 for(var iLight = 0; iLight < lightedThings.length; iLight++) {
                     var thing = lightedThings[iLight];
                     var xCoord = (thing.x) - screen.x;
                     var yCoord = (thing.y) - screen.y;
-                    var grd = bufferCtx.createRadialGradient(xCoord, yCoord, 1, xCoord, yCoord, thing.lightRadius);
+                    var grd = buffer.context.createRadialGradient(xCoord, yCoord, 1, xCoord, yCoord, thing.lightRadius);
                     grd.addColorStop(0, "rgba(255, 255, 255, " + (this.darkness * thing.lightIntensity) + ")");
                     grd.addColorStop(1, "rgba(255, 255, 255, 0)");
-                    bufferCtx.fillStyle = grd;
-                    bufferCtx.beginPath();
-                    bufferCtx.arc(xCoord, yCoord, 150, 0, 2 * Math.PI);
-                    bufferCtx.closePath();
-                    bufferCtx.fill();
+                    buffer.context.fillStyle = grd;
+                    buffer.context.beginPath();
+                    buffer.context.arc(xCoord, yCoord, 150, 0, 2 * Math.PI);
+                    buffer.context.closePath();
+                    buffer.context.fill();
                 }
                 
                 //XOR lights placed with black overlay (the result being holes in the black)
-                bufferCtx.globalCompositeOperation = "xor";
-                bufferCtx.fillStyle = "rgba(0, 0, 0, " + this.darkness + ")";//"#000000";
-                bufferCtx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                buffer.context.globalCompositeOperation = "xor";
+                buffer.context.fillStyle = "rgba(0, 0, 0, " + this.darkness + ")";//"#000000";
+                buffer.context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                 
                 //Render buffer
-                ctx.drawImage(buffer, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                ctx.drawImage(buffer.element, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
                 
                 //Return to default SplitTime.image layering
-                bufferCtx.globalCompositeOperation = "source-over";
+                buffer.context.globalCompositeOperation = "source-over";
             }
             //Weather
             if(this.isRaining) {
@@ -101,17 +89,12 @@ namespace SplitTime {
         
         /**
         * Initialize canvases that WeatherRenderer will use
-        * @param {int} width
-        * @param {int} height
         */
-        static createCanvases(width, height) {
+        static createCanvases(width: int, height: int) {
             SCREEN_WIDTH = width;
             SCREEN_HEIGHT = height;
             
-            buffer = document.createElement("canvas");
-            buffer.setAttribute("width", SCREEN_WIDTH);
-            buffer.setAttribute("height", SCREEN_HEIGHT);
-            bufferCtx = buffer.getContext("2d");
+            buffer = new SLVD.Canvas(width, height);
         };
     }
     
@@ -121,7 +104,7 @@ namespace SplitTime {
     * @param {number} left x in image to start tiling at
     * @param {number} top y in image to start tiling at
     */
-    function drawTiled(ctx, image, left, top) {
+    function drawTiled(ctx: CanvasRenderingContext2D, image: HTMLImageElement, left: number, top: number) {
         left = SLVD.mod(left, image.naturalWidth);
         top = SLVD.mod(top, image.naturalHeight);
         // Draw upper left tile

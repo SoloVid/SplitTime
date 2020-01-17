@@ -6,11 +6,7 @@ namespace SplitTime.body.collisions {
             this.mover = mover;
         }
         
-        /**
-        *
-        * @param {number} maxDistance
-        */
-        zeldaSlide(maxDistance) {
+        zeldaSlide(maxDistance: number) {
             if(this.mover.bodyExt.sliding) {
                 return;
             }
@@ -32,7 +28,7 @@ namespace SplitTime.body.collisions {
             
             var me = this;
             var levelTraces = this.mover.body.getLevel().getLevelTraces();
-            function isCornerOpen(direction, howFarAway) {
+            function isCornerOpen(direction: number, howFarAway: number) {
                 var collisionInfo = new SplitTime.level.traces.CollisionInfo();
                 var testX = x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway);
                 var testY = y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway);
@@ -40,7 +36,7 @@ namespace SplitTime.body.collisions {
                 return !collisionInfo.containsSolid;
             }
             
-            for(var howFarOut = 1; howFarOut <= 5; howFarOut++) {
+            for(var howFarOut = 2; howFarOut <= 5; howFarOut++) {
                 var isCorner1Open = isCornerOpen(positiveDiagonal, howFarOut);
                 var isCorner2Open = isCornerOpen(negativeDiagonal, howFarOut);
                 if(isCorner1Open && !isCorner2Open) {

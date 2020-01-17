@@ -1,21 +1,15 @@
-namespace SplitTime.body {    
-    /**
-    * @constructor
-    */
-    function BodyExt() {
-        this.bumped = false;
-        this.pushing = false;
-        this.sliding = false;
-        this.previousGroundBody = null;
-        this.previousGroundTraceX = -1;
-        this.previousGroundTraceY = -1;
-        this.previousGroundTraceZ = -1;
+namespace SplitTime.body {
+
+    class BodyExt {
+        bumped: boolean = false;
+        pushing: boolean = false;
+        sliding: boolean = false;
+        previousGroundBody: Body | null = null;
+        previousGroundTraceX: int = -1;
+        previousGroundTraceY: int = -1;
+        previousGroundTraceZ: int = -1;
     }
     
-    /**
-    * @param {SplitTime.Body} body
-    * @constructor
-    */
     export class Mover {
         body: SplitTime.Body;
         bodyExt: any;
@@ -23,7 +17,7 @@ namespace SplitTime.body {
         horizontal: collisions.Horizontal;
         rising: collisions.Rising;
         falling: collisions.Falling;
-        constructor(body) {
+        constructor(body: Body) {
             this.body = body;
             this.bodyExt = new BodyExt();
             
@@ -36,11 +30,8 @@ namespace SplitTime.body {
         
         /**
         * Zelda step with input direction
-        * @param distance
-        * @param direction
-        * @returns {boolean}
         */
-        zeldaBump(distance, direction) {
+        zeldaBump(distance: number, direction: number): boolean {
             this.ensureInRegion();
             //Prevent infinite recursion
             if(this.bodyExt.pushing || (this.bodyExt.bumped && !this.bodyExt.sliding)) {
@@ -75,7 +66,7 @@ namespace SplitTime.body {
         * @param {number} maxDZ
         * @returns {number} Z pixels actually moved
         */
-        zeldaVerticalBump(maxDZ) {
+        zeldaVerticalBump(maxDZ: number): number {
             this.ensureInRegion();
             
             var actualDZ;
@@ -97,7 +88,7 @@ namespace SplitTime.body {
         *
         * @param {Object<string, boolean>} levelIdSet
         */
-        transportLevelIfApplicable(levelIdSet) {
+        transportLevelIfApplicable(levelIdSet: { [s: string]: boolean; }) {
             var id = null;
             for(var key in levelIdSet) {
                 if(id !== null) {

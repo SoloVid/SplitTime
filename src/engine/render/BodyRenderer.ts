@@ -1,12 +1,11 @@
 namespace SplitTime.body {
     export class Renderer {
-        _nodes: BodyNode[];
-        _bodyToNodeIndexMap: {};
-        screen: any;
-        ctx: any;
+        _nodes: (BodyNode | null)[];
+        _bodyToNodeIndexMap: { [ref: number]: number };
+        screen: { x: number; y: number; } | null;
+        ctx: CanvasRenderingContext2D | null;
         
         constructor() {
-            /** @type {BodyNode[]} */
             this._nodes = [];
             this._bodyToNodeIndexMap = {};
             
@@ -14,11 +13,7 @@ namespace SplitTime.body {
             this.ctx = null;
         };
         
-        /**
-        * @param screen
-        * @param {CanvasRenderingContext2D} ctx
-        */
-        notifyNewFrame(screen, ctx) {
+        notifyNewFrame(screen: { x: number; y: number; }, ctx: CanvasRenderingContext2D) {
             this.screen = screen;
             this.ctx = ctx;
             for(var i = 0; i < this._nodes.length; i++) {
@@ -34,10 +29,8 @@ namespace SplitTime.body {
         
         /**
         * receives a body that needs to be rendered (called by BoardRenderer)
-        *
-        * @param {SplitTime.Body} body
         */
-        feedBody(body) {
+        feedBody(body: SplitTime.Body) {
             if(!body.drawable) {
                 return;
             }
@@ -48,27 +41,25 @@ namespace SplitTime.body {
             node.shouldBeDrawnThisFrame = true;
         };
         
-        /**
-        * @param {SplitTime.Body} body
-        * @return {BodyNode}
-        * @private
-        */
-        _getBodyNode(body) {
+        private _getBodyNode(body: SplitTime.Body): BodyNode {
             // If the body is unaccounted or misplaced, set up a new node
-            if(!(body.ref in this._bodyToNodeIndexMap) ||
-            !this._nodes[this._bodyToNodeIndexMap[body.ref]] ||
-            this._nodes[this._bodyToNodeIndexMap[body.ref]].body !== body) {
-                var node = new BodyNode(body);
-                for(var i = 0; i <= this._nodes.length; i++) {
-                    if(!this._nodes[i]) {
-                        this._nodes[i] = node;
-                        this._bodyToNodeIndexMap[body.ref] = i;
+            if((body.ref in this._bodyToNodeIndexMap)) {
+                const node = this._nodes[this._bodyToNodeIndexMap[body.ref]];
+                if(node) {
+                    if(node.body !== body) {
                         return node;
                     }
                 }
-                SplitTime.Logger.error("Failed to find a suitable place in body rendering array for " + body.ref);
             }
-            return this._nodes[this._bodyToNodeIndexMap[body.ref]];
+            var node = new BodyNode(body);
+            for(var i = 0; i <= this._nodes.length; i++) {
+                if(!this._nodes[i]) {
+                    this._nodes[i] = node;
+                    this._bodyToNodeIndexMap[body.ref] = i;
+                    return node;
+                }
+            }
+            throw new Error("Failed to find a suitable place in body rendering array for " + body.ref);
         };
         
         render() {
@@ -82,11 +73,7 @@ namespace SplitTime.body {
             }
         };
         
-        /**
-        * @param {BodyNode} node
-        * @private
-        */
-        _visitNode(node) {
+        private _visitNode(node: BodyNode) {
             if(node.visitedThisFrame) {
                 return;
             }
@@ -99,7 +86,7 @@ namespace SplitTime.body {
             this.drawBodyTo(node);
         };
         
-        _removeDeadBodies() {
+        private _removeDeadBodies() {
             for(var i = 0; i < this._nodes.length; i++) {
                 var node = this._nodes[i];
                 if(node) {
@@ -112,12 +99,16 @@ namespace SplitTime.body {
             }
         };
         
-        _rebuildGraph() {
+        private _rebuildGraph() {
             var nodesOnScreen = this._getNodesOnScreen();
             //For each node
             for(var i = 0; i < nodesOnScreen.length; i++) {
                 var node = nodesOnScreen[i];
                 var canvReq = node.canvReq;
+                //FTODO: revisit
+                if(!canvReq) {
+                    continue;
+                }
                 //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
                 var nodeBottom = canvReq.y - canvReq.z;
                 
@@ -131,6 +122,10 @@ namespace SplitTime.body {
                 for(var h = i + 1; h < nodesOnScreen.length; h++) {
                     var otherNode = nodesOnScreen[h];
                     var otherCanvReq = otherNode.canvReq;
+                    //FTODO: revisit
+                    if(!otherCanvReq) {
+                        continue;
+                    }
                     
                     var otherNodeBottom = otherCanvReq.y - otherCanvReq.z;
                     var otherHeight = otherCanvReq.height;
@@ -157,14 +152,18 @@ namespace SplitTime.body {
             }
         };
         
-        _getNodesOnScreen() {
+        private _getNodesOnScreen() {
             var nodesOnScreen = [];
             //For each node
             for(var i = 0; i < this._nodes.length; i++) {
                 var node = this._nodes[i];
                 if(node) {
                     var canvReq = node.canvReq;
-                    
+                    //FTODO: revisit
+                    if(!canvReq) {
+                        continue;
+                    }
+
                     //Combine y and z axes to get the "screen y" position,
                     //which is the y location of the bottom of 
                     //the node on the 2D screen
@@ -199,7 +198,7 @@ namespace SplitTime.body {
         * @param {int} overlappingPixels - the number of pixels by which the two are overlapping
         * @private
         */
-        _constructEdge(node1, node2, overlappingPixels) {
+        private _constructEdge(node1: BodyNode, node2: BodyNode, overlappingPixels: int) {
             //determine which node corresponds to the body in front
             var nodeInFront = node1;
             var nodeBehind = node2;
@@ -220,7 +219,10 @@ namespace SplitTime.body {
         * @param {int} overlappingPixels - the number of pixels by which the two are overlapping
         * @private
         */
-        _fadeOccludingSprite(nodeInFront, nodeBehind, overlappingPixels) {
+        private _fadeOccludingSprite(nodeInFront: BodyNode, nodeBehind: BodyNode, overlappingPixels: int) {
+            if(!nodeInFront.drawable) {
+                return;
+            }
             //If this sprite has the "playerOcclusionFadeFactor" property set to a value greater than zero, fade it out when player is behind
             if(nodeInFront.drawable.playerOcclusionFadeFactor > 0.01) {
                 //If the active player is behind an object, lower the opacity
@@ -242,14 +244,22 @@ namespace SplitTime.body {
             }
         };
         
-        /**
-        *
-        * @param {BodyNode} node
-        */
-        drawBodyTo(node) {
+        drawBodyTo(node: BodyNode) {
+            //FTODO: revisit
+            if(!this.ctx || !this.screen) {
+                return;
+            }
             // TODO: potentially give the body a cleared personal canvas if requested
             
             var canvReq = node.canvReq;
+            //FTODO: revisit
+            if(!canvReq) {
+                return;
+            }
+
+            if(!node.drawable) {
+                return;
+            }
             
             // Translate origin to body location
             if(canvReq.translateOrigin) {
@@ -280,7 +290,7 @@ namespace SplitTime.body {
     * @param {SplitTime.Body} body1
     * @param {SplitTime.Body} body2
     */
-    function shouldRenderInFront(body1, body2) {
+    function shouldRenderInFront(body1: SplitTime.Body, body2: SplitTime.Body) {
         if(isAbove(body1, body2) || isInFront(body1, body2)) {  //if body1 is completely above or in front
             return true;
         } else if(isAbove(body2, body1) || isInFront(body2, body1)) {   //if body2 is completely above or in front
@@ -298,7 +308,7 @@ namespace SplitTime.body {
     * @param {SplitTime.Body} body1
     * @param {SplitTime.Body} body2
     */
-    function isAbove(body1, body2) {
+    function isAbove(body1: SplitTime.Body, body2: SplitTime.Body) {
         return (body1.z >= body2.z + body2.height);
     }
     
@@ -308,14 +318,14 @@ namespace SplitTime.body {
     * @param {SplitTime.Body} body1
     * @param {SplitTime.Body} body2
     */
-    function isInFront(body1, body2) {
+    function isInFront(body1: SplitTime.Body, body2: SplitTime.Body) {
         return (body1.y - body1.halfBaseLength >= body2.y + body2.halfBaseLength);
     }
     
     class BodyNode {
         shouldBeDrawnThisFrame: boolean;
         visitedThisFrame: boolean;
-        overlappingWithPlayer: boolean;
+        overlappingWithPlayer: boolean = false;
         drawable: SplitTime.body.Drawable|null;
         canvReq: SplitTime.body.CanvasRequirements|null;
         body: SplitTime.Body;

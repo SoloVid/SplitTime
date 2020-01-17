@@ -4,9 +4,9 @@ namespace SplitTime {
         _timeAdvanceListeners: SLVD.RegisterCallbacks;
         _regions: SplitTime.Region[];
         _timelineSecondsPerRealSecond: number;
-        clockSeconds: number;
-        clockMinutes: number;
-        clockHours: number;
+        clockSeconds: number = 0;
+        clockMinutes: number = 0;
+        clockHours: number = 0;
         constructor() {
             this._timeInMilliseconds = 0;
             this._timeAdvanceListeners = new SLVD.RegisterCallbacks();
@@ -18,7 +18,7 @@ namespace SplitTime {
             this._timelineSecondsPerRealSecond = 1;
         };
         
-        static get(timeId) {
+        static get(timeId: string) {
             if(!timeMap[timeId]) {
                 timeMap[timeId] = new SplitTime.Timeline();
             }
@@ -28,11 +28,8 @@ namespace SplitTime {
         /**
         * Get the time object currently in play.
         */
-        static getCurrent(): SplitTime.Timeline | null {
+        static getCurrent(): SplitTime.Timeline {
             var currentLevel = SplitTime.Level.getCurrent();
-            if(currentLevel === null) {
-                return null;
-            }
             return currentLevel.getRegion().getTimeline();
         };
         
@@ -40,23 +37,14 @@ namespace SplitTime {
             return defaultTime;
         };
         
-        /**
-        * @param {function(number)} listener
-        */
-        registerTimeAdvanceListener(listener) {
+        registerTimeAdvanceListener(listener: (delta: number) => any) {
             this._timeAdvanceListeners.register(listener);
         };
         
-        /**
-        * @param {SplitTime.Region} region
-        */
-        addRegion(region) {
+        addRegion(region: SplitTime.Region) {
             this._regions.push(region);
         };
-        /**
-        * @param {SplitTime.Region} region
-        */
-        removeRegion(region) {
+        removeRegion(region: SplitTime.Region) {
             var regionIndex = this._regions.indexOf(region);
             if(regionIndex >= 0) {
                 this._regions.splice(regionIndex, 1);
@@ -65,7 +53,7 @@ namespace SplitTime {
             }
         };
         
-        static componentToAbsolute(day, hour, minute, second) {
+        static componentToAbsolute(day: number, hour: number, minute: number, second: number) {
             return day * 60 * 60 * 24 + hour * 60 * 60 + minute * 60 + second;
         };
         
@@ -73,7 +61,7 @@ namespace SplitTime {
             return this._timeInMilliseconds;
         };
         
-        advance(seconds) {
+        advance(seconds: number) {
             this._timeInMilliseconds += Math.floor(seconds * 1000);
             this._timeAdvanceListeners.run(seconds);
             
@@ -82,14 +70,14 @@ namespace SplitTime {
             }
         };
         
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: number) {
             this.advance(delta * this._timelineSecondsPerRealSecond);
         };
         
         
         
         
-        renderClock(context) {
+        renderClock(context: CanvasRenderingContext2D) {
             context.drawImage(SplitTime.image.get("clock.png"), SplitTime.SCREENX - 140, 0);
             context.lineWidth = 1;
             context.strokeStyle = "#DDDDDD";
@@ -115,14 +103,14 @@ namespace SplitTime {
         };
     }
     
-    const timeMap = {};
+    const timeMap: {[id: string]: Timeline} = {};
     const defaultTime = new SplitTime.Timeline();
     
     export interface TimeNotified {
         /**
         * @param delta number of seconds passed (in game time) since last frame
         */
-        notifyTimeAdvance(delta: number);
+        notifyTimeAdvance(delta: number): void;
     }
 
     export namespace instanceOf {

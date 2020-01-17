@@ -3,17 +3,17 @@ namespace SplitTime.controls {
         getDirection: function() {
             return null;
         },
-        onTilt: function(callback) {}
+        onTilt: function(callback: () => SLVD.CallbackResult) {}
     };
     
     export class Button {
         _bindings: { obsolete: boolean; };
         _downCallbacks: SLVD.RegisterCallbacks;
         _upCallbacks: SLVD.RegisterCallbacks;
-        onDown: any;
-        onUp: any;
-        isDown: any;
-        constructor(onDown?, onUp?, isDown?) {
+        _onDown: (callback: () => SLVD.CallbackResult) => void;
+        _onUp: (callback: () => SLVD.CallbackResult) => void;
+        _isDown: () => boolean;
+        constructor(onDown?: (callback: () => void) => void, onUp?: (callback: () => void) => void, isDown?: () => boolean) {
             this._bindings = {
                 obsolete: true
             };
@@ -22,14 +22,26 @@ namespace SplitTime.controls {
             this._upCallbacks = new SLVD.RegisterCallbacks();
             
             var that = this;
-            this.onDown = onDown || function(callback) {
+            this._onDown = onDown || function(callback: () => SLVD.CallbackResult) {
                 that._downCallbacks.register(callback);
             };
-            this.onUp = onUp || function(callback) {
+            this._onUp = onUp || function(callback: () => SLVD.CallbackResult) {
                 that._upCallbacks.register(callback);
             };
-            this.isDown = isDown || function() { return false; };
+            this._isDown = isDown || function() { return false; };
         };
+
+        onDown(callback: () => SLVD.CallbackResult) {
+            return this._onDown(callback);
+        }
+
+        onUp(callback: () => SLVD.CallbackResult) {
+            return this._onUp(callback);
+        }
+
+        isDown() {
+            return this._isDown();
+        }
         
         setKeyboardBindings(...keyCodes: int[]) {
             this._bindings.obsolete = true;
@@ -41,16 +53,18 @@ namespace SplitTime.controls {
             
             function runDownCallbacks() {
                 if(currentBindings.obsolete) {
-                    return true;
+                    return SLVD.STOP_CALLBACKS;
                 }
                 that._downCallbacks.run();
+                return;
             }
             
             function runUpCallbacks() {
                 if(currentBindings.obsolete) {
-                    return true;
+                    return SLVD.STOP_CALLBACKS;
                 }
                 that._upCallbacks.run();
+                return;
             }
             
             for(var i = 0; i < keyCodes.length; i++) {
@@ -69,34 +83,36 @@ namespace SplitTime.controls {
         };
         
         waitForDown() {
-            var promise = new SLVD.Promise();
             var isResolved = false;
             
-            this.onDown(function() {
-                // Since the button could be overloaded, we might be dealing with multiple registered callbacks
-                if(!isResolved) {
-                    isResolved = true;
-                    promise.resolve();
-                }
-                return true;
+            const promise = new Promise<void>(resolve => {
+                this.onDown(function() {
+                    // Since the button could be overloaded, we might be dealing with multiple registered callbacks
+                    if(!isResolved) {
+                        isResolved = true;
+                        resolve();
+                    }
+                    return SLVD.STOP_CALLBACKS;
+                });
             });
             
             return promise;
         };
         
-        waitForAfterUp() {
-            var promise = new SLVD.Promise();
+        waitForAfterUp(): Promise<void> {
             var isResolved = false;
             
-            this.onUp(function() {
-                // Since the button could be overloaded, we might be dealing with multiple registered callbacks
-                if(!isResolved) {
-                    isResolved = true;
-                    promise.resolve();
-                }
-                return true;
+            const promise = new Promise<void>(resolve => {
+                this.onUp(function() {
+                    // Since the button could be overloaded, we might be dealing with multiple registered callbacks
+                    if(!isResolved) {
+                        isResolved = true;
+                        resolve();
+                    }
+                    return SLVD.STOP_CALLBACKS;
+                });
             });
-            
+                
             return promise;
         };
     }
