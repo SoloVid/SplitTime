@@ -1,5 +1,5 @@
 namespace SplitTime {
-    export class Position implements LevelLocation {
+    export class Position implements ILevelLocation {
         level: SplitTime.Level;
         x: number;
         y: number;

@@ -1,4 +1,4 @@
-namespace SplitTime.dialog {
+namespace SplitTime.conversation {
 	class DialogDrawing {
 		constructor(public dialog: SpeechBubble, public incoming: boolean = true, public visibility: number = 0) {
 
@@ -29,11 +29,6 @@ namespace SplitTime.dialog {
 	const MIN_SCREEN_MARGIN = 10;
 
 	export class Renderer {
-
-		// defer(() => {
-		// 	SplitTime.hud.pushRenderer(SplitTime.dialog.renderer);
-		// });
-
 		private dialogDrawings: DialogDrawing[] = [];
 
 		constructor(private readonly camera: Camera) {

@@ -1,18 +1,18 @@
-namespace SplitTime.dialog {
+namespace SplitTime.conversation {
     export class SpeechBubble {
         // can be cut short
         _effectiveLine: string;
         _charactersDisplayed: number;
         _startDelay: number | null = null;
         _isFinished: boolean;
-        _location: LevelLocation;
+        _location: ILevelLocation;
         _timeline: SplitTime.Timeline | null = null;
         _lastStepMs: number = 0;
         _playerInteractHandler: PlayerInteractHandler | Function | null = null;
         _dismissHandler: Function | null = null;
-        _dialogEndHandler: DialogEndHandler | Function | null = null;
+        _dialogEndHandler: ConversationEndHandler | Function | null = null;
 
-        constructor(public readonly conversation: Conversation, public readonly speaker: string, private _line: string, location: LevelLocation) {
+        constructor(public readonly conversation: Clique, public readonly speaker: string, private _line: string, location: ILevelLocation) {
             for(const conversion of CONVERSIONS) {
                 this._line = conversion.apply(this._line);
             }
@@ -32,10 +32,10 @@ namespace SplitTime.dialog {
         _delay: number = DEFAULT_DELAY_MS;
         _msPerChar = DEFAULT_MS_PER_CHAR;
         
-        getLocation(): LevelLocation {
+        getLocation(): ILevelLocation {
             return this._location;
         };
-        setLocation(location: LevelLocation) {
+        setLocation(location: ILevelLocation) {
             this._location = location;
             this._lastStepMs = 0;
         };
@@ -87,7 +87,7 @@ namespace SplitTime.dialog {
         /**
         * TODO: potentially support multiple
         */
-        registerDialogEndHandler(handler: DialogEndHandler | Function) {
+        registerDialogEndHandler(handler: ConversationEndHandler | Function) {
             this._dialogEndHandler = handler;
         };
 
@@ -138,8 +138,8 @@ namespace SplitTime.dialog {
             if(this._dialogEndHandler) {
                 if(typeof this._dialogEndHandler === "function") {
                     this._dialogEndHandler(this);
-                } else if(typeof this._dialogEndHandler.onDialogEnd === "function") {
-                    this._dialogEndHandler.onDialogEnd();
+                } else if(typeof this._dialogEndHandler.onConversationEnd === "function") {
+                    this._dialogEndHandler.onConversationEnd();
                 } else {
                     SplitTime.Logger.error("Invalid dialog end handler: ", this._dialogEndHandler);
                 }

@@ -1,4 +1,4 @@
-namespace SplitTime.dialog {
+namespace SplitTime.conversation {
     const MIN_SCORE = 1;
 
     interface LimitedPerspective {
@@ -23,7 +23,7 @@ namespace SplitTime.dialog {
         */
         private engagedDialog: SpeechBubble|null = null;
 
-        private engagedConversation: Conversation|null = null;
+        private engagedConversation: Clique|null = null;
 
         constructor(private readonly renderer: Renderer, private readonly perspective: LimitedPerspective) {
 

@@ -1,5 +1,5 @@
 namespace SplitTime.body {
-    export class SpeechBox implements LevelLocation {
+    export class SpeechBox implements ILevelLocation {
         body: Body;
         offsetX: number;
         offsetY: number;

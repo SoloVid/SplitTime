@@ -186,7 +186,7 @@ namespace SplitTime {
             this.setZ(z, includeChildren);
         };
         
-        putLocation(location: LevelLocation, includeChildren = false) {
+        putLocation(location: ILevelLocation, includeChildren = false) {
             this.put(location.getLevel(), location.getX(), location.getY(), location.getZ(), includeChildren);
         };
         

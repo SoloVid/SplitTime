@@ -1,4 +1,4 @@
-namespace SplitTime.dialog {
+namespace SplitTime.conversation {
     export class Speaker {
         name: string;
         body: SplitTime.Body;

@@ -53,7 +53,7 @@ export function fromTo(fromX: number, fromY: number, toX: number, toY: number): 
 };
 
 //Get direction from one thing to another (both in Maven orientation)
-export function fromToThing(fromThing: LevelLocation, toThing: LevelLocation): number;
+export function fromToThing(fromThing: ILevelLocation, toThing: ILevelLocation): number;
 export function fromToThing(fromThing: {x: number, y: number}, toThing: {x: number, y: number}): number;
 export function fromToThing(fromThing: any, toThing: any): number {
 	if(typeof fromThing.getX === "function") {
