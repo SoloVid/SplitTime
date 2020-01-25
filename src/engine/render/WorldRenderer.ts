@@ -99,7 +99,7 @@ namespace SplitTime {
             if(currentLevel.getBackgroundImage()) {
                 //Note: this single call on a perform test is a huge percentage of CPU usage.
                 this.snapshot.context.drawImage(
-                    ASSETS.images.get(currentLevel.getBackgroundImage()),
+                    G.ASSETS.images.get(currentLevel.getBackgroundImage()),
                     this.screen.x + xBackShift, this.screen.y + yBackShift,
                     this.SCREEN_WIDTH - 2 * xBackShift, this.SCREEN_HEIGHT - 2 * yBackShift,
                     xBackShift, yBackShift,

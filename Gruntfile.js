@@ -158,7 +158,7 @@ module.exports = function(grunt) {
             gameData.soundEffectFiles.push(join(subDir, fileName));
         });
 
-        var dataFileContents = "SplitTime._GAME_DATA = " + JSON.stringify(gameData) + ";";
+        var dataFileContents = "G._GAME_DATA = " + JSON.stringify(gameData) + ";";
         grunt.verbose.writeln("Writing data JS file");
         grunt.file.write(path.join(projectRoot, "build/generated/data.js"), dataFileContents);
     });

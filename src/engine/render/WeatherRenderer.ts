@@ -1,4 +1,5 @@
 namespace SplitTime {
+    // TODO: Try not to let these be global state like this.
     export let RAIN_IMAGE: string = "rain.png";
     export let CLOUDS_IMAGE: string = "stormClouds.png";
 
@@ -55,7 +56,7 @@ namespace SplitTime {
             }
             //Weather
             if(level.weather.isRaining) {
-                this.ctx.drawImage(ASSETS.images.get(RAIN_IMAGE), -((counter % 100) / 100) * this.SCREEN_WIDTH, ((counter % 25) / 25) * this.SCREEN_HEIGHT - this.SCREEN_HEIGHT);
+                this.ctx.drawImage(G.ASSETS.images.get(RAIN_IMAGE), -((counter % 100) / 100) * this.SCREEN_WIDTH, ((counter % 25) / 25) * this.SCREEN_HEIGHT - this.SCREEN_HEIGHT);
             }
             if(level.weather.isCloudy) {
                 var CLOUDS_WIDTH = 2560;
@@ -63,7 +64,7 @@ namespace SplitTime {
                 var xPixelsShift = -SLVD.mod(counter - screen.x, CLOUDS_WIDTH);
                 var yPixelsShift = SLVD.mod(screen.y, CLOUDS_HEIGHT);
                 this.ctx.globalAlpha = level.weather.cloudAlpha;
-                this.drawTiled(ASSETS.images.get(CLOUDS_IMAGE), xPixelsShift, yPixelsShift);
+                this.drawTiled(G.ASSETS.images.get(CLOUDS_IMAGE), xPixelsShift, yPixelsShift);
                 this.ctx.globalAlpha = 1;
             }
             if(level.weather.lightningFrequency > 0) {

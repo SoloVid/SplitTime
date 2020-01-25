@@ -72,7 +72,7 @@ namespace SplitTime {
             
             this.background = levelData.background;
             if(this.background) {
-                var loadProm = ASSETS.images.load(this.background).then(onLoadImage);
+                var loadProm = G.ASSETS.images.load(this.background).then(onLoadImage);
                 levelLoadPromises.push(loadProm);
             }
             

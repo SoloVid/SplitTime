@@ -47,7 +47,7 @@ namespace SplitTime {
         };
         
         private getImage(): HTMLImageElement {
-            return ASSETS.images.get(this.img);
+            return G.ASSETS.images.get(this.img);
         };
         
         getCanvasRequirements(x: number, y: number, z: number) {
