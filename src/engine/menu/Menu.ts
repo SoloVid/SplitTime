@@ -10,32 +10,12 @@ namespace SplitTime.menu {
 		Button.GUI_CANCEL = new SplitTime.controls.Button();
 	});
 
-	export async function showImage(file: CanvasImageSource, duration: number, waitForEnterSpace: boolean): Promise<void> {
-		SplitTime.see.drawImage(file, 0, 0, SplitTime.SCREENX, SplitTime.SCREENY);
-		await SplitTime.delay(duration);
-		if(waitForEnterSpace) {
-			var formerProcess = SplitTime.process;
-			SplitTime.process = SplitTime.main.State.OTHER;
-			await Button.GUI_CONFIRMATION.waitForAfterUp();
-			SplitTime.process = formerProcess;
-		} else {
-			return Promise.resolve();
-		}
-	};
-	
-	export async function waitForUser(): Promise<void> {
-		var formerProcess = SplitTime.process;
-		SplitTime.process = SplitTime.main.State.OTHER;
-		await Button.GUI_CONFIRMATION.waitForAfterUp();
-		SplitTime.process = formerProcess;
-	};
-	
 	export class Menu {
 		point: {x: int, y: int}[];
 		currentPoint: int = 0;
 		background: CanvasImageSource | null = null;
 		cursor: CanvasImageSource | null = null;
-		constructor() {
+		constructor(private readonly view: player.View) {
 			this.point = [];
 		};
 		
@@ -45,25 +25,28 @@ namespace SplitTime.menu {
 			this.point[index] = { x: x, y: y };
 		};
 		
-		runMenu() {
+		runMenu(hud?: HUD) {
 			this.currentPoint = 0;
 			var isRunning = true;
 			
-			SplitTime.hud.pushRenderer(this);
+			if(hud) {
+				hud.pushRenderer(this);
+			}
 			
 			var promise = new SLVD.Promise();
-			var me = this;
-			Button.GUI_CONFIRMATION.waitForAfterUp().then(function() {
+			Button.GUI_CONFIRMATION.waitForAfterUp().then(() => {
 				isRunning = false;
-				SplitTime.hud.removeRenderer(me);
-				promise.resolve(me.currentPoint);
+				if(hud) {
+					hud.removeRenderer(this);
+				}
+				promise.resolve(this.currentPoint);
 			});
 			
-			SplitTime.controls.JoyStick.onTilt(function() {
+			SplitTime.controls.JoyStick.onTilt(() => {
 				if(!isRunning) {
 					return SLVD.STOP_CALLBACKS;
 				}
-				me.handleMenu();
+				this.handleMenu();
 				return;
 			});
 			
@@ -84,11 +67,11 @@ namespace SplitTime.menu {
 			
 			//Draw SplitTime.Menu background
 			if(this.background) {
-				SplitTime.see.drawImage(this.background, 0, 0);
+				this.view.see.drawImage(this.background, 0, 0);
 			}
 			//Draw cursor
 			if(this.cursor) {
-				SplitTime.see.drawImage(this.cursor, this.point[this.currentPoint].x, this.point[this.currentPoint].y);
+				this.view.see.drawImage(this.cursor, this.point[this.currentPoint].x, this.point[this.currentPoint].y);
 			}
 		}
 		
@@ -116,13 +99,13 @@ namespace SplitTime.menu {
 						isUnderUpperBound = this.point[iPoint].y <= -this.point[iPoint].x + this.point[prevPoint].x + this.point[prevPoint].y;
 						isAboveLowerBound = this.point[iPoint].y >= this.point[iPoint].x - this.point[prevPoint].x + this.point[prevPoint].y;
 					} else {
-						isUnderUpperBound = this.point[iPoint].y <= -this.point[iPoint].x + (this.point[prevPoint].x + SplitTime.SCREENX) + this.point[prevPoint].y;
-						isAboveLowerBound = this.point[iPoint].y >= this.point[iPoint].x - (this.point[prevPoint].x + SplitTime.SCREENX) + this.point[prevPoint].y;
+						isUnderUpperBound = this.point[iPoint].y <= -this.point[iPoint].x + (this.point[prevPoint].x + this.view.width) + this.point[prevPoint].y;
+						isAboveLowerBound = this.point[iPoint].y >= this.point[iPoint].x - (this.point[prevPoint].x + this.view.width) + this.point[prevPoint].y;
 					}
 					if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 					{
 						dxTest = this.point[prevPoint].x - this.point[iPoint].x;
-						if(!isLeft) dxTest += SplitTime.SCREENX;
+						if(!isLeft) dxTest += this.view.width;
 						dyTest = Math.abs(this.point[prevPoint].y - this.point[iPoint].y);
 						if(dxTest <= dxBest) {
 							setNewBest = !(dxTest == dxBest && dyTest > dyBest);
@@ -146,13 +129,13 @@ namespace SplitTime.menu {
 						isAboveLowerBound = this.point[iPoint].x <= -this.point[iPoint].y + this.point[prevPoint].y + this.point[prevPoint].x;
 						isUnderUpperBound = this.point[iPoint].x >= this.point[iPoint].y - this.point[prevPoint].y + this.point[prevPoint].x;
 					} else {
-						isAboveLowerBound = this.point[iPoint].x <= -this.point[iPoint].y + (this.point[prevPoint].y + SplitTime.SCREENY) + this.point[prevPoint].x;
-						isUnderUpperBound = this.point[iPoint].x >= this.point[iPoint].y - (this.point[prevPoint].y + SplitTime.SCREENY) + this.point[prevPoint].x;
+						isAboveLowerBound = this.point[iPoint].x <= -this.point[iPoint].y + (this.point[prevPoint].y + this.view.height) + this.point[prevPoint].x;
+						isUnderUpperBound = this.point[iPoint].x >= this.point[iPoint].y - (this.point[prevPoint].y + this.view.height) + this.point[prevPoint].x;
 					}
 					if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 					{
 						dyTest = this.point[prevPoint].y - this.point[iPoint].y;
-						if(!isUp) dyTest += SplitTime.SCREENY;
+						if(!isUp) dyTest += this.view.height;
 						dxTest = Math.abs(this.point[prevPoint].x - this.point[iPoint].x);
 						if(dyTest <= dyBest) {
 							setNewBest = !(dyTest == dyBest && dxTest > dxBest);
@@ -177,13 +160,13 @@ namespace SplitTime.menu {
 						isUnderUpperBound = this.point[iPoint].y >= -this.point[iPoint].x + this.point[prevPoint].x + this.point[prevPoint].y;
 						isAboveLowerBound = this.point[iPoint].y <= this.point[iPoint].x - this.point[prevPoint].x + this.point[prevPoint].y;
 					} else {
-						isUnderUpperBound = this.point[iPoint].y >= -this.point[iPoint].x + (this.point[prevPoint].x - SplitTime.SCREENX) + this.point[prevPoint].y;
-						isAboveLowerBound = this.point[iPoint].y <= this.point[iPoint].x - (this.point[prevPoint].x - SplitTime.SCREENX) + this.point[prevPoint].y;
+						isUnderUpperBound = this.point[iPoint].y >= -this.point[iPoint].x + (this.point[prevPoint].x - this.view.width) + this.point[prevPoint].y;
+						isAboveLowerBound = this.point[iPoint].y <= this.point[iPoint].x - (this.point[prevPoint].x - this.view.width) + this.point[prevPoint].y;
 					}
 					if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 					{
 						dxTest =  this.point[iPoint].x - this.point[prevPoint].x;
-						if(!isRight) dxTest += SplitTime.SCREENX;
+						if(!isRight) dxTest += this.view.width;
 						dyTest = Math.abs(this.point[prevPoint].y - this.point[iPoint].y);
 						if(dxTest <= dxBest) {
 							setNewBest = !(dxTest == dxBest && dyTest > dyBest);
@@ -208,13 +191,13 @@ namespace SplitTime.menu {
 						isUnderUpperBound = this.point[iPoint].x >= -this.point[iPoint].y + this.point[prevPoint].y + this.point[prevPoint].x;
 						isAboveLowerBound = this.point[iPoint].x <= this.point[iPoint].y - this.point[prevPoint].y + this.point[prevPoint].x;
 					} else {
-						isUnderUpperBound = this.point[iPoint].x >= -this.point[iPoint].y + (this.point[prevPoint].y - SplitTime.SCREENY) + this.point[prevPoint].x;
-						isAboveLowerBound = this.point[iPoint].x <= this.point[iPoint].y - (this.point[prevPoint].y - SplitTime.SCREENY) + this.point[prevPoint].x;
+						isUnderUpperBound = this.point[iPoint].x >= -this.point[iPoint].y + (this.point[prevPoint].y - this.view.height) + this.point[prevPoint].x;
+						isAboveLowerBound = this.point[iPoint].x <= this.point[iPoint].y - (this.point[prevPoint].y - this.view.height) + this.point[prevPoint].x;
 					}
 					if(isUnderUpperBound && isAboveLowerBound) //Point within 90 degree viewing window
 					{
 						dyTest = this.point[iPoint].y - this.point[prevPoint].y;
-						if(!isDown) dyTest += SplitTime.SCREENY;
+						if(!isDown) dyTest += this.view.height;
 						dxTest = Math.abs(this.point[prevPoint].x - this.point[iPoint].x);
 						if(dyTest <= dyBest) {
 							setNewBest = !(dyTest == dyBest && dxTest > dxBest);

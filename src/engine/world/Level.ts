@@ -1,14 +1,7 @@
 namespace SplitTime {
-    var ENTER_LEVEL_FUNCTION_ID = "__ENTER_LEVEL";
-    var EXIT_LEVEL_FUNCTION_ID = "__EXIT_LEVEL";
-    
-    var levelMap: { [id: string]: Level } = {};
-    var currentLevel: SplitTime.Level | null = null;
-    
-    var transitionPromise: SLVD.Promise | null = null;
-    
-    var nextLevel: SplitTime.Level | null = null;
-    
+    export const ENTER_LEVEL_FUNCTION_ID = "__ENTER_LEVEL";
+    export const EXIT_LEVEL_FUNCTION_ID = "__EXIT_LEVEL";
+
     export class Level {
         id: string;
         events: { [id: string]: Function };
@@ -19,7 +12,7 @@ namespace SplitTime {
         background: string;
         layerFuncData: ImageData[];
         _cellGrid: level.CellGrid | null;
-        weatherRenderer: WeatherRenderer;
+        weather: WeatherSettings;
         _addingProps: boolean;
         _props: any[];
         fileData: level.FileData | null = null;
@@ -42,22 +35,16 @@ namespace SplitTime {
             // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer();
             this._cellGrid = null;
             
-            this.weatherRenderer = new SplitTime.WeatherRenderer();
+            this.weather = new WeatherSettings();
             
             this._addingProps = false;
             this._props = [];
         };
         
-        static load(levelData: level.FileData) {
-            var levelName = levelData.fileName.replace(/\.json$/, "");
-            var level = SplitTime.Level.get(levelName);
-            return level.load(levelData);
-        };
-        
-        load(levelData: SplitTime.level.FileData): PromiseLike<any> {
+        load(world: World, levelData: SplitTime.level.FileData): PromiseLike<any> {
             const levelLoadPromises: PromiseLike<unknown>[] = [];
             
-            SplitTime.Region.get(levelData.region).addLevel(this);
+            world.getRegion(levelData.region).addLevel(this);
             
             this.fileData = levelData;
             this.type = levelData.type;
@@ -85,7 +72,7 @@ namespace SplitTime {
             
             this.background = levelData.background;
             if(this.background) {
-                var loadProm = SplitTime.image.load(this.background).then(onLoadImage);
+                var loadProm = ASSETS.images.load(this.background).then(onLoadImage);
                 levelLoadPromises.push(loadProm);
             }
             
@@ -122,7 +109,7 @@ namespace SplitTime {
                         var type = rawTrace.type;
                         switch(type) {
                             case SplitTime.Trace.Type.TRANSPORT:
-                                var trace = SplitTime.Trace.fromRaw(rawTrace);
+                                var trace = SplitTime.Trace.fromRaw(rawTrace, world);
                                 const level = trace.level;
                                 if(!level) {
                                     throw new Error("Transport trace is missing level");
@@ -165,29 +152,27 @@ namespace SplitTime {
                 return this._levelTraces;
             };
             
-            getBackgroundImage(): HTMLImageElement {
+            getBackgroundImage(): string {
                 if(!this.background) {
                     throw new Error("Background image for level " + this.id + " is not set");
                 }
-                return SplitTime.image.get(this.background);
+                return this.background;
             };
             
             getDebugTraceCanvas() {
                 return this._levelTraces.getDebugTraceCanvas();
             };
             
-            getRegion(): SplitTime.Region {
+            getRegion(): Region {
                 if(!this.region) {
-                    console.warn("Level \"" + this.id + "\" is not assigned to a region");
-                    this.region = SplitTime.Region.getDefault();
+                    throw new Error("Level \"" + this.id + "\" is not assigned to a region");
                 }
                 return this.region;
             };
             
             getPosition(positionId: string): SplitTime.Position {
                 if(!this.positions[positionId]) {
-                    console.warn("Level \"" + this.id + "\" does not contain the position \"" + positionId + "\"");
-                    this.positions[positionId] = new SplitTime.Position(this, 0, 0, 0, SplitTime.Direction.S, "default");
+                    throw new Error("Level \"" + this.id + "\" does not contain the position \"" + positionId + "\"");
                 }
                 return this.positions[positionId];
             };
@@ -319,18 +304,14 @@ namespace SplitTime {
                 }
             };
             
-            async loadForPlay(): Promise<any> {
-                if(currentLevel === null) {
-                    throw new Error("currentLevel is null");
-                }
-
-                await currentLevel.waitForLoadAssets();
+            async loadForPlay(world: World): Promise<any> {
+                await this.waitForLoadAssets();
 
                     this.refetchBodies();
                     if(this.fileData === null) {
                         throw new Error("this.fileData is null");
                     }
-                    this._levelTraces = new SplitTime.level.Traces(this, this.fileData);
+                    this._levelTraces = new SplitTime.level.Traces(this, this.fileData, world);
             };
             
             unload() {
@@ -346,85 +327,6 @@ namespace SplitTime {
                     l.removeBody(this._props[i]);
                 }
                 this._props = [];
-            };
-            
-            static get(levelId: string): SplitTime.Level {
-                if(!levelMap[levelId]) {
-                    levelMap[levelId] = new SplitTime.Level(levelId);
-                }
-                return levelMap[levelId];
-            };
-            
-            /**
-            * STOP!!! This method should ONLY be called by the main game loop.
-            */
-            static async applyTransition() {
-                if(nextLevel === null) {
-                    // nothing to do
-                    return;
-                }
-                
-                if(!transitionPromise) {
-                    throw new Error("transitionPromise is null when applyTransition is called!?!");
-                }
-
-                var exitingLevel = currentLevel;
-                currentLevel = nextLevel;
-                nextLevel = null;
-                
-                var changeRegion = !exitingLevel || exitingLevel.getRegion() !== currentLevel.getRegion();
-                
-                //********Leave current level
-                
-                if(exitingLevel) {
-                    if(exitingLevel.events[EXIT_LEVEL_FUNCTION_ID]) {
-                        exitingLevel.runEvent(EXIT_LEVEL_FUNCTION_ID);
-                    }
-                    if(changeRegion) {
-                        exitingLevel.getRegion().unloadLevels();
-                    }
-                }
-                
-                //********Enter new level
-                
-                const enteringLevel = currentLevel;
-                SplitTime.process = "loading";
-                if(changeRegion) {
-                    await currentLevel.getRegion().loadForPlay();
-                } else {
-                    await Promise.resolve();
-                }
-                SplitTime.process = enteringLevel.type as string;
-                if(enteringLevel.events[ENTER_LEVEL_FUNCTION_ID]) {
-                    enteringLevel.runEvent(ENTER_LEVEL_FUNCTION_ID);
-                }
-                transitionPromise.resolve();
-                transitionPromise = null;
-            };
-            
-            static async transition(level: SplitTime.Level | string): Promise<any> {
-                if(typeof level === "string") {
-                    level = SplitTime.Level.get(level);
-                }
-                
-                if(transitionPromise) {
-                    throw new Error("Level transition is already in progress. Cannot transition to " + level.id);
-                }
-                
-                if(level === currentLevel) {
-                    return SLVD.Promise.as();
-                }
-                
-                nextLevel = level;
-                transitionPromise = new SLVD.Promise();
-                await transitionPromise;
-            };
-            
-            static getCurrent(): SplitTime.Level {
-                if(!currentLevel) {
-                    throw new Error("currentLevel is not set");
-                }
-                return currentLevel;
             };
         }
     }

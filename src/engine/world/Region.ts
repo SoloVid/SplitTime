@@ -1,26 +1,25 @@
 namespace SplitTime {
-    
-    var regionMap: { [id: string]: Region } = {};
-    
     // A region is a logical unit of levels that are loaded together and share a common timeline
     export class Region {
-        levels: SplitTime.Level[];
-        _timeline: SplitTime.Timeline;
+        private levels: SplitTime.Level[] = [];
+        private _timeline: SplitTime.Timeline | null = null;
         constructor(public readonly id: string) {
-            this.levels = [];
-            this._timeline = SplitTime.Timeline.getDefault();
-            this._timeline.addRegion(this);
         };
         
-        getTimeline() {
+        getTimeline(): Timeline {
+            if(!this._timeline) {
+                throw new Error("Region " + this.id + " does not have a timeline set");
+            }
             return this._timeline;
         };
-        getTimeMs() {
-            return this._timeline.getTimeMs();
+        getTimeMs(): number {
+            return this.getTimeline().getTimeMs();
         };
 
         setTimeline(timeline: Timeline) {
-            this._timeline.removeRegion(this);
+            if(this._timeline) {
+                this._timeline.removeRegion(this);
+            }
             this._timeline = timeline;
             this._timeline.addRegion(this);
         }
@@ -37,25 +36,6 @@ namespace SplitTime {
             level.region = this;
         };
         
-        static get(regionId: string) {
-            if(!regionMap[regionId]) {
-                regionMap[regionId] = new SplitTime.Region(regionId);
-            }
-            return regionMap[regionId];
-        };
-        
-        /**
-        * Get the region currently in play.
-        */
-        static getCurrent(): SplitTime.Region {
-            var currentLevel = SplitTime.Level.getCurrent();
-            return currentLevel.getRegion();
-        };
-        
-        static getDefault() {
-            return defaultRegion;
-        };
-        
         notifyFrameUpdate(delta: number) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyFrameUpdate(delta);
@@ -68,10 +48,10 @@ namespace SplitTime {
             }
         };
         
-        loadForPlay(): PromiseLike<any> {
+        loadForPlay(world: World): PromiseLike<any> {
             var promises = [];
             for(var i = 0; i < this.levels.length; i++) {
-                promises.push(this.levels[i].loadForPlay());
+                promises.push(this.levels[i].loadForPlay(world));
             }
             return Promise.all(promises);
         };
@@ -82,5 +62,4 @@ namespace SplitTime {
             }
         };
     }
-    var defaultRegion = new SplitTime.Region("!!!DEFAULT!!!");
 }

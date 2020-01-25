@@ -1,0 +1,337 @@
+namespace SplitTime.dialog {
+	class DialogDrawing {
+		constructor(public dialog: SpeechBubble, public incoming: boolean = true, public visibility: number = 0) {
+
+		}
+	}
+
+	const CONFIG = {
+		OUTLINE_STYLE: "rgba(255, 255, 255, .8)",
+		OUTLINE_WIDTH: 3,
+		BACKGROUND_STYLE: "rgba(50, 100, 150, .4)",
+		TEXT_OUTLINE_COLOR: "#000000",
+		TEXT_OUTLINE_WIDTH: 5,
+		TEXT_COLOR: "#FFFFFF",
+		FONT_SIZE: 18,
+		FONT: "Verdana",
+		SPEAKER_NAMES_ENABLED: false
+	};
+	export const Configuration = CONFIG;
+
+	const MAX_ROW_LENGTH = 500;
+	const MIN_ROW_LENGTH_SPLIT = 100;
+	const LINE_SPACING = 2;
+	export const IDEAL_TAIL_LENGTH = 16;
+	export const TRI_BASE_TO_TAIL_LENGTH = 2/3;
+	const TEXT_BOX_PADDING = 10;
+	const IDEAL_HEIGHT_TO_WIDTH = 7/16;
+	const FOCAL_MARGIN = 20;
+	const MIN_SCREEN_MARGIN = 10;
+
+	export class Renderer {
+
+		// defer(() => {
+		// 	SplitTime.hud.pushRenderer(SplitTime.dialog.renderer);
+		// });
+
+		private dialogDrawings: DialogDrawing[] = [];
+
+		constructor(private readonly camera: Camera) {
+
+		}
+
+		show(dialog: SpeechBubble) {
+			this.dialogDrawings.push(new DialogDrawing(dialog));
+		};
+
+		hide(dialog: SpeechBubble) {
+			for(var i = 0; i < this.dialogDrawings.length; i++) {
+				if(this.dialogDrawings[i].dialog === dialog) {
+					this.dialogDrawings[i].incoming = false;
+				}
+			}
+		};
+
+		notifyFrameUpdate() {
+			for(var i = this.dialogDrawings.length - 1; i >= 0; i--) {
+				var drawing = this.dialogDrawings[i];
+				if(drawing.incoming) {
+					drawing.visibility = SLVD.approachValue(drawing.visibility, 1, 0.1);
+					// TODO: remove temporary hackaround bad UX
+					drawing.visibility = 1;
+				} else {
+					drawing.visibility -= 0.1;
+					// TODO: remove temporary hackaround bad UX
+					drawing.visibility = 0;
+					if(drawing.visibility <= 0) {
+						const spliced = this.dialogDrawings.splice(i, 1);
+						spliced[0].dialog.onDismiss();
+					}
+				}
+			}
+		};
+
+		/**
+		 * @param {CanvasRenderingContext2D} ctx
+		 */
+		render(ctx: CanvasRenderingContext2D) {
+			for(var i = 0; i < this.dialogDrawings.length; i++) {
+				// TODO: visibility
+				var drawing = this.dialogDrawings[i];
+				var dialog = drawing.dialog;
+				var location = dialog.getLocation();
+				this.sayFromBoardFocalPoint(ctx, {x: location.getX(), y: location.getY(), z: location.getZ()},
+					dialog.line, dialog.getDisplayedCurrentLine(), dialog.speaker);
+			}
+		}
+
+		private drawAwesomeRect(left: number, top: number, right: number, bottom: number, ctx: CanvasRenderingContext2D, pointX: number = -1, pointY: number = -1) {
+			var CURVE_RADIUS = 10;
+			var TRI_CURVE_BUFFER = 2*CURVE_RADIUS;
+			var TRI_BASE_HALF = (IDEAL_TAIL_LENGTH * TRI_BASE_TO_TAIL_LENGTH) / 2;
+			var horizontalMid = SLVD.constrain((2*pointX + left + right)/4, left + TRI_CURVE_BUFFER, right - TRI_CURVE_BUFFER);
+			var verticalMid = SLVD.constrain((2*pointY + top + bottom)/4, top + TRI_CURVE_BUFFER, bottom - TRI_CURVE_BUFFER);
+
+			var isLeft = false;
+			var isTop = false;
+			var isRight = false;
+			var isBottom = false;
+			if(pointX !== undefined && pointY !== undefined) {
+				var dLeft = left - pointX;
+				var dTop = top - pointY;
+				var dRight = pointX - right;
+				var dBottom = pointY - bottom;
+				if(pointX < left && dLeft >= dTop && dLeft > dBottom) {
+					isLeft = true;
+				} else if(pointY < top && dTop > dRight) {
+					isTop = true;
+				} else if(pointX > right && dRight > dBottom) {
+					isRight = true;
+				} else if(pointY > bottom) {
+					isBottom = true;
+				}
+			}
+
+			ctx.beginPath();
+			ctx.moveTo(left + CURVE_RADIUS, top);
+			if(isTop) {
+				ctx.lineTo(horizontalMid - TRI_BASE_HALF, top);
+				ctx.lineTo(pointX, pointY);
+				ctx.lineTo(horizontalMid + TRI_BASE_HALF, top);
+			}
+			ctx.lineTo(right - CURVE_RADIUS, top);
+			ctx.arc(right - CURVE_RADIUS, top + CURVE_RADIUS, CURVE_RADIUS, 1.5*Math.PI, 0, false);
+			if(isRight) {
+				ctx.lineTo(right, verticalMid - TRI_BASE_HALF);
+				ctx.lineTo(pointX, pointY);
+				ctx.lineTo(right, verticalMid + TRI_BASE_HALF);
+			}
+			ctx.lineTo(right, bottom - CURVE_RADIUS);
+			ctx.arc(right - CURVE_RADIUS, bottom - CURVE_RADIUS, CURVE_RADIUS, 0, 0.5*Math.PI, false);
+			if(isBottom) {
+				ctx.lineTo(horizontalMid + TRI_BASE_HALF, bottom);
+				ctx.lineTo(pointX, pointY);
+				ctx.lineTo(horizontalMid - TRI_BASE_HALF, bottom);
+			}
+			ctx.lineTo(left + CURVE_RADIUS, bottom);
+			ctx.arc(left + CURVE_RADIUS, bottom - CURVE_RADIUS, CURVE_RADIUS, 0.5*Math.PI, Math.PI, false);
+			if(isLeft) {
+				ctx.lineTo(left, verticalMid + TRI_BASE_HALF);
+				ctx.lineTo(pointX, pointY);
+				ctx.lineTo(left, verticalMid - TRI_BASE_HALF);
+			}
+			ctx.lineTo(left, top + CURVE_RADIUS);
+			ctx.arc(left + CURVE_RADIUS, top + CURVE_RADIUS, CURVE_RADIUS, Math.PI, 1.5*Math.PI, false);
+			ctx.closePath();
+
+			ctx.strokeStyle = CONFIG.OUTLINE_STYLE;
+			ctx.lineWidth = CONFIG.OUTLINE_WIDTH;
+			ctx.stroke();
+
+			ctx.fillStyle = CONFIG.BACKGROUND_STYLE;
+			ctx.fill();
+		}
+
+		private sayFromBoardFocalPoint(ctx: CanvasRenderingContext2D, focalPoint: { x: number; y: number; z: number; }, fullMessage: string, displayedMessage: string, speakerName: string) {
+			var pointRelativeToScreen = this.camera.getRelativeToScreen(focalPoint);
+			this.drawSpeechBubble(ctx, fullMessage, displayedMessage, speakerName, pointRelativeToScreen.x, pointRelativeToScreen.y);
+		}
+
+		private drawSpeechBubble(ctx: CanvasRenderingContext2D, fullMessage: string, displayedMessage: string, speakerName: string, pointX: number, pointY: number) {
+			// TODO: isn't top what we want here? but it looks funny
+			ctx.textBaseline = "hanging";
+			ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT;
+
+			var textHeight = this.getLineHeight(ctx);
+			var lineHeight = textHeight + LINE_SPACING;
+
+			var namePadding = TEXT_BOX_PADDING;
+			var nameWidth = 0;
+			var nameBoxHeight = 0;
+			var nameBoxWidth = 0;
+			if(CONFIG.SPEAKER_NAMES_ENABLED && speakerName) {
+				nameWidth = ctx.measureText(speakerName).width;
+				nameBoxHeight = textHeight + 2*namePadding;
+				nameBoxWidth = nameWidth + 2*namePadding;
+			}
+
+			var maxTextWidth = this.calculateIdealizedMaxWidth(ctx, fullMessage, lineHeight, nameWidth);
+			var lines = this.getLinesFromMessage(fullMessage, displayedMessage, ctx, maxTextWidth);
+
+			var bubbleWidth = Math.max(lines.maxWidth, nameWidth) + 2*TEXT_BOX_PADDING;
+			var wholeBubbleTextHeight = lines.all.length * lineHeight;
+			var bubbleHeight = wholeBubbleTextHeight + 2*TEXT_BOX_PADDING;
+
+			var position = this.calculateDialogPosition(bubbleWidth, bubbleHeight + nameBoxHeight, pointX, pointY);
+
+			var messageTop = position.triPointY > position.top ? position.top + nameBoxHeight : position.top;
+
+			//Text box
+			this.drawAwesomeRect(position.left, messageTop, position.left + bubbleWidth, messageTop + bubbleHeight, ctx, position.triPointX, position.triPointY);
+
+			//Lines
+			for(var index = 0; index < lines.displayed.length; index++) {
+				this.drawText(ctx, lines.displayed[index], position.left + TEXT_BOX_PADDING, messageTop + lineHeight*index + TEXT_BOX_PADDING);
+			}
+
+			// Draw speaker box afterward in case it needs to cover part of the triangle
+			if(CONFIG.SPEAKER_NAMES_ENABLED && speakerName) {
+				var nameTop = position.triPointY > position.top ? position.top : position.top + bubbleHeight;
+				var nameBoxLeft = position.left;
+				//Name box
+				this.drawAwesomeRect(nameBoxLeft, nameTop, nameBoxLeft + nameBoxWidth, nameTop + nameBoxHeight, ctx);
+				//Name
+				this.drawText(ctx, speakerName, nameBoxLeft + namePadding, nameTop + namePadding);
+			}
+		}
+
+		private drawText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
+			ctx.strokeStyle = CONFIG.TEXT_OUTLINE_COLOR;
+			ctx.lineWidth = CONFIG.TEXT_OUTLINE_WIDTH;
+			ctx.lineJoin="round";
+			ctx.miterLimit=2;
+			ctx.strokeText(text, x, y);
+			ctx.fillStyle=CONFIG.TEXT_COLOR;
+			ctx.fillText(text, x, y);
+		}
+
+		private calculateIdealizedMaxWidth(ctx: CanvasRenderingContext2D, fullMessage: string, lineHeight: number, nameWidth: number): number {
+			var singleLineWidth = ctx.measureText(fullMessage).width;
+			var singleLineArea = singleLineWidth * lineHeight;
+			var proposedWidth = Math.sqrt(singleLineArea / IDEAL_HEIGHT_TO_WIDTH) + 3*lineHeight;
+			return Math.min(MAX_ROW_LENGTH, Math.max(MIN_ROW_LENGTH_SPLIT, nameWidth, proposedWidth));
+		}
+
+		private calculateDialogPosition(areaWidth: number, areaHeight: number, focalPointX: number, focalPointY: number): { left: number; top: number; triPointX: number; triPointY: number; } {
+			// Start centered (around focal point) horizontally
+			var idealLeft = SLVD.constrain(
+				focalPointX - areaWidth/2, // ideal
+				MIN_SCREEN_MARGIN, // left side of screen
+				this.camera.SCREEN_WIDTH - MIN_SCREEN_MARGIN - areaWidth // right side of screen
+			);
+			var left = idealLeft;
+
+			// Try to make the dialog be above the focal point
+			var top = focalPointY - (areaHeight + IDEAL_TAIL_LENGTH + FOCAL_MARGIN);
+			if(top < MIN_SCREEN_MARGIN) {
+				// If that is off screen, try below
+				top = focalPointY + (FOCAL_MARGIN + IDEAL_TAIL_LENGTH);
+
+				if(top + areaHeight > this.camera.SCREEN_HEIGHT - MIN_SCREEN_MARGIN) {
+					// If below is also off screen, try switching to more of a horizontal approach
+					var idealTop = SLVD.constrain(
+						focalPointY - areaHeight/2, // ideal
+						MIN_SCREEN_MARGIN, // top of screen
+						this.camera.SCREEN_HEIGHT - MIN_SCREEN_MARGIN - areaHeight // bottom of screen
+					);
+					top = idealTop;
+
+					// TODO: prefer away from player rather than left over right
+					// Try to make dialog be to the left of focal point
+					left = focalPointX - (areaWidth + IDEAL_TAIL_LENGTH + FOCAL_MARGIN);
+					if(left < MIN_SCREEN_MARGIN) {
+						// If that is off screen, try to the right
+						left = focalPointX + (FOCAL_MARGIN + IDEAL_TAIL_LENGTH);
+
+						if(left + areaWidth > this.camera.SCREEN_WIDTH - MIN_SCREEN_MARGIN) {
+							// At this point, give up trying to avoid the focal point
+							left = idealLeft;
+							top = idealTop;
+						}
+					}
+				}
+			}
+
+			// Determine off-focal point
+			var centerX = left + areaWidth/2;
+			var centerY = top + areaHeight/2;
+			var dx = centerX - focalPointX;
+			var dy = centerY - focalPointY;
+			var dist = Math.sqrt(dx*dx + dy*dy);
+			var triPointX = focalPointX + dx/dist * FOCAL_MARGIN;
+			var triPointY = focalPointY + dy/dist * FOCAL_MARGIN;
+
+			return {
+				left: left,
+				top: top,
+				triPointX: triPointX,
+				triPointY: triPointY
+			};
+		}
+
+		private getLinesFromMessage(fullMessage: string, displayedMessage: string, ctx: CanvasRenderingContext2D, maxRowLength: number): { maxWidth: number; all: string[]; displayed: string[]; } {
+			var initialFont = ctx.font;
+			ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT;
+
+			function getLine(str: string) {
+				var words = str.split(" ");
+				var nextWord = words.shift() as string;
+				var line = nextWord;
+				var width = ctx.measureText(line).width;
+				while(words.length > 0 && width < maxRowLength) {
+					nextWord = words.shift() as string;
+					line += " " + nextWord;
+					width = ctx.measureText(line).width;
+				}
+
+				if(width > maxRowLength && line !== nextWord) {
+					words.unshift(nextWord);
+					line = line.substr(0, line.length - (nextWord.length + 1));
+				}
+
+				return line;
+			}
+
+			var allLines = [];
+			var displayedLines = [];
+			var maxWidth = 0;
+
+			var remainingFullMessage = fullMessage;
+			var remainingDisplayedMessage = displayedMessage;
+			while(remainingFullMessage.length > 0) {
+				const i: int = allLines.length;
+				allLines[i] = getLine(remainingFullMessage);
+				displayedLines[i] = allLines[i].substring(0, remainingDisplayedMessage.length);
+				remainingFullMessage = remainingFullMessage.substring(allLines[i].length).trim();
+				remainingDisplayedMessage = remainingDisplayedMessage.substring(displayedLines[i].length).trim();
+				maxWidth = Math.max(maxWidth, ctx.measureText(allLines[i]).width);
+			}
+
+			ctx.font = initialFont;
+
+			return {
+				maxWidth: maxWidth,
+				all: allLines,
+				displayed: displayedLines
+			};
+		}
+
+		/**
+		 * @param {CanvasRenderingContext2D} ctx
+		 * @return {number}
+		 */
+		private getLineHeight(ctx: CanvasRenderingContext2D): number {
+			return CONFIG.FONT_SIZE;
+		}
+	}
+}

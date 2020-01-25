@@ -1,5 +1,5 @@
 namespace SplitTime.body {
-    export interface Drawable extends main.FrameNotified, TimeNotified {
+    export interface Drawable extends FrameNotified, TimeNotified {
         
         playerOcclusionFadeFactor: number;
         

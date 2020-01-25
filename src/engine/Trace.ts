@@ -20,7 +20,7 @@ namespace SplitTime {
 			this.eventId = "";
 		};
 		
-		static fromRaw(rawTrace: SplitTime.level.file_data.Trace): SplitTime.Trace {
+		static fromRaw(rawTrace: SplitTime.level.file_data.Trace, world: World): SplitTime.Trace {
 			var trace = new SplitTime.Trace(rawTrace.type);
 			switch(trace.type) {
 				case SplitTime.Trace.Type.SOLID:
@@ -34,7 +34,7 @@ namespace SplitTime {
 				break;
 				case SplitTime.Trace.Type.POINTER:
 				case SplitTime.Trace.Type.TRANSPORT:
-				trace.level = SplitTime.Level.get(rawTrace.level);
+				trace.level = world.getLevel(rawTrace.level);
 				trace.offsetX = +rawTrace.offsetX;
 				trace.offsetY = +rawTrace.offsetY;
 				trace.offsetZ = +rawTrace.offsetZ;

@@ -3,7 +3,7 @@ namespace SplitTime {
         _internalStabilizer: SplitTime.IntervalStabilizer;
         
         constructor(msPerFrame: number, maxCounter: number = 1) {
-            this._internalStabilizer = new SplitTime.IntervalStabilizer(msPerFrame || SplitTime.msPerFrame, maxCounter, function() {
+            this._internalStabilizer = new SplitTime.IntervalStabilizer(msPerFrame, maxCounter, function() {
                 return new Date().getTime();
             });
         };

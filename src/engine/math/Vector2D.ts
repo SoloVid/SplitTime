@@ -5,7 +5,7 @@ namespace SplitTime {
 
         constructor(x: number, y: number) {
             this.x = x || 0;
-            this.y = y || 0;        
+            this.y = y || 0;
         }
 
         static angular(angle: number, magnitude: number) {

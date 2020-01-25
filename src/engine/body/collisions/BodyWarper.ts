@@ -16,9 +16,10 @@ namespace SplitTime.body {
         * Check that body is in current region
         */
         ensureInRegion() {
-            if(this.body.getLevel().getRegion() !== SplitTime.Region.getCurrent()) {
-                throw new Error("Attempt to do zelda movement for body not in current region");
-            }
+            // TODO: maybe reimplement?
+            // if(this.body.getLevel().getRegion() !== SplitTime.Region.getCurrent()) {
+            //     throw new Error("Attempt to do zelda movement for body not in current region");
+            // }
         };
         
         /**

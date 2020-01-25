@@ -87,10 +87,6 @@ namespace SplitTime {
             return this.childrenBolted.concat(this.childrenLoose);
         };
         
-        isPlayer() {
-            return this === SplitTime.playerBody;
-        };
-        
         staticTrace: {traceStr: string, type: string}[] = [];
         /**
         * @deprecated should be moved to Prop class or something
@@ -183,13 +179,6 @@ namespace SplitTime {
             return this.getY() - this.baseLength / 2;
         };
         
-        /**
-        * @deprecated
-        */
-        isInCurrentLevel(): boolean {
-            return this.getLevel() === SplitTime.Level.getCurrent();
-        };
-        
         put(level: Level, x: number, y: number, z: number, includeChildren = false) {
             this.setLevel(level, includeChildren);
             this.setX(x, includeChildren);
@@ -201,11 +190,7 @@ namespace SplitTime {
             this.put(location.getLevel(), location.getX(), location.getY(), location.getZ(), includeChildren);
         };
         
-        setLevel(level: string | SplitTime.Level | null, includeChildren: boolean = false) {
-            if(typeof level === "string") {
-                level = SplitTime.Level.get(level);
-            }
-            
+        setLevel(level: SplitTime.Level | null, includeChildren: boolean = false) {
             if(level === this._level) {
                 return;
             }
@@ -229,10 +214,6 @@ namespace SplitTime {
                     }
                 }
             }
-            
-            if(this.isPlayer()) {
-                SplitTime.Level.transition(this.getLevel());
-            }
         };
         getLevel(): SplitTime.Level {
             if(!this._level) {
@@ -244,11 +225,7 @@ namespace SplitTime {
         * @deprecated perhaps too much clog
         */
         getRegion(): SplitTime.Region {
-            var level = this.getLevel();
-            if(!level) {
-                return SplitTime.Region.getDefault();
-            }
-            return level.getRegion();
+            return this.getLevel().getRegion();
         };
         
         notifyFrameUpdate(delta: number) {
@@ -266,8 +243,7 @@ namespace SplitTime {
             this.timeAdvanceListeners.run(delta);
         
             var level = this._level;
-            var region = level ? level.getRegion() : null;
-            if(region === SplitTime.Region.getCurrent()) {
+            if(level) {
                 var ZILCH = 0.00001;
                 if(this.baseLength > ZILCH) {
                     this.zVelocity += this.GRAVITY * delta;
@@ -295,7 +271,7 @@ namespace SplitTime {
         };
         
         //Function run every frame
-        registerFrameUpdateHandler(handler: ((delta: number) => any) | SplitTime.main.FrameNotified) {
+        registerFrameUpdateHandler(handler: ((delta: number) => any) | SplitTime.FrameNotified) {
             this.frameUpdateHandlers.register(handler);
         };
 

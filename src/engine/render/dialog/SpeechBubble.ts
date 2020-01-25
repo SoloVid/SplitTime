@@ -108,17 +108,13 @@ namespace SplitTime.dialog {
             }
         }
         
-        start() {
-            SplitTime.dialog.submit(this);
-        };
-        
         advance() {
             this._startDelay = null;
             if(this._charactersDisplayed < this._effectiveLine.length) {
                 this._charactersDisplayed = this._effectiveLine.length;
             } else {
                 this._isFinished = true;
-                this.close();
+                this.onClose();
             }
         };
         
@@ -138,8 +134,7 @@ namespace SplitTime.dialog {
             }
         };
         
-        close() {
-            SplitTime.dialog.remove(this);
+        onClose() {
             if(this._dialogEndHandler) {
                 if(typeof this._dialogEndHandler === "function") {
                     this._dialogEndHandler(this);

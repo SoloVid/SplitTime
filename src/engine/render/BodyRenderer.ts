@@ -5,7 +5,7 @@ namespace SplitTime.body {
         screen: { x: number; y: number; } | null;
         ctx: CanvasRenderingContext2D | null;
         
-        constructor() {
+        constructor(private readonly camera: Camera) {
             this._nodes = [];
             this._bodyToNodeIndexMap = {};
             
@@ -30,7 +30,7 @@ namespace SplitTime.body {
         /**
         * receives a body that needs to be rendered (called by BoardRenderer)
         */
-        feedBody(body: SplitTime.Body) {
+        feedBody(body: SplitTime.Body, isPlayer: boolean) {
             if(!body.drawable) {
                 return;
             }
@@ -39,6 +39,7 @@ namespace SplitTime.body {
             node.drawable = body.drawable;
             node.canvReq = canvReq;
             node.shouldBeDrawnThisFrame = true;
+            node.isPlayer = isPlayer;
         };
         
         private _getBodyNode(body: SplitTime.Body): BodyNode {
@@ -170,9 +171,9 @@ namespace SplitTime.body {
                     var nodeScreenY = canvReq.y - canvReq.z;
                     
                     //optimization for not drawing if out of bounds
-                    var screen = SplitTime.BoardRenderer.getScreenCoordinates();
-                    var screenBottom = screen.y + SplitTime.SCREENY;
-                    var screenRightEdge = screen.x + SplitTime.SCREENX;
+                    var screen = this.camera.getScreenCoordinates();
+                    var screenBottom = screen.y + this.camera.SCREEN_HEIGHT;
+                    var screenRightEdge = screen.x + this.camera.SCREEN_WIDTH;
                     
                     //If the body is in bounds
                     if(
@@ -226,7 +227,7 @@ namespace SplitTime.body {
             //If this sprite has the "playerOcclusionFadeFactor" property set to a value greater than zero, fade it out when player is behind
             if(nodeInFront.drawable.playerOcclusionFadeFactor > 0.01) {
                 //If the active player is behind an object, lower the opacity
-                if(nodeBehind.body.isPlayer()) {
+                if(nodeBehind.isPlayer) {
                     var CROSS_FADE_PIXELS = 32;
                     
                     if(SplitTime.debug.ENABLED) {
@@ -324,6 +325,7 @@ namespace SplitTime.body {
     
     class BodyNode {
         shouldBeDrawnThisFrame: boolean;
+        isPlayer: boolean = false;
         visitedThisFrame: boolean;
         overlappingWithPlayer: boolean = false;
         drawable: SplitTime.body.Drawable|null;

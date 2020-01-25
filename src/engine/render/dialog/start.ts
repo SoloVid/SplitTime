@@ -1,26 +1,16 @@
 namespace SplitTime.dialog {
-    export function start(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
-        const orchestrationHelper = new OrchestrationHelper();
-        const topLevelSection = new Section(null, orchestrationHelper, () => {
-            orchestrator(orchestrationHelper);
-        });
-        return Promise.resolve().then(() => { return topLevelSection.run(); });
-    }
+    export class ConversationOrchestrator {
+        constructor(private readonly manager: Manager) {
 
-    export function startCancelable(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
-        return start(d => {
-            d.cancelable(() => {
-                orchestrator(d);
-            })
-        });
-    }
+        }
 
-    export function startInterruptible(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
-        return start(d => {
-            d.section(() => {
-                orchestrator(d);
-            }).interruptible();
-        });
+        start(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
+            const orchestrationHelper = new OrchestrationHelper(this.manager);
+            const topLevelSection = new Section(null, orchestrationHelper, () => {
+                orchestrator(orchestrationHelper);
+            });
+            return Promise.resolve().then(() => { return topLevelSection.run(); });
+        }
     }
 
     type DialogOutcomeHandler = (result: DialogOutcome) => any;
@@ -125,7 +115,7 @@ namespace SplitTime.dialog {
                         canceled = true;
                         // TODO: keep or remove?
                         resolveWithCleanup();
-                        dialog.close();
+                        this.helper.manager.remove(dialog);
                     }
                 };
                 const speakers = this.initialSpeakers.slice();
@@ -150,7 +140,7 @@ namespace SplitTime.dialog {
                 dialog.registerPlayerInteractHandler(onInteract);
                 dialog.registerDismissHandler(onDismiss);
                 dialog.registerDialogEndHandler(resolveWithCleanup);
-                dialog.start();
+                this.helper.manager.submit(dialog);
             });
         }
     }
@@ -167,6 +157,8 @@ namespace SplitTime.dialog {
 
     class OrchestrationHelper implements DSL {
         _parentSection: Section | null = null;
+
+        constructor(public readonly manager: Manager) {}
 
         get parentSection(): Section {
             if(!this._parentSection) {

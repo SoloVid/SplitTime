@@ -32,12 +32,12 @@ namespace SplitTime.level {
         _internalPointerTraceMap: any;
         debugTraceCanvas: HTMLCanvasElement | null = null;
         
-        constructor(level: SplitTime.Level, levelFileData: SplitTime.level.FileData) {
+        constructor(level: SplitTime.Level, levelFileData: SplitTime.level.FileData, world: World) {
             this.level = level;
             this.levelFileData = levelFileData;
             this.layerFuncData = [];
             
-            this.initCanvasData();
+            this.initCanvasData(world);
         };
         
         getEventIdFromPixel(r: number, g: number, b: number, a: number) {
@@ -117,15 +117,15 @@ namespace SplitTime.level {
             }
         };
         
-        initCanvasData() {
+        initCanvasData(world: World) {
             this._internalEventIdMap = {};
             this._internalPointerTraceMap = {};
             var nextFunctionId = 1;
             var nextPointerId = 1;
             
             var holderCanvas = document.createElement("canvas");
-            holderCanvas.width = this.level.width/(this.level.type === SplitTime.main.State.OVERWORLD ? 32 : 1);
-            holderCanvas.height = this.level.yWidth/(this.level.type === SplitTime.main.State.OVERWORLD ? 32 : 1);
+            holderCanvas.width = this.level.width;
+            holderCanvas.height = this.level.yWidth;
             var holderCtx = holderCanvas.getContext("2d");
 
             if(holderCtx === null) {
@@ -186,12 +186,12 @@ namespace SplitTime.level {
                         case SplitTime.Trace.Type.POINTER:
                         var pointerIntId = nextPointerId++;
                         // TODO: actual SplitTime.Trace object
-                        this._internalPointerTraceMap[pointerIntId] = SplitTime.Trace.fromRaw(trace);
+                        this._internalPointerTraceMap[pointerIntId] = SplitTime.Trace.fromRaw(trace, world);
                         var pointerColor = SplitTime.Trace.getPointerColor(pointerIntId);
                         SplitTime.Trace.drawColor(trace.vertices, holderCtx, pointerColor);
                         break;
                         case SplitTime.Trace.Type.TRANSPORT:
-                            var transportTrace = SplitTime.Trace.fromRaw(trace);
+                            var transportTrace = SplitTime.Trace.fromRaw(trace, world);
                             var transportStringId = transportTrace.getLocationId();
                             var transportIntId = nextFunctionId++;
                             this._internalEventIdMap[transportIntId] = transportStringId;

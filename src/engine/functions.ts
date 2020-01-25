@@ -1,10 +1,7 @@
 namespace SplitTime {
 	export function delay(seconds: number): Promise<unknown> {
-		var formerProcess = SplitTime.process;
-		SplitTime.process = SplitTime.main.State.OTHER;
 		var promise = new Promise(resolve => {
 			setTimeout(function() {
-				SplitTime.process = formerProcess;
 				resolve();
 			}, seconds * 1000);
 		});
