@@ -11,6 +11,22 @@ namespace SplitTime.dialog {
             });
             return Promise.resolve().then(() => { return topLevelSection.run(); });
         }
+
+        startCancelable(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
+            return this.start(d => {
+                d.cancelable(() => {
+                    orchestrator(d);
+                })
+            });
+        }
+    
+        startInterruptible(orchestrator: (d: OrchestrationHelper) => any): Promise<DialogOutcome> {
+            return this.start(d => {
+                d.section(() => {
+                    orchestrator(d);
+                }).interruptible();
+            });
+        }
     }
 
     type DialogOutcomeHandler = (result: DialogOutcome) => any;

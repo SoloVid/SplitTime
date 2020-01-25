@@ -3,11 +3,6 @@ namespace SplitTime {
     type body_getter = () => Body | null;
 
     export class WorldRenderer {
-        /**
-        * Cached screen coordinates
-        */
-        private screen: { x: number; y: number; };
-        
         private SCREEN_WIDTH: int;
         private SCREEN_HEIGHT: int;
         
@@ -24,8 +19,6 @@ namespace SplitTime {
             this.buffer = new SLVD.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
             this.snapshot = new SLVD.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
 
-            this.screen = this.camera.getScreenCoordinates();
-
             this.bodyRenderer = new body.Renderer(this.camera);
             this.weatherRenderer = new WeatherRenderer(this.camera, this.see);
         }
@@ -41,13 +34,13 @@ namespace SplitTime {
                 throw new Error("currentLevel is not initialized");
             }
 
-            this.screen = this.camera.getScreenCoordinates();
+            const screen = this.camera.getScreenCoordinates();
             
             //Black out screen (mainly for the case of board being smaller than the screen)
             this.buffer.context.fillStyle = "#000000";
             this.buffer.context.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
             
-            this.bodyRenderer.notifyNewFrame(this.screen, this.snapshot.context);
+            this.bodyRenderer.notifyNewFrame(screen, this.snapshot.context);
             var bodies = currentLevel.getBodies();
             const playerBody = this.playerBodyGetter();
             
@@ -89,9 +82,9 @@ namespace SplitTime {
             
             //Work out details of smaller-than-screen dimensions
             var xBackShift, yBackShift;
-            if(this.screen.x < 0) xBackShift = -this.screen.x;
+            if(screen.x < 0) xBackShift = -screen.x;
             else xBackShift = 0;
-            if(this.screen.y < 0) yBackShift = -this.screen.y;
+            if(screen.y < 0) yBackShift = -screen.y;
             else yBackShift = 0;
             
             this.snapshot.context.globalCompositeOperation = "destination-over";
@@ -100,7 +93,7 @@ namespace SplitTime {
                 //Note: this single call on a perform test is a huge percentage of CPU usage.
                 this.snapshot.context.drawImage(
                     G.ASSETS.images.get(currentLevel.getBackgroundImage()),
-                    this.screen.x + xBackShift, this.screen.y + yBackShift,
+                    screen.x + xBackShift, screen.y + yBackShift,
                     this.SCREEN_WIDTH - 2 * xBackShift, this.SCREEN_HEIGHT - 2 * yBackShift,
                     xBackShift, yBackShift,
                     this.SCREEN_WIDTH - 2 * xBackShift, this.SCREEN_HEIGHT - 2 * yBackShift
@@ -113,7 +106,7 @@ namespace SplitTime {
                 this.snapshot.context.globalAlpha = 0.5;
                 this.snapshot.context.drawImage(
                     currentLevel.getDebugTraceCanvas(),
-                    this.screen.x + xBackShift, this.screen.y + yBackShift,
+                    screen.x + xBackShift, screen.y + yBackShift,
                     this.SCREEN_WIDTH - 2 * xBackShift, this.SCREEN_HEIGHT - 2 * yBackShift,
                     xBackShift, yBackShift,
                     this.SCREEN_WIDTH - 2 * xBackShift, this.SCREEN_HEIGHT - 2 * yBackShift

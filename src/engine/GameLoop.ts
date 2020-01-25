@@ -20,9 +20,9 @@ namespace SplitTime {
         var displayFPS = FPS;
         const msPerFrame = (1/FPS)*1000;
         if(msElapsed < msPerFrame) {
-            setTimeout(mainGameLoopBody, msPerFrame - msElapsed);
+            scheduleNextLoop(msPerFrame - msElapsed, gameLoop);
         } else {
-            setTimeout(mainGameLoopBody, 2); //give browser a quick breath
+            scheduleNextLoop(2, gameLoop); //give browser a quick breath
             var secondsElapsed = msElapsed/1000;
             displayFPS = Math.round(1/secondsElapsed);
         }
@@ -36,37 +36,50 @@ namespace SplitTime {
         }
     };
 
+    function scheduleNextLoop(ms: number, gameLoop: GameLoop) {
+        setTimeout(mainGameLoop, ms, gameLoop);
+    }
+
     function mainGameLoopBody(g: GameLoop) {
         const perspective = g.perspective;
         g.performanceCheckpoint("start loop", 999999);
-        
-        const level = perspective.levelManager.getCurrent();
 
-        if(perspective.playerBody && perspective.playerBody.getLevel() !== level) {
+        if(perspective.levelManager.isTransitioning()) {
+            // FTODO: don't skip rest of frame
+            return;
+        }
+
+        const isCurrentLevelSet = perspective.levelManager.isCurrentSet();
+        if(perspective.playerBody && (!isCurrentLevelSet || perspective.playerBody.getLevel() !== perspective.levelManager.getCurrent())) {
             perspective.levelManager.transition(perspective.playerBody.getLevel());
             g.performanceCheckpoint("level transition", 10);
+            // FTODO: don't skip rest of frame
+            return;
         }
 
         const secondsForFrame = 1/SplitTime.FPS;
 
-        const region = level.getRegion();
-        const timeline = region.getTimeline();
+        if(isCurrentLevelSet) {
+            const level = perspective.levelManager.getCurrent();
+            const region = level.getRegion();
+            const timeline = region.getTimeline();
 
-        timeline.notifyFrameUpdate(secondsForFrame);
-        g.performanceCheckpoint("timeline frame update");
+            timeline.notifyFrameUpdate(secondsForFrame);
+            g.performanceCheckpoint("timeline frame update");
 
-        region.notifyFrameUpdate(secondsForFrame);
-        g.performanceCheckpoint("region frame update");
+            region.notifyFrameUpdate(secondsForFrame);
+            g.performanceCheckpoint("region frame update");
 
-        g.notifyListenersFrameUpdate(secondsForFrame);
-        g.performanceCheckpoint("notify listeners of update");
+            g.notifyListenersFrameUpdate(secondsForFrame);
+            g.performanceCheckpoint("notify listeners of update");
+            
+            SplitTime.debug.setDebugValue("Board Bodies", perspective.levelManager.getCurrent().bodies.length);
+            SplitTime.debug.setDebugValue("Focus point", Math.round(perspective.camera.getFocusPoint().x) + "," + Math.round(perspective.camera.getFocusPoint().y) + "," + Math.round(perspective.camera.getFocusPoint().z));
         
-        SplitTime.debug.setDebugValue("Board Bodies", perspective.levelManager.getCurrent().bodies.length);
-        SplitTime.debug.setDebugValue("Focus point", Math.round(perspective.camera.getFocusPoint().x) + "," + Math.round(perspective.camera.getFocusPoint().y) + "," + Math.round(perspective.camera.getFocusPoint().z));
-    
-        perspective.camera.notifyFrameUpdate(secondsForFrame);
-        perspective.worldRenderer.renderBoardState(true);
-        g.performanceCheckpoint("world state render");
+            perspective.camera.notifyFrameUpdate(secondsForFrame);
+            perspective.worldRenderer.renderBoardState(true);
+            g.performanceCheckpoint("world state render");
+        }
         
         if(perspective.hud) {
             perspective.hud.render(perspective.view.see);
@@ -78,7 +91,7 @@ namespace SplitTime {
         private running: boolean = false;
         private listeners: FrameNotified[] = [];
 
-        constructor(public readonly perspective: SplitTime.player.Perspective) {
+        constructor(public readonly perspective: Perspective) {
             Promise.resolve().then(() => mainGameLoop(this));
         }
 

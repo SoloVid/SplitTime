@@ -17,18 +17,11 @@ namespace SplitTime {
         /** @type {{x: number, y: number, z: number}[]} */
         private focusPoints: { x: number; y: number; z: number; }[] = [];
                 
-        constructor(width: int, height: int, private readonly playerBodyGetter: body_getter, private readonly currentLevelGetter: level_getter) {
+        constructor(width: int, height: int, private readonly currentLevelGetter: level_getter) {
             this.SCREEN_WIDTH = width;
             this.SCREEN_HEIGHT = height;
         }
 
-        focusCameraOnPlayerBody() {
-            const playerBody = this.playerBodyGetter();
-            if(playerBody) {
-                this.setFocusPoint(playerBody);
-            }
-        };
-        
         getFocusPoint() {
             return this.actualFocusPoint;
         }

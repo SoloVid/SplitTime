@@ -12,3 +12,9 @@ namespace SplitTime {
         }
     }
 }
+
+namespace G {
+    // It is difficult to abstract assets away and still allow them to be useful
+    // Avoid accessing this global when possible
+    export var ASSETS: SplitTime.Assets;
+}

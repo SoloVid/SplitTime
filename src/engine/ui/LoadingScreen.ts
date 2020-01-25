@@ -1,6 +1,6 @@
 namespace SplitTime {
     export class LoadingScreen {
-        constructor(private readonly view: SplitTime.player.View) {
+        constructor(private readonly view: ui.View) {
 
         }
 

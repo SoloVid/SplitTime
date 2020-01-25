@@ -3,8 +3,8 @@ namespace SplitTime.dialog {
 
     interface LimitedPerspective {
         camera: Camera;
-        levelManager: { getCurrentLevel: () => Level };
-        playerBody: Body;
+        levelManager: { getCurrent: () => Level };
+        playerBody: Body | null;
     }
         
     /**
@@ -64,7 +64,11 @@ namespace SplitTime.dialog {
         };
         
         notifyFrameUpdate() {
-            var currentLevel = this.perspective.levelManager.getCurrentLevel();
+            if(this.engagedDialog && this.engagedDialog.isFinished()) {
+                this.remove(this.engagedDialog);
+            }
+
+            var currentLevel = this.perspective.levelManager.getCurrent();
             var currentRegion = currentLevel.getRegion();
             
             var engagedScore = this.engagedDialog ? this.calculateDialogImportanceScore(this.engagedDialog) : 0;
@@ -103,7 +107,7 @@ namespace SplitTime.dialog {
         };
         
         private calculateDialogImportanceScore(dialog: SpeechBubble) {
-            if(dialog.getLocation().getLevel() !== this.perspective.levelManager.getCurrentLevel()) {
+            if(dialog.getLocation().getLevel() !== this.perspective.levelManager.getCurrent()) {
                 return MIN_SCORE - 1;
             }
             

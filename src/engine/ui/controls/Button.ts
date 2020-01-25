@@ -61,13 +61,13 @@ namespace SplitTime.controls {
             }
             
             for(var i = 0; i < keyCodes.length; i++) {
-                SplitTime.keyboard.onDown(keyCodes[i], runDownCallbacks);
-                SplitTime.keyboard.afterUp(keyCodes[i], runUpCallbacks);
+                KEYBOARD_INSTANCE.onDown(keyCodes[i], runDownCallbacks);
+                KEYBOARD_INSTANCE.afterUp(keyCodes[i], runUpCallbacks);
             }
             
             this.isDown = function() {
                 for(var i = 0; i < keyCodes.length; i++) {
-                    if(SplitTime.keyboard.isKeyDown(keyCodes[i])) {
+                    if(KEYBOARD_INSTANCE.isKeyDown(keyCodes[i])) {
                         return true;
                     }
                 }

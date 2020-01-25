@@ -31,3 +31,8 @@ namespace SplitTime {
         };
     }
 }
+
+namespace G {
+    // This world object is a convenience for game code and should not be used in engine code
+    export const WORLD: SplitTime.World = new SplitTime.World();
+}

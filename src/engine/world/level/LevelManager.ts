@@ -73,17 +73,27 @@ namespace SplitTime {
             if(enteringLevel.events[ENTER_LEVEL_FUNCTION_ID]) {
                 enteringLevel.runEvent(ENTER_LEVEL_FUNCTION_ID);
             }
-        };
+
+            this.transitionInProgress = false;
+        }
         
         queueTransition(level: Level): Promise<any> {
             return Promise.resolve().then(() => this.transition(level));
-        };
-        
+        }
+
+        isTransitioning(): boolean {
+            return this.transitionInProgress;
+        }
+
+        isCurrentSet(): boolean {
+            return !!this.currentLevel;
+        }
+
         getCurrent(): Level {
             if(!this.currentLevel) {
                 throw new Error("currentLevel is not set");
             }
             return this.currentLevel;
-        };
+        }
     }
 }

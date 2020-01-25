@@ -14,7 +14,7 @@ namespace SplitTime.controls {
             for(const group of this.keyboardGroups) {
                 let down = false;
                 for(const keyCode of group.keyCodes) {
-                    if(keyboard.isKeyDown(keyCode)) {
+                    if(KEYBOARD_INSTANCE.isKeyDown(keyCode)) {
                         down = true;
                         break;
                     }
@@ -56,7 +56,7 @@ namespace SplitTime.controls {
     
             for(const group of this.keyboardGroups) {
                 for(const keyCode of group.keyCodes) {
-                    keyboard.onDown(keyCode, innerCallback);
+                    KEYBOARD_INSTANCE.onDown(keyCode, innerCallback);
                 }
             }
         }

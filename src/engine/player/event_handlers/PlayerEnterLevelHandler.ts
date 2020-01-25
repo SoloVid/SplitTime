@@ -1,3 +1,0 @@
-interface PlayerEnterLevelHandler {
-    onPlayerEnterLevel(): void;
-}
