@@ -1,11 +1,4 @@
 namespace SplitTime.controls {
-    export const JoyStick = {
-        getDirection: function(): number | null {
-            return null;
-        },
-        onTilt: function(callback: () => SLVD.CallbackResult) {}
-    };
-    
     export class Button {
         _bindings: { obsolete: boolean; };
         _downCallbacks: SLVD.RegisterCallbacks;

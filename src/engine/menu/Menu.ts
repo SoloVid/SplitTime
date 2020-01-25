@@ -1,21 +1,12 @@
 namespace SplitTime.menu {
-	// These buttons are intended to be wholesale replaced by game-specific settings
-	export const Button = {} as {
-		GUI_CONFIRMATION: SplitTime.controls.Button,
-		GUI_CANCEL: SplitTime.controls.Button
-	};
 
-	defer(() => {
-		Button.GUI_CONFIRMATION = new SplitTime.controls.Button();
-		Button.GUI_CANCEL = new SplitTime.controls.Button();
-	});
 
 	export class Menu {
 		point: {x: int, y: int}[];
 		currentPoint: int = 0;
 		background: CanvasImageSource | null = null;
 		cursor: CanvasImageSource | null = null;
-		constructor(private readonly view: player.View) {
+		constructor(private readonly view: player.View, private readonly controls: MenuControls) {
 			this.point = [];
 		};
 		
@@ -34,7 +25,7 @@ namespace SplitTime.menu {
 			}
 			
 			var promise = new SLVD.Promise();
-			Button.GUI_CONFIRMATION.waitForAfterUp().then(() => {
+			this.controls.confirmButton.waitForAfterUp().then(() => {
 				isRunning = false;
 				if(hud) {
 					hud.removeRenderer(this);
@@ -42,7 +33,7 @@ namespace SplitTime.menu {
 				promise.resolve(this.currentPoint);
 			});
 			
-			SplitTime.controls.JoyStick.onTilt(() => {
+			this.controls.joyStick.onTilt(() => {
 				if(!isRunning) {
 					return SLVD.STOP_CALLBACKS;
 				}
@@ -81,7 +72,7 @@ namespace SplitTime.menu {
 			Basically, the code finds the closest point (in the direction of the key press)
 			to the current point that is within a 90 degree viewing angle from the point in that direction.*/
 			
-			var controlDirection = SplitTime.Direction.simplifyToCardinal(SplitTime.controls.JoyStick.getDirection());
+			var controlDirection = SplitTime.Direction.simplifyToCardinal(this.controls.joyStick.getDirection());
 			
 			var prevPoint = this.currentPoint;
 			var iPoint = prevPoint;
