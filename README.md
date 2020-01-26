@@ -18,13 +18,14 @@ npm install
 To build the engine:
 ```sh
 grunt build //build the engine
-grunt build:projectName //build the project where projectName is the name of the project folder within the projects directory
 ```
 
 To build a project (after building the engine):
 ```sh
-grunt build:projectName //build the project where projectName is the name of the project folder within the projects directory
+grunt build:<projectName> //build the project
 ```
+
+_In the previous command, `<projectName>` should be replaced with the name of the directory containing the game project as described in the Project Structure section below._
 
 Although development ought to be possible without it, we also recommend using http-server. Using a local server allows a better simulation of the production environment and avoids some security hurdles of browsers accessing local files (I'm looking at you, Chrome).
 To install http-server:
@@ -52,7 +53,7 @@ The directories within each project should be
     - ``preloaded/`` for image assets that will be loaded into memory at engine startup
 - ``levels/`` for level files
 
-The launch point of the game should be some HTML file in the project home directory. This file should include ``<script src="dist/game.js"></script>`` and later call ``SplitTime.launch(XRES, YRES);``. After primary assets are loaded, the launch sequence will call the startup callback provided via ``SplitTime.onGameEngineLoaded(() => { ... });`` as defined somewhere in the game's source files.
+The launch point of the game should be some HTML file in the project home directory. This file should include ``<script src="dist/game.js"></script>`` and later call ``G.launch();`` as defined somewhere in the game's source files.
 
 Note that all TS files in ``src/`` will be included within ``dist/game.js``. No ordering of project JS files should be assumed. (However, you may use ``defer(() => { ... })`` to ensure that some code gets run after all definitions.)
 
@@ -64,4 +65,5 @@ All files in a project's home ``dist/`` directory should be served in the produc
 ## Editing Levels
 Level files should be saved in a project's ``levels/`` directory, but levels are edited from the SplitTime repository.
 After building the project, launch ``levelEditor.html`` in your browser (at the server-ed localhost address for best results), and provide the name of your project's directory.
+
 Since this document is not meant to be an authoritative source for the editor's interface, we'll assume you can figure out how to use it from that point. Do note, though, that you will need to manually put the downloaded level file back into your project's ``levels/`` directory after you are done editing the level.

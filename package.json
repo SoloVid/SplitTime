@@ -1,6 +1,13 @@
 {
-  "name": "SplitTimeEngine",
-  "version": "0.1.0",
+  "name": "splittime",
+  "version": "0.2.0",
+  "description": "2.5D clock-based game engine for Maven",
+  "homepage": "https://github.com/SoloVid/SplitTime",
+  "repository": {
+    "type": "git",
+    "url": "github:SoloVid/SplitTime"
+  },
+  "private": true,
   "devDependencies": {
     "@types/howler": "^2.1.2",
     "concat-with-sourcemaps": "^1.1.0",
@@ -12,8 +19,9 @@
     "grunt-contrib-nodeunit": "^2.0.0",
     "grunt-contrib-uglify": "^4.0.1",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-sync": "^0.8.1",
-    "typescript": "^3.7.4",
+    "grunt-sync": "^0.8.2",
+    "jquery": "^3.4.1",
+    "typescript": "^3.7.5",
     "vue": "^2.6.11"
   },
   "dependencies": {

@@ -82,7 +82,7 @@ namespace SplitTime.level {
         
         private _calculatePixelCollision(collisionInfo: traces.CollisionInfo, x: int, y: int, layer: int, layerZ: number, minZ: number, exMaxZ: number) {
             var imageData = this.layerFuncData[layer];
-            var dataIndex = SplitTime.pixCoordToIndex(x, y, imageData);
+            var dataIndex = pixCoordToIndex(x, y, imageData);
             var r = imageData.data[dataIndex++];
             var g = imageData.data[dataIndex++];
             var b = imageData.data[dataIndex++];
@@ -219,4 +219,15 @@ namespace SplitTime.level {
             return this.debugTraceCanvas;
         };
     }
+	
+	/**
+	* Gets the index on canvas data of given coordinates
+	* @param {int} x
+	* @param {int} y
+	* @param {ImageData} data Collision canvas data array
+	* @returns {int}
+	*/
+	function pixCoordToIndex(x: int,y: int,data: ImageData): int {
+		return (y*data.width + x)*4;
+	};
 }
