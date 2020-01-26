@@ -118,26 +118,26 @@ Vue.component("rendered-prop", {
     		return loadBodyFromTemplate(this.prop.template);
 		},
     	imgSrc: function() {
-            return this.body.img ? imgSrc(this.body.img) : subImg;
+            return getBodyImage(this.body);
 		},
     	positionLeft: function() {
-            return this.prop.x - this.body.xres/2 - this.body.baseOffX;
+            return this.prop.x - this.crop.xres/2 - this.spriteOffset.x;
 		},
 		positionTop: function() {
-            return this.prop.y - this.prop.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY;
+            return this.prop.y - this.prop.z - this.crop.yres + this.body.baseLength/2 - this.spriteOffset.y;
 		},
 		width: function() {
-			return this.body.xres;
+			return this.crop.xres;
 		},
 		height: function() {
-			return this.body.yres;
+			return this.crop.yres;
 		},
-		cropLeft: function() {
-            return this.body.getAnimationFrameCrop(this.body.dir, this.body.stance, 0);
-		},
-		cropTop: function() {
-            return 0;
-		}
+		crop: function() {
+            return getAnimationFrameCrop(this.body, this.prop.dir, this.prop.stance);
+        },
+        spriteOffset: function() {
+            return getSpriteOffset(this.body);
+        }
 	},
     methods: {
         edit: function() {
@@ -175,30 +175,30 @@ Vue.component("rendered-position", {
             };
         },
         body: function() {
-            return loadBodyFromTemplate();
+            return loadBodyFromTemplate(this.position.template);
         },
         imgSrc: function() {
-            return this.body.img ? imgSrc(this.body.img) : subImg;
+            return getBodyImage(this.body);
         },
         positionLeft: function() {
             // console.log(this.position);
             // console.log(this.body);
-            return this.position.x - this.body.xres/2 - this.body.baseOffX;
+            return this.position.x - this.crop.xres/2 - this.spriteOffset.x;
         },
         positionTop: function() {
-            return this.position.y - this.position.z - this.body.yres + this.body.baseLength/2 - this.body.baseOffY;
+            return this.position.y - this.position.z - this.crop.yres + this.body.baseLength/2 - this.spriteOffset.y;
         },
         width: function() {
-            return this.body.xres;
+            return this.crop.xres;
         },
         height: function() {
-            return this.body.yres;
+            return this.crop.yres;
         },
-        cropLeft: function() {
-            return this.body.getAnimationFrameCrop(this.body.dir, this.body.stance, 0);
+        crop: function() {
+            return getAnimationFrameCrop(this.body, this.position.dir, this.position.stance);
         },
-        cropTop: function() {
-            return 0;
+        spriteOffset: function() {
+            return getSpriteOffset(this.body);
         }
     },
     methods: {

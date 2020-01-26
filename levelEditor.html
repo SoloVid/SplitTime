@@ -244,7 +244,7 @@
 				v-on:mouseleave="toggleHighlight(false)"
 				v-bind:style="styleObject"
 		>
-			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
+			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.sx + 'px', top: -crop.sy + 'px' }"/>
 		</div>
 	</script>
 
@@ -258,7 +258,7 @@
 				v-on:mouseleave="toggleHighlight(false)"
 				v-bind:style="styleObject"
 		>
-			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
+			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.sx + 'px', top: -crop.sy + 'px' }"/>
 		</div>
 	</script>
 

@@ -192,11 +192,8 @@ function showEditorPosition(position) {
         {
             key: "id"
         },
-        // {
-        //     key: "actorAlias"
-        // },
         {
-            key: "alias"
+            key: "template"
         },
         {
             key: "x",

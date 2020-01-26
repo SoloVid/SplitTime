@@ -79,7 +79,7 @@ function imgSrc(fileName) {
     if(!fileName) {
         return "";
     }
-    return projectPath + SplitTime.location.images + fileName;
+    return projectPath + SplitTime.IMAGE_DIR + "/" + fileName;
 }
 
 function safeGetColor(trace) {
@@ -227,7 +227,8 @@ function createObject(type)  {
     var y = mouseLevelY + z;
 
 	var object = {
-        id: "",
+		id: "",
+		template: "",
         x: x,
         y: y,
         z: z,
@@ -241,16 +242,45 @@ function createObject(type)  {
 		levelObject.positions.push(object);
 		showEditorPosition(object);
 	} else if(type == "prop") {
-        object.template = "";
 		levelObject.props.push(object);
 		showEditorProp(object);
 	}
 }
 
 function loadBodyFromTemplate(templateName) {
-	var bodyInstance = SplitTime.Body.getTemplateInstance(templateName);
-	if(!bodyInstance) {
+	try {
+		return SplitTime.body.getTemplateInstance(templateName);
+	} catch(e) {
 		return new SplitTime.Body();
 	}
-	return bodyInstance;
+}
+
+function getBodyImage(body) {
+	if(body.drawable instanceof SplitTime.Sprite) {
+		return imgSrc(body.drawable.img);
+	}
+	return subImg;
+}
+
+function getAnimationFrameCrop(body, dir, stance) {
+	if(body.drawable instanceof SplitTime.Sprite) {
+		return body.drawable.getAnimationFrameCrop(SplitTime.direction.interpret(dir), stance, 0);
+	}
+	// FTODO: more solid default
+	return {
+		xres: 32,
+		yres: 64,
+		sx: 0,
+		sy: 0
+	};
+}
+
+function getSpriteOffset(body) {
+	if(body.drawable instanceof SplitTime.Sprite) {
+		return {
+			x: body.drawable.baseOffX,
+			y: body.drawable.baseOffY
+		};
+	}
+	return { x: 0, y: 0 };
 }
