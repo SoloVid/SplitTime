@@ -91,7 +91,12 @@ module.exports = function(grunt) {
         var done = this.async();
         var tscPath = getPathInNodeModules(path.join("typescript", "bin", "tsc"));
         grunt.verbose.writeln("Found tsc: " + tscPath);
-        var tsconfigRoot = projectName ? "projects/" + projectName : ".";
+        var tsconfigRoot = ".";
+        if(projectName) {
+            tsconfigRoot = "projects/" + projectName;
+            grunt.verbose.writeln("Copy project tsconfig.json");
+            grunt.file.write(path.join(tsconfigRoot, "tsconfig.json"), grunt.file.read("tsconfig.project.json"));
+        }
         grunt.verbose.writeln("Running in " + tsconfigRoot);
         var process = childProcess.fork(tscPath, [], {
             cwd: tsconfigRoot
@@ -119,6 +124,7 @@ module.exports = function(grunt) {
             concatFilesWithSourceMaps(files, projectRoot + '/dist/game.js');
         } else {
             files = [
+                'node_modules/es6-promise/dist/es6-promise.auto.min.js',
                 'node_modules/howler/dist/howler.min.js',
                 'build/tsjs/defer.def.js',
                 'build/tsjs/engine/**/*.js',
@@ -157,7 +163,7 @@ module.exports = function(grunt) {
             gameData.soundEffectFiles.push(join(subDir, fileName));
         });
 
-        var dataFileContents = "SplitTime._GAME_DATA = " + JSON.stringify(gameData) + ";";
+        var dataFileContents = "G._GAME_DATA = " + JSON.stringify(gameData) + ";";
         grunt.verbose.writeln("Writing data JS file");
         grunt.file.write(path.join(projectRoot, "build/generated/data.js"), dataFileContents);
     });
@@ -244,12 +250,5 @@ module.exports = function(grunt) {
             content: fileLinesWithoutSourceMaps.join("\n"),
             sourceMap: sourceMap
         };
-    }
-
-    function inDir(dir, callback) {
-        var origDir = process.cwd();
-        process.chdir(dir);
-        callback();
-        process.chdir(origDir);
     }
 };

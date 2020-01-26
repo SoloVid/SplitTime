@@ -6,8 +6,8 @@ namespace SplitTime {
         maxValue: any;
         valueLookup32: any[];
         sortedByValue: { value: any; ref: number; object: {}; }[];
-        reverseSortLookup: {};
-        constructor(maxValue, bucketSize) {
+        reverseSortLookup: { [ref: number]: int };
+        constructor(maxValue: int, bucketSize: int) {
             this.bucketSize = bucketSize || 32;
             this.maxValue = maxValue;
             this.valueLookup32 = new Array(Math.ceil(maxValue / this.bucketSize));
@@ -34,7 +34,7 @@ namespace SplitTime {
             return this.maxValue + BUFFER;
         };
         
-        add(ref, object) {
+        add(ref: int, object: any) {
             this.sortedByValue.push({
                 value: this._getBeyondMaxValue(),
                 ref: ref,
@@ -43,13 +43,13 @@ namespace SplitTime {
             this.reverseSortLookup[ref] = this.sortedByValue.length - 1;
         };
         
-        remove(ref) {
+        remove(ref: int) {
             this.resort(ref, this._getBeyondMaxValue());
             this.sortedByValue.splice(this.reverseSortLookup[ref], 1);
             delete this.reverseSortLookup[ref];
         };
         
-        resort(ref, value) {
+        resort(ref: int, value: number) {
             if(Math.floor(value) !== value) {
                 console.warn("Non-integer value: " + value);
             }
@@ -66,7 +66,7 @@ namespace SplitTime {
             }
         };
         
-        resortUpward(ref, value) {
+        resortUpward(ref: number, value: number) {
             var currentIndex = this.reverseSortLookup[ref];
             var oldObject = this.sortedByValue[currentIndex].object;
             var oldValue = this.sortedByValue[currentIndex].value;
@@ -91,7 +91,7 @@ namespace SplitTime {
             }
         };
         
-        resortDownward(ref, value) {
+        resortDownward(ref: int, value: number) {
             var currentIndex = this.reverseSortLookup[ref];
             var oldObject = this.sortedByValue[currentIndex].object;
             var oldValue = this.sortedByValue[currentIndex].value;
@@ -122,7 +122,7 @@ namespace SplitTime {
         * @param {function(Object)} callback
         * @return {boolean}
         */
-        forEachInRange(valueStart, valueEndEx, callback) {
+        forEachInRange(valueStart: int, valueEndEx: int, callback: (arg0: object) => any): boolean {
             // if(Math.floor(valueStart) !== valueStart) {
             //     console.warn("Non-integer value: " + valueStart);
             // }
@@ -157,7 +157,7 @@ namespace SplitTime {
         * @param {function(Object)} callback - function that will be called for each item in the sorted list
         * @return {boolean} found - true if there is something in the list
         */
-        forEachInList(callback) {
+        forEachInList(callback: (arg0: object) => any): boolean {
             var found = false;
             for(var iSorted = 0; iSorted < this.sortedByValue.length; iSorted++) {
                 var sortedItem = this.sortedByValue[iSorted];

@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<script src="node_modules/vue/dist/vue.js"></script>
-		<script src="src/libs/jquery-1.11.1.min.js"></script>
+		<script src="node_modules/jquery/dist/jquery.min.js"></script>
 		<link rel="stylesheet" href="src/editor/level/style.css">
 	</head>
 	<body>
@@ -244,7 +244,7 @@
 				v-on:mouseleave="toggleHighlight(false)"
 				v-bind:style="styleObject"
 		>
-			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
+			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.sx + 'px', top: -crop.sy + 'px' }"/>
 		</div>
 	</script>
 
@@ -258,13 +258,13 @@
 				v-on:mouseleave="toggleHighlight(false)"
 				v-bind:style="styleObject"
 		>
-			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: cropLeft + 'px', top: cropTop + 'px' }"/>
+			<img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.sx + 'px', top: -crop.sy + 'px' }"/>
 		</div>
 	</script>
 
 	<script src="src/editor/level/eventHandlers.js"></script>
 		<script src="src/editor/level/form.js"></script>
 		<script src="src/editor/level/editorFunctions.js"></script>
-		<!--<script src="src/editor/level/vueSetup.js"></script>-->
+		<script src="src/editor/level/loadOtherSource.js"></script>
 	</body>
 </html>

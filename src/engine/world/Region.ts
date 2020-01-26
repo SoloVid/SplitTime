@@ -1,90 +1,59 @@
 namespace SplitTime {
-    
-    var regionMap = {};
-    
     // A region is a logical unit of levels that are loaded together and share a common timeline
     export class Region {
-        id;
-        levels: SplitTime.Level[];
-        _timeline: SplitTime.Timeline;
-        constructor(id) {
-            this.id = id;
-            this.levels = [];
-            this._timeline = SplitTime.Timeline.getDefault();
-            this._timeline.addRegion(this);
+        private levels: SplitTime.Level[] = [];
+        private _timeline: SplitTime.Timeline | null = null;
+        constructor(public readonly id: string) {
         };
         
-        getTimeline() {
+        getTimeline(): Timeline {
+            if(!this._timeline) {
+                throw new Error("Region " + this.id + " does not have a timeline set");
+            }
             return this._timeline;
         };
-        getTimeMs() {
-            return this._timeline.getTimeMs();
+        getTimeMs(): game_ms {
+            return this.getTimeline().getTimeMs();
         };
 
-        setTimeline(timeline) {
-            this._timeline.removeRegion(this);
+        setTimeline(timeline: Timeline) {
+            if(this._timeline) {
+                this._timeline.removeRegion(this);
+            }
             this._timeline = timeline;
             this._timeline.addRegion(this);
         }
         
-        /**
-        *
-        * @param msPerStep
-        * @param maxCounter
-        * @return {Signaler}
-        */
-        getTimeStabilizer(msPerStep?, maxCounter?) {
+        getTimeStabilizer(msPerStep?: game_ms, maxCounter?: number): Signaler {
             var that = this;
             return new SplitTime.IntervalStabilizer(msPerStep, maxCounter, function() {
                 return that.getTimeMs();
             });
         };
         
-        addLevel(level) {
+        addLevel(level: Level) {
             this.levels.push(level);
             level.region = this;
         };
         
-        static get(regionId) {
-            if(!regionMap[regionId]) {
-                regionMap[regionId] = new SplitTime.Region(regionId);
-            }
-            return regionMap[regionId];
-        };
-        
-        /**
-        * Get the region currently in play.
-        */
-        static getCurrent(): SplitTime.Region | null {
-            var currentLevel = SplitTime.Level.getCurrent();
-            if(currentLevel === null) {
-                return null;
-            }
-            return currentLevel.getRegion();
-        };
-        
-        static getDefault() {
-            return defaultRegion;
-        };
-        
-        notifyFrameUpdate(delta) {
+        notifyFrameUpdate(delta: real_seconds) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyFrameUpdate(delta);
             }
         };
         
-        notifyTimeAdvance(delta) {
+        notifyTimeAdvance(delta: game_seconds) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyTimeAdvance(delta);
             }
         };
         
-        loadForPlay() {
-            var promises = new SLVD.PromiseCollection();
+        loadForPlay(world: World): PromiseLike<any> {
+            var promises = [];
             for(var i = 0; i < this.levels.length; i++) {
-                promises.add(this.levels[i].loadForPlay());
+                promises.push(this.levels[i].loadForPlay(world));
             }
-            return promises;
+            return Promise.all(promises);
         };
         
         unloadLevels() {
@@ -93,5 +62,4 @@ namespace SplitTime {
             }
         };
     }
-    var defaultRegion = new SplitTime.Region("!!!DEFAULT!!!");
 }
