@@ -4,7 +4,7 @@ namespace SplitTime.conversation {
         hud.pushRenderer(renderer);
         const manager = new Manager(renderer, perspective);
         gameLoop.onFrameUpdate(manager);
-        const orchestrator = new Orchestrator(manager);
+        const orchestrator = new Orchestrator(manager, () => perspective.playerBody);
         return orchestrator;
     }
 }

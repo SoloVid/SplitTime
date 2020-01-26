@@ -2,7 +2,7 @@ namespace SplitTime.conversation {
     export class OrchestrationHelper implements DSL {
         _parentSection: Section | null = null;
 
-        constructor(public readonly manager: Manager) {}
+        constructor(public readonly manager: Manager, public readonly playerBodyGetter: () => Body | null) {}
 
         get parentSection(): Section {
             if(!this._parentSection) {

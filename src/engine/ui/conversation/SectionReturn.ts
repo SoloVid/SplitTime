@@ -23,7 +23,7 @@ namespace SplitTime.conversation {
             return this;
         }
 
-        interruptibleByDetection(body: Body, condition: any = true, callback: Function = () => {}): SectionReturn {
+        interruptibleByDetection(condition: any = true, callback: Function = () => {}, body?: Body): SectionReturn {
             // FTODO: don't duplicate with above
             const parentSection = this.section.parentSection as Section;
             const interruptible = new Interruptible(condition, callback, body);

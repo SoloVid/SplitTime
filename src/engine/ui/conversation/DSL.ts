@@ -13,7 +13,7 @@ namespace SplitTime.conversation {
         // The modified section can be interrupted when the player interacts
         interruptible(condition?: any, callback?: Function): SectionChainInterruptible;
         // The modified section can be interrupted when the body is detected by some speaker
-        interruptibleByDetection(body: Body, condition?: any, callback?: Function): SectionChainInterruptible;
+        interruptibleByDetection(condition?: any, callback?: Function, body?: Body): SectionChainInterruptible;
     }
 
     interface SectionChainThenable {

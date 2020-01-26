@@ -46,18 +46,25 @@ namespace SplitTime.conversation {
             return false;
         }
 
-        triggerInterruptByDetection(body: Body): boolean {
-            for(const interruptible of this.detectionInterruptibles) {
-                if(body === interruptible.body && interruptible.conditionMet) {
-                    interruptible.trigger();
-                    this.selfInterruptTriggered = true;
-                    return true;
-                }
+        triggerInterruptByDetection(interruptible: Interruptible): boolean {
+            if(this.detectionInterruptibles.indexOf(interruptible) >= 0 && interruptible.conditionMet) {
+                interruptible.trigger();
+                this.selfInterruptTriggered = true;
+                return true;
             }
             if(this.parentSection !== null) {
-                return this.parentSection.triggerInterruptByDetection(body);
+                return this.parentSection.triggerInterruptByDetection(interruptible);
             }
             return false;
+        }
+
+        forEachDetectionInteruptible(callback: (interruptible: Interruptible) => void) {
+            for(const interruptible of this.detectionInterruptibles) {
+                callback(interruptible);
+            }
+            if(this.parentSection !== null) {
+                this.parentSection.forEachDetectionInteruptible(callback);
+            }
         }
 
         async run(): Promise<Outcome> {

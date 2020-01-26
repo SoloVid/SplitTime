@@ -50,24 +50,23 @@ namespace SplitTime.conversation {
                 for(const speaker of speakers) {
                     speaker.body.registerPlayerInteractHandler(onInteract);
                     // FTODO: refactor
-                    for(const interruptible of this.parentSection.detectionInterruptibles) {
-                        if(interruptible.body) {
-                            speaker.body.registerTimeAdvanceListener(((detective, target) => {
-                                return (delta: number) => {
-                                    if(done) {
-                                        return SLVD.STOP_CALLBACKS;
+                    this.parentSection.forEachDetectionInteruptible(interruptible => {
+                        speaker.body.registerTimeAdvanceListener(((detective, interruptible) => {
+                            return (delta: number) => {
+                                if(done) {
+                                    return SLVD.STOP_CALLBACKS;
+                                }
+                                const actualTarget = interruptible.body || this.helper.playerBodyGetter();
+                                if(actualTarget && SplitTime.body.canDetect(detective, actualTarget)) {
+                                    if(this.parentSection.triggerInterruptByDetection(interruptible)) {
+                                        interrupted = true;
+                                        dialog.cutOff();
                                     }
-                                    if(SplitTime.body.canDetect(detective, target)) {
-                                        if(this.parentSection.triggerInterruptByDetection(target)) {
-                                            interrupted = true;
-                                            dialog.cutOff();
-                                        }
-                                    }
-                                    return;
-                                };
-                            })(speaker.body, interruptible.body));
-                        }
-                    }
+                                }
+                                return;
+                            };
+                        })(speaker.body, interruptible));
+                    });
                 }
                 dialog.registerPlayerInteractHandler(onInteract);
                 dialog.registerDismissHandler(onDismiss);
