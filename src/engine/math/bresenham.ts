@@ -42,5 +42,5 @@ namespace SLVD.bresenham {
                 y += dy2;
             }
         }
-    };
+    }
 }
