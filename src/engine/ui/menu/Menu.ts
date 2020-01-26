@@ -57,7 +57,7 @@ namespace SplitTime.menu {
 			Basically, the code finds the closest point (in the direction of the key press)
 			to the current point that is within a 90 degree viewing angle from the point in that direction.*/
 			
-			var controlDirection = SplitTime.Direction.simplifyToCardinal(this.controls.joyStick.getDirection());
+			var controlDirection = SplitTime.direction.simplifyToCardinal(this.controls.joyStick.getDirection());
 			
 			var prevPoint = this.currentPoint;
 			var iPoint = prevPoint;
@@ -66,7 +66,7 @@ namespace SplitTime.menu {
 			var dyBest = 1000;
 			var isUnderUpperBound, isAboveLowerBound;
 			var dxTest, dyTest, setNewBest;
-			if(controlDirection === SplitTime.Direction.W) //Left
+			if(controlDirection === SplitTime.direction.W) //Left
 			{
 				do //While index point does not equal original point
 				{
@@ -96,7 +96,7 @@ namespace SplitTime.menu {
 				} while(iPoint != prevPoint);
 				this.currentPoint = bestPoint;
 			}
-			else if(controlDirection === SplitTime.Direction.N) //Up
+			else if(controlDirection === SplitTime.direction.N) //Up
 			{
 				do //While index point does not equal original point
 				{
@@ -127,7 +127,7 @@ namespace SplitTime.menu {
 				this.currentPoint = bestPoint;
 				//		this.currentPoint = (this.spec.point.length + this.currentPoint - 1)%this.spec.point.length;
 			}
-			else if(controlDirection === SplitTime.Direction.E) //Right
+			else if(controlDirection === SplitTime.direction.E) //Right
 			{
 				do //While index point does not equal original point
 				{
@@ -158,7 +158,7 @@ namespace SplitTime.menu {
 				this.currentPoint = bestPoint;
 				//this.currentPoint = (this.currentPoint + 1)%this.spec.point.length;
 			}
-			else if(controlDirection === SplitTime.Direction.S) //Down
+			else if(controlDirection === SplitTime.direction.S) //Down
 			{
 				do //While index point does not equal original point
 				{

@@ -12,7 +12,7 @@ namespace SplitTime.conversation {
         _dismissHandler: Function | null = null;
         _dialogEndHandler: ConversationEndHandler | Function | null = null;
 
-        constructor(public readonly conversation: Clique, public readonly speaker: string, private _line: string, location: ILevelLocation) {
+        constructor(public readonly clique: Clique, public readonly speaker: string, private _line: string, location: ILevelLocation) {
             for(const conversion of CONVERSIONS) {
                 this._line = conversion.apply(this._line);
             }

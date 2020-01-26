@@ -161,12 +161,12 @@ namespace SplitTime {
 			}
 			ctx.closePath();
 			
-			var xUnit = SplitTime.Direction.getXSign(direction);
+			var xUnit = SplitTime.direction.getXSign(direction);
 			var minXWeight = 1 + xUnit; // for negative X, prefer starting right (weight 0 on minX)
 			var maxXWeight = 1 - xUnit; // for positive X, prefer starting left (weight 0 on maxX)
 			var startX = ((minXWeight * minX) + (maxXWeight * maxX)) / 2;
 			
-			var yUnit = SplitTime.Direction.getYSign(direction);
+			var yUnit = SplitTime.direction.getYSign(direction);
 			var minYWeight = 1 + yUnit; // for negative Y, prefer starting down (weight 0 on minY)
 			var maxYWeight = 1 - yUnit; // for positive Y, prefer starting up (weight 0 on maxY)
 			var startY = ((minYWeight * minY) + (maxYWeight * maxY)) / 2;

@@ -5,12 +5,12 @@ namespace SplitTime.conversation {
         private initialSpeakers: Speaker[] = [];
 
         constructor(private readonly parentSection: Section, private readonly helper: OrchestrationHelper, public readonly speaker: Speaker, public readonly line: string, public readonly callback: DialogOutcomeHandler) {
-            this.initialSpeakers = this.parentSection.conversation.speakers.slice();
+            this.initialSpeakers = this.parentSection.clique.speakers.slice();
         }
 
         run(): Promise<Outcome> {
             return new Promise((resolve, reject) => {
-                const dialog = new SpeechBubble(this.parentSection.conversation, this.speaker.name, this.line, this.speaker.speechBox);
+                const dialog = new SpeechBubble(this.parentSection.clique, this.speaker.name, this.line, this.speaker.speechBox);
                 let done = false;
                 let interrupted = false;
                 let canceled = false;
@@ -31,7 +31,7 @@ namespace SplitTime.conversation {
                     }
                 };
                 const speakers = this.initialSpeakers.slice();
-                for(const speaker of this.parentSection.conversation.speakers) {
+                for(const speaker of this.parentSection.clique.speakers) {
                     if(speakers.indexOf(speaker) < 0) {
                         speakers.push(speaker);
                     }

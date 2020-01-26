@@ -34,8 +34,8 @@ namespace SplitTime {
         requestedStance = SplitTime.Sprite.DEFAULT_STANCE;
         requestedFrameReset = false;
         frame = 0;
-        dir = SplitTime.Direction.S;
-        requestedDir = SplitTime.Direction.S;
+        dir = SplitTime.direction.S;
+        requestedDir = SplitTime.direction.S;
         
         stances: { [x: string]: ({ "S": number; "N": number; "E": number; "W": number; }) | number; } = {
             [Sprite.DEFAULT_STANCE]: {
@@ -93,8 +93,8 @@ namespace SplitTime {
             };
             
             var column = 0;
-            var dir = SplitTime.Direction.toString(numDir);
-            var simpleDir = SplitTime.Direction.simplifyToCardinal(dir);
+            var dir = SplitTime.direction.toString(numDir);
+            var simpleDir = SplitTime.direction.simplifyToCardinal(dir);
             
             //Allow for non-complicated spritesheets with one column
             if(!this.stances) {

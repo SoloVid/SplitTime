@@ -1,12 +1,17 @@
 namespace SplitTime {
+    export type game_seconds = number;
+    export type game_ms = number;
+    export type real_seconds = number;
+    export type real_ms = number;
+
     export class Timeline {
-        _timeInMilliseconds: number;
+        _timeInMilliseconds: game_ms;
         _timeAdvanceListeners: SLVD.RegisterCallbacks;
         _regions: SplitTime.Region[];
-        _timelineSecondsPerRealSecond: number;
-        clockSeconds: number = 0;
-        clockMinutes: number = 0;
-        clockHours: number = 0;
+        _timelineSecondsPerRealSecond: game_seconds;
+        clockSeconds: game_seconds = 0;
+        clockMinutes: game_seconds = 0;
+        clockHours: game_seconds = 0;
         constructor() {
             this._timeInMilliseconds = 0;
             this._timeAdvanceListeners = new SLVD.RegisterCallbacks();
@@ -18,7 +23,7 @@ namespace SplitTime {
             this._timelineSecondsPerRealSecond = 1;
         };
         
-        registerTimeAdvanceListener(listener: (delta: number) => any) {
+        registerTimeAdvanceListener(listener: (delta: game_seconds) => any) {
             this._timeAdvanceListeners.register(listener);
         };
         
@@ -38,11 +43,11 @@ namespace SplitTime {
             return day * 60 * 60 * 24 + hour * 60 * 60 + minute * 60 + second;
         };
         
-        getTimeMs() {
+        getTimeMs(): game_ms {
             return this._timeInMilliseconds;
         };
         
-        advance(seconds: number) {
+        advance(seconds: game_seconds) {
             this._timeInMilliseconds += Math.floor(seconds * 1000);
             this._timeAdvanceListeners.run(seconds);
             
@@ -51,7 +56,7 @@ namespace SplitTime {
             }
         };
         
-        notifyFrameUpdate(delta: number) {
+        notifyFrameUpdate(delta: real_seconds) {
             this.advance(delta * this._timelineSecondsPerRealSecond);
         };
         
@@ -85,7 +90,7 @@ namespace SplitTime {
         /**
         * @param delta number of seconds passed (in game time) since last frame
         */
-        notifyTimeAdvance(delta: number): void;
+        notifyTimeAdvance(delta: game_seconds): void;
     }
 
     export namespace instanceOf {

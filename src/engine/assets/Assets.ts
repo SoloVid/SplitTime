@@ -1,6 +1,6 @@
 namespace SplitTime {
-    const AUDIO_DIR = "audio";
-    const IMAGE_DIR = "images";
+    export const AUDIO_DIR = "audio";
+    export const IMAGE_DIR = "images";
 
     export class Assets {
         public readonly audio: assets.Audio;

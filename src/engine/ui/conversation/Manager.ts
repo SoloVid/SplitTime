@@ -23,7 +23,7 @@ namespace SplitTime.conversation {
         */
         private engagedDialog: SpeechBubble|null = null;
 
-        private engagedConversation: Clique|null = null;
+        private recentlyEngagedClique: Clique|null = null;
 
         constructor(private readonly renderer: Renderer, private readonly perspective: LimitedPerspective) {
 
@@ -50,7 +50,6 @@ namespace SplitTime.conversation {
             }
             if(dialog === this.engagedDialog) {
                 this.engagedDialog = null;
-                this.engagedConversation = null;
             }
         };
         
@@ -60,7 +59,7 @@ namespace SplitTime.conversation {
         */
         disengageAllDialogs() {
             this.engagedDialog = null;
-            this.engagedConversation = null;
+            this.recentlyEngagedClique = null;
         };
         
         notifyFrameUpdate() {
@@ -94,12 +93,12 @@ namespace SplitTime.conversation {
             if(this.engagedDialog && winningScore > engagedScore) {
                 this.renderer.hide(this.engagedDialog);
                 this.engagedDialog = null;
-                this.engagedConversation = null;
+                this.recentlyEngagedClique = null;
             }
             
             if(usurper !== null) {
                 this.engagedDialog = usurper;
-                this.engagedConversation = this.engagedDialog.conversation;
+                this.recentlyEngagedClique = this.engagedDialog.clique;
                 this.renderer.show(this.engagedDialog);
             }
             
@@ -114,19 +113,19 @@ namespace SplitTime.conversation {
             var focusPoint = this.perspective.camera.getFocusPoint();
             var location = dialog.getLocation();
             
-            var distance = SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, location.getX(), location.getY());
+            var distance = SplitTime.measurement.distanceEasy(focusPoint.x, focusPoint.y, location.getX(), location.getY());
             // If we've engaged in a dialog, we don't want to accidentally stop tracking the conversation just because the speaker changed.
-            if(dialog.conversation === this.engagedConversation) {
-                const speakersExcludingPlayer = dialog.conversation.speakers.filter(s => s.body !== this.perspective.playerBody);
+            if(dialog.clique === this.recentlyEngagedClique) {
+                const speakersExcludingPlayer = dialog.clique.speakers.filter(s => s.body !== this.perspective.playerBody);
                 if(speakersExcludingPlayer.length > 0) {
                     distance = speakersExcludingPlayer
-                        .map(s => SplitTime.Measurement.distanceEasy(focusPoint.x, focusPoint.y, s.body.getX(), s.body.getY()))
+                        .map(s => SplitTime.measurement.distanceEasy(focusPoint.x, focusPoint.y, s.body.getX(), s.body.getY()))
                         .reduce((tempMin, tempDist) => Math.min(tempMin, tempDist), SLVD.MAX_SAFE_INTEGER);
                 }
             }
             var distanceScore = ((this.perspective.camera.SCREEN_WIDTH / 3) / Math.max(distance, 0.0001));
             
-            if(dialog.conversation === this.engagedConversation) {
+            if(dialog.clique === this.recentlyEngagedClique) {
                 return distanceScore * 1.5;
             }
             return distanceScore;

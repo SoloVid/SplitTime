@@ -1,6 +1,6 @@
 namespace SplitTime.conversation {
     export class Section {
-        conversation: Clique;
+        clique: Clique;
         parts: (Line | Section)[] = [];
         nextPartToRunIndex: int = 0;
         markedCancelable: boolean = false;
@@ -11,7 +11,7 @@ namespace SplitTime.conversation {
         resolve: (value?: Outcome | PromiseLike<Outcome>) => void = () => {};
 
         constructor(public readonly parentSection: Section | null, private readonly helper: OrchestrationHelper, private readonly setup: Function) {
-            this.conversation = this.parentSection === null ? new Clique() : this.parentSection.conversation;
+            this.clique = this.parentSection === null ? new Clique() : this.parentSection.clique;
 
             this.promise = new Promise(resolve => {
                 this.resolve = resolve;
@@ -61,7 +61,7 @@ namespace SplitTime.conversation {
         }
 
         async run(): Promise<Outcome> {
-            const previousConversationSpeakers = this.conversation.speakers.slice();
+            const previousConversationSpeakers = this.clique.speakers.slice();
             const previousSection = this.helper._parentSection;
             let sectionOutcome: Outcome = new Outcome();
             try {
@@ -77,7 +77,7 @@ namespace SplitTime.conversation {
                 }
             } finally {
                 this.helper._parentSection = previousSection;
-                this.conversation.speakers = previousConversationSpeakers;
+                this.clique.speakers = previousConversationSpeakers;
             }
             // FTODO: address warning here
             await this.resolve(sectionOutcome);

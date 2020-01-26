@@ -16,8 +16,8 @@ namespace SplitTime.conversation {
         }
 
         say(speaker: Speaker, line: string): Promise<Outcome> {
-            if(this.parentSection.conversation.speakers.indexOf(speaker) < 0) {
-                this.parentSection.conversation.speakers.push(speaker);
+            if(this.parentSection.clique.speakers.indexOf(speaker) < 0) {
+                this.parentSection.clique.speakers.push(speaker);
             }
             return new Promise((resolve, reject) => {
                 this.parentSection.parts.push(new Line(this.parentSection, this, speaker, line, resolve));

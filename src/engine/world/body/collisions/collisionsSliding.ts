@@ -30,8 +30,8 @@ namespace SplitTime.body.collisions {
             var levelTraces = this.mover.body.getLevel().getLevelTraces();
             function isCornerOpen(direction: number, howFarAway: number) {
                 var collisionInfo = new SplitTime.level.traces.CollisionInfo();
-                var testX = x + SplitTime.Direction.getXSign(direction) * (halfBase + howFarAway);
-                var testY = y + SplitTime.Direction.getYSign(direction) * (halfBase + howFarAway);
+                var testX = x + SplitTime.direction.getXSign(direction) * (halfBase + howFarAway);
+                var testY = y + SplitTime.direction.getYSign(direction) * (halfBase + howFarAway);
                 levelTraces.calculatePixelColumnCollisionInfo(collisionInfo, testX, testY, me.mover.body.z, me.mover.body.z + me.mover.body.height);
                 return !collisionInfo.containsSolid;
             }

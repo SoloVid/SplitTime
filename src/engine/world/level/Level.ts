@@ -84,7 +84,7 @@ namespace SplitTime {
                     +posObj.x,
                     +posObj.y,
                     +posObj.z,
-                    +posObj.dir,
+                    SplitTime.direction.interpret(posObj.dir),
                     posObj.stance
                     );
                     
@@ -212,13 +212,13 @@ namespace SplitTime {
                 }
             };
             
-            notifyFrameUpdate(delta: number) {
+            notifyFrameUpdate(delta: real_seconds) {
                 this.forEachBody(function(body) {
                     body.notifyFrameUpdate(delta);
                 });
             };
   
-            notifyTimeAdvance(delta: number) {
+            notifyTimeAdvance(delta: game_seconds) {
                 this.forEachBody(function(body) {
                     body.notifyTimeAdvance(delta);
                 });
@@ -262,7 +262,7 @@ namespace SplitTime {
                     if(obj) {
                         obj.id = prop.id;
                         obj.put(this, +prop.x, +prop.y, +prop.z, true);
-                        obj.dir = typeof prop.dir === "string" ? SplitTime.Direction.fromString(prop.dir) : +prop.dir;
+                        obj.dir = typeof prop.dir === "string" ? SplitTime.direction.fromString(prop.dir) : +prop.dir;
                         if(obj.drawable instanceof Sprite) {
                             obj.drawable.requestStance(prop.stance, obj.dir, true, true);
                         }

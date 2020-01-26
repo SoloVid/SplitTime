@@ -76,7 +76,7 @@ namespace SplitTime.body.collisions {
                             if(xCollisionInfo.bodies.length > 0) {
                                 // Slow down when pushing
                                 xPixelsRemaining--;
-                                this.tryPushOtherBodies(xCollisionInfo.bodies, dx > 0 ? SplitTime.Direction.E : SplitTime.Direction.W);
+                                this.tryPushOtherBodies(xCollisionInfo.bodies, dx > 0 ? SplitTime.direction.E : SplitTime.direction.W);
                             }
                         } else {
                             roundX = newRoundX;
@@ -102,7 +102,7 @@ namespace SplitTime.body.collisions {
                             if(yCollisionInfo.bodies.length > 0) {
                                 // Slow down when pushing
                                 yPixelsRemaining--;
-                                this.tryPushOtherBodies(yCollisionInfo.bodies, dy > 0 ? SplitTime.Direction.S : SplitTime.Direction.N);
+                                this.tryPushOtherBodies(yCollisionInfo.bodies, dy > 0 ? SplitTime.direction.S : SplitTime.direction.N);
                             }
                         } else {
                             roundY = newRoundY;
@@ -142,7 +142,7 @@ namespace SplitTime.body.collisions {
             this.mover.body.level.runEventSet(eventIdSet, this.mover.body);
             this.mover.transportLevelIfApplicable(levelIdSet);
             
-            return SplitTime.Measurement.distanceTrue(oldX, oldY, this.mover.body.getX(), this.mover.body.getY());
+            return SplitTime.measurement.distanceTrue(oldX, oldY, this.mover.body.getX(), this.mover.body.getY());
         };
         
         tryPushOtherBodies(bodies: Body[], dir: number) {

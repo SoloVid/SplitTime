@@ -35,8 +35,8 @@ namespace SplitTime.body {
             var startX = Math.round(this.body.x);
             var startY = Math.round(this.body.y);
             var z = Math.round(this.body.z);
-            var furthestX = Math.round(this.body.x + maxDistance * SplitTime.Direction.getXMagnitude(dir));
-            var furthestY = Math.round(this.body.y + maxDistance * SplitTime.Direction.getYMagnitude(dir));
+            var furthestX = Math.round(this.body.x + maxDistance * SplitTime.direction.getXMagnitude(dir));
+            var furthestY = Math.round(this.body.y + maxDistance * SplitTime.direction.getYMagnitude(dir));
             
             var toX: number | null = null;
             var toY: number | null = null;
@@ -73,7 +73,7 @@ namespace SplitTime.body {
                     var transporter = new SplitTime.body.Transporter(this.body);
                     transporter.transportLevelIfApplicable(otherLevelId);
                 }
-                return SplitTime.Measurement.distanceTrue(startX, startY, toX, toY);
+                return SplitTime.measurement.distanceTrue(startX, startY, toX, toY);
             } else {
                 return 0;
             }

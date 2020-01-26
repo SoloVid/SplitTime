@@ -186,8 +186,16 @@ namespace SplitTime {
             this.setZ(z, includeChildren);
         };
         
-        putLocation(location: ILevelLocation, includeChildren = false) {
+        putInLocation(location: ILevelLocation, includeChildren = false) {
             this.put(location.getLevel(), location.getX(), location.getY(), location.getZ(), includeChildren);
+        };
+        
+        putInPosition(position: Position, includeChildren = false) {
+            this.put(position.getLevel(), position.getX(), position.getY(), position.getZ(), includeChildren);
+            this.dir = position.dir;
+            if(this.drawable instanceof Sprite) {
+                this.drawable.requestStance(position.stance, this.dir, true, true);
+            }
         };
         
         setLevel(level: SplitTime.Level | null, includeChildren: boolean = false) {
@@ -228,7 +236,7 @@ namespace SplitTime {
             return this.getLevel().getRegion();
         };
         
-        notifyFrameUpdate(delta: number) {
+        notifyFrameUpdate(delta: real_seconds) {
             this.frameUpdateHandlers.run(delta);
             try {
                 if(this.drawable && SplitTime.instanceOf.FrameNotified(this.drawable)) {
@@ -239,7 +247,7 @@ namespace SplitTime {
             }
         }
         
-        notifyTimeAdvance(delta: number) {
+        notifyTimeAdvance(delta: game_seconds) {
             this.timeAdvanceListeners.run(delta);
         
             var level = this._level;
@@ -271,11 +279,11 @@ namespace SplitTime {
         };
         
         //Function run every frame
-        registerFrameUpdateHandler(handler: ((delta: number) => any) | SplitTime.FrameNotified) {
+        registerFrameUpdateHandler(handler: ((delta: real_seconds) => any) | SplitTime.FrameNotified) {
             this.frameUpdateHandlers.register(handler);
         };
 
-        registerTimeAdvanceListener(handler: ((delta: number) => any) | SplitTime.TimeNotified) {
+        registerTimeAdvanceListener(handler: ((delta: game_seconds) => any) | SplitTime.TimeNotified) {
             this.timeAdvanceListeners.register(handler);
         };
         

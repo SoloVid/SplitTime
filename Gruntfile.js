@@ -91,7 +91,12 @@ module.exports = function(grunt) {
         var done = this.async();
         var tscPath = getPathInNodeModules(path.join("typescript", "bin", "tsc"));
         grunt.verbose.writeln("Found tsc: " + tscPath);
-        var tsconfigRoot = projectName ? "projects/" + projectName : ".";
+        var tsconfigRoot = ".";
+        if(projectName) {
+            tsconfigRoot = "projects/" + projectName;
+            grunt.verbose.writeln("Copy project tsconfig.json");
+            grunt.file.write(path.join(tsconfigRoot, "tsconfig.json"), grunt.file.read("tsconfig.project.json"));
+        }
         grunt.verbose.writeln("Running in " + tsconfigRoot);
         var process = childProcess.fork(tscPath, [], {
             cwd: tsconfigRoot

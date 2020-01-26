@@ -12,7 +12,7 @@ namespace SplitTime {
             }
             return this._timeline;
         };
-        getTimeMs(): number {
+        getTimeMs(): game_ms {
             return this.getTimeline().getTimeMs();
         };
 
@@ -24,7 +24,7 @@ namespace SplitTime {
             this._timeline.addRegion(this);
         }
         
-        getTimeStabilizer(msPerStep?: number, maxCounter?: number): Signaler {
+        getTimeStabilizer(msPerStep?: game_ms, maxCounter?: number): Signaler {
             var that = this;
             return new SplitTime.IntervalStabilizer(msPerStep, maxCounter, function() {
                 return that.getTimeMs();
@@ -36,13 +36,13 @@ namespace SplitTime {
             level.region = this;
         };
         
-        notifyFrameUpdate(delta: number) {
+        notifyFrameUpdate(delta: real_seconds) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyFrameUpdate(delta);
             }
         };
         
-        notifyTimeAdvance(delta: number) {
+        notifyTimeAdvance(delta: game_seconds) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyTimeAdvance(delta);
             }

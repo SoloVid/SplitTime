@@ -20,13 +20,13 @@ namespace SplitTime.controls {
                     }
                 }
                 if(down) {
-                    x += Direction.getXMagnitude(group.dir);
-                    y += Direction.getYMagnitude(group.dir);
+                    x += direction.getXMagnitude(group.dir);
+                    y += direction.getYMagnitude(group.dir);
                 }
             }
 
             if(x !== 0 || y !== 0) {
-                return SplitTime.Direction.fromTo(0, 0, x, y);
+                return SplitTime.direction.fromTo(0, 0, x, y);
             }
             return null;
         }
