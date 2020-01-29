@@ -12,12 +12,11 @@ namespace SplitTime {
         return ms / 1000;
     }
 
-    class EventInstance {
+    class ScheduledEvent {
         public readonly timeMs: game_ms;
         constructor(
             public readonly time: game_seconds,
-            public readonly spec: time.EventSpec,
-            public readonly argument?: file.jsonable
+            public readonly instance: time.EventInstance<any>
         ) {
             this.timeMs = toMs(this.time);
         }
@@ -28,7 +27,7 @@ namespace SplitTime {
         _timeAdvanceListeners: SLVD.RegisterCallbacks;
         _regions: SplitTime.Region[];
 
-        private upcomingEvents: EventInstance[] = [];
+        private upcomingEvents: ScheduledEvent[] = [];
 
         kSecondsPerRealSecond: game_seconds;
         kSecondsPerMinute = 60;
@@ -75,10 +74,10 @@ namespace SplitTime {
 
             // Run scheduled events
             while(this.upcomingEvents.length > 0 && this.upcomingEvents[0].timeMs <= newTimeMs) {
-                const event = this.upcomingEvents.shift() as EventInstance;
+                const event = this.upcomingEvents.shift() as ScheduledEvent;
                 // Update time along the way in case someone cares
                 this._timeInMilliseconds = event.timeMs;
-                event.spec.callback(event.argument);
+                event.instance.run();
             }
 
             // Move time fully ahead
@@ -111,17 +110,17 @@ namespace SplitTime {
             return days * this.hour(this.kHoursPerDay);
         }
 
-        schedule(moment: time.Moment, spec: time.EventSpec, argument?: file.jsonable): void {
-            this.scheduleAbsolute(new EventInstance(moment.getTime(), spec, argument));
+        schedule(moment: time.Moment, eventInstance: time.EventInstance<any>): void {
+            this.scheduleAbsolute(new ScheduledEvent(moment.getTime(), eventInstance));
         }
 
-        scheduleFromNow(timeFromNow: game_seconds, spec: time.EventSpec, argument?: file.jsonable): void {
-            this.scheduleAbsolute(new EventInstance(this.getTime() + timeFromNow, spec, argument));
+        scheduleFromNow(timeFromNow: game_seconds, eventInstance: time.EventInstance<any>): void {
+            this.scheduleAbsolute(new ScheduledEvent(this.getTime() + timeFromNow, eventInstance));
         }
 
-        private scheduleAbsolute(event: EventInstance) {
+        private scheduleAbsolute(event: ScheduledEvent) {
             if(event.time < this.getTime()) {
-                throw new Error("Cannot schedule event in the past: " + event.spec.id + " at " + event.time + " (current time " + this.getTime() + ")");
+                throw new Error("Cannot schedule event in the past: " + event.instance.spec.id + " at " + event.time + " (current time " + this.getTime() + ")");
             }
             for(let i = 0; i < this.upcomingEvents.length; i++) {
                 if(event.time < this.upcomingEvents[i].time) {

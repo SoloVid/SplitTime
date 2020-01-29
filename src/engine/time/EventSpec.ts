@@ -1,9 +1,13 @@
 namespace SplitTime.time {
-    type event_callback_t = (param?: file.jsonable) => void;
+    export class EventSpec<T extends file.jsonable> {
+        constructor(id: string, callback: () => void);
+        constructor(id: string, callback: (param: T) => void);
+        constructor(public readonly id: string, public readonly callback: (param?: T) => void) {
 
-    export class EventSpec {
-        constructor(public readonly id: string, public readonly callback: event_callback_t) {
+        }
 
+        inst(argument?: T): EventInstance<T> {
+            return new EventInstance(this, argument);
         }
     }
 }
