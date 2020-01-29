@@ -5,6 +5,12 @@ namespace SLVD{
     type CallbackObject = {[method: string]: (data?: any) => CallbackResult} | any;
     type Callback = CallbackFunction | CallbackObject;
 
+    export enum CopingMechanism {
+        RETHROW,
+        SUPPRESS,
+        LOG
+    }
+
     export class RegisterCallbacks {
         _handlers: any[];
         _isRunningCallbacks: boolean;
@@ -80,7 +86,7 @@ namespace SLVD{
             this.run(data);
         };
         
-        run(data?: any) {
+        run(data?: any, exceptionCoping: CopingMechanism = CopingMechanism.RETHROW) {
             this._isRunningCallbacks = true;
             for(var i = this._handlers.length - 1; i >= 0; i--) {
                 // Default to true so exceptions don't continue
@@ -92,7 +98,15 @@ namespace SLVD{
                         done = true;
                     }
                 } catch(ex) {
-                    console.error(ex);
+                    switch(exceptionCoping) {
+                        case CopingMechanism.RETHROW:
+                            throw ex;
+                        case CopingMechanism.LOG:
+                            SplitTime.Logger.error(ex);
+                            break;
+                        case CopingMechanism.SUPPRESS:
+                            break;
+                    }
                     // console.warn("callback will be removed");
                 }
                 if(done) {

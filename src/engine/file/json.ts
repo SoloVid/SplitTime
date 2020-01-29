@@ -2,6 +2,10 @@ namespace SplitTime.file {
     export type jsonable = boolean | number | string | jsonable[] | { [key: string]: jsonable };
     export type json = string;
 
+    export function toJsonable(thing: any): jsonable {
+        return JSON.parse(JSON.stringify(thing));
+    }
+
     class JsonType {
         public constructor(public readonly id: string) {}
     }

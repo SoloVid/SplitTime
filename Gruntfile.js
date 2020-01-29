@@ -117,6 +117,7 @@ module.exports = function(grunt) {
             var projectRoot = "projects/" + projectName;
             files = [
                 'build/engine.js',
+                'build/tsjs/defer.def.js',
                 projectRoot + '/build/tsjs/**/*.js',
                 projectRoot + '/build/generated/**/*.js',
                 'build/tsjs/defer.run.js'
@@ -126,6 +127,7 @@ module.exports = function(grunt) {
             files = [
                 'node_modules/es6-promise/dist/es6-promise.auto.min.js',
                 'node_modules/howler/dist/howler.min.js',
+                'build/tsjs/compiler_defines.debug.js',
                 'build/tsjs/defer.def.js',
                 'build/tsjs/engine/**/*.js',
                 'build/tsjs/defer.run.js'
