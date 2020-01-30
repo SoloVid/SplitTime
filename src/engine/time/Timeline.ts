@@ -37,11 +37,8 @@ namespace SplitTime {
         constructor() {
             this._timeInMilliseconds = 0;
             this._timeAdvanceListeners = new SLVD.RegisterCallbacks();
-            /**
-            * @type {SplitTime.Region[]}
-            */
             this._regions = [];
-            
+
             this.kSecondsPerRealSecond = 1;
         };
         
@@ -110,11 +107,11 @@ namespace SplitTime {
             return days * this.hour(this.kHoursPerDay);
         }
 
-        schedule(moment: time.Moment, eventInstance: time.EventInstance<any>): void {
+        schedule<T extends file.jsonable>(moment: time.Moment, eventInstance: time.EventInstance<T>): void {
             this.scheduleAbsolute(new ScheduledEvent(moment.getTime(), eventInstance));
         }
 
-        scheduleFromNow(timeFromNow: game_seconds, eventInstance: time.EventInstance<any>): void {
+        scheduleFromNow<T extends file.jsonable>(timeFromNow: game_seconds, eventInstance: time.EventInstance<T>): void {
             this.scheduleAbsolute(new ScheduledEvent(this.getTime() + timeFromNow, eventInstance));
         }
 
