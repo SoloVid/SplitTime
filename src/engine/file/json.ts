@@ -1,5 +1,5 @@
 namespace SplitTime.file {
-    export type jsonable = boolean | number | string | jsonable[] | { [key: string]: jsonable };
+    export type jsonable = boolean | number | string | jsonable[] | { [key: string]: jsonable } | { [key: number]: jsonable };
     export type json = string;
 
     export function toJsonable(thing: any): jsonable {
