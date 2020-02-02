@@ -4,8 +4,6 @@ namespace SplitTime.menu {
             readonly joyStick: controls.JoyStick,
             readonly confirmButton: controls.Button,
             readonly cancelButton: controls.Button
-        ) {
-
-        }
+        ) {}
     }
 }

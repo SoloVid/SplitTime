@@ -1,86 +1,90 @@
 namespace SplitTime.controls {
     export class Keyboard {
-        private keyDown: { [keyCode: number]: boolean } = {};
+        private keyDown: { [keyCode: number]: boolean } = {}
 
         constructor(eventElement: HTMLElement | Document) {
             // FTODO: Is the cast going to cause problems here?
             eventElement.addEventListener("keydown", event => {
-                return this.onKeyDown(event as KeyboardEvent);
-            });
+                return this.onKeyDown(event as KeyboardEvent)
+            })
             eventElement.addEventListener("keyup", event => {
-                return this.onKeyUp(event as KeyboardEvent);
-            });
+                return this.onKeyUp(event as KeyboardEvent)
+            })
         }
 
-        private downCallbacks: { [keyCode: number]: SLVD.RegisterCallbacks } = {};
+        private downCallbacks: {
+            [keyCode: number]: SLVD.RegisterCallbacks
+        } = {}
         private getDownCallbacks(keyCode: number) {
-            if(!this.downCallbacks[keyCode]) {
-                this.downCallbacks[keyCode] = new SLVD.RegisterCallbacks();
+            if (!this.downCallbacks[keyCode]) {
+                this.downCallbacks[keyCode] = new SLVD.RegisterCallbacks()
             }
-            return this.downCallbacks[keyCode];
+            return this.downCallbacks[keyCode]
         }
-        private upCallbacks: { [keyCode: number]: SLVD.RegisterCallbacks } = {};
+        private upCallbacks: { [keyCode: number]: SLVD.RegisterCallbacks } = {}
         private getUpCallbacks(keyCode: number) {
-            if(!this.upCallbacks[keyCode]) {
-                this.upCallbacks[keyCode] = new SLVD.RegisterCallbacks();
+            if (!this.upCallbacks[keyCode]) {
+                this.upCallbacks[keyCode] = new SLVD.RegisterCallbacks()
             }
-            return this.upCallbacks[keyCode];
+            return this.upCallbacks[keyCode]
         }
 
         public isKeyDown(keyCode: number) {
-            return !!this.keyDown[keyCode];
+            return !!this.keyDown[keyCode]
         }
 
         public waitForDown(keyCode: number) {
-            return this.getDownCallbacks(keyCode).waitForOnce();
+            return this.getDownCallbacks(keyCode).waitForOnce()
         }
         public onDown(keyCode: number, callback: () => SLVD.CallbackResult) {
-            this.getDownCallbacks(keyCode).register(callback);
+            this.getDownCallbacks(keyCode).register(callback)
         }
 
         public waitForUp(keyCode: number) {
-            return this.getUpCallbacks(keyCode).waitForOnce();
+            return this.getUpCallbacks(keyCode).waitForOnce()
         }
         public afterUp(keyCode: number, callback: () => SLVD.CallbackResult) {
-            this.getUpCallbacks(keyCode).register(callback);
+            this.getUpCallbacks(keyCode).register(callback)
         }
 
         //Sets variables useful for determining what keys are down at any time.
         public onKeyDown(e: KeyboardEvent) {
-            var keyCode = e.which || e.keyCode;
+            var keyCode = e.which || e.keyCode
 
             //Prevent scrolling with arrows
-            if([
+            if (
+                [
                     keyboard.keycode.SPACE,
                     keyboard.keycode.DOWN,
                     keyboard.keycode.UP,
                     keyboard.keycode.LEFT,
                     keyboard.keycode.RIGHT
-                ].indexOf(keyCode) > -1) {
-                e.preventDefault();
+                ].indexOf(keyCode) > -1
+            ) {
+                e.preventDefault()
             }
 
-            var key = e.key.toLowerCase();
+            var key = e.key.toLowerCase()
 
-            if(key == "t") {
+            if (key == "t") {
                 // Note: This case is just here for quick and dirty testing
-                alert("Huzzah!");
+                alert("Huzzah!")
             }
 
-            this.keyDown[keyCode] = true;
+            this.keyDown[keyCode] = true
 
-            this.getDownCallbacks(keyCode).run();
+            this.getDownCallbacks(keyCode).run()
         }
 
         //The clean-up of the above function.
         public onKeyUp(e: KeyboardEvent) {
-            var keyCode = e.which || e.keyCode;
-            this.keyDown[keyCode] = false;
+            var keyCode = e.which || e.keyCode
+            this.keyDown[keyCode] = false
 
-            this.getUpCallbacks(keyCode).run();
+            this.getUpCallbacks(keyCode).run()
         }
     }
 
     // FTODO: maybe make not singleton
-    export const KEYBOARD_INSTANCE = new Keyboard(document);
+    export const KEYBOARD_INSTANCE = new Keyboard(document)
 }

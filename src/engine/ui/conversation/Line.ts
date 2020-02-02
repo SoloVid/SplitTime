@@ -5,12 +5,11 @@ namespace SplitTime.conversation {
             private readonly helper: OrchestrationHelper,
             public readonly speaker: Speaker,
             public readonly line: string
-        ) {
-        }
+        ) {}
 
         run(): PromiseLike<outcome_t> {
-            const runner = new LineRunner(this.parentSection, this.helper, this);
-            return runner.run();
+            const runner = new LineRunner(this.parentSection, this.helper, this)
+            return runner.run()
         }
     }
 }

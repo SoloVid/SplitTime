@@ -1,36 +1,34 @@
 namespace SplitTime.time {
     export class Moment {
-        private cachedActualTimeCalculation: game_seconds | null = null;
-        private amountOfTime: game_seconds | null = null;
-        private relativeOtherMoment: Moment | undefined;
+        private cachedActualTimeCalculation: game_seconds | null = null
+        private amountOfTime: game_seconds | null = null
+        private relativeOtherMoment: Moment | undefined
 
-        constructor() {
-
-        }
+        constructor() {}
 
         setTime(amountOfTime: game_seconds, relativeTo?: Moment) {
-            defer();
-            if(this.amountOfTime !== null) {
-                throw new Error("Time of moment has already been set");
+            defer()
+            if (this.amountOfTime !== null) {
+                throw new Error("Time of moment has already been set")
             }
-            this.amountOfTime = amountOfTime;
-            this.relativeOtherMoment = relativeTo;
+            this.amountOfTime = amountOfTime
+            this.relativeOtherMoment = relativeTo
         }
 
         getTime(): game_seconds {
-            if(!this.cachedActualTimeCalculation) {
-                this.calculateTime();
+            if (!this.cachedActualTimeCalculation) {
+                this.calculateTime()
             }
-            return this.cachedActualTimeCalculation as game_seconds;
+            return this.cachedActualTimeCalculation as game_seconds
         }
 
         private calculateTime() {
-            if(this.amountOfTime === null) {
-                throw new Error("Time of moment has not been set");
+            if (this.amountOfTime === null) {
+                throw new Error("Time of moment has not been set")
             }
-            this.cachedActualTimeCalculation = this.amountOfTime;
-            if(this.relativeOtherMoment) {
-                this.cachedActualTimeCalculation += this.relativeOtherMoment.getTime();
+            this.cachedActualTimeCalculation = this.amountOfTime
+            if (this.relativeOtherMoment) {
+                this.cachedActualTimeCalculation += this.relativeOtherMoment.getTime()
             }
         }
     }

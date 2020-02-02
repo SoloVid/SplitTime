@@ -1,9 +1,8 @@
-
 interface ILevelLocation {
-    getX(): number;
-    getY(): number;
-    getZ(): number;
-    getLevel(): SplitTime.Level;
+    getX(): number
+    getY(): number
+    getZ(): number
+    getLevel(): SplitTime.Level
 }
 
 namespace SplitTime.level {
@@ -13,20 +12,18 @@ namespace SplitTime.level {
             public readonly y: number,
             public readonly z: number,
             public readonly level: Level
-        ) {
-
-        }
+        ) {}
         getX(): number {
-            return this.x;
+            return this.x
         }
         getY(): number {
-            return this.y;
+            return this.y
         }
         getZ(): number {
-            return this.z;
+            return this.z
         }
         getLevel(): Level {
-            return this.level;
+            return this.level
         }
     }
 }

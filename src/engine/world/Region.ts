@@ -1,69 +1,74 @@
 namespace SplitTime {
     // A region is a logical unit of levels that are loaded together and share a common timeline
     export class Region {
-        private levels: SplitTime.Level[] = [];
-        private _timeline: SplitTime.Timeline | null = null;
-        constructor(public readonly id: string) {
-        };
-        
+        private levels: SplitTime.Level[] = []
+        private _timeline: SplitTime.Timeline | null = null
+        constructor(public readonly id: string) {}
+
         getTimeline(): Timeline {
-            if(!this._timeline) {
-                throw new Error("Region " + this.id + " does not have a timeline set");
+            if (!this._timeline) {
+                throw new Error(
+                    "Region " + this.id + " does not have a timeline set"
+                )
             }
-            return this._timeline;
-        };
+            return this._timeline
+        }
         getTimeMs(): game_ms {
-            return this.getTimeline().getTimeMs();
-        };
+            return this.getTimeline().getTimeMs()
+        }
 
         setTimeline(timeline: Timeline) {
-            if(this._timeline) {
-                this._timeline.removeRegion(this);
+            if (this._timeline) {
+                this._timeline.removeRegion(this)
             }
-            this._timeline = timeline;
-            this._timeline.addRegion(this);
+            this._timeline = timeline
+            this._timeline.addRegion(this)
         }
-        
+
         getTimeStabilizer(msPerStep?: game_ms, maxCounter?: number): Signaler {
-            var that = this;
-            return new SplitTime.IntervalStabilizer(msPerStep, maxCounter, function() {
-                return that.getTimeMs();
-            });
-        };
-        
+            var that = this
+            return new SplitTime.IntervalStabilizer(
+                msPerStep,
+                maxCounter,
+                function() {
+                    return that.getTimeMs()
+                }
+            )
+        }
+
         addLevel(level: Level) {
-            this.levels.push(level);
-            level.region = this;
-        };
+            this.levels.push(level)
+            level.region = this
+        }
 
         getLevels(): Level[] {
-            return this.levels;
+            return this.levels
         }
-        
+
         notifyFrameUpdate(delta: real_seconds) {
-            for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
-                this.levels[iLevel].notifyFrameUpdate(delta);
+            for (var iLevel = 0; iLevel < this.levels.length; iLevel++) {
+                this.levels[iLevel].notifyFrameUpdate(delta)
             }
-        };
-        
+        }
+
         notifyTimeAdvance(delta: game_seconds) {
-            for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {
-                this.levels[iLevel].notifyTimeAdvance(delta);
+            for (var iLevel = 0; iLevel < this.levels.length; iLevel++) {
+                this.levels[iLevel].notifyTimeAdvance(delta)
             }
-        };
-        
+        }
+
         loadForPlay(world: World): PromiseLike<any> {
-            var promises = [];
-            for(var i = 0; i < this.levels.length; i++) {
-                promises.push(this.levels[i].loadForPlay(world));
+            var promises = []
+            for (var i = 0; i < this.levels.length; i++) {
+                promises.push(this.levels[i].loadForPlay(world))
             }
-            return Promise.all(promises);
-        };
-        
+            return Promise.all(promises)
+        }
+
         unloadLevels() {
-            for(var i = 0; i < this.levels.length; i++) {
-                this.levels[i].unload();
+            for (var i = 0; i < this.levels.length; i++) {
+                this.levels[i].unload()
             }
-        };
+        }
     }
 }
