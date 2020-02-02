@@ -10,7 +10,7 @@ namespace SplitTime.time {
 
         setTime(amountOfTime: game_seconds, relativeTo?: Moment) {
             defer();
-            if(this.amountOfTime) {
+            if(this.amountOfTime !== null) {
                 throw new Error("Time of moment has already been set");
             }
             this.amountOfTime = amountOfTime;
@@ -25,7 +25,7 @@ namespace SplitTime.time {
         }
 
         private calculateTime() {
-            if(!this.amountOfTime) {
+            if(this.amountOfTime === null) {
                 throw new Error("Time of moment has not been set");
             }
             this.cachedActualTimeCalculation = this.amountOfTime;

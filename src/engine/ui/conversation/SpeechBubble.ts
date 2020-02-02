@@ -1,16 +1,16 @@
 namespace SplitTime.conversation {
     export class SpeechBubble {
         // can be cut short
-        _effectiveLine: string;
-        _charactersDisplayed: number;
-        _startDelay: number | null = null;
-        _isFinished: boolean;
-        _location: ILevelLocation;
-        _timeline: SplitTime.Timeline | null = null;
-        _lastStepMs: number = 0;
-        _playerInteractHandler: PlayerInteractHandler | Function | null = null;
-        _dismissHandler: Function | null = null;
-        _dialogEndHandler: ConversationEndHandler | Function | null = null;
+        private _effectiveLine: string;
+        private _charactersDisplayed: number;
+        private _startDelay: number | null = null;
+        private _isFinished: boolean;
+        private _location: ILevelLocation;
+        private _timeline: SplitTime.Timeline | null = null;
+        private _lastStepMs: number = 0;
+        private _playerInteractHandler: PlayerInteractHandler | Function | null = null;
+        private _dismissHandler: Function | null = null;
+        private _dialogEndHandler: ConversationEndHandler | Function | null = null;
 
         constructor(public readonly clique: Clique, public readonly speaker: string, private _line: string, location: ILevelLocation) {
             for(const conversion of CONVERSIONS) {

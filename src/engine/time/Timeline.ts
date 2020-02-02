@@ -23,25 +23,20 @@ namespace SplitTime {
     }
 
     export class Timeline {
-        _timeInMilliseconds: game_ms;
-        _timeAdvanceListeners: SLVD.RegisterCallbacks;
-        _regions: SplitTime.Region[];
+        _timeInMilliseconds: game_ms = 0;
+        _timeAdvanceListeners: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks();
+        _regions: SplitTime.Region[] = [];
 
         private upcomingEvents: ScheduledEvent[] = [];
 
-        kSecondsPerRealSecond: game_seconds;
+        readonly beginning: time.Moment = new time.Moment();
+        kSecondsPerRealSecond: game_seconds = 1;
         kSecondsPerMinute = 60;
         kMinutesPerHour = 60;
         kHoursPerDay = 24;
 
-        constructor() {
-            this._timeInMilliseconds = 0;
-            this._timeAdvanceListeners = new SLVD.RegisterCallbacks();
-            this._regions = [];
+        constructor(public readonly id: string) {}
 
-            this.kSecondsPerRealSecond = 1;
-        };
-        
         registerTimeAdvanceListener(listener: (delta: game_seconds) => any) {
             this._timeAdvanceListeners.register(listener);
         };
@@ -67,6 +62,11 @@ namespace SplitTime {
         };
         
         advance(seconds: game_seconds) {
+            const beginningMs = toMs(this.beginning.getTime());
+            if(this._timeInMilliseconds < beginningMs) {
+                this._timeInMilliseconds = beginningMs;
+            }
+
             const newTimeMs = this._timeInMilliseconds + toMs(seconds);
 
             // Run scheduled events

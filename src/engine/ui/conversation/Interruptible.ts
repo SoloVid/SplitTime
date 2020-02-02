@@ -2,7 +2,7 @@ namespace SplitTime.conversation {
     export class Interruptible {
         private _triggered: boolean = false;
 
-        constructor(private condition: any, private callback: Function, public readonly body?: Body) {
+        constructor(private readonly condition: condition_t, public readonly section: Section, public readonly body?: Body) {
 
         }
 
@@ -23,10 +23,6 @@ namespace SplitTime.conversation {
 
         trigger(): void {
             this._triggered = true;
-        }
-
-        runCallback(): void {
-            this.callback();
         }
     }
 }

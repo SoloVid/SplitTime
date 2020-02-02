@@ -1,37 +1,43 @@
 namespace SplitTime.conversation {
     export class OrchestrationHelper implements DSL {
-        _parentSection: Section | null = null;
+        private _section: Section;
 
-        constructor(public readonly manager: Manager, public readonly playerBodyGetter: () => Body | null) {}
-
-        get parentSection(): Section {
-            if(!this._parentSection) {
-                throw new Error("No conversation context available");
-            }
-            return this._parentSection;
+        constructor(
+            public readonly manager: Manager,
+            public readonly playerBodyGetter: () => Body | null,
+            topLevelSection: Section
+        ) {
+            this._section = topLevelSection;
         }
 
-        set parentSection(section: Section) {
-            this._parentSection = section;
+        say(speaker: Speaker, line: string): void {
+            const lineObj = new Line(this._section, this, speaker, line);
+            this._section.append(lineObj);
         }
 
-        say(speaker: Speaker, line: string): Promise<Outcome> {
-            if(this.parentSection.clique.speakers.indexOf(speaker) < 0) {
-                this.parentSection.clique.speakers.push(speaker);
-            }
-            return new Promise((resolve, reject) => {
-                this.parentSection.parts.push(new Line(this.parentSection, this, speaker, line, resolve));
-            });
-        }
-
-        section(setup: Function): SectionReturn {
-            const newSection = new Section(this.parentSection, this, setup);
-            this.parentSection.parts.push(newSection);
+        section(setup: () => void): SectionReturn {
+            const newSection = new Section(this._section);
+            this.withSection(newSection, setup);
+            this._section.append(newSection);
             return new SectionReturn(newSection, this);
         }
 
-        cancelable(setup: Function): SectionReturn {
-            return this.section(setup).cancelable();
+        do(action: () => void): void {
+            this._section.append(new SimpleRunnable(action));
+        }
+
+        waitUntil(condition: condition_t): void {
+            this._section.append(new Wait(condition));
+        }
+
+        withSection(section: Section, callback: () => void): void {
+            const prevSection = this._section;
+            try {
+                this._section = section;
+                callback();
+            } finally {
+                this._section = prevSection;
+            }
         }
     }
 }

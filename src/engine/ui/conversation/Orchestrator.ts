@@ -4,28 +4,11 @@ namespace SplitTime.conversation {
 
         }
 
-        start(orchestrator: (d: DSL) => any): Promise<Outcome> {
-            const orchestrationHelper = new OrchestrationHelper(this.manager, this.playerBodyGetter);
-            const topLevelSection = new Section(null, orchestrationHelper, () => {
-                orchestrator(orchestrationHelper);
-            });
-            return Promise.resolve().then(() => { return topLevelSection.run(); });
-        }
-
-        startCancelable(orchestrator: (d: DSL) => any): Promise<Outcome> {
-            return this.start(d => {
-                d.cancelable(() => {
-                    orchestrator(d);
-                })
-            });
-        }
-    
-        startInterruptible(orchestrator: (d: DSL) => any): Promise<Outcome> {
-            return this.start(d => {
-                d.section(() => {
-                    orchestrator(d);
-                }).interruptible();
-            });
+        start(setup: (d: DSL) => any): void {
+            const topLevelSection = new Section(null);
+            const orchestrationHelper = new OrchestrationHelper(this.manager, this.playerBodyGetter, topLevelSection);
+            setup(orchestrationHelper);
+            topLevelSection.run();
         }
     }
 }

@@ -1,35 +1,72 @@
 namespace SplitTime.conversation {
+    interface Runnable {
+        run(): PromiseLike<outcome_t>;
+    }
+
     export class Section {
-        clique: Clique;
-        parts: (Line | Section)[] = [];
-        nextPartToRunIndex: int = 0;
-        markedCancelable: boolean = false;
-        interruptibles: Interruptible[] = [];
-        detectionInterruptibles: Interruptible[] = [];
-        selfInterruptTriggered: boolean = false;
-        promise: Promise<Outcome>;
-        resolve: (value?: Outcome | PromiseLike<Outcome>) => void = () => {};
+        public readonly clique: Clique;
+        private readonly localSpeakers: Speaker[] = [];
+        private readonly parts: Runnable[] = [];
+        private partRunningIndex: int = -1;
+        private cancelSection: Section | null = null;
+        private interruptibles: Interruptible[] = [];
+        private detectionInterruptibles: Interruptible[] = [];
+        private selfInterruptTriggered: boolean = false;
+        private followUpSection: Section | null = null;
 
-        constructor(public readonly parentSection: Section | null, private readonly helper: OrchestrationHelper, private readonly setup: Function) {
+        constructor(public readonly parentSection: Section | null) {
             this.clique = this.parentSection === null ? new Clique() : this.parentSection.clique;
-
-            this.promise = new Promise(resolve => {
-                this.resolve = resolve;
-            });
         }
 
-        get cancelable(): boolean {
-            if(this.parentSection == null) {
-                return this.markedCancelable;
+        dontAllowModifyWhileRunning() {
+            if(this.partRunningIndex >= 0) {
+                throw new Error("Conversation should not be modified after started");
             }
-            return this.markedCancelable || this.parentSection.cancelable;
         }
 
-        get interruptTriggered(): boolean {
-            if(this.parentSection == null) {
-                return this.selfInterruptTriggered;
+        append(part: Runnable) {
+            this.dontAllowModifyWhileRunning();
+            this.parts.push(part);
+            if(part instanceof Line) {
+                if(this.localSpeakers.indexOf(part.speaker) < 0) {
+                    this.localSpeakers.push(part.speaker);
+                }
             }
-            return this.selfInterruptTriggered || this.parentSection.interruptTriggered;
+        }
+
+        setCancelSection(section: Section) {
+            this.dontAllowModifyWhileRunning();
+            this.cancelSection = section;
+        }
+
+        addInterruptible(interruptible: Interruptible) {
+            this.dontAllowModifyWhileRunning();
+            this.interruptibles.push(interruptible);
+        }
+
+        addDetectionInterruptible(interruptible: Interruptible) {
+            this.dontAllowModifyWhileRunning();
+            this.detectionInterruptibles.push(interruptible);
+        }
+
+        getSpeakers(): Speaker[] {
+            const speakers = this.localSpeakers.slice();
+            if(this.parentSection) {
+                for(const speaker of this.parentSection.getSpeakers()) {
+                    if(speakers.indexOf(speaker) < 0) {
+                        speakers.push(speaker);
+                    }
+                }
+            }
+            return speakers;
+        }
+
+        isCancelable(): boolean {
+            return !!this.cancelSection || !!this.parentSection?.isCancelable();
+        }
+
+        isInterruptTriggered(): boolean {
+            return this.selfInterruptTriggered || !!this.parentSection?.isInterruptTriggered();
         }
 
         triggerInterrupt(): boolean {
@@ -37,6 +74,7 @@ namespace SplitTime.conversation {
                 if(interruptible.conditionMet) {
                     interruptible.trigger();
                     this.selfInterruptTriggered = true;
+                    this.followUpSection = interruptible.section;
                     return true;
                 }
             }
@@ -50,6 +88,7 @@ namespace SplitTime.conversation {
             if(this.detectionInterruptibles.indexOf(interruptible) >= 0 && interruptible.conditionMet) {
                 interruptible.trigger();
                 this.selfInterruptTriggered = true;
+                this.followUpSection = interruptible.section;
                 return true;
             }
             if(this.parentSection !== null) {
@@ -67,32 +106,26 @@ namespace SplitTime.conversation {
             }
         }
 
-        async run(): Promise<Outcome> {
-            const previousConversationSpeakers = this.clique.speakers.slice();
-            const previousSection = this.helper._parentSection;
-            let sectionOutcome: Outcome = new Outcome();
-            try {
-                this.helper.parentSection = this;
-                this.setup();
+        async run(): Promise<outcome_t> {
+            let sectionOutcome: outcome_t = {
+                canceled: false,
+                interrupted: false
+            };
 
-                while(this.nextPartToRunIndex != this.parts.length) {
-                    const outcome = await this.parts[this.nextPartToRunIndex++].run();
-                    if((outcome.canceled && this.cancelable) || (outcome.interrupted && this.interruptTriggered)) {
-                        sectionOutcome = outcome;
-                        break;
-                    }
+            for(const part of this.parts) {
+                this.partRunningIndex++;
+                const outcome = await part.run();
+                if(outcome.canceled && this.isCancelable()) {
+                    sectionOutcome.canceled = true;
+                    this.followUpSection = this.cancelSection;
                 }
-            } finally {
-                this.helper._parentSection = previousSection;
-                this.clique.speakers = previousConversationSpeakers;
+                if(this.followUpSection) {
+                    await this.followUpSection.run();
+                    break;
+                }
             }
-            // FTODO: address warning here
-            await this.resolve(sectionOutcome);
-            return sectionOutcome;
-        }
 
-        then(callback: (value: Outcome) => Outcome | PromiseLike<Outcome>): Promise<Outcome> {
-            return this.promise.then(callback);
+            return sectionOutcome;
         }
     }
 }
