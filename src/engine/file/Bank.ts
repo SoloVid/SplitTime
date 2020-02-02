@@ -1,6 +1,7 @@
 namespace SplitTime.file {
     export class Bank {
         private onNewCallbacks: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks();
+        private onLoadCallbacks: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks();
 
         constructor(private id: string | number) {
 
@@ -12,13 +13,24 @@ namespace SplitTime.file {
             this.id = id;
         }
 
+        /**
+         * Register a callback to be run when a new file is create before onLoad callbacks run
+         */
         onNew(callback: () => void) {
             this.onNewCallbacks.register(callback);
+        }
+
+        /**
+         * Register a callback to be run after a file is loaded (including a new file)
+         */
+        onLoad(callback: () => void) {
+            this.onLoadCallbacks.register(callback);
         }
 
         loadNew(): Promise<void> {
             // TODO: implement
             this.onNewCallbacks.run();
+            this.onLoadCallbacks.run();
             return Promise.resolve();
         }
 
@@ -33,7 +45,7 @@ namespace SplitTime.file {
 }
 
 namespace G {
-    // This world object is a convenience for game code and should not be used in engine code
+    // This object is a convenience for game code and should not be used in engine code
     export var FILE_BANK: SplitTime.file.Bank;
 
     defer(() => {

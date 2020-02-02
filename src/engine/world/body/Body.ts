@@ -2,6 +2,7 @@ namespace SplitTime {
     var nextRef = 10; //reserve first 10
     
     export class Body {
+        template: string | null = null
         id: string = "NOT SET";
         ref: int;
         private frameUpdateHandlers: SLVD.RegisterCallbacks;

@@ -35,6 +35,10 @@ namespace SplitTime {
             this.levels.push(level);
             level.region = this;
         };
+
+        getLevels(): Level[] {
+            return this.levels;
+        }
         
         notifyFrameUpdate(delta: real_seconds) {
             for(var iLevel = 0; iLevel < this.levels.length; iLevel++) {

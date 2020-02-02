@@ -249,7 +249,7 @@ function createObject(type)  {
 
 function loadBodyFromTemplate(templateName) {
 	try {
-		return SplitTime.body.getTemplateInstance(templateName);
+		return G.BODY_TEMPLATES.getInstance(templateName);
 	} catch(e) {
 		return new SplitTime.Body();
 	}

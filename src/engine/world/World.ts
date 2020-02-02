@@ -3,12 +3,12 @@ namespace SplitTime {
         private readonly timeMap: {[id: string]: Timeline} = {};
         getTimeline(timeId: string): Timeline {
             if(!this.timeMap[timeId]) {
-                this.timeMap[timeId] = new SplitTime.Timeline();
+                this.timeMap[timeId] = new SplitTime.Timeline(timeId);
             }
             return this.timeMap[timeId];
         };
 
-        private readonly defaultTime = new SplitTime.Timeline();
+        private readonly defaultTime = new SplitTime.Timeline("__DEFAULT__");
         getDefaultTimeline(): SplitTime.Timeline {
             return this.defaultTime;
         };

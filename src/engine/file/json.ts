@@ -40,3 +40,34 @@ namespace SplitTime.file {
         }
     }
 }
+
+namespace SplitTime.instanceOf {
+    export function jsonable(obj: any): obj is file.jsonable {
+        const type = typeof obj;
+        switch(type) {
+            case "boolean":
+            case "number":
+            case "string":
+                return true;
+            case "object":
+                const prototype = Object.getPrototypeOf(obj);
+                if(prototype === Object.prototype) {
+                    for(const key in obj) {
+                        if(!jsonable(obj[key])) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else if(prototype === Array.prototype) {
+                    const arr = obj as any[];
+                    for(const item of arr) {
+                        if(!jsonable(item)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+        }
+        return false;
+    }
+}

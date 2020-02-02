@@ -258,7 +258,7 @@ namespace SplitTime {
                     var prop = this.fileData.props[iProp];
                     var template = prop.template;
                     
-                    var obj = SplitTime.body.getTemplateInstance(template);
+                    var obj = G.BODY_TEMPLATES.getInstance(template);
                     if(obj) {
                         obj.id = prop.id;
                         obj.put(this, +prop.x, +prop.y, +prop.z, true);
