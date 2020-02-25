@@ -86,5 +86,5 @@ namespace SplitTime.controls {
     }
 
     // FTODO: maybe make not singleton
-    export const KEYBOARD_INSTANCE = new Keyboard(document)
+    export const KEYBOARD_INSTANCE = __DOM__ ? new Keyboard(document) : ({} as Keyboard)
 }

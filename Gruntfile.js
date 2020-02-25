@@ -79,6 +79,22 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.registerTask('test', 'Build engine and run tests', function() {
+        var done = this.async();
+        var process = childProcess.fork('build/engine-test.js');
+        process.on('error', function(err) {
+            done(false);
+        });
+        process.on('exit', function(code) {
+            if(code === 0) {
+                done();
+            } else {
+                done(false);
+            }
+        });
+
+    });
+
     function join() {
         var args = [];
         for(var i = 0; i < arguments.length; i++) {
@@ -128,11 +144,20 @@ module.exports = function(grunt) {
                 'node_modules/es6-promise/dist/es6-promise.auto.min.js',
                 'node_modules/howler/dist/howler.min.js',
                 'build/tsjs/compiler_defines.debug.js',
+                'build/tsjs/environment.js',
                 'build/tsjs/defer.def.js',
                 'build/tsjs/engine/**/*.js',
                 'build/tsjs/defer.run.js'
             ];
             concatFilesWithSourceMaps(files, 'build/engine.js');
+            files = [
+                'build/engine.js',
+                'build/tsjs/test.def.js',
+                'build/tsjs/engine-test/**/*.js',
+                'build/tsjs/simple-test-runner.js',
+                'src/node-test.js'
+            ];
+            concatFilesWithSourceMaps(files, 'build/engine-test.js');
         }
     });
 

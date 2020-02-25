@@ -10,6 +10,7 @@
   "private": true,
   "devDependencies": {
     "@types/howler": "^2.1.2",
+    "@types/node": "^13.7.4",
     "concat-with-sourcemaps": "^1.1.0",
     "convert-source-map": "^1.7.0",
     "es6-promise": "^4.2.8",
@@ -22,6 +23,7 @@
     "grunt-sync": "^0.8.2",
     "jquery": "^3.4.1",
     "prettier": "1.19.1",
+    "source-map-support": "^0.5.16",
     "typescript": "^3.7.5",
     "vue": "^2.6.11"
   },

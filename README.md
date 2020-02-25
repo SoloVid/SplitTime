@@ -10,22 +10,31 @@ Make sure you have [Nodejs](http://nodejs.org/download/) installed.
 
 Also make sure that [Grunt](https://gruntjs.com/) is installed (``npm install -g grunt-cli``).
 
-From the command line, run the following commands to setup development dependencies (including GruntJS):
+From the command line, run the following commands to setup development dependencies:
 ```sh
 npm install
 ```
 
+### Building
+
 To build the engine:
 ```sh
-grunt build //build the engine
+grunt build
 ```
 
 To build a project (after building the engine):
 ```sh
-grunt build:<projectName> //build the project
+grunt build:<projectName>
 ```
 
 _In the previous command, `<projectName>` should be replaced with the name of the directory containing the game project as described in the Project Structure section below._
+
+Or to build both:
+```sh
+grunt build build:<projectName>
+```
+
+### Running
 
 Although development ought to be possible without it, we also recommend using http-server. Using a local server allows a better simulation of the production environment and avoids some security hurdles of browsers accessing local files (I'm looking at you, Chrome).
 To install http-server:
@@ -38,6 +47,23 @@ http-server
 ```
 While the server is running, you may access files in your browser at [localhost:8080](http://localhost:8080).
 You'll probably access your game at something like [localhost:8080/projects/projectName/](http://localhost:8080/projects/projectName/).
+
+### Testing
+
+To run tests in ``src/engine-test/`` (after building the engine):
+```sh
+grunt test
+```
+
+Or to build and run tests:
+```sh
+grunt build test
+```
+
+### Cleaning
+
+To get a clean build, delete the ``build`` directory
+(in engine or project), and run your desired build.
 
 ## Project Structure
 Projects are individual games that reside in separate directories within ``projects/``. All of the files specific to your game are to be located within this directory.
