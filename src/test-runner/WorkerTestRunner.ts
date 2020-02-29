@@ -2,6 +2,9 @@ namespace SplitTime.testRunner {
     export class WorkerTestRunner {
         private readonly worker: Worker
         private readonly topLevelNode: GroupNode | TestNode
+        private readonly promise = new SLVD.Promise()
+        private totalTests: int = 0
+        private testsCompleted: int = 0
 
         constructor(scriptPath: string, node: GroupNode | TestNode) {
             this.worker = new Worker(scriptPath)
@@ -10,15 +13,29 @@ namespace SplitTime.testRunner {
             this.worker.onmessage = message => {
                 const data = message.data as TestResult
                 console.log(data)
-                const test = this.findTestById(data.testId, this.topLevelNode)!
-                test.status = data.isSuccess ? TestStatus.SUCCESS : TestStatus.FAIL
-                test.message = data.message
+                this.handleTestResult(data)
             }
         }
 
-        launch(): void {
-            var ids = this.gatherTestIds(this.topLevelNode)
+        private handleTestResult(result: TestResult): void {
+            const test = this.findTestById(result.testId, this.topLevelNode)!
+            test.status = result.isSuccess ? TestStatus.SUCCESS : TestStatus.FAIL
+            test.message = result.message || null
+            this.testsCompleted++
+            if(this.testsCompleted >= this.totalTests) {
+                this.promise.resolve()
+            }
+        }
+
+        launch(): PromiseLike<void> {
+            let ids: int[] = []
+            this.forEachTest(this.topLevelNode, test => {
+                this.totalTests++
+                test.status = TestStatus.RUNNING
+                ids.push(test.id)
+            })
             this.worker.postMessage(ids)
+            return this.promise
         }
 
         kill(): void {
@@ -28,6 +45,7 @@ namespace SplitTime.testRunner {
                     test.status = TestStatus.NONE
                 }
             })
+            this.promise.resolve()
         }
 
         private findTestById(id: int, node: Node): TestNode | null {
@@ -38,32 +56,6 @@ namespace SplitTime.testRunner {
                 }
             })
             return matchedTest
-            // if(node instanceof GroupNode) {
-            //     for(const child of node.children) {
-            //         const childResult = this.findTestById(id, child)
-            //         if(childResult) {
-            //             return childResult
-            //         }
-            //     }
-            // } else {
-            //     if(node.id === id) {
-            //         return node
-            //     }
-            // }
-            // return null
-        }
-
-        private gatherTestIds(node: Node): int[] {
-            var ids: int[] = []
-            this.forEachTest(node, test => ids.push(test.id))
-            // if(node instanceof GroupNode) {
-            //     for(var i = 0; i < node.children.length; i++) {
-            //         ids = ids.concat(this.gatherTestIds(node.children[i]))
-            //     }
-            // } else {
-            //     ids.push(node.id)
-            // }
-            return ids
         }
 
         private forEachTest(node: Node, callback: (testNode: TestNode) => void): void {

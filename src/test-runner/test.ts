@@ -36,37 +36,6 @@ namespace SplitTime.testRunner {
 
         getTree(): TestTree {
             return new TestTree(this.groups, this.scenarios)
-            // const topLevelNodes: Node[] = []
-            // const groupNodes: GroupNode[] = []
-            // for(const group of this.groups) {
-            //     groupNodes.push(new GroupNode(group.id, group.description))
-            // }
-            // const findGroup = (id: GroupId) => {
-            //     const existingGroup = groupNodes.find(node => node.id === id)
-            //     if(existingGroup) {
-            //         return existingGroup
-            //     }
-            //     const newGroup = new GroupNode(id, "Group #" + groupNodes.length)
-            //     groupNodes.push(newGroup)
-            //     topLevelNodes.push(newGroup)
-            //     return newGroup
-            // }
-            // for(const group of this.groups) {
-            //     if(group.parentId) {
-            //         findGroup(group.parentId).children.push(findGroup(group.id))
-            //     } else {
-            //         topLevelNodes.push(findGroup(group.id))
-            //     }
-            // }
-            // this.scenarios.forEach((scenario, i) => {
-            //     const node = new TestNode(i, scenario.description, scenario.definition)
-            //     if(scenario.parentId) {
-            //         findGroup(scenario.parentId).children.push(node)
-            //     } else {
-            //         topLevelNodes.push(node)
-            //     }
-            // })
-            // return topLevelNodes
         }
     }
 }

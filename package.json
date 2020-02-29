@@ -9,6 +9,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^5.12.1",
     "@types/howler": "^2.1.2",
     "@types/node": "^13.7.4",
     "concat-with-sourcemaps": "^1.1.0",

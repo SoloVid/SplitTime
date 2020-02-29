@@ -7,6 +7,10 @@ namespace SplitTime.test_group_two {
     })
 
     SplitTime.test.scenario(test_group_two, "Second two test", t => {
+        for(var i = 0; i < 9999999; i++) {
+            new Date()
+            Math.random() * Math.sin(i)
+        }
         t.assertEqual(1, 2, "Uh oh")
     })
 }

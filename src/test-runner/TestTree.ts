@@ -17,7 +17,7 @@ namespace SplitTime.testRunner {
 
     export class TestNode {
         public status: int = TestStatus.NONE
-        public message: string | undefined
+        public message: string | null = null
         constructor(
             public readonly id: int,
             public readonly description: string,

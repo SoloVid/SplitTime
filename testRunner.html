@@ -4,85 +4,73 @@
 <head>
     <script src="node_modules/vue/dist/vue.js"></script>
     <script src="build/engine-test.js"></script>
+
+    <link href="node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
+    <style>
+        .list {
+            padding-left: 16px;
+        }
+
+        .clicky {
+            cursor: pointer;
+        }
+
+        .error-box {
+            background-color: rgba(200,50,50,.5);
+            display: inline-block;
+        }
+    </style>
 </head>
 
 <body>
     <!-- item template -->
     <script type="text/x-template" id="item-template">
-    <li>
+    <div class="list-item">
         <div>
             <span
+                class="clicky"
                 @click="toggle"
-                v-if="isGroup">
-                    [{{ isExpanded ? '-' : '+' }}]
+                v-if="isExpandable">
+                <i v-if="!isExpanded" class="fas fa-fw fa-chevron-right"></i>
+                <i v-if="isExpanded" class="fas fa-fw fa-chevron-down"></i>
             </span>
-            <span>(status: {{ computedStatus }})</span>
-            <span @click="toggle">{{ item.description }}</span>
-            <span @click="run">(run)</span>
+            <span title="Success" v-if="!isExpandable"><i class="fas fa-fw fa-flask"></i></span>
+            <span title="Success" v-if="isSuccess"><i style="color:green" class="fas fa-fw fa-check"></i></span>
+            <span title="Failure" v-if="isFail"><i style="color:red" class="fas fa-fw fa-times"></i></span>
+            <span title="Running" v-if="isRunning"><i class="fas fa-fw fa-spinner fa-spin"></i></span>
+            <span title="Not Run" v-if="isNone"><i style="color:rgba(150,150,150,.3)" class="fas fa-fw fa-dot-circle"></i></span>
+            <span>{{ item.description }}</span>
+            <span title="Run" class="clicky" @click="run" v-if="isRunnable"><i class="fas fa-play"></i></span>
+            <span title="Kill" class="clicky" @click="kill" v-if="isKillable"><i class="fas fa-stop"></i></span>
         </div>
-        <ul v-show="isExpanded" v-if="isGroup">
+        <div class="list" v-show="isExpanded" v-if="isGroup">
             <tree-item
             class="item"
             v-for="(child, index) in item.children"
             :key="index"
             :item="child"
             ></tree-item>
-        </ul>
-    </li>
+        </div>
+        <div v-show="isExpanded" v-if="hasError">
+            <pre class="error-box">{{ item.message }}</pre>
+        </div>
+    </div>
     </script>
 
     <!-- the explorer root element -->
-    <ul id="explorer">
+    <div id="explorer">
         <tree-item
             class="item"
             v-for="(child, index) in treeData"
             :key="index"
             :item="child"
         ></tree-item>
-    </ul>
+    </div>
 
     <script>
         // explorer data
         var treeData = SplitTime.test.getTree().topLevelNodes
-        // function setStatusNone(nodeArray) {
-        //     for(var i = 0; i < nodeArray.length; i++) {
-        //         var node = nodeArray[i]
-        //         if(node instanceof SplitTime.testRunner.GroupNode) {
-        //             setStatusNone(node.children)
-        //         } else {
-        //             node.status = TestStatus.NONE
-        //         }
-        //     }
-        // }
-        // setStatusNone(treeData)
-        // function getStatus(node) {
-        //     if(node instanceof SplitTime.testRunner.GroupNode) {
-        //         return node.children.reduce(function(max, child) {
-        //             return Math.max(max, getStatus(child))
-        //         }, TestStatus.NONE)
-        //     } else {
-        //         return node.status
-        //     }
-        // }
-        // function runTest(node) {
-        //     var ids = gatherTestIds(node)
-        //     var worker = new Worker('build/engine-test.js')
-        //     worker.onmessage = function(message) {
-        //         console.log(message)
-        //     }
-        //     worker.postMessage(ids)
-        // }
-        // function gatherTestIds(node) {
-        //     var ids = []
-        //     if(node instanceof SplitTime.testRunner.GroupNode) {
-        //         for(var i = 0; i < node.children.length; i++) {
-        //             ids = ids.concat(gatherTestIds(node.children[i]))
-        //         }
-        //     } else {
-        //         ids.push(node.id)
-        //     }
-        //     return ids
-        // }
+        var TestStatus = SplitTime.testRunner.TestStatus
 
         // define the tree-item component
         Vue.component('tree-item', {
@@ -93,31 +81,60 @@
             data: function () {
                 return {
                     isExpanded: false,
-                    // status: TestStatus.NONE
+                    runner: undefined
                 }
             },
             computed: {
+                isExpandable: function() {
+                    return this.isGroup || this.hasError
+                },
                 isGroup: function () {
                     return this.item.children &&
                         this.item.children.length
                 },
+                hasError: function() {
+                    return !!this.item.message
+                },
+                isRunnable: function() {
+                    return this.item.getStatus() !== SplitTime.testRunner.TestStatus.RUNNING
+                },
+                isKillable: function() {
+                    return !!this.runner
+                },
                 computedStatus: function() {
                     return this.item.getStatus()
-                }
+                },
+                isSuccess: function() {
+                    return this.item.getStatus() === TestStatus.SUCCESS
+                },
+                isFail: function() {
+                    return this.item.getStatus() === TestStatus.FAIL
+                },
+                isRunning: function() {
+                    return this.item.getStatus() === TestStatus.RUNNING
+                },
+                isNone: function() {
+                    return this.item.getStatus() === TestStatus.NONE
+                },
             },
             methods: {
                 toggle: function () {
-                    if (this.isGroup) {
+                    if (this.isExpandable) {
                         this.isExpanded = !this.isExpanded
                     }
                 },
                 run: function() {
                     var runner = new SplitTime.testRunner.WorkerTestRunner("build/engine-test.js", this.item)
-                    runner.launch()
-                    // this.item.status = TestStatus.RUNNING
-                    // runTest(this.item)
-                    // console.log("TODO: actually run the test")
-                    // this.item.status = Math.random() > 0.5 ? TestStatus.SUCCESS : TestStatus.FAIL
+                    this.runner = runner
+                    var that = this
+                    runner.launch().then(function() {
+                        that.runner = undefined
+                    })
+                },
+                kill: function() {
+                    if(this.runner) {
+                        this.runner.kill()
+                    }
                 }
             }
         })
