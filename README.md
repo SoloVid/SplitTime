@@ -90,6 +90,6 @@ All files in a project's home ``dist/`` directory should be served in the produc
 
 ## Editing Levels
 Level files should be saved in a project's ``levels/`` directory, but levels are edited from the SplitTime repository.
-After building the project, launch ``levelEditor.html`` in your browser (at the server-ed localhost address for best results), and provide the name of your project's directory.
+After building the project, launch ``level-editor.html`` in your browser (at the server-ed localhost address for best results), and provide the name of your project's directory.
 
 Since this document is not meant to be an authoritative source for the editor's interface, we'll assume you can figure out how to use it from that point. Do note, though, that you will need to manually put the downloaded level file back into your project's ``levels/`` directory after you are done editing the level.

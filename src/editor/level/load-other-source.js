@@ -20,7 +20,7 @@ $(document).ready(function() {
 		ctx.fillRect(0, 0, 320, 320);
 		subImg2 = subImg2.toDataURL();
 
-		$.getScript("src/editor/level/vueSetup.js", function() {
+		$.getScript("src/editor/level/vue-setup.js", function() {
 			setupEventHandlers();
 		});
 	});
