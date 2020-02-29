@@ -5,14 +5,11 @@ namespace SplitTime.file {
         private idObjectPairs: { id: int; object: any }[] = []
 
         constructor(
-            private readonly objectSerializers: {
-                id: string
-                serializer: ObjectSerializer<unknown>
-            }[]
+            private readonly objectSerializerPool: ObjectSerializerPool
         ) {
-            for (const s of objectSerializers) {
-                this.data[s.id] = []
-            }
+            this.objectSerializerPool.forEach(id => {
+                this.data[id] = []
+            })
         }
 
         serialize<O extends object, T>(thing: O): int {
@@ -22,42 +19,32 @@ namespace SplitTime.file {
                 }
             }
 
-            for (const s of this.objectSerializers) {
-                const st = s.serializer as ObjectSerializer<T>
-                if (st.isT(thing)) {
-                    const id = this.nextUniqueId++
-                    this.idObjectPairs.push({
-                        id: id,
-                        object: thing
-                    })
-                    const bucket = this.data[s.id] as serialized_object_bucket_t
-                    if (typeof bucket !== "object") {
-                        throw new Error(
-                            'Missing data bucket for serialized objects of type "' +
-                                s.id +
-                                '"'
-                        )
-                    }
-                    if (id in bucket) {
-                        throw new Error(
-                            'There appears to be an object of type "' +
-                                s.id +
-                                '" already serialized with ID ' +
-                                id
-                        )
-                    }
-                    const json = st.serialize(this, thing)
-                    bucket[id] = json
-                    return id
-                }
+            const serializer = this.objectSerializerPool.getSerializer(thing)
+            const serializerId = this.objectSerializerPool.getSerializerId(serializer)
+            const id = this.nextUniqueId++
+            this.idObjectPairs.push({
+                id: id,
+                object: thing
+            })
+            const bucket = this.data[serializerId] as serialized_object_bucket_t
+            if (typeof bucket !== "object") {
+                throw new Error(
+                    'Missing data bucket for serialized objects of type "' +
+                    serializerId +
+                        '"'
+                )
             }
-
-            throw new Error(
-                "Unable to find object serializer for object of type " +
-                    thing.constructor.name +
-                    ": " +
-                    JSON.stringify(thing)
-            )
+            if (id in bucket) {
+                throw new Error(
+                    'There appears to be an object of type "' +
+                        serializerId +
+                        '" already serialized with ID ' +
+                        id
+                )
+            }
+            const json = serializer.serialize(this, thing)
+            bucket[id] = json
+            return id
         }
     }
 }

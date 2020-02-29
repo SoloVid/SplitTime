@@ -50,3 +50,8 @@ Let's call "Bodys" NPCs in this doc.
     - Items might provide an opportunity for somewhat more dynamic actions.
     - Actions could have conditions for use based on some character stats or flags.
     - Items should probably be stored in the character object as an array of strings (or some kind of simple object array with quantities).
+
+### Conversation
+
+- Add ellipses for unseen characters in dialog (i.e. before user is able to see dialog)
+- Add line sequence between everything else

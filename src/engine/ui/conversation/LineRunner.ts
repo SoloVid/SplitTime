@@ -1,107 +1,30 @@
 namespace SplitTime.conversation {
-    export class LineRunner {
+    export class LineRunner implements Interruptible {
         private readonly dialog: SpeechBubble
-        private readonly outcome: outcome_t
-        private readonly speakers: Speaker[]
+        private readonly speakers: readonly Speaker[]
         private started: boolean = false
-        private done: boolean = false
-        private readonly promise: SLVD.Promise = new SLVD.Promise()
         constructor(
-            private readonly parentSection: Section,
-            private readonly helper: OrchestrationHelper,
-            private readonly line: Line
+            private readonly conversation: ConversationInstance,
+            private readonly nodeId: BreadCrumbs,
+            private readonly line: Line,
+            private readonly helper: RunnerHelper
         ) {
             this.dialog = new SpeechBubble(
-                this.parentSection.clique,
+                conversation.clique,
                 this.line.speaker.name,
-                this.line.line,
+                this.line.text,
                 this.line.speaker.speechBox
             )
-            this.outcome = {
-                canceled: false,
-                interrupted: true
-            }
-            this.speakers = this.parentSection.getSpeakers()
-        }
-
-        private onInteract() {
-            if (this.parentSection.triggerInterrupt()) {
-                this.outcome.interrupted = true
-                this.dialog.cutOff()
-            } else {
-                this.dialog.advance()
-            }
-        }
-
-        private onDismiss() {
-            if (this.parentSection.isCancelable()) {
-                this.outcome.canceled = true
-                // TODO: keep or remove?
-                this.resolve()
-                this.helper.manager.remove(this.dialog)
-            }
-        }
-
-        private resolve() {
-            this.promise.resolve(this.outcome)
-            this.deregisterHandlers()
+            this.speakers = line.getParent().getSpeakers()
         }
 
         private registerHandlers() {
-            // FTODO: Try to push this up the chain so that we don't attach and detach so often
-            for (const speaker of this.speakers) {
-                speaker.body.registerPlayerInteractHandler(() =>
-                    this.onInteract()
-                )
-                // FTODO: refactor
-                this.parentSection.forEachDetectionInteruptible(
-                    interruptible => {
-                        speaker.body.registerTimeAdvanceListener(
-                            ((detective, interruptible) => {
-                                return (delta: number) => {
-                                    if (this.promise.resolved) {
-                                        return SLVD.STOP_CALLBACKS
-                                    }
-                                    const actualTarget =
-                                        interruptible.body ||
-                                        this.helper.playerBodyGetter()
-                                    if (
-                                        actualTarget &&
-                                        SplitTime.body.canDetect(
-                                            detective,
-                                            actualTarget
-                                        )
-                                    ) {
-                                        if (
-                                            this.parentSection.triggerInterruptByDetection(
-                                                interruptible
-                                            )
-                                        ) {
-                                            this.outcome.interrupted = true
-                                            this.dialog.cutOff()
-                                        }
-                                    }
-                                    return
-                                }
-                            })(speaker.body, interruptible)
-                        )
-                    }
-                )
-            }
-            this.dialog.registerPlayerInteractHandler(() => this.onInteract())
-            this.dialog.registerDismissHandler(() => this.onDismiss())
-            this.dialog.registerDialogEndHandler(() => this.resolve())
+            this.dialog.registerPlayerInteractHandler(() => this.conversation.tryInterrupt(this.nodeId))
+            this.dialog.registerDismissHandler(() => this.conversation.tryCancel(this.nodeId) && this.stop())
+            this.dialog.registerDialogEndHandler(() => this.stop())
         }
 
-        private deregisterHandlers() {
-            for (const speaker of this.speakers) {
-                speaker.body.deregisterPlayerInteractHandler(() =>
-                    this.onInteract()
-                )
-            }
-        }
-
-        run(): PromiseLike<outcome_t> {
+        start(): void {
             if (this.started) {
                 throw new Error("LineRunner already started!")
             }
@@ -109,8 +32,16 @@ namespace SplitTime.conversation {
             // FTODO: make this a bit more object oriented
             this.registerHandlers()
             this.dialog.clique.speakers = this.speakers
-            this.helper.manager.submit(this.dialog)
-            return this.promise
+            this.helper.secretary.submit(this.dialog)
+        }
+
+        stop(): void {
+            this.helper.secretary.remove(this.dialog)
+            this.conversation.notifyNodeCompletion(this.nodeId)
+        }
+
+        interrupt(): void {
+            this.dialog.interrupt()
         }
     }
 }

@@ -1,11 +1,11 @@
 namespace SplitTime.conversation {
-    export type condition_t = true | (() => boolean)
+    export type Condition = true | (() => boolean)
 
     export interface DSL {
         say(speaker: Speaker, line: string): void
         section(sectionSetup: () => void): SectionChain
-        do(action: () => void): void
-        waitUntil(condition: condition_t): void
+        do(action: MidConversationCallback): void
+        // waitUntil(condition: Condition): void
     }
 
     export interface SectionChain extends SectionChainInterruptible {
@@ -20,14 +20,14 @@ namespace SplitTime.conversation {
          * The modified section can be interrupted when the player interacts
          */
         interruptible(
-            condition?: condition_t,
+            condition?: Condition,
             sectionSetup?: () => void
         ): SectionChainInterruptible
         /**
          * The modified section can be interrupted when the body is detected by some speaker
          */
         interruptibleByDetection(
-            condition?: condition_t,
+            condition?: Condition,
             sectionSetup?: () => void,
             body?: Body
         ): SectionChainInterruptible

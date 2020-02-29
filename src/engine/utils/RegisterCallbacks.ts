@@ -14,17 +14,12 @@ namespace SLVD {
     }
 
     export class RegisterCallbacks {
-        _handlers: any[]
-        _isRunningCallbacks: boolean
-        _listAwaitingRegistration: any[]
-        _listAwaitingRemoval: any[]
-        _allowedObjectMethods: any
-        constructor(allowedObjectMethodsPattern?: any) {
-            this._handlers = []
-            this._isRunningCallbacks = false
-            this._listAwaitingRegistration = []
-            this._listAwaitingRemoval = []
-            this._allowedObjectMethods = []
+        private _handlers: Callback[] = []
+        private _isRunningCallbacks: boolean = false
+        private _listAwaitingRegistration: Callback[] = []
+        private _listAwaitingRemoval: Callback[] = []
+        private _allowedObjectMethods: any[] = []
+        constructor(allowedObjectMethodsPattern?: object) {
             if (allowedObjectMethodsPattern) {
                 for (var methodName in allowedObjectMethodsPattern) {
                     this._allowedObjectMethods.push(methodName)
@@ -132,7 +127,7 @@ namespace SLVD {
             return this._handlers.length
         }
 
-        _callFunction(registered: Callback, data: any) {
+        private _callFunction(registered: Callback, data: any) {
             if (typeof registered === "function") {
                 return registered(data)
             }

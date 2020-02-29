@@ -1,6 +1,6 @@
 namespace SplitTime.conversation {
-    export class Wait implements Runnable {
-        constructor(private readonly condition: condition_t) {}
+    export class Wait {
+        constructor(private readonly condition: Condition) {}
 
         async run(): Promise<outcome_t> {
             // TODO: implement

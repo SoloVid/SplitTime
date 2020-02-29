@@ -114,7 +114,7 @@ namespace SplitTime {
             return days * this.hour(this.kHoursPerDay)
         }
 
-        schedule<T extends file.jsonable>(
+        schedule<T extends file.jsonable | void>(
             moment: time.Moment,
             eventInstance: time.EventInstance<T>
         ): void {
@@ -123,7 +123,7 @@ namespace SplitTime {
             )
         }
 
-        scheduleFromNow<T extends file.jsonable>(
+        scheduleFromNow<T extends file.jsonable | void>(
             timeFromNow: game_seconds,
             eventInstance: time.EventInstance<T>
         ): void {

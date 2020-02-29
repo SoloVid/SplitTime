@@ -1,5 +1,5 @@
 namespace SplitTime.conversation {
-    export class SpeechBubble {
+    export class SpeechBubble implements Interruptible {
         // can be cut short
         private _effectiveLine: string
         private _charactersDisplayed: number
@@ -184,7 +184,7 @@ namespace SplitTime.conversation {
             return this._isFinished
         }
 
-        cutOff() {
+        interrupt(): void {
             if (
                 this._charactersDisplayed >
                 this.line.length - 1.5 * DASH.length

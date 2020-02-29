@@ -1,15 +1,20 @@
 namespace SplitTime.conversation {
     export class Line {
+        private parent: LineSequence | null = null
+
         constructor(
-            private readonly parentSection: Section,
-            private readonly helper: OrchestrationHelper,
             public readonly speaker: Speaker,
-            public readonly line: string
+            public readonly text: string
         ) {}
 
-        run(): PromiseLike<outcome_t> {
-            const runner = new LineRunner(this.parentSection, this.helper, this)
-            return runner.run()
+        setParent(parent: LineSequence): void {
+            assert(this.parent === null, "Line parent can only be set once")
+            this.parent = parent
+        }
+
+        getParent(): SectionSpec {
+            assert(this.parent !== null, "Line parent should have been set")
+            return this.parent!.getParent()
         }
     }
 }

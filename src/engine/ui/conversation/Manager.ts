@@ -15,7 +15,7 @@ namespace SplitTime.conversation {
      * - Choose which Dialog object(s) should display on the screen (and push to DialogRenderer).
      * - Delegate screen interactions from the player to appropriate Dialog objects.
      */
-    export class Manager {
+    export class Secretary {
         private dialogs: SpeechBubble[] = []
 
         /**

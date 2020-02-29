@@ -54,29 +54,26 @@ namespace SplitTime.file {
 
         constructor(
             rawData: jsonable,
-            objectSerializers: {
-                id: string
-                serializer: ObjectSerializer<unknown>
-            }[]
+            objectSerializationPool: ObjectSerializerPool
         ) {
             if (typeof rawData !== "object") {
                 throw new Error("Serialized data is not an object as expected")
             }
             this.data = rawData as serialized_format_t
             this.secondPass = new DeserializeSecondPass(this.idObjectPairs)
-            for (const s of objectSerializers) {
-                const bucket = this.data[s.id] as serialized_object_bucket_t
+            objectSerializationPool.forEach((id, s) => {
+                const bucket = this.data[id] as serialized_object_bucket_t
                 if (typeof bucket !== "object") {
                     throw new Error(
                         'Missing data bucket for serialized objects of type "' +
-                            s.id +
+                            id +
                             '"'
                     )
                 }
                 for (const objectId in bucket) {
                     const objectIdN = +objectId
                     const json = bucket[objectIdN]
-                    const thing = s.serializer.deserialize(
+                    const thing = s.deserialize(
                         this.secondPass,
                         json
                     )
@@ -85,7 +82,7 @@ namespace SplitTime.file {
                         object: thing
                     })
                 }
-            }
+            })
         }
 
         deserialize<T>(id: int): PromiseLike<T> {
