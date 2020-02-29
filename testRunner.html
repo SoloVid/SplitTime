@@ -101,9 +101,6 @@
                 isKillable: function() {
                     return !!this.runner
                 },
-                computedStatus: function() {
-                    return this.item.getStatus()
-                },
                 isSuccess: function() {
                     return this.item.getStatus() === TestStatus.SUCCESS
                 },
@@ -128,6 +125,7 @@
                     this.runner = runner
                     var that = this
                     runner.launch().then(function() {
+                        runner.kill()
                         that.runner = undefined
                     })
                 },
