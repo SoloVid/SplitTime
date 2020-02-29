@@ -16,10 +16,8 @@ namespace SplitTime.testRunner {
         // If we run in a WebWorker, add some message handlers
         if(__WORKER__) {
             onmessage = function(message) {
-                console.log('Message received from main script')
                 for(const i of message.data) {
                     const result = runTest(i)
-                    console.log('Posting message back to main script')
                     postMessage(result)
                 }
             }

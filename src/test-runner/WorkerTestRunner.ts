@@ -6,13 +6,12 @@ namespace SplitTime.testRunner {
         private totalTests: int = 0
         private testsCompleted: int = 0
 
-        constructor(scriptPath: string, node: GroupNode | TestNode) {
-            this.worker = new Worker(scriptPath)
+        constructor(id: int, scriptPath: string, node: GroupNode | TestNode) {
+            this.worker = new Worker(scriptPath, { name: "(" + id + ") " + node.description })
             this.topLevelNode = node
 
             this.worker.onmessage = message => {
                 const data = message.data as TestResult
-                console.log(data)
                 this.handleTestResult(data)
             }
         }
@@ -45,7 +44,9 @@ namespace SplitTime.testRunner {
                     test.status = TestStatus.NONE
                 }
             })
-            this.promise.resolve()
+            if(!this.promise.resolved) {
+                this.promise.resolve()
+            }
         }
 
         private findTestById(id: int, node: Node): TestNode | null {
