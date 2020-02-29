@@ -1,4 +1,4 @@
-namespace SplitTime.menu {
+namespace splitTime.menu {
     type menu_option_handler = () => void
 
     export class MenuSpec {

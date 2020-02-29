@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export const FPS = 60
 
     function mainGameLoop(gameLoop: GameLoop) {
@@ -28,10 +28,10 @@ namespace SplitTime {
         }
 
         if (isRunning) {
-            SplitTime.debug.setDebugValue("FPS", displayFPS)
+            splitTime.debug.setDebugValue("FPS", displayFPS)
 
-            if (SplitTime.debug.ENABLED) {
-                SplitTime.debug.renderCanvas(perspective.view.see)
+            if (splitTime.debug.ENABLED) {
+                splitTime.debug.renderCanvas(perspective.view.see)
             }
         }
     }
@@ -64,7 +64,7 @@ namespace SplitTime {
             return
         }
 
-        const secondsForFrame = 1 / SplitTime.FPS
+        const secondsForFrame = 1 / splitTime.FPS
 
         if (isCurrentLevelSet) {
             const level = perspective.levelManager.getCurrent()
@@ -80,11 +80,11 @@ namespace SplitTime {
             g.notifyListenersFrameUpdate(secondsForFrame)
             g.performanceCheckpoint("notify listeners of update")
 
-            SplitTime.debug.setDebugValue(
+            splitTime.debug.setDebugValue(
                 "Board Bodies",
                 perspective.levelManager.getCurrent().bodies.length
             )
-            SplitTime.debug.setDebugValue(
+            splitTime.debug.setDebugValue(
                 "Focus point",
                 Math.round(perspective.camera.getFocusPoint().x) +
                     "," +
@@ -137,14 +137,14 @@ namespace SplitTime {
         private lastPerformanceCheck: Date | null = null
 
         performanceCheckpoint(debugName: string, allow = 5) {
-            if (SplitTime.debug.ENABLED) {
+            if (splitTime.debug.ENABLED) {
                 var now = new Date()
                 if (this.lastPerformanceCheck) {
                     var timePassed =
                         now.getMilliseconds() -
                         this.lastPerformanceCheck.getMilliseconds()
                     if (timePassed > allow) {
-                        SplitTime.Logger.warn(
+                        splitTime.Logger.warn(
                             debugName +
                                 ": " +
                                 timePassed +

@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     class DialogDrawing {
         constructor(
             public dialog: SpeechBubble,

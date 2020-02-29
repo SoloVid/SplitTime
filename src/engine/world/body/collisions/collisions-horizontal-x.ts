@@ -1,7 +1,7 @@
 // NOTE: This file has a sister that is nearly identical: collisionsHorizontalY.js
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
-namespace SplitTime.body.collisions {
+namespace splitTime.body.collisions {
     class CollisionInfo {
         blocked: boolean = false
         bodies: Body[] = []
@@ -15,7 +15,7 @@ namespace SplitTime.body.collisions {
     }
 
     export class HorizontalX {
-        constructor(private readonly mover: SplitTime.body.Mover) {}
+        constructor(private readonly mover: splitTime.body.Mover) {}
 
         /**
          * Check that dx can be accomplished, potentially with vertical adjustment.
@@ -38,13 +38,13 @@ namespace SplitTime.body.collisions {
             if (
                 simpleCollisionInfo.blocked &&
                 simpleCollisionInfo.vStepUpEstimate <=
-                    SplitTime.body.Mover.VERTICAL_FUDGE
+                    splitTime.body.Mover.VERTICAL_FUDGE
             ) {
                 var stepUpZ = this.mover.rising.calculateRiseThroughTraces(
                     x + dx,
                     y,
                     z,
-                    SplitTime.body.Mover.VERTICAL_FUDGE
+                    splitTime.body.Mover.VERTICAL_FUDGE
                 ).zEnd
                 var simpleStepUpCollisionInfo = this.calculateXPixelCollision(
                     this.mover.body.getLevel(),
@@ -58,7 +58,7 @@ namespace SplitTime.body.collisions {
                         x + dx,
                         y,
                         stepUpZ,
-                        SplitTime.body.Mover.VERTICAL_FUDGE
+                        splitTime.body.Mover.VERTICAL_FUDGE
                     ).zBlocked
                     simpleCollisionInfo = simpleStepUpCollisionInfo
                 }
@@ -75,14 +75,14 @@ namespace SplitTime.body.collisions {
          * Check that dx can be accomplished.
          */
         calculateXPixelCollision(
-            level: SplitTime.Level,
+            level: splitTime.Level,
             x: int,
             y: int,
             z: number,
             dx: unit
         ): {
             blocked: boolean
-            bodies: SplitTime.Body[]
+            bodies: splitTime.Body[]
             vStepUpEstimate: number
             events: string[]
             otherLevels: string[]
@@ -92,7 +92,7 @@ namespace SplitTime.body.collisions {
                     ? x + dx + this.mover.body.halfBaseLength
                     : x + dx - this.mover.body.halfBaseLength
             var top = y - this.mover.body.halfBaseLength
-            return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+            return splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
                 level,
                 edgeX,
                 1,

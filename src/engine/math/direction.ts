@@ -1,8 +1,8 @@
-namespace SplitTime {
+namespace splitTime {
     export type direction_t = number
 }
 
-namespace SplitTime.direction {
+namespace splitTime.direction {
     export const E = 0
     export const N = 1
     export const W = 2
@@ -28,8 +28,8 @@ namespace SplitTime.direction {
     }
 
     export function fromString(stringDir: string): direction_t {
-        if (stringDir in SplitTime.direction) {
-            return (SplitTime.direction as any)[stringDir]
+        if (stringDir in splitTime.direction) {
+            return (splitTime.direction as any)[stringDir]
         } else {
             Logger.warn("Invalid direction: " + stringDir)
             return -1
@@ -87,14 +87,14 @@ namespace SplitTime.direction {
     ): direction_t
     export function fromToThing(fromThing: any, toThing: any): direction_t {
         if (typeof fromThing.getX === "function") {
-            return SplitTime.direction.fromTo(
+            return splitTime.direction.fromTo(
                 fromThing.getX(),
                 fromThing.getY(),
                 toThing.getX(),
                 toThing.getY()
             )
         }
-        return SplitTime.direction.fromTo(
+        return splitTime.direction.fromTo(
             fromThing.x,
             fromThing.y,
             toThing.x,
@@ -126,15 +126,15 @@ namespace SplitTime.direction {
 
     export function getXMagnitude(direction: string | direction_t): number {
         if (typeof direction === "string") {
-            return SplitTime.direction.getXMagnitude(
-                SplitTime.direction.fromString(direction)
+            return splitTime.direction.getXMagnitude(
+                splitTime.direction.fromString(direction)
             )
         }
 
         return Math.cos(direction * (Math.PI / 2))
     }
     export function getXSign(direction: string | direction_t) {
-        var magnitude = SplitTime.direction.getXMagnitude(direction)
+        var magnitude = splitTime.direction.getXMagnitude(direction)
         if (magnitude > 0.1) {
             return 1
         } else if (magnitude < -0.1) {
@@ -145,15 +145,15 @@ namespace SplitTime.direction {
 
     export function getYMagnitude(direction: string | direction_t): number {
         if (typeof direction === "string") {
-            return SplitTime.direction.getYMagnitude(
-                SplitTime.direction.fromString(direction)
+            return splitTime.direction.getYMagnitude(
+                splitTime.direction.fromString(direction)
             )
         }
 
         return -Math.sin(direction * (Math.PI / 2))
     }
     export function getYSign(direction: string | direction_t): unitOrZero {
-        var magnitude = SplitTime.direction.getYMagnitude(direction)
+        var magnitude = splitTime.direction.getYMagnitude(direction)
         if (magnitude > 0.1) {
             return 1
         } else if (magnitude < -0.1) {

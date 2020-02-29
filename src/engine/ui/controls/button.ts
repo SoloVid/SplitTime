@@ -1,4 +1,4 @@
-namespace SplitTime.controls {
+namespace splitTime.controls {
     export class Button {
         _bindings: { obsolete: boolean }
         _downCallbacks: SLVD.RegisterCallbacks

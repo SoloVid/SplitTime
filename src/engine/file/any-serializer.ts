@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export interface AnySerializer {
         serialize<T extends object>(thing: T): serialized_object_t
     }

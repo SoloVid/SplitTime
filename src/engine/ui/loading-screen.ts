@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export class LoadingScreen {
         constructor(private readonly view: ui.View) {}
 

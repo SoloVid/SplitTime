@@ -1,4 +1,4 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     export interface Drawable extends FrameNotified, TimeNotified {
         playerOcclusionFadeFactor: number
 
@@ -6,7 +6,7 @@ namespace SplitTime.body {
             x: number,
             y: number,
             z: number
-        ): SplitTime.body.CanvasRequirements
+        ): splitTime.body.CanvasRequirements
 
         draw(ctx: CanvasRenderingContext2D): void
 

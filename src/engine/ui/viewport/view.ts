@@ -1,4 +1,4 @@
-namespace SplitTime.ui {
+namespace splitTime.ui {
     export class View {
         public readonly seeB: HTMLCanvasElement
         public readonly see: CanvasRenderingContext2D
@@ -55,8 +55,8 @@ namespace SplitTime.ui {
 
             parent.appendChild(this.seeB)
 
-            if (SplitTime.debug.ENABLED) {
-                SplitTime.debug.attachDebug(parent)
+            if (splitTime.debug.ENABLED) {
+                splitTime.debug.attachDebug(parent)
             }
         }
     }

@@ -1,4 +1,4 @@
-namespace SplitTime.level {
+namespace splitTime.level {
     export namespace traces {
         export class ZRange {
             // FTODO: int?
@@ -7,7 +7,7 @@ namespace SplitTime.level {
 
         export class CollisionInfo {
             containsSolid: boolean
-            pointerTraces: { [levelId: string]: SplitTime.Trace }
+            pointerTraces: { [levelId: string]: splitTime.Trace }
             zBlockedTopEx: int
             zBlockedBottom: int
             events: { [eventId: string]: ZRange }
@@ -22,16 +22,16 @@ namespace SplitTime.level {
     }
 
     export class Traces {
-        level: SplitTime.Level
-        levelFileData: SplitTime.level.FileData
+        level: splitTime.Level
+        levelFileData: splitTime.level.FileData
         layerFuncData: ImageData[]
         _internalEventIdMap: any
         _internalPointerTraceMap: any
         debugTraceCanvas: HTMLCanvasElement | null = null
 
         constructor(
-            level: SplitTime.Level,
-            levelFileData: SplitTime.level.FileData,
+            level: splitTime.Level,
+            levelFileData: splitTime.level.FileData,
             world: World
         ) {
             this.level = level
@@ -42,20 +42,20 @@ namespace SplitTime.level {
         }
 
         getEventIdFromPixel(r: number, g: number, b: number, a: number) {
-            var eventIntId = SplitTime.Trace.getEventIdFromColor(r, g, b, a)
+            var eventIntId = splitTime.Trace.getEventIdFromColor(r, g, b, a)
             return this._internalEventIdMap[eventIntId]
         }
 
         /**
-         * @return {SplitTime.Trace}
+         * @return {splitTime.Trace}
          */
         getPointerTraceFromPixel(
             r: number,
             g: number,
             b: number,
             a: number
-        ): SplitTime.Trace {
-            var pointerIntId = SplitTime.Trace.getPointerIdFromColor(r, g, b, a)
+        ): splitTime.Trace {
+            var pointerIntId = splitTime.Trace.getPointerIdFromColor(r, g, b, a)
             return this._internalPointerTraceMap[pointerIntId]
         }
 
@@ -135,7 +135,7 @@ namespace SplitTime.level {
             var a = imageData.data[dataIndex++]
             if (a === 255) {
                 switch (r) {
-                    case SplitTime.Trace.RColor.SOLID:
+                    case splitTime.Trace.RColor.SOLID:
                         var height = layerZ + g
                         if (height >= minZ) {
                             collisionInfo.containsSolid = true
@@ -149,7 +149,7 @@ namespace SplitTime.level {
                             )
                         }
                         break
-                    case SplitTime.Trace.RColor.EVENT:
+                    case splitTime.Trace.RColor.EVENT:
                         var eventId = this.getEventIdFromPixel(r, g, b, a)
                         if (!(eventId in collisionInfo.events)) {
                             collisionInfo.events[eventId] = new traces.ZRange(
@@ -167,7 +167,7 @@ namespace SplitTime.level {
                             )
                         }
                         break
-                    case SplitTime.Trace.RColor.POINTER:
+                    case splitTime.Trace.RColor.POINTER:
                         var trace = this.getPointerTraceFromPixel(r, g, b, a)
                         if (!trace.level) {
                             throw new Error("Pointer trace has no level")
@@ -194,7 +194,7 @@ namespace SplitTime.level {
             }
 
             var debugTraceCtx = null
-            if (SplitTime.debug.ENABLED) {
+            if (splitTime.debug.ENABLED) {
                 this.debugTraceCanvas = document.createElement("canvas")
                 this.debugTraceCanvas.width = this.level.width
                 this.debugTraceCanvas.height = this.level.height
@@ -241,72 +241,72 @@ namespace SplitTime.level {
                     var trace = layerTraces[iLayerTrace]
                     var type = trace.type
                     switch (type) {
-                        case SplitTime.Trace.Type.EVENT:
+                        case splitTime.Trace.Type.EVENT:
                             var eventStringId = trace.event
                             var eventIntId = nextFunctionId++
                             this._internalEventIdMap[eventIntId] = eventStringId
-                            var functionColor = SplitTime.Trace.getEventColor(
+                            var functionColor = splitTime.Trace.getEventColor(
                                 eventIntId
                             )
-                            SplitTime.Trace.drawColor(
+                            splitTime.Trace.drawColor(
                                 trace.vertices,
                                 holderCtx,
                                 functionColor
                             )
                             break
-                        case SplitTime.Trace.Type.SOLID:
+                        case splitTime.Trace.Type.SOLID:
                             var height = +trace.height || layerHeight
-                            SplitTime.Trace.drawColor(
+                            splitTime.Trace.drawColor(
                                 trace.vertices,
                                 holderCtx,
-                                SplitTime.Trace.getSolidColor(height)
+                                splitTime.Trace.getSolidColor(height)
                             )
                             break
-                        case SplitTime.Trace.Type.GROUND:
-                            SplitTime.Trace.drawColor(
+                        case splitTime.Trace.Type.GROUND:
+                            splitTime.Trace.drawColor(
                                 trace.vertices,
                                 holderCtx,
-                                SplitTime.Trace.getSolidColor(0)
+                                splitTime.Trace.getSolidColor(0)
                             )
                             break
-                        case SplitTime.Trace.Type.STAIRS:
+                        case splitTime.Trace.Type.STAIRS:
                             var stairsUpDirection = trace.direction
-                            var gradient = SplitTime.Trace.calculateGradient(
+                            var gradient = splitTime.Trace.calculateGradient(
                                 trace.vertices,
                                 holderCtx,
                                 stairsUpDirection
                             )
                             gradient.addColorStop(
                                 0,
-                                SplitTime.Trace.getSolidColor(0)
+                                splitTime.Trace.getSolidColor(0)
                             )
                             gradient.addColorStop(
                                 1,
-                                SplitTime.Trace.getSolidColor(layerHeight)
+                                splitTime.Trace.getSolidColor(layerHeight)
                             )
-                            SplitTime.Trace.drawColor(
+                            splitTime.Trace.drawColor(
                                 trace.vertices,
                                 holderCtx,
                                 gradient
                             )
                             break
-                        case SplitTime.Trace.Type.POINTER:
+                        case splitTime.Trace.Type.POINTER:
                             var pointerIntId = nextPointerId++
-                            // TODO: actual SplitTime.Trace object
+                            // TODO: actual splitTime.Trace object
                             this._internalPointerTraceMap[
                                 pointerIntId
-                            ] = SplitTime.Trace.fromRaw(trace, world)
-                            var pointerColor = SplitTime.Trace.getPointerColor(
+                            ] = splitTime.Trace.fromRaw(trace, world)
+                            var pointerColor = splitTime.Trace.getPointerColor(
                                 pointerIntId
                             )
-                            SplitTime.Trace.drawColor(
+                            splitTime.Trace.drawColor(
                                 trace.vertices,
                                 holderCtx,
                                 pointerColor
                             )
                             break
-                        case SplitTime.Trace.Type.TRANSPORT:
-                            var transportTrace = SplitTime.Trace.fromRaw(
+                        case splitTime.Trace.Type.TRANSPORT:
+                            var transportTrace = splitTime.Trace.fromRaw(
                                 trace,
                                 world
                             )
@@ -315,17 +315,17 @@ namespace SplitTime.level {
                             this._internalEventIdMap[
                                 transportIntId
                             ] = transportStringId
-                            var transportColor = SplitTime.Trace.getEventColor(
+                            var transportColor = splitTime.Trace.getEventColor(
                                 transportIntId
                             )
-                            SplitTime.Trace.drawColor(
+                            splitTime.Trace.drawColor(
                                 trace.vertices,
                                 holderCtx,
                                 transportColor
                             )
                             break
                         default:
-                            SplitTime.Trace.draw(
+                            splitTime.Trace.draw(
                                 layerTraces[iLayerTrace].vertices,
                                 holderCtx,
                                 type
@@ -344,7 +344,7 @@ namespace SplitTime.level {
                     holderCanvas.height
                 )
 
-                if (SplitTime.debug.ENABLED && debugTraceCtx !== null) {
+                if (splitTime.debug.ENABLED && debugTraceCtx !== null) {
                     debugTraceCtx.drawImage(holderCanvas, 0, -layerZ)
                 }
             }

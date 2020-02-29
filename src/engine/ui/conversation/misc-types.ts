@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export type conversation_tree_pointer_t = readonly int[]
     export type outcome_t = { canceled: boolean, interrupted: boolean }
     export type SectionSpecRawPart = SectionSpec | Line | MidConversationAction

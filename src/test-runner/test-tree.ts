@@ -1,4 +1,4 @@
-namespace SplitTime.testRunner {
+namespace splitTime.testRunner {
     export type Node = GroupNode | TestNode
 
     export class GroupNode {

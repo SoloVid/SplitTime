@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     type region_json_t = {
         id: string
     }

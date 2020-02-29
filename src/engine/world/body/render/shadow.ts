@@ -1,13 +1,13 @@
-namespace SplitTime.body {
-    export class Shadow implements SplitTime.body.Drawable {
+namespace splitTime.body {
+    export class Shadow implements splitTime.body.Drawable {
         realBody: Body
         shadowBody: Body
         minRadius: number
         maxRadius: any
         radius: any
-        constructor(body: SplitTime.Body) {
+        constructor(body: splitTime.Body) {
             this.realBody = body
-            this.shadowBody = new SplitTime.Body()
+            this.shadowBody = new splitTime.Body()
             this.shadowBody.drawable = this
             this.shadowBody.baseLength = body.baseLength
             this.shadowBody.height = 0
@@ -20,7 +20,7 @@ namespace SplitTime.body {
         playerOcclusionFadeFactor = 0
 
         getCanvasRequirements(x: number, y: number, z: number) {
-            return new SplitTime.body.CanvasRequirements(
+            return new splitTime.body.CanvasRequirements(
                 Math.round(x),
                 Math.round(y),
                 Math.round(z),

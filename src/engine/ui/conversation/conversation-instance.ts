@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     type Action = Line | MidConversationAction
     type Part = Action | SectionSpec | LineSequence | InterruptibleSpec
 

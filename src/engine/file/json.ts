@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export type jsonable =
         | boolean
         | number
@@ -53,7 +53,7 @@ namespace SplitTime.file {
     }
 }
 
-namespace SplitTime.instanceOf {
+namespace splitTime.instanceOf {
     export function jsonable(obj: any): obj is file.jsonable {
         const type = typeof obj
         switch (type) {

@@ -1,4 +1,4 @@
-namespace SplitTime.controls {
+namespace splitTime.controls {
     export class Keyboard {
         private keyDown: { [keyCode: number]: boolean } = {}
 

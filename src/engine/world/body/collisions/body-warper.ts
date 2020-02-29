@@ -1,10 +1,10 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     export class Warper {
-        level: SplitTime.Level
+        level: splitTime.Level
         baseLength: number
         halfBaseLength: number
         height: number
-        constructor(public readonly body: SplitTime.Body) {
+        constructor(public readonly body: splitTime.Body) {
             this.level = body.getLevel()
 
             this.baseLength = this.body.baseLength
@@ -17,13 +17,13 @@ namespace SplitTime.body {
          */
         ensureInRegion() {
             // TODO: maybe reimplement?
-            // if(this.body.getLevel().getRegion() !== SplitTime.Region.getCurrent()) {
+            // if(this.body.getLevel().getRegion() !== splitTime.Region.getCurrent()) {
             //     throw new Error("Attempt to do zelda movement for body not in current region");
             // }
         }
 
         /**
-         * Advances SplitTime.Body up to maxDistance pixels as far as is legal.
+         * Advances splitTime.Body up to maxDistance pixels as far as is legal.
          * Includes pushing other Bodys out of the way? (this part is currently unavailable)
          * @param {number} dir
          * @param {number} maxDistance
@@ -37,11 +37,11 @@ namespace SplitTime.body {
             var z = Math.round(this.body.z)
             var furthestX = Math.round(
                 this.body.x +
-                    maxDistance * SplitTime.direction.getXMagnitude(dir)
+                    maxDistance * splitTime.direction.getXMagnitude(dir)
             )
             var furthestY = Math.round(
                 this.body.y +
-                    maxDistance * SplitTime.direction.getYMagnitude(dir)
+                    maxDistance * splitTime.direction.getYMagnitude(dir)
             )
 
             var toX: number | null = null
@@ -93,10 +93,10 @@ namespace SplitTime.body {
                 this.body.put(this.level, toX, toY, z)
                 this.level.runEvents(events, this.body)
                 if (otherLevelId !== null) {
-                    var transporter = new SplitTime.body.Transporter(this.body)
+                    var transporter = new splitTime.body.Transporter(this.body)
                     transporter.transportLevelIfApplicable(otherLevelId)
                 }
-                return SplitTime.measurement.distanceTrue(
+                return splitTime.measurement.distanceTrue(
                     startX,
                     startY,
                     toX,
@@ -115,7 +115,7 @@ namespace SplitTime.body {
             var left = x - this.halfBaseLength
             var top = y - this.halfBaseLength
 
-            return SplitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+            return splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
                 this.level,
                 left,
                 this.baseLength,

@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export type Condition = true | (() => boolean)
 
     export interface DSL {

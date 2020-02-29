@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export interface SpecialSerializer {
         id: string
         serialize(s: AnySerializer): jsonable

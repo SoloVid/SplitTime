@@ -1,4 +1,4 @@
-namespace SplitTime.testRunner {
+namespace splitTime.testRunner {
     export class ConsoleTestRunner {
         // FTODO: maybe clean up; not sure these log statements would look right in browser
         private redError(message: string) {
@@ -12,7 +12,7 @@ namespace SplitTime.testRunner {
         run(): void {
             console.info("Running tests in console...");
             const testHelper = new ExceptionTestHelper()
-            const scenarios = SplitTime.test.getScenarios()
+            const scenarios = splitTime.test.getScenarios()
             let passedCount = 0
             for(const testDef of scenarios) {
                 try {

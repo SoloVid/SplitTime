@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export const ENTER_LEVEL_FUNCTION_ID = "__ENTER_LEVEL"
     export const EXIT_LEVEL_FUNCTION_ID = "__EXIT_LEVEL"
 
@@ -32,7 +32,7 @@ namespace SplitTime {
             this.background = ""
             this.layerFuncData = []
 
-            // this._bodyOrganizer = new SplitTime.Level.BodyOrganizer();
+            // this._bodyOrganizer = new splitTime.Level.BodyOrganizer();
             this._cellGrid = null
 
             this.weather = new WeatherSettings()
@@ -43,7 +43,7 @@ namespace SplitTime {
 
         load(
             world: World,
-            levelData: SplitTime.level.FileData
+            levelData: splitTime.level.FileData
         ): PromiseLike<any> {
             const levelLoadPromises: PromiseLike<unknown>[] = []
 
@@ -88,12 +88,12 @@ namespace SplitTime {
             //Pull positions from file
             for (var i = 0; i < levelData.positions.length; i++) {
                 var posObj = levelData.positions[i]
-                var position = new SplitTime.Position(
+                var position = new splitTime.Position(
                     this,
                     +posObj.x,
                     +posObj.y,
                     +posObj.z,
-                    SplitTime.direction.interpret(posObj.dir),
+                    splitTime.direction.interpret(posObj.dir),
                     posObj.stance
                 )
 
@@ -107,7 +107,7 @@ namespace SplitTime {
                 // var alias = ...;
                 //
                 // if(actor && alias) {
-                //     SplitTime.Actor[actor].registerPosition(alias, position);
+                //     splitTime.Actor[actor].registerPosition(alias, position);
                 // }
             }
 
@@ -121,8 +121,8 @@ namespace SplitTime {
                     var rawTrace = layerTraces[iLayerTrace]
                     var type = rawTrace.type
                     switch (type) {
-                        case SplitTime.Trace.Type.TRANSPORT:
-                            var trace = SplitTime.Trace.fromRaw(rawTrace, world)
+                        case splitTime.Trace.Type.TRANSPORT:
+                            var trace = splitTime.Trace.fromRaw(rawTrace, world)
                             const level = trace.level
                             if (!level) {
                                 throw new Error(
@@ -133,7 +133,7 @@ namespace SplitTime {
                             this.registerEvent(
                                 transportTraceId,
                                 (function(trace, level) {
-                                    return (body: SplitTime.Body) => {
+                                    return (body: splitTime.Body) => {
                                         body.put(
                                             level,
                                             body.x + trace.offsetX,
@@ -164,14 +164,14 @@ namespace SplitTime {
             return this.loadPromise
         }
 
-        getCellGrid(): SplitTime.level.CellGrid {
+        getCellGrid(): splitTime.level.CellGrid {
             if (!this._cellGrid) {
                 throw new Error("CellGrid unavailable")
             }
             return this._cellGrid
         }
 
-        getLevelTraces(): SplitTime.level.Traces {
+        getLevelTraces(): splitTime.level.Traces {
             return this._levelTraces
         }
 
@@ -197,7 +197,7 @@ namespace SplitTime {
             return this.region
         }
 
-        getPosition(positionId: string): SplitTime.Position {
+        getPosition(positionId: string): splitTime.Position {
             if (!this.positions[positionId]) {
                 throw new Error(
                     'Level "' +
@@ -267,13 +267,13 @@ namespace SplitTime {
             }
         }
 
-        forEachBody(callback: (body: SplitTime.Body) => any) {
+        forEachBody(callback: (body: splitTime.Body) => any) {
             for (var i = 0; i < this.bodies.length; i++) {
                 callback(this.bodies[i])
             }
         }
 
-        getBodies(): SplitTime.Body[] {
+        getBodies(): splitTime.Body[] {
             return this.bodies
         }
 
@@ -282,8 +282,8 @@ namespace SplitTime {
                 throw new Error("this.fileData is null")
             }
 
-            // this._bodyOrganizer = new SplitTime.level.BodyOrganizer(this);
-            this._cellGrid = new SplitTime.level.CellGrid(this)
+            // this._bodyOrganizer = new splitTime.level.BodyOrganizer(this);
+            this._cellGrid = new splitTime.level.CellGrid(this)
 
             for (var iBody = 0; iBody < this.bodies.length; iBody++) {
                 this._cellGrid.addBody(this.bodies[iBody])
@@ -301,7 +301,7 @@ namespace SplitTime {
                     obj.put(this, +prop.x, +prop.y, +prop.z, true)
                     obj.dir =
                         typeof prop.dir === "string"
-                            ? SplitTime.direction.fromString(prop.dir)
+                            ? splitTime.direction.fromString(prop.dir)
                             : +prop.dir
                     if (obj.drawable instanceof Sprite) {
                         obj.drawable.requestStance(
@@ -319,7 +319,7 @@ namespace SplitTime {
                         obj.drawable.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor
                     }
                 } else {
-                    SplitTime.Logger.error(
+                    splitTime.Logger.error(
                         'Template "' +
                             template +
                             '" not found for instantiating prop'
@@ -332,7 +332,7 @@ namespace SplitTime {
         /**
          * @deprecated Used to be related to rendering; not sure interface is still appropriate
          */
-        insertBody(body: SplitTime.Body) {
+        insertBody(body: splitTime.Body) {
             if (this.bodies.indexOf(body) < 0) {
                 this.bodies.push(body)
                 if (this._addingProps) {
@@ -347,7 +347,7 @@ namespace SplitTime {
         /**
          * @deprecated Used to be related to rendering; not sure interface is still appropriate
          */
-        removeBody(body: SplitTime.Body) {
+        removeBody(body: splitTime.Body) {
             if (this._cellGrid) {
                 this._cellGrid.removeBody(body)
             }
@@ -364,7 +364,7 @@ namespace SplitTime {
             if (this.fileData === null) {
                 throw new Error("this.fileData is null")
             }
-            this._levelTraces = new SplitTime.level.Traces(
+            this._levelTraces = new splitTime.level.Traces(
                 this,
                 this.fileData,
                 world

@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class SectionBuilderFluentReturn implements SectionChain {
         constructor(
             private readonly sectionBuilder: SectionBuilder,

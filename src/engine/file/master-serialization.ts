@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export class MasterSerialization implements AnySerializer {
         public readonly data: serialized_format_t = {}
         private nextUniqueId: int = 10

@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     type body_getter = () => Body | null
     type level_getter = () => Level
 
@@ -12,7 +12,7 @@ namespace SplitTime {
             z: 0
         }
 
-        private currentLevel: SplitTime.Level | null = null
+        private currentLevel: splitTime.Level | null = null
 
         /** @type {{x: number, y: number, z: number}[]} */
         private focusPoints: { x: number; y: number; z: number }[] = []

@@ -1,4 +1,4 @@
-namespace SplitTime.body.collisions {
+namespace splitTime.body.collisions {
     class CollisionInfo {
         x: int = -1
         y: int = -1
@@ -12,7 +12,7 @@ namespace SplitTime.body.collisions {
 
     export class Falling {
         mover: Mover
-        constructor(mover: SplitTime.body.Mover) {
+        constructor(mover: splitTime.body.Mover) {
             this.mover = mover
         }
         /**
@@ -140,7 +140,7 @@ namespace SplitTime.body.collisions {
             }
 
             var levelTraces = this.mover.body.level.getLevelTraces()
-            var originCollisionInfo = new SplitTime.level.traces.CollisionInfo()
+            var originCollisionInfo = new splitTime.level.traces.CollisionInfo()
             //Loop through Y width of base
             for (var testY = startY; testY < startY + yPixels; testY++) {
                 //Loop through X width of base

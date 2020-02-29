@@ -1,7 +1,7 @@
-namespace SplitTime {
+namespace splitTime {
     let nextRef = 10
 
-    export class Sprite implements SplitTime.body.Drawable {
+    export class Sprite implements splitTime.body.Drawable {
         private img: string
         private _timeMs: number
         private _frameSignaler: Signaler
@@ -9,7 +9,7 @@ namespace SplitTime {
         constructor(img: string) {
             this.img = img
             this._timeMs = 0
-            this._frameSignaler = new SplitTime.IntervalStabilizer(
+            this._frameSignaler = new splitTime.IntervalStabilizer(
                 200,
                 1,
                 () => {
@@ -34,12 +34,12 @@ namespace SplitTime {
 
         opacity = 1
         playerOcclusionFadeFactor = 0
-        stance = SplitTime.Sprite.DEFAULT_STANCE
-        requestedStance = SplitTime.Sprite.DEFAULT_STANCE
+        stance = splitTime.Sprite.DEFAULT_STANCE
+        requestedStance = splitTime.Sprite.DEFAULT_STANCE
         requestedFrameReset = false
         frame = 0
-        dir = SplitTime.direction.S
-        requestedDir = SplitTime.direction.S
+        dir = splitTime.direction.S
+        requestedDir = splitTime.direction.S
 
         stances: {
             [x: string]: { S: number; N: number; E: number; W: number } | number
@@ -57,7 +57,7 @@ namespace SplitTime {
         }
 
         getCanvasRequirements(x: number, y: number, z: number) {
-            return new SplitTime.body.CanvasRequirements(
+            return new splitTime.body.CanvasRequirements(
                 Math.round(x),
                 Math.round(y),
                 Math.round(z),
@@ -71,7 +71,7 @@ namespace SplitTime {
 
             ctx.rotate(this.rotate)
 
-            //SplitTime.onBoard.bodies is displayed partially transparent depending on health (<= 50% transparent)
+            //splitTime.onBoard.bodies is displayed partially transparent depending on health (<= 50% transparent)
             //ctx.globalAlpha = (this.hp + this.strg)/(2*this.strg);
 
             this._drawSimple(ctx)
@@ -119,8 +119,8 @@ namespace SplitTime {
             }
 
             var column = 0
-            var dir = SplitTime.direction.toString(numDir)
-            var simpleDir = SplitTime.direction.simplifyToCardinal(dir)
+            var dir = splitTime.direction.toString(numDir)
+            var simpleDir = splitTime.direction.simplifyToCardinal(dir)
 
             //Allow for non-complicated spritesheets with one column
             if (!this.stances) {
@@ -175,8 +175,8 @@ namespace SplitTime {
         getAnimationFramesAvailable(): int {
             var calculation = Math.floor(this.getImage().height / this.yres)
             if (isNaN(calculation)) {
-                if (SplitTime.debug.ENABLED) {
-                    SplitTime.Logger.warn(
+                if (splitTime.debug.ENABLED) {
+                    splitTime.Logger.warn(
                         this.img +
                             " not loaded yet for frame count calculation for " +
                             this.ref
@@ -217,7 +217,7 @@ namespace SplitTime {
         }
 
         private resetStance() {
-            this.requestStance(SplitTime.Sprite.DEFAULT_STANCE, this.dir, true)
+            this.requestStance(splitTime.Sprite.DEFAULT_STANCE, this.dir, true)
         }
 
         notifyFrameUpdate(delta: number) {
@@ -238,8 +238,8 @@ namespace SplitTime {
             }
         }
 
-        clone(): SplitTime.Sprite {
-            var clone = new SplitTime.Sprite(this.img)
+        clone(): splitTime.Sprite {
+            var clone = new splitTime.Sprite(this.img)
             clone.xres = this.xres
             clone.yres = this.yres
             clone.baseOffX = this.baseOffX

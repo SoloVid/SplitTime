@@ -1,4 +1,4 @@
-namespace SplitTime.level {
+namespace splitTime.level {
     export interface FileData {
         fileName: string
         type: "action"

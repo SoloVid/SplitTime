@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     type level_getter = () => Level
     type body_getter = () => Body | null
 
@@ -66,7 +66,7 @@ namespace SplitTime {
                     }
                 }
                 if (body.shadow) {
-                    var shadow = new SplitTime.body.Shadow(body)
+                    var shadow = new splitTime.body.Shadow(body)
                     shadow.prepareForRender()
                     this.bodyRenderer.feedBody(shadow.shadowBody, false)
                 }
@@ -81,16 +81,16 @@ namespace SplitTime {
                 this.SCREEN_HEIGHT
             )
 
-            // if(SplitTime.process == "TRPG")
+            // if(splitTime.process == "TRPG")
             // {
             // 	//Draw blue range squares
-            // 	if(index == SplitTime.cTeam[SplitTime.currentPlayer].z && SplitTime.cTeam[SplitTime.currentPlayer].squares)
+            // 	if(index == splitTime.cTeam[splitTime.currentPlayer].z && splitTime.cTeam[splitTime.currentPlayer].squares)
             // 	{
-            // 		for(second = 0; second < SplitTime.cTeam[SplitTime.currentPlayer].squares.length; second++)
+            // 		for(second = 0; second < splitTime.cTeam[splitTime.currentPlayer].squares.length; second++)
             // 		{
-            // 			SplitTime.see.fillStyle = "rgba(0, 100, 255, .5)";
-            // 			SplitTime.see.fillRect(SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
-            // 			//SplitTime.see.drawImage(SplitTime.image.get("blueSquare.png"), 0, 0, 32, 32, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].x*32 - SplitTime.wX, SplitTime.cTeam[SplitTime.currentPlayer].squares[second].y*32 - SplitTime.wY, 32, 32);
+            // 			splitTime.see.fillStyle = "rgba(0, 100, 255, .5)";
+            // 			splitTime.see.fillRect(splitTime.cTeam[splitTime.currentPlayer].squares[second].x*32 - splitTime.wX, splitTime.cTeam[splitTime.currentPlayer].squares[second].y*32 - splitTime.wY, 32, 32);
+            // 			//splitTime.see.drawImage(splitTime.image.get("blueSquare.png"), 0, 0, 32, 32, splitTime.cTeam[splitTime.currentPlayer].squares[second].x*32 - splitTime.wX, splitTime.cTeam[splitTime.currentPlayer].squares[second].y*32 - splitTime.wY, 32, 32);
             // 		}
             // 	}
             // }
@@ -124,7 +124,7 @@ namespace SplitTime {
 
             this.snapshot.context.globalCompositeOperation = "source-over"
 
-            if (SplitTime.debug.ENABLED && SplitTime.debug.DRAW_TRACES) {
+            if (splitTime.debug.ENABLED && splitTime.debug.DRAW_TRACES) {
                 this.snapshot.context.globalAlpha = 0.5
                 this.snapshot.context.drawImage(
                     currentLevel.getDebugTraceCanvas(),
@@ -144,12 +144,12 @@ namespace SplitTime {
 
             this.weatherRenderer.render(currentLevel)
 
-            //Display current SplitTime.player stats
-            // SplitTime.see.fillStyle="#FFFFFF";
-            // SplitTime.see.font="12px Verdana";
-            // SplitTime.see.fillText(SplitTime.player[SplitTime.currentPlayer].name + ": " + SplitTime.player[SplitTime.currentPlayer].hp + " HP | " + SplitTime.player[SplitTime.currentPlayer].strg + " Strength | " + SplitTime.player[SplitTime.currentPlayer].spd + " Agility", 10, 20);
+            //Display current splitTime.player stats
+            // splitTime.see.fillStyle="#FFFFFF";
+            // splitTime.see.font="12px Verdana";
+            // splitTime.see.fillText(splitTime.player[splitTime.currentPlayer].name + ": " + splitTime.player[splitTime.currentPlayer].hp + " HP | " + splitTime.player[splitTime.currentPlayer].strg + " Strength | " + splitTime.player[splitTime.currentPlayer].spd + " Agility", 10, 20);
             //
-            // SplitTime.Timeline.renderClock(SplitTime.see); //in time.js
+            // splitTime.Timeline.renderClock(splitTime.see); //in time.js
 
             //Save screen into snapshot
             this.see.drawImage(this.buffer.element, 0, 0)

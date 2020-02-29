@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     const MIN_SCORE = 1
 
     interface LimitedPerspective {
@@ -119,7 +119,7 @@ namespace SplitTime.conversation {
             var focusPoint = this.perspective.camera.getFocusPoint()
             var location = dialog.getLocation()
 
-            var distance = SplitTime.measurement.distanceEasy(
+            var distance = splitTime.measurement.distanceEasy(
                 focusPoint.x,
                 focusPoint.y,
                 location.getX(),
@@ -133,7 +133,7 @@ namespace SplitTime.conversation {
                 if (speakersExcludingPlayer.length > 0) {
                     distance = speakersExcludingPlayer
                         .map(s =>
-                            SplitTime.measurement.distanceEasy(
+                            splitTime.measurement.distanceEasy(
                                 focusPoint.x,
                                 focusPoint.y,
                                 s.body.getX(),

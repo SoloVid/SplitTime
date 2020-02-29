@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     class CollisionInfo {
         blocked: boolean = false
         bodies: Body[] = []
@@ -18,14 +18,14 @@ namespace SplitTime {
          * Calculate collisions in volume. This function is primarily useful for gauging a slice of volume (i.e. one-pixel step).
          */
         calculateVolumeCollision(
-            level: SplitTime.Level,
+            level: splitTime.Level,
             startX: int,
             xPixels: int,
             startY: int,
             yPixels: int,
             startZ: int,
             zPixels: int,
-            ignoreBody?: SplitTime.Body
+            ignoreBody?: splitTime.Body
         ): CollisionInfo {
             var collisionInfo = new CollisionInfo()
             function handleFoundBody(otherBody: Body) {
@@ -113,7 +113,7 @@ namespace SplitTime {
          * Check that the volume is open in level collision canvas data.
          */
         calculateVolumeTraceCollision(
-            level: SplitTime.Level,
+            level: splitTime.Level,
             startX: int,
             xPixels: int,
             startY: int,
@@ -123,7 +123,7 @@ namespace SplitTime {
         ): CollisionInfo {
             var collisionInfo = new CollisionInfo()
 
-            var originCollisionInfo = new SplitTime.level.traces.CollisionInfo()
+            var originCollisionInfo = new splitTime.level.traces.CollisionInfo()
             level
                 .getLevelTraces()
                 .calculateVolumeCollision(

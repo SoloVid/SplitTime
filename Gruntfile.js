@@ -33,8 +33,8 @@ module.exports = function(grunt) {
         },
         uglify: {
             options: {
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n;var SplitTime = (function() {\n',
-                footer: '\nreturn SplitTime;\n} ());'
+                banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n;var splitTime = (function() {\n',
+                footer: '\nreturn splitTime;\n} ());'
             },
             project: {
                 files: {
@@ -53,7 +53,7 @@ module.exports = function(grunt) {
                     console: true,
                     document: true,
                     SLVD: true,
-                    SplitTime: true
+                    splitTime: true
                 },
                 reporterOutput: ""
             },
@@ -198,10 +198,10 @@ module.exports = function(grunt) {
         grunt.file.write(path.join(projectRoot, "build/generated/data.js"), dataFileContents);
     });
 
-    grunt.registerTask(TASK_DECL_GEN, 'Create index.d.ts for SplitTime .d.ts files', function() {
-        grunt.log.writeln("Generating index.d.ts for SplitTime");
+    grunt.registerTask(TASK_DECL_GEN, 'Create index.d.ts for splitTime .d.ts files', function() {
+        grunt.log.writeln("Generating index.d.ts for splitTime");
         var declRefs = [];
-        grunt.file.recurse("build/@types/SplitTime/", function(absPath, rootDir, subDir, fileName) {
+        grunt.file.recurse("build/@types/splitTime/", function(absPath, rootDir, subDir, fileName) {
             if(/index\.d\.ts$/.test(fileName)) {
                 // Skip index.d.ts
             } else if(/\.d\.ts$/.test(fileName)) {
@@ -215,7 +215,7 @@ module.exports = function(grunt) {
 
         var indexFileContents = declRefs.join("\n");
         grunt.verbose.writeln("Writing index.d.ts file");
-        grunt.file.write("build/@types/SplitTime/index.d.ts", indexFileContents);
+        grunt.file.write("build/@types/splitTime/index.d.ts", indexFileContents);
     });
 
     function getPathInNodeModules(pathPart) {

@@ -1,13 +1,13 @@
-namespace SplitTime.agent {
+namespace splitTime.agent {
     export class ControlledCollisionMovement {
-        private body: SplitTime.Body
+        private body: splitTime.Body
         private targetBoardX: number | null = null
         private targetBoardY: number | null = null
         private targetScreenX: number | null = null
         private targetScreenY: number | null = null
         private targetDirection: number | null = null
 
-        public constructor(body: SplitTime.Body) {
+        public constructor(body: splitTime.Body) {
             this.body = body
         }
         setBody(body: Body) {
@@ -70,8 +70,8 @@ namespace SplitTime.agent {
             return null
         }
 
-        private get sprite(): SplitTime.Sprite | null {
-            if (this.body.drawable instanceof SplitTime.Sprite) {
+        private get sprite(): splitTime.Sprite | null {
+            if (this.body.drawable instanceof splitTime.Sprite) {
                 return this.body.drawable
             }
             return null

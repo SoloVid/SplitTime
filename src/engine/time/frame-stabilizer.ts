@@ -1,9 +1,9 @@
-namespace SplitTime {
+namespace splitTime {
     export class FrameStabilizer implements Signaler {
-        _internalStabilizer: SplitTime.IntervalStabilizer
+        _internalStabilizer: splitTime.IntervalStabilizer
 
         constructor(msPerFrame: number, maxCounter: number = 1) {
-            this._internalStabilizer = new SplitTime.IntervalStabilizer(
+            this._internalStabilizer = new splitTime.IntervalStabilizer(
                 msPerFrame,
                 maxCounter,
                 function() {

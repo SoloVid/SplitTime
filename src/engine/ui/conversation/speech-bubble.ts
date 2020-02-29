@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class SpeechBubble implements Interruptible {
         // can be cut short
         private _effectiveLine: string
@@ -6,7 +6,7 @@ namespace SplitTime.conversation {
         private _startDelay: number | null = null
         private _isFinished: boolean
         private _location: ILevelLocation
-        private _timeline: SplitTime.Timeline | null = null
+        private _timeline: splitTime.Timeline | null = null
         private _lastStepMs: number = 0
         private _playerInteractHandler:
             | PlayerInteractHandler
@@ -169,7 +169,7 @@ namespace SplitTime.conversation {
                 ) {
                     this._dialogEndHandler.onConversationEnd()
                 } else {
-                    SplitTime.Logger.error(
+                    splitTime.Logger.error(
                         "Invalid dialog end handler: ",
                         this._dialogEndHandler
                     )

@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class LineRunner implements Interruptible {
         private readonly dialog: SpeechBubble
         private readonly speakers: readonly Speaker[]

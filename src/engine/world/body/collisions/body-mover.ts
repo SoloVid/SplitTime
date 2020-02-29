@@ -1,4 +1,4 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     class BodyExt {
         bumped: boolean = false
         pushing: boolean = false
@@ -10,7 +10,7 @@ namespace SplitTime.body {
     }
 
     export class Mover {
-        body: SplitTime.Body
+        body: splitTime.Body
         bodyExt: any
         dir: any
         horizontal: collisions.Horizontal
@@ -59,7 +59,7 @@ namespace SplitTime.body {
          */
         ensureInRegion() {
             // TODO: maybe reimplement this?
-            // if(this.body.getLevel().getRegion() !== SplitTime.Region.getCurrent()) {
+            // if(this.body.getLevel().getRegion() !== splitTime.Region.getCurrent()) {
             //     throw new Error("Attempt to do zelda movement for body not in current region");
             // }
         }
@@ -102,7 +102,7 @@ namespace SplitTime.body {
             if (id === null) {
                 return
             }
-            var transporter = new SplitTime.body.Transporter(this.body)
+            var transporter = new splitTime.body.Transporter(this.body)
             transporter.transportLevelIfApplicable(id)
         }
     }

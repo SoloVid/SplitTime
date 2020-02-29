@@ -1,4 +1,4 @@
-namespace SplitTime.particles {
+namespace splitTime.particles {
     export class Particle {
         seed: number
         age: number
@@ -19,9 +19,9 @@ namespace SplitTime.particles {
         opacityShift: number
 
         constructor(
-            posVec: SplitTime.Vector2D,
-            vVec: SplitTime.Vector2D,
-            accVec: SplitTime.Vector2D
+            posVec: splitTime.Vector2D,
+            vVec: splitTime.Vector2D,
+            accVec: splitTime.Vector2D
         ) {
             this.seed = Math.random()
             this.age = 0 // milliseconds
@@ -40,12 +40,12 @@ namespace SplitTime.particles {
             this.colorShiftB = 0
             this.opacity = 0.8
             this.opacityShift = 0
-            // this.updateHandler = SplitTime.Particle.applyBasicPhysics;
+            // this.updateHandler = splitTime.Particle.applyBasicPhysics;
             // this.updateHandler = function(emitter, particle, msPassed) {
-            //     SplitTime.Particle.applyBasicPhysics(emitter, particle, msPassed);
-            //     SplitTime.Particle.applyLazyEffect(emitter, particle, msPassed);
-            //     SplitTime.Particle.applyColorShift(emitter, particle, msPassed);
-            //     SplitTime.Particle.applyOpacityShift(emitter, particle, msPassed);
+            //     splitTime.Particle.applyBasicPhysics(emitter, particle, msPassed);
+            //     splitTime.Particle.applyLazyEffect(emitter, particle, msPassed);
+            //     splitTime.Particle.applyColorShift(emitter, particle, msPassed);
+            //     splitTime.Particle.applyOpacityShift(emitter, particle, msPassed);
             // };
         }
 
@@ -54,10 +54,10 @@ namespace SplitTime.particles {
         }
 
         advanceTime(emitter: ParticleEmitter, msPassed: number) {
-            SplitTime.particles.applyBasicPhysics(emitter, this, msPassed)
-            SplitTime.particles.applyLazyEffect(emitter, this, msPassed)
-            SplitTime.particles.applyColorShift(emitter, this, msPassed)
-            SplitTime.particles.applyOpacityShift(emitter, this, msPassed)
+            splitTime.particles.applyBasicPhysics(emitter, this, msPassed)
+            splitTime.particles.applyLazyEffect(emitter, this, msPassed)
+            splitTime.particles.applyColorShift(emitter, this, msPassed)
+            splitTime.particles.applyOpacityShift(emitter, this, msPassed)
             // this.updateHandler(emitter, this, msPassed);
         }
 
@@ -133,23 +133,23 @@ namespace SplitTime.particles {
     export function generateDefaultParticle(
         emitter: ParticleEmitter
     ): Particle {
-        return new SplitTime.particles.Particle(
-            new SplitTime.Vector2D(
+        return new splitTime.particles.Particle(
+            new splitTime.Vector2D(
                 emitter.location.x + Math.random() * 32 - 16,
                 emitter.location.y -
                     emitter.location.z +
                     Math.random() * 32 -
                     16
             ),
-            SplitTime.Vector2D.angular(
+            splitTime.Vector2D.angular(
                 SLVD.randomRanged(0, 2 * Math.PI),
                 Math.random() * 16
             ),
-            new SplitTime.Vector2D(0, 10)
+            new splitTime.Vector2D(0, 10)
         )
     }
 
-    export class ParticleEmitter implements SplitTime.body.Drawable {
+    export class ParticleEmitter implements splitTime.body.Drawable {
         _particles: any[]
         _lastParticleGenerated: number
         _currentTime: number
@@ -256,7 +256,7 @@ namespace SplitTime.particles {
         }
 
         getCanvasRequirements(x: number, y: number, z: number) {
-            var canvReq = new SplitTime.body.CanvasRequirements(
+            var canvReq = new splitTime.body.CanvasRequirements(
                 Math.round(x),
                 Math.round(y),
                 Math.round(z),
@@ -314,10 +314,10 @@ namespace SplitTime.particles {
         }
 
         /**
-         * @param {SplitTime.Level} level
+         * @param {splitTime.Level} level
          */
-        put(level: SplitTime.Level) {
-            var tempBody = new SplitTime.Body()
+        put(level: splitTime.Level) {
+            var tempBody = new splitTime.Body()
             tempBody.baseLength = 0
             tempBody.put(
                 level,

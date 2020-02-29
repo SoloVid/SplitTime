@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export class ObjectSerializerPool {
         private readonly objectSerializers: { [id: string]: ObjectSerializer<any> } = {}
 

@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export interface Interruptible {
         interrupt(): void
     }

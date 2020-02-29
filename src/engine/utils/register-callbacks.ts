@@ -102,7 +102,7 @@ namespace SLVD {
                         case CopingMechanism.RETHROW:
                             throw ex
                         case CopingMechanism.LOG:
-                            SplitTime.Logger.error(ex)
+                            splitTime.Logger.error(ex)
                             break
                         case CopingMechanism.SUPPRESS:
                             break

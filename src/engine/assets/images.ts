@@ -1,4 +1,4 @@
-namespace SplitTime.assets {
+namespace splitTime.assets {
     export class Images {
         constructor(private readonly root: string) {}
 

@@ -1,4 +1,4 @@
-namespace SplitTime.controls {
+namespace splitTime.controls {
     class KeyboardDirectionGroup {
         constructor(readonly dir: number, readonly keyCodes: int[]) {}
     }
@@ -25,7 +25,7 @@ namespace SplitTime.controls {
             }
 
             if (x !== 0 || y !== 0) {
-                return SplitTime.direction.fromTo(0, 0, x, y)
+                return splitTime.direction.fromTo(0, 0, x, y)
             }
             return null
         }

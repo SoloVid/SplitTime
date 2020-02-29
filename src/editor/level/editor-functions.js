@@ -79,7 +79,7 @@ function imgSrc(fileName) {
     if(!fileName) {
         return "";
     }
-    return projectPath + SplitTime.IMAGE_DIR + "/" + fileName;
+    return projectPath + splitTime.IMAGE_DIR + "/" + fileName;
 }
 
 function safeGetColor(trace) {
@@ -95,7 +95,7 @@ function safeGetColor(trace) {
 }
 function safeExtractTraceArray(traceStr) {
     var normalizedTraceStr = normalizeTraceStr(traceStr);
-    return SplitTime.Trace.extractArray(normalizedTraceStr);
+    return splitTime.Trace.extractArray(normalizedTraceStr);
 }
 
 function normalizeTraceStr(traceStr) {
@@ -251,20 +251,20 @@ function loadBodyFromTemplate(templateName) {
 	try {
 		return G.BODY_TEMPLATES.getInstance(templateName);
 	} catch(e) {
-		return new SplitTime.Body();
+		return new splitTime.Body();
 	}
 }
 
 function getBodyImage(body) {
-	if(body.drawable instanceof SplitTime.Sprite) {
+	if(body.drawable instanceof splitTime.Sprite) {
 		return imgSrc(body.drawable.img);
 	}
 	return subImg;
 }
 
 function getAnimationFrameCrop(body, dir, stance) {
-	if(body.drawable instanceof SplitTime.Sprite) {
-		return body.drawable.getAnimationFrameCrop(SplitTime.direction.interpret(dir), stance, 0);
+	if(body.drawable instanceof splitTime.Sprite) {
+		return body.drawable.getAnimationFrameCrop(splitTime.direction.interpret(dir), stance, 0);
 	}
 	// FTODO: more solid default
 	return {
@@ -276,7 +276,7 @@ function getAnimationFrameCrop(body, dir, stance) {
 }
 
 function getSpriteOffset(body) {
-	if(body.drawable instanceof SplitTime.Sprite) {
+	if(body.drawable instanceof splitTime.Sprite) {
 		return {
 			x: body.drawable.baseOffX,
 			y: body.drawable.baseOffY

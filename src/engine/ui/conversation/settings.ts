@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export const AdvanceMethod = {
         DEFAULT: "HYBRID",
         AUTO: "AUTO",

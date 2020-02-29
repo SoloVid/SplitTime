@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export class MasterSerializer {
         public readonly objectSerializerPool: ObjectSerializerPool = new ObjectSerializerPool()
         private readonly specialSerializers: SpecialSerializer[] = []

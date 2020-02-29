@@ -1,4 +1,4 @@
-namespace SplitTime.debug {
+namespace splitTime.debug {
     export var ENABLED = true // Master switch
     export var DRAW_TRACES = true
 
@@ -14,11 +14,11 @@ namespace SplitTime.debug {
     var LIFE = 2000
     var frameStabilizer: FrameStabilizer
     defer(() => {
-        frameStabilizer = new SplitTime.FrameStabilizer(DEBOUNCE)
+        frameStabilizer = new splitTime.FrameStabilizer(DEBOUNCE)
     })
 
     export function setDebugValue(key: string, value: any) {
-        if (!SplitTime.debug.ENABLED) {
+        if (!splitTime.debug.ENABLED) {
             return
         }
 

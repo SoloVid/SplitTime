@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export class Vector2D {
         x: number
         y: number
@@ -9,7 +9,7 @@ namespace SplitTime {
         }
 
         static angular(angle: number, magnitude: number) {
-            return new SplitTime.Vector2D(
+            return new splitTime.Vector2D(
                 magnitude * Math.cos(angle),
                 magnitude * Math.sin(angle)
             )

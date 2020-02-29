@@ -2,10 +2,10 @@ interface ILevelLocation {
     getX(): number
     getY(): number
     getZ(): number
-    getLevel(): SplitTime.Level
+    getLevel(): splitTime.Level
 }
 
-namespace SplitTime.level {
+namespace splitTime.level {
     export class Location implements ILevelLocation {
         constructor(
             public readonly x: number,

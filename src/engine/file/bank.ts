@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export class Bank {
         private onNewCallbacks: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks()
         private onLoadCallbacks: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks()
@@ -44,9 +44,9 @@ namespace SplitTime.file {
 
 namespace G {
     // This object is a convenience for game code and should not be used in engine code
-    export var FILE_BANK: SplitTime.file.Bank
+    export var FILE_BANK: splitTime.file.Bank
 
     defer(() => {
-        FILE_BANK = new SplitTime.file.Bank("DEFAULT")
+        FILE_BANK = new splitTime.file.Bank("DEFAULT")
     })
 }

@@ -1,4 +1,4 @@
-namespace SplitTime.testRunner {
+namespace splitTime.testRunner {
     export type TestFunction = (t: TestHelper) => void
     export type GroupId = object
 
@@ -40,6 +40,6 @@ namespace SplitTime.testRunner {
     }
 }
 
-namespace SplitTime {
+namespace splitTime {
     export const test = new testRunner.TestCollection()
 }

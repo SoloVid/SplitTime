@@ -69,8 +69,8 @@
 
     <script>
         // explorer data
-        var treeData = SplitTime.test.getTree().topLevelNodes
-        var TestStatus = SplitTime.testRunner.TestStatus
+        var treeData = splitTime.test.getTree().topLevelNodes
+        var TestStatus = splitTime.testRunner.TestStatus
         var nextWorkerId = 1;
 
         // define the tree-item component
@@ -97,7 +97,7 @@
                     return !!this.item.message
                 },
                 isRunnable: function() {
-                    return this.item.getStatus() !== SplitTime.testRunner.TestStatus.RUNNING
+                    return this.item.getStatus() !== splitTime.testRunner.TestStatus.RUNNING
                 },
                 isKillable: function() {
                     return !!this.runner
@@ -122,7 +122,7 @@
                     }
                 },
                 run: function() {
-                    var runner = new SplitTime.testRunner.WorkerTestRunner(nextWorkerId++, "build/engine-test.js", this.item)
+                    var runner = new splitTime.testRunner.WorkerTestRunner(nextWorkerId++, "build/engine-test.js", this.item)
                     this.runner = runner
                     var that = this
                     runner.launch().then(function() {

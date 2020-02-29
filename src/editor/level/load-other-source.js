@@ -11,7 +11,7 @@ $(document).ready(function() {
 		ctx = subImg.getContext("2d");
 		subImg2 = $("#subImg2").get(0);
 
-		var t = new SplitTime.Body();
+		var t = new splitTime.Body();
 		ctx.fillStyle = "#CD96CD";
 		ctx.fillRect(5, 5, t.xres - 10, t.yres - 10);
 		subImg = subImg.toDataURL();

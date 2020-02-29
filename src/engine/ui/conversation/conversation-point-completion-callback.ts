@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class ConversationPointCompletionCallback implements Callback<void> {
         constructor(
             private readonly conversation: ConversationInstance,

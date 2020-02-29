@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export type MidConversationCallback = () => (void | ObjectCallbacks<void>)
 
     export class MidConversationAction {

@@ -1,4 +1,4 @@
-// namespace SplitTime.conversation {
+// namespace splitTime.conversation {
 //     const MAIN_PARTS_NODE_ID = 1
 //     const INTERRUPTIBLES_NODE_ID = 10
 //     const DETECTION_INTERUPTIBLES_NODE_ID = 11

@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class InterruptibleSpecBuilder {
         constructor(
             public readonly condition: Condition,

@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class Line {
         private parent: LineSequence | null = null
 

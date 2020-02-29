@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class ConversationHandlers {
         private onInteractLambda = () => this.onInteract()
         private isTornDown = false
@@ -53,7 +53,7 @@ namespace SplitTime.conversation {
             interruptible.body ||
             this.helper.playerBodyGetter()
             return !!actualTarget &&
-                SplitTime.body.canDetect(
+                splitTime.body.canDetect(
                     detective,
                     actualTarget
                 ) &&

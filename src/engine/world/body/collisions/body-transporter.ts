@@ -1,4 +1,4 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     export class Transporter {
         constructor(public readonly body: Body) {}
 
@@ -24,7 +24,7 @@ namespace SplitTime.body {
             }
             var cyclicEnd = whereToNext !== null
             if (cyclicEnd) {
-                if (SplitTime.debug.ENABLED) {
+                if (splitTime.debug.ENABLED) {
                     console.warn(
                         "Cyclic pointer traces detected on level " +
                             currentLevel.id +
@@ -43,18 +43,18 @@ namespace SplitTime.body {
         }
 
         private _theNextTransport(
-            levelFrom: SplitTime.Level,
+            levelFrom: splitTime.Level,
             levelIdTo: string | null,
             x: number,
             y: number,
             z: number
-        ): { level: SplitTime.Level; x: number; y: number; z: number } | null {
+        ): { level: splitTime.Level; x: number; y: number; z: number } | null {
             var levelTraces = levelFrom.getLevelTraces()
             var cornerCollisionInfos = [
-                new SplitTime.level.traces.CollisionInfo(),
-                new SplitTime.level.traces.CollisionInfo(),
-                new SplitTime.level.traces.CollisionInfo(),
-                new SplitTime.level.traces.CollisionInfo()
+                new splitTime.level.traces.CollisionInfo(),
+                new splitTime.level.traces.CollisionInfo(),
+                new splitTime.level.traces.CollisionInfo(),
+                new splitTime.level.traces.CollisionInfo()
             ]
             var left = Math.round(x - this.body.baseLength / 2)
             var topY = Math.round(y - this.body.baseLength / 2)

@@ -1,4 +1,4 @@
-namespace SplitTime.ui {
+namespace splitTime.ui {
     type render_func = (ctx: CanvasRenderingContext2D) => void
     type renderer = render_func | { render: render_func }
 

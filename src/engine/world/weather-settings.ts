@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export class WeatherSettings {
         isRaining: boolean = false
         // Number of lightning strikes per minute

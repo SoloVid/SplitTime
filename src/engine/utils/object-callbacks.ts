@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     /**
      * This class intended to be very similar to RegisterCallbacks or Promise
      * but with the advantage of accomodating serialization.

@@ -1,4 +1,4 @@
-namespace SplitTime.menu {
+namespace splitTime.menu {
     export class MenuControls {
         constructor(
             readonly joyStick: controls.JoyStick,

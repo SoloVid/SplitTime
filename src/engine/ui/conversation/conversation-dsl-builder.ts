@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class ConversationDslBuilder implements DSL {
         private sectionBuilder: SectionBuilder
 

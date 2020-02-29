@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     var BUFFER = 10000
 
     export class DataSortedByOneValue {

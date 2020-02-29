@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export interface Thenable<T> {
         then(arg: T): void
     }

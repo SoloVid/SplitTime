@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     // TODO: Try not to let these be global state like this.
     export let RAIN_IMAGE: string = "rain.png"
     export let CLOUDS_IMAGE: string = "stormClouds.png"
@@ -89,7 +89,7 @@ namespace SplitTime {
                     this.SCREEN_HEIGHT
                 )
 
-                //Return to default SplitTime.image layering
+                //Return to default splitTime.image layering
                 this.buffer.context.globalCompositeOperation = "source-over"
             }
             //Weather
@@ -117,7 +117,7 @@ namespace SplitTime {
             if (level.weather.lightningFrequency > 0) {
                 // TODO: tie to time rather than frames
                 if (
-                    SLVD.randomInt(SplitTime.FPS * 60) <=
+                    SLVD.randomInt(splitTime.FPS * 60) <=
                     level.weather.lightningFrequency
                 ) {
                     this.ctx.fillStyle = "rgba(255, 255, 255, .75)"

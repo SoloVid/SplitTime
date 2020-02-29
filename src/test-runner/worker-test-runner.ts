@@ -1,4 +1,4 @@
-namespace SplitTime.testRunner {
+namespace splitTime.testRunner {
     export class WorkerTestRunner {
         private readonly worker: Worker
         private readonly topLevelNode: GroupNode | TestNode

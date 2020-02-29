@@ -9,12 +9,12 @@ Vue.component("rendered-trace", {
         height: function() {
             var displayLayerHeight = Math.min(this.layerHeight, 10000);
             switch(this.trace.type) {
-                case SplitTime.Trace.Type.SOLID:
+                case splitTime.Trace.Type.SOLID:
                     if(!this.trace.height && this.trace.height !== "0") {
                         return displayLayerHeight;
                     }
                     return this.trace.height;
-                case SplitTime.Trace.Type.STAIRS:
+                case splitTime.Trace.Type.STAIRS:
                     return displayLayerHeight;
             }
             return 0;
@@ -355,37 +355,37 @@ var vueApp = new Vue({
 		activeLayer: 0,
 		traceOptions: [
             {
-                type: SplitTime.Trace.Type.SOLID,
+                type: splitTime.Trace.Type.SOLID,
                 color: "rgba(0, 0, 255, .7)",
                 help: "Completely impenetrable areas bodies may not pass through (but may sit on top)"
             },
             {
-                type: SplitTime.Trace.Type.STAIRS,
+                type: splitTime.Trace.Type.STAIRS,
                 color: "rgba(0, 200, 0, .7)",
                 help: "Solid trace slope up to the next layer"
             },
             {
-                type: SplitTime.Trace.Type.GROUND,
+                type: splitTime.Trace.Type.GROUND,
                 color: "rgba(0, 100, 100, .7)",
                 help: "Zero-height solid trace, perfect for bridges"
             },
             {
-                type: SplitTime.Trace.Type.EVENT,
+                type: splitTime.Trace.Type.EVENT,
                 color: "rgba(255, 0, 0, .7)",
                 help: "Indicates area of the level which will trigger a function call when a body moves into the area"
             },
             {
-                type: SplitTime.Trace.Type.PATH,
+                type: splitTime.Trace.Type.PATH,
                 color: "rgba(0, 0, 0, 1)",
                 help: "Link positions together for walking purposes"
             },
             {
-                type: SplitTime.Trace.Type.POINTER,
+                type: splitTime.Trace.Type.POINTER,
                 color: "rgba(100, 50, 100, .8)",
                 help: "Link to another level. Traces from that level will affect this area, and a body fully moved into the pointer trace will be transported to that level."
             },
             {
-                type: SplitTime.Trace.Type.TRANSPORT,
+                type: splitTime.Trace.Type.TRANSPORT,
                 color: "rgba(200, 100, 10, .8)",
                 help: "Link to another level regardless of what's on the other side. Note: You'll want to use opposite values for pairs of these traces, but be careful not to overlap the traces and leave enough room for the maximum expected base between."
             }

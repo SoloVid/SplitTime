@@ -1,8 +1,8 @@
-namespace SplitTime {
+namespace splitTime {
     // A region is a logical unit of levels that are loaded together and share a common timeline
     export class Region {
-        private levels: SplitTime.Level[] = []
-        private _timeline: SplitTime.Timeline | null = null
+        private levels: splitTime.Level[] = []
+        private _timeline: splitTime.Timeline | null = null
         constructor(public readonly id: string) {}
 
         getTimeline(): Timeline {
@@ -27,7 +27,7 @@ namespace SplitTime {
 
         getTimeStabilizer(msPerStep?: game_ms, maxCounter?: number): Signaler {
             var that = this
-            return new SplitTime.IntervalStabilizer(
+            return new splitTime.IntervalStabilizer(
                 msPerStep,
                 maxCounter,
                 function() {

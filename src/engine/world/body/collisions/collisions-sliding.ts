@@ -1,7 +1,7 @@
-namespace SplitTime.body.collisions {
+namespace splitTime.body.collisions {
     export class Sliding {
         mover: Mover
-        constructor(mover: SplitTime.body.Mover) {
+        constructor(mover: splitTime.body.Mover) {
             this.mover = mover
         }
 
@@ -30,14 +30,14 @@ namespace SplitTime.body.collisions {
             var me = this
             var levelTraces = this.mover.body.getLevel().getLevelTraces()
             function isCornerOpen(direction: number, howFarAway: number) {
-                var collisionInfo = new SplitTime.level.traces.CollisionInfo()
+                var collisionInfo = new splitTime.level.traces.CollisionInfo()
                 var testX =
                     x +
-                    SplitTime.direction.getXSign(direction) *
+                    splitTime.direction.getXSign(direction) *
                         (halfBase + howFarAway)
                 var testY =
                     y +
-                    SplitTime.direction.getYSign(direction) *
+                    splitTime.direction.getYSign(direction) *
                         (halfBase + howFarAway)
                 levelTraces.calculatePixelColumnCollisionInfo(
                     collisionInfo,

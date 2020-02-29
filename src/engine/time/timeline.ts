@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export type game_seconds = number
     export type game_ms = int
     export type real_seconds = number
@@ -25,7 +25,7 @@ namespace SplitTime {
     export class Timeline {
         _timeInMilliseconds: game_ms = 0
         _timeAdvanceListeners: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks()
-        _regions: SplitTime.Region[] = []
+        _regions: splitTime.Region[] = []
 
         private upcomingEvents: ScheduledEvent[] = []
 
@@ -41,15 +41,15 @@ namespace SplitTime {
             this._timeAdvanceListeners.register(listener)
         }
 
-        addRegion(region: SplitTime.Region) {
+        addRegion(region: splitTime.Region) {
             this._regions.push(region)
         }
-        removeRegion(region: SplitTime.Region) {
+        removeRegion(region: splitTime.Region) {
             var regionIndex = this._regions.indexOf(region)
             if (regionIndex >= 0) {
                 this._regions.splice(regionIndex, 1)
-            } else if (SplitTime.debug.ENABLED) {
-                SplitTime.Logger.warn(
+            } else if (splitTime.debug.ENABLED) {
+                splitTime.Logger.warn(
                     "Attempted to remove region " +
                         region.id +
                         " from non-parent timeline"

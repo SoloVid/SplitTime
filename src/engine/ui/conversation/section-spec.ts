@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class SectionSpec {
         private parent: SectionSpec | null = null
 

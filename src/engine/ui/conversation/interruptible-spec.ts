@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class InterruptibleSpec {
         private parent: SectionSpec | null = null
 

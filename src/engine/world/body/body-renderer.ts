@@ -1,4 +1,4 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     export class Renderer {
         _nodes: (BodyNode | null)[]
         _bodyToNodeIndexMap: { [ref: number]: number }
@@ -33,7 +33,7 @@ namespace SplitTime.body {
         /**
          * receives a body that needs to be rendered (called by BoardRenderer)
          */
-        feedBody(body: SplitTime.Body, isPlayer: boolean) {
+        feedBody(body: splitTime.Body, isPlayer: boolean) {
             if (!body.drawable) {
                 return
             }
@@ -49,7 +49,7 @@ namespace SplitTime.body {
             node.isPlayer = isPlayer
         }
 
-        private _getBodyNode(body: SplitTime.Body): BodyNode {
+        private _getBodyNode(body: splitTime.Body): BodyNode {
             // If the body is unaccounted or misplaced, set up a new node
             if (body.ref in this._bodyToNodeIndexMap) {
                 const node = this._nodes[this._bodyToNodeIndexMap[body.ref]]
@@ -268,7 +268,7 @@ namespace SplitTime.body {
                 if (nodeBehind.isPlayer) {
                     var CROSS_FADE_PIXELS = 32
 
-                    if (SplitTime.debug.ENABLED) {
+                    if (splitTime.debug.ENABLED) {
                         if (
                             nodeInFront.drawable.playerOcclusionFadeFactor <
                                 0 ||
@@ -349,10 +349,10 @@ namespace SplitTime.body {
     /**
      * returns true if the body in question should render in front of the other body.
      *
-     * @param {SplitTime.Body} body1
-     * @param {SplitTime.Body} body2
+     * @param {splitTime.Body} body1
+     * @param {splitTime.Body} body2
      */
-    function shouldRenderInFront(body1: SplitTime.Body, body2: SplitTime.Body) {
+    function shouldRenderInFront(body1: splitTime.Body, body2: splitTime.Body) {
         if (isAbove(body1, body2) || isInFront(body1, body2)) {
             //if body1 is completely above or in front
             return true
@@ -369,20 +369,20 @@ namespace SplitTime.body {
     /**
      * returns true if body1's top is lower than body2's bottom
      *
-     * @param {SplitTime.Body} body1
-     * @param {SplitTime.Body} body2
+     * @param {splitTime.Body} body1
+     * @param {splitTime.Body} body2
      */
-    function isAbove(body1: SplitTime.Body, body2: SplitTime.Body) {
+    function isAbove(body1: splitTime.Body, body2: splitTime.Body) {
         return body1.z >= body2.z + body2.height
     }
 
     /**
      * returns true if body1's backside is more forward than body2's frontside
      *
-     * @param {SplitTime.Body} body1
-     * @param {SplitTime.Body} body2
+     * @param {splitTime.Body} body1
+     * @param {splitTime.Body} body2
      */
-    function isInFront(body1: SplitTime.Body, body2: SplitTime.Body) {
+    function isInFront(body1: splitTime.Body, body2: splitTime.Body) {
         return body1.y - body1.halfBaseLength >= body2.y + body2.halfBaseLength
     }
 
@@ -391,14 +391,14 @@ namespace SplitTime.body {
         isPlayer: boolean = false
         visitedThisFrame: boolean
         overlappingWithPlayer: boolean = false
-        drawable: SplitTime.body.Drawable | null
-        canvReq: SplitTime.body.CanvasRequirements | null
-        body: SplitTime.Body
+        drawable: splitTime.body.Drawable | null
+        canvReq: splitTime.body.CanvasRequirements | null
+        body: splitTime.Body
         /** @type {BodyNode[]} bodies drawn before this one */
         before: BodyNode[]
         opacity: number
         targetOpacity: number
-        constructor(body: SplitTime.Body) {
+        constructor(body: splitTime.Body) {
             this.body = body
             this.drawable = body.drawable
             this.before = []

@@ -1,17 +1,17 @@
-namespace SplitTime.body.collisions {
+namespace splitTime.body.collisions {
     var ZILCH = 0.000001
 
     export class Horizontal {
         horizontalX: HorizontalX
         horizontalY: HorizontalY
         sliding: Sliding
-        constructor(private readonly mover: SplitTime.body.Mover) {
+        constructor(private readonly mover: splitTime.body.Mover) {
             this.horizontalX = new HorizontalX(mover)
             this.horizontalY = new HorizontalY(mover)
             this.sliding = new Sliding(mover)
         }
         /**
-         * Advances SplitTime.Body up to maxDistance pixels as far as is legal.
+         * Advances splitTime.Body up to maxDistance pixels as far as is legal.
          * Includes pushing other Bodys out of the way
          * @returns distance actually moved
          */
@@ -86,8 +86,8 @@ namespace SplitTime.body.collisions {
                                 this.tryPushOtherBodies(
                                     xCollisionInfo.bodies,
                                     dx > 0
-                                        ? SplitTime.direction.E
-                                        : SplitTime.direction.W
+                                        ? splitTime.direction.E
+                                        : splitTime.direction.W
                                 )
                             }
                         } else {
@@ -127,8 +127,8 @@ namespace SplitTime.body.collisions {
                                 this.tryPushOtherBodies(
                                     yCollisionInfo.bodies,
                                     dy > 0
-                                        ? SplitTime.direction.S
-                                        : SplitTime.direction.N
+                                        ? splitTime.direction.S
+                                        : splitTime.direction.N
                                 )
                             }
                         } else {
@@ -176,7 +176,7 @@ namespace SplitTime.body.collisions {
             this.mover.body.level.runEventSet(eventIdSet, this.mover.body)
             this.mover.transportLevelIfApplicable(levelIdSet)
 
-            return SplitTime.measurement.distanceTrue(
+            return splitTime.measurement.distanceTrue(
                 oldX,
                 oldY,
                 this.mover.body.getX(),

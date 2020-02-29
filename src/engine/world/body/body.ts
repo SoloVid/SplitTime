@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     var nextRef = 10 //reserve first 10
 
     export class Body {
@@ -8,8 +8,8 @@ namespace SplitTime {
         private frameUpdateHandlers: SLVD.RegisterCallbacks
         private timeAdvanceListeners: SLVD.RegisterCallbacks
         private playerInteractHandlers: SLVD.RegisterCallbacks
-        mover: SplitTime.body.Mover
-        speechBox: SplitTime.body.SpeechBox
+        mover: splitTime.body.Mover
+        speechBox: splitTime.body.SpeechBox
 
         // TODO: remove parameter when moving templates elsewhere
         constructor() {
@@ -23,9 +23,9 @@ namespace SplitTime {
             this.playerInteractHandlers = new SLVD.RegisterCallbacks({
                 onPlayerInteract: null
             })
-            this.mover = new SplitTime.body.Mover(this)
+            this.mover = new splitTime.body.Mover(this)
             // TODO: sort out (throw out) inheritance to make this work right
-            this.speechBox = new SplitTime.body.SpeechBox(this, 42)
+            this.speechBox = new splitTime.body.SpeechBox(this, 42)
         }
         get x() {
             return this.getX()
@@ -55,7 +55,7 @@ namespace SplitTime {
             return Math.round(this.baseLength / 2)
         }
 
-        drawable: SplitTime.body.Drawable | null = null
+        drawable: splitTime.body.Drawable | null = null
         lightIntensity = 0
         lightRadius = 150
         shadow = false
@@ -105,7 +105,7 @@ namespace SplitTime {
             this.staticTrace.push({ traceStr: traceStr, type: type })
         }
 
-        //The SplitTime.Body's base is the collision area of the SplitTime.Body
+        //The splitTime.Body's base is the collision area of the splitTime.Body
         baseLength = 16
         //Standard offset of the base is 0--that is, x=0 is centered and y=0 is at bottom
         baseOffX = 0
@@ -117,7 +117,7 @@ namespace SplitTime {
             }
         }
 
-        private _level: SplitTime.Level | null = null
+        private _level: splitTime.Level | null = null
         _x = 0
         getX() {
             return this._x
@@ -229,7 +229,7 @@ namespace SplitTime {
         }
 
         setLevel(
-            level: SplitTime.Level | null,
+            level: splitTime.Level | null,
             includeChildren: boolean = false
         ) {
             if (level === this._level) {
@@ -256,7 +256,7 @@ namespace SplitTime {
                 }
             }
         }
-        getLevel(): SplitTime.Level {
+        getLevel(): splitTime.Level {
             if (!this._level) {
                 throw new Error("Body is not in a Level")
             }
@@ -265,7 +265,7 @@ namespace SplitTime {
         /**
          * @deprecated perhaps too much clog
          */
-        getRegion(): SplitTime.Region {
+        getRegion(): splitTime.Region {
             return this.getLevel().getRegion()
         }
 
@@ -274,12 +274,12 @@ namespace SplitTime {
             try {
                 if (
                     this.drawable &&
-                    SplitTime.instanceOf.FrameNotified(this.drawable)
+                    splitTime.instanceOf.FrameNotified(this.drawable)
                 ) {
                     this.drawable.notifyFrameUpdate(delta)
                 }
             } catch (e) {
-                SplitTime.Logger.error(e)
+                splitTime.Logger.error(e)
             }
         }
 
@@ -307,12 +307,12 @@ namespace SplitTime {
             try {
                 if (
                     this.drawable &&
-                    SplitTime.instanceOf.TimeNotified(this.drawable)
+                    splitTime.instanceOf.TimeNotified(this.drawable)
                 ) {
                     this.drawable.notifyTimeAdvance(delta)
                 }
             } catch (e) {
-                SplitTime.Logger.error(e)
+                splitTime.Logger.error(e)
             }
         }
 
@@ -322,13 +322,13 @@ namespace SplitTime {
 
         //Function run every frame
         registerFrameUpdateHandler(
-            handler: ((delta: real_seconds) => any) | SplitTime.FrameNotified
+            handler: ((delta: real_seconds) => any) | splitTime.FrameNotified
         ) {
             this.frameUpdateHandlers.register(handler)
         }
 
         registerTimeAdvanceListener(
-            handler: ((delta: game_seconds) => any) | SplitTime.TimeNotified
+            handler: ((delta: game_seconds) => any) | splitTime.TimeNotified
         ) {
             this.timeAdvanceListeners.register(handler)
         }

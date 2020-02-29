@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export function delay(seconds: number): Promise<unknown> {
         var promise = new Promise(resolve => {
             setTimeout(function() {

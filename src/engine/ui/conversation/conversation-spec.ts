@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export type SetupFunc = (d: DSL) => void
 
     export class ConversationSpec {

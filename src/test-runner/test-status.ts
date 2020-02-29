@@ -1,4 +1,4 @@
-namespace SplitTime.testRunner {
+namespace splitTime.testRunner {
     export const TestStatus = {
         UNKNOWN: 0,
         SUCCESS: 1,

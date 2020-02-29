@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export class IntervalStabilizer implements Signaler {
         msPerFrame: number
         maxCounter: number

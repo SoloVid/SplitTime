@@ -1,4 +1,4 @@
-namespace SplitTime.measurement {
+namespace splitTime.measurement {
     export function distanceEasy(
         x1: number,
         y1: number,
@@ -32,7 +32,7 @@ namespace SplitTime.measurement {
     }
 }
 
-namespace SplitTime {
+namespace splitTime {
     export type unit = -1 | 1
     export type unitOrZero = unit | 0
 }

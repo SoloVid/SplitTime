@@ -8,7 +8,7 @@
  * Note: depending on the total number of audio files used in a project, it may be better to
  * load all the files at the start of the program.
  */
-namespace SplitTime.assets {
+namespace splitTime.assets {
     const MUSIC_DIR = "music/"
     const SOUND_EFFECT_DIR = "fx/"
     const FADE_DURATION_MS = 2000
@@ -155,7 +155,7 @@ namespace SplitTime.assets {
             return similar
         }
 
-        //Pause current SplitTime.audio
+        //Pause current splitTime.audio
         pause() {
             for (var handle in this.sounds) {
                 var sound = this.sounds[handle]
@@ -169,7 +169,7 @@ namespace SplitTime.assets {
             }
         }
 
-        //Stop current SplitTime.audio
+        //Stop current splitTime.audio
         stop() {
             for (var handle in this.sounds) {
                 var sound = this.sounds[handle]

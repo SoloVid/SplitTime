@@ -1,4 +1,4 @@
-namespace SplitTime.menu {
+namespace splitTime.menu {
     export class MenuMan {
         constructor(
             private readonly view: ui.View,

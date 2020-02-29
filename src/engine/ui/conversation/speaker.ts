@@ -1,10 +1,10 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class Speaker {
         name: string
-        body: SplitTime.Body
-        speechBox: SplitTime.body.SpeechBox
+        body: splitTime.Body
+        speechBox: splitTime.body.SpeechBox
 
-        constructor(name: string, body: SplitTime.Body) {
+        constructor(name: string, body: splitTime.Body) {
             this.name = name
             this.body = body
             this.speechBox = this.body.speechBox

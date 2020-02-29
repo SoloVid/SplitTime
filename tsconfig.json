@@ -8,7 +8,7 @@
     "sourceMap": true,
     "declaration" : true,
     "declarationMap": true,
-    "declarationDir": "./build/@types/SplitTime",
+    "declarationDir": "./build/@types/splitTime",
     "incremental": true,
     "noEmitOnError": true,
     "strict": true,

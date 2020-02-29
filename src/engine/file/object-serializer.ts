@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     export interface ObjectSerializer<T> {
         isT(thing: any): thing is T
         serialize(s: AnySerializer, thing: T): jsonable

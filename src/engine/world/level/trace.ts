@@ -1,7 +1,7 @@
-namespace SplitTime {
+namespace splitTime {
     export class Trace {
         type: string
-        level: SplitTime.Level | null
+        level: splitTime.Level | null
         offsetX: number
         offsetY: number
         offsetZ: number
@@ -21,22 +21,22 @@ namespace SplitTime {
         }
 
         static fromRaw(
-            rawTrace: SplitTime.level.file_data.Trace,
+            rawTrace: splitTime.level.file_data.Trace,
             world: World
-        ): SplitTime.Trace {
-            var trace = new SplitTime.Trace(rawTrace.type)
+        ): splitTime.Trace {
+            var trace = new splitTime.Trace(rawTrace.type)
             switch (trace.type) {
-                case SplitTime.Trace.Type.SOLID:
+                case splitTime.Trace.Type.SOLID:
                     trace.height = +rawTrace.height
                     break
-                case SplitTime.Trace.Type.STAIRS:
+                case splitTime.Trace.Type.STAIRS:
                     trace.direction = rawTrace.direction
                     break
-                case SplitTime.Trace.Type.EVENT:
+                case splitTime.Trace.Type.EVENT:
                     trace.eventId = rawTrace.event
                     break
-                case SplitTime.Trace.Type.POINTER:
-                case SplitTime.Trace.Type.TRANSPORT:
+                case splitTime.Trace.Type.POINTER:
+                case splitTime.Trace.Type.TRANSPORT:
                     trace.level = world.getLevel(rawTrace.level)
                     trace.offsetX = +rawTrace.offsetX
                     trace.offsetY = +rawTrace.offsetY
@@ -64,8 +64,8 @@ namespace SplitTime {
             type: string,
             offsetPos?: { x: number; y: number } | undefined
         ) {
-            var color = SplitTime.Trace.getColor(type)
-            return SplitTime.Trace.drawColor(traceStr, ctx, color, offsetPos)
+            var color = splitTime.Trace.getColor(type)
+            return splitTime.Trace.drawColor(traceStr, ctx, color, offsetPos)
         }
 
         static extractArray(
@@ -123,7 +123,7 @@ namespace SplitTime {
             ctx.strokeStyle = color
             ctx.fillStyle = ctx.strokeStyle
 
-            var pointsArray = SplitTime.Trace.extractArray(traceStr)
+            var pointsArray = splitTime.Trace.extractArray(traceStr)
             var newX, newY
 
             ctx.beginPath()
@@ -171,7 +171,7 @@ namespace SplitTime {
             ctx: CanvasRenderingContext2D,
             direction: string
         ): CanvasGradient {
-            var pointsArray = SplitTime.Trace.extractArray(traceStr)
+            var pointsArray = splitTime.Trace.extractArray(traceStr)
             var minX = 100000
             var minY = 100000
             var maxX = 0
@@ -204,12 +204,12 @@ namespace SplitTime {
             }
             ctx.closePath()
 
-            var xUnit = SplitTime.direction.getXSign(direction)
+            var xUnit = splitTime.direction.getXSign(direction)
             var minXWeight = 1 + xUnit // for negative X, prefer starting right (weight 0 on minX)
             var maxXWeight = 1 - xUnit // for positive X, prefer starting left (weight 0 on maxX)
             var startX = (minXWeight * minX + maxXWeight * maxX) / 2
 
-            var yUnit = SplitTime.direction.getYSign(direction)
+            var yUnit = splitTime.direction.getYSign(direction)
             var minYWeight = 1 + yUnit // for negative Y, prefer starting down (weight 0 on minY)
             var maxYWeight = 1 - yUnit // for positive Y, prefer starting up (weight 0 on maxY)
             var startY = (minYWeight * minY + maxYWeight * maxY) / 2

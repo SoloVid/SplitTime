@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     type transition_listener = (
         oldLevel: Level | null,
         newLevel: Level
@@ -51,7 +51,7 @@ namespace SplitTime {
             //********Leave current level
 
             // TODO: move to listener
-            // SplitTime.process = "loading";
+            // splitTime.process = "loading";
             if (this.transitionStartListener) {
                 await this.transitionStartListener(exitingLevel, enteringLevel)
             }
@@ -73,7 +73,7 @@ namespace SplitTime {
                 await enteringLevel.getRegion().loadForPlay(this.world)
             }
 
-            // SplitTime.process = enteringLevel.type as string;
+            // splitTime.process = enteringLevel.type as string;
             if (this.transitionEndListener) {
                 await this.transitionEndListener(exitingLevel, enteringLevel)
             }

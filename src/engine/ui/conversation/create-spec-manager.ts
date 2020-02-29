@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export function createSpecManager(
         gameLoop: GameLoop,
         perspective: Perspective,

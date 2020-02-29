@@ -1,5 +1,5 @@
 namespace SLVD {
-    //Promises for SplitTime
+    //Promises for splitTime
     export class Promise implements PromiseLike<any> {
         callBacks: Function[]
         babyPromises: Promise[]

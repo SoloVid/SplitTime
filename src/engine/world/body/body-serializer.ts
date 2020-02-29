@@ -1,4 +1,4 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     type body_json_t = {
         template: string | null
         x: number

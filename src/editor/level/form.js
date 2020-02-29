@@ -232,17 +232,17 @@ function showEditorTrace(trace) {
     ];
 
     switch(trace.type) {
-        case SplitTime.Trace.Type.SOLID:
+        case splitTime.Trace.Type.SOLID:
             fields.push({key: "height"});
             break;
-        case SplitTime.Trace.Type.STAIRS:
+        case splitTime.Trace.Type.STAIRS:
             fields.push({key: "direction"});
             break;
-        case SplitTime.Trace.Type.EVENT:
+        case splitTime.Trace.Type.EVENT:
             fields.push({key: "event"});
             break;
-        case SplitTime.Trace.Type.POINTER:
-        case SplitTime.Trace.Type.TRANSPORT:
+        case splitTime.Trace.Type.POINTER:
+        case splitTime.Trace.Type.TRANSPORT:
             fields.push({key: "level"});
             fields.push({key: "offsetX"});
             fields.push({key: "offsetY"});

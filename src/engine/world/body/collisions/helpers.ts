@@ -1,4 +1,4 @@
-namespace SplitTime.body.collisions {
+namespace splitTime.body.collisions {
     export function addArrayToSet(
         arr: string[],
         set: { [id: string]: true }

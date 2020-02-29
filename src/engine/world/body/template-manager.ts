@@ -1,4 +1,4 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     export class TemplateManager {
         private templates: { [templateName: string]: () => Body } = {}
 
@@ -28,5 +28,5 @@ namespace SplitTime.body {
 namespace G {
     // This object is a convenience for game code and should not be used in engine code
     // It is also used by the level editor
-    export const BODY_TEMPLATES = new SplitTime.body.TemplateManager()
+    export const BODY_TEMPLATES = new splitTime.body.TemplateManager()
 }

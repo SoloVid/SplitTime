@@ -1,11 +1,11 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     export class SpeechBox implements ILevelLocation {
         body: Body
         offsetX: number
         offsetY: number
         offsetZ: number
         constructor(
-            body: SplitTime.Body,
+            body: splitTime.Body,
             offsetZ: number = 0,
             offsetX: number = 0,
             offsetY: number = 0
@@ -35,7 +35,7 @@ namespace SplitTime.body {
             return this.body.getZ() + this.offsetZ
         }
         /**
-         * @return SplitTime.Level
+         * @return splitTime.Level
          */
         getLevel() {
             return this.body.getLevel()

@@ -1,4 +1,4 @@
-namespace SplitTime.body {
+namespace splitTime.body {
     const ARBITRARY_MAX_DETECTION_RADIUS = 256
     const ARBITRARY_DETECTION_RADIUS = 48
 
@@ -7,7 +7,7 @@ namespace SplitTime.body {
             return false
         }
 
-        var proximity = SplitTime.measurement.distanceEasy(
+        var proximity = splitTime.measurement.distanceEasy(
             detective.x,
             detective.y,
             target.x,
@@ -52,7 +52,7 @@ namespace SplitTime.body {
     }
 
     function isJustNearEnough(detective: Body, target: Body): boolean {
-        var proximity = SplitTime.measurement.distanceTrue(
+        var proximity = splitTime.measurement.distanceTrue(
             detective.x,
             detective.y,
             target.x,

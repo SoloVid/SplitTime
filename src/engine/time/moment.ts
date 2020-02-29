@@ -1,4 +1,4 @@
-namespace SplitTime.time {
+namespace splitTime.time {
     export class Moment {
         private cachedActualTimeCalculation: game_seconds | null = null
         private amountOfTime: game_seconds | null = null

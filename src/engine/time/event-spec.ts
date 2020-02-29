@@ -1,4 +1,4 @@
-namespace SplitTime.time {
+namespace splitTime.time {
     export class EventSpec<T extends file.jsonable | void = void> {
         constructor(
             public readonly id: string,

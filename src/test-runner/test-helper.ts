@@ -1,4 +1,4 @@
-namespace SplitTime.testRunner {
+namespace splitTime.testRunner {
     export interface TestHelper {
         assert(expression: boolean, message: string): void
         assertEqual<T>(expected: T, actual: T, message: string): void

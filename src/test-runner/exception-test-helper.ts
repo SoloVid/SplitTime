@@ -1,4 +1,4 @@
-namespace SplitTime.testRunner {
+namespace splitTime.testRunner {
     export class ExceptionTestHelper implements TestHelper {
         assert(expression: boolean, message: string): void {
             if(!expression) {

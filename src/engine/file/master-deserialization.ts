@@ -1,4 +1,4 @@
-namespace SplitTime.file {
+namespace splitTime.file {
     class DeserializeSecondPass implements AnyDeserializer {
         private idPromisePairs: { objectId: int; promise: SLVD.Promise }[] = []
 

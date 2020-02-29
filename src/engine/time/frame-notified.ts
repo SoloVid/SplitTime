@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export interface FrameNotified {
         /**
          * @param delta number of seconds passed (in real time) since last frame

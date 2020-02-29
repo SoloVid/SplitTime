@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     /**
      * This class is meant to be a cheap Section that only holds Lines.
      * The purpose is to allow the conversation tree stack to index into groups of lines

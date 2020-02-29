@@ -1,4 +1,4 @@
-namespace SplitTime.body.collisions {
+namespace splitTime.body.collisions {
     var ZILCH = 0.00001
 
     class CollisionInfo {
@@ -19,7 +19,7 @@ namespace SplitTime.body.collisions {
     }
 
     export class Rising {
-        constructor(private readonly mover: SplitTime.body.Mover) {}
+        constructor(private readonly mover: splitTime.body.Mover) {}
 
         /**
          * @param {number} maxDZ (positive)
@@ -138,7 +138,7 @@ namespace SplitTime.body.collisions {
             var yPixels = this.mover.body.baseLength
 
             var levelTraces = this.mover.body.level.getLevelTraces()
-            var originCollisionInfo = new SplitTime.level.traces.CollisionInfo()
+            var originCollisionInfo = new splitTime.level.traces.CollisionInfo()
             //Loop through width of base
             for (var testY = startY; testY < startY + yPixels; testY++) {
                 //Loop through height of base

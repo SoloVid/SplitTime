@@ -1,4 +1,4 @@
-namespace SplitTime.controls.keyboard.keycode {
+namespace splitTime.controls.keyboard.keycode {
     export const A = 65
     export const S = 83
     export const D = 68

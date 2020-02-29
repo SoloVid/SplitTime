@@ -1,4 +1,4 @@
-namespace SplitTime {
+namespace splitTime {
     export class Perspective {
         public readonly world: World
         public readonly levelManager: LevelManager
@@ -7,7 +7,7 @@ namespace SplitTime {
          * If set, level transitions will be made automatically when this body changes levels.
          * Additionally, some sprites may fade out when this body goes behind them.
          */
-        public playerBody: SplitTime.Body | null = null
+        public playerBody: splitTime.Body | null = null
 
         public readonly view: ui.View
         public readonly camera: Camera

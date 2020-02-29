@@ -1,4 +1,4 @@
-namespace SplitTime.level {
+namespace splitTime.level {
     type level_json_t = {
         id: string
     }

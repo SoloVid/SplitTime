@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     type ActionCrumb = Line | MidConversationAction
     type ObjectContainerCrumb = SectionSpec | LineSequence | InterruptibleSpec
     type NonArrayCrumb = ActionCrumb | ObjectContainerCrumb

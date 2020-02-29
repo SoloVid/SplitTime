@@ -1,4 +1,4 @@
-namespace SplitTime.level {
+namespace splitTime.level {
     const PARTITION_SIZE = 32
 
     /**
@@ -6,14 +6,14 @@ namespace SplitTime.level {
      */
     export class CellGrid {
         private _initialized: boolean
-        private _waitingBodies: SplitTime.Body[]
+        private _waitingBodies: splitTime.Body[]
         private _whereAreBodies: { [bodyRef: number]: WhereIsBody | undefined }
-        private _grids: SplitTime.Body[][][]
+        private _grids: splitTime.Body[][][]
         _xCells: number
         _yCells: number
         _zCells: number
 
-        constructor(level: SplitTime.Level) {
+        constructor(level: splitTime.Level) {
             this._initialized = false
             this._waitingBodies = []
             this._whereAreBodies = {}
@@ -42,7 +42,7 @@ namespace SplitTime.level {
         /**
          * Register a body with the organizer (such as on level entrance)
          */
-        addBody(body: SplitTime.Body) {
+        addBody(body: splitTime.Body) {
             if (this._whereAreBodies[body.ref]) {
                 return
             }
@@ -70,7 +70,7 @@ namespace SplitTime.level {
                         iX++
                     ) {
                         var cell = this._grids[iZ][iY * this._xCells + iX]
-                        if (SplitTime.debug.ENABLED) {
+                        if (splitTime.debug.ENABLED) {
                             for (var i = 0; i < cell.length; i++) {
                                 if (cell[i] === body) {
                                     console.warn(
@@ -92,7 +92,7 @@ namespace SplitTime.level {
         /**
          * Deregister a body from the organizer (such as on level exit)
          */
-        removeBody(body: SplitTime.Body) {
+        removeBody(body: splitTime.Body) {
             if (!this._initialized) {
                 for (
                     var iBody = this._waitingBodies.length - 1;
@@ -142,9 +142,9 @@ namespace SplitTime.level {
          * Force the organizer to resort the body in question.
          * This method assumes all other bodies in the organizer are already sorted.
          * Should be called every time coordinates of body change.
-         * @param {SplitTime.Body} body
+         * @param {splitTime.Body} body
          */
-        resort(body: SplitTime.Body) {
+        resort(body: splitTime.Body) {
             if (!this._initialized) {
                 return
             }
@@ -166,7 +166,7 @@ namespace SplitTime.level {
 
             function addToCell(body: Body, x: int, y: int, z: int) {
                 var cell = me._grids[z][y * me._xCells + x]
-                if (SplitTime.debug.ENABLED) {
+                if (splitTime.debug.ENABLED) {
                     for (var i = 0; i < cell.length; i++) {
                         if (cell[i] === body) {
                             console.warn(
@@ -204,10 +204,10 @@ namespace SplitTime.level {
          * @param blacklistArea cells to ignore
          */
         private _adjustCellClaims(
-            body: SplitTime.Body,
+            body: splitTime.Body,
             whitelistArea: WhereIsBody,
             blacklistArea: WhereIsBody,
-            callback: (body: SplitTime.Body, x: int, y: int, z: int) => any
+            callback: (body: splitTime.Body, x: int, y: int, z: int) => any
         ) {
             var iX, iY, iZ
 
@@ -344,7 +344,7 @@ namespace SplitTime.level {
             exMaxX: int,
             exMaxY: int,
             exMaxZ: int,
-            callback: (arg0: SplitTime.Body) => any
+            callback: (arg0: splitTime.Body) => any
         ) {
             var bodiesHit: { [bodyRef: number]: true } = {}
             for (
@@ -426,7 +426,7 @@ namespace SplitTime.level {
         minXCellIndex: any
         exMaxXCellIndex: any
 
-        constructor(cellGrid: SplitTime.level.CellGrid, body?: SplitTime.Body) {
+        constructor(cellGrid: splitTime.level.CellGrid, body?: splitTime.Body) {
             if (body) {
                 var left = Math.round(body.getLeft())
                 var right = left + Math.round(body.baseLength)

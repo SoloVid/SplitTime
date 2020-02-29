@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class ConversationSpecManager {
         // private pendingRegistrations: { id: string, setup: SetupFunc }[] = []
         private specs: { [id: string]: ConversationSpec } = {}

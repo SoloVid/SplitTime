@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     export class RunnerHelper {
         constructor(
             public readonly secretary: Secretary,

@@ -1,4 +1,4 @@
-namespace SplitTime.conversation {
+namespace splitTime.conversation {
     type BuilderPart = SectionBuilder | Line | MidConversationAction
     export class SectionBuilder {
         private readonly parts: BuilderPart[] = []
