@@ -1,18 +1,4 @@
-namespace SplitTime {
-    class SimpleTestHelper implements SplitTime.TestHelper {
-        assert(expression: boolean, message: string): void {
-            if(!expression) {
-                throw new Error(message)
-            }
-        }
-
-        assertEqual<T>(expected: T, actual: T, message: string): void {
-            if(expected !== actual) {
-                throw new Error(message + "\n\tExpected: |" + JSON.stringify(expected) + "|\n\tActual:   |" + JSON.stringify(actual) + "|\n")
-            }
-        }
-    }
-
+namespace SplitTime.testRunner {
     export class ConsoleTestRunner {
         // FTODO: maybe clean up; not sure these log statements would look right in browser
         private redError(message: string) {
@@ -25,8 +11,8 @@ namespace SplitTime {
 
         run(): void {
             console.info("Running tests in console...");
-            const testHelper = new SimpleTestHelper()
-            const scenarios = SplitTime.test.tree()
+            const testHelper = new ExceptionTestHelper()
+            const scenarios = SplitTime.test.getScenarios()
             let passedCount = 0
             for(const testDef of scenarios) {
                 try {

@@ -1,0 +1,135 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <script src="node_modules/vue/dist/vue.js"></script>
+    <script src="build/engine-test.js"></script>
+</head>
+
+<body>
+    <!-- item template -->
+    <script type="text/x-template" id="item-template">
+    <li>
+        <div>
+            <span
+                @click="toggle"
+                v-if="isGroup">
+                    [{{ isExpanded ? '-' : '+' }}]
+            </span>
+            <span>(status: {{ computedStatus }})</span>
+            <span @click="toggle">{{ item.description }}</span>
+            <span @click="run">(run)</span>
+        </div>
+        <ul v-show="isExpanded" v-if="isGroup">
+            <tree-item
+            class="item"
+            v-for="(child, index) in item.children"
+            :key="index"
+            :item="child"
+            ></tree-item>
+        </ul>
+    </li>
+    </script>
+
+    <!-- the explorer root element -->
+    <ul id="explorer">
+        <tree-item
+            class="item"
+            v-for="(child, index) in treeData"
+            :key="index"
+            :item="child"
+        ></tree-item>
+    </ul>
+
+    <script>
+        // explorer data
+        var treeData = SplitTime.test.getTree().topLevelNodes
+        // function setStatusNone(nodeArray) {
+        //     for(var i = 0; i < nodeArray.length; i++) {
+        //         var node = nodeArray[i]
+        //         if(node instanceof SplitTime.testRunner.GroupNode) {
+        //             setStatusNone(node.children)
+        //         } else {
+        //             node.status = TestStatus.NONE
+        //         }
+        //     }
+        // }
+        // setStatusNone(treeData)
+        // function getStatus(node) {
+        //     if(node instanceof SplitTime.testRunner.GroupNode) {
+        //         return node.children.reduce(function(max, child) {
+        //             return Math.max(max, getStatus(child))
+        //         }, TestStatus.NONE)
+        //     } else {
+        //         return node.status
+        //     }
+        // }
+        // function runTest(node) {
+        //     var ids = gatherTestIds(node)
+        //     var worker = new Worker('build/engine-test.js')
+        //     worker.onmessage = function(message) {
+        //         console.log(message)
+        //     }
+        //     worker.postMessage(ids)
+        // }
+        // function gatherTestIds(node) {
+        //     var ids = []
+        //     if(node instanceof SplitTime.testRunner.GroupNode) {
+        //         for(var i = 0; i < node.children.length; i++) {
+        //             ids = ids.concat(gatherTestIds(node.children[i]))
+        //         }
+        //     } else {
+        //         ids.push(node.id)
+        //     }
+        //     return ids
+        // }
+
+        // define the tree-item component
+        Vue.component('tree-item', {
+            template: '#item-template',
+            props: {
+                item: Object
+            },
+            data: function () {
+                return {
+                    isExpanded: false,
+                    // status: TestStatus.NONE
+                }
+            },
+            computed: {
+                isGroup: function () {
+                    return this.item.children &&
+                        this.item.children.length
+                },
+                computedStatus: function() {
+                    return this.item.getStatus()
+                }
+            },
+            methods: {
+                toggle: function () {
+                    if (this.isGroup) {
+                        this.isExpanded = !this.isExpanded
+                    }
+                },
+                run: function() {
+                    var runner = new SplitTime.testRunner.WorkerTestRunner("build/engine-test.js", this.item)
+                    runner.launch()
+                    // this.item.status = TestStatus.RUNNING
+                    // runTest(this.item)
+                    // console.log("TODO: actually run the test")
+                    // this.item.status = Math.random() > 0.5 ? TestStatus.SUCCESS : TestStatus.FAIL
+                }
+            }
+        })
+
+        // boot up the explorer
+        var explorer = new Vue({
+            el: '#explorer',
+            data: {
+                treeData: treeData
+            }
+        })
+    </script>
+</body>
+
+</html>
