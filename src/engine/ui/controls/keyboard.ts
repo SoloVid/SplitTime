@@ -68,7 +68,7 @@ namespace splitTime.controls {
 
             if (key == "t") {
                 // Note: This case is just here for quick and dirty testing
-                alert("Huzzah!")
+                // alert("Huzzah!")
             }
 
             this.keyDown[keyCode] = true
