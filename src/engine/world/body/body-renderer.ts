@@ -327,7 +327,7 @@ namespace splitTime.body {
             }
 
             //Set the opacity for this body, but ease toward it
-            node.opacity = SLVD.approachValue(
+            node.opacity = splitTime.approachValue(
                 node.opacity,
                 node.targetOpacity,
                 0.05

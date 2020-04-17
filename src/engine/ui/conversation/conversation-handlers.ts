@@ -36,7 +36,7 @@ namespace splitTime.conversation {
         private makeDetectionListener(detective: Body, interruptibles: readonly InterruptibleSpec[]): (delta: number) => "SC" | undefined {
             return (delta: number) => {
                 if (this.isTornDown) {
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 }
                 for(const interruptible of interruptibles) {
                     if(this.isDetectionInterruptibleTriggered(detective, interruptible)) {

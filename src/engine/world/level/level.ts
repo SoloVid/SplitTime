@@ -8,7 +8,7 @@ namespace splitTime {
         positions: { [id: string]: Position }
         region: Region | null
         bodies: Body[]
-        loadPromise: SLVD.Promise
+        loadPromise: splitTime.Pledge
         background: string
         layerFuncData: ImageData[]
         _cellGrid: level.CellGrid | null
@@ -28,7 +28,7 @@ namespace splitTime {
             this.positions = {}
             this.region = null
             this.bodies = []
-            this.loadPromise = new SLVD.Promise()
+            this.loadPromise = new splitTime.Pledge()
             this.background = ""
             this.layerFuncData = []
 
@@ -319,7 +319,7 @@ namespace splitTime {
                         obj.drawable.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor
                     }
                 } else {
-                    splitTime.Logger.error(
+                    splitTime.log.error(
                         'Template "' +
                             template +
                             '" not found for instantiating prop'

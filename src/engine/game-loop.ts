@@ -144,7 +144,7 @@ namespace splitTime {
                         now.getMilliseconds() -
                         this.lastPerformanceCheck.getMilliseconds()
                     if (timePassed > allow) {
-                        splitTime.Logger.warn(
+                        splitTime.log.warn(
                             debugName +
                                 ": " +
                                 timePassed +

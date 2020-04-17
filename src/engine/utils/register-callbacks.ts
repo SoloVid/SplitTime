@@ -1,4 +1,4 @@
-namespace SLVD {
+namespace splitTime {
     export const STOP_CALLBACKS = "SC"
     export type CallbackResult = void | "SC"
     type CallbackFunction = (data?: any) => CallbackResult
@@ -32,7 +32,7 @@ namespace SLVD {
         }
 
         waitForOnce() {
-            var promise = new SLVD.Promise()
+            var promise = new splitTime.Pledge()
 
             this.register(function(data: any) {
                 promise.resolve(data)
@@ -43,7 +43,7 @@ namespace SLVD {
         }
 
         /**
-         * @deprecated use {@link SLVD.RegisterCallbacks#register} instead
+         * @deprecated use {@link splitTime.RegisterCallbacks#register} instead
          */
         registerCallback(callback: Callback) {
             this.register(callback)
@@ -58,7 +58,7 @@ namespace SLVD {
         }
 
         /**
-         * @deprecated use {@link SLVD.RegisterCallbacks#remove} instead
+         * @deprecated use {@link splitTime.RegisterCallbacks#remove} instead
          */
         removeCallback(callback: Callback) {
             this.remove(callback)
@@ -77,7 +77,7 @@ namespace SLVD {
         }
 
         /**
-         * @deprecated use {@link SLVD.RegisterCallbacks#run} instead
+         * @deprecated use {@link splitTime.RegisterCallbacks#run} instead
          */
         runCallbacks(data?: any) {
             this.run(data)
@@ -102,7 +102,7 @@ namespace SLVD {
                         case CopingMechanism.RETHROW:
                             throw ex
                         case CopingMechanism.LOG:
-                            splitTime.Logger.error(ex)
+                            splitTime.log.error(ex)
                             break
                         case CopingMechanism.SUPPRESS:
                             break

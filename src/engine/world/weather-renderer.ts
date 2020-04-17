@@ -9,7 +9,7 @@ namespace splitTime {
         private readonly SCREEN_WIDTH: int
         private readonly SCREEN_HEIGHT: int
 
-        private readonly buffer: SLVD.Canvas
+        private readonly buffer: splitTime.Canvas
 
         constructor(
             private readonly camera: Camera,
@@ -18,7 +18,7 @@ namespace splitTime {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
 
-            this.buffer = new SLVD.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
+            this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
         }
 
         render(level: Level) {
@@ -104,8 +104,8 @@ namespace splitTime {
             if (level.weather.isCloudy) {
                 var CLOUDS_WIDTH = 2560
                 var CLOUDS_HEIGHT = 480
-                var xPixelsShift = -SLVD.mod(counter - screen.x, CLOUDS_WIDTH)
-                var yPixelsShift = SLVD.mod(screen.y, CLOUDS_HEIGHT)
+                var xPixelsShift = -splitTime.mod(counter - screen.x, CLOUDS_WIDTH)
+                var yPixelsShift = splitTime.mod(screen.y, CLOUDS_HEIGHT)
                 this.ctx.globalAlpha = level.weather.cloudAlpha
                 this.drawTiled(
                     G.ASSETS.images.get(CLOUDS_IMAGE),
@@ -117,7 +117,7 @@ namespace splitTime {
             if (level.weather.lightningFrequency > 0) {
                 // TODO: tie to time rather than frames
                 if (
-                    SLVD.randomInt(splitTime.FPS * 60) <=
+                    splitTime.randomInt(splitTime.FPS * 60) <=
                     level.weather.lightningFrequency
                 ) {
                     this.ctx.fillStyle = "rgba(255, 255, 255, .75)"
@@ -137,8 +137,8 @@ namespace splitTime {
          * @param {number} top y in image to start tiling at
          */
         private drawTiled(image: HTMLImageElement, left: number, top: number) {
-            left = SLVD.mod(left, image.naturalWidth)
-            top = SLVD.mod(top, image.naturalHeight)
+            left = splitTime.mod(left, image.naturalWidth)
+            top = splitTime.mod(top, image.naturalHeight)
             // Draw upper left tile
             this.ctx.drawImage(
                 image,

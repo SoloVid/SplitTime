@@ -24,7 +24,7 @@ namespace splitTime {
             loadingScreen.show(Math.round((itemsLoaded / itemsToLoad) * 100))
         }
 
-        G.ASSETS = new splitTime.Assets(SLVD.getScriptDirectory())
+        G.ASSETS = new splitTime.Assets(splitTime.getScriptDirectory())
 
         var i, fileName
         for (i = 0; i < masterData.preloadedImageFiles.length; i++) {

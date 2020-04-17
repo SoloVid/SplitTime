@@ -31,12 +31,12 @@ namespace splitTime.direction {
         if (stringDir in splitTime.direction) {
             return (splitTime.direction as any)[stringDir]
         } else {
-            Logger.warn("Invalid direction: " + stringDir)
+            log.warn("Invalid direction: " + stringDir)
             return -1
         }
     }
     export function toString(numDir: direction_t): string {
-        var modDir = SLVD.mod(Math.round(numDir), 4)
+        var modDir = splitTime.mod(Math.round(numDir), 4)
         switch (modDir) {
             case 0:
                 return "E"
@@ -111,17 +111,17 @@ namespace splitTime.direction {
             return realDir.charAt(0)
         }
 
-        return SLVD.mod(Math.round(realDir), 4)
+        return splitTime.mod(Math.round(realDir), 4)
     }
 
     export function getRandom(): direction_t {
-        return (SLVD.randomInt(16) - 1) / 4
+        return (splitTime.randomInt(16) - 1) / 4
     }
     export function getRandomCardinal(): direction_t {
-        return SLVD.randomInt(4) - 1
+        return splitTime.randomInt(4) - 1
     }
     export function getRandomOctal(): direction_t {
-        return (SLVD.randomInt(8) - 1) / 2
+        return (splitTime.randomInt(8) - 1) / 2
     }
 
     export function getXMagnitude(direction: string | direction_t): number {

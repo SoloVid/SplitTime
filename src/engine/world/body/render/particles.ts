@@ -91,8 +91,8 @@ namespace splitTime.particles {
         var HOW_OFTEN = emitter.lazyIntervalMs
         var HOW_DRASTIC = emitter.lazyMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
-            particle.accX = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
-            particle.accY = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.accX = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.accY = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
         }
     }
 
@@ -104,13 +104,13 @@ namespace splitTime.particles {
         var HOW_OFTEN = emitter.colorShiftIntervalMs
         var HOW_DRASTIC = emitter.colorShiftMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
-            particle.colorShiftR = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
-            particle.colorShiftG = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
-            particle.colorShiftB = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.colorShiftR = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.colorShiftG = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.colorShiftB = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
         }
-        particle.r = SLVD.constrain(particle.r + particle.colorShiftR, 0, 255)
-        particle.g = SLVD.constrain(particle.g + particle.colorShiftG, 0, 255)
-        particle.b = SLVD.constrain(particle.b + particle.colorShiftB, 0, 255)
+        particle.r = splitTime.constrain(particle.r + particle.colorShiftR, 0, 255)
+        particle.g = splitTime.constrain(particle.g + particle.colorShiftG, 0, 255)
+        particle.b = splitTime.constrain(particle.b + particle.colorShiftB, 0, 255)
     }
 
     export function applyOpacityShift(
@@ -121,9 +121,9 @@ namespace splitTime.particles {
         var HOW_OFTEN = emitter.opacityShiftIntervalMs
         var HOW_DRASTIC = emitter.opacityShiftMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
-            particle.opacityShift = SLVD.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.opacityShift = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
         }
-        particle.opacity = SLVD.constrain(
+        particle.opacity = splitTime.constrain(
             particle.opacity + particle.opacityShift,
             0,
             1
@@ -142,7 +142,7 @@ namespace splitTime.particles {
                     16
             ),
             splitTime.Vector2D.angular(
-                SLVD.randomRanged(0, 2 * Math.PI),
+                splitTime.randomRanged(0, 2 * Math.PI),
                 Math.random() * 16
             ),
             new splitTime.Vector2D(0, 10)
@@ -158,7 +158,7 @@ namespace splitTime.particles {
         generateIntervalMs: number
         location: any
         generateParticle: any
-        _particlesGoneHandlers: SLVD.RegisterCallbacks
+        _particlesGoneHandlers: splitTime.RegisterCallbacks
         xres: number
         yres: number
         lazyIntervalMs: number
@@ -180,7 +180,7 @@ namespace splitTime.particles {
             this.location = location
             this.generateParticle = particleGenerator || generateDefaultParticle
 
-            this._particlesGoneHandlers = new SLVD.RegisterCallbacks()
+            this._particlesGoneHandlers = new splitTime.RegisterCallbacks()
 
             this.xres = 100
             this.yres = 100

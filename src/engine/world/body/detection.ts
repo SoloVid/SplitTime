@@ -69,7 +69,7 @@ namespace splitTime.body {
     ): boolean {
         let blocked = false
         // TODO: 3D bresenham
-        SLVD.bresenham.forEachPoint(
+        splitTime.bresenham.forEachPoint(
             start.getX(),
             start.getY(),
             end.getX(),
@@ -91,9 +91,9 @@ namespace splitTime.body {
                     } else {
                         blocked = true
                     }
-                    return SLVD.bresenham.ReturnCode.EXIT_EARLY
+                    return splitTime.bresenham.ReturnCode.EXIT_EARLY
                 }
-                return SLVD.bresenham.ReturnCode.CONTINUE
+                return splitTime.bresenham.ReturnCode.CONTINUE
             }
         )
         return !blocked

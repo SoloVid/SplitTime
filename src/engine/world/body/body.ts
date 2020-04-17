@@ -5,22 +5,22 @@ namespace splitTime {
         template: string | null = null
         id: string = "NOT SET"
         ref: int
-        private frameUpdateHandlers: SLVD.RegisterCallbacks
-        private timeAdvanceListeners: SLVD.RegisterCallbacks
-        private playerInteractHandlers: SLVD.RegisterCallbacks
+        private frameUpdateHandlers: splitTime.RegisterCallbacks
+        private timeAdvanceListeners: splitTime.RegisterCallbacks
+        private playerInteractHandlers: splitTime.RegisterCallbacks
         mover: splitTime.body.Mover
         speechBox: splitTime.body.SpeechBox
 
         // TODO: remove parameter when moving templates elsewhere
         constructor() {
             this.ref = nextRef++
-            this.frameUpdateHandlers = new SLVD.RegisterCallbacks({
+            this.frameUpdateHandlers = new splitTime.RegisterCallbacks({
                 notifyFrameUpdate: null
             })
-            this.timeAdvanceListeners = new SLVD.RegisterCallbacks({
+            this.timeAdvanceListeners = new splitTime.RegisterCallbacks({
                 notifyTimeAdvance: null
             })
-            this.playerInteractHandlers = new SLVD.RegisterCallbacks({
+            this.playerInteractHandlers = new splitTime.RegisterCallbacks({
                 onPlayerInteract: null
             })
             this.mover = new splitTime.body.Mover(this)
@@ -279,7 +279,7 @@ namespace splitTime {
                     this.drawable.notifyFrameUpdate(delta)
                 }
             } catch (e) {
-                splitTime.Logger.error(e)
+                splitTime.log.error(e)
             }
         }
 
@@ -312,7 +312,7 @@ namespace splitTime {
                     this.drawable.notifyTimeAdvance(delta)
                 }
             } catch (e) {
-                splitTime.Logger.error(e)
+                splitTime.log.error(e)
             }
         }
 
@@ -322,13 +322,13 @@ namespace splitTime {
 
         //Function run every frame
         registerFrameUpdateHandler(
-            handler: ((delta: real_seconds) => any) | splitTime.FrameNotified
+            handler: ((delta: real_seconds) => splitTime.CallbackResult) | splitTime.FrameNotified
         ) {
             this.frameUpdateHandlers.register(handler)
         }
 
         registerTimeAdvanceListener(
-            handler: ((delta: game_seconds) => any) | splitTime.TimeNotified
+            handler: ((delta: game_seconds) => splitTime.CallbackResult) | splitTime.TimeNotified
         ) {
             this.timeAdvanceListeners.register(handler)
         }

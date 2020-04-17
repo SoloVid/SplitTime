@@ -6,8 +6,8 @@ namespace splitTime {
         private SCREEN_WIDTH: int
         private SCREEN_HEIGHT: int
 
-        private buffer: SLVD.Canvas
-        private snapshot: SLVD.Canvas
+        private buffer: splitTime.Canvas
+        private snapshot: splitTime.Canvas
 
         private readonly bodyRenderer: body.Renderer
         private readonly weatherRenderer: WeatherRenderer
@@ -21,14 +21,14 @@ namespace splitTime {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
 
-            this.buffer = new SLVD.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
-            this.snapshot = new SLVD.Canvas(
+            this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
+            this.snapshot = new splitTime.Canvas(
                 this.SCREEN_WIDTH,
                 this.SCREEN_HEIGHT
             )
 
             this.bodyRenderer = new body.Renderer(this.camera)
-            this.weatherRenderer = new WeatherRenderer(this.camera, this.see)
+            this.weatherRenderer = new WeatherRenderer(this.camera, this.buffer.context)
         }
 
         renderBoardState(forceCalculate: boolean) {

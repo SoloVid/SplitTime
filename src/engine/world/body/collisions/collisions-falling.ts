@@ -4,7 +4,7 @@ namespace splitTime.body.collisions {
         y: int = -1
         body: Body | null = null
         // positive number
-        distanceAllowed: number = SLVD.MAX_SAFE_INTEGER
+        distanceAllowed: number = splitTime.MAX_SAFE_INTEGER
         zBlocked: int = -1
         events: string[] = []
         otherLevels: string[] = []

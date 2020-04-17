@@ -1,4 +1,4 @@
-namespace SLVD {
+namespace splitTime {
     export class Canvas {
         public readonly element: HTMLCanvasElement
         public readonly context: CanvasRenderingContext2D

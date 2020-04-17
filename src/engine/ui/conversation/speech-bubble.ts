@@ -169,7 +169,7 @@ namespace splitTime.conversation {
                 ) {
                     this._dialogEndHandler.onConversationEnd()
                 } else {
-                    splitTime.Logger.error(
+                    splitTime.log.error(
                         "Invalid dialog end handler: ",
                         this._dialogEndHandler
                     )

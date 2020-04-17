@@ -24,7 +24,7 @@ namespace splitTime {
 
     export class Timeline {
         _timeInMilliseconds: game_ms = 0
-        _timeAdvanceListeners: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks()
+        _timeAdvanceListeners: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         _regions: splitTime.Region[] = []
 
         private upcomingEvents: ScheduledEvent[] = []
@@ -49,7 +49,7 @@ namespace splitTime {
             if (regionIndex >= 0) {
                 this._regions.splice(regionIndex, 1)
             } else if (splitTime.debug.ENABLED) {
-                splitTime.Logger.warn(
+                splitTime.log.warn(
                     "Attempted to remove region " +
                         region.id +
                         " from non-parent timeline"

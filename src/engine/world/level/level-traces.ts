@@ -15,7 +15,7 @@ namespace splitTime.level {
                 this.containsSolid = false
                 this.pointerTraces = {}
                 this.zBlockedTopEx = 0
-                this.zBlockedBottom = SLVD.MAX_SAFE_INTEGER
+                this.zBlockedBottom = splitTime.MAX_SAFE_INTEGER
                 this.events = {}
             }
         }
@@ -103,7 +103,7 @@ namespace splitTime.level {
             ) {
                 var layerZ = this.levelFileData.layers[iLayer].z
                 var nextLayer = this.levelFileData.layers[iLayer + 1]
-                var nextLayerZ = nextLayer ? nextLayer.z : SLVD.MAX_SAFE_INTEGER
+                var nextLayerZ = nextLayer ? nextLayer.z : splitTime.MAX_SAFE_INTEGER
                 if (exMaxZ > layerZ && minZ < nextLayerZ) {
                     this._calculatePixelCollision(
                         collisionInfo,

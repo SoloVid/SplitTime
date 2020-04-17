@@ -36,7 +36,7 @@ namespace splitTime {
             }
 
             if (level === this.currentLevel) {
-                return SLVD.Promise.as()
+                return splitTime.Pledge.as()
             }
 
             this.transitionInProgress = true

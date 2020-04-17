@@ -50,7 +50,7 @@ namespace splitTime.body {
             var otherLevelId: string | null = null
 
             var me = this
-            SLVD.bresenham.forEachPoint(
+            splitTime.bresenham.forEachPoint(
                 furthestX,
                 furthestY,
                 startX,
@@ -78,7 +78,7 @@ namespace splitTime.body {
                                 otherLevelId = collisionInfo.otherLevels[0]
                             }
                         }
-                        return SLVD.bresenham.ReturnCode.EXIT_EARLY
+                        return splitTime.bresenham.ReturnCode.EXIT_EARLY
                     }
                     return
                 }
