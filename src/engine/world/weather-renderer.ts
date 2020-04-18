@@ -22,76 +22,11 @@ namespace splitTime {
         }
 
         render(level: Level) {
-            var screen = this.camera.getScreenCoordinates()
+            this.applyLighting(level)
 
-            var counter = level.getRegion().getTimeMs() % COUNTER_BASE
-            //Light in dark
-            if (level.weather.darkness > 0) {
-                //Transparentize buffer
-                this.buffer.context.clearRect(
-                    0,
-                    0,
-                    this.SCREEN_WIDTH,
-                    this.SCREEN_HEIGHT
-                )
+            const screen = this.camera.getScreenCoordinates()
+            const counter = level.getRegion().getTimeMs() % COUNTER_BASE
 
-                var bodies = level.getBodies()
-                for (const body of bodies) {
-                    if (body.lightIntensity > 0) {
-                        var xCoord = body.x - screen.x
-                        var yCoord = body.y - screen.y
-                        var grd = this.buffer.context.createRadialGradient(
-                            xCoord,
-                            yCoord,
-                            1,
-                            xCoord,
-                            yCoord,
-                            body.lightRadius
-                        )
-                        grd.addColorStop(
-                            0,
-                            "rgba(255, 255, 255, " +
-                                level.weather.darkness * body.lightIntensity +
-                                ")"
-                        )
-                        grd.addColorStop(1, "rgba(255, 255, 255, 0)")
-                        this.buffer.context.fillStyle = grd
-                        this.buffer.context.beginPath()
-                        this.buffer.context.arc(
-                            xCoord,
-                            yCoord,
-                            150,
-                            0,
-                            2 * Math.PI
-                        )
-                        this.buffer.context.closePath()
-                        this.buffer.context.fill()
-                    }
-                }
-
-                //XOR lights placed with black overlay (the result being holes in the black)
-                this.buffer.context.globalCompositeOperation = "xor"
-                this.buffer.context.fillStyle =
-                    "rgba(0, 0, 0, " + level.weather.darkness + ")" //"#000000";
-                this.buffer.context.fillRect(
-                    0,
-                    0,
-                    this.SCREEN_WIDTH,
-                    this.SCREEN_HEIGHT
-                )
-
-                //Render buffer
-                this.ctx.drawImage(
-                    this.buffer.element,
-                    0,
-                    0,
-                    this.SCREEN_WIDTH,
-                    this.SCREEN_HEIGHT
-                )
-
-                //Return to default splitTime.image layering
-                this.buffer.context.globalCompositeOperation = "source-over"
-            }
             //Weather
             if (level.weather.isRaining) {
                 this.ctx.drawImage(
@@ -198,6 +133,71 @@ namespace splitTime {
                     this.SCREEN_HEIGHT
                 )
             }
+        }
+
+        private applyLighting(level: Level) {
+            //Transparentize buffer
+            this.buffer.context.clearRect(
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
+            //Fill with light
+            this.buffer.context.fillStyle = level.weather.ambientLight
+            this.buffer.context.fillRect(
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
+
+            var bodies = level.getBodies()
+            for (const body of bodies) {
+                if (body.lightIntensity > 0) {
+                    var xCoord = body.x - screen.x
+                    var yCoord = body.y - body.z - screen.y
+                    var grd = this.buffer.context.createRadialGradient(
+                        xCoord,
+                        yCoord,
+                        1,
+                        xCoord,
+                        yCoord,
+                        body.lightRadius
+                    )
+                    grd.addColorStop(
+                        0,
+                        "rgba(255, 255, 255, " +
+                            body.lightIntensity +
+                            ")"
+                    )
+                    grd.addColorStop(1, "rgba(255, 255, 255, 0)")
+                    this.buffer.context.fillStyle = grd
+                    this.buffer.context.beginPath()
+                    this.buffer.context.arc(
+                        xCoord,
+                        yCoord,
+                        150,
+                        0,
+                        2 * Math.PI
+                    )
+                    this.buffer.context.closePath()
+                    this.buffer.context.fill()
+                }
+            }
+
+            this.ctx.globalCompositeOperation = "multiply"
+            //Render buffer
+            this.ctx.drawImage(
+                this.buffer.element,
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
+
+            //Return to default splitTime.image layering
+            this.ctx.globalCompositeOperation = "source-over"
         }
     }
 }

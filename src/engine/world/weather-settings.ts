@@ -6,7 +6,7 @@ namespace splitTime {
         isCloudy: boolean = false
         // 0-1 invisible to fully visible
         cloudAlpha: number = 1
-        // 0-1 not dark to 100% dark
-        darkness: number = 0
+        // Color of light (e.g. black for darkness)
+        ambientLight: string = "rgba(255, 255, 255, 1)"
     }
 }
