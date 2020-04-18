@@ -59,7 +59,6 @@ function addNewLayer() {
     levelObject.layers.push({
         displayed: true,
 		id: "",
-        background: "",
         z: z,
         traces: []
     });
@@ -152,6 +151,14 @@ function moveFollower(dx, dy) {
     }
 }
 
+function updatePageTitle() {
+	var title = levelObject.fileName ? levelObject.fileName : "untitled";
+	if (levelObject.region) {
+		title += " (" + levelObject.region + ")";
+	}
+	document.title = title;
+}
+
 function clickFileChooser() {
 	$("#fileChooser").click();
 }
@@ -160,12 +167,15 @@ function downloadFile() {
 	var jsonText = exportLevel();
 
 	var filename = prompt("File name?", levelObject.fileName);
-	if(filename === null) {
+	if(!filename) {
 		return;
 	}
 	if(!filename.endsWith(".json")) {
 		filename += ".json";
 	}
+
+	levelObject.fileName = filename;
+	updatePageTitle();
 
 	var pom = document.createElement('a');
 	pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonText));
@@ -218,6 +228,8 @@ function createLevel(type) {
 	vueApp.createLayer();
 
 	$("#editorTools").show();
+
+	updatePageTitle();
 }
 
 function createObject(type)  {

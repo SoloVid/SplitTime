@@ -100,6 +100,7 @@ function setupEventHandlers() {
 
                 importLevel(contents);
                 levelObject.fileName = f.name;
+                updatePageTitle();
 
                 $("#editorTools").show();
             };
