@@ -210,6 +210,8 @@ namespace splitTime.level {
                 )
             }
 
+            const tracesByLayer = this.getFragmentedTraces()
+
             //Initialize functional map
             for (
                 var iLayer = 0;
@@ -229,7 +231,7 @@ namespace splitTime.level {
                 var layerHeight = nextLayerZ - layerZ
 
                 //Draw traces
-                var layerTraces = this.levelFileData.layers[iLayer].traces
+                const layerTraces = tracesByLayer[iLayer]
 
                 holderCtx.translate(0.5, 0.5)
 
@@ -350,6 +352,51 @@ namespace splitTime.level {
             }
         }
 
+        /**
+         * Potentially split up traces into smaller traces if crossing layer boundaries
+         */
+        getFragmentedTraces(): file_data.Trace[][] {
+            let queuedSolidTraces: file_data.Trace[] = []
+            let tracesByLayer: file_data.Trace[][] = []
+            for (
+                let iLayer = 0;
+                iLayer < this.levelFileData.layers.length;
+                iLayer++
+            ) {
+                const layerZ = this.levelFileData.layers[iLayer].z
+                const nextLayer = this.levelFileData.layers[iLayer + 1]
+                const nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_VALUE
+                const layerHeight = nextLayerZ - layerZ
+
+                const allTracesForLayer = queuedSolidTraces.concat(this.levelFileData.layers[iLayer].traces)
+                queuedSolidTraces = []
+                tracesByLayer[iLayer] = []
+                for (const trace of allTracesForLayer) {
+                    switch (trace.type) {
+                        case splitTime.Trace.Type.SOLID:
+                            const height = +trace.height || layerHeight
+                            if (height > layerHeight) {
+                                const truncTrace = {} as file_data.Trace
+                                Object.assign(truncTrace, trace)
+                                truncTrace.height = "" + layerHeight
+                                tracesByLayer[iLayer].push(truncTrace)
+    
+                                const upperTrace = {} as file_data.Trace
+                                Object.assign(upperTrace, trace)
+                                upperTrace.height = "" + (height - layerHeight)
+                                queuedSolidTraces.push(upperTrace)
+                            } else {
+                                tracesByLayer[iLayer].push(trace)
+                            }
+                            break
+                        default:
+                            tracesByLayer[iLayer].push(trace)
+                    }
+                }
+            }
+            return tracesByLayer
+        }
+    
         getDebugTraceCanvas() {
             return this.debugTraceCanvas
         }
