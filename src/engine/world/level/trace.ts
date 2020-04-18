@@ -193,12 +193,14 @@ namespace splitTime {
 
                 if (point.x < minX) {
                     minX = point.x
-                } else if (point.x > maxX) {
+                }
+                if (point.x > maxX) {
                     maxX = point.x
                 }
                 if (point.y < minY) {
                     minY = point.y
-                } else if (point.y > maxY) {
+                }
+                if (point.y > maxY) {
                     maxY = point.y
                 }
             }
