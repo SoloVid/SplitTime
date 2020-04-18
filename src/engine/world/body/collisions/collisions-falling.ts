@@ -61,11 +61,12 @@ namespace splitTime.body.collisions {
                 collisionInfo.body = groundBody
                 return collisionInfo
             }
-            if (this.mover.body.z <= 0) {
+            const minZ = this.mover.body.level.lowestLayerZ
+            if (this.mover.body.z <= minZ) {
                 collisionInfo.x = roundX
                 collisionInfo.y = roundY
                 collisionInfo.distanceAllowed = 0
-                collisionInfo.zBlocked = 0
+                collisionInfo.zBlocked = minZ
                 return collisionInfo
             }
             if (this.isPreviousGroundTraceRelevant()) {
@@ -130,16 +131,17 @@ namespace splitTime.body.collisions {
             var startY = y - this.mover.body.halfBaseLength
             var yPixels = this.mover.body.baseLength
 
-            if (z <= 0) {
+            const level = this.mover.body.level
+            if (z <= level.lowestLayerZ) {
                 collisionInfo.distanceAllowed = 0
-                collisionInfo.zBlocked = 0
+                collisionInfo.zBlocked = level.lowestLayerZ
                 return collisionInfo
-            } else if (targetZ <= 0) {
-                collisionInfo.distanceAllowed = z
-                collisionInfo.zBlocked = 0
+            } else if (targetZ <= level.lowestLayerZ) {
+                collisionInfo.distanceAllowed = z - level.lowestLayerZ
+                collisionInfo.zBlocked = level.lowestLayerZ
             }
 
-            var levelTraces = this.mover.body.level.getLevelTraces()
+            var levelTraces = level.getLevelTraces()
             var originCollisionInfo = new splitTime.level.traces.CollisionInfo()
             //Loop through Y width of base
             for (var testY = startY; testY < startY + yPixels; testY++) {
@@ -229,13 +231,14 @@ namespace splitTime.body.collisions {
             var startY = y - this.mover.body.halfBaseLength
             var yPixels = this.mover.body.baseLength
 
-            if (z <= 0) {
+            const level = this.mover.body.level
+            if (z <= level.lowestLayerZ) {
                 collisionInfo.distanceAllowed = 0
-                collisionInfo.zBlocked = 0
+                collisionInfo.zBlocked = level.lowestLayerZ
                 return collisionInfo
-            } else if (targetZ <= 0) {
-                collisionInfo.distanceAllowed = z
-                collisionInfo.zBlocked = 0
+            } else if (targetZ <= level.lowestLayerZ) {
+                collisionInfo.distanceAllowed = z - level.lowestLayerZ
+                collisionInfo.zBlocked = level.lowestLayerZ
             }
 
             function handleFoundBody(otherBody: Body) {
@@ -249,8 +252,7 @@ namespace splitTime.body.collisions {
                     collisionInfo.zBlocked = zBlocked
                 }
             }
-            this.mover.body.level
-                .getCellGrid()
+            level.getCellGrid()
                 .forEachBody(
                     startX,
                     startY,

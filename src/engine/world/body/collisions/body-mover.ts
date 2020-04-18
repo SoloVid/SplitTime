@@ -79,7 +79,7 @@ namespace splitTime.body {
             } else if (maxDZ > 0) {
                 actualDZ = this.rising.zeldaVerticalRise(maxDZ)
                 return actualDZ
-            } else if (this.body.z > 0) {
+            } else if (this.body.z > this.body.level.lowestLayerZ) {
                 actualDZ = this.falling.zeldaVerticalDrop(-maxDZ)
                 return actualDZ
             }

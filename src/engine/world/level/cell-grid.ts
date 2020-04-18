@@ -13,7 +13,7 @@ namespace splitTime.level {
         _yCells: number
         _zCells: number
 
-        constructor(level: splitTime.Level) {
+        constructor(private readonly level: splitTime.Level) {
             this._initialized = false
             this._waitingBodies = []
             this._whereAreBodies = {}
@@ -21,7 +21,7 @@ namespace splitTime.level {
 
             this._xCells = Math.ceil(level.width / PARTITION_SIZE)
             this._yCells = Math.ceil(level.yWidth / PARTITION_SIZE)
-            this._zCells = Math.ceil(level.highestLayerZ / PARTITION_SIZE) + 1
+            this._zCells = Math.ceil((level.highestLayerZ - level.lowestLayerZ) / PARTITION_SIZE) + 1
             for (var iLayer = 0; iLayer < this._zCells; iLayer++) {
                 this._grids[iLayer] = []
                 for (
@@ -412,7 +412,7 @@ namespace splitTime.level {
          */
         getZIndex(z: int): int {
             return Math.min(
-                Math.max(0, Math.floor(z / PARTITION_SIZE)),
+                Math.max(0, Math.floor((z - this.level.lowestLayerZ) / PARTITION_SIZE)),
                 this._zCells - 1
             )
         }
