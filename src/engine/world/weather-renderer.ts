@@ -22,9 +22,10 @@ namespace splitTime {
         }
 
         render(level: Level) {
-            this.applyLighting(level)
-
             const screen = this.camera.getScreenCoordinates()
+
+            this.applyLighting(level, screen)
+
             const counter = level.getRegion().getTimeMs() % COUNTER_BASE
 
             //Weather
@@ -135,7 +136,7 @@ namespace splitTime {
             }
         }
 
-        private applyLighting(level: Level) {
+        private applyLighting(level: Level, screen: { x: number; y: number }) {
             //Transparentize buffer
             this.buffer.context.clearRect(
                 0,
