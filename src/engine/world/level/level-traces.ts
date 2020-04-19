@@ -7,12 +7,14 @@ namespace splitTime.level {
 
         export class CollisionInfo {
             containsSolid: boolean
+            levels: { [levelId: string]: Level }
             pointerTraces: { [levelId: string]: splitTime.Trace }
             zBlockedTopEx: int
             zBlockedBottom: int
             events: { [eventId: string]: ZRange }
             constructor() {
                 this.containsSolid = false
+                this.levels = {}
                 this.pointerTraces = {}
                 this.zBlockedTopEx = 0
                 this.zBlockedBottom = splitTime.MAX_SAFE_INTEGER
@@ -69,8 +71,8 @@ namespace splitTime.level {
             xPixels: int,
             startY: int,
             yPixels: int,
-            minZ: number,
-            exMaxZ: number
+            minZ: int,
+            exMaxZ: int
         ) {
             for (var y = startY; y < startY + yPixels; y++) {
                 for (var x = startX; x < startX + xPixels; x++) {
@@ -93,8 +95,8 @@ namespace splitTime.level {
             collisionInfo: traces.CollisionInfo,
             x: int,
             y: int,
-            minZ: number,
-            exMaxZ: number
+            minZ: int,
+            exMaxZ: int
         ) {
             for (
                 var iLayer = 0;
@@ -123,9 +125,9 @@ namespace splitTime.level {
             x: int,
             y: int,
             layer: int,
-            layerZ: number,
-            minZ: number,
-            exMaxZ: number
+            layerZ: int,
+            minZ: int,
+            exMaxZ: int
         ) {
             var imageData = this.layerFuncData[layer]
             var dataIndex = pixCoordToIndex(x, y, imageData)
@@ -133,6 +135,7 @@ namespace splitTime.level {
             var g = imageData.data[dataIndex++]
             var b = imageData.data[dataIndex++]
             var a = imageData.data[dataIndex++]
+            let isOtherLevel = false
             if (a === 255) {
                 switch (r) {
                     case splitTime.Trace.RColor.SOLID:
@@ -168,13 +171,19 @@ namespace splitTime.level {
                         }
                         break
                     case splitTime.Trace.RColor.POINTER:
+                        isOtherLevel = true
                         var trace = this.getPointerTraceFromPixel(r, g, b, a)
                         if (!trace.level) {
                             throw new Error("Pointer trace has no level")
                         }
                         collisionInfo.pointerTraces[trace.level.id] = trace
+                        collisionInfo.levels[trace.level.id] = trace.level
                         break
                 }
+            }
+
+            if (!isOtherLevel) {
+                collisionInfo.levels[this.level.id] = this.level
             }
         }
 
@@ -297,7 +306,7 @@ namespace splitTime.level {
                             // TODO: actual splitTime.Trace object
                             this._internalPointerTraceMap[
                                 pointerIntId
-                            ] = splitTime.Trace.fromRaw(trace, world)
+                            ] = splitTime.Trace.fromRaw(trace, layerZ, world)
                             var pointerColor = splitTime.Trace.getPointerColor(
                                 pointerIntId
                             )
@@ -310,6 +319,7 @@ namespace splitTime.level {
                         case splitTime.Trace.Type.TRANSPORT:
                             var transportTrace = splitTime.Trace.fromRaw(
                                 trace,
+                                layerZ,
                                 world
                             )
                             var transportStringId = transportTrace.getLocationId()

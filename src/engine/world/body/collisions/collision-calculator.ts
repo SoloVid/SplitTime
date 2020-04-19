@@ -1,11 +1,23 @@
 namespace splitTime {
-    class CollisionInfo {
+    interface ApiCollisionInfo {
+        blocked: boolean
+        bodies: Body[]
+        vStepUpEstimate: int
+        events: string[]
+        targetLevel: Level
+    }
+
+    class InternalCollisionInfo implements ApiCollisionInfo {
         blocked: boolean = false
         bodies: Body[] = []
         vStepUpEstimate: int = 0
         events: string[] = []
         pointerTraces: Trace[] = []
-        otherLevels: string[] = []
+        targetLevel: Level
+
+        constructor(targetLevel: Level) {
+            this.targetLevel = targetLevel
+        }
     }
 
     class CollisionCalculator {
@@ -19,15 +31,15 @@ namespace splitTime {
          */
         calculateVolumeCollision(
             level: splitTime.Level,
-            startX: int,
-            xPixels: int,
-            startY: int,
-            yPixels: int,
-            startZ: int,
-            zPixels: int,
+            startX: number,
+            xPixels: number,
+            startY: number,
+            yPixels: number,
+            startZ: number,
+            zPixels: number,
             ignoreBody?: splitTime.Body
-        ): CollisionInfo {
-            var collisionInfo = new CollisionInfo()
+        ): ApiCollisionInfo {
+            var collisionInfo = new InternalCollisionInfo(level)
             function handleFoundBody(otherBody: Body) {
                 if (otherBody !== ignoreBody) {
                     collisionInfo.blocked = true
@@ -36,17 +48,15 @@ namespace splitTime {
                         otherBody.getZ() + otherBody.height - startZ
                 }
             }
-            level
-                .getCellGrid()
-                .forEachBody(
-                    startX,
-                    startY,
-                    startZ,
-                    startX + xPixels,
-                    startY + yPixels,
-                    startZ + zPixels,
-                    handleFoundBody
-                )
+            level.getCellGrid().forEachBody(
+                startX,
+                startY,
+                startZ,
+                startX + xPixels,
+                startY + yPixels,
+                startZ + zPixels,
+                handleFoundBody
+            )
 
             if (!collisionInfo.blocked) {
                 var traceCollision = this.calculateVolumeTraceCollision(
@@ -59,51 +69,47 @@ namespace splitTime {
                     zPixels
                 )
                 collisionInfo.events = traceCollision.events
+                collisionInfo.targetLevel = traceCollision.targetLevel
                 if (traceCollision.blocked) {
                     collisionInfo.blocked = traceCollision.blocked
                     collisionInfo.vStepUpEstimate =
                         traceCollision.vStepUpEstimate
                 } else {
-                    for (
-                        var iPointerCollision = 0;
-                        iPointerCollision < traceCollision.pointerTraces.length;
-                        iPointerCollision++
-                    ) {
-                        var pointerTrace =
-                            traceCollision.pointerTraces[iPointerCollision]
-                        if (!pointerTrace.level) {
-                            throw new Error("Pointer trace does not have level")
+                    const targetLevels: { [levelId: string]: Level } = {}
+                    for (const pointerTrace of traceCollision.pointerTraces) {
+                        const otherLevel = pointerTrace.getLevel()
+                        if (this._levelIdStack.indexOf(otherLevel.id) >= 0) {
+                            continue;
                         }
-                        collisionInfo.otherLevels.push(pointerTrace.level.id)
-                        if (
-                            this._levelIdStack.indexOf(pointerTrace.level.id) <
-                            0
-                        ) {
-                            this._levelIdStack.push(level.id)
-                            try {
-                                var otherLevelCollisionInfo = this.calculateVolumeCollision(
-                                    pointerTrace.level,
-                                    startX + pointerTrace.offsetX,
-                                    xPixels,
-                                    startY + pointerTrace.offsetY,
-                                    yPixels,
-                                    startZ + pointerTrace.offsetZ,
-                                    zPixels
-                                )
-                                // TODO: maybe add events?
-                                if (otherLevelCollisionInfo.blocked) {
-                                    collisionInfo.blocked = true
-                                    collisionInfo.bodies =
-                                        otherLevelCollisionInfo.bodies
-                                    collisionInfo.vStepUpEstimate =
-                                        otherLevelCollisionInfo.vStepUpEstimate
-                                    break
-                                }
-                            } finally {
-                                this._levelIdStack.pop()
+                        this._levelIdStack.push(level.id)
+                        try {
+                            var otherLevelCollisionInfo = this.calculateVolumeCollision(
+                                otherLevel,
+                                startX + pointerTrace.offsetX,
+                                xPixels,
+                                startY + pointerTrace.offsetY,
+                                yPixels,
+                                startZ + pointerTrace.offsetZ,
+                                zPixels
+                            )
+                            // TODO: maybe add events?
+                            if (otherLevelCollisionInfo.blocked) {
+                                collisionInfo.blocked = true
+                                collisionInfo.bodies =
+                                    otherLevelCollisionInfo.bodies
+                                collisionInfo.vStepUpEstimate =
+                                    otherLevelCollisionInfo.vStepUpEstimate
+                                break
                             }
+                            // If we had decided this other level was our target, see if it wants to pawn us off
+                            if (otherLevel === collisionInfo.targetLevel) {
+                                targetLevels[otherLevelCollisionInfo.targetLevel.id] = otherLevelCollisionInfo.targetLevel
+                            }
+                        } finally {
+                            this._levelIdStack.pop()
                         }
                     }
+                    collisionInfo.targetLevel = chooseTheOneOrDefault(targetLevels, collisionInfo.targetLevel)
                 }
             }
             return collisionInfo
@@ -112,29 +118,30 @@ namespace splitTime {
         /**
          * Check that the volume is open in level collision canvas data.
          */
-        calculateVolumeTraceCollision(
+        private calculateVolumeTraceCollision(
             level: splitTime.Level,
-            startX: int,
-            xPixels: int,
-            startY: int,
-            yPixels: int,
-            startZ: int,
-            zPixels: int
-        ): CollisionInfo {
-            var collisionInfo = new CollisionInfo()
-
+            startX: number,
+            xPixels: number,
+            startY: number,
+            yPixels: number,
+            startZ: number,
+            zPixels: number
+        ): InternalCollisionInfo {
             var originCollisionInfo = new splitTime.level.traces.CollisionInfo()
             level
                 .getLevelTraces()
                 .calculateVolumeCollision(
                     originCollisionInfo,
-                    startX,
-                    xPixels,
-                    startY,
-                    yPixels,
-                    startZ,
-                    startZ + zPixels
+                    Math.floor(startX),
+                    Math.ceil(xPixels),
+                    Math.floor(startY),
+                    Math.ceil(yPixels),
+                    Math.floor(startZ),
+                    Math.ceil(startZ + zPixels)
                 )
+
+            let targetLevel = chooseTheOneOrDefault(originCollisionInfo.levels, level)
+            const collisionInfo = new InternalCollisionInfo(targetLevel)
 
             collisionInfo.vStepUpEstimate =
                 originCollisionInfo.zBlockedTopEx - startZ
@@ -152,6 +159,14 @@ namespace splitTime {
 
             return collisionInfo
         }
+    }
+
+    export function chooseTheOneOrDefault<T>(map: { [id: string]: T}, defaultOption: T): T {
+        const ids = Object.keys(map)
+        if (ids.length == 1) {
+            return map[ids[0]]
+        }
+        return defaultOption
     }
 
     export const COLLISION_CALCULATOR = new CollisionCalculator()

@@ -47,7 +47,7 @@ namespace splitTime.body {
             var toX: number | null = null
             var toY: number | null = null
             var events: string[] = []
-            var otherLevelId: string | null = null
+            let mightMoveLevels = false
 
             var me = this
             splitTime.bresenham.forEachPoint(
@@ -74,8 +74,8 @@ namespace splitTime.body {
                             toX = x
                             toY = y
                             events = collisionInfo.events
-                            if (collisionInfo.otherLevels.length === 1) {
-                                otherLevelId = collisionInfo.otherLevels[0]
+                            if (collisionInfo.targetLevel !== this.level) {
+                                mightMoveLevels = true
                             }
                         }
                         return splitTime.bresenham.ReturnCode.EXIT_EARLY
@@ -92,9 +92,9 @@ namespace splitTime.body {
             ) {
                 this.body.put(this.level, toX, toY, z)
                 this.level.runEvents(events, this.body)
-                if (otherLevelId !== null) {
+                if (mightMoveLevels) {
                     var transporter = new splitTime.body.Transporter(this.body)
-                    transporter.transportLevelIfApplicable(otherLevelId)
+                    transporter.transportLevelIfApplicable()
                 }
                 return splitTime.measurement.distanceTrue(
                     startX,
@@ -111,7 +111,7 @@ namespace splitTime.body {
             x: int,
             y: int,
             z: int
-        ): { blocked: boolean; events: string[]; otherLevels: string[] } {
+        ): { blocked: boolean; events: string[]; targetLevel: Level } {
             var left = x - this.halfBaseLength
             var top = y - this.halfBaseLength
 

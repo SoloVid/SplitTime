@@ -77,6 +77,7 @@ namespace splitTime {
 
             for (var iLayer = 0; iLayer < levelData.layers.length; iLayer++) {
                 var layerTraces = levelData.layers[iLayer].traces
+                const z = levelData.layers[iLayer].z
                 for (
                     var iLayerTrace = 0;
                     iLayerTrace < layerTraces.length;
@@ -86,7 +87,7 @@ namespace splitTime {
                     var type = rawTrace.type
                     switch (type) {
                         case splitTime.Trace.Type.TRANSPORT:
-                            var trace = splitTime.Trace.fromRaw(rawTrace, world)
+                            var trace = splitTime.Trace.fromRaw(rawTrace, z, world)
                             const level = trace.level
                             if (!level) {
                                 throw new Error(

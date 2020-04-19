@@ -2,18 +2,6 @@
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
 namespace splitTime.body.collisions {
-    class CollisionInfo {
-        blocked: boolean = false
-        bodies: Body[] = []
-        adjustedZ: number
-        events: string[] = []
-        otherLevels: string[] = []
-
-        constructor(z: number) {
-            this.adjustedZ = z
-        }
-    }
-
     export class HorizontalX {
         constructor(private readonly mover: splitTime.body.Mover) {}
 
@@ -21,52 +9,44 @@ namespace splitTime.body.collisions {
          * Check that dx can be accomplished, potentially with vertical adjustment.
          */
         calculateXPixelCollisionWithStepUp(
-            x: int,
-            y: int,
+            level: Level,
+            x: number,
+            y: number,
             z: number,
-            dx: unit
-        ): CollisionInfo {
-            var collisionInfo = new CollisionInfo(z)
+            dx: number
+        ): HorizontalCollisionInfo {
+            var collisionInfo = new HorizontalCollisionInfo(z)
 
-            var simpleCollisionInfo = this.calculateXPixelCollision(
-                this.mover.body.getLevel(),
-                x,
-                y,
-                z,
-                dx
-            )
+            var simpleCollisionInfo = this.calculateXPixelCollision(level, x, y, z, dx)
             if (
                 simpleCollisionInfo.blocked &&
                 simpleCollisionInfo.vStepUpEstimate <=
                     splitTime.body.Mover.VERTICAL_FUDGE
             ) {
-                var stepUpZ = this.mover.rising.calculateRiseThroughTraces(
-                    x + dx,
-                    y,
-                    z,
+                const stepUpCollisionInfo = this.mover.vertical.calculateZCollision(
+                    level, x + dx, y, z,
                     splitTime.body.Mover.VERTICAL_FUDGE
-                ).zEnd
+                )
+                const stepUpZ = z + stepUpCollisionInfo.dzAllowed
                 var simpleStepUpCollisionInfo = this.calculateXPixelCollision(
-                    this.mover.body.getLevel(),
-                    x,
-                    y,
-                    stepUpZ,
-                    dx
+                    level, x, y, stepUpZ, dx
                 )
                 if (!simpleStepUpCollisionInfo.blocked) {
-                    collisionInfo.adjustedZ = this.mover.falling.calculateDropThroughTraces(
+                    const backDownCollisionInfo = this.mover.vertical.calculateZCollision(
+                        level,
                         x + dx,
                         y,
                         stepUpZ,
-                        splitTime.body.Mover.VERTICAL_FUDGE
-                    ).zBlocked
+                        -splitTime.body.Mover.VERTICAL_FUDGE
+                    )
+                    collisionInfo.adjustedZ = stepUpZ + backDownCollisionInfo.dzAllowed
                     simpleCollisionInfo = simpleStepUpCollisionInfo
                 }
             }
             collisionInfo.blocked = simpleCollisionInfo.blocked
             collisionInfo.bodies = simpleCollisionInfo.bodies
             collisionInfo.events = simpleCollisionInfo.events
-            collisionInfo.otherLevels = simpleCollisionInfo.otherLevels
+            collisionInfo.targetLevel = simpleCollisionInfo.targetLevel
 
             return collisionInfo
         }
@@ -76,16 +56,16 @@ namespace splitTime.body.collisions {
          */
         calculateXPixelCollision(
             level: splitTime.Level,
-            x: int,
-            y: int,
+            x: number,
+            y: number,
             z: number,
-            dx: unit
+            dx: number
         ): {
             blocked: boolean
             bodies: splitTime.Body[]
             vStepUpEstimate: number
             events: string[]
-            otherLevels: string[]
+            targetLevel: Level
         } {
             var edgeX =
                 dx > 0
@@ -95,11 +75,11 @@ namespace splitTime.body.collisions {
             return splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
                 level,
                 edgeX,
-                1,
+                Math.abs(dx),
                 top,
                 this.mover.body.baseLength,
-                Math.round(z),
-                Math.round(this.mover.body.height)
+                z,
+                this.mover.body.height
             )
         }
     }

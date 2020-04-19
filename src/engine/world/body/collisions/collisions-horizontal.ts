@@ -1,6 +1,18 @@
 namespace splitTime.body.collisions {
     var ZILCH = 0.000001
 
+    export class HorizontalCollisionInfo {
+        blocked: boolean = false
+        bodies: Body[] = []
+        adjustedZ: number
+        events: string[] = []
+        targetLevel: Level | null = null
+
+        constructor(z: number) {
+            this.adjustedZ = z
+        }
+    }
+
     export class Horizontal {
         horizontalX: HorizontalX
         horizontalY: HorizontalY
@@ -51,30 +63,30 @@ namespace splitTime.body.collisions {
 
             var oldX = this.mover.body.getX()
             var oldY = this.mover.body.getY()
-            var oldRoundX = Math.floor(oldX)
-            var oldRoundY = Math.floor(oldY)
-            var roundX = oldRoundX
-            var roundY = oldRoundY
+            var currentX = oldX
+            var currentY = oldY
             var currentZ = this.mover.body.getZ()
 
             var halfLength = this.mover.body.halfBaseLength
 
             var eventIdSet = {}
             var levelIdSet = {}
+            let mightMoveLevels = false
             for (var i = 0; i < maxIterations; i++) {
                 if (xPixelsRemaining > 0) {
-                    var newRoundX = roundX + iHat
+                    const newX = currentX + iHat
 
                     //If the body is out of bounds on the x axis
                     if (
-                        newRoundX + halfLength >= level.width ||
-                        newRoundX - halfLength < 0
+                        newX + halfLength >= level.width ||
+                        newX - halfLength < 0
                     ) {
                         outX = true
                     } else {
-                        var xCollisionInfo = this.horizontalX.calculateXPixelCollisionWithStepUp(
-                            roundX,
-                            roundY,
+                        const xCollisionInfo = this.horizontalX.calculateXPixelCollisionWithStepUp(
+                            level,
+                            currentX,
+                            currentY,
                             currentZ,
                             iHat as unit
                         )
@@ -91,31 +103,31 @@ namespace splitTime.body.collisions {
                                 )
                             }
                         } else {
-                            roundX = newRoundX
+                            currentX = newX
                             currentZ = xCollisionInfo.adjustedZ
                             xPixelsRemaining--
                             pixelsMovedX++
                             addArrayToSet(xCollisionInfo.events, eventIdSet)
-                            addArrayToSet(
-                                xCollisionInfo.otherLevels,
-                                levelIdSet
-                            )
+                            if (xCollisionInfo.targetLevel !== level) {
+                                mightMoveLevels = true
+                            }
                         }
                     }
                 }
 
                 if (yPixelsRemaining > 0) {
-                    var newRoundY = roundY + jHat
+                    const newY = currentY + jHat
                     //Check if out of bounds on the y axis
                     if (
-                        newRoundY + halfLength >= level.yWidth ||
-                        newRoundY - halfLength < 0
+                        newY + halfLength >= level.yWidth ||
+                        newY - halfLength < 0
                     ) {
                         outY = true
                     } else {
-                        var yCollisionInfo = this.horizontalY.calculateYPixelCollisionWithStepUp(
-                            roundX,
-                            roundY,
+                        const yCollisionInfo = this.horizontalY.calculateYPixelCollisionWithStepUp(
+                            level,
+                            currentX,
+                            currentY,
                             currentZ,
                             jHat as unit
                         )
@@ -132,30 +144,29 @@ namespace splitTime.body.collisions {
                                 )
                             }
                         } else {
-                            roundY = newRoundY
+                            currentY = newY
                             currentZ = yCollisionInfo.adjustedZ
                             yPixelsRemaining--
                             pixelsMovedY++
                             addArrayToSet(yCollisionInfo.events, eventIdSet)
-                            addArrayToSet(
-                                yCollisionInfo.otherLevels,
-                                levelIdSet
-                            )
+                            if (yCollisionInfo.targetLevel !== level) {
+                                mightMoveLevels = true
+                            }
                         }
                     }
                 }
             }
 
             if (ady > 0 && pixelsMovedY > 0) {
-                var roundYMoved = roundY - oldRoundY
-                var newYFromSteps = oldY + roundYMoved
+                var yMoved = currentY - oldY
+                var newYFromSteps = oldY + yMoved
                 // Subtract off any overshoot
                 var actualNewY = newYFromSteps - (dyRounded - dy)
                 this.mover.body.setY(actualNewY)
             }
             if (adx > 0 && pixelsMovedX > 0) {
-                var roundXMoved = roundX - oldRoundX
-                var newXFromSteps = oldX + roundXMoved
+                var xMoved = currentX - oldX
+                var newXFromSteps = oldX + xMoved
                 // Subtract off any overshoot
                 var actualNewX = newXFromSteps - (dxRounded - dx)
                 this.mover.body.setX(actualNewX)
@@ -174,7 +185,9 @@ namespace splitTime.body.collisions {
             }
 
             this.mover.body.level.runEventSet(eventIdSet, this.mover.body)
-            this.mover.transportLevelIfApplicable(levelIdSet)
+            if (mightMoveLevels) {
+                this.mover.transportLevelIfApplicable(levelIdSet)
+            }
 
             return splitTime.measurement.distanceTrue(
                 oldX,

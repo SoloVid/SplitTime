@@ -2,6 +2,7 @@ namespace splitTime {
     export class Trace {
         type: string
         level: splitTime.Level | null
+        z: number
         offsetX: number
         offsetY: number
         offsetZ: number
@@ -12,6 +13,7 @@ namespace splitTime {
         constructor(type: string) {
             this.type = type
             this.level = null
+            this.z = 0
             this.offsetX = 0
             this.offsetY = 0
             this.offsetZ = 0
@@ -22,9 +24,11 @@ namespace splitTime {
 
         static fromRaw(
             rawTrace: splitTime.level.file_data.Trace,
+            z: number,
             world: World
         ): splitTime.Trace {
             var trace = new splitTime.Trace(rawTrace.type)
+            trace.z = z
             switch (trace.type) {
                 case splitTime.Trace.Type.SOLID:
                     trace.height = +rawTrace.height
@@ -44,6 +48,13 @@ namespace splitTime {
                     break
             }
             return trace
+        }
+
+        getLevel(): Level {
+            if (!this.level) {
+                throw new Error("Trace does not have a Level")
+            }
+            return this.level
         }
 
         getLocationId() {

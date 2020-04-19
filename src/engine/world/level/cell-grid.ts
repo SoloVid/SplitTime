@@ -73,7 +73,7 @@ namespace splitTime.level {
                         if (splitTime.debug.ENABLED) {
                             for (var i = 0; i < cell.length; i++) {
                                 if (cell[i] === body) {
-                                    console.warn(
+                                    log.warn(
                                         "Body " +
                                             body.ref +
                                             " added to cell more than once"
@@ -338,28 +338,28 @@ namespace splitTime.level {
         }
 
         forEachBody(
-            minX: int,
-            minY: int,
-            minZ: int,
-            exMaxX: int,
-            exMaxY: int,
-            exMaxZ: int,
+            minX: number,
+            minY: number,
+            minZ: number,
+            exMaxX: number,
+            exMaxY: number,
+            exMaxZ: number,
             callback: (arg0: splitTime.Body) => any
         ) {
             var bodiesHit: { [bodyRef: number]: true } = {}
             for (
                 var iCellZ = this.getZIndex(minZ);
-                iCellZ <= this.getZIndex(exMaxZ - 1);
+                iCellZ <= this.getZIndex(exMaxZ);
                 iCellZ++
             ) {
                 for (
                     var iCellY = this.getYIndex(minY);
-                    iCellY <= this.getYIndex(exMaxY - 1);
+                    iCellY <= this.getYIndex(exMaxY);
                     iCellY++
                 ) {
                     for (
                         var iCellX = this.getXIndex(minX);
-                        iCellX <= this.getXIndex(exMaxX - 1);
+                        iCellX <= this.getXIndex(exMaxX);
                         iCellX++
                     ) {
                         var cell = this._grids[iCellZ][
@@ -385,10 +385,8 @@ namespace splitTime.level {
 
         /**
          * Map real x coordinate to cell x-coordinate
-         * @param {int} x
-         * @return {int}
          */
-        getXIndex(x: int): int {
+        getXIndex(x: number): int {
             return Math.min(
                 Math.max(0, Math.floor(x / PARTITION_SIZE)),
                 this._xCells - 1
@@ -396,10 +394,8 @@ namespace splitTime.level {
         }
         /**
          * Map real y coordinate to cell y-coordinate
-         * @param {int} y
-         * @return {int}
          */
-        getYIndex(y: int): int {
+        getYIndex(y: number): int {
             return Math.min(
                 Math.max(0, Math.floor(y / PARTITION_SIZE)),
                 this._yCells - 1
@@ -407,10 +403,8 @@ namespace splitTime.level {
         }
         /**
          * Map real z coordinate to cell z-coordinate
-         * @param {int} z
-         * @return {int}
          */
-        getZIndex(z: int): int {
+        getZIndex(z: number): int {
             return Math.min(
                 Math.max(0, Math.floor((z - this.level.lowestLayerZ) / PARTITION_SIZE)),
                 this._zCells - 1
@@ -419,21 +413,21 @@ namespace splitTime.level {
     }
 
     class WhereIsBody {
-        minZCellIndex: any
-        exMaxZCellIndex: any
-        minYCellIndex: any
-        exMaxYCellIndex: any
-        minXCellIndex: any
-        exMaxXCellIndex: any
+        readonly minZCellIndex: int
+        readonly exMaxZCellIndex: int
+        readonly minYCellIndex: int
+        readonly exMaxYCellIndex: int
+        readonly minXCellIndex: int
+        readonly exMaxXCellIndex: int
 
         constructor(cellGrid: splitTime.level.CellGrid, body?: splitTime.Body) {
             if (body) {
-                var left = Math.round(body.getLeft())
-                var right = left + Math.round(body.baseLength)
-                var yTop = Math.round(body.getTopY())
-                var yBottom = yTop + Math.round(body.baseLength)
-                var zBottom = Math.round(body.getZ())
-                var zTop = zBottom + Math.round(body.height)
+                const left = body.getLeft()
+                const right = left + body.baseLength
+                const yTop = body.getTopY()
+                const yBottom = yTop + body.baseLength
+                const zBottom = body.getZ()
+                const zTop = zBottom + body.height
 
                 this.minXCellIndex = cellGrid.getXIndex(left)
                 this.exMaxXCellIndex = cellGrid.getXIndex(right) + 1
@@ -452,24 +446,24 @@ namespace splitTime.level {
         }
     }
 
-    function isXOverlap(minX: int, exMaxX: int, body: Body) {
-        var bodyLeft = Math.round(body.getLeft())
+    function isXOverlap(minX: number, exMaxX: number, body: Body) {
+        var bodyLeft = body.getLeft()
         var noOverlap =
-            exMaxX <= bodyLeft || bodyLeft + Math.round(body.baseLength) <= minX
+            exMaxX <= bodyLeft || bodyLeft + body.baseLength <= minX
         return !noOverlap
     }
 
-    function isYOverlap(minY: int, exMaxY: int, body: Body) {
-        var bodyTop = Math.round(body.getTopY())
+    function isYOverlap(minY: number, exMaxY: number, body: Body) {
+        var bodyTop = body.getTopY()
         var noOverlap =
-            exMaxY <= bodyTop || bodyTop + Math.round(body.baseLength) <= minY
+            exMaxY <= bodyTop || bodyTop + body.baseLength <= minY
         return !noOverlap
     }
 
-    function isZOverlap(minZ: int, exMaxZ: int, body: Body) {
-        var bodyBottom = Math.round(body.z)
+    function isZOverlap(minZ: number, exMaxZ: number, body: Body) {
+        var bodyBottom = body.z
         var noOverlap =
-            exMaxZ <= body.z || bodyBottom + Math.round(body.height) <= minZ
+            exMaxZ <= body.z || bodyBottom + body.height <= minZ
         return !noOverlap
     }
 }

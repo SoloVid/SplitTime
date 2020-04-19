@@ -2,18 +2,6 @@
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
 namespace splitTime.body.collisions {
-    class CollisionInfo {
-        blocked: boolean = false
-        bodies: Body[] = []
-        adjustedZ: number
-        events: string[] = []
-        otherLevels: string[] = []
-
-        constructor(z: number) {
-            this.adjustedZ = z
-        }
-    }
-
     export class HorizontalY {
         constructor(private readonly mover: splitTime.body.Mover) {}
 
@@ -21,52 +9,44 @@ namespace splitTime.body.collisions {
          * Check that dy can be accomplished, potentially with vertical adjustment.
          */
         calculateYPixelCollisionWithStepUp(
-            x: int,
-            y: int,
+            level: Level,
+            x: number,
+            y: number,
             z: number,
-            dy: unit
-        ): CollisionInfo {
-            var collisionInfo = new CollisionInfo(z)
-
-            var simpleCollisionInfo = this.calculateYPixelCollision(
-                this.mover.body.getLevel(),
-                x,
-                y,
-                z,
-                dy
-            )
+            dy: number
+        ): HorizontalCollisionInfo {
+            var collisionInfo = new HorizontalCollisionInfo(z)
+    
+            var simpleCollisionInfo = this.calculateYPixelCollision(level, x, y, z, dy)
             if (
                 simpleCollisionInfo.blocked &&
                 simpleCollisionInfo.vStepUpEstimate <=
                     splitTime.body.Mover.VERTICAL_FUDGE
             ) {
-                var stepUpZ = this.mover.rising.calculateRiseThroughTraces(
-                    x,
-                    y + dy,
-                    z,
+                const stepUpCollisionInfo = this.mover.vertical.calculateZCollision(
+                    level, x, y + dy, z,
                     splitTime.body.Mover.VERTICAL_FUDGE
-                ).zEnd
+                )
+                const stepUpZ = z + stepUpCollisionInfo.dzAllowed
                 var simpleStepUpCollisionInfo = this.calculateYPixelCollision(
-                    this.mover.body.getLevel(),
-                    x,
-                    y,
-                    stepUpZ,
-                    dy
+                    level, x, y, stepUpZ, dy
                 )
                 if (!simpleStepUpCollisionInfo.blocked) {
-                    collisionInfo.adjustedZ = this.mover.falling.calculateDropThroughTraces(
+                    const backDownCollisionInfo = this.mover.vertical.calculateZCollision(
+                        level,
                         x,
                         y + dy,
                         stepUpZ,
-                        splitTime.body.Mover.VERTICAL_FUDGE
-                    ).zBlocked
+                        -splitTime.body.Mover.VERTICAL_FUDGE
+                    )
+                    collisionInfo.adjustedZ = stepUpZ + backDownCollisionInfo.dzAllowed
                     simpleCollisionInfo = simpleStepUpCollisionInfo
                 }
             }
             collisionInfo.blocked = simpleCollisionInfo.blocked
             collisionInfo.bodies = simpleCollisionInfo.bodies
             collisionInfo.events = simpleCollisionInfo.events
-            collisionInfo.otherLevels = simpleCollisionInfo.otherLevels
+            collisionInfo.targetLevel = simpleCollisionInfo.targetLevel
 
             return collisionInfo
         }
@@ -76,16 +56,16 @@ namespace splitTime.body.collisions {
          */
         calculateYPixelCollision(
             level: splitTime.Level,
-            x: int,
-            y: int,
+            x: number,
+            y: number,
             z: number,
-            dy: unit
+            dy: number
         ): {
             blocked: boolean
             bodies: splitTime.Body[]
             vStepUpEstimate: number
             events: string[]
-            otherLevels: string[]
+            targetLevel: Level
         } {
             var edgeY =
                 dy > 0
@@ -97,9 +77,9 @@ namespace splitTime.body.collisions {
                 left,
                 this.mover.body.baseLength,
                 edgeY,
-                1,
-                Math.round(z),
-                Math.round(this.mover.body.height)
+                Math.abs(dy),
+                z,
+                this.mover.body.height
             )
         }
     }

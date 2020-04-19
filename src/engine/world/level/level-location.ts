@@ -5,6 +5,13 @@ interface ILevelLocation {
     getLevel(): splitTime.Level
 }
 
+interface ILevelLocation2 {
+    x: number
+    y: number
+    z: number
+    level: splitTime.Level
+}
+
 namespace splitTime.level {
     export class Location implements ILevelLocation {
         constructor(
