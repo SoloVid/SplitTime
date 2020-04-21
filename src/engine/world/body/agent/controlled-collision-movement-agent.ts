@@ -38,7 +38,8 @@ namespace splitTime.agent {
                 }
                 this.body.mover.horizontal.zeldaStep(
                     this.body.dir,
-                    this.body.spd * delta
+                    this.body.spd * delta,
+                    true
                 )
             }
         }

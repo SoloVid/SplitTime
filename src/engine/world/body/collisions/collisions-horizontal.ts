@@ -27,7 +27,7 @@ namespace splitTime.body.collisions {
          * Includes pushing other Bodys out of the way
          * @returns distance actually moved
          */
-        zeldaStep(dir: number, maxDistance: number): number {
+        zeldaStep(dir: number, maxDistance: number, withPush: boolean = false): number {
             this.mover.ensureInRegion()
             var level = this.mover.body.level
 
@@ -92,7 +92,7 @@ namespace splitTime.body.collisions {
                         )
                         if (xCollisionInfo.blocked) {
                             stoppedX = true
-                            if (xCollisionInfo.bodies.length > 0) {
+                            if (withPush && xCollisionInfo.bodies.length > 0) {
                                 // Slow down when pushing
                                 xPixelsRemaining--
                                 this.tryPushOtherBodies(
@@ -133,7 +133,7 @@ namespace splitTime.body.collisions {
                         )
                         if (yCollisionInfo.blocked) {
                             stoppedY = true
-                            if (yCollisionInfo.bodies.length > 0) {
+                            if (withPush && yCollisionInfo.bodies.length > 0) {
                                 // Slow down when pushing
                                 yPixelsRemaining--
                                 this.tryPushOtherBodies(
