@@ -146,8 +146,7 @@ namespace splitTime {
             collisionInfo.vStepUpEstimate =
                 originCollisionInfo.zBlockedTopEx - startZ
             collisionInfo.blocked =
-                originCollisionInfo.containsSolid &&
-                collisionInfo.vStepUpEstimate > 0
+                originCollisionInfo.containsSolid
             for (var levelId in originCollisionInfo.pointerTraces) {
                 collisionInfo.pointerTraces.push(
                     originCollisionInfo.pointerTraces[levelId]
