@@ -55,12 +55,12 @@ namespace splitTime.body.collisions {
             //-1 for negative movement on the axis, 1 for positive
             var kHat = (dz === 0 ? 0 : dzRoundedUp / adz) as unitOrZero
 
-            const left = this.mover.body.getLeft()
-            const top = this.mover.body.getTopY()
+            const left = x - this.mover.body.baseLength / 2
+            const top = y - this.mover.body.baseLength / 2
             const baseLength = this.mover.body.baseLength
             const height = this.mover.body.height
 
-            let lowerBoundZ = height
+            let lowerBoundZ = z + height
             if (kHat === -1) {
                 lowerBoundZ = z - 1
             }
