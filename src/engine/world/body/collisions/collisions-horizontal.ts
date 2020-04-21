@@ -70,7 +70,6 @@ namespace splitTime.body.collisions {
             var halfLength = this.mover.body.halfBaseLength
 
             var eventIdSet = {}
-            var levelIdSet = {}
             let mightMoveLevels = false
             for (var i = 0; i < maxIterations; i++) {
                 if (xPixelsRemaining > 0) {
@@ -186,7 +185,7 @@ namespace splitTime.body.collisions {
 
             this.mover.body.level.runEventSet(eventIdSet, this.mover.body)
             if (mightMoveLevels) {
-                this.mover.transportLevelIfApplicable(levelIdSet)
+                this.mover.transportLevelIfApplicable()
             }
 
             return splitTime.measurement.distanceTrue(
