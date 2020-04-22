@@ -187,12 +187,14 @@ namespace splitTime.level {
                 whereIsBodyNow,
                 removeFromCell
             )
-            this._adjustCellClaims(
-                body,
-                whereIsBodyNow,
-                whereWasBody,
-                addToCell
-            )
+            if (body.baseLength > 0) {
+                this._adjustCellClaims(
+                    body,
+                    whereIsBodyNow,
+                    whereWasBody,
+                    addToCell
+                )
+            }
 
             this._whereAreBodies[body.ref] = whereIsBodyNow
         }
