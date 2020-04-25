@@ -144,12 +144,7 @@ namespace splitTime.level {
                     )
                     break
                 case splitTime.Trace.Type.STAIRS:
-                    assert(trace.direction !== null, "Stairs trace must have a direction")
-                    const gradient = splitTime.Trace.calculateGradient(
-                        trace.vertices,
-                        holderCtx,
-                        trace.direction
-                    )
+                    const gradient = trace.createStairsGradient(holderCtx)
                     const startFraction = minZRelativeToTrace / trace.height
                     if (startFraction >= 0 && startFraction <= 1) {
                         gradient.addColorStop(startFraction, noColor)

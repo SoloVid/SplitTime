@@ -171,4 +171,17 @@ namespace splitTime.direction {
         var dDir = Math.abs(dir1 - dir2)
         return dDir < howMany90Degrees || dDir > 4 - howMany90Degrees
     }
+
+    /**
+     * Convert from SplitTime representation of direction to radians for math
+     * @param direction SplitTime direction
+     * @param invert (default true) change from y-axis down to up
+     */
+    export function toRadians(direction: direction_t, invert: boolean = true): number {
+        let radians = direction * (Math.PI / 2)
+        if (invert) {
+            radians = -radians
+        }
+        return radians
+    }
 }

@@ -27,13 +27,38 @@ Vue.component("rendered-trace", {
         pointsShadow: function() {
             var that = this;
             var pointsArray = safeExtractTraceArray(this.trace.vertices);
+            if(this.trace.type === splitTime.Trace.Type.STAIRS && !!this.trace.direction && pointsArray.length >= 3) {
+                var officialTrace = splitTime.Trace.fromRaw(this.trace);
+                var extremes = officialTrace.calculateStairsExtremes();
+                var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y);
+                var stairsLength = stairsVector.magnitude;
+                var totalDZ = that.trace.height;
+                pointsArray = pointsArray.map(function(point) {
+                    if(!point) {
+                        return point;
+                    }
+                    var partUpVector = new splitTime.Vector2D(point.x - extremes.bottom.x, point.y - extremes.bottom.y); 
+                    var distanceUp = stairsVector.times(partUpVector.dot(stairsVector) / (stairsLength * stairsLength)).magnitude;
+                    var height = Math.min(Math.round(totalDZ * (distanceUp / stairsLength)), totalDZ);
+                    point.z = that.trace.z + height;
+                    return point;
+                });
+            } else {
+                pointsArray = pointsArray.map(function(point) {
+                    if(!point) {
+                        return point;
+                    }
+                    point.z = that.trace.z + that.trace.height;
+                    return point;
+                });
+            }
             return pointsArray.reduce(function(pointsStr, point) {
                 var y;
                 if(point !== null) {
-                    y = point.y - that.trace.z - that.height;
+                    y = point.y - point.z;
                     return pointsStr + " " + point.x + "," + y;
                 } else if(pointsArray.length > 0 && pointsArray[0] !== null) {
-                    y = pointsArray[0].y - that.trace.z - that.height;
+                    y = pointsArray[0].y - pointsArray[0].z;
                     return pointsStr + " " + pointsArray[0].x + "," + y;
                 }
                 return pointsStr;

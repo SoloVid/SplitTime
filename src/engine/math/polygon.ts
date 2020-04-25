@@ -1,8 +1,20 @@
 namespace splitTime.math {
 
     export class Polygon {
-        constructor(readonly vertices: Vector2D[]) {
+        private readonly isClockwise: boolean
+        constructor(readonly vertices: readonly Vector2D[]) {
+            assert(this.vertices.length >= 3, "Polygon requires at least three vertices")
+            this.isClockwise = this.checkClockwise()
+        }
 
+        // See https://stackoverflow.com/a/1165943/4639640
+        // or https://www.element84.com/blog/determining-the-winding-of-a-polygon-given-as-a-set-of-ordered-points
+        private checkClockwise(): boolean {
+            const twiceArea = this.vertices.reduce((sum, v, i) => {
+                const nextV = this.vertices[(i + 1) % this.vertices.length]
+                return sum + (nextV.x - v.x) * (nextV.y + v.y)
+            }, 0)
+            return twiceArea > 0
         }
 
         /**
@@ -17,9 +29,10 @@ namespace splitTime.math {
          */
         findPointToward(direction: number): Vector2D {
             const oppositeRadians = mod(direction + Math.PI, 2 * Math.PI)
+            // See https://stackoverflow.com/a/7869457/4639640
             function calcDAngle(compareRadians: number) {
-                const compareRadiansPrime = mod(compareRadians, 2 * Math.PI)
-                return Math.abs(compareRadiansPrime - oppositeRadians)
+                const initialDifference = compareRadians - oppositeRadians
+                return Math.abs(mod(initialDifference + Math.PI, 2 * Math.PI) - Math.PI)
             }
 
             const that = this
@@ -49,17 +62,17 @@ namespace splitTime.math {
             // See if one of the two adjacent edges aligns better with the angle
             const prevVertex = that.vertices[mod(bestVertexI - 1, that.vertices.length)]
             const prevEdge = prevVertex.plus(bestVertex.times(-1))
-            const prevEdgeDAngleLeft = calcDAngle(prevEdge.rotate(Math.PI / 2).angle)
-            const prevEdgeDAngleRight = calcDAngle(prevEdge.rotate(-Math.PI / 2).angle)
-            if (prevEdgeDAngleLeft < bestAngle || prevEdgeDAngleRight < bestAngle) {
+            const prevRotate = this.isClockwise ? +1 : -1
+            const prevEdgeDAngle = calcDAngle(prevEdge.rotate(prevRotate * Math.PI / 2).angle)
+            if (prevEdgeDAngle < bestAngle) {
                 return measurement.midpoint(bestVertex, prevVertex)
             }
 
             const nextVertex = that.vertices[mod(bestVertexI + 1, that.vertices.length)]
             const nextEdge = nextVertex.plus(bestVertex.times(-1))
-            const nextEdgeDAngleLeft = calcDAngle(nextEdge.rotate(Math.PI / 2).angle)
-            const nextEdgeDAngleRight = calcDAngle(nextEdge.rotate(-Math.PI / 2).angle)
-            if (nextEdgeDAngleLeft < bestAngle || nextEdgeDAngleRight < bestAngle) {
+            const nextRotate = -prevRotate
+            const nextEdgeDAngle = calcDAngle(nextEdge.rotate(nextRotate * Math.PI / 2).angle)
+            if (nextEdgeDAngle < bestAngle) {
                 return measurement.midpoint(bestVertex, nextVertex)
             }
 

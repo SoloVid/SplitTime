@@ -31,9 +31,14 @@ namespace splitTime {
             this.eventId = null
         }
 
+        /**
+         * Basically a constructor for Trace from level file data
+         * @param rawTrace 
+         * @param world only pass null if you know what you're doing (e.g. in editor)
+         */
         static fromRaw(
             rawTrace: splitTime.level.file_data.Trace,
-            world: World
+            world: World | null = null
         ): splitTime.Trace {
             var trace = new splitTime.Trace(rawTrace.type, rawTrace.vertices)
             trace.z = +rawTrace.z
@@ -47,7 +52,7 @@ namespace splitTime {
                     break
                 case splitTime.Trace.Type.POINTER:
                 case splitTime.Trace.Type.TRANSPORT:
-                    trace.level = world.getLevel(rawTrace.level)
+                    trace.level = world ? world.getLevel(rawTrace.level) : null
                     trace.offsetX = +rawTrace.offsetX
                     trace.offsetY = +rawTrace.offsetY
                     trace.offsetZ = +rawTrace.offsetZ
@@ -191,82 +196,28 @@ namespace splitTime {
             ctx.stroke()
         }
 
-        static calculateGradient(
-            traceStr: string,
-            ctx: CanvasRenderingContext2D,
-            direction: direction_t
+        createStairsGradient(
+            ctx: CanvasRenderingContext2D
         ): CanvasGradient {
-            var pointsArray = splitTime.Trace.extractArray(traceStr)
-            var minX = 100000
-            var minY = 100000
-            var maxX = 0
-            var maxY = 0
-            for (var i = 0; i < pointsArray.length; i++) {
-                var point = pointsArray[i]
+            const stairsExtremes = this.calculateStairsExtremes()
+            return ctx.createLinearGradient(
+                stairsExtremes.bottom.x, stairsExtremes.bottom.y,
+                stairsExtremes.top.x, stairsExtremes.top.y
+            )
+        }
 
-                if (point === null) {
-                    continue
-                }
-
-                if (i === 0) {
-                    ctx.beginPath()
-                    // TODO: if first point null?
-                    ctx.moveTo(point.x, point.y)
-                } else {
-                    ctx.lineTo(point.x, point.y)
-                }
-
-                if (point.x < minX) {
-                    minX = point.x
-                }
-                if (point.x > maxX) {
-                    maxX = point.x
-                }
-                if (point.y < minY) {
-                    minY = point.y
-                }
-                if (point.y > maxY) {
-                    maxY = point.y
-                }
+        calculateStairsExtremes(): { top: Vector2D, bottom: Vector2D } {
+            const points = Trace.extractArray(this.vertices)
+                .filter(v => v !== null)
+                .map(v => new Vector2D(v!.x, v!.y))
+            const polygon = new math.Polygon(points)
+            assert(this.direction !== null, "Stairs must have a direction")
+            const top = polygon.findPointToward(direction.toRadians(this.direction))
+            const bottom = polygon.findPointToward(direction.toRadians(this.direction) + Math.PI)
+            return {
+                top: top,
+                bottom: bottom
             }
-            ctx.closePath()
-
-            var xUnit = splitTime.direction.getXSign(direction)
-            var minXWeight = 1 + xUnit // for negative X, prefer starting right (weight 0 on minX)
-            var maxXWeight = 1 - xUnit // for positive X, prefer starting left (weight 0 on maxX)
-            var startX = (minXWeight * minX + maxXWeight * maxX) / 2
-
-            var yUnit = splitTime.direction.getYSign(direction)
-            var minYWeight = 1 + yUnit // for negative Y, prefer starting down (weight 0 on minY)
-            var maxYWeight = 1 - yUnit // for positive Y, prefer starting up (weight 0 on maxY)
-            var startY = (minYWeight * minY + maxYWeight * maxY) / 2
-
-            var checkingX = startX
-            var checkingY = startY
-
-            var x0 = null
-            var y0 = null
-            var x1 = null
-            var y1 = null
-            for (var iBound = 0; iBound < 100000; iBound++) {
-                if (ctx.isPointInPath(checkingX, checkingY)) {
-                    if (x0 === null) {
-                        x0 = checkingX
-                        y0 = checkingY
-                    }
-                } else {
-                    if (x0 !== null && y0 !== null) {
-                        x1 = checkingX
-                        y1 = checkingY
-                        return ctx.createLinearGradient(x0, y0, x1, y1)
-                    }
-                }
-
-                checkingX += xUnit
-                checkingY += yUnit
-            }
-
-            throw new Error("Could not create gradient")
         }
 
         static Type = {
