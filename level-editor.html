@@ -48,7 +48,7 @@
                 <br>
                 Active Layer:
                 <select id="activeLayer" v-model="activeLayer">
-                    <option v-for="(layer, index) in level.layers" v-bind:value="index">Layer {{ index }}</option>
+                    <option v-for="(layer, index) in level.layers" v-bind:value="index">{{ layer.id || ("Layer " + index) }}</option>
                 </select>
                 <br><br>
                 <div id="traceOptions">
@@ -103,7 +103,7 @@
                 <span v-show="layer.id">{{layer.id}}</span>
             </strong>
             <input type="checkbox" v-model="layer.displayed"/>
-            <div v-show="layer.traces.length > 0">
+            <div v-show="traces.length > 0">
             <div>
                 Traces
                 <input type="checkbox"
@@ -112,7 +112,7 @@
                 />
             </div>
             <ul>
-                <li v-for="(trace, traceIndex) in layer.traces"
+                <li v-for="(trace, traceIndex) in traces"
                     v-on:mouseenter="trace.isHighlighted = true"
                     v-on:mouseleave="trace.isHighlighted = false"
                     style="list-style-type: circle"
@@ -192,11 +192,9 @@
                         <!--<stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" />-->
                     <!--</linearGradient>-->
                 <!--</defs>-->
-                <rendered-trace v-for="(trace, traceIndex) in layer.traces"
+                <rendered-trace v-for="(trace, traceIndex) in traces"
                                 v-bind:trace="trace"
                                 v-bind:index="traceIndex"
-                                v-bind:layerZ="layer.z"
-                                v-bind:layerHeight="layerHeight"
                 ></rendered-trace>
             </svg>
             <div v-bind:style="thingsStyleObject">
@@ -265,6 +263,11 @@
     <script src="src/editor/level/event-handlers.js"></script>
     <script src="src/editor/level/form.js"></script>
     <script src="src/editor/level/editor-functions.js"></script>
+    <script src="src/editor/level/vue-menu-layer.js"></script>
+    <script src="src/editor/level/vue-rendered-layer.js"></script>
+    <script src="src/editor/level/vue-rendered-position.js"></script>
+    <script src="src/editor/level/vue-rendered-prop.js"></script>
+    <script src="src/editor/level/vue-rendered-trace.js"></script>
     <script src="src/editor/level/load-other-source.js"></script>
     </body>
 </html>

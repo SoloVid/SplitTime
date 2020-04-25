@@ -1,14 +1,14 @@
 function setMode(name) { mode = name; }
 
 function exportLevel() {
-	var levelCopy = JSON.parse(JSON.stringify(levelObject));
-	for(var iLayer = 0; iLayer < levelCopy.layers.length; iLayer++) {
-		var layer = levelCopy.layers[iLayer];
-		removeEditorProperties(layer);
-		for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
-			removeEditorProperties(layer.traces[iTrace]);
-		}
-	}
+    var levelCopy = JSON.parse(JSON.stringify(levelObject));
+    for(var iLayer = 0; iLayer < levelCopy.layers.length; iLayer++) {
+        var layer = levelCopy.layers[iLayer];
+        removeEditorProperties(layer);
+    }
+    for(var iTrace = 0; iTrace < levelCopy.traces.length; iTrace++) {
+        removeEditorProperties(levelCopy.traces[iTrace]);
+    }
     for(var iPos = 0; iPos < levelCopy.positions.length; iPos++) {
         removeEditorProperties(levelCopy.positions[iPos]);
     }
@@ -19,13 +19,13 @@ function exportLevel() {
 }
 
 function importLevel(levelText) {
-	levelObject = JSON.parse(levelText);
+    levelObject = JSON.parse(levelText);
     for(var iLayer = 0; iLayer < levelObject.layers.length; iLayer++) {
         var layer = levelObject.layers[iLayer];
         addEditorProperties(layer);
-        for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
-            addEditorProperties(layer.traces[iTrace]);
-        }
+    }
+    for(var iTrace = 0; iTrace < levelObject.traces.length; iTrace++) {
+        addEditorProperties(levelObject.traces[iTrace]);
     }
     for(var iPos = 0; iPos < levelObject.positions.length; iPos++) {
         addEditorProperties(levelObject.positions[iPos]);
@@ -46,11 +46,13 @@ function removeEditorProperties(object) {
     delete object.isHighlighted;
 }
 
+var DEFAULT_HEIGHT = 64;
+
 function addNewLayer() {
-	var assumedRelativeZ = 64;
-	if(levelObject.layers.length > 1) {
-		assumedRelativeZ = Math.abs(levelObject.layers[1].z - levelObject.layers[0].z);
-	}
+    var assumedRelativeZ = DEFAULT_HEIGHT;
+    if(levelObject.layers.length > 1) {
+        assumedRelativeZ = Math.abs(levelObject.layers[1].z - levelObject.layers[0].z);
+    }
     var z = 0;
     if(levelObject.layers.length > 0) {
         var previousLayer = levelObject.layers[levelObject.layers.length - 1];
@@ -58,20 +60,25 @@ function addNewLayer() {
     }
     levelObject.layers.push({
         displayed: true,
-		id: "",
-        z: z,
-        traces: []
+        id: "",
+        z: z
     });
 }
 
 function addNewTrace(layerIndex) {
-	var trace = {
-		type: "",
-		vertices: ""
-	};
-	addEditorProperties(trace);
-	levelObject.layers[layerIndex].traces.push(trace);
-	return trace;
+    var z = levelObject.layers[layerIndex].z;
+    var height = levelObject.layers.length > layerIndex + 1 ?
+        levelObject.layers[layerIndex + 1].z - z :
+        DEFAULT_HEIGHT;
+    var trace = {
+        type: "",
+        vertices: "",
+        z: z,
+        height: height
+    };
+    addEditorProperties(trace);
+    levelObject.traces.push(trace);
+    return trace;
 }
 
 function imgSrc(fileName) {
@@ -86,10 +93,10 @@ function safeGetColor(trace) {
         return "rgba(255, 255, 0, 0.8)";
     }
     for(var i = 0; i < vueApp.traceOptions.length; i++) {
-    	if(vueApp.traceOptions[i].type === trace.type) {
-    		return vueApp.traceOptions[i].color;
-		}
-	}
+        if(vueApp.traceOptions[i].type === trace.type) {
+            return vueApp.traceOptions[i].color;
+        }
+    }
     return "rgba(255, 255, 255, 1)";
 }
 function safeExtractTraceArray(traceStr) {
@@ -98,45 +105,45 @@ function safeExtractTraceArray(traceStr) {
 }
 
 function normalizeTraceStr(traceStr) {
-	return traceStr.replace(/\(pos:(.+?)\)/g, function(match, posId) {
-		var position = null;
-		for(var i = 0; i < levelObject.positions.length; i++) {
-			if(levelObject.positions[i].id === posId) {
-				position = levelObject.positions[i];
-			}
-		}
+    return traceStr.replace(/\(pos:(.+?)\)/g, function(match, posId) {
+        var position = null;
+        for(var i = 0; i < levelObject.positions.length; i++) {
+            if(levelObject.positions[i].id === posId) {
+                position = levelObject.positions[i];
+            }
+        }
 
-		if(!position) {
-			console.warn("Position (" + posId + ") undefined in trace string \"" + traceStr + "\"");
-			return "";
-		}
+        if(!position) {
+            console.warn("Position (" + posId + ") undefined in trace string \"" + traceStr + "\"");
+            return "";
+        }
 
-		return "(" + position.x + ", " + position.y + ")";
-	});
+        return "(" + position.x + ", " + position.y + ")";
+    });
 }
 
 function findClosestPosition(x, y) {
-	var closestDistance = Number.MAX_SAFE_INTEGER;
-	var closestPosition = null;
+    var closestDistance = Number.MAX_SAFE_INTEGER;
+    var closestPosition = null;
 
-	levelObject.positions.forEach(function(pos) {
-		var dx = pos.x - x;
-		var dy = pos.y - y;
-		var dist = Math.sqrt((dx * dx) + (dy * dy));
-		if(dist < closestDistance) {
-			closestDistance = dist;
-			closestPosition = pos;
-		}
-	});
+    levelObject.positions.forEach(function(pos) {
+        var dx = pos.x - x;
+        var dy = pos.y - y;
+        var dist = Math.sqrt((dx * dx) + (dy * dy));
+        if(dist < closestDistance) {
+            closestDistance = dist;
+            closestPosition = pos;
+        }
+    });
 
-	return closestPosition;
+    return closestPosition;
 }
 
 function moveFollower(dx, dy) {
-	var toMove = follower || lastFollower;
-	if(!toMove) {
-		return;
-	}
+    var toMove = follower || lastFollower;
+    if(!toMove) {
+        return;
+    }
     if(toMove.vertices !== undefined) {
         var regex = /\((-?[\d]+), (-?[\d]+)\)/g;
         var pointString = toMove.vertices;
@@ -152,95 +159,95 @@ function moveFollower(dx, dy) {
 }
 
 function updatePageTitle() {
-	var title = levelObject.fileName ? levelObject.fileName : "untitled";
-	if (levelObject.region) {
-		title += " (" + levelObject.region + ")";
-	}
-	document.title = title;
+    var title = levelObject.fileName ? levelObject.fileName : "untitled";
+    if (levelObject.region) {
+        title += " (" + levelObject.region + ")";
+    }
+    document.title = title;
 }
 
 function clickFileChooser() {
-	$("#fileChooser").click();
+    $("#fileChooser").click();
 }
 
 function downloadFile() {
-	var jsonText = exportLevel();
+    var jsonText = exportLevel();
 
-	var filename = prompt("File name?", levelObject.fileName);
-	if(!filename) {
-		return;
-	}
-	if(!filename.endsWith(".json")) {
-		filename += ".json";
-	}
+    var filename = prompt("File name?", levelObject.fileName);
+    if(!filename) {
+        return;
+    }
+    if(!filename.endsWith(".json")) {
+        filename += ".json";
+    }
 
-	levelObject.fileName = filename;
-	updatePageTitle();
+    levelObject.fileName = filename;
+    updatePageTitle();
 
-	var pom = document.createElement('a');
-	pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonText));
-	pom.setAttribute('download', filename);
+    var pom = document.createElement('a');
+    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonText));
+    pom.setAttribute('download', filename);
 
-	pom.style.display = 'none';
-	document.body.appendChild(pom);
+    pom.style.display = 'none';
+    document.body.appendChild(pom);
 
-	pom.click();
+    pom.click();
 
-	document.body.removeChild(pom);
+    document.body.removeChild(pom);
 }
 
 function resizeBoardCheck(imgEl) {
-	var layerWidth = imgEl.width;
-	var layerHeight = imgEl.height;
+    var layerWidth = imgEl.width;
+    var layerHeight = imgEl.height;
 
-	if(layerWidth > vueApp.levelWidth || layerHeight > vueApp.levelHeight) {
-		vueApp.levelWidth = layerWidth;
-		vueApp.levelHeight = layerHeight;
-	}
+    if(layerWidth > vueApp.levelWidth || layerHeight > vueApp.levelHeight) {
+        vueApp.levelWidth = layerWidth;
+        vueApp.levelHeight = layerHeight;
+    }
 }
 
 function getPixelsPerPixel() {
-	return levelObject.type === "TRPG" ? 32 : 1;
+    return levelObject.type === "TRPG" ? 32 : 1;
 }
 
 function createLevel(type) {
-	if(levelObject.layers.length > 0) {
-		if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
-			return;
-		}
+    if(levelObject.layers.length > 0) {
+        if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
+            return;
+        }
     }
 
-	if(!type) {
+    if(!type) {
         // type = prompt("Type: (action/overworld)");
-		type = "action";
-	}
+        type = "action";
+    }
 
-	levelObject = {
-		region: "",
-		background: "",
-		type: type,
-		layers: [],
-		positions: [],
-		props: []
-	};
+    levelObject = {
+        region: "",
+        background: "",
+        type: type,
+        layers: [],
+        positions: [],
+        props: []
+    };
 
-	vueApp.level = levelObject;
-	vueApp.createLayer();
+    vueApp.level = levelObject;
+    vueApp.createLayer();
 
-	$("#editorTools").show();
+    $("#editorTools").show();
 
-	updatePageTitle();
+    updatePageTitle();
 }
 
 function createObject(type)  {
-	var layerIndex = vueApp.activeLayer;
-	var z = levelObject.layers[layerIndex].z;
+    var layerIndex = vueApp.activeLayer;
+    var z = levelObject.layers[layerIndex].z;
     var x = mouseLevelX;
     var y = mouseLevelY + z;
 
-	var object = {
-		id: "",
-		template: "",
+    var object = {
+        id: "",
+        template: "",
         x: x,
         y: y,
         z: z,
@@ -248,51 +255,51 @@ function createObject(type)  {
         stance: "default"
     };
 
-	addEditorProperties(object);
+    addEditorProperties(object);
 
-	if(type == "position") {
-		levelObject.positions.push(object);
-		showEditorPosition(object);
-	} else if(type == "prop") {
-		levelObject.props.push(object);
-		showEditorProp(object);
-	}
+    if(type == "position") {
+        levelObject.positions.push(object);
+        showEditorPosition(object);
+    } else if(type == "prop") {
+        levelObject.props.push(object);
+        showEditorProp(object);
+    }
 }
 
 function loadBodyFromTemplate(templateName) {
-	try {
-		return G.BODY_TEMPLATES.getInstance(templateName);
-	} catch(e) {
-		return new splitTime.Body();
-	}
+    try {
+        return G.BODY_TEMPLATES.getInstance(templateName);
+    } catch(e) {
+        return new splitTime.Body();
+    }
 }
 
 function getBodyImage(body) {
-	if(body.drawable instanceof splitTime.Sprite) {
-		return imgSrc(body.drawable.img);
-	}
-	return subImg;
+    if(body.drawable instanceof splitTime.Sprite) {
+        return imgSrc(body.drawable.img);
+    }
+    return subImg;
 }
 
 function getAnimationFrameCrop(body, dir, stance) {
-	if(body.drawable instanceof splitTime.Sprite) {
-		return body.drawable.getAnimationFrameCrop(splitTime.direction.interpret(dir), stance, 0);
-	}
-	// FTODO: more solid default
-	return {
-		xres: 32,
-		yres: 64,
-		sx: 0,
-		sy: 0
-	};
+    if(body.drawable instanceof splitTime.Sprite) {
+        return body.drawable.getAnimationFrameCrop(splitTime.direction.interpret(dir), stance, 0);
+    }
+    // FTODO: more solid default
+    return {
+        xres: 32,
+        yres: 64,
+        sx: 0,
+        sy: 0
+    };
 }
 
 function getSpriteOffset(body) {
-	if(body.drawable instanceof splitTime.Sprite) {
-		return {
-			x: body.drawable.baseOffX,
-			y: body.drawable.baseOffY
-		};
-	}
-	return { x: 0, y: 0 };
+    if(body.drawable instanceof splitTime.Sprite) {
+        return {
+            x: body.drawable.baseOffX,
+            y: body.drawable.baseOffY
+        };
+    }
+    return { x: 0, y: 0 };
 }

@@ -228,13 +228,18 @@ function showEditorTrace(trace) {
         {
             type: "textarea",
             key: "vertices"
+        },
+        {
+            key: "z",
+            type: "number"
+        },
+        {
+            key: "height",
+            type: "number"
         }
     ];
 
     switch(trace.type) {
-        case splitTime.Trace.Type.SOLID:
-            fields.push({key: "height"});
-            break;
         case splitTime.Trace.Type.STAIRS:
             fields.push({key: "direction"});
             break;
@@ -244,9 +249,9 @@ function showEditorTrace(trace) {
         case splitTime.Trace.Type.POINTER:
         case splitTime.Trace.Type.TRANSPORT:
             fields.push({key: "level"});
-            fields.push({key: "offsetX"});
-            fields.push({key: "offsetY"});
-            fields.push({key: "offsetZ"});
+            fields.push({key: "offsetX", type: "number"});
+            fields.push({key: "offsetY", type: "number"});
+            fields.push({key: "offsetZ", type: "number"});
             break;
     }
 
