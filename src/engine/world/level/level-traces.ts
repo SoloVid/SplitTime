@@ -69,7 +69,7 @@ namespace splitTime.level {
             for (const z in zSet) {
                 zArray.push(+z)
             }
-            this.layerZs = zArray.sort()
+            this.layerZs = zArray.sort((a, b) => a - b)
 
             //Initialize functional map
             for (
@@ -85,7 +85,7 @@ namespace splitTime.level {
                 )
 
                 var layerZ = this.layerZs[iLayer]
-                var nextLayerZ = this.layerZs[iLayer + 1] || Number.MAX_VALUE
+                var nextLayerZ = this.layerZs.length > iLayer + 1 ? this.layerZs[iLayer + 1] : MAX_SAFE_INTEGER
 
                 holderCtx.translate(0.5, 0.5)
 
