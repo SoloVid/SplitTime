@@ -101,14 +101,12 @@ namespace splitTime.body {
             if (!pointerTrace) {
                 return null
             }
-            if (!pointerTrace.level) {
-                throw new Error("Pointer trace does not have level")
-            }
+            const pointerOffset = pointerTrace.getPointerOffset()
             return {
-                level: pointerTrace.level,
-                x: x + pointerTrace.offsetX,
-                y: y + pointerTrace.offsetY,
-                z: z + pointerTrace.offsetZ
+                level: pointerOffset.level,
+                x: x + pointerOffset.offsetX,
+                y: y + pointerOffset.offsetY,
+                z: z + pointerOffset.offsetZ
             }
         }
     }

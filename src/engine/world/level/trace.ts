@@ -1,40 +1,46 @@
 namespace splitTime {
-    export class Trace {
-        type: string
-        level: splitTime.Level | null
-        z: number
+    interface PointerOffset {
+        level: splitTime.Level
         offsetX: number
         offsetY: number
         offsetZ: number
-        height: number
-        direction: string
-        eventId: string
+    }
 
-        constructor(type: string) {
+    export class Trace {
+        type: string
+        vertices: string
+        z: number
+        height: number
+        level: splitTime.Level | null
+        offsetX: number | null
+        offsetY: number | null
+        offsetZ: number | null
+        direction: direction_t | null
+        eventId: string | null
+
+        constructor(type: string, vertices: string) {
             this.type = type
-            this.level = null
+            this.vertices = vertices
             this.z = 0
-            this.offsetX = 0
-            this.offsetY = 0
-            this.offsetZ = 0
             this.height = 0
-            this.direction = ""
-            this.eventId = ""
+            this.level = null
+            this.offsetX = null
+            this.offsetY = null
+            this.offsetZ = null
+            this.direction = null
+            this.eventId = null
         }
 
         static fromRaw(
             rawTrace: splitTime.level.file_data.Trace,
-            z: number,
             world: World
         ): splitTime.Trace {
-            var trace = new splitTime.Trace(rawTrace.type)
-            trace.z = z
+            var trace = new splitTime.Trace(rawTrace.type, rawTrace.vertices)
+            trace.z = +rawTrace.z
+            trace.height = +rawTrace.height
             switch (trace.type) {
-                case splitTime.Trace.Type.SOLID:
-                    trace.height = +rawTrace.height
-                    break
                 case splitTime.Trace.Type.STAIRS:
-                    trace.direction = rawTrace.direction
+                    trace.direction = direction.interpret(rawTrace.direction)
                     break
                 case splitTime.Trace.Type.EVENT:
                     trace.eventId = rawTrace.event
@@ -48,6 +54,14 @@ namespace splitTime {
                     break
             }
             return trace
+        }
+
+        getPointerOffset(): PointerOffset {
+            assert(!!this.level, "Pointer trace must have a level")
+            assert(!!this.offsetX, "Pointer trace must have offsetX")
+            assert(!!this.offsetY, "Pointer trace must have offsetY")
+            assert(!!this.offsetZ, "Pointer trace must have offsetZ")
+            return this as PointerOffset
         }
 
         getLevel(): Level {
@@ -180,7 +194,7 @@ namespace splitTime {
         static calculateGradient(
             traceStr: string,
             ctx: CanvasRenderingContext2D,
-            direction: string
+            direction: direction_t
         ): CanvasGradient {
             var pointsArray = splitTime.Trace.extractArray(traceStr)
             var minX = 100000

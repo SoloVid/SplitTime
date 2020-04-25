@@ -10,7 +10,6 @@ namespace splitTime {
         region: Region | null
         bodies: Body[]
         background: string
-        layerFuncData: ImageData[]
         _cellGrid: level.CellGrid | null
         weather: WeatherSettings
         _props: any[]
@@ -29,7 +28,6 @@ namespace splitTime {
             this.region = null
             this.bodies = []
             this.background = ""
-            this.layerFuncData = []
 
             // this._bodyOrganizer = new splitTime.Level.BodyOrganizer();
             this._cellGrid = null

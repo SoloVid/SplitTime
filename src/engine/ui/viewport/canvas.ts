@@ -3,7 +3,10 @@ namespace splitTime {
         public readonly element: HTMLCanvasElement
         public readonly context: CanvasRenderingContext2D
 
-        public constructor(width: int, height: int) {
+        public constructor(
+            public readonly width: int,
+            public readonly height: int
+        ) {
             this.element = document.createElement("canvas")
             this.element.setAttribute("width", "" + width)
             this.element.setAttribute("height", "" + height)

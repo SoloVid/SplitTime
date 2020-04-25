@@ -77,19 +77,19 @@ namespace splitTime {
                 } else {
                     const targetLevels: { [levelId: string]: Level } = {}
                     for (const pointerTrace of traceCollision.pointerTraces) {
-                        const otherLevel = pointerTrace.getLevel()
-                        if (this._levelIdStack.indexOf(otherLevel.id) >= 0) {
+                        const pointerOffset = pointerTrace.getPointerOffset()
+                        if (this._levelIdStack.indexOf(pointerOffset.level.id) >= 0) {
                             continue;
                         }
                         this._levelIdStack.push(level.id)
                         try {
                             var otherLevelCollisionInfo = this.calculateVolumeCollision(
-                                otherLevel,
-                                startX + pointerTrace.offsetX,
+                                pointerOffset.level,
+                                startX + pointerOffset.offsetX,
                                 xPixels,
-                                startY + pointerTrace.offsetY,
+                                startY + pointerOffset.offsetY,
                                 yPixels,
-                                startZ + pointerTrace.offsetZ,
+                                startZ + pointerOffset.offsetZ,
                                 zPixels
                             )
                             // TODO: maybe add events?
@@ -102,7 +102,7 @@ namespace splitTime {
                                 break
                             }
                             // If we had decided this other level was our target, see if it wants to pawn us off
-                            if (otherLevel === collisionInfo.targetLevel) {
+                            if (pointerOffset.level === collisionInfo.targetLevel) {
                                 targetLevels[otherLevelCollisionInfo.targetLevel.id] = otherLevelCollisionInfo.targetLevel
                             }
                         } finally {

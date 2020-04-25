@@ -66,4 +66,11 @@ namespace splitTime {
     export function mod(n: number, base: number) {
         return ((n % base) + base) % base
     }
+
+    export function isOverlap(x1: number, length1: number, x2: number, length2: number) {
+        var noOverlap =
+            x1 + length1 <= x2 ||
+            x2 + length2 <= x1
+        return !noOverlap
+    }
 }

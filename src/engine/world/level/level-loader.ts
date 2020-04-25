@@ -25,11 +25,13 @@ namespace splitTime {
 
             this.level.lowestLayerZ = 0
             this.level.highestLayerZ = 0
-            if (levelData.layers.length > 0) {
-                this.level.lowestLayerZ =
-                    levelData.layers[0].z
-                this.level.highestLayerZ =
-                    levelData.layers[levelData.layers.length - 1].z
+            for (const trace of levelData.traces) {
+                if (trace.z < this.level.lowestLayerZ) {
+                    this.level.lowestLayerZ = +trace.z
+                }
+                if (trace.z > this.level.highestLayerZ) {
+                    this.level.highestLayerZ = +trace.z
+                }
             }
 
             var that = this
@@ -75,40 +77,26 @@ namespace splitTime {
                 }
             }
 
-            for (var iLayer = 0; iLayer < levelData.layers.length; iLayer++) {
-                var layerTraces = levelData.layers[iLayer].traces
-                const z = levelData.layers[iLayer].z
-                for (
-                    var iLayerTrace = 0;
-                    iLayerTrace < layerTraces.length;
-                    iLayerTrace++
-                ) {
-                    var rawTrace = layerTraces[iLayerTrace]
-                    var type = rawTrace.type
-                    switch (type) {
-                        case splitTime.Trace.Type.TRANSPORT:
-                            var trace = splitTime.Trace.fromRaw(rawTrace, z, world)
-                            const level = trace.level
-                            if (!level) {
-                                throw new Error(
-                                    "Transport trace is missing level"
-                                )
-                            }
-                            var transportTraceId = trace.getLocationId()
-                            this.level.registerEvent(
-                                transportTraceId,
-                                (function(trace, level) {
-                                    return (body: splitTime.Body) => {
-                                        body.put(
-                                            level,
-                                            body.x + trace.offsetX,
-                                            body.y + trace.offsetY,
-                                            body.z + trace.offsetZ
-                                        )
-                                    }
-                                })(trace, level)
-                            )
-                    }
+            for (const rawTrace of levelData.traces) {
+                var type = rawTrace.type
+                switch (type) {
+                    case splitTime.Trace.Type.TRANSPORT:
+                        var trace = splitTime.Trace.fromRaw(rawTrace, world)
+                        const pointerOffset = trace.getPointerOffset()
+                        var transportTraceId = trace.getLocationId()
+                        this.level.registerEvent(
+                            transportTraceId,
+                            (function(trace, level) {
+                                return (body: splitTime.Body) => {
+                                    body.put(
+                                        pointerOffset.level,
+                                        body.x + pointerOffset.offsetX,
+                                        body.y + pointerOffset.offsetY,
+                                        body.z + pointerOffset.offsetZ
+                                    )
+                                }
+                            })(trace, level)
+                        )
                 }
             }
 

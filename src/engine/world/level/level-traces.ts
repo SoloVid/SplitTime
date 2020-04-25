@@ -1,7 +1,6 @@
 namespace splitTime.level {
     export namespace traces {
         export class ZRange {
-            // FTODO: int?
             constructor(public minZ: number, public exMaxZ: number) {}
         }
 
@@ -26,10 +25,14 @@ namespace splitTime.level {
     export class Traces {
         level: splitTime.Level
         levelFileData: splitTime.level.FileData
+        traces: Trace[]
+        _layerZs: int[]
         layerFuncData: ImageData[]
-        _internalEventIdMap: any
-        _internalPointerTraceMap: any
-        debugTraceCanvas: HTMLCanvasElement | null = null
+        _nextFunctionId: int
+        _internalEventIdMap: { [intId: number]: string }
+        _nextPointerId: int
+        _internalPointerTraceMap: { [intId: number]: splitTime.Trace }
+        debugTraceCanvas: splitTime.Canvas | null = null
 
         constructor(
             level: splitTime.Level,
@@ -38,9 +41,186 @@ namespace splitTime.level {
         ) {
             this.level = level
             this.levelFileData = levelFileData
+            this._layerZs = []
             this.layerFuncData = []
 
-            this.initCanvasData(world)
+            this._internalEventIdMap = {}
+            this._internalPointerTraceMap = {}
+            this._nextFunctionId = 1
+            this._nextPointerId = 1
+
+            const holderCanvas = new splitTime.Canvas(this.level.width, this.level.yWidth)
+            const holderCtx = holderCanvas.context
+
+            let debugTraceCtx = null
+            if (splitTime.debug.ENABLED) {
+                this.debugTraceCanvas = new splitTime.Canvas(this.level.width, this.level.height)
+                debugTraceCtx = this.debugTraceCanvas.context
+                debugTraceCtx.clearRect(
+                    0,
+                    0,
+                    this.debugTraceCanvas.width,
+                    this.debugTraceCanvas.height
+                )
+            }
+
+            this.traces = []
+            const zSet: { [z: number]: true } = {}
+            for (const rawTrace of this.levelFileData.traces) {
+                this.traces.push(Trace.fromRaw(rawTrace, world))
+                zSet[+rawTrace.z] = true
+            }
+            const zArray: number[] = []
+            for (const z in zSet) {
+                zArray.push(+z)
+            }
+            this._layerZs = zArray.sort()
+
+            //Initialize functional map
+            for (
+                var iLayer = 0;
+                iLayer < this._layerZs.length;
+                iLayer++
+            ) {
+                holderCtx.clearRect(
+                    0,
+                    0,
+                    holderCanvas.width,
+                    holderCanvas.height
+                )
+
+                var layerZ = this._layerZs[iLayer]
+                var nextLayerZ = this._layerZs[iLayer + 1] || Number.MAX_VALUE
+
+                holderCtx.translate(0.5, 0.5)
+
+                for (const trace of this.traces) {
+                    this.drawPartialSolidTrace(trace, holderCtx, layerZ, nextLayerZ)
+                }
+                // We are drawing these in a separate loop because in the future
+                // we want these to be additively drawn while the solids are drawn normally
+                for (const trace of this.traces) {
+                    this.drawPartialSpecialTrace(trace, holderCtx, layerZ, nextLayerZ)
+                }
+
+                // TODO: traces related to props
+
+                holderCtx.translate(-0.5, -0.5)
+
+                this.layerFuncData[iLayer] = holderCtx.getImageData(
+                    0,
+                    0,
+                    holderCanvas.width,
+                    holderCanvas.height
+                )
+
+                if (splitTime.debug.ENABLED && debugTraceCtx !== null) {
+                    debugTraceCtx.drawImage(holderCanvas.element, 0, -layerZ)
+                }
+            }
+        }
+
+        drawPartialSolidTrace(trace: Trace, holderCtx: CanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
+            const maxHeight = exMaxZ - minZ
+            const minZRelativeToTrace = minZ - trace.z
+            const traceHeightFromMinZ = trace.z + trace.height - minZ
+            const pixelHeight = constrain(traceHeightFromMinZ, 0, maxHeight)
+            const groundColor = splitTime.Trace.getSolidColor(0)
+            const topColor = splitTime.Trace.getSolidColor(pixelHeight)
+            const noColor = "rgba(0, 0, 0, 0)"
+            switch (trace.type) {
+                case splitTime.Trace.Type.SOLID:
+                    splitTime.Trace.drawColor(
+                        trace.vertices,
+                        holderCtx,
+                        topColor
+                    )
+                    break
+                case splitTime.Trace.Type.GROUND:
+                    splitTime.Trace.drawColor(
+                        trace.vertices,
+                        holderCtx,
+                        groundColor
+                    )
+                    break
+                case splitTime.Trace.Type.STAIRS:
+                    assert(trace.direction !== null, "Stairs trace must have a direction")
+                    const gradient = splitTime.Trace.calculateGradient(
+                        trace.vertices,
+                        holderCtx,
+                        trace.direction
+                    )
+                    const startFraction = minZRelativeToTrace / trace.height
+                    if (startFraction >= 0 && startFraction <= 1) {
+                        gradient.addColorStop(startFraction, noColor)
+                        gradient.addColorStop(startFraction, groundColor)
+
+                        const stairsTopThisLayer = Math.min(trace.z + trace.height, exMaxZ)
+                        const stairsTopRelativeToTrace = stairsTopThisLayer - trace.z
+                        const endFraction = stairsTopRelativeToTrace / trace.height
+                        gradient.addColorStop(endFraction, topColor)
+                        gradient.addColorStop(endFraction, noColor)
+
+                        splitTime.Trace.drawColor(
+                            trace.vertices,
+                            holderCtx,
+                            gradient
+                        )
+                    }
+                    break
+            }
+        }
+
+        drawPartialSpecialTrace(trace: Trace, holderCtx: CanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
+            if (!isOverlap(trace.z, trace.height, minZ, exMaxZ)) {
+                return
+            }
+            // FTODO: support adding multiple in same pixel
+            // Will require additive blending and probably
+            // also cell-based lookups
+            switch (trace.type) {
+                case splitTime.Trace.Type.EVENT:
+                    const eventStringId = trace.eventId
+                    assert(eventStringId !== null, "Event trace must have an event")
+                    const eventIntId = this._nextFunctionId++
+                    this._internalEventIdMap[eventIntId] = eventStringId
+                    const functionColor = splitTime.Trace.getEventColor(
+                        eventIntId
+                    )
+                    splitTime.Trace.drawColor(
+                        trace.vertices,
+                        holderCtx,
+                        functionColor
+                    )
+                    break
+                case splitTime.Trace.Type.POINTER:
+                    const pointerIntId = this._nextPointerId++
+                    this._internalPointerTraceMap[pointerIntId] = trace
+                    const pointerColor = splitTime.Trace.getPointerColor(
+                        pointerIntId
+                    )
+                    splitTime.Trace.drawColor(
+                        trace.vertices,
+                        holderCtx,
+                        pointerColor
+                    )
+                    break
+                case splitTime.Trace.Type.TRANSPORT:
+                    const transportStringId = trace.getLocationId()
+                    const transportIntId = this._nextFunctionId++
+                    this._internalEventIdMap[
+                        transportIntId
+                    ] = transportStringId
+                    const transportColor = splitTime.Trace.getEventColor(
+                        transportIntId
+                    )
+                    splitTime.Trace.drawColor(
+                        trace.vertices,
+                        holderCtx,
+                        transportColor
+                    )
+                    break
+            }
         }
 
         getEventIdFromPixel(r: number, g: number, b: number, a: number) {
@@ -58,7 +238,9 @@ namespace splitTime.level {
             a: number
         ): splitTime.Trace {
             var pointerIntId = splitTime.Trace.getPointerIdFromColor(r, g, b, a)
-            return this._internalPointerTraceMap[pointerIntId]
+            const pointerTrace = this._internalPointerTraceMap[pointerIntId]
+            assert(!!pointerTrace, "Pointer trace not found: " + pointerIntId)
+            return pointerTrace
         }
 
         /**
@@ -100,12 +282,11 @@ namespace splitTime.level {
         ) {
             for (
                 var iLayer = 0;
-                iLayer < this.levelFileData.layers.length;
+                iLayer < this._layerZs.length;
                 iLayer++
             ) {
-                var layerZ = this.levelFileData.layers[iLayer].z
-                var nextLayer = this.levelFileData.layers[iLayer + 1]
-                var nextLayerZ = nextLayer ? nextLayer.z : splitTime.MAX_SAFE_INTEGER
+                var layerZ = this._layerZs[iLayer]
+                var nextLayerZ = this._layerZs[iLayer + 1] || splitTime.MAX_SAFE_INTEGER
                 if (exMaxZ > layerZ && minZ < nextLayerZ) {
                     this._calculatePixelCollision(
                         collisionInfo,
@@ -173,9 +354,7 @@ namespace splitTime.level {
                     case splitTime.Trace.RColor.POINTER:
                         isOtherLevel = true
                         var trace = this.getPointerTraceFromPixel(r, g, b, a)
-                        if (!trace.level) {
-                            throw new Error("Pointer trace has no level")
-                        }
+                        assert(!!trace.level, "Pointer trace has no level")
                         collisionInfo.pointerTraces[trace.level.id] = trace
                         collisionInfo.levels[trace.level.id] = trace.level
                         break
@@ -187,226 +366,6 @@ namespace splitTime.level {
             }
         }
 
-        initCanvasData(world: World) {
-            this._internalEventIdMap = {}
-            this._internalPointerTraceMap = {}
-            var nextFunctionId = 1
-            var nextPointerId = 1
-
-            var holderCanvas = document.createElement("canvas")
-            holderCanvas.width = this.level.width
-            holderCanvas.height = this.level.yWidth
-            var holderCtx = holderCanvas.getContext("2d")
-
-            if (holderCtx === null) {
-                throw new Error("Unable to initialize holderCtx")
-            }
-
-            var debugTraceCtx = null
-            if (splitTime.debug.ENABLED) {
-                this.debugTraceCanvas = document.createElement("canvas")
-                this.debugTraceCanvas.width = this.level.width
-                this.debugTraceCanvas.height = this.level.height
-                debugTraceCtx = this.debugTraceCanvas.getContext("2d")
-                if (debugTraceCtx === null) {
-                    throw new Error("Unable to initialize debugTraceCtx")
-                }
-                debugTraceCtx.clearRect(
-                    0,
-                    0,
-                    this.debugTraceCanvas.width,
-                    this.debugTraceCanvas.height
-                )
-            }
-
-            const tracesByLayer = this.getFragmentedTraces()
-
-            //Initialize functional map
-            for (
-                var iLayer = 0;
-                iLayer < this.levelFileData.layers.length;
-                iLayer++
-            ) {
-                holderCtx.clearRect(
-                    0,
-                    0,
-                    holderCanvas.width,
-                    holderCanvas.height
-                )
-
-                var layerZ = this.levelFileData.layers[iLayer].z
-                var nextLayer = this.levelFileData.layers[iLayer + 1]
-                var nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_VALUE
-                var layerHeight = nextLayerZ - layerZ
-
-                //Draw traces
-                const layerTraces = tracesByLayer[iLayer]
-
-                holderCtx.translate(0.5, 0.5)
-
-                for (
-                    var iLayerTrace = 0;
-                    iLayerTrace < layerTraces.length;
-                    iLayerTrace++
-                ) {
-                    var trace = layerTraces[iLayerTrace]
-                    var type = trace.type
-                    switch (type) {
-                        case splitTime.Trace.Type.EVENT:
-                            var eventStringId = trace.event
-                            var eventIntId = nextFunctionId++
-                            this._internalEventIdMap[eventIntId] = eventStringId
-                            var functionColor = splitTime.Trace.getEventColor(
-                                eventIntId
-                            )
-                            splitTime.Trace.drawColor(
-                                trace.vertices,
-                                holderCtx,
-                                functionColor
-                            )
-                            break
-                        case splitTime.Trace.Type.SOLID:
-                            var height = +trace.height || layerHeight
-                            splitTime.Trace.drawColor(
-                                trace.vertices,
-                                holderCtx,
-                                splitTime.Trace.getSolidColor(height)
-                            )
-                            break
-                        case splitTime.Trace.Type.GROUND:
-                            splitTime.Trace.drawColor(
-                                trace.vertices,
-                                holderCtx,
-                                splitTime.Trace.getSolidColor(0)
-                            )
-                            break
-                        case splitTime.Trace.Type.STAIRS:
-                            var stairsUpDirection = trace.direction
-                            var gradient = splitTime.Trace.calculateGradient(
-                                trace.vertices,
-                                holderCtx,
-                                stairsUpDirection
-                            )
-                            gradient.addColorStop(
-                                0,
-                                splitTime.Trace.getSolidColor(0)
-                            )
-                            gradient.addColorStop(
-                                1,
-                                splitTime.Trace.getSolidColor(layerHeight)
-                            )
-                            splitTime.Trace.drawColor(
-                                trace.vertices,
-                                holderCtx,
-                                gradient
-                            )
-                            break
-                        case splitTime.Trace.Type.POINTER:
-                            var pointerIntId = nextPointerId++
-                            // TODO: actual splitTime.Trace object
-                            this._internalPointerTraceMap[
-                                pointerIntId
-                            ] = splitTime.Trace.fromRaw(trace, layerZ, world)
-                            var pointerColor = splitTime.Trace.getPointerColor(
-                                pointerIntId
-                            )
-                            splitTime.Trace.drawColor(
-                                trace.vertices,
-                                holderCtx,
-                                pointerColor
-                            )
-                            break
-                        case splitTime.Trace.Type.TRANSPORT:
-                            var transportTrace = splitTime.Trace.fromRaw(
-                                trace,
-                                layerZ,
-                                world
-                            )
-                            var transportStringId = transportTrace.getLocationId()
-                            var transportIntId = nextFunctionId++
-                            this._internalEventIdMap[
-                                transportIntId
-                            ] = transportStringId
-                            var transportColor = splitTime.Trace.getEventColor(
-                                transportIntId
-                            )
-                            splitTime.Trace.drawColor(
-                                trace.vertices,
-                                holderCtx,
-                                transportColor
-                            )
-                            break
-                        default:
-                            splitTime.Trace.draw(
-                                layerTraces[iLayerTrace].vertices,
-                                holderCtx,
-                                type
-                            )
-                    }
-                }
-
-                // TODO: traces related to props
-
-                holderCtx.translate(-0.5, -0.5)
-
-                this.layerFuncData[iLayer] = holderCtx.getImageData(
-                    0,
-                    0,
-                    holderCanvas.width,
-                    holderCanvas.height
-                )
-
-                if (splitTime.debug.ENABLED && debugTraceCtx !== null) {
-                    debugTraceCtx.drawImage(holderCanvas, 0, -layerZ)
-                }
-            }
-        }
-
-        /**
-         * Potentially split up traces into smaller traces if crossing layer boundaries
-         */
-        getFragmentedTraces(): file_data.Trace[][] {
-            let queuedSolidTraces: file_data.Trace[] = []
-            let tracesByLayer: file_data.Trace[][] = []
-            for (
-                let iLayer = 0;
-                iLayer < this.levelFileData.layers.length;
-                iLayer++
-            ) {
-                const layerZ = this.levelFileData.layers[iLayer].z
-                const nextLayer = this.levelFileData.layers[iLayer + 1]
-                const nextLayerZ = nextLayer ? nextLayer.z : Number.MAX_VALUE
-                const layerHeight = nextLayerZ - layerZ
-
-                const allTracesForLayer = queuedSolidTraces.concat(this.levelFileData.layers[iLayer].traces)
-                queuedSolidTraces = []
-                tracesByLayer[iLayer] = []
-                for (const trace of allTracesForLayer) {
-                    switch (trace.type) {
-                        case splitTime.Trace.Type.SOLID:
-                            const height = +trace.height || layerHeight
-                            if (height > layerHeight) {
-                                const truncTrace = {} as file_data.Trace
-                                Object.assign(truncTrace, trace)
-                                truncTrace.height = "" + layerHeight
-                                tracesByLayer[iLayer].push(truncTrace)
-    
-                                const upperTrace = {} as file_data.Trace
-                                Object.assign(upperTrace, trace)
-                                upperTrace.height = "" + (height - layerHeight)
-                                queuedSolidTraces.push(upperTrace)
-                            } else {
-                                tracesByLayer[iLayer].push(trace)
-                            }
-                            break
-                        default:
-                            tracesByLayer[iLayer].push(trace)
-                    }
-                }
-            }
-            return tracesByLayer
-        }
-    
         getDebugTraceCanvas() {
             return this.debugTraceCanvas
         }
