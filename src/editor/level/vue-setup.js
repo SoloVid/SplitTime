@@ -23,7 +23,7 @@ var vueApp = new Vue({
             },
             {
                 type: splitTime.Trace.Type.GROUND,
-                color: "rgba(0, 100, 100, .7)",
+                color: TRACE_GROUND_COLOR,
                 help: "Zero-height solid trace, perfect for bridges"
             },
             {

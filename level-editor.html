@@ -172,26 +172,28 @@
         </li>
     </script>
 
+    <svg
+        style="position:absolute"
+    >
+        <defs>
+            <pattern id="up-arrows-pattern" x="0" y="0" width="20" height="25" patternUnits="userSpaceOnUse">
+                <polyline
+                    points="5,8 10,0 10,20 10,0 15,8"
+                    stroke="rgba(0, 0, 0, 0.7)" stroke-width="1.5" fill="none"
+                ></polyline>
+            </pattern>
+        </defs>
+    </svg>
+
+
     <script type="text/x-template" id="rendered-layer-template">
         <div v-show="layer.displayed" v-bind:style="styleObject">
-            <!--<img v-if="!!imgSrc" class="background" v-bind:src="imgSrc"/>-->
             <svg
                     style="position:absolute"
                     v-bind:width="containerWidth"
                     v-bind:height="containerHeight"
                     v-bind:viewBox="viewBox"
             >
-                <!--<defs>-->
-                    <!--<linearGradient-->
-                            <!--v-for="(trace, traceIndex) in layer.traces"-->
-                            <!--v-bind:id="'stairGradient' + traceIndex"-->
-                            <!--v-bind:x1="stairsGradient.x1" v-bind:y1="stairsGradient.y1"-->
-                            <!--v-bind:x2="stairsGradient.x2" v-bind:y2="stairsGradient.y2"-->
-                    <!--&gt;-->
-                        <!--<stop offset="0%" style="stop-color:rgb(255,255,0);stop-opacity:0" />-->
-                        <!--<stop offset="100%" style="stop-color:rgb(255,0,0);stop-opacity:1" />-->
-                    <!--</linearGradient>-->
-                <!--</defs>-->
                 <rendered-trace v-for="(trace, traceIndex) in traces"
                                 v-bind:trace="trace"
                                 v-bind:index="traceIndex"
@@ -220,6 +222,20 @@
                     v-bind:fill="traceFill"
                     v-bind:stroke="traceStroke"
                     v-bind:fill-opacity="traceOpacity"
+            ></polyline>
+            <polyline
+                    v-show="trace.displayed"
+                    v-bind:points="pointsStairsSlope"
+                    stroke="red" stroke-width="5" fill="none"
+                    v-if="pointsStairsSlope"
+                    style="pointer-events: none;"
+            ></polyline>
+            <polyline
+                    v-show="trace.displayed"
+                    v-bind:points="pointsStairsSlope"
+                    stroke="black" stroke-width="2" stroke-dasharray="10,5" fill="url(#up-arrows-pattern)"
+                    v-if="pointsStairsSlope"
+                    style="pointer-events: none;"
             ></polyline>
             <polyline
                     v-show="trace.displayed"

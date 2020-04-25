@@ -1,3 +1,6 @@
+var TRACE_GROUND_COLOR = "rgba(100, 100, 100, .5)";
+var TRACE_GROUND_HIGHLIGHT_COLOR = "rgba(200, 200, 50, .5)";
+
 Vue.component("rendered-trace", {
     props: ["trace", "index"],
     template: "#rendered-trace-template",
@@ -27,6 +30,28 @@ Vue.component("rendered-trace", {
         pointsShadow: function() {
             var that = this;
             var pointsArray = safeExtractTraceArray(this.trace.vertices);
+            pointsArray = pointsArray.map(function(point) {
+                if(!point) {
+                    return point;
+                }
+                point.z = that.trace.z + that.trace.height;
+                return point;
+            });
+            return pointsArray.reduce(function(pointsStr, point) {
+                var y;
+                if(point !== null) {
+                    y = point.y - point.z;
+                    return pointsStr + " " + point.x + "," + y;
+                } else if(pointsArray.length > 0 && pointsArray[0] !== null) {
+                    y = pointsArray[0].y - pointsArray[0].z;
+                    return pointsStr + " " + pointsArray[0].x + "," + y;
+                }
+                return pointsStr;
+            }, "");
+        },
+        pointsStairsSlope: function() {
+            var that = this;
+            var pointsArray = safeExtractTraceArray(this.trace.vertices);
             if(this.trace.type === splitTime.Trace.Type.STAIRS && !!this.trace.direction && pointsArray.length >= 3) {
                 var officialTrace = splitTime.Trace.fromRaw(this.trace);
                 var extremes = officialTrace.calculateStairsExtremes();
@@ -44,13 +69,7 @@ Vue.component("rendered-trace", {
                     return point;
                 });
             } else {
-                pointsArray = pointsArray.map(function(point) {
-                    if(!point) {
-                        return point;
-                    }
-                    point.z = that.trace.z + that.trace.height;
-                    return point;
-                });
+                pointsArray = [];
             }
             return pointsArray.reduce(function(pointsStr, point) {
                 var y;
@@ -64,28 +83,17 @@ Vue.component("rendered-trace", {
                 return pointsStr;
             }, "");
         },
-        // stairsGradient: function() {
-        //     return {
-        //         x1: "0%",
-        //         y1: "0%",
-        //         x2: "100%",
-        //         y2: "0%"
-        //     };
-        // },
         traceFill: function() {
-            // if(this.trace.type === "stairs") {
-            //     return "url(#stairGradient" + this.index + ")";
-            // }
-			return safeGetColor(this.trace);
+            return safeGetColor(this.trace);
         },
         traceStroke: function() {
-			return safeGetColor(this.trace);
+            return this.hasClose ? "black" : safeGetColor(this.trace);
         },
         traceOpacity: function() {
-			return this.hasClose ? 1 : 0;
+            return this.hasClose ? 1 : 0;
         },
         traceShadowFill: function() {
-            return "rgba(100, 100, 100, .5)";
+            return this.trace.isHighlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR;
         },
         traceShadowStroke: function() {
             return "black";
@@ -94,21 +102,21 @@ Vue.component("rendered-trace", {
             return this.height > 0;
         }
     },
-	methods: {
-    	edit: function() {
-    		showEditorTrace(this.trace);
-		},
-		track: function() {
-    	    if(pathInProgress) {
-    	        return;
+    methods: {
+        edit: function() {
+            showEditorTrace(this.trace);
+        },
+        track: function() {
+            if(pathInProgress) {
+                return;
             }
-    		follower = this.trace;
-		},
+            follower = this.trace;
+        },
         toggleHighlight: function(highlight) {
             if(mouseDown || pathInProgress) {
                 return;
             }
             this.trace.isHighlighted = highlight;
         }
-	}
+    }
 });

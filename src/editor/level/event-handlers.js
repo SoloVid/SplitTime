@@ -158,8 +158,7 @@ function setupEventHandlers() {
                 }
             } else if(event.which == 3) { // right click
                 if(!pathInProgress) {
-                    var trace = addNewTrace(vueApp.activeLayer);
-                    trace.type = typeSelected;
+                    var trace = addNewTrace(vueApp.activeLayer, typeSelected);
 
                     if(typeSelected == splitTime.Trace.Type.PATH && !ctrlDown) {
                         trace.vertices = positionPoint;

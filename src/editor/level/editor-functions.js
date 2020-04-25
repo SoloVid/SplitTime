@@ -65,13 +65,16 @@ function addNewLayer() {
     });
 }
 
-function addNewTrace(layerIndex) {
+function addNewTrace(layerIndex, type) {
     var z = levelObject.layers[layerIndex].z;
     var height = levelObject.layers.length > layerIndex + 1 ?
         levelObject.layers[layerIndex + 1].z - z :
         DEFAULT_HEIGHT;
+    if(type === splitTime.Trace.Type.GROUND) {
+        height = 0;
+    }
     var trace = {
-        type: "",
+        type: type,
         vertices: "",
         z: z,
         height: height
@@ -92,8 +95,12 @@ function safeGetColor(trace) {
     if(trace.isHighlighted) {
         return "rgba(255, 255, 0, 0.8)";
     }
+    var type = trace.type;
+    if(type === splitTime.Trace.Type.SOLID && +trace.height === 0) {
+        type = splitTime.Trace.Type.GROUND;
+    }
     for(var i = 0; i < vueApp.traceOptions.length; i++) {
-        if(vueApp.traceOptions[i].type === trace.type) {
+        if(vueApp.traceOptions[i].type === type) {
             return vueApp.traceOptions[i].color;
         }
     }
