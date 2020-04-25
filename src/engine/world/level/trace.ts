@@ -63,9 +63,9 @@ namespace splitTime {
 
         getPointerOffset(): PointerOffset {
             assert(!!this.level, "Pointer trace must have a level")
-            assert(!!this.offsetX, "Pointer trace must have offsetX")
-            assert(!!this.offsetY, "Pointer trace must have offsetY")
-            assert(!!this.offsetZ, "Pointer trace must have offsetZ")
+            assert(!!this.offsetX || this.offsetX === 0, "Pointer trace must have offsetX")
+            assert(!!this.offsetY || this.offsetY === 0, "Pointer trace must have offsetY")
+            assert(!!this.offsetZ || this.offsetZ === 0, "Pointer trace must have offsetZ")
             return this as PointerOffset
         }
 

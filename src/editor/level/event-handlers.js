@@ -6,6 +6,7 @@ var levelObject = {
     props: [],
     positions: []
 };
+var fileName = "";
 
 var mode = "position";
 
@@ -99,7 +100,7 @@ function setupEventHandlers() {
                 console.log(contents);
 
                 importLevel(contents);
-                levelObject.fileName = f.name;
+                fileName = f.name;
                 updatePageTitle();
 
                 $("#editorTools").show();

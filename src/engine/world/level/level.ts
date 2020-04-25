@@ -64,7 +64,7 @@ namespace splitTime {
             return this.background
         }
 
-        getDebugTraceCanvas() {
+        getDebugTraceCanvas(): splitTime.Canvas {
             return this._levelTraces.getDebugTraceCanvas()
         }
 

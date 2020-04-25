@@ -127,7 +127,7 @@ namespace splitTime {
             if (splitTime.debug.ENABLED && splitTime.debug.DRAW_TRACES) {
                 this.snapshot.context.globalAlpha = 0.5
                 this.snapshot.context.drawImage(
-                    currentLevel.getDebugTraceCanvas(),
+                    currentLevel.getDebugTraceCanvas().element,
                     screen.x + xBackShift,
                     screen.y + yBackShift,
                     this.SCREEN_WIDTH - 2 * xBackShift,

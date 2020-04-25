@@ -358,7 +358,8 @@ namespace splitTime.level {
             }
         }
 
-        getDebugTraceCanvas() {
+        getDebugTraceCanvas(): splitTime.Canvas {
+            assert(this.debugTraceCanvas !== null, "Debug trace canvas requested when null")
             return this.debugTraceCanvas
         }
     }

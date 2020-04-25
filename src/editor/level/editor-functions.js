@@ -71,6 +71,7 @@ function addNewTrace(layerIndex, type) {
         levelObject.layers[layerIndex + 1].z - z :
         DEFAULT_HEIGHT;
     if(type === splitTime.Trace.Type.GROUND) {
+        type = splitTime.Trace.Type.SOLID;
         height = 0;
     }
     var trace = {
@@ -166,7 +167,7 @@ function moveFollower(dx, dy) {
 }
 
 function updatePageTitle() {
-    var title = levelObject.fileName ? levelObject.fileName : "untitled";
+    var title = fileName ? fileName : "untitled";
     if (levelObject.region) {
         title += " (" + levelObject.region + ")";
     }
@@ -180,15 +181,14 @@ function clickFileChooser() {
 function downloadFile() {
     var jsonText = exportLevel();
 
-    var filename = prompt("File name?", levelObject.fileName);
-    if(!filename) {
+    fileName = prompt("File name?", fileName);
+    if(!fileName) {
         return;
     }
-    if(!filename.endsWith(".json")) {
-        filename += ".json";
+    if(!fileName.endsWith(".json")) {
+        fileName += ".json";
     }
 
-    levelObject.fileName = filename;
     updatePageTitle();
 
     var pom = document.createElement('a');
