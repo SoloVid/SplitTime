@@ -8,7 +8,7 @@ namespace splitTime.body {
             z: number
         ): splitTime.body.CanvasRequirements
 
-        draw(ctx: CanvasRenderingContext2D): void
+        draw(ctx: GenericCanvasRenderingContext2D): void
 
         prepareForRender(): void
         cleanupAfterRender(): void

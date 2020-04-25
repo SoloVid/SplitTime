@@ -63,7 +63,7 @@ namespace splitTime.debug {
         debugDiv.innerHTML = table
     }
 
-    export function renderCanvas(ctx: CanvasRenderingContext2D) {
+    export function renderCanvas(ctx: GenericCanvasRenderingContext2D) {
         var FONT_SIZE = 16
         var SPACING = 5
         ctx.font = FONT_SIZE + "px monospace"

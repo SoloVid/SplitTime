@@ -140,8 +140,8 @@ namespace splitTime {
                     Math.ceil(startZ + zPixels)
                 )
 
-            let targetLevel = chooseTheOneOrDefault(originCollisionInfo.levels, level)
-            const collisionInfo = new InternalCollisionInfo(targetLevel)
+            const targetLevel = chooseTheOneOrDefault(originCollisionInfo.levels, level)
+            const collisionInfo = new InternalCollisionInfo(targetLevel || level)
 
             collisionInfo.vStepUpEstimate =
                 originCollisionInfo.zBlockedTopEx - startZ

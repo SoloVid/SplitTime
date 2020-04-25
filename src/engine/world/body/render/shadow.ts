@@ -29,7 +29,7 @@ namespace splitTime.body {
             )
         }
 
-        draw(ctx: CanvasRenderingContext2D) {
+        draw(ctx: GenericCanvasRenderingContext2D) {
             var // Radii of the white glow.
                 innerRadius = 2,
                 outerRadius = this.radius,

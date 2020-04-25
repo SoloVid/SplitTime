@@ -1,4 +1,4 @@
-// renderClock(context: CanvasRenderingContext2D) {
+// renderClock(context: GenericCanvasRenderingContext2D) {
 //     context.drawImage(splitTime.image.get("clock.png"), splitTime.SCREENX - 140, 0);
 //     context.lineWidth = 1;
 //     context.strokeStyle = "#DDDDDD";

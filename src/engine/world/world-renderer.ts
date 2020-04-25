@@ -14,7 +14,7 @@ namespace splitTime {
 
         constructor(
             private readonly camera: Camera,
-            private readonly see: CanvasRenderingContext2D,
+            private readonly see: GenericCanvasRenderingContext2D,
             private readonly currentLevelGetter: level_getter,
             private readonly playerBodyGetter: body_getter
         ) {

@@ -73,7 +73,7 @@ namespace splitTime {
                 if (posObj.id) {
                     this.level.registerPosition(posObj.id, position)
                 } else {
-                    console.warn("position missing id in level: " + this.level.id)
+                    log.warn("position missing id in level: " + this.level.id)
                 }
             }
 
@@ -114,9 +114,7 @@ namespace splitTime {
         }
 
         refetchBodies() {
-            if (this.fileData === null) {
-                throw new Error("this.fileData is null")
-            }
+            assert(this.fileData !== null, "Level must have file data")
 
             // this._bodyOrganizer = new splitTime.level.BodyOrganizer(this);
             this.level._cellGrid = new splitTime.level.CellGrid(this.level)
@@ -169,13 +167,11 @@ namespace splitTime {
             await this.loadPromise
 
             this.refetchBodies()
-            if (this.fileData === null) {
-                throw new Error("this.fileData is null")
-            }
+            assert(this.fileData !== null, "Level must have file data to be loaded")
             this.level._levelTraces = new splitTime.level.Traces(
-                this.level,
-                this.fileData,
-                world
+                this.fileData.traces.map(t => Trace.fromRaw(t, world)),
+                this.level.width,
+                this.level.yWidth
             )
         }
 

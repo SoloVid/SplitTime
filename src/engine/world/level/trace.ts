@@ -90,7 +90,7 @@ namespace splitTime {
 
         static draw(
             traceStr: string,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             type: string,
             offsetPos?: { x: number; y: number } | undefined
         ) {
@@ -146,7 +146,7 @@ namespace splitTime {
 
         static drawColor(
             traceStr: string,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             color: string | CanvasGradient,
             offsetPos = { x: 0, y: 0 }
         ) {
@@ -197,7 +197,7 @@ namespace splitTime {
         }
 
         createStairsGradient(
-            ctx: CanvasRenderingContext2D
+            ctx: GenericCanvasRenderingContext2D
         ): CanvasGradient {
             const stairsExtremes = this.calculateStairsExtremes()
             return ctx.createLinearGradient(
@@ -255,7 +255,7 @@ namespace splitTime {
 
         static getSolidColor(height: number) {
             var g = Math.min(Math.max(0, +height), 255)
-            var b = 4 * g
+            var b = 0
             return "rgba(" + Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)"
         }
 

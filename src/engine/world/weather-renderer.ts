@@ -13,7 +13,7 @@ namespace splitTime {
 
         constructor(
             private readonly camera: Camera,
-            private readonly ctx: CanvasRenderingContext2D
+            private readonly ctx: GenericCanvasRenderingContext2D
         ) {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT

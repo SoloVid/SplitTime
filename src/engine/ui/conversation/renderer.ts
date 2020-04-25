@@ -71,9 +71,9 @@ namespace splitTime.conversation {
         }
 
         /**
-         * @param {CanvasRenderingContext2D} ctx
+         * @param {GenericCanvasRenderingContext2D} ctx
          */
-        render(ctx: CanvasRenderingContext2D) {
+        render(ctx: GenericCanvasRenderingContext2D) {
             for (var i = 0; i < this.dialogDrawings.length; i++) {
                 // TODO: visibility
                 var drawing = this.dialogDrawings[i]
@@ -98,7 +98,7 @@ namespace splitTime.conversation {
             top: number,
             right: number,
             bottom: number,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             pointX: number = -1,
             pointY: number = -1
         ) {
@@ -206,7 +206,7 @@ namespace splitTime.conversation {
         }
 
         private sayFromBoardFocalPoint(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             focalPoint: { x: number; y: number; z: number },
             fullMessage: string,
             displayedMessage: string,
@@ -226,7 +226,7 @@ namespace splitTime.conversation {
         }
 
         private drawSpeechBubble(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             fullMessage: string,
             displayedMessage: string,
             speakerName: string,
@@ -327,7 +327,7 @@ namespace splitTime.conversation {
         }
 
         private drawText(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             text: string,
             x: number,
             y: number
@@ -342,7 +342,7 @@ namespace splitTime.conversation {
         }
 
         private calculateIdealizedMaxWidth(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             fullMessage: string,
             lineHeight: number,
             nameWidth: number
@@ -434,7 +434,7 @@ namespace splitTime.conversation {
         private getLinesFromMessage(
             fullMessage: string,
             displayedMessage: string,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             maxRowLength: number
         ): { maxWidth: number; all: string[]; displayed: string[] } {
             var initialFont = ctx.font
@@ -494,10 +494,10 @@ namespace splitTime.conversation {
         }
 
         /**
-         * @param {CanvasRenderingContext2D} ctx
+         * @param {GenericCanvasRenderingContext2D} ctx
          * @return {number}
          */
-        private getLineHeight(ctx: CanvasRenderingContext2D): number {
+        private getLineHeight(ctx: GenericCanvasRenderingContext2D): number {
             return CONFIG.FONT_SIZE
         }
     }

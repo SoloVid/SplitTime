@@ -268,9 +268,9 @@ namespace splitTime.particles {
         }
 
         /**
-         * @param {CanvasRenderingContext2D} ctx
+         * @param {GenericCanvasRenderingContext2D} ctx
          */
-        draw(ctx: CanvasRenderingContext2D) {
+        draw(ctx: GenericCanvasRenderingContext2D) {
             var initialOpacity = ctx.globalAlpha
             for (
                 var iParticle = 0;

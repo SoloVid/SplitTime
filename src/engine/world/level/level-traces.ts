@@ -1,12 +1,14 @@
 namespace splitTime.level {
     export namespace traces {
+        export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
+
         export class ZRange {
             constructor(public minZ: number, public exMaxZ: number) {}
         }
 
         export class CollisionInfo {
             containsSolid: boolean
-            levels: { [levelId: string]: Level }
+            levels: { [levelId: string]: Level | null }
             pointerTraces: { [levelId: string]: splitTime.Trace }
             zBlockedTopEx: int
             zBlockedBottom: int
@@ -23,38 +25,33 @@ namespace splitTime.level {
     }
 
     export class Traces {
-        level: splitTime.Level
-        levelFileData: splitTime.level.FileData
-        traces: Trace[]
-        _layerZs: int[]
-        layerFuncData: ImageData[]
-        _nextFunctionId: int
-        _internalEventIdMap: { [intId: number]: string }
-        _nextPointerId: int
-        _internalPointerTraceMap: { [intId: number]: splitTime.Trace }
-        debugTraceCanvas: splitTime.Canvas | null = null
+        private layerZs: int[]
+        private layerFuncData: ImageData[]
+        private nextFunctionId: int
+        private internalEventIdMap: { [intId: number]: string }
+        private nextPointerId: int
+        private internalPointerTraceMap: { [intId: number]: splitTime.Trace }
+        private debugTraceCanvas: splitTime.Canvas | null = null
 
         constructor(
-            level: splitTime.Level,
-            levelFileData: splitTime.level.FileData,
-            world: World
+            readonly traces: readonly Trace[],
+            levelWidth: int,
+            levelYWidth: int
         ) {
-            this.level = level
-            this.levelFileData = levelFileData
-            this._layerZs = []
+            this.layerZs = []
             this.layerFuncData = []
 
-            this._internalEventIdMap = {}
-            this._internalPointerTraceMap = {}
-            this._nextFunctionId = 1
-            this._nextPointerId = 1
+            this.internalEventIdMap = {}
+            this.internalPointerTraceMap = {}
+            this.nextFunctionId = 1
+            this.nextPointerId = 1
 
-            const holderCanvas = new splitTime.Canvas(this.level.width, this.level.yWidth)
+            const holderCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
             const holderCtx = holderCanvas.context
 
             let debugTraceCtx = null
             if (splitTime.debug.ENABLED) {
-                this.debugTraceCanvas = new splitTime.Canvas(this.level.width, this.level.height)
+                this.debugTraceCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
                 debugTraceCtx = this.debugTraceCanvas.context
                 debugTraceCtx.clearRect(
                     0,
@@ -64,22 +61,20 @@ namespace splitTime.level {
                 )
             }
 
-            this.traces = []
             const zSet: { [z: number]: true } = {}
-            for (const rawTrace of this.levelFileData.traces) {
-                this.traces.push(Trace.fromRaw(rawTrace, world))
-                zSet[+rawTrace.z] = true
+            for (const trace of this.traces) {
+                zSet[trace.z] = true
             }
             const zArray: number[] = []
             for (const z in zSet) {
                 zArray.push(+z)
             }
-            this._layerZs = zArray.sort()
+            this.layerZs = zArray.sort()
 
             //Initialize functional map
             for (
                 var iLayer = 0;
-                iLayer < this._layerZs.length;
+                iLayer < this.layerZs.length;
                 iLayer++
             ) {
                 holderCtx.clearRect(
@@ -89,8 +84,8 @@ namespace splitTime.level {
                     holderCanvas.height
                 )
 
-                var layerZ = this._layerZs[iLayer]
-                var nextLayerZ = this._layerZs[iLayer + 1] || Number.MAX_VALUE
+                var layerZ = this.layerZs[iLayer]
+                var nextLayerZ = this.layerZs[iLayer + 1] || Number.MAX_VALUE
 
                 holderCtx.translate(0.5, 0.5)
 
@@ -120,8 +115,11 @@ namespace splitTime.level {
             }
         }
 
-        drawPartialSolidTrace(trace: Trace, holderCtx: CanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
+        private drawPartialSolidTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
             const maxHeight = exMaxZ - minZ
+            if (trace.height > 0 && !isOverlap(trace.z, trace.height, minZ, maxHeight)) {
+                return
+            }
             const minZRelativeToTrace = minZ - trace.z
             const traceHeightFromMinZ = trace.z + trace.height - minZ
             const pixelHeight = constrain(traceHeightFromMinZ, 0, maxHeight)
@@ -154,7 +152,6 @@ namespace splitTime.level {
                         const stairsTopRelativeToTrace = stairsTopThisLayer - trace.z
                         const endFraction = stairsTopRelativeToTrace / trace.height
                         gradient.addColorStop(endFraction, topColor)
-                        gradient.addColorStop(endFraction, noColor)
 
                         splitTime.Trace.drawColor(
                             trace.vertices,
@@ -166,8 +163,8 @@ namespace splitTime.level {
             }
         }
 
-        drawPartialSpecialTrace(trace: Trace, holderCtx: CanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
-            if (!isOverlap(trace.z, trace.height, minZ, exMaxZ)) {
+        private drawPartialSpecialTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
+            if (!isOverlap(trace.z, trace.height, minZ, exMaxZ - minZ)) {
                 return
             }
             // FTODO: support adding multiple in same pixel
@@ -177,8 +174,8 @@ namespace splitTime.level {
                 case splitTime.Trace.Type.EVENT:
                     const eventStringId = trace.eventId
                     assert(eventStringId !== null, "Event trace must have an event")
-                    const eventIntId = this._nextFunctionId++
-                    this._internalEventIdMap[eventIntId] = eventStringId
+                    const eventIntId = this.nextFunctionId++
+                    this.internalEventIdMap[eventIntId] = eventStringId
                     const functionColor = splitTime.Trace.getEventColor(
                         eventIntId
                     )
@@ -189,8 +186,8 @@ namespace splitTime.level {
                     )
                     break
                 case splitTime.Trace.Type.POINTER:
-                    const pointerIntId = this._nextPointerId++
-                    this._internalPointerTraceMap[pointerIntId] = trace
+                    const pointerIntId = this.nextPointerId++
+                    this.internalPointerTraceMap[pointerIntId] = trace
                     const pointerColor = splitTime.Trace.getPointerColor(
                         pointerIntId
                     )
@@ -202,8 +199,8 @@ namespace splitTime.level {
                     break
                 case splitTime.Trace.Type.TRANSPORT:
                     const transportStringId = trace.getLocationId()
-                    const transportIntId = this._nextFunctionId++
-                    this._internalEventIdMap[
+                    const transportIntId = this.nextFunctionId++
+                    this.internalEventIdMap[
                         transportIntId
                     ] = transportStringId
                     const transportColor = splitTime.Trace.getEventColor(
@@ -218,22 +215,22 @@ namespace splitTime.level {
             }
         }
 
-        getEventIdFromPixel(r: number, g: number, b: number, a: number) {
+        private getEventIdFromPixel(r: number, g: number, b: number, a: number) {
             var eventIntId = splitTime.Trace.getEventIdFromColor(r, g, b, a)
-            return this._internalEventIdMap[eventIntId]
+            return this.internalEventIdMap[eventIntId]
         }
 
         /**
          * @return {splitTime.Trace}
          */
-        getPointerTraceFromPixel(
+        private getPointerTraceFromPixel(
             r: number,
             g: number,
             b: number,
             a: number
         ): splitTime.Trace {
             var pointerIntId = splitTime.Trace.getPointerIdFromColor(r, g, b, a)
-            const pointerTrace = this._internalPointerTraceMap[pointerIntId]
+            const pointerTrace = this.internalPointerTraceMap[pointerIntId]
             assert(!!pointerTrace, "Pointer trace not found: " + pointerIntId)
             return pointerTrace
         }
@@ -277,11 +274,11 @@ namespace splitTime.level {
         ) {
             for (
                 var iLayer = 0;
-                iLayer < this._layerZs.length;
+                iLayer < this.layerZs.length;
                 iLayer++
             ) {
-                var layerZ = this._layerZs[iLayer]
-                var nextLayerZ = this._layerZs[iLayer + 1] || splitTime.MAX_SAFE_INTEGER
+                var layerZ = this.layerZs[iLayer]
+                var nextLayerZ = this.layerZs[iLayer + 1] || splitTime.MAX_SAFE_INTEGER
                 if (exMaxZ > layerZ && minZ < nextLayerZ) {
                     this._calculatePixelCollision(
                         collisionInfo,
@@ -357,7 +354,7 @@ namespace splitTime.level {
             }
 
             if (!isOtherLevel) {
-                collisionInfo.levels[this.level.id] = this.level
+                collisionInfo.levels[traces.SELF_LEVEL_ID] = null
             }
         }
 

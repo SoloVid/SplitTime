@@ -66,7 +66,7 @@ namespace splitTime {
             )
         }
 
-        draw(ctx: CanvasRenderingContext2D) {
+        draw(ctx: GenericCanvasRenderingContext2D) {
             // if(!this.canSee) {return;}
 
             ctx.rotate(this.rotate)
@@ -84,7 +84,7 @@ namespace splitTime {
             this.rotate = 0
         }
 
-        _drawSimple(ctx: CanvasRenderingContext2D) {
+        _drawSimple(ctx: GenericCanvasRenderingContext2D) {
             var tImg = this.getImage()
 
             var crop = this.getAnimationFrameCrop(

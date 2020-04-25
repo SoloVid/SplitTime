@@ -3,7 +3,7 @@ namespace splitTime.body {
         _nodes: (BodyNode | null)[]
         _bodyToNodeIndexMap: { [ref: number]: number }
         screen: { x: number; y: number } | null
-        ctx: CanvasRenderingContext2D | null
+        ctx: GenericCanvasRenderingContext2D | null
 
         constructor(private readonly camera: Camera) {
             this._nodes = []
@@ -15,7 +15,7 @@ namespace splitTime.body {
 
         notifyNewFrame(
             screen: { x: number; y: number },
-            ctx: CanvasRenderingContext2D
+            ctx: GenericCanvasRenderingContext2D
         ) {
             this.screen = screen
             this.ctx = ctx
