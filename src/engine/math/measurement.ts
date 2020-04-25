@@ -30,6 +30,13 @@ namespace splitTime.measurement {
     export function yTileToPix(y: number) {
         return y * 32 + 21
     }
+
+    export function midpoint(v1: Vector2D, v2: Vector2D): Vector2D {
+        return new Vector2D(
+            (v1.x + v2.x) / 2,
+            (v1.y + v2.y) / 2
+        )
+    }
 }
 
 namespace splitTime {
