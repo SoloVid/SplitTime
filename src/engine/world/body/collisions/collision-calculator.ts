@@ -2,7 +2,8 @@ namespace splitTime {
     interface ApiCollisionInfo {
         blocked: boolean
         bodies: Body[]
-        vStepUpEstimate: int
+        vStepUpEstimate: number
+        zBlockedTopEx: number
         events: string[]
         targetLevel: Level
     }
@@ -10,7 +11,8 @@ namespace splitTime {
     class InternalCollisionInfo implements ApiCollisionInfo {
         blocked: boolean = false
         bodies: Body[] = []
-        vStepUpEstimate: int = 0
+        vStepUpEstimate: number = 0
+        zBlockedTopEx: number = 0
         events: string[] = []
         pointerTraces: Trace[] = []
         targetLevel: Level
@@ -44,6 +46,8 @@ namespace splitTime {
                 if (otherBody !== ignoreBody) {
                     collisionInfo.blocked = true
                     collisionInfo.bodies.push(otherBody)
+                    collisionInfo.zBlockedTopEx =
+                        otherBody.getZ() + otherBody.height
                     collisionInfo.vStepUpEstimate =
                         otherBody.getZ() + otherBody.height - startZ
                 }
@@ -72,6 +76,8 @@ namespace splitTime {
                 collisionInfo.targetLevel = traceCollision.targetLevel
                 if (traceCollision.blocked) {
                     collisionInfo.blocked = traceCollision.blocked
+                    collisionInfo.zBlockedTopEx =
+                        traceCollision.zBlockedTopEx
                     collisionInfo.vStepUpEstimate =
                         traceCollision.vStepUpEstimate
                 } else {
@@ -97,6 +103,12 @@ namespace splitTime {
                                 collisionInfo.blocked = true
                                 collisionInfo.bodies =
                                     otherLevelCollisionInfo.bodies
+                                // Note that the sign on the offset is flipped here
+                                // because we are coming back from the other level's
+                                // coordinates to our own.
+                                collisionInfo.zBlockedTopEx =
+                                    otherLevelCollisionInfo.zBlockedTopEx -
+                                    pointerOffset.offsetZ
                                 collisionInfo.vStepUpEstimate =
                                     otherLevelCollisionInfo.vStepUpEstimate
                                 break
@@ -143,6 +155,7 @@ namespace splitTime {
             const targetLevel = chooseTheOneOrDefault(originCollisionInfo.levels, level)
             const collisionInfo = new InternalCollisionInfo(targetLevel || level)
 
+            collisionInfo.zBlockedTopEx = originCollisionInfo.zBlockedTopEx
             collisionInfo.vStepUpEstimate =
                 originCollisionInfo.zBlockedTopEx - startZ
             collisionInfo.blocked =

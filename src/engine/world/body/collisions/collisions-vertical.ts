@@ -51,6 +51,7 @@ namespace splitTime.body.collisions {
 
             const dzRoundedUp = dz > 0 ? Math.ceil(dz) : Math.floor(dz)
             const adz = Math.abs(dzRoundedUp)
+            let steps = adz
 
             //-1 for negative movement on the axis, 1 for positive
             var kHat = (dz === 0 ? 0 : dzRoundedUp / adz) as unitOrZero
@@ -60,17 +61,23 @@ namespace splitTime.body.collisions {
             const baseLength = this.mover.body.baseLength
             const height = this.mover.body.height
 
+            // The lower bound of the collision area we'll check each iteration
             let lowerBoundZ = z + height
+            // Where we are projecting to wind up
+            let targetZ = z
             if (kHat === -1) {
-                lowerBoundZ = z - 1
+                // We would start at z - 1 here,
+                // but there is a special case for ground traces
+                // which are 0-height solid traces
+                lowerBoundZ = z
+                targetZ = lowerBoundZ + 1
+                steps += 1
             }
-            let newZ = z
-            let zPixelsMoved = 0
 
             let bodies: Body[] = []
             const targetLevels: { [levelId: string]: Level } = {}
             var eventIdSet = {}
-            for (var i = 0; i < adz; i++) {
+            for (var i = 0; i < steps; i++) {
                 const originCollisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
                     level,
                     left, baseLength,
@@ -80,26 +87,33 @@ namespace splitTime.body.collisions {
                 )
                 if (originCollisionInfo.blocked) {
                     bodies = originCollisionInfo.bodies
+                    if (dz < 0) {
+                        // Since we started targetZ above our initial point, make sure we don't go up
+                        targetZ = Math.min(targetZ, z)
+                        if (originCollisionInfo.zBlockedTopEx < z) {
+                            targetZ = originCollisionInfo.zBlockedTopEx
+                        }
+                    }
                     break
                 }
-                zPixelsMoved++
                 lowerBoundZ += kHat
-                newZ += kHat
+                targetZ += kHat
                 addArrayToSet(originCollisionInfo.events, eventIdSet)
                 targetLevels[originCollisionInfo.targetLevel.id] = originCollisionInfo.targetLevel
             }
 
-            let actualNewZ = newZ
-            if (zPixelsMoved > 0) {
-                // Subtract off any overshoot
-                actualNewZ = newZ - (dzRoundedUp - dz)
+            let dzAllowed = targetZ - z
+            // If the amount we want to move is more than
+            // the amount requested, go with requested
+            if (Math.abs(dzAllowed) > adz) {
+                dzAllowed = dz
             }
 
             return {
                 bodies: bodies,
                 events: Object.keys(eventIdSet),
                 targetLevel: chooseTheOneOrDefault(targetLevels, level),
-                dzAllowed: actualNewZ - z
+                dzAllowed: dzAllowed
             }
         }
     }

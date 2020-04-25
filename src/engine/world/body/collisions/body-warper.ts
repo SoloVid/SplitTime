@@ -115,16 +115,22 @@ namespace splitTime.body {
             var left = x - this.halfBaseLength
             var top = y - this.halfBaseLength
 
-            return splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
-                this.level,
-                left,
-                this.baseLength,
-                top,
-                this.baseLength,
-                z,
-                this.body.height,
-                this.body
-            )
+            const originCollisionInfo =
+                splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+                    this.level,
+                    left,
+                    this.baseLength,
+                    top,
+                    this.baseLength,
+                    z,
+                    this.body.height,
+                    this.body
+                )
+            return {
+                blocked: originCollisionInfo.blocked && originCollisionInfo.zBlockedTopEx !== z,
+                events: originCollisionInfo.events,
+                targetLevel: originCollisionInfo.targetLevel
+            }
         }
     }
 }

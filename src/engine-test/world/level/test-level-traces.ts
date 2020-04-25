@@ -139,4 +139,68 @@ namespace splitTime.level {
             }
         }
     })
+
+    // This test is intended to cover ground
+    splitTime.test.scenario(levelTracesTests, "Collisions with ground trace", t => {
+        const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
+        const groundTrace = new Trace(Trace.Type.SOLID, groundPoints)
+        groundTrace.z = 15
+        groundTrace.height = 0
+
+        // Unfortunately, the order is important here at the present
+        var levelTraces = new Traces([groundTrace], 30, 30);
+
+        // Pixel by pixel
+        for (let x = 0; x < 30; x++) {
+            for (let y = 0; y < 30; y++) {
+                for (let z = 0; z < 30; z++) {
+                    const collisionInfo = new traces.CollisionInfo()
+                    levelTraces.calculateVolumeCollision(collisionInfo, x, 1, y, 1, z, z + 1)
+                    const coordsStr = "(" + x + ", " + y + ", " + z + ")"
+                    const isNotInGround = z !== 15
+                    if (isNotInGround) {
+                        t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with ground at " + coordsStr)
+                    } else {
+                        t.assert(collisionInfo.containsSolid, "We should be colliding with ground at " + coordsStr)
+                    }
+                }
+            }
+        }
+    })
+
+    // This test is intended to cover ground mixed with other stuff
+    // This test is currently failing, presumably because of weird compositing issues?
+    splitTime.test.scenario(levelTracesTests, "Collisions with ground and cube", t => {
+        const squarePoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
+        const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
+        cubeTrace.z = 10
+        cubeTrace.height = 10
+        const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
+        const groundTrace = new Trace(Trace.Type.SOLID, groundPoints)
+        groundTrace.z = 15
+        groundTrace.height = 0
+
+        // Unfortunately, the order is important here at the present
+        var levelTraces = new Traces([cubeTrace, groundTrace], 30, 30);
+
+        // Pixel by pixel
+        for (let x = 0; x < 30; x++) {
+            for (let y = 0; y < 30; y++) {
+                for (let z = 0; z < 30; z++) {
+                    const collisionInfo = new traces.CollisionInfo()
+                    levelTraces.calculateVolumeCollision(collisionInfo, x, 1, y, 1, z, z + 1)
+                    const coordsStr = "(" + x + ", " + y + ", " + z + ")"
+                    const isNotInCube = (x < 10 || x > 20)
+                        || (y < 10 || y > 20)
+                        || (z < 10 || z > 20)
+                    const isNotInGround = z !== 15
+                    if (isNotInCube && isNotInGround) {
+                        t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr)
+                    } else {
+                        t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr)
+                    }
+                }
+            }
+        }
+    })
 }

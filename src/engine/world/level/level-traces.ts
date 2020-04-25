@@ -11,14 +11,12 @@ namespace splitTime.level {
             levels: { [levelId: string]: Level | null }
             pointerTraces: { [levelId: string]: splitTime.Trace }
             zBlockedTopEx: int
-            zBlockedBottom: int
             events: { [eventId: string]: ZRange }
             constructor() {
                 this.containsSolid = false
                 this.levels = {}
                 this.pointerTraces = {}
-                this.zBlockedTopEx = 0
-                this.zBlockedBottom = splitTime.MAX_SAFE_INTEGER
+                this.zBlockedTopEx = -4096 // arbitrary
                 this.events = {}
             }
         }
@@ -89,9 +87,17 @@ namespace splitTime.level {
 
                 holderCtx.translate(0.5, 0.5)
 
-                for (const trace of this.traces) {
+                const existingGCO = holderCtx.globalCompositeOperation
+                // The operation we want here is to take the brighter of the pixels.
+                // According to MDN, that should be "lighten."
+                // However, "lighten" seems to be an alias for "lighter" (additive)
+                // in all three major browsers I tried.
+                // holderCtx.globalCompositeOperation = "lighten"
+                const tracesSortedFromBottomToTop = this.traces.slice().sort((a, b) => (a.z + a.height) - (b.z + b.height))
+                for (const trace of tracesSortedFromBottomToTop) {
                     this.drawPartialSolidTrace(trace, holderCtx, layerZ, nextLayerZ)
                 }
+                holderCtx.globalCompositeOperation = existingGCO
                 // We are drawing these in a separate loop because in the future
                 // we want these to be additively drawn while the solids are drawn normally
                 for (const trace of this.traces) {
@@ -118,6 +124,9 @@ namespace splitTime.level {
         private drawPartialSolidTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
             const maxHeight = exMaxZ - minZ
             if (trace.height > 0 && !isOverlap(trace.z, trace.height, minZ, maxHeight)) {
+                return
+            }
+            if (trace.height === 0 && (trace.z < minZ || trace.z >= exMaxZ)) {
                 return
             }
             const minZRelativeToTrace = minZ - trace.z
@@ -278,7 +287,7 @@ namespace splitTime.level {
                 iLayer++
             ) {
                 var layerZ = this.layerZs[iLayer]
-                var nextLayerZ = this.layerZs[iLayer + 1] || splitTime.MAX_SAFE_INTEGER
+                var nextLayerZ = this.layerZs.length > iLayer + 1 ? this.layerZs[iLayer + 1] : splitTime.MAX_SAFE_INTEGER
                 if (exMaxZ > layerZ && minZ < nextLayerZ) {
                     this._calculatePixelCollision(
                         collisionInfo,
@@ -318,10 +327,6 @@ namespace splitTime.level {
                             collisionInfo.zBlockedTopEx = Math.max(
                                 height,
                                 collisionInfo.zBlockedTopEx
-                            )
-                            collisionInfo.zBlockedBottom = Math.min(
-                                layerZ,
-                                collisionInfo.zBlockedBottom
                             )
                         }
                         break
