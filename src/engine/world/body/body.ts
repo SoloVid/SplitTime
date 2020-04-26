@@ -11,6 +11,13 @@ namespace splitTime {
         mover: splitTime.body.Mover
         speechBox: splitTime.body.SpeechBox
 
+        inRegionTransition: boolean
+        transitionLevel: Level | null
+        transitionX: number
+        transitionY: number
+        transitionZ: number
+        transitionIncludeChildren: boolean
+        
         // TODO: remove parameter when moving templates elsewhere
         constructor() {
             this.ref = nextRef++
@@ -26,6 +33,13 @@ namespace splitTime {
             this.mover = new splitTime.body.Mover(this)
             // TODO: sort out (throw out) inheritance to make this work right
             this.speechBox = new splitTime.body.SpeechBox(this, 42)
+
+            this.inRegionTransition = true
+            this.transitionLevel = null
+            this.transitionX = -1
+            this.transitionY = -1
+            this.transitionZ = -1
+            this.transitionIncludeChildren = false
         }
         get x() {
             return this.getX()
@@ -187,16 +201,44 @@ namespace splitTime {
         }
 
         put(
-            level: Level,
+            level: Level | null,
             x: number,
             y: number,
             z: number,
-            includeChildren = false
+            includeChildren = false,
+            finishTransition = false
         ) {
-            this.setLevel(level, includeChildren)
-            this.setX(x, includeChildren)
-            this.setY(y, includeChildren)
-            this.setZ(z, includeChildren)
+            //If we are switching regions, wait for the world renderer to do the transition animation
+            if(
+                !finishTransition &&
+                this._level !== null &&
+                level !== null &&
+                this._level?.getRegion() !== level.getRegion()
+            ) {
+                this.inRegionTransition = true
+                this.transitionLevel = level
+                this.transitionX = x
+                this.transitionY = y
+                this.transitionZ = z
+                this.transitionIncludeChildren = includeChildren
+            } else {
+                this.inRegionTransition = false
+                this.setLevel(level, includeChildren)
+                this.setX(x, includeChildren)
+                this.setY(y, includeChildren)
+                this.setZ(z, includeChildren)
+            }
+        }
+
+        finishRegionTransition() {
+            this.put(
+                this.transitionLevel,
+                this.transitionX,
+                this.transitionY,
+                this.transitionZ,
+                this.transitionIncludeChildren,
+                true
+            )
         }
 
         putInLocation(location: ILevelLocation, includeChildren = false) {

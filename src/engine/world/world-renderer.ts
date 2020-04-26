@@ -11,6 +11,10 @@ namespace splitTime {
 
         private readonly bodyRenderer: body.Renderer
         private readonly weatherRenderer: WeatherRenderer
+        
+        private fadeOut: number
+        private fadeIn: number
+        private FADE_INCREMENT: number
 
         constructor(
             private readonly camera: Camera,
@@ -20,6 +24,10 @@ namespace splitTime {
         ) {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
+
+            this.fadeOut = 0
+            this.fadeIn = 0
+            this.FADE_INCREMENT = 0.1
 
             this.buffer = new SLVD.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
             this.snapshot = new SLVD.Canvas(
@@ -55,7 +63,7 @@ namespace splitTime {
 
             this.bodyRenderer.notifyNewFrame(screen, this.snapshot.context)
             var bodies = currentLevel.getBodies()
-            const playerBody = this.playerBodyGetter()
+            var playerBody = this.playerBodyGetter()        
 
             for (var iBody = 0; iBody < bodies.length; iBody++) {
                 var body = bodies[iBody]
@@ -140,6 +148,34 @@ namespace splitTime {
                 this.snapshot.context.globalAlpha = 1
             }
 
+            //If the active player is switching regions  
+            if(playerBody?.inRegionTransition){                
+                //Fade to white
+                if (this.fadeOut < 1) {
+                    this.fadeOut += this.FADE_INCREMENT
+                } else {
+                    playerBody.inRegionTransition = false
+                    playerBody.finishRegionTransition()
+
+                    //Switch from fading out to fading in
+                    this.fadeIn = 1
+                    this.fadeOut = 0
+                }                
+            } else if (this.fadeIn > 0) {
+                //Continue fading in
+                this.fadeIn -= this.FADE_INCREMENT
+            }
+         
+            //Draw the (semi-)transparent rectangle for fading in/out
+            var transparancyValue = this.fadeOut + this.fadeIn
+            this.snapshot.context.fillStyle = "rgba(255,255,255," + transparancyValue + ")"
+            this.snapshot.context.fillRect(
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
+            
             this.buffer.context.drawImage(this.snapshot.element, 0, 0)
 
             this.weatherRenderer.render(currentLevel)
