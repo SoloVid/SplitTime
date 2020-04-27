@@ -34,7 +34,8 @@ namespace splitTime {
             // TODO: sort out (throw out) inheritance to make this work right
             this.speechBox = new splitTime.body.SpeechBox(this, 42)
 
-            this.inRegionTransition = true
+            //Initialize variables used for region transitions
+            this.inRegionTransition = false
             this.transitionLevel = null
             this.transitionX = -1
             this.transitionY = -1
@@ -200,14 +201,70 @@ namespace splitTime {
             return this.getY() - this.baseLength / 2
         }
 
+        /**
+         * Put this body in the specified level at the specified coordinates.
+         *
+         * @param level - the level to put the body into
+         * @param x - the x coordinate of the target location
+         * @param y - the y coordinate of the target location
+         * @param z - the z coordinate of the target location
+         * @param includeChildren - whether or not to put the children of this body in the specified location as well
+         */         
         put(
+            level: Level | null,
+            x: number,
+            y: number,
+            z: number,
+            includeChildren = false
+        ) {
+            this.putWithTransition(
+                level,
+                x,
+                y,
+                z,
+                includeChildren,
+                false
+            )
+        }
+
+        /**
+         * 
+         * When the active player is transitioning to a new region and the transition
+         * animation is complete, this function puts the body in the new location.
+         */
+        finishRegionTransition() {
+            this.inRegionTransition = false
+            
+            // Use the arguments that we saved from the initial call to put()
+            this.putWithTransition(
+                this.transitionLevel,
+                this.transitionX,
+                this.transitionY,
+                this.transitionZ,
+                this.transitionIncludeChildren,
+                true
+            )
+        }
+
+        /**
+         * Used by put() and finishRegionTransition() to put a body in the specified location 
+         * (or save the location for later if a region transition is triggered).
+         * 
+         * @param @param level - the level to put the body into
+         * @param x - the x coordinate of the target location
+         * @param y - the y coordinate of the target location
+         * @param z - the z coordinate of the target location
+         * @param includeChildren - whether or not to put the children of this body in the specified location as well 
+         * @param finishTransition - true if a transition animation has just finished
+         */
+        private putWithTransition(
             level: Level | null,
             x: number,
             y: number,
             z: number,
             includeChildren = false,
             finishTransition = false
-        ) {
+        ){
             //If we are switching regions, wait for the world renderer to do the transition animation
             if(
                 !finishTransition &&
@@ -216,29 +273,21 @@ namespace splitTime {
                 this._level?.getRegion() !== level.getRegion()
             ) {
                 this.inRegionTransition = true
+
+                //Don't put the body in the next level yet, but save the location
+                //information to be used once the transition animation is finished.
                 this.transitionLevel = level
                 this.transitionX = x
                 this.transitionY = y
                 this.transitionZ = z
                 this.transitionIncludeChildren = includeChildren
             } else {
-                this.inRegionTransition = false
+                //Put the body in the specified level / coordinates
                 this.setLevel(level, includeChildren)
                 this.setX(x, includeChildren)
                 this.setY(y, includeChildren)
                 this.setZ(z, includeChildren)
             }
-        }
-
-        finishRegionTransition() {
-            this.put(
-                this.transitionLevel,
-                this.transitionX,
-                this.transitionY,
-                this.transitionZ,
-                this.transitionIncludeChildren,
-                true
-            )
         }
 
         putInLocation(location: ILevelLocation, includeChildren = false) {

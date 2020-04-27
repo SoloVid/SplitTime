@@ -167,8 +167,8 @@ namespace splitTime {
             }
          
             //Draw the (semi-)transparent rectangle for fading in/out
-            var transparancyValue = this.fadeOut + this.fadeIn
-            this.snapshot.context.fillStyle = "rgba(255,255,255," + transparancyValue + ")"
+            var transparencyValue = this.fadeOut + this.fadeIn
+            this.snapshot.context.fillStyle = "rgba(255,255,255," + transparencyValue + ")"
             this.snapshot.context.fillRect(
                 0,
                 0,
