@@ -62,15 +62,11 @@ namespace splitTime.level {
                 )
             }
 
-            const zSet: { [z: number]: true } = {}
-            for (const trace of this.traces) {
-                zSet[trace.z] = true
-            }
-            const zArray: number[] = []
-            for (const z in zSet) {
-                zArray.push(+z)
-            }
-            this.layerZs = zArray.sort((a, b) => a - b)
+            const tracesSortedFromBottomToTop = this.traces.slice().sort((a, b) => (a.z + a.height) - (b.z + b.height))
+            const topZ = tracesSortedFromBottomToTop.length > 0 ?
+                tracesSortedFromBottomToTop[tracesSortedFromBottomToTop.length - 1] : 0
+
+            this.layerZs = this.calculateLayerZs(this.traces)
             this.layerCount = this.layerZs.length
             // Put a sentinel on the end
             this.layerZs.push(splitTime.MAX_SAFE_INTEGER)
@@ -100,7 +96,6 @@ namespace splitTime.level {
                 // However, "lighten" seems to be an alias for "lighter" (additive)
                 // in all three major browsers I tried.
                 // holderCtx.globalCompositeOperation = "lighten"
-                const tracesSortedFromBottomToTop = this.traces.slice().sort((a, b) => (a.z + a.height) - (b.z + b.height))
                 for (const trace of tracesSortedFromBottomToTop) {
                     this.drawPartialSolidTrace(trace, holderCtx, layerZ, nextLayerZ)
                 }
@@ -126,6 +121,40 @@ namespace splitTime.level {
                     debugTraceCtx.drawImage(holderCanvas.element, 0, -layerZ)
                 }
             }
+        }
+
+        private calculateLayerZs(traces: readonly Trace[]): int[] {
+            let layerZs = this.fillLayerZGaps(traces, traces.map(t => Math.floor(t.z)))
+            return layerZs.sort((a, b) => a - b)
+        }
+
+        // It isn't enough to just create a layer for every trace z.
+        // If a trace is too tall, it might exceed the 255 limit
+        // imposed by the resolution of RGB colors used by this collision scheme.
+        // This method creates more layers as necessary for such cases.
+        private fillLayerZGaps(traces: readonly Trace[], zArray: readonly int[]): int[] {
+            const zSet: { [z: number]: true } = {}
+            for (const z of zArray) {
+                zSet[z] = true
+            }
+            // Technically, this is something like 255 based on the limit of pixels
+            const MAX_LAYER_Z = 240
+            for (const trace of traces) {
+                let startZ = trace.z
+                for (let currentZ = startZ; currentZ < trace.z + trace.height; currentZ++) {
+                    if (zSet[currentZ]) {
+                        startZ = currentZ
+                    } else if (currentZ - startZ > MAX_LAYER_Z) {
+                        zSet[currentZ] = true
+                        startZ = currentZ
+                    }
+                }
+            }
+            const newZArray: int[] = []
+            for (const z in zSet) {
+                newZArray.push(+z)
+            }
+            return newZArray.sort((a, b) => a - b)
         }
 
         private drawPartialSolidTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, minZ: int, exMaxZ: int): void {

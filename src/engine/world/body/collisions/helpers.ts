@@ -3,8 +3,8 @@ namespace splitTime.body.collisions {
         arr: string[],
         set: { [id: string]: true }
     ): void {
-        for (var i = 0; i < arr.length; i++) {
-            set[arr[i]] = true
+        for (const item of arr) {
+            set[item] = true
         }
     }
 }

@@ -183,7 +183,7 @@ namespace splitTime.body.collisions {
                 this.sliding.zeldaSlide(maxDistance / 2)
             }
 
-            this.mover.body.level.runEventSet(eventIdSet, this.mover.body)
+            this.mover.body.level.runEvents(Object.keys(eventIdSet), this.mover.body)
             if (mightMoveLevels) {
                 this.mover.transportLevelIfApplicable()
             }

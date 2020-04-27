@@ -24,10 +24,12 @@ namespace splitTime.body.collisions {
                 maxDZ
             )
 
-            this.mover.body.setZ(this.mover.body.z + collisionInfo.dzAllowed)
-            this.mover.body.level.runEvents(collisionInfo.events, this.mover.body)
-            if (collisionInfo.targetLevel !== this.mover.body.level) {
-                this.mover.transportLevelIfApplicable()
+            if (collisionInfo.dzAllowed !== 0) {
+                this.mover.body.setZ(this.mover.body.z + collisionInfo.dzAllowed)
+                this.mover.body.level.runEvents(collisionInfo.events, this.mover.body)
+                if (collisionInfo.targetLevel !== this.mover.body.level) {
+                    this.mover.transportLevelIfApplicable()
+                }
             }
 
             return Math.abs(collisionInfo.dzAllowed)

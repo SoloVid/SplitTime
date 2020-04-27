@@ -193,7 +193,7 @@ function downloadFile() {
 
     var pom = document.createElement('a');
     pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonText));
-    pom.setAttribute('download', filename);
+    pom.setAttribute('download', fileName);
 
     pom.style.display = 'none';
     document.body.appendChild(pom);
