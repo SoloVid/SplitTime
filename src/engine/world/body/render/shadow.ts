@@ -65,21 +65,17 @@ namespace splitTime.body {
         }
 
         prepareForRender() {
-            this.shadowBody.put(
-                this.realBody.level,
-                this.realBody.x,
-                this.realBody.y,
-                this.realBody.z
-            )
             var shadowFallInfo = this.shadowBody.mover.vertical.calculateZCollision(
                 this.realBody.level,
                 this.realBody.x,
                 this.realBody.y,
                 this.realBody.z,
-                -(this.realBody.level.highestLayerZ + 1000)
+                -(this.realBody.level.highestLayerZ + 1000),
+                [this.realBody]
             )
-            this.shadowBody.setLevel(null)
-            this.shadowBody.setZ(this.realBody.z + shadowFallInfo.dzAllowed)
+            this.shadowBody.x = this.realBody.x
+            this.shadowBody.y = this.realBody.y
+            this.shadowBody.z = this.realBody.z + shadowFallInfo.dzAllowed
             this.radius =
                 (this.maxRadius - this.minRadius) /
                     (0.05 * Math.abs(shadowFallInfo.dzAllowed) + 1) +

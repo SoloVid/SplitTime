@@ -41,7 +41,8 @@ namespace splitTime.body.collisions {
             x: number,
             y: number,
             z: number,
-            dz: number
+            dz: number,
+            ignoreBodies: Body[] = []
         ): VerticalCollisionInfo {
             //If the body is out of bounds on the Z axis
             if (z + dz < level.lowestLayerZ) {
@@ -83,7 +84,7 @@ namespace splitTime.body.collisions {
                     left, baseLength,
                     top, baseLength,
                     lowerBoundZ, 1,
-                    this.mover.body
+                    ignoreBodies.concat(this.mover.body)
                 )
                 if (originCollisionInfo.blocked) {
                     bodies = originCollisionInfo.bodies

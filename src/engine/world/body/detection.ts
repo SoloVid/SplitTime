@@ -83,7 +83,7 @@ namespace splitTime.body {
                     1,
                     start.getZ(),
                     1,
-                    detective
+                    [detective]
                 )
                 if (collisionInfo.blocked) {
                     if (collisionInfo.bodies.indexOf(target) >= 0) {

@@ -23,7 +23,9 @@ namespace splitTime.level {
     }
 
     export class Traces {
+        private width: int
         private layerZs: int[]
+        private layerCount: int
         private layerFuncData: ImageData[]
         private nextFunctionId: int
         private internalEventIdMap: { [intId: number]: string }
@@ -36,6 +38,7 @@ namespace splitTime.level {
             levelWidth: int,
             levelYWidth: int
         ) {
+            this.width = levelWidth
             this.layerZs = []
             this.layerFuncData = []
 
@@ -68,11 +71,14 @@ namespace splitTime.level {
                 zArray.push(+z)
             }
             this.layerZs = zArray.sort((a, b) => a - b)
+            this.layerCount = this.layerZs.length
+            // Put a sentinel on the end
+            this.layerZs.push(splitTime.MAX_SAFE_INTEGER)
 
             //Initialize functional map
             for (
-                var iLayer = 0;
-                iLayer < this.layerZs.length;
+                let iLayer = 0;
+                iLayer < this.layerCount;
                 iLayer++
             ) {
                 holderCtx.clearRect(
@@ -82,8 +88,9 @@ namespace splitTime.level {
                     holderCanvas.height
                 )
 
-                var layerZ = this.layerZs[iLayer]
-                var nextLayerZ = this.layerZs.length > iLayer + 1 ? this.layerZs[iLayer + 1] : MAX_SAFE_INTEGER
+                const layerZ = this.layerZs[iLayer]
+                // This operation is safe because there should be a sentinel
+                const nextLayerZ = this.layerZs[iLayer + 1]
 
                 holderCtx.translate(0.5, 0.5)
 
@@ -257,8 +264,10 @@ namespace splitTime.level {
             minZ: int,
             exMaxZ: int
         ) {
-            for (var y = startY; y < startY + yPixels; y++) {
-                for (var x = startX; x < startX + xPixels; x++) {
+            const endY = startY + yPixels
+            const endX = startX + xPixels
+            for (let y = startY; y < endY; y++) {
+                for (let x = startX; x < endX; x++) {
                     this.calculatePixelColumnCollisionInfo(
                         collisionInfo,
                         x,
@@ -283,11 +292,12 @@ namespace splitTime.level {
         ) {
             for (
                 var iLayer = 0;
-                iLayer < this.layerZs.length;
+                iLayer < this.layerCount;
                 iLayer++
             ) {
                 var layerZ = this.layerZs[iLayer]
-                var nextLayerZ = this.layerZs.length > iLayer + 1 ? this.layerZs[iLayer + 1] : splitTime.MAX_SAFE_INTEGER
+                // This operation should be safe because there is a sentinel
+                var nextLayerZ = this.layerZs[iLayer + 1]
                 if (exMaxZ > layerZ && minZ < nextLayerZ) {
                     this._calculatePixelCollision(
                         collisionInfo,
@@ -312,7 +322,8 @@ namespace splitTime.level {
             exMaxZ: int
         ) {
             var imageData = this.layerFuncData[layer]
-            var dataIndex = pixCoordToIndex(x, y, imageData)
+            // This operation needed to be inline to be performant
+            var dataIndex = (y * this.width + x) * 4
             var r = imageData.data[dataIndex++]
             var g = imageData.data[dataIndex++]
             var b = imageData.data[dataIndex++]
@@ -367,16 +378,5 @@ namespace splitTime.level {
             assert(this.debugTraceCanvas !== null, "Debug trace canvas requested when null")
             return this.debugTraceCanvas
         }
-    }
-
-    /**
-     * Gets the index on canvas data of given coordinates
-     * @param {int} x
-     * @param {int} y
-     * @param {ImageData} data Collision canvas data array
-     * @returns {int}
-     */
-    function pixCoordToIndex(x: int, y: int, data: ImageData): int {
-        return (y * data.width + x) * 4
     }
 }

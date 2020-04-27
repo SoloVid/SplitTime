@@ -39,18 +39,22 @@ namespace splitTime {
             yPixels: number,
             startZ: number,
             zPixels: number,
-            ignoreBody?: splitTime.Body
+            ignoreBodies: splitTime.Body[] = []
         ): ApiCollisionInfo {
             var collisionInfo = new InternalCollisionInfo(level)
             function handleFoundBody(otherBody: Body) {
-                if (otherBody !== ignoreBody) {
-                    collisionInfo.blocked = true
-                    collisionInfo.bodies.push(otherBody)
-                    collisionInfo.zBlockedTopEx =
-                        otherBody.getZ() + otherBody.height
-                    collisionInfo.vStepUpEstimate =
-                        otherBody.getZ() + otherBody.height - startZ
+                for (const ignoreBody of ignoreBodies) {
+                    if (otherBody === ignoreBody) {
+                        return
+                    }
                 }
+
+                collisionInfo.blocked = true
+                collisionInfo.bodies.push(otherBody)
+                collisionInfo.zBlockedTopEx =
+                    otherBody.getZ() + otherBody.height
+                collisionInfo.vStepUpEstimate =
+                    otherBody.getZ() + otherBody.height - startZ
             }
             level.getCellGrid().forEachBody(
                 startX,

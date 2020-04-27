@@ -124,7 +124,7 @@ namespace splitTime.body {
                     this.baseLength,
                     z,
                     this.body.height,
-                    this.body
+                    [this.body]
                 )
             return {
                 blocked: originCollisionInfo.blocked && originCollisionInfo.zBlockedTopEx !== z,

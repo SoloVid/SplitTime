@@ -187,7 +187,7 @@ namespace splitTime.level {
                 whereIsBodyNow,
                 removeFromCell
             )
-            if (body.baseLength > 0) {
+            if (body.baseLength > 0 && body.height > 0) {
                 this._adjustCellClaims(
                     body,
                     whereIsBodyNow,
