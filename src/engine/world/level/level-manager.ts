@@ -57,9 +57,7 @@ namespace splitTime {
             }
 
             if (exitingLevel) {
-                if (exitingLevel.events[EXIT_LEVEL_FUNCTION_ID]) {
-                    exitingLevel.runEvent(EXIT_LEVEL_FUNCTION_ID)
-                }
+                exitingLevel.runExitFunction()
                 if (changeRegion) {
                     exitingLevel.getRegion().unloadLevels()
                 }
@@ -77,9 +75,7 @@ namespace splitTime {
             if (this.transitionEndListener) {
                 await this.transitionEndListener(exitingLevel, enteringLevel)
             }
-            if (enteringLevel.events[ENTER_LEVEL_FUNCTION_ID]) {
-                enteringLevel.runEvent(ENTER_LEVEL_FUNCTION_ID)
-            }
+            enteringLevel.runEnterFunction()
 
             this.transitionInProgress = false
         }

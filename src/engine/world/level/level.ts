@@ -1,12 +1,11 @@
 namespace splitTime {
-    export const ENTER_LEVEL_FUNCTION_ID = "__ENTER_LEVEL"
-    export const EXIT_LEVEL_FUNCTION_ID = "__EXIT_LEVEL"
-
     export class Level {
         id: string
         private loader: LevelLoader
-        events: { [id: string]: Function }
-        positions: { [id: string]: Position }
+        private events: { [id: string]: (triggeringBody: Body) => void }
+        private enterFunction: (() => void) | null = null
+        private exitFunction: (() => void) | null = null
+        private positions: { [id: string]: Position }
         region: Region | null
         bodies: Body[]
         background: string
@@ -90,15 +89,15 @@ namespace splitTime {
             return this.positions[positionId]
         }
 
-        registerEnterFunction(fun: Function) {
-            this.registerEvent(ENTER_LEVEL_FUNCTION_ID, fun)
+        registerEnterFunction(fun: () => void) {
+            this.enterFunction = fun
         }
 
-        registerExitFunction(fun: Function) {
-            this.registerEvent(EXIT_LEVEL_FUNCTION_ID, fun)
+        registerExitFunction(fun: () => void) {
+            this.exitFunction = fun
         }
 
-        registerEvent(eventId: string, callback: Function) {
+        registerEvent(eventId: string, callback: (triggeringBody: Body) => void) {
             this.events[eventId] = callback
         }
 
@@ -106,7 +105,19 @@ namespace splitTime {
             this.positions[positionId] = position
         }
 
-        runEvent(eventId: string, param?: any) {
+        runEnterFunction() {
+            if (this.enterFunction) {
+                this.enterFunction()
+            }
+        }
+
+        runExitFunction() {
+            if (this.exitFunction) {
+                this.exitFunction()
+            }
+        }
+
+        private runEvent(eventId: string, triggeringBody: Body) {
             var that = this
             var fun =
                 this.events[eventId] ||
@@ -115,17 +126,12 @@ namespace splitTime {
                         'Event "' + eventId + '" not found for level ' + that.id
                     )
                 }
-            return fun(param)
+            return fun(triggeringBody)
         }
 
-        runEvents(eventIds: string[], param: any) {
+        runEvents(eventIds: string[], triggeringBody: Body) {
             for (var i = 0; i < eventIds.length; i++) {
-                this.runEvent(eventIds[i], param)
-            }
-        }
-        runEventSet(eventIdSet: { [id: string]: any }, param: any) {
-            for (var id in eventIdSet) {
-                this.runEvent(id, param)
+                this.runEvent(eventIds[i], triggeringBody)
             }
         }
 
