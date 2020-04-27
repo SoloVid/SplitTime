@@ -288,19 +288,17 @@ namespace splitTime {
 
             var level = this._level
             if (level) {
-                var ZILCH = 0.00001
+                const ZILCH = 0.00001
                 if (this.baseLength > ZILCH) {
-                    this.zVelocity += this.GRAVITY * delta
-                }
-                if (
-                    this.baseLength > ZILCH &&
-                    Math.abs(this.zVelocity) > ZILCH
-                ) {
-                    var expectedDZ = this.zVelocity * delta
-                    var actualDZ = this.mover.zeldaVerticalBump(expectedDZ)
-                    if (Math.abs(actualDZ) <= ZILCH) {
-                        this.zVelocity = 0
+                    if (Math.abs(this.zVelocity) > ZILCH) {
+                        var expectedDZ = this.zVelocity * delta
+                        var actualDZ = this.mover.zeldaVerticalBump(expectedDZ)
+                        if (Math.abs(actualDZ) <= ZILCH) {
+                            this.zVelocity = 0
+                        }
                     }
+                    // Up the velocity after the move so that others can cancel it out beforehand
+                    this.zVelocity += this.GRAVITY * delta
                 }
             }
 
@@ -318,13 +316,6 @@ namespace splitTime {
 
         notifyPlayerInteract() {
             this.playerInteractHandlers.run()
-        }
-
-        //Function run every frame
-        registerFrameUpdateHandler(
-            handler: ((delta: real_seconds) => splitTime.CallbackResult) | splitTime.FrameNotified
-        ) {
-            this.frameUpdateHandlers.register(handler)
         }
 
         registerTimeAdvanceListener(

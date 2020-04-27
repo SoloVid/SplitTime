@@ -1,11 +1,12 @@
 namespace splitTime.agent {
-    export class ControlledCollisionMovement {
+    export class ControlledCollisionMovement implements splitTime.TimeNotified {
         private body: splitTime.Body
         private targetBoardX: number | null = null
         private targetBoardY: number | null = null
         private targetScreenX: number | null = null
         private targetScreenY: number | null = null
         private targetDirection: number | null = null
+        private ladderLocation: ILevelLocation2 | null = null
 
         public constructor(body: splitTime.Body) {
             this.body = body
@@ -26,21 +27,51 @@ namespace splitTime.agent {
         setWalkingDirection(dir: number) {
             this.targetDirection = dir
         }
+
         setStopped() {
             this.resetTarget()
         }
-        notifyFrameUpdate(delta: number) {
+
+        setLadderLocation(ladderLocation: ILevelLocation2) {
+            this.ladderLocation = ladderLocation
+        }
+
+        private checkLadderLocation() {
+            if (this.ladderLocation !== null) {
+                if (!level.areLocationsEquivalent(this.ladderLocation, this.body)) {
+                    this.ladderLocation = null
+                }
+            }
+        }
+
+        notifyTimeAdvance(delta: splitTime.game_seconds) {
+            this.checkLadderLocation()
+            if (this.ladderLocation !== null) {
+                this.body.zVelocity = 0
+            }
+
             var walkingDir = this.getWalkingDirection()
             if (walkingDir !== null) {
                 this.body.dir = walkingDir
                 if (this.sprite) {
                     this.sprite.requestStance("walk", this.body.dir)
                 }
-                this.body.mover.horizontal.zeldaStep(
-                    this.body.dir,
-                    this.body.spd * delta,
-                    true
-                )
+                let dz = 0
+                if (this.ladderLocation !== null) {
+                    if (direction.areWithin90Degrees(this.body.dir, direction.N)) {
+                        dz = this.body.mover.vertical.zeldaVerticalMove(this.body.spd * delta / 2)
+                    } else if (direction.areWithin90Degrees(this.body.dir, direction.S)) {
+                        dz = this.body.mover.vertical.zeldaVerticalMove(-this.body.spd * delta / 2)
+                    }
+                }
+
+                if (dz === 0) {
+                    this.body.mover.horizontal.zeldaStep(
+                        this.body.dir,
+                        this.body.spd * delta,
+                        true
+                    )
+                }
             }
         }
 
