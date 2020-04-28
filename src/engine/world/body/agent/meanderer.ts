@@ -36,11 +36,17 @@ namespace splitTime.agent {
     
     export class RandomMeandering implements TimeNotified {
         private base: BaseMeanderer
-        constructor(body: Body) {
+        constructor(
+            private readonly body: Body,
+            private readonly levelManager: LevelManager
+        ) {
             this.base = new BaseMeanderer(body)
         }
         
         notifyTimeAdvance(delta: game_seconds): void {
+            if (this.levelManager.getCurrent() !== this.body.level) {
+                return
+            }
             this.base.regularMotion(delta, randomInt(16) + 16, direction.getRandom())
         }
     }
