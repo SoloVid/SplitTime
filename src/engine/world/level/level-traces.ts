@@ -372,7 +372,7 @@ namespace splitTime.level {
                         break
                     case splitTime.Trace.RColor.EVENT:
                         var eventId = this.getEventIdFromPixel(r, g, b, a)
-                        if (!(eventId in collisionInfo.events)) {
+                        if (!collisionInfo.events[eventId]) {
                             collisionInfo.events[eventId] = new traces.ZRange(
                                 minZ,
                                 exMaxZ
