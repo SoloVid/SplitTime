@@ -14,7 +14,7 @@ namespace splitTime.menu {
 
             this.hud.pushRenderer(this)
 
-            var promise = new SLVD.Promise()
+            var promise = new splitTime.Pledge()
             this.controls.confirmButton.waitForAfterUp().then(() => {
                 isRunning = false
                 this.hud.removeRenderer(this)
@@ -27,7 +27,7 @@ namespace splitTime.menu {
 
             this.controls.joyStick.onTilt(() => {
                 if (!isRunning) {
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 }
                 this.handleMenu()
                 return

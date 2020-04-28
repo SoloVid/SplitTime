@@ -1,9 +1,9 @@
 # SplitTime Engine
-JavaScript game engine for SoloVid's [Maven](http://www.solovid.com/games/maven)
+TypeScript game engine for SoloVid's [Maven](http://www.solovid.com/games/maven)
 
-The engine was named for the idea of how it would handle time. Time is ever moving forward along a fixed-length timeline, but this timeline is segmented into asynchronous regional timelines. The overworld serves as a hub for all of the regions and also has its own timeline. Time is segmented into periods which represent one move in the overworld and so much real time for each region occupied by some subset of the player-controlled party members. A timeline has events which occur at specified points.
+The engine was named for the idea of how it would handle time. Time is ever moving forward along a fixed-length timeline, but this timeline is segmented into asynchronous regional timelines. A timeline has events which occur at specified points.
 
-However, this time system is not yet realized and may be scrapped. The real distinguisher currently for this engine is its 2.5D nature. Although graphics are all 2D, the game supports simple 3D physics rather than using the standard 2D layer approach.
+However, the real distinction of this engine is its 2.5D nature. Although graphics are all 2D, the game supports simple 3D physics rather than using the standard 2D layer approach.
 
 ## Development Environment
 Make sure you have [Nodejs](http://nodejs.org/download/) installed.
@@ -81,7 +81,7 @@ The directories within each project should be
 
 The launch point of the game should be some HTML file in the project home directory. This file should include ``<script src="dist/game.js"></script>`` and later call ``G.launch();`` as defined somewhere in the game's source files.
 
-Note that all TS files in ``src/`` will be included within ``dist/game.js``. No ordering of project JS files should be assumed. (However, you may use ``defer(() => { ... })`` to ensure that some code gets run after all definitions.)
+Note that all TS files in ``src/`` will be included within ``dist/game.js``. No ordering of project source files should be assumed. (However, you may use ``defer(() => { ... })`` to ensure that some code gets run after all definitions.)
 
 Within the game, all resources should be referenced relative to their asset type directory as specified in the enumeration above.
 

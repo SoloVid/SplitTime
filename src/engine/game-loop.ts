@@ -106,7 +106,7 @@ namespace splitTime {
 
     export class GameLoop {
         private running: boolean = false
-        private listeners: FrameNotified[] = []
+        private listeners: (FrameNotified | ((seconds: number) => void))[] = []
 
         constructor(public readonly perspective: Perspective) {
             Promise.resolve().then(() => mainGameLoop(this))
@@ -120,13 +120,17 @@ namespace splitTime {
             this.running = false
         }
 
-        onFrameUpdate(listener: FrameNotified) {
+        onFrameUpdate(listener: FrameNotified | ((seconds: number) => void)) {
             this.listeners.push(listener)
         }
 
         notifyListenersFrameUpdate(seconds: number) {
             for (const listener of this.listeners) {
-                listener.notifyFrameUpdate(seconds)
+                if (typeof listener === "function") {
+                    listener(seconds)
+                } else {
+                    listener.notifyFrameUpdate(seconds)
+                }
             }
         }
 
@@ -144,7 +148,7 @@ namespace splitTime {
                         now.getMilliseconds() -
                         this.lastPerformanceCheck.getMilliseconds()
                     if (timePassed > allow) {
-                        splitTime.Logger.warn(
+                        splitTime.log.warn(
                             debugName +
                                 ": " +
                                 timePassed +

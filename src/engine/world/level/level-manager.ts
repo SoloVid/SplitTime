@@ -27,7 +27,7 @@ namespace splitTime {
         /**
          * STOP!!! This method should ONLY be called by the main game loop.
          */
-        async transition(level: Level): Promise<any> {
+        async transition(level: Level): Promise<void> {
             if (this.transitionInProgress) {
                 throw new Error(
                     "Level transition is already in progress. Cannot transition to " +
@@ -36,7 +36,7 @@ namespace splitTime {
             }
 
             if (level === this.currentLevel) {
-                return SLVD.Promise.as()
+                return splitTime.Pledge.as()
             }
 
             this.transitionInProgress = true
@@ -57,9 +57,7 @@ namespace splitTime {
             }
 
             if (exitingLevel) {
-                if (exitingLevel.events[EXIT_LEVEL_FUNCTION_ID]) {
-                    exitingLevel.runEvent(EXIT_LEVEL_FUNCTION_ID)
-                }
+                exitingLevel.runExitFunction()
                 if (changeRegion) {
                     exitingLevel.getRegion().unloadLevels()
                 }
@@ -77,9 +75,7 @@ namespace splitTime {
             if (this.transitionEndListener) {
                 await this.transitionEndListener(exitingLevel, enteringLevel)
             }
-            if (enteringLevel.events[ENTER_LEVEL_FUNCTION_ID]) {
-                enteringLevel.runEvent(ENTER_LEVEL_FUNCTION_ID)
-            }
+            enteringLevel.runEnterFunction()
 
             this.transitionInProgress = false
         }

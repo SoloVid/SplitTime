@@ -1,8 +1,7 @@
-namespace SLVD {
-    //Promises for splitTime
-    export class Promise implements PromiseLike<any> {
+namespace splitTime {
+    export class Pledge implements PromiseLike<any> {
         callBacks: Function[]
-        babyPromises: Promise[]
+        babyPromises: Pledge[]
         resolved: boolean = false
         data: any
         constructor() {
@@ -19,15 +18,15 @@ namespace SLVD {
 
             if (this.isResolved()) {
                 var result = callBack(this.data)
-                if (result instanceof SLVD.Promise) {
+                if (result instanceof splitTime.Pledge) {
                     return result
                 } else {
-                    return SLVD.Promise.as(result)
+                    return splitTime.Pledge.as(result)
                 }
             } else {
                 this.callBacks.push(callBack)
 
-                var baby = new SLVD.Promise()
+                var baby = new splitTime.Pledge()
                 this.babyPromises.push(baby)
                 return baby
             }
@@ -44,11 +43,11 @@ namespace SLVD {
 
             while (this.callBacks.length > 0) {
                 var callBack = this.callBacks.shift() as Function
-                var babyPromise = this.babyPromises.shift() as SLVD.Promise
+                var babyPromise = this.babyPromises.shift() as splitTime.Pledge
 
                 var result = callBack(data)
 
-                if (result instanceof SLVD.Promise) {
+                if (result instanceof splitTime.Pledge) {
                     //callback returned promise
                     var tPromise = result
                     if (tPromise.isResolved()) {
@@ -61,7 +60,7 @@ namespace SLVD {
                                 babyPromise.callBacks.shift() as Function
                             )
                             tPromise.babyPromises.push(
-                                babyPromise.babyPromises.shift() as SLVD.Promise
+                                babyPromise.babyPromises.shift() as splitTime.Pledge
                             )
                         }
                     }
@@ -76,20 +75,20 @@ namespace SLVD {
         }
 
         static as(data?: any) {
-            var prom = new SLVD.Promise()
+            var prom = new splitTime.Pledge()
             prom.resolve(data)
             return prom
         }
-        static when(arr: SLVD.Promise[]): PromiseLike<any> {
+        static when(arr: splitTime.Pledge[]): PromiseLike<any> {
             if (!Array.isArray(arr)) {
                 var newArr = new Array(arguments.length)
                 for (var i = 0; i < arguments.length; i++) {
                     newArr[i] = arguments[i]
                 }
-                return SLVD.Promise.when(newArr)
+                return splitTime.Pledge.when(newArr)
             }
 
-            var prom = new SLVD.Promise()
+            var prom = new splitTime.Pledge()
             var results: any[] = []
 
             function addResult(index: number, data: any) {
@@ -118,16 +117,16 @@ namespace SLVD {
             }
             return prom
         }
-        static whenAny(arr: SLVD.Promise[]): SLVD.Promise {
+        static whenAny(arr: splitTime.Pledge[]): splitTime.Pledge {
             if (!Array.isArray(arr)) {
                 var newArr = new Array(arguments.length)
                 for (var i = 0; i < arguments.length; i++) {
                     newArr[i] = arguments[i]
                 }
-                return SLVD.Promise.whenAny(newArr)
+                return splitTime.Pledge.whenAny(newArr)
             }
 
-            var prom = new SLVD.Promise()
+            var prom = new splitTime.Pledge()
             var isResolved = false
 
             function callback(data: any) {
@@ -144,20 +143,20 @@ namespace SLVD {
             return prom
         }
     }
-    export class PromiseCollection {
-        promises: SLVD.Promise[]
+    export class PledgeCollection {
+        promises: splitTime.Pledge[]
         constructor() {
             this.promises = []
         }
-        add(prom: SLVD.Promise) {
+        add(prom: splitTime.Pledge) {
             this.promises.push(prom)
         }
         then(callBack: { (): void; (): void; (): void; (): void }) {
-            return SLVD.Promise.when(this.promises).then(callBack)
+            return splitTime.Pledge.when(this.promises).then(callBack)
         }
 
         static wait(ms: number | undefined) {
-            var promise = new SLVD.Promise()
+            var promise = new splitTime.Pledge()
             setTimeout(function() {
                 promise.resolve()
             }, ms)

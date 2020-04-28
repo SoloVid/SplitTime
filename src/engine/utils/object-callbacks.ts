@@ -5,7 +5,7 @@ namespace splitTime {
      * (Objects are easier to serialize than functions/lambdas.)
      */
     export class ObjectCallbacks<T> {
-        private registerCallbacks: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks();
+        private registerCallbacks: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks();
         private readonly callbacks: Callback<T>[] = [];
 
         constructor() {

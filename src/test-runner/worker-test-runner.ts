@@ -2,7 +2,7 @@ namespace splitTime.testRunner {
     export class WorkerTestRunner {
         private readonly worker: Worker
         private readonly topLevelNode: GroupNode | TestNode
-        private readonly promise = new SLVD.Promise()
+        private readonly promise = new splitTime.Pledge()
         private totalTests: int = 0
         private testsCompleted: int = 0
 

@@ -1,7 +1,7 @@
 namespace splitTime.file {
     export class Bank {
-        private onNewCallbacks: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks()
-        private onLoadCallbacks: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks()
+        private onNewCallbacks: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
+        private onLoadCallbacks: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
 
         constructor(private id: string | number) {}
 

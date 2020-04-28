@@ -1,6 +1,6 @@
 namespace splitTime.file {
     class DeserializeSecondPass implements AnyDeserializer {
-        private idPromisePairs: { objectId: int; promise: SLVD.Promise }[] = []
+        private idPromisePairs: { objectId: int; promise: splitTime.Pledge }[] = []
 
         constructor(
             private readonly idObjectPairs: { id: int; object: any }[] = []
@@ -11,7 +11,7 @@ namespace splitTime.file {
             if (objectAlreadyHere) {
                 return Promise.resolve(objectAlreadyHere)
             }
-            const promise = new SLVD.Promise()
+            const promise = new splitTime.Pledge()
             this.idPromisePairs.push({
                 objectId: id,
                 promise: promise
@@ -27,7 +27,7 @@ namespace splitTime.file {
 
         private resolveSinglePromise(
             objectId: int,
-            promise: SLVD.Promise
+            promise: splitTime.Pledge
         ): void {
             const obj = this.getObject(objectId)
             if (obj) {

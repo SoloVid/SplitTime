@@ -31,12 +31,12 @@ namespace splitTime.direction {
         if (stringDir in splitTime.direction) {
             return (splitTime.direction as any)[stringDir]
         } else {
-            Logger.warn("Invalid direction: " + stringDir)
+            log.warn("Invalid direction: " + stringDir)
             return -1
         }
     }
     export function toString(numDir: direction_t): string {
-        var modDir = SLVD.mod(Math.round(numDir), 4)
+        var modDir = splitTime.mod(Math.round(numDir), 4)
         switch (modDir) {
             case 0:
                 return "E"
@@ -111,17 +111,17 @@ namespace splitTime.direction {
             return realDir.charAt(0)
         }
 
-        return SLVD.mod(Math.round(realDir), 4)
+        return splitTime.mod(Math.round(realDir), 4)
     }
 
     export function getRandom(): direction_t {
-        return (SLVD.randomInt(16) - 1) / 4
+        return (splitTime.randomInt(16) - 1) / 4
     }
     export function getRandomCardinal(): direction_t {
-        return SLVD.randomInt(4) - 1
+        return splitTime.randomInt(4) - 1
     }
     export function getRandomOctal(): direction_t {
-        return (SLVD.randomInt(8) - 1) / 2
+        return (splitTime.randomInt(8) - 1) / 2
     }
 
     export function getXMagnitude(direction: string | direction_t): number {
@@ -170,5 +170,18 @@ namespace splitTime.direction {
         howMany90Degrees = howMany90Degrees
         var dDir = Math.abs(dir1 - dir2)
         return dDir < howMany90Degrees || dDir > 4 - howMany90Degrees
+    }
+
+    /**
+     * Convert from SplitTime representation of direction to radians for math
+     * @param direction SplitTime direction
+     * @param invert (default true) change from y-axis down to up
+     */
+    export function toRadians(direction: direction_t, invert: boolean = true): number {
+        let radians = direction * (Math.PI / 2)
+        if (invert) {
+            radians = -radians
+        }
+        return radians
     }
 }

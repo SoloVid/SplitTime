@@ -1,4 +1,4 @@
-namespace SLVD {
+namespace splitTime {
     // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
     export const MAX_SAFE_INTEGER = 9007199254740991
 
@@ -17,48 +17,6 @@ namespace SLVD {
 
     export function getScriptDirectory(): string {
         return SCRIPT_DIRECTORY
-    }
-
-    //Get text from file; returns SLVD promise
-    export function getTXT(fil: string) {
-        var promise = new SLVD.Promise()
-
-        var xmlhttp: XMLHttpRequest
-        if (window.XMLHttpRequest) {
-            // code for IE7+, Firefox, Chrome, Opera, Safari
-            xmlhttp = new XMLHttpRequest()
-        } else {
-            // code for IE6, IE5
-            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
-        }
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4) promise.resolve(xmlhttp.responseText)
-        }
-        xmlhttp.open("GET", fil, true)
-        xmlhttp.send()
-        return promise
-    }
-
-    //Get XML DOM from file; returns SLVD promise
-    export function getXML(fil: string) {
-        var promise = new SLVD.Promise()
-
-        var xmlhttp: XMLHttpRequest
-        if (window.XMLHttpRequest) {
-            // code for IE7+, Firefox, Chrome, Opera, Safari
-            xmlhttp = new XMLHttpRequest()
-        } else {
-            // code for IE6, IE5
-            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
-        }
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4) {
-                promise.resolve(xmlhttp.responseXML)
-            }
-        }
-        xmlhttp.open("GET", fil, true)
-        xmlhttp.send()
-        return promise
     }
 
     /**
@@ -107,5 +65,12 @@ namespace SLVD {
 
     export function mod(n: number, base: number) {
         return ((n % base) + base) % base
+    }
+
+    export function isOverlap(x1: number, length1: number, x2: number, length2: number) {
+        var noOverlap =
+            x1 + length1 <= x2 ||
+            x2 + length2 <= x1
+        return !noOverlap
     }
 }

@@ -1,5 +1,5 @@
 namespace splitTime.ui {
-    type render_func = (ctx: CanvasRenderingContext2D) => void
+    type render_func = (ctx: GenericCanvasRenderingContext2D) => void
     type renderer = render_func | { render: render_func }
 
     export class HUD {
@@ -25,7 +25,7 @@ namespace splitTime.ui {
             }
         }
 
-        render(ctx: CanvasRenderingContext2D) {
+        render(ctx: GenericCanvasRenderingContext2D) {
             for (var i = 0; i < this.renderCallbacks.length; i++) {
                 var renderer = this.renderCallbacks[i]
                 if (typeof renderer === "function") {

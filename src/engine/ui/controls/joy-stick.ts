@@ -29,13 +29,13 @@ namespace splitTime.controls {
             }
             return null
         }
-        onTilt(callback: () => SLVD.CallbackResult) {
+        onTilt(callback: () => splitTime.CallbackResult) {
             var lastTrigger = new Date().getTime()
             var isDone = false
 
-            var innerCallback = function(): SLVD.CallbackResult {
+            var innerCallback = function(): splitTime.CallbackResult {
                 if (isDone) {
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 }
 
                 var newTime = new Date().getTime()
@@ -45,11 +45,11 @@ namespace splitTime.controls {
                 lastTrigger = newTime
 
                 const result = callback()
-                if (result === SLVD.STOP_CALLBACKS) {
+                if (result === splitTime.STOP_CALLBACKS) {
                     isDone = true
                 }
                 if (isDone) {
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 }
             }
 

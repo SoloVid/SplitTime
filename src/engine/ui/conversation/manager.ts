@@ -142,7 +142,7 @@ namespace splitTime.conversation {
                         )
                         .reduce(
                             (tempMin, tempDist) => Math.min(tempMin, tempDist),
-                            SLVD.MAX_SAFE_INTEGER
+                            splitTime.MAX_SAFE_INTEGER
                         )
                 }
             }

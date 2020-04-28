@@ -1,11 +1,11 @@
 namespace splitTime {
     export type game_seconds = number
-    export type game_ms = int
+    export type game_ms = number
     export type real_seconds = number
     export type real_ms = number
 
-    function toMs(seconds: number): int {
-        return Math.floor(seconds * 1000)
+    function toMs(seconds: number): number {
+        return seconds * 1000
     }
 
     function toSeconds(ms: number): number {
@@ -23,8 +23,8 @@ namespace splitTime {
     }
 
     export class Timeline {
-        _timeInMilliseconds: game_ms = 0
-        _timeAdvanceListeners: SLVD.RegisterCallbacks = new SLVD.RegisterCallbacks()
+        _time: game_seconds = 0
+        _timeAdvanceListeners: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         _regions: splitTime.Region[] = []
 
         private upcomingEvents: ScheduledEvent[] = []
@@ -49,7 +49,7 @@ namespace splitTime {
             if (regionIndex >= 0) {
                 this._regions.splice(regionIndex, 1)
             } else if (splitTime.debug.ENABLED) {
-                splitTime.Logger.warn(
+                splitTime.log.warn(
                     "Attempted to remove region " +
                         region.id +
                         " from non-parent timeline"
@@ -58,39 +58,39 @@ namespace splitTime {
         }
 
         getTimeMs(): game_ms {
-            return this._timeInMilliseconds
+            return toMs(this._time)
         }
 
         getTime(): game_seconds {
-            return toSeconds(this.getTimeMs())
+            return this._time
         }
 
         advance(seconds: game_seconds) {
-            const beginningMs = toMs(this.beginning.getTime())
-            if (this._timeInMilliseconds < beginningMs) {
-                this._timeInMilliseconds = beginningMs
+            const beginning = this.beginning.getTime()
+            if (this._time < beginning) {
+                this._time = beginning
             }
 
-            const newTimeMs = this._timeInMilliseconds + toMs(seconds)
+            const newTime = this._time + seconds
 
             // Run scheduled events
             while (
                 this.upcomingEvents.length > 0 &&
-                this.upcomingEvents[0].timeMs <= newTimeMs
+                this.upcomingEvents[0].time <= newTime
             ) {
                 const event = this.upcomingEvents.shift() as ScheduledEvent
                 // Update time along the way in case someone cares
-                this._timeInMilliseconds = event.timeMs
+                this._time = event.time
                 event.instance.run()
             }
 
             // Move time fully ahead
-            this._timeInMilliseconds = newTimeMs
+            this._time = newTime
 
             // Notify listeners
             this._timeAdvanceListeners.run(seconds)
             for (var i = 0; i < this._regions.length; i++) {
-                this._regions[i].notifyTimeAdvance(seconds)
+                this._regions[i].notifyTimeAdvance(seconds, newTime)
             }
         }
 

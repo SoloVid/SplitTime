@@ -51,7 +51,7 @@ namespace splitTime.conversation {
             for (var i = this.dialogDrawings.length - 1; i >= 0; i--) {
                 var drawing = this.dialogDrawings[i]
                 if (drawing.incoming) {
-                    drawing.visibility = SLVD.approachValue(
+                    drawing.visibility = splitTime.approachValue(
                         drawing.visibility,
                         1,
                         0.1
@@ -71,9 +71,9 @@ namespace splitTime.conversation {
         }
 
         /**
-         * @param {CanvasRenderingContext2D} ctx
+         * @param {GenericCanvasRenderingContext2D} ctx
          */
-        render(ctx: CanvasRenderingContext2D) {
+        render(ctx: GenericCanvasRenderingContext2D) {
             for (var i = 0; i < this.dialogDrawings.length; i++) {
                 // TODO: visibility
                 var drawing = this.dialogDrawings[i]
@@ -98,7 +98,7 @@ namespace splitTime.conversation {
             top: number,
             right: number,
             bottom: number,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             pointX: number = -1,
             pointY: number = -1
         ) {
@@ -106,12 +106,12 @@ namespace splitTime.conversation {
             var TRI_CURVE_BUFFER = 2 * CURVE_RADIUS
             var TRI_BASE_HALF =
                 (IDEAL_TAIL_LENGTH * TRI_BASE_TO_TAIL_LENGTH) / 2
-            var horizontalMid = SLVD.constrain(
+            var horizontalMid = splitTime.constrain(
                 (2 * pointX + left + right) / 4,
                 left + TRI_CURVE_BUFFER,
                 right - TRI_CURVE_BUFFER
             )
-            var verticalMid = SLVD.constrain(
+            var verticalMid = splitTime.constrain(
                 (2 * pointY + top + bottom) / 4,
                 top + TRI_CURVE_BUFFER,
                 bottom - TRI_CURVE_BUFFER
@@ -206,7 +206,7 @@ namespace splitTime.conversation {
         }
 
         private sayFromBoardFocalPoint(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             focalPoint: { x: number; y: number; z: number },
             fullMessage: string,
             displayedMessage: string,
@@ -226,7 +226,7 @@ namespace splitTime.conversation {
         }
 
         private drawSpeechBubble(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             fullMessage: string,
             displayedMessage: string,
             speakerName: string,
@@ -327,7 +327,7 @@ namespace splitTime.conversation {
         }
 
         private drawText(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             text: string,
             x: number,
             y: number
@@ -342,7 +342,7 @@ namespace splitTime.conversation {
         }
 
         private calculateIdealizedMaxWidth(
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             fullMessage: string,
             lineHeight: number,
             nameWidth: number
@@ -365,7 +365,7 @@ namespace splitTime.conversation {
             focalPointY: number
         ): { left: number; top: number; triPointX: number; triPointY: number } {
             // Start centered (around focal point) horizontally
-            var idealLeft = SLVD.constrain(
+            var idealLeft = splitTime.constrain(
                 focalPointX - areaWidth / 2, // ideal
                 MIN_SCREEN_MARGIN, // left side of screen
                 this.camera.SCREEN_WIDTH - MIN_SCREEN_MARGIN - areaWidth // right side of screen
@@ -384,7 +384,7 @@ namespace splitTime.conversation {
                     this.camera.SCREEN_HEIGHT - MIN_SCREEN_MARGIN
                 ) {
                     // If below is also off screen, try switching to more of a horizontal approach
-                    var idealTop = SLVD.constrain(
+                    var idealTop = splitTime.constrain(
                         focalPointY - areaHeight / 2, // ideal
                         MIN_SCREEN_MARGIN, // top of screen
                         this.camera.SCREEN_HEIGHT -
@@ -434,7 +434,7 @@ namespace splitTime.conversation {
         private getLinesFromMessage(
             fullMessage: string,
             displayedMessage: string,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             maxRowLength: number
         ): { maxWidth: number; all: string[]; displayed: string[] } {
             var initialFont = ctx.font
@@ -494,10 +494,10 @@ namespace splitTime.conversation {
         }
 
         /**
-         * @param {CanvasRenderingContext2D} ctx
+         * @param {GenericCanvasRenderingContext2D} ctx
          * @return {number}
          */
-        private getLineHeight(ctx: CanvasRenderingContext2D): number {
+        private getLineHeight(ctx: GenericCanvasRenderingContext2D): number {
             return CONFIG.FONT_SIZE
         }
     }

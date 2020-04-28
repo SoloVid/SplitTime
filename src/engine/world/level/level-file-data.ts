@@ -4,23 +4,18 @@ namespace splitTime.level {
         type: "action"
         region: string
         background: string
-        layers: file_data.Layer[]
+        traces: file_data.Trace[]
         props: file_data.Prop[]
         positions: file_data.Position[]
     }
 
     export namespace file_data {
-        export interface Layer {
-            id: string
-            z: number
-            traces: Trace[]
-        }
-
         export interface Trace {
             id: string
             type: string
             vertices: string
-            height: string // for solid
+            z: number | string
+            height: number | string
             direction: string // for stairs
             event: string // for events
             level: string // for pointers
@@ -32,9 +27,9 @@ namespace splitTime.level {
         export interface Prop {
             id: string
             template: string
-            x: number
-            y: number
-            z: number
+            x: number | string
+            y: number | string
+            z: number | string
             dir: string
             stance: string
             // FTODO: clean up
@@ -43,9 +38,9 @@ namespace splitTime.level {
 
         export interface Position {
             id: string
-            x: number
-            y: number
-            z: number
+            x: number | string
+            y: number | string
+            z: number | string
             dir: string
             stance: string
         }

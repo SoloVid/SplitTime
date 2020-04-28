@@ -66,7 +66,7 @@ namespace splitTime {
             )
         }
 
-        draw(ctx: CanvasRenderingContext2D) {
+        draw(ctx: GenericCanvasRenderingContext2D) {
             // if(!this.canSee) {return;}
 
             ctx.rotate(this.rotate)
@@ -84,7 +84,7 @@ namespace splitTime {
             this.rotate = 0
         }
 
-        _drawSimple(ctx: CanvasRenderingContext2D) {
+        _drawSimple(ctx: GenericCanvasRenderingContext2D) {
             var tImg = this.getImage()
 
             var crop = this.getAnimationFrameCrop(
@@ -141,7 +141,7 @@ namespace splitTime {
                 } else if (simpleDir && simpleDir in dirMap) {
                     column = (dirMap as any)[simpleDir]
                 } else {
-                    Logger.warn(
+                    log.warn(
                         "Stance " + stance + " missing direction " + dir
                     )
                     column = 0
@@ -176,7 +176,7 @@ namespace splitTime {
             var calculation = Math.floor(this.getImage().height / this.yres)
             if (isNaN(calculation)) {
                 if (splitTime.debug.ENABLED) {
-                    splitTime.Logger.warn(
+                    splitTime.log.warn(
                         this.img +
                             " not loaded yet for frame count calculation for " +
                             this.ref

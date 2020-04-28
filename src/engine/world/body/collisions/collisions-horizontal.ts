@@ -1,6 +1,18 @@
 namespace splitTime.body.collisions {
     var ZILCH = 0.000001
 
+    export class HorizontalCollisionInfo {
+        blocked: boolean = false
+        bodies: Body[] = []
+        adjustedZ: number
+        events: string[] = []
+        targetLevel: Level | null = null
+
+        constructor(z: number) {
+            this.adjustedZ = z
+        }
+    }
+
     export class Horizontal {
         horizontalX: HorizontalX
         horizontalY: HorizontalY
@@ -15,7 +27,7 @@ namespace splitTime.body.collisions {
          * Includes pushing other Bodys out of the way
          * @returns distance actually moved
          */
-        zeldaStep(dir: number, maxDistance: number): number {
+        zeldaStep(dir: number, maxDistance: number, withPush: boolean = false): number {
             this.mover.ensureInRegion()
             var level = this.mover.body.level
 
@@ -51,36 +63,35 @@ namespace splitTime.body.collisions {
 
             var oldX = this.mover.body.getX()
             var oldY = this.mover.body.getY()
-            var oldRoundX = Math.floor(oldX)
-            var oldRoundY = Math.floor(oldY)
-            var roundX = oldRoundX
-            var roundY = oldRoundY
+            var currentX = oldX
+            var currentY = oldY
             var currentZ = this.mover.body.getZ()
 
             var halfLength = this.mover.body.halfBaseLength
 
             var eventIdSet = {}
-            var levelIdSet = {}
+            let mightMoveLevels = false
             for (var i = 0; i < maxIterations; i++) {
                 if (xPixelsRemaining > 0) {
-                    var newRoundX = roundX + iHat
+                    const newX = currentX + iHat
 
                     //If the body is out of bounds on the x axis
                     if (
-                        newRoundX + halfLength >= level.width ||
-                        newRoundX - halfLength < 0
+                        newX + halfLength >= level.width ||
+                        newX - halfLength < 0
                     ) {
                         outX = true
                     } else {
-                        var xCollisionInfo = this.horizontalX.calculateXPixelCollisionWithStepUp(
-                            roundX,
-                            roundY,
+                        const xCollisionInfo = this.horizontalX.calculateXPixelCollisionWithStepUp(
+                            level,
+                            currentX,
+                            currentY,
                             currentZ,
                             iHat as unit
                         )
                         if (xCollisionInfo.blocked) {
                             stoppedX = true
-                            if (xCollisionInfo.bodies.length > 0) {
+                            if (withPush && xCollisionInfo.bodies.length > 0) {
                                 // Slow down when pushing
                                 xPixelsRemaining--
                                 this.tryPushOtherBodies(
@@ -91,37 +102,37 @@ namespace splitTime.body.collisions {
                                 )
                             }
                         } else {
-                            roundX = newRoundX
+                            currentX = newX
                             currentZ = xCollisionInfo.adjustedZ
                             xPixelsRemaining--
                             pixelsMovedX++
                             addArrayToSet(xCollisionInfo.events, eventIdSet)
-                            addArrayToSet(
-                                xCollisionInfo.otherLevels,
-                                levelIdSet
-                            )
+                            if (xCollisionInfo.targetLevel !== level) {
+                                mightMoveLevels = true
+                            }
                         }
                     }
                 }
 
                 if (yPixelsRemaining > 0) {
-                    var newRoundY = roundY + jHat
+                    const newY = currentY + jHat
                     //Check if out of bounds on the y axis
                     if (
-                        newRoundY + halfLength >= level.yWidth ||
-                        newRoundY - halfLength < 0
+                        newY + halfLength >= level.yWidth ||
+                        newY - halfLength < 0
                     ) {
                         outY = true
                     } else {
-                        var yCollisionInfo = this.horizontalY.calculateYPixelCollisionWithStepUp(
-                            roundX,
-                            roundY,
+                        const yCollisionInfo = this.horizontalY.calculateYPixelCollisionWithStepUp(
+                            level,
+                            currentX,
+                            currentY,
                             currentZ,
                             jHat as unit
                         )
                         if (yCollisionInfo.blocked) {
                             stoppedY = true
-                            if (yCollisionInfo.bodies.length > 0) {
+                            if (withPush && yCollisionInfo.bodies.length > 0) {
                                 // Slow down when pushing
                                 yPixelsRemaining--
                                 this.tryPushOtherBodies(
@@ -132,30 +143,29 @@ namespace splitTime.body.collisions {
                                 )
                             }
                         } else {
-                            roundY = newRoundY
+                            currentY = newY
                             currentZ = yCollisionInfo.adjustedZ
                             yPixelsRemaining--
                             pixelsMovedY++
                             addArrayToSet(yCollisionInfo.events, eventIdSet)
-                            addArrayToSet(
-                                yCollisionInfo.otherLevels,
-                                levelIdSet
-                            )
+                            if (yCollisionInfo.targetLevel !== level) {
+                                mightMoveLevels = true
+                            }
                         }
                     }
                 }
             }
 
             if (ady > 0 && pixelsMovedY > 0) {
-                var roundYMoved = roundY - oldRoundY
-                var newYFromSteps = oldY + roundYMoved
+                var yMoved = currentY - oldY
+                var newYFromSteps = oldY + yMoved
                 // Subtract off any overshoot
                 var actualNewY = newYFromSteps - (dyRounded - dy)
                 this.mover.body.setY(actualNewY)
             }
             if (adx > 0 && pixelsMovedX > 0) {
-                var roundXMoved = roundX - oldRoundX
-                var newXFromSteps = oldX + roundXMoved
+                var xMoved = currentX - oldX
+                var newXFromSteps = oldX + xMoved
                 // Subtract off any overshoot
                 var actualNewX = newXFromSteps - (dxRounded - dx)
                 this.mover.body.setX(actualNewX)
@@ -173,8 +183,10 @@ namespace splitTime.body.collisions {
                 this.sliding.zeldaSlide(maxDistance / 2)
             }
 
-            this.mover.body.level.runEventSet(eventIdSet, this.mover.body)
-            this.mover.transportLevelIfApplicable(levelIdSet)
+            this.mover.body.level.runEvents(Object.keys(eventIdSet), this.mover.body)
+            if (mightMoveLevels) {
+                this.mover.transportLevelIfApplicable()
+            }
 
             return splitTime.measurement.distanceTrue(
                 oldX,

@@ -29,7 +29,7 @@ namespace splitTime.body {
             )
         }
 
-        draw(ctx: CanvasRenderingContext2D) {
+        draw(ctx: GenericCanvasRenderingContext2D) {
             var // Radii of the white glow.
                 innerRadius = 2,
                 outerRadius = this.radius,
@@ -65,20 +65,20 @@ namespace splitTime.body {
         }
 
         prepareForRender() {
-            this.shadowBody.put(
+            var shadowFallInfo = this.shadowBody.mover.vertical.calculateZCollision(
                 this.realBody.level,
                 this.realBody.x,
                 this.realBody.y,
-                this.realBody.z
+                this.realBody.z,
+                -(this.realBody.level.highestLayerZ + 1000),
+                [this.realBody]
             )
-            var shadowFallInfo = this.shadowBody.mover.falling.calculateDrop(
-                this.realBody.level.highestLayerZ + 1000
-            )
-            this.shadowBody.setLevel(null)
-            this.shadowBody.setZ(shadowFallInfo.zBlocked)
+            this.shadowBody.x = this.realBody.x
+            this.shadowBody.y = this.realBody.y
+            this.shadowBody.z = this.realBody.z + shadowFallInfo.dzAllowed
             this.radius =
                 (this.maxRadius - this.minRadius) /
-                    (0.05 * shadowFallInfo.distanceAllowed + 1) +
+                    (0.05 * Math.abs(shadowFallInfo.dzAllowed) + 1) +
                 this.minRadius
         }
         cleanupAfterRender() {

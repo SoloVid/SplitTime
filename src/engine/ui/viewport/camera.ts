@@ -136,21 +136,21 @@ namespace splitTime {
             if (this.currentLevel !== existingLevel) {
                 this.actualFocusPoint = targetFocus
             } else {
-                this.actualFocusPoint.x = SLVD.approachValue(
+                this.actualFocusPoint.x = splitTime.approachValue(
                     this.actualFocusPoint.x,
                     targetFocus.x,
                     this.getScreenMoveSpeed(
                         targetFocus.x - this.actualFocusPoint.x
                     )
                 )
-                this.actualFocusPoint.y = SLVD.approachValue(
+                this.actualFocusPoint.y = splitTime.approachValue(
                     this.actualFocusPoint.y,
                     targetFocus.y,
                     this.getScreenMoveSpeed(
                         targetFocus.y - this.actualFocusPoint.y
                     )
                 )
-                this.actualFocusPoint.z = SLVD.approachValue(
+                this.actualFocusPoint.z = splitTime.approachValue(
                     this.actualFocusPoint.z,
                     targetFocus.z,
                     this.getScreenMoveSpeed(

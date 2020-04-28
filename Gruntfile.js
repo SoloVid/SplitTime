@@ -52,7 +52,6 @@ module.exports = function(grunt) {
                     jQuery: true,
                     console: true,
                     document: true,
-                    SLVD: true,
                     splitTime: true
                 },
                 reporterOutput: ""

@@ -2,21 +2,18 @@ namespace splitTime.body {
     export class Transporter {
         constructor(public readonly body: Body) {}
 
-        transportLevelIfApplicable(levelId: string) {
-            var currentLevel = this.body.getLevel()
+        detectApplicableOtherLevel(fromLevel: Level, fromX: number, fromY: number, fromZ: number): ILevelLocation2 | null {
             var whereToNext = this._theNextTransport(
-                currentLevel,
-                levelId,
-                this.body.getX(),
-                this.body.getY(),
-                this.body.getZ()
+                fromLevel,
+                fromX,
+                fromY,
+                fromZ
             )
             var whereTo = null
-            while (whereToNext !== null && whereToNext.level !== currentLevel) {
+            while (whereToNext !== null && whereToNext.level !== fromLevel) {
                 whereTo = whereToNext
                 whereToNext = this._theNextTransport(
                     whereToNext.level,
-                    null,
                     whereToNext.x,
                     whereToNext.y,
                     whereToNext.z
@@ -27,96 +24,89 @@ namespace splitTime.body {
                 if (splitTime.debug.ENABLED) {
                     console.warn(
                         "Cyclic pointer traces detected on level " +
-                            currentLevel.id +
+                            fromLevel.id +
                             " near (" +
-                            this.body.getX() +
+                            fromX +
                             ", " +
-                            this.body.getY() +
+                            fromY +
                             ", " +
-                            this.body.getZ() +
+                            fromZ +
                             ")"
                     )
                 }
             } else if (whereTo !== null) {
+                return whereTo
+            }
+            return null
+        }
+
+        transportLevelIfApplicable(hintLevelId?: string) {
+            const whereTo = this.detectApplicableOtherLevel(
+                this.body.getLevel(),
+                this.body.getX(),
+                this.body.getY(),
+                this.body.getZ()
+            )
+            if (whereTo !== null) {
                 this.body.put(whereTo.level, whereTo.x, whereTo.y, whereTo.z)
             }
         }
 
         private _theNextTransport(
             levelFrom: splitTime.Level,
-            levelIdTo: string | null,
             x: number,
             y: number,
             z: number
         ): { level: splitTime.Level; x: number; y: number; z: number } | null {
+            let levelIdTo: string | null = null
             var levelTraces = levelFrom.getLevelTraces()
-            var cornerCollisionInfos = [
-                new splitTime.level.traces.CollisionInfo(),
-                new splitTime.level.traces.CollisionInfo(),
-                new splitTime.level.traces.CollisionInfo(),
-                new splitTime.level.traces.CollisionInfo()
-            ]
             var left = Math.round(x - this.body.baseLength / 2)
             var topY = Math.round(y - this.body.baseLength / 2)
             var roundBase = Math.round(this.body.baseLength)
             var roundZ = Math.round(z)
             var topZ = roundZ + Math.round(this.body.height)
-            levelTraces.calculatePixelColumnCollisionInfo(
-                cornerCollisionInfos[0],
-                left,
-                topY,
-                roundZ,
-                topZ
-            )
-            levelTraces.calculatePixelColumnCollisionInfo(
-                cornerCollisionInfos[1],
-                left,
-                topY + roundBase,
-                roundZ,
-                topZ
-            )
-            levelTraces.calculatePixelColumnCollisionInfo(
-                cornerCollisionInfos[2],
-                left + roundBase,
-                topY,
-                roundZ,
-                topZ
-            )
-            levelTraces.calculatePixelColumnCollisionInfo(
-                cornerCollisionInfos[3],
-                left + roundBase,
-                topY + roundBase,
-                roundZ,
-                topZ
-            )
-            for (var i = 0; i < cornerCollisionInfos.length; i++) {
-                for (var key in cornerCollisionInfos[i].pointerTraces) {
-                    if (levelIdTo === null) {
-                        levelIdTo = key
-                    } else if (key !== levelIdTo) {
-                        return null
+            const xChecks = [left, left + roundBase]
+            const yChecks = [topY, topY + roundBase]
+            const zChecks = [roundZ, topZ - 1]
+            let pointerTrace: Trace | null = null
+            for (const xCheck of xChecks) {
+                for (const yCheck of yChecks) {
+                    for (const zCheck of zChecks) {
+                        const cornerCollisionInfo = new splitTime.level.traces.CollisionInfo()
+                        levelTraces.calculatePixelColumnCollisionInfo(
+                            cornerCollisionInfo,
+                            xCheck,
+                            yCheck,
+                            zCheck,
+                            zCheck + 1
+                        )
+
+                        const pointerTraces = cornerCollisionInfo.pointerTraces
+                        // Make sure no pointer trace is something different
+                        for (var key in pointerTraces) {
+                            if (levelIdTo === null) {
+                                levelIdTo = key
+                            } else if (key !== levelIdTo) {
+                                return null
+                            }
+                        }
+                        // Make sure the pointer trace actually showed up in the list
+                        if (!levelIdTo || !pointerTraces[levelIdTo]) {
+                            return null
+                        }
+                        pointerTrace = pointerTraces[levelIdTo]
                     }
                 }
-                if (
-                    !levelIdTo ||
-                    !cornerCollisionInfos[i].pointerTraces[levelIdTo]
-                ) {
-                    return null
-                }
             }
-            if (!levelIdTo) {
+            if (!pointerTrace) {
                 return null
             }
-            var pointerTrace = cornerCollisionInfos[0].pointerTraces[levelIdTo]
-            if (!pointerTrace.level) {
-                // FTODO: re-evaluate
-                return null
-            }
+            const pointerOffset = pointerTrace.getPointerOffset()
             return {
-                level: pointerTrace.level,
-                x: x + pointerTrace.offsetX,
-                y: y + pointerTrace.offsetY,
-                z: z + pointerTrace.offsetZ
+                level: pointerOffset.level,
+                x: x + pointerOffset.offsetX,
+                y: y + pointerOffset.offsetY,
+                z: z + pointerOffset.offsetZ
             }
         }
     }

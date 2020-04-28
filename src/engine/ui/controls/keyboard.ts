@@ -13,18 +13,18 @@ namespace splitTime.controls {
         }
 
         private downCallbacks: {
-            [keyCode: number]: SLVD.RegisterCallbacks
+            [keyCode: number]: splitTime.RegisterCallbacks
         } = {}
         private getDownCallbacks(keyCode: number) {
             if (!this.downCallbacks[keyCode]) {
-                this.downCallbacks[keyCode] = new SLVD.RegisterCallbacks()
+                this.downCallbacks[keyCode] = new splitTime.RegisterCallbacks()
             }
             return this.downCallbacks[keyCode]
         }
-        private upCallbacks: { [keyCode: number]: SLVD.RegisterCallbacks } = {}
+        private upCallbacks: { [keyCode: number]: splitTime.RegisterCallbacks } = {}
         private getUpCallbacks(keyCode: number) {
             if (!this.upCallbacks[keyCode]) {
-                this.upCallbacks[keyCode] = new SLVD.RegisterCallbacks()
+                this.upCallbacks[keyCode] = new splitTime.RegisterCallbacks()
             }
             return this.upCallbacks[keyCode]
         }
@@ -36,14 +36,14 @@ namespace splitTime.controls {
         public waitForDown(keyCode: number) {
             return this.getDownCallbacks(keyCode).waitForOnce()
         }
-        public onDown(keyCode: number, callback: () => SLVD.CallbackResult) {
+        public onDown(keyCode: number, callback: () => splitTime.CallbackResult) {
             this.getDownCallbacks(keyCode).register(callback)
         }
 
         public waitForUp(keyCode: number) {
             return this.getUpCallbacks(keyCode).waitForOnce()
         }
-        public afterUp(keyCode: number, callback: () => SLVD.CallbackResult) {
+        public afterUp(keyCode: number, callback: () => splitTime.CallbackResult) {
             this.getUpCallbacks(keyCode).register(callback)
         }
 
@@ -68,7 +68,7 @@ namespace splitTime.controls {
 
             if (key == "t") {
                 // Note: This case is just here for quick and dirty testing
-                alert("Huzzah!")
+                // alert("Huzzah!")
             }
 
             this.keyDown[keyCode] = true

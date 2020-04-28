@@ -1,49 +1,79 @@
 namespace splitTime {
-    export class Trace {
-        type: string
-        level: splitTime.Level | null
+    interface PointerOffset {
+        level: splitTime.Level
         offsetX: number
         offsetY: number
         offsetZ: number
-        height: number
-        direction: string
-        eventId: string
+    }
 
-        constructor(type: string) {
+    export class Trace {
+        type: string
+        vertices: string
+        z: number
+        height: number
+        level: splitTime.Level | null
+        offsetX: number | null
+        offsetY: number | null
+        offsetZ: number | null
+        direction: direction_t | null
+        eventId: string | null
+
+        constructor(type: string, vertices: string) {
             this.type = type
-            this.level = null
-            this.offsetX = 0
-            this.offsetY = 0
-            this.offsetZ = 0
+            this.vertices = vertices
+            this.z = 0
             this.height = 0
-            this.direction = ""
-            this.eventId = ""
+            this.level = null
+            this.offsetX = null
+            this.offsetY = null
+            this.offsetZ = null
+            this.direction = null
+            this.eventId = null
         }
 
+        /**
+         * Basically a constructor for Trace from level file data
+         * @param rawTrace 
+         * @param world only pass null if you know what you're doing (e.g. in editor)
+         */
         static fromRaw(
             rawTrace: splitTime.level.file_data.Trace,
-            world: World
+            world: World | null = null
         ): splitTime.Trace {
-            var trace = new splitTime.Trace(rawTrace.type)
+            var trace = new splitTime.Trace(rawTrace.type, rawTrace.vertices)
+            trace.z = +rawTrace.z
+            trace.height = +rawTrace.height
             switch (trace.type) {
-                case splitTime.Trace.Type.SOLID:
-                    trace.height = +rawTrace.height
-                    break
                 case splitTime.Trace.Type.STAIRS:
-                    trace.direction = rawTrace.direction
+                    trace.direction = direction.interpret(rawTrace.direction)
                     break
                 case splitTime.Trace.Type.EVENT:
                     trace.eventId = rawTrace.event
                     break
                 case splitTime.Trace.Type.POINTER:
                 case splitTime.Trace.Type.TRANSPORT:
-                    trace.level = world.getLevel(rawTrace.level)
+                    trace.level = world ? world.getLevel(rawTrace.level) : null
                     trace.offsetX = +rawTrace.offsetX
                     trace.offsetY = +rawTrace.offsetY
                     trace.offsetZ = +rawTrace.offsetZ
                     break
             }
             return trace
+        }
+
+        getPointerOffset(): PointerOffset {
+            assert(!!this.level, "Pointer trace must have a level")
+            assert(!!this.offsetX || this.offsetX === 0, "Pointer trace must have offsetX")
+            assert(!!this.offsetY || this.offsetY === 0, "Pointer trace must have offsetY")
+            assert(!!this.offsetZ || this.offsetZ === 0, "Pointer trace must have offsetZ")
+            return this as PointerOffset
+        }
+
+        getLevel(): Level {
+            if (!this.level) {
+                throw new Error("Trace does not have a Level")
+            }
+            return this.level
         }
 
         getLocationId() {
@@ -60,7 +90,7 @@ namespace splitTime {
 
         static draw(
             traceStr: string,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             type: string,
             offsetPos?: { x: number; y: number } | undefined
         ) {
@@ -116,7 +146,7 @@ namespace splitTime {
 
         static drawColor(
             traceStr: string,
-            ctx: CanvasRenderingContext2D,
+            ctx: GenericCanvasRenderingContext2D,
             color: string | CanvasGradient,
             offsetPos = { x: 0, y: 0 }
         ) {
@@ -166,80 +196,28 @@ namespace splitTime {
             ctx.stroke()
         }
 
-        static calculateGradient(
-            traceStr: string,
-            ctx: CanvasRenderingContext2D,
-            direction: string
+        createStairsGradient(
+            ctx: GenericCanvasRenderingContext2D
         ): CanvasGradient {
-            var pointsArray = splitTime.Trace.extractArray(traceStr)
-            var minX = 100000
-            var minY = 100000
-            var maxX = 0
-            var maxY = 0
-            for (var i = 0; i < pointsArray.length; i++) {
-                var point = pointsArray[i]
+            const stairsExtremes = this.calculateStairsExtremes()
+            return ctx.createLinearGradient(
+                stairsExtremes.bottom.x, stairsExtremes.bottom.y,
+                stairsExtremes.top.x, stairsExtremes.top.y
+            )
+        }
 
-                if (point === null) {
-                    continue
-                }
-
-                if (i === 0) {
-                    ctx.beginPath()
-                    // TODO: if first point null?
-                    ctx.moveTo(point.x, point.y)
-                } else {
-                    ctx.lineTo(point.x, point.y)
-                }
-
-                if (point.x < minX) {
-                    minX = point.x
-                } else if (point.x > maxX) {
-                    maxX = point.x
-                }
-                if (point.y < minY) {
-                    minY = point.y
-                } else if (point.y > maxY) {
-                    maxY = point.y
-                }
+        calculateStairsExtremes(): { top: Vector2D, bottom: Vector2D } {
+            const points = Trace.extractArray(this.vertices)
+                .filter(v => v !== null)
+                .map(v => new Vector2D(v!.x, v!.y))
+            const polygon = new math.Polygon(points)
+            assert(this.direction !== null, "Stairs must have a direction")
+            const top = polygon.findPointToward(direction.toRadians(this.direction))
+            const bottom = polygon.findPointToward(direction.toRadians(this.direction) + Math.PI)
+            return {
+                top: top,
+                bottom: bottom
             }
-            ctx.closePath()
-
-            var xUnit = splitTime.direction.getXSign(direction)
-            var minXWeight = 1 + xUnit // for negative X, prefer starting right (weight 0 on minX)
-            var maxXWeight = 1 - xUnit // for positive X, prefer starting left (weight 0 on maxX)
-            var startX = (minXWeight * minX + maxXWeight * maxX) / 2
-
-            var yUnit = splitTime.direction.getYSign(direction)
-            var minYWeight = 1 + yUnit // for negative Y, prefer starting down (weight 0 on minY)
-            var maxYWeight = 1 - yUnit // for positive Y, prefer starting up (weight 0 on maxY)
-            var startY = (minYWeight * minY + maxYWeight * maxY) / 2
-
-            var checkingX = startX
-            var checkingY = startY
-
-            var x0 = null
-            var y0 = null
-            var x1 = null
-            var y1 = null
-            for (var iBound = 0; iBound < 100000; iBound++) {
-                if (ctx.isPointInPath(checkingX, checkingY)) {
-                    if (x0 === null) {
-                        x0 = checkingX
-                        y0 = checkingY
-                    }
-                } else {
-                    if (x0 !== null && y0 !== null) {
-                        x1 = checkingX
-                        y1 = checkingY
-                        return ctx.createLinearGradient(x0, y0, x1, y1)
-                    }
-                }
-
-                checkingX += xUnit
-                checkingY += yUnit
-            }
-
-            throw new Error("Could not create gradient")
         }
 
         static Type = {
@@ -277,7 +255,7 @@ namespace splitTime {
 
         static getSolidColor(height: number) {
             var g = Math.min(Math.max(0, +height), 255)
-            var b = 4 * g
+            var b = 0
             return "rgba(" + Trace.RColor.SOLID + ", " + g + ", " + b + ", 1)"
         }
 

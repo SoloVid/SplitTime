@@ -23,4 +23,6 @@ namespace splitTime.controls.keyboard.keycode {
     export const Z = 90
     export const X = 88
     export const C = 67
+
+    export const P = 80
 }

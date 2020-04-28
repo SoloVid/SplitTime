@@ -9,89 +9,25 @@ namespace splitTime {
         private readonly SCREEN_WIDTH: int
         private readonly SCREEN_HEIGHT: int
 
-        private readonly buffer: SLVD.Canvas
+        private readonly buffer: splitTime.Canvas
 
         constructor(
             private readonly camera: Camera,
-            private readonly ctx: CanvasRenderingContext2D
+            private readonly ctx: GenericCanvasRenderingContext2D
         ) {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
 
-            this.buffer = new SLVD.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
+            this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
         }
 
         render(level: Level) {
-            var screen = this.camera.getScreenCoordinates()
+            const screen = this.camera.getScreenCoordinates()
 
-            var counter = level.getRegion().getTimeMs() % COUNTER_BASE
-            //Light in dark
-            if (level.weather.darkness > 0) {
-                //Transparentize buffer
-                this.buffer.context.clearRect(
-                    0,
-                    0,
-                    this.SCREEN_WIDTH,
-                    this.SCREEN_HEIGHT
-                )
+            this.applyLighting(level, screen)
 
-                var bodies = level.getBodies()
-                for (const body of bodies) {
-                    if (body.lightIntensity > 0) {
-                        var xCoord = body.x - screen.x
-                        var yCoord = body.y - screen.y
-                        var grd = this.buffer.context.createRadialGradient(
-                            xCoord,
-                            yCoord,
-                            1,
-                            xCoord,
-                            yCoord,
-                            body.lightRadius
-                        )
-                        grd.addColorStop(
-                            0,
-                            "rgba(255, 255, 255, " +
-                                level.weather.darkness * body.lightIntensity +
-                                ")"
-                        )
-                        grd.addColorStop(1, "rgba(255, 255, 255, 0)")
-                        this.buffer.context.fillStyle = grd
-                        this.buffer.context.beginPath()
-                        this.buffer.context.arc(
-                            xCoord,
-                            yCoord,
-                            150,
-                            0,
-                            2 * Math.PI
-                        )
-                        this.buffer.context.closePath()
-                        this.buffer.context.fill()
-                    }
-                }
+            const counter = Math.round(level.getRegion().getTimeMs()) % COUNTER_BASE
 
-                //XOR lights placed with black overlay (the result being holes in the black)
-                this.buffer.context.globalCompositeOperation = "xor"
-                this.buffer.context.fillStyle =
-                    "rgba(0, 0, 0, " + level.weather.darkness + ")" //"#000000";
-                this.buffer.context.fillRect(
-                    0,
-                    0,
-                    this.SCREEN_WIDTH,
-                    this.SCREEN_HEIGHT
-                )
-
-                //Render buffer
-                this.ctx.drawImage(
-                    this.buffer.element,
-                    0,
-                    0,
-                    this.SCREEN_WIDTH,
-                    this.SCREEN_HEIGHT
-                )
-
-                //Return to default splitTime.image layering
-                this.buffer.context.globalCompositeOperation = "source-over"
-            }
             //Weather
             if (level.weather.isRaining) {
                 this.ctx.drawImage(
@@ -104,8 +40,8 @@ namespace splitTime {
             if (level.weather.isCloudy) {
                 var CLOUDS_WIDTH = 2560
                 var CLOUDS_HEIGHT = 480
-                var xPixelsShift = -SLVD.mod(counter - screen.x, CLOUDS_WIDTH)
-                var yPixelsShift = SLVD.mod(screen.y, CLOUDS_HEIGHT)
+                var xPixelsShift = -splitTime.mod(counter - screen.x, CLOUDS_WIDTH)
+                var yPixelsShift = splitTime.mod(screen.y, CLOUDS_HEIGHT)
                 this.ctx.globalAlpha = level.weather.cloudAlpha
                 this.drawTiled(
                     G.ASSETS.images.get(CLOUDS_IMAGE),
@@ -117,7 +53,7 @@ namespace splitTime {
             if (level.weather.lightningFrequency > 0) {
                 // TODO: tie to time rather than frames
                 if (
-                    SLVD.randomInt(splitTime.FPS * 60) <=
+                    splitTime.randomInt(splitTime.FPS * 60) <=
                     level.weather.lightningFrequency
                 ) {
                     this.ctx.fillStyle = "rgba(255, 255, 255, .75)"
@@ -137,8 +73,8 @@ namespace splitTime {
          * @param {number} top y in image to start tiling at
          */
         private drawTiled(image: HTMLImageElement, left: number, top: number) {
-            left = SLVD.mod(left, image.naturalWidth)
-            top = SLVD.mod(top, image.naturalHeight)
+            left = splitTime.mod(left, image.naturalWidth)
+            top = splitTime.mod(top, image.naturalHeight)
             // Draw upper left tile
             this.ctx.drawImage(
                 image,
@@ -198,6 +134,71 @@ namespace splitTime {
                     this.SCREEN_HEIGHT
                 )
             }
+        }
+
+        private applyLighting(level: Level, screen: { x: number; y: number }) {
+            //Transparentize buffer
+            this.buffer.context.clearRect(
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
+            //Fill with light
+            this.buffer.context.fillStyle = level.weather.ambientLight
+            this.buffer.context.fillRect(
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
+
+            var bodies = level.getBodies()
+            for (const body of bodies) {
+                if (body.lightIntensity > 0) {
+                    var xCoord = body.x - screen.x
+                    var yCoord = body.y - body.z - screen.y
+                    var grd = this.buffer.context.createRadialGradient(
+                        xCoord,
+                        yCoord,
+                        1,
+                        xCoord,
+                        yCoord,
+                        body.lightRadius
+                    )
+                    grd.addColorStop(
+                        0,
+                        "rgba(255, 255, 255, " +
+                            body.lightIntensity +
+                            ")"
+                    )
+                    grd.addColorStop(1, "rgba(255, 255, 255, 0)")
+                    this.buffer.context.fillStyle = grd
+                    this.buffer.context.beginPath()
+                    this.buffer.context.arc(
+                        xCoord,
+                        yCoord,
+                        150,
+                        0,
+                        2 * Math.PI
+                    )
+                    this.buffer.context.closePath()
+                    this.buffer.context.fill()
+                }
+            }
+
+            this.ctx.globalCompositeOperation = "multiply"
+            //Render buffer
+            this.ctx.drawImage(
+                this.buffer.element,
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
+
+            //Return to default splitTime.image layering
+            this.ctx.globalCompositeOperation = "source-over"
         }
     }
 }

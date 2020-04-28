@@ -14,15 +14,13 @@ namespace splitTime.body {
         bodyExt: any
         dir: any
         horizontal: collisions.Horizontal
-        rising: collisions.Rising
-        falling: collisions.Falling
+        vertical: collisions.Vertical
         constructor(body: Body) {
             this.body = body
             this.bodyExt = new BodyExt()
 
             this.horizontal = new collisions.Horizontal(this)
-            this.rising = new collisions.Rising(this)
-            this.falling = new collisions.Falling(this)
+            this.vertical = new collisions.Vertical(this)
         }
 
         static VERTICAL_FUDGE = 4
@@ -72,38 +70,21 @@ namespace splitTime.body {
         zeldaVerticalBump(maxDZ: number): number {
             this.ensureInRegion()
 
-            var actualDZ
             if (Math.abs(maxDZ) < 0.000001) {
                 // do nothing
                 return 0
-            } else if (maxDZ > 0) {
-                actualDZ = this.rising.zeldaVerticalRise(maxDZ)
-                return actualDZ
-            } else if (this.body.z > 0) {
-                actualDZ = this.falling.zeldaVerticalDrop(-maxDZ)
-                return actualDZ
+            }
+            if (maxDZ < 0 && this.body.z <= this.body.level.lowestLayerZ) {
+                // do nothing
+                return 0
             }
 
-            return 0
+            return this.vertical.zeldaVerticalMove(maxDZ)
         }
 
-        /**
-         *
-         * @param {Object<string, boolean>} levelIdSet
-         */
-        transportLevelIfApplicable(levelIdSet: { [s: string]: boolean }) {
-            var id = null
-            for (var key in levelIdSet) {
-                if (id !== null) {
-                    return
-                }
-                id = key
-            }
-            if (id === null) {
-                return
-            }
+        transportLevelIfApplicable() {
             var transporter = new splitTime.body.Transporter(this.body)
-            transporter.transportLevelIfApplicable(id)
+            transporter.transportLevelIfApplicable()
         }
     }
 }

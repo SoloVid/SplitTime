@@ -1,4 +1,4 @@
-namespace SLVD.bresenham {
+namespace splitTime.bresenham {
     export enum ReturnCode {
         EXIT_EARLY,
         CONTINUE

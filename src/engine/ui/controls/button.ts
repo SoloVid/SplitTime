@@ -1,10 +1,10 @@
 namespace splitTime.controls {
     export class Button {
         _bindings: { obsolete: boolean }
-        _downCallbacks: SLVD.RegisterCallbacks
-        _upCallbacks: SLVD.RegisterCallbacks
-        _onDown: (callback: () => SLVD.CallbackResult) => void
-        _onUp: (callback: () => SLVD.CallbackResult) => void
+        _downCallbacks: splitTime.RegisterCallbacks
+        _upCallbacks: splitTime.RegisterCallbacks
+        _onDown: (callback: () => splitTime.CallbackResult) => void
+        _onUp: (callback: () => splitTime.CallbackResult) => void
         _isDown: () => boolean
         constructor(
             onDown?: (callback: () => void) => void,
@@ -15,18 +15,18 @@ namespace splitTime.controls {
                 obsolete: true
             }
 
-            this._downCallbacks = new SLVD.RegisterCallbacks()
-            this._upCallbacks = new SLVD.RegisterCallbacks()
+            this._downCallbacks = new splitTime.RegisterCallbacks()
+            this._upCallbacks = new splitTime.RegisterCallbacks()
 
             var that = this
             this._onDown =
                 onDown ||
-                function(callback: () => SLVD.CallbackResult) {
+                function(callback: () => splitTime.CallbackResult) {
                     that._downCallbacks.register(callback)
                 }
             this._onUp =
                 onUp ||
-                function(callback: () => SLVD.CallbackResult) {
+                function(callback: () => splitTime.CallbackResult) {
                     that._upCallbacks.register(callback)
                 }
             this._isDown =
@@ -36,11 +36,11 @@ namespace splitTime.controls {
                 }
         }
 
-        onDown(callback: () => SLVD.CallbackResult) {
+        onDown(callback: () => splitTime.CallbackResult) {
             return this._onDown(callback)
         }
 
-        onUp(callback: () => SLVD.CallbackResult) {
+        onUp(callback: () => splitTime.CallbackResult) {
             return this._onUp(callback)
         }
 
@@ -58,7 +58,7 @@ namespace splitTime.controls {
 
             function runDownCallbacks() {
                 if (currentBindings.obsolete) {
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 }
                 that._downCallbacks.run()
                 return
@@ -66,7 +66,7 @@ namespace splitTime.controls {
 
             function runUpCallbacks() {
                 if (currentBindings.obsolete) {
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 }
                 that._upCallbacks.run()
                 return
@@ -97,7 +97,7 @@ namespace splitTime.controls {
                         isResolved = true
                         resolve()
                     }
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 })
             })
 
@@ -114,7 +114,7 @@ namespace splitTime.controls {
                         isResolved = true
                         resolve()
                     }
-                    return SLVD.STOP_CALLBACKS
+                    return splitTime.STOP_CALLBACKS
                 })
             })
 

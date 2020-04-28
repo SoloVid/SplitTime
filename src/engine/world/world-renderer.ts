@@ -6,8 +6,8 @@ namespace splitTime {
         private SCREEN_WIDTH: int
         private SCREEN_HEIGHT: int
 
-        private buffer: SLVD.Canvas
-        private snapshot: SLVD.Canvas
+        private buffer: splitTime.Canvas
+        private snapshot: splitTime.Canvas
 
         private readonly bodyRenderer: body.Renderer
         private readonly weatherRenderer: WeatherRenderer
@@ -18,7 +18,7 @@ namespace splitTime {
 
         constructor(
             private readonly camera: Camera,
-            private readonly see: CanvasRenderingContext2D,
+            private readonly see: GenericCanvasRenderingContext2D,
             private readonly currentLevelGetter: level_getter,
             private readonly playerBodyGetter: body_getter
         ) {
@@ -29,14 +29,14 @@ namespace splitTime {
             this.fadeIn = 0
             this.FADE_INCREMENT = 0.1
 
-            this.buffer = new SLVD.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
-            this.snapshot = new SLVD.Canvas(
+            this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
+            this.snapshot = new splitTime.Canvas(
                 this.SCREEN_WIDTH,
                 this.SCREEN_HEIGHT
             )
 
             this.bodyRenderer = new body.Renderer(this.camera)
-            this.weatherRenderer = new WeatherRenderer(this.camera, this.see)
+            this.weatherRenderer = new WeatherRenderer(this.camera, this.buffer.context)
         }
 
         renderBoardState(forceCalculate: boolean) {
@@ -135,7 +135,7 @@ namespace splitTime {
             if (splitTime.debug.ENABLED && splitTime.debug.DRAW_TRACES) {
                 this.snapshot.context.globalAlpha = 0.5
                 this.snapshot.context.drawImage(
-                    currentLevel.getDebugTraceCanvas(),
+                    currentLevel.getDebugTraceCanvas().element,
                     screen.x + xBackShift,
                     screen.y + yBackShift,
                     this.SCREEN_WIDTH - 2 * xBackShift,
