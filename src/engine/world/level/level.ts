@@ -2,6 +2,7 @@ namespace splitTime {
     export class Level {
         id: string
         private loader: LevelLoader
+        private loaded: boolean = false
         private events: { [id: string]: (triggeringBody: Body) => void }
         private enterFunction: (() => void) | null = null
         private exitFunction: (() => void) | null = null
@@ -141,9 +142,9 @@ namespace splitTime {
             })
         }
 
-        notifyTimeAdvance(delta: game_seconds) {
+        notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
             this.forEachBody(function(body) {
-                body.notifyTimeAdvance(delta)
+                body.notifyTimeAdvance(delta, absoluteTime)
             })
         }
 
@@ -191,14 +192,21 @@ namespace splitTime {
             }
         }
 
-        loadForPlay(world: World): Promise<any> {
-            return this.loader.loadForPlay(world)
+        loadForPlay(world: World): PromiseLike<void> {
+            return this.loader.loadForPlay(world).then(() => {
+                this.loaded = true
+            })
         }
 
-        unload() {
+        unload(): void {
             //TODO: give listeners a chance to clean up
 
             this.loader.unload()
+            this.loaded = false
+        }
+
+        isLoaded(): boolean {
+            return this.loaded
         }
     }
 }

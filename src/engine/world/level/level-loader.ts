@@ -163,7 +163,7 @@ namespace splitTime {
             this._addingProps = false
         }
 
-        async loadForPlay(world: World): Promise<any> {
+        async loadForPlay(world: World): Promise<void> {
             await this.loadPromise
 
             this.refetchBodies()

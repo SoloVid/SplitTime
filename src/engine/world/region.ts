@@ -51,9 +51,9 @@ namespace splitTime {
             }
         }
 
-        notifyTimeAdvance(delta: game_seconds) {
+        notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
             for (var iLevel = 0; iLevel < this.levels.length; iLevel++) {
-                this.levels[iLevel].notifyTimeAdvance(delta)
+                this.levels[iLevel].notifyTimeAdvance(delta, absoluteTime)
             }
         }
 

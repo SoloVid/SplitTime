@@ -11,6 +11,32 @@ namespace splitTime {
         mover: splitTime.body.Mover
         speechBox: splitTime.body.SpeechBox
 
+        drawable: splitTime.body.Drawable | null = null
+        lightIntensity = 0
+        lightRadius = 150
+        shadow = false
+
+        private _level: splitTime.Level | null = null
+        _x = 0
+        _y = 0
+        _z = 0
+        _time: game_ms = Number.NEGATIVE_INFINITY
+
+        childrenBolted: Body[] = []
+        childrenLoose: Body[] = []
+
+        dir = 3
+
+        GRAVITY = -1280
+        zVelocity = 0
+        height = 32
+
+        //The splitTime.Body's base is the collision area of the splitTime.Body
+        baseLength = 16
+        //Standard offset of the base is 0--that is, x=0 is centered and y=0 is at bottom
+        baseOffX = 0
+        baseOffY = 0
+
         // TODO: remove parameter when moving templates elsewhere
         constructor() {
             this.ref = nextRef++
@@ -55,13 +81,6 @@ namespace splitTime {
             return Math.round(this.baseLength / 2)
         }
 
-        drawable: splitTime.body.Drawable | null = null
-        lightIntensity = 0
-        lightRadius = 150
-        shadow = false
-
-        childrenBolted: Body[] = []
-        childrenLoose: Body[] = []
         addChild(child: Body, isBolted: boolean) {
             if (isBolted) {
                 if (this.childrenBolted.length === 0) {
@@ -105,20 +124,12 @@ namespace splitTime {
             this.staticTrace.push({ traceStr: traceStr, type: type })
         }
 
-        //The splitTime.Body's base is the collision area of the splitTime.Body
-        baseLength = 16
-        //Standard offset of the base is 0--that is, x=0 is centered and y=0 is at bottom
-        baseOffX = 0
-        baseOffY = 0
-
         _resortInBodyOrganizer() {
             if (this._level) {
                 this._level.notifyBodyMoved(this)
             }
         }
 
-        private _level: splitTime.Level | null = null
-        _x = 0
         getX() {
             return this._x
         }
@@ -136,7 +147,6 @@ namespace splitTime {
                 this._resortInBodyOrganizer()
             }
         }
-        _y = 0
         getY() {
             return this._y
         }
@@ -154,7 +164,6 @@ namespace splitTime {
                 this._resortInBodyOrganizer()
             }
         }
-        _z = 0
         getZ() {
             return this._z
         }
@@ -172,11 +181,6 @@ namespace splitTime {
                 this._resortInBodyOrganizer()
             }
         }
-        GRAVITY = -1280
-        zVelocity = 0
-        height = 32
-
-        dir = 3
 
         getLeft(): number {
             return this.getX() - this.baseLength / 2
@@ -283,12 +287,20 @@ namespace splitTime {
             }
         }
 
-        notifyTimeAdvance(delta: game_seconds) {
+        notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
+            const ZILCH = 0.00001
+            const cappedDelta = Math.min(delta, absoluteTime - this._time)
+            this._time = absoluteTime
+            // If we accidentally get into two different levels' time update loops,
+            // we don't want to advance more time
+            if (cappedDelta < ZILCH) {
+                return
+            }
+
             this.timeAdvanceListeners.run(delta)
 
             var level = this._level
-            if (level) {
-                const ZILCH = 0.00001
+            if (level && level.isLoaded()) {
                 if (this.baseLength > ZILCH) {
                     if (Math.abs(this.zVelocity) > ZILCH) {
                         var expectedDZ = this.zVelocity * delta

@@ -27,7 +27,7 @@ namespace splitTime {
         /**
          * STOP!!! This method should ONLY be called by the main game loop.
          */
-        async transition(level: Level): Promise<any> {
+        async transition(level: Level): Promise<void> {
             if (this.transitionInProgress) {
                 throw new Error(
                     "Level transition is already in progress. Cannot transition to " +

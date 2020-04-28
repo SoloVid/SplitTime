@@ -26,7 +26,7 @@ namespace splitTime {
 
             this.applyLighting(level, screen)
 
-            const counter = level.getRegion().getTimeMs() % COUNTER_BASE
+            const counter = Math.round(level.getRegion().getTimeMs()) % COUNTER_BASE
 
             //Weather
             if (level.weather.isRaining) {
