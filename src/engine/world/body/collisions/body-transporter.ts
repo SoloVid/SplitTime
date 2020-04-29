@@ -78,7 +78,8 @@ namespace splitTime.body {
                             xCheck,
                             yCheck,
                             zCheck,
-                            zCheck + 1
+                            zCheck + 1,
+                            true
                         )
 
                         const pointerTraces = cornerCollisionInfo.pointerTraces

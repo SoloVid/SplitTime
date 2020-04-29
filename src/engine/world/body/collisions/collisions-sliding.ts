@@ -44,7 +44,8 @@ namespace splitTime.body.collisions {
                     testX,
                     testY,
                     me.mover.body.z,
-                    me.mover.body.z + me.mover.body.height
+                    me.mover.body.z + me.mover.body.height,
+                    true
                 )
                 return !collisionInfo.containsSolid
             }

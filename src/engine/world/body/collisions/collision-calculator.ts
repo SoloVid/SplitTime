@@ -39,7 +39,8 @@ namespace splitTime {
             yPixels: number,
             startZ: number,
             zPixels: number,
-            ignoreBodies: splitTime.Body[] = []
+            ignoreBodies: splitTime.Body[] = [],
+            ignoreEvents: boolean = false
         ): ApiCollisionInfo {
             var collisionInfo = new InternalCollisionInfo(level)
             function handleFoundBody(otherBody: Body) {
@@ -74,7 +75,8 @@ namespace splitTime {
                     startY,
                     yPixels,
                     startZ,
-                    zPixels
+                    zPixels,
+                    ignoreEvents
                 )
                 collisionInfo.events = traceCollision.events
                 collisionInfo.targetLevel = traceCollision.targetLevel
@@ -141,7 +143,8 @@ namespace splitTime {
             startY: number,
             yPixels: number,
             startZ: number,
-            zPixels: number
+            zPixels: number,
+            ignoreEvents: boolean
         ): InternalCollisionInfo {
             var originCollisionInfo = new splitTime.level.traces.CollisionInfo()
             level
@@ -153,7 +156,8 @@ namespace splitTime {
                     Math.floor(startY),
                     Math.ceil(yPixels),
                     Math.floor(startZ),
-                    Math.ceil(startZ + zPixels)
+                    Math.ceil(startZ + zPixels),
+                    ignoreEvents
                 )
 
             const targetLevel = chooseTheOneOrDefault(originCollisionInfo.levels, level)

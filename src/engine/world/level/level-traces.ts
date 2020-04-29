@@ -291,7 +291,8 @@ namespace splitTime.level {
             startY: int,
             yPixels: int,
             minZ: int,
-            exMaxZ: int
+            exMaxZ: int,
+            ignoreEvents: boolean = false
         ) {
             const endY = startY + yPixels
             const endX = startX + xPixels
@@ -302,7 +303,8 @@ namespace splitTime.level {
                         x,
                         y,
                         minZ,
-                        exMaxZ
+                        exMaxZ,
+                        ignoreEvents
                     )
                 }
             }
@@ -317,7 +319,8 @@ namespace splitTime.level {
             x: int,
             y: int,
             minZ: int,
-            exMaxZ: int
+            exMaxZ: int,
+            ignoreEvents: boolean = false
         ) {
             for (
                 var iLayer = 0;
@@ -335,7 +338,8 @@ namespace splitTime.level {
                         iLayer,
                         layerZ,
                         Math.max(layerZ, minZ),
-                        Math.min(nextLayerZ, exMaxZ)
+                        Math.min(nextLayerZ, exMaxZ),
+                        ignoreEvents
                     )
                 }
             }
@@ -348,7 +352,8 @@ namespace splitTime.level {
             layer: int,
             layerZ: int,
             minZ: int,
-            exMaxZ: int
+            exMaxZ: int,
+            ignoreEvents: boolean
         ) {
             var imageData = this.layerFuncData[layer]
             // This operation needed to be inline to be performant
@@ -371,6 +376,9 @@ namespace splitTime.level {
                         }
                         break
                     case splitTime.Trace.RColor.EVENT:
+                        if (ignoreEvents) {
+                            break
+                        }
                         var eventId = this.getEventIdFromPixel(r, g, b, a)
                         if (!collisionInfo.events[eventId]) {
                             collisionInfo.events[eventId] = new traces.ZRange(
