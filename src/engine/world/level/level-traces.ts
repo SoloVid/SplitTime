@@ -379,6 +379,7 @@ namespace splitTime.level {
                         if (ignoreEvents) {
                             break
                         }
+                        // TODO: check event height
                         var eventId = this.getEventIdFromPixel(r, g, b, a)
                         if (!collisionInfo.events[eventId]) {
                             collisionInfo.events[eventId] = new traces.ZRange(
@@ -399,6 +400,9 @@ namespace splitTime.level {
                     case splitTime.Trace.RColor.POINTER:
                         isOtherLevel = true
                         var trace = this.getPointerTraceFromPixel(r, g, b, a)
+                        if (!isOverlap(minZ, exMaxZ - minZ, trace.z, trace.height)) {
+                            break
+                        }
                         assert(!!trace.level, "Pointer trace has no level")
                         collisionInfo.pointerTraces[trace.level.id] = trace
                         collisionInfo.levels[trace.level.id] = trace.level
