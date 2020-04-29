@@ -1,9 +1,11 @@
 namespace splitTime {
+    type EventCallback = ((triggeringBody: Body) => void) | ((triggeringBody: Body, eventId: string) => void)
+
     export class Level {
         id: string
         private loader: LevelLoader
         private loaded: boolean = false
-        private events: { [id: string]: (triggeringBody: Body) => void }
+        private events: { [id: string]: EventCallback }
         private enterFunction: (() => void) | null = null
         private exitFunction: (() => void) | null = null
         private positions: { [id: string]: Position }
@@ -98,7 +100,7 @@ namespace splitTime {
             this.exitFunction = fun
         }
 
-        registerEvent(eventId: string, callback: (triggeringBody: Body) => void) {
+        registerEvent(eventId: string, callback: EventCallback) {
             this.events[eventId] = callback
         }
 
@@ -127,7 +129,7 @@ namespace splitTime {
                         'Event "' + eventId + '" not found for level ' + that.id
                     )
                 }
-            return fun(triggeringBody)
+            return fun(triggeringBody, eventId)
         }
 
         runEvents(eventIds: string[], triggeringBody: Body) {

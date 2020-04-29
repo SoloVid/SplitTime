@@ -1,4 +1,12 @@
 namespace splitTime.agent {
+    class EngagedLadder {
+        constructor(
+            public readonly eventId: string,
+            public location: ILevelLocation2,
+            public readonly direction: direction_t
+        ) {}
+    }
+
     export class ControlledCollisionMovement implements splitTime.TimeNotified {
         private body: splitTime.Body
         private targetBoardX: number | null = null
@@ -6,7 +14,7 @@ namespace splitTime.agent {
         private targetScreenX: number | null = null
         private targetScreenY: number | null = null
         private targetDirection: number | null = null
-        private ladderLocation: ILevelLocation2 | null = null
+        private ladder: EngagedLadder | null = null
 
         public constructor(body: splitTime.Body) {
             this.body = body
@@ -32,21 +40,37 @@ namespace splitTime.agent {
             this.resetTarget()
         }
 
-        setLadderLocation(ladderLocation: ILevelLocation2) {
-            this.ladderLocation = ladderLocation
+        setLadder(eventId: string, direction: direction_t, keepExistingDirection: boolean = true) {
+            if (keepExistingDirection && this.ladder) {
+                this.ladder.location = level.copyLocation(this.body)
+            } else {
+                this.ladder = new EngagedLadder(eventId, level.copyLocation(this.body), direction)
+            }
         }
 
-        private checkLadderLocation() {
-            if (this.ladderLocation !== null) {
-                if (!level.areLocationsEquivalent(this.ladderLocation, this.body)) {
-                    this.ladderLocation = null
+        private checkLadder() {
+            if (this.ladder !== null) {
+                if (!level.areLocationsEquivalent(this.ladder.location, this.body)) {
+                    // FTODO: should this check more/different part of Body than base?
+                    const baseCollisionCheck = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+                        this.body.level,
+                        this.body.x - this.body.halfBaseLength, this.body.baseLength,
+                        this.body.y - this.body.halfBaseLength, this.body.baseLength,
+                        this.body.z, 1,
+                        [this.body]
+                    )
+                    if (baseCollisionCheck.events.includes(this.ladder.eventId)) {
+                        this.ladder.location = level.copyLocation(this.body)
+                    } else {
+                        this.ladder = null
+                    }
                 }
             }
         }
 
         notifyTimeAdvance(delta: splitTime.game_seconds) {
-            this.checkLadderLocation()
-            if (this.ladderLocation !== null) {
+            this.checkLadder()
+            if (this.ladder !== null) {
                 this.body.zVelocity = 0
             }
 
@@ -57,10 +81,10 @@ namespace splitTime.agent {
                     this.sprite.requestStance("walk", this.body.dir)
                 }
                 let dz = 0
-                if (this.ladderLocation !== null) {
-                    if (direction.areWithin90Degrees(this.body.dir, direction.N)) {
+                if (this.ladder !== null) {
+                    if (direction.areWithin90Degrees(this.body.dir, this.ladder.direction)) {
                         dz = this.body.mover.vertical.zeldaVerticalMove(this.body.spd * delta / 2)
-                    } else if (direction.areWithin90Degrees(this.body.dir, direction.S)) {
+                    } else if (!direction.areWithin90Degrees(this.body.dir, this.ladder.direction, 2)) {
                         dz = this.body.mover.vertical.zeldaVerticalMove(-this.body.spd * delta / 2)
                     }
                 }
