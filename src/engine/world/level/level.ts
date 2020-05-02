@@ -5,16 +5,18 @@ namespace splitTime {
         id: string
         private loader: LevelLoader
         private loaded: boolean = false
-        private events: { [id: string]: EventCallback }
+        private events: { [id: string]: EventCallback } = {}
         private enterFunction: (() => void) | null = null
         private exitFunction: (() => void) | null = null
-        private positions: { [id: string]: Position }
-        region: Region | null
-        bodies: Body[]
-        background: string
-        _cellGrid: level.CellGrid | null
-        weather: WeatherSettings
-        _props: Body[]
+        private positions: { [id: string]: Position } = {}
+        region: Region | null = null
+        bodies: Body[] = []
+        background: string = ""
+        backgroundOffsetX: int = 0
+        backgroundOffsetY: int = 0
+        _cellGrid: level.CellGrid | null = null
+        weather: WeatherSettings = new WeatherSettings()
+        _props: Body[] = []
         type: "action" | null = null
         width: int = 0
         height: int = 0
@@ -25,18 +27,6 @@ namespace splitTime {
         constructor(levelId: string) {
             this.id = levelId
             this.loader = new LevelLoader(this)
-            this.events = {}
-            this.positions = {}
-            this.region = null
-            this.bodies = []
-            this.background = ""
-
-            // this._bodyOrganizer = new splitTime.Level.BodyOrganizer();
-            this._cellGrid = null
-
-            this.weather = new WeatherSettings()
-
-            this._props = []
         }
 
         /**

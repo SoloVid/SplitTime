@@ -39,13 +39,12 @@ $(document).ready(function() {
             if(layer === editingThing) {
                 levelObject.layers.splice(iLayer, 1);
                 iLayer--;
-            } else {
-                for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
-                    if(layer.traces[iTrace] === editingThing) {
-                        layer.traces.splice(iTrace, 1);
-                        iTrace--;
-                    }
-                }
+            }
+        }
+        for(var iTrace = 0; iTrace < levelObject.traces.length; iTrace++) {
+            if(levelObject.traces[iTrace] === editingThing) {
+                levelObject.traces.splice(iTrace, 1);
+                iTrace--;
             }
         }
         for(var iProp = 0; iProp < levelObject.props.length; iProp++) {
@@ -141,7 +140,23 @@ function showEditorLevel() {
             key: "region"
         },
         {
+            key: "width",
+            type: "number"
+        },
+        {
+            key: "height",
+            type: "number"
+        },
+        {
             key: "background"
+        },
+        {
+            key: "backgroundOffsetX",
+            type: "number"
+        },
+        {
+            key: "backgroundOffsetY",
+            type: "number"
         }
     ]);
 }

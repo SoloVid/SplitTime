@@ -105,8 +105,8 @@ namespace splitTime {
                 //Note: this single call on a perform test is a huge percentage of CPU usage.
                 this.snapshot.context.drawImage(
                     G.ASSETS.images.get(currentLevel.getBackgroundImage()),
-                    screen.x + xBackShift,
-                    screen.y + yBackShift,
+                    screen.x + xBackShift + currentLevel.backgroundOffsetX,
+                    screen.y + yBackShift + currentLevel.backgroundOffsetY,
                     this.SCREEN_WIDTH - 2 * xBackShift,
                     this.SCREEN_HEIGHT - 2 * yBackShift,
                     xBackShift,

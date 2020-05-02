@@ -23,9 +23,8 @@ namespace splitTime {
 
             this.fileData = levelData
             this.level.type = levelData.type
-            // this.width = levelData.width || 0;
-            // this.height = levelData.height || 0;
-            // this.yWidth = levelData.yWidth || 0;
+            this.level.width = levelData.width || 0;
+            this.level.height = levelData.height || 0;
 
             this.level.lowestLayerZ = 0
             this.level.highestLayerZ = 0
@@ -38,29 +37,17 @@ namespace splitTime {
                 }
             }
 
-            var that = this
-            function onLoadImage(backgroundImg: {
-                height: number
-                width: number
-            }) {
-                if (backgroundImg.height > that.level.height) {
-                    that.level.height = backgroundImg.height
-                    that.level.yWidth = that.level.height + that.level.highestLayerZ
-                }
-                if (backgroundImg.width > that.level.width) {
-                    that.level.width = backgroundImg.width
-                }
-
-                that.level._cellGrid = new level.CellGrid(that.level)
-            }
+            this.level.yWidth = this.level.height + this.level.highestLayerZ
+            this.level._cellGrid = new level.CellGrid(this.level)
 
             this.level.background = levelData.background
             if (this.level.background) {
                 var loadProm = G.ASSETS.images
                     .load(this.level.background)
-                    .then(onLoadImage)
                 levelLoadPromises.push(loadProm)
             }
+            this.level.backgroundOffsetX = levelData.backgroundOffsetX
+            this.level.backgroundOffsetY = levelData.backgroundOffsetY
 
             //Pull positions from file
             for (var i = 0; i < levelData.positions.length; i++) {

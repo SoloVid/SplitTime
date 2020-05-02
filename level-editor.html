@@ -19,7 +19,7 @@
             </ul>
         </div>
         <div id="editorTools">
-            <div id="layers" v-bind:style="{ width: containerWidth + 'px', height: containerHeight + 'px' }">
+            <div id="layers" v-bind:style="{ width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }">
                 <img v-if="!!backgroundSrc" class="background" v-bind:src="backgroundSrc" v-bind:style="{ left: leftPadding + 'px', top: topPadding + 'px' }"/>
                 <rendered-layer
                         v-for="(layer, layerIndex) in level.layers"
@@ -27,8 +27,8 @@
                         v-bind:level="level"
                         v-bind:layer="layer"
                         v-bind:index="layerIndex"
-                        v-bind:width="levelWidth"
-                        v-bind:height="levelHeight"
+                        v-bind:width="level.width"
+                        v-bind:height="level.height"
                         v-bind:is-active="layerIndex === activeLayer"
                 ></rendered-layer>
             </div>

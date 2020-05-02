@@ -1,16 +1,14 @@
 var vueApp = new Vue({
-	el: '#app',
-	data: {
-	    info: {
-	        x: undefined,
+    el: '#app',
+    data: {
+        info: {
+            x: undefined,
             y: undefined,
             z: undefined
         },
-		level: levelObject,
-		levelWidth: 0,
-		levelHeight: 0,
-		activeLayer: 0,
-		traceOptions: [
+        level: levelObject,
+        activeLayer: 0,
+        traceOptions: [
             {
                 type: splitTime.Trace.Type.SOLID,
                 color: "rgba(0, 0, 255, .7)",
@@ -47,35 +45,35 @@ var vueApp = new Vue({
                 help: "Link to another level regardless of what's on the other side. Note: You'll want to use opposite values for pairs of these traces, but be careful not to overlap the traces and leave enough room for the maximum expected base between."
             }
         ]
-	},
+    },
     computed: {
-	    backgroundSrc: function() {
+        backgroundSrc: function() {
             return imgSrc(this.level.background);
         },
         containerWidth: function() {
-	        return this.levelWidth + 2*EDITOR_PADDING;
+            return this.level.width + 2*EDITOR_PADDING;
         },
         containerHeight: function() {
             var addedHeight = this.level.layers.length > 0 ? this.level.layers[this.level.layers.length - 1].z : 0;
-            return this.levelHeight + 2*EDITOR_PADDING + addedHeight;
+            return this.level.height + 2*EDITOR_PADDING + addedHeight;
         },
         leftPadding: function() {
-	        return EDITOR_PADDING;
+            return EDITOR_PADDING + this.level.backgroundOffsetX;
         },
         topPadding: function() {
-	        return EDITOR_PADDING;
+            return EDITOR_PADDING + this.level.backgroundOffsetY;
         }
     },
-	methods: {
-	    selectModeOption: function(mode) {
-	        setMode(mode);
+    methods: {
+        selectModeOption: function(mode) {
+            setMode(mode);
         },
-		selectTraceOption: function(type) {
+        selectTraceOption: function(type) {
             typeSelected = type;
             setMode("trace");
         },
-		createLayer: function() {
-	        addNewLayer();
-		}
-	}
+        createLayer: function() {
+            addNewLayer();
+        }
+    }
 });

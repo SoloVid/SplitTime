@@ -3,7 +3,11 @@ namespace splitTime.level {
         fileName: string
         type: "action"
         region: string
+        width: int
+        height: int
         background: string
+        backgroundOffsetX: int
+        backgroundOffsetY: int
         traces: file_data.Trace[]
         props: file_data.Prop[]
         positions: file_data.Position[]

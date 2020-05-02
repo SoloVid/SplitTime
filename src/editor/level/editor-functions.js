@@ -203,16 +203,6 @@ function downloadFile() {
     document.body.removeChild(pom);
 }
 
-function resizeBoardCheck(imgEl) {
-    var layerWidth = imgEl.width;
-    var layerHeight = imgEl.height;
-
-    if(layerWidth > vueApp.levelWidth || layerHeight > vueApp.levelHeight) {
-        vueApp.levelWidth = layerWidth;
-        vueApp.levelHeight = layerHeight;
-    }
-}
-
 function getPixelsPerPixel() {
     return levelObject.type === "TRPG" ? 32 : 1;
 }
@@ -231,7 +221,11 @@ function createLevel(type) {
 
     levelObject = {
         region: "",
+        width: 640,
+        height: 480,
         background: "",
+        backgroundOffsetX: 0,
+        backgroundOffsetY: 0,
         type: type,
         layers: [],
         traces: [],

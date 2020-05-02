@@ -50,12 +50,6 @@ function setupEventHandlers() {
         event.preventDefault();
     });
 
-    setInterval(function(event) {
-        if(document.getElementsByClassName("background").length > 0) {
-            resizeBoardCheck(document.getElementsByClassName("background")[0]);
-        }
-    }, 1000);
-
     $(document).keydown(function(event) {
         switch (event.target.tagName.toLowerCase()) {
             case "input":
