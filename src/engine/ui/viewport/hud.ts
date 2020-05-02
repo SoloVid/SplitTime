@@ -1,23 +1,24 @@
 namespace splitTime.ui {
-    type render_func = (ctx: GenericCanvasRenderingContext2D) => void
-    type renderer = render_func | { render: render_func }
+    type RenderFunction = (view: View) => void
+    export type Renderer = { render: RenderFunction }
+    type AnyRenderer = RenderFunction | Renderer
 
     export class HUD {
-        private renderCallbacks: renderer[] = []
+        private renderCallbacks: AnyRenderer[] = []
 
         getRendererCount() {
             return this.renderCallbacks.length
         }
 
-        pushRenderer(callback: renderer) {
+        pushRenderer(callback: AnyRenderer) {
             this.renderCallbacks.push(callback)
         }
 
-        unshiftRenderer(callback: renderer) {
+        unshiftRenderer(callback: AnyRenderer) {
             this.renderCallbacks.unshift(callback)
         }
 
-        removeRenderer(callback: renderer) {
+        removeRenderer(callback: AnyRenderer) {
             for (var i = this.renderCallbacks.length - 1; i >= 0; i--) {
                 if (this.renderCallbacks[i] === callback) {
                     this.renderCallbacks.splice(i, 1)
@@ -25,13 +26,13 @@ namespace splitTime.ui {
             }
         }
 
-        render(ctx: GenericCanvasRenderingContext2D) {
+        render(view: View) {
             for (var i = 0; i < this.renderCallbacks.length; i++) {
                 var renderer = this.renderCallbacks[i]
                 if (typeof renderer === "function") {
-                    renderer(ctx)
+                    renderer(view)
                 } else if (typeof renderer.render === "function") {
-                    renderer.render(ctx)
+                    renderer.render(view)
                 }
             }
         }

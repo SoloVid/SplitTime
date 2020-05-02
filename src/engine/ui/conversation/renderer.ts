@@ -70,17 +70,14 @@ namespace splitTime.conversation {
             }
         }
 
-        /**
-         * @param {GenericCanvasRenderingContext2D} ctx
-         */
-        render(ctx: GenericCanvasRenderingContext2D) {
+        render(view: ui.View) {
             for (var i = 0; i < this.dialogDrawings.length; i++) {
                 // TODO: visibility
                 var drawing = this.dialogDrawings[i]
                 var dialog = drawing.dialog
                 var location = dialog.getLocation()
                 this.sayFromBoardFocalPoint(
-                    ctx,
+                    view.see,
                     {
                         x: location.getX(),
                         y: location.getY(),

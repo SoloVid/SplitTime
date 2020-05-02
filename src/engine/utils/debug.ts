@@ -63,11 +63,11 @@ namespace splitTime.debug {
         debugDiv.innerHTML = table
     }
 
-    export function renderCanvas(ctx: GenericCanvasRenderingContext2D) {
+    export function renderCanvas(view: ui.View) {
         var FONT_SIZE = 16
         var SPACING = 5
-        ctx.textBaseline = "alphabetic"
-        ctx.font = FONT_SIZE + "px monospace"
+        view.see.textBaseline = "alphabetic"
+        view.see.font = FONT_SIZE + "px monospace"
 
         const lines: string[] = []
         let width = 0
@@ -75,17 +75,17 @@ namespace splitTime.debug {
         for (var key in debugInfo) {
             var line = key + ": " + debugInfo[key].value
             lines.push(line)
-            const metrics = ctx.measureText(line)
+            const metrics = view.see.measureText(line)
             width = Math.max(width, metrics.width + 2 * SPACING)
             height += FONT_SIZE + SPACING
         }
-        ctx.fillStyle = "rgba(100, 100, 100, 0.4)"
-        ctx.fillRect(0, 0, width, height)
+        view.see.fillStyle = "rgba(100, 100, 100, 0.4)"
+        view.see.fillRect(0, view.height - height, width, height)
 
-        ctx.fillStyle = "#FFFFFF"
-        var y = 2 * SPACING + FONT_SIZE / 2
+        view.see.fillStyle = "#FFFFFF"
+        var y = view.height - height + (2 * SPACING + FONT_SIZE / 2)
         for (const line of lines) {
-            ctx.fillText(line, SPACING, y)
+            view.see.fillText(line, SPACING, y)
             y += FONT_SIZE + SPACING
         }
     }
