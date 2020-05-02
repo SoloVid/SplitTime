@@ -52,18 +52,9 @@ namespace splitTime {
 
             const screen = this.camera.getScreenCoordinates()
 
-            //Black out screen (mainly for the case of board being smaller than the screen)
-            this.buffer.context.fillStyle = "#000000"
-            this.buffer.context.fillRect(
-                0,
-                0,
-                this.SCREEN_WIDTH,
-                this.SCREEN_HEIGHT
-            )
-
             this.bodyRenderer.notifyNewFrame(screen, this.snapshot.context)
             var bodies = currentLevel.getBodies()
-            var playerBody = this.playerBodyGetter()        
+            var playerBody = this.playerBodyGetter()
 
             for (var iBody = 0; iBody < bodies.length; iBody++) {
                 var body = bodies[iBody]
@@ -115,6 +106,15 @@ namespace splitTime {
                     this.SCREEN_HEIGHT - 2 * yBackShift
                 )
             }
+
+            // Fill in the rest of the background with black (mainly for the case of board being smaller than the screen)
+            this.snapshot.context.fillStyle = "#000000"
+            this.snapshot.context.fillRect(
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
 
             this.snapshot.context.globalCompositeOperation = "source-over"
 
