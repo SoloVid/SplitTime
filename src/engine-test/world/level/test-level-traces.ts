@@ -9,7 +9,7 @@ namespace splitTime.level {
         cubeTrace.z = 10
         cubeTrace.height = 10
 
-        var levelTraces = new Traces([cubeTrace], 30, 30);
+        var levelTraces = new Traces([cubeTrace], 30, 30)
 
         // Pixel by pixel
         for (let x = 0; x < 30; x++) {
@@ -76,7 +76,7 @@ namespace splitTime.level {
         stairsTrace.height = 10
         stairsTrace.direction = direction.interpret("E")
 
-        var levelTraces = new Traces([stairsTrace], 30, 30);
+        var levelTraces = new Traces([stairsTrace], 30, 30)
 
         for (let x = 0; x < 30; x++) {
             for (let y = 0; y < 30; y++) {
@@ -113,7 +113,7 @@ namespace splitTime.level {
         stairsTrace.height = 10
         stairsTrace.direction = direction.interpret("E")
 
-        var levelTraces = new Traces([stairsTrace, cubeTrace], 30, 30);
+        var levelTraces = new Traces([stairsTrace, cubeTrace], 30, 30)
 
         for (let x = 0; x < 30; x++) {
             for (let y = 0; y < 30; y++) {
@@ -148,7 +148,7 @@ namespace splitTime.level {
         groundTrace.height = 0
 
         // Unfortunately, the order is important here at the present
-        var levelTraces = new Traces([groundTrace], 30, 30);
+        var levelTraces = new Traces([groundTrace], 30, 30)
 
         // Pixel by pixel
         for (let x = 0; x < 30; x++) {
@@ -181,7 +181,7 @@ namespace splitTime.level {
         groundTrace.height = 0
 
         // Unfortunately, the order is important here at the present
-        var levelTraces = new Traces([cubeTrace, groundTrace], 30, 30);
+        var levelTraces = new Traces([cubeTrace, groundTrace], 30, 30)
 
         // Pixel by pixel
         for (let x = 0; x < 30; x++) {

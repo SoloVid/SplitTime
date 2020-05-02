@@ -49,6 +49,7 @@ namespace splitTime.level {
 
             const holderCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
             const holderCtx = holderCanvas.context
+            const extraBuffer = new splitTime.Canvas(levelWidth, levelYWidth)
 
             let debugTraceCtx = null
             if (splitTime.debug.ENABLED) {
@@ -88,7 +89,7 @@ namespace splitTime.level {
                 // This operation is safe because there should be a sentinel
                 const nextLayerZ = this.layerZs[iLayer + 1]
 
-                holderCtx.translate(0.5, 0.5)
+                // holderCtx.translate(0.5, 0.5)
 
                 const existingGCO = holderCtx.globalCompositeOperation
                 // The operation we want here is to take the brighter of the pixels.
@@ -97,18 +98,18 @@ namespace splitTime.level {
                 // in all three major browsers I tried.
                 // holderCtx.globalCompositeOperation = "lighten"
                 for (const trace of tracesSortedFromBottomToTop) {
-                    this.drawPartialSolidTrace(trace, holderCtx, layerZ, nextLayerZ)
+                    this.drawPartialSolidTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ)
                 }
                 holderCtx.globalCompositeOperation = existingGCO
                 // We are drawing these in a separate loop because in the future
                 // we want these to be additively drawn while the solids are drawn normally
                 for (const trace of this.traces) {
-                    this.drawPartialSpecialTrace(trace, holderCtx, layerZ, nextLayerZ)
+                    this.drawPartialSpecialTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ)
                 }
 
                 // TODO: traces related to props
 
-                holderCtx.translate(-0.5, -0.5)
+                // holderCtx.translate(-0.5, -0.5)
 
                 this.layerFuncData[iLayer] = holderCtx.getImageData(
                     0,
@@ -157,7 +158,7 @@ namespace splitTime.level {
             return newZArray.sort((a, b) => a - b)
         }
 
-        private drawPartialSolidTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
+        private drawPartialSolidTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, extraBuffer: splitTime.Canvas, minZ: int, exMaxZ: int): void {
             const maxHeight = exMaxZ - minZ
             if (trace.height > 0 && !isOverlap(trace.z, trace.height, minZ, maxHeight)) {
                 return
@@ -173,16 +174,16 @@ namespace splitTime.level {
             const noColor = "rgba(0, 0, 0, 0)"
             switch (trace.type) {
                 case splitTime.Trace.Type.SOLID:
-                    splitTime.Trace.drawColor(
-                        trace.vertices,
+                    trace.drawColor(
                         holderCtx,
+                        extraBuffer,
                         topColor
                     )
                     break
                 case splitTime.Trace.Type.GROUND:
-                    splitTime.Trace.drawColor(
-                        trace.vertices,
+                    trace.drawColor(
                         holderCtx,
+                        extraBuffer,
                         groundColor
                     )
                     break
@@ -198,9 +199,9 @@ namespace splitTime.level {
                         const endFraction = stairsTopRelativeToTrace / trace.height
                         gradient.addColorStop(endFraction, topColor)
 
-                        splitTime.Trace.drawColor(
-                            trace.vertices,
+                        trace.drawColor(
                             holderCtx,
+                            extraBuffer,
                             gradient
                         )
                     }
@@ -208,7 +209,7 @@ namespace splitTime.level {
             }
         }
 
-        private drawPartialSpecialTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, minZ: int, exMaxZ: int): void {
+        private drawPartialSpecialTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, extraBuffer: splitTime.Canvas, minZ: int, exMaxZ: int): void {
             if (!isOverlap(trace.z, trace.height, minZ, exMaxZ - minZ)) {
                 return
             }
@@ -224,9 +225,9 @@ namespace splitTime.level {
                     const functionColor = splitTime.Trace.getEventColor(
                         eventIntId
                     )
-                    splitTime.Trace.drawColor(
-                        trace.vertices,
+                    trace.drawColor(
                         holderCtx,
+                        extraBuffer,
                         functionColor
                     )
                     break
@@ -236,9 +237,9 @@ namespace splitTime.level {
                     const pointerColor = splitTime.Trace.getPointerColor(
                         pointerIntId
                     )
-                    splitTime.Trace.drawColor(
-                        trace.vertices,
+                    trace.drawColor(
                         holderCtx,
+                        extraBuffer,
                         pointerColor
                     )
                     break
@@ -251,9 +252,9 @@ namespace splitTime.level {
                     const transportColor = splitTime.Trace.getEventColor(
                         transportIntId
                     )
-                    splitTime.Trace.drawColor(
-                        trace.vertices,
+                    trace.drawColor(
                         holderCtx,
+                        extraBuffer,
                         transportColor
                     )
                     break

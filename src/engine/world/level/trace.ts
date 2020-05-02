@@ -88,16 +88,6 @@ namespace splitTime {
             )
         }
 
-        static draw(
-            traceStr: string,
-            ctx: GenericCanvasRenderingContext2D,
-            type: string,
-            offsetPos?: { x: number; y: number } | undefined
-        ) {
-            var color = splitTime.Trace.getColor(type)
-            return splitTime.Trace.drawColor(traceStr, ctx, color, offsetPos)
-        }
-
         static extractArray(
             traceStr: string
         ): ({
@@ -144,56 +134,15 @@ namespace splitTime {
             return pointsArr
         }
 
-        static drawColor(
-            traceStr: string,
-            ctx: GenericCanvasRenderingContext2D,
+        drawColor(
+            target: GenericCanvasRenderingContext2D,
+            extraBuffer: splitTime.Canvas,
             color: string | CanvasGradient,
             offsetPos = { x: 0, y: 0 }
         ) {
-            ctx.strokeStyle = color
-            ctx.fillStyle = ctx.strokeStyle
-
-            var pointsArray = splitTime.Trace.extractArray(traceStr)
-            var newX, newY
-
-            ctx.beginPath()
-
-            if (
-                !pointsArray ||
-                pointsArray.length === 0 ||
-                pointsArray[0] === null
-            ) {
-                throw new Error(
-                    'Trace string "' +
-                        traceStr +
-                        "\" doesn't have a valid point to begin with"
-                )
-            }
-
-            newX = pointsArray[0].x + offsetPos.x
-            newY = pointsArray[0].y + offsetPos.y
-
-            ctx.moveTo(newX, newY)
-
-            // ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
-            ctx.fillRect(newX - 1, newY - 1, 1, 1)
-
-            for (var k = 1; k < pointsArray.length; k++) {
-                const point = pointsArray[k]
-                if (point === null) {
-                    ctx.closePath()
-                    // ctx.stroke();
-                    ctx.fill()
-                } else {
-                    newX = point.x + offsetPos.x
-                    newY = point.y + offsetPos.y
-
-                    ctx.lineTo(newX, newY)
-                    // ctx.fillRect(newX - 0.5, newY - 0.5, 1, 1);
-                    ctx.fillRect(newX - 1, newY - 1, 1, 1)
-                }
-            }
-            ctx.stroke()
+            const pointsArray = splitTime.Trace.extractArray(this.vertices)
+                .map(t => t === null ? null : new Coordinates2D(t.x + offsetPos.x, t.y + offsetPos.y))
+            utils.drawShapeOpaque(pointsArray, target, extraBuffer, color)
         }
 
         createStairsGradient(
