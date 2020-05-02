@@ -152,6 +152,8 @@ namespace splitTime {
                 this.SCREEN_HEIGHT
             )
 
+            this.buffer.context.globalCompositeOperation = "lighter"
+
             var bodies = level.getBodies()
             for (const body of bodies) {
                 if (body.lightIntensity > 0) {
@@ -185,6 +187,9 @@ namespace splitTime {
                     this.buffer.context.fill()
                 }
             }
+
+            // Return to default
+            this.buffer.context.globalCompositeOperation = "source-over"
 
             ctx.globalCompositeOperation = "multiply"
             //Render buffer

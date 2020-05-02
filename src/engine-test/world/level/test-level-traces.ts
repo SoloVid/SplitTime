@@ -169,7 +169,6 @@ namespace splitTime.level {
     })
 
     // This test is intended to cover ground mixed with other stuff
-    // This test is currently failing, presumably because of weird compositing issues?
     splitTime.test.scenario(levelTracesTests, "Collisions with ground and cube", t => {
         const squarePoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
         const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
