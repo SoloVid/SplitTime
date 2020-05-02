@@ -398,7 +398,7 @@ namespace splitTime {
                     if (Math.abs(this.zVelocity) > ZILCH) {
                         var expectedDZ = this.zVelocity * delta
                         var actualDZ = this.mover.zeldaVerticalBump(expectedDZ)
-                        if (Math.abs(actualDZ) <= ZILCH) {
+                        if (Math.abs(actualDZ) < Math.abs(expectedDZ)) {
                             this.zVelocity = 0
                         }
                     }
