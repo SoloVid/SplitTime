@@ -14,7 +14,7 @@ $(document).ready(function() {
     });
 
     $fields.on("keyup", "input", function(event) {
-        if(event.which == 13) {
+        if(event.which == 13) { // enter
             $saveButton.click();
         }
     });

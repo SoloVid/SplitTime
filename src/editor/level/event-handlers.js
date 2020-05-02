@@ -1,3 +1,5 @@
+window.__EDITOR_CONSTANT__ = true;
+
 var levelObject = {
     fileName: "",
     type: "",
@@ -55,6 +57,11 @@ function setupEventHandlers() {
     }, 1000);
 
     $(document).keydown(function(event) {
+        switch (event.target.tagName.toLowerCase()) {
+            case "input":
+            case "textarea":
+                return;
+        }
 
         var specialKey = true;
         switch(event.which) {
@@ -83,7 +90,7 @@ function setupEventHandlers() {
     });
 
     $(document).keyup(function(event) {
-        if(event.which == 16) {
+        if(event.which == 16) { // shift
             ctrlDown = false;
         } else if(event.which == 27) { // esc
             console.log("export of level JSON:");

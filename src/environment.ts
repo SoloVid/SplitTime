@@ -7,6 +7,9 @@ const __NODE__ = typeof process !== "undefined"
 declare function importScripts(...urls: string[]): void
 const __WORKER__ = typeof importScripts === 'function'
 
+// This is defined in editor/event-handlers.js
+const __EDITOR__ = __DOM__ && typeof ((window as any)["__EDITOR_CONSTANT__"]) !== "undefined"
+
 if(__NODE__) {
     require('source-map-support').install();
 }
