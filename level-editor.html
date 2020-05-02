@@ -215,7 +215,7 @@
             <polyline
                     v-show="trace.displayed"
                     v-on:dblclick="edit"
-                    v-on:mousedown.left="track"
+                    v-on:mousedown.left="track(null)"
                     v-on:mouseenter="toggleHighlight(true)"
                     v-on:mouseleave="toggleHighlight(false)"
                     v-bind:points="points"
@@ -223,6 +223,14 @@
                     v-bind:stroke="traceStroke"
                     v-bind:fill-opacity="traceOpacity"
             ></polyline>
+            <circle
+                    class="hoverable"
+                    v-for="(vertex) in vertices"
+                    v-bind:cx="vertex.x"
+                    v-bind:cy="vertex.y - vertex.z"
+                    r="3"
+                    v-on:mousedown.left="track(vertex)"
+            />
             <polyline
                     v-show="trace.displayed"
                     v-bind:points="pointsStairsSlope"

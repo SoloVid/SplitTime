@@ -152,10 +152,19 @@ function moveFollower(dx, dy) {
     if(!toMove) {
         return;
     }
-    if(toMove.vertices !== undefined) {
-        var regex = /\((-?[\d]+), (-?[\d]+)\)/g;
-        var pointString = toMove.vertices;
-        toMove.vertices = pointString.replace(regex, function(match, p1, p2) {
+    if(toMove.trace !== undefined) {
+        var trace = toMove.trace;
+        var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g;
+        if (toMove.point) {
+            regex = new RegExp("\\((" + toMove.point.x + "),\\s*(" + toMove.point.y + ")\\)", "g");
+            toMove.point = {
+                x: toMove.point.x + dx,
+                y: toMove.point.y + dy,
+                z: toMove.point.z,
+            };
+        }
+        var pointString = trace.vertices;
+        trace.vertices = pointString.replace(regex, function(match, p1, p2) {
             var newX = Number(p1) + dx;
             var newY = Number(p2) + dy;
             return "(" + newX + ", " + newY + ")";

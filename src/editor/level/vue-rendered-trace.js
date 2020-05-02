@@ -12,6 +12,19 @@ Vue.component("rendered-trace", {
         height: function() {
             return this.trace.height;
         },
+        vertices: function() {
+            var that = this;
+            var pointsArray = safeExtractTraceArray(this.trace.vertices);
+            return pointsArray.filter(function(point) {
+                return !!point;
+            }).map(function(point) {
+                return {
+                    x: point.x,
+                    y: point.y,
+                    z: that.trace.z
+                };
+            });
+        },
         points: function() {
             var that = this;
             var pointsArray = safeExtractTraceArray(this.trace.vertices);
@@ -106,17 +119,20 @@ Vue.component("rendered-trace", {
         edit: function() {
             showEditorTrace(this.trace);
         },
-        track: function() {
+        track: function(point) {
             if(pathInProgress) {
                 return;
             }
-            follower = this.trace;
+            follower = {
+                trace: this.trace,
+                point: point
+            };
         },
         toggleHighlight: function(highlight) {
-            if(mouseDown || pathInProgress) {
+            if(mouseDown) {
                 return;
             }
-            this.trace.isHighlighted = highlight;
+            this.trace.isHighlighted = highlight && !pathInProgress;
         }
     }
 });
