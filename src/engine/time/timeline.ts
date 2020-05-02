@@ -65,6 +65,17 @@ namespace splitTime {
             return this.time
         }
 
+        getTimeOfDay(): game_seconds {
+            return this.getTime() % this.day()
+        }
+
+        getTimeOfDayString(): string {
+            const timeOfDay = this.getTimeOfDay()
+            const hour = Math.floor(timeOfDay / this.hour())
+            const minute = Math.floor((timeOfDay % this.hour()) / this.minute())
+            return pad(hour, 2) + ":" + pad(minute, 2)
+        }
+
         advance(seconds: game_seconds, includeRelated: boolean = true): void {
             if (this.isAlreadyVisited) {
                 return

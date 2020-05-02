@@ -67,6 +67,12 @@ namespace splitTime {
         return ((n % base) + base) % base
     }
 
+    // From https://stackoverflow.com/a/10073788/4639640
+    export function pad(n: number, width: int, padChar: string = "0") {
+        let nStr = n + '';
+        return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join(padChar) + nStr;
+      }
+
     export function isOverlap(x1: number, length1: number, x2: number, length2: number) {
         var noOverlap =
             x1 + length1 <= x2 ||
