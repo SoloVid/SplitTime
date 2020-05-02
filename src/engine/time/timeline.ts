@@ -22,6 +22,13 @@ namespace splitTime {
         }
     }
 
+    class TimelineRelation {
+        constructor(
+            public readonly otherTimeline: Timeline,
+            public readonly otherSecondsPerMySecond: number
+        ) {}
+    }
+
     export class Timeline {
         private time: game_seconds = Number.NEGATIVE_INFINITY
         private timeAdvanceListeners: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
@@ -34,6 +41,10 @@ namespace splitTime {
         kSecondsPerMinute: number = 60
         kMinutesPerHour: number = 60
         kHoursPerDay: number = 24
+
+        private readonly timelineRelations: TimelineRelation[] = []
+        // This is our variable for preventing infinite recursion on navigating two-way relations
+        private isAlreadyVisited: boolean = false
 
         constructor(public readonly id: string) {}
 
@@ -57,6 +68,17 @@ namespace splitTime {
             }
         }
 
+        /**
+         * Relate two timelines such that they advance together.
+         * The timelines can have different rates of advancing.
+         * @param otherTimeline timeline to relate (two-way)
+         * @param otherSecondsPerMySecond ratio of advance rates (e.g. 2 means other timeline moves half as fast as this one)
+         */
+        relateTimeline(otherTimeline: Timeline, otherSecondsPerMySecond: number = 1): void {
+            this.timelineRelations.push(new TimelineRelation(otherTimeline, otherSecondsPerMySecond))
+            otherTimeline.timelineRelations.push(new TimelineRelation(this, 1 / otherSecondsPerMySecond))
+        }
+
         getTimeMs(): game_ms {
             return toMs(this.time)
         }
@@ -74,6 +96,26 @@ namespace splitTime {
             const hour = Math.floor(timeOfDay / this.hour())
             const minute = Math.floor((timeOfDay % this.hour()) / this.minute())
             return pad(hour, 2) + ":" + pad(minute, 2)
+        }
+
+        /**
+         * This method is only really intended to be called for initializing/resetting timelines
+         * @param seconds 
+         * @param includeRelated 
+         */
+        setTime(seconds: game_seconds, includeRelated: boolean = false): void {
+            this.time = seconds
+
+            if(includeRelated) {
+                try {
+                    this.isAlreadyVisited = true
+                    for (const timelineRelation of this.timelineRelations) {
+                        timelineRelation.otherTimeline.setTime(seconds * timelineRelation.otherSecondsPerMySecond, true)
+                    }
+                } finally {
+                    this.isAlreadyVisited = false
+                }
+            }
         }
 
         advance(seconds: game_seconds, includeRelated: boolean = true): void {
@@ -107,6 +149,16 @@ namespace splitTime {
             for (const region of this.regions) {
                 region.notifyTimeAdvance(seconds, newTime)
             }
+
+            if(includeRelated) {
+                try {
+                    this.isAlreadyVisited = true
+                    for (const timelineRelation of this.timelineRelations) {
+                        timelineRelation.otherTimeline.advance(seconds * timelineRelation.otherSecondsPerMySecond, true)
+                    }
+                } finally {
+                    this.isAlreadyVisited = false
+                }
             }
         }
 
