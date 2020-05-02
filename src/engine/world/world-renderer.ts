@@ -180,5 +180,15 @@ namespace splitTime {
                 // TODO: maybe cleanup shadows?
             }
         }
+
+        fadeTo(color: string = "rgba(0, 0, 0, 1)"): PromiseLike<void> {
+            log.warn("TODO: fade here")
+            return getPlaceholderPledge()
+        }
+
+        fadeIn(): PromiseLike<void> {
+            log.warn("TODO: fade in (if not already faded in)")
+            return getPlaceholderPledge()
+        }
     }
 }

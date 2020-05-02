@@ -163,4 +163,13 @@ namespace splitTime {
             return promise
         }
     }
+
+    export function getPlaceholderPledge(): Pledge {
+        const ARBITRARY_PLACEHOLDER_TIME = 1000
+        const pledge = new Pledge()
+        setTimeout(() => {
+            pledge.resolve()
+        }, ARBITRARY_PLACEHOLDER_TIME)
+        return pledge
+    }
 }
