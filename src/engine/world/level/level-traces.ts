@@ -102,7 +102,7 @@ namespace splitTime.level {
                 }
                 holderCtx.globalCompositeOperation = existingGCO
                 // We are drawing these in a separate loop because in the future
-                // we want these to be additively drawn while the solids are drawn normally
+                // we want these to be additively drawn ("lighter") while the solids are drawn normally
                 for (const trace of this.traces) {
                     this.drawPartialSpecialTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ)
                 }
