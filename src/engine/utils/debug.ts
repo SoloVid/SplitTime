@@ -66,6 +66,7 @@ namespace splitTime.debug {
     export function renderCanvas(ctx: GenericCanvasRenderingContext2D) {
         var FONT_SIZE = 16
         var SPACING = 5
+        ctx.textBaseline = "alphabetic"
         ctx.font = FONT_SIZE + "px monospace"
 
         const lines: string[] = []

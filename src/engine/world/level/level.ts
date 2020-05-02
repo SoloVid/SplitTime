@@ -14,14 +14,14 @@ namespace splitTime {
         background: string
         _cellGrid: level.CellGrid | null
         weather: WeatherSettings
-        _props: any[]
+        _props: Body[]
         type: "action" | null = null
         width: int = 0
         height: int = 0
         yWidth: int = 0
         lowestLayerZ: int = 0
         highestLayerZ: int = 0
-        _levelTraces: any
+        _levelTraces: level.Traces | null = null
         constructor(levelId: string) {
             this.id = levelId
             this.loader = new LevelLoader(this)
@@ -39,6 +39,23 @@ namespace splitTime {
             this._props = []
         }
 
+        /**
+         * A level can be referenced but not have a level file.
+         * This method is to help protect against that.
+         */
+        private ensureHasFile(): void | never {
+            if (!this.loader.hasData()) {
+                throw new Error("Not level file found associated with " + this.id)
+            }
+        }
+
+        private ensureLoaded(): void | never {
+            this.ensureHasFile()
+            if (!this.isLoaded()) {
+                throw new Error("Level " + this.id + " is not currently loaded")
+            }
+        }
+
         load(
             world: World,
             levelData: splitTime.level.FileData
@@ -47,6 +64,7 @@ namespace splitTime {
         }
 
         getCellGrid(): splitTime.level.CellGrid {
+            this.ensureLoaded()
             if (!this._cellGrid) {
                 throw new Error("CellGrid unavailable")
             }
@@ -54,6 +72,10 @@ namespace splitTime {
         }
 
         getLevelTraces(): splitTime.level.Traces {
+            this.ensureLoaded()
+            if (!this._levelTraces) {
+                throw new Error("Level traces unavailable")
+            }
             return this._levelTraces
         }
 
@@ -67,7 +89,7 @@ namespace splitTime {
         }
 
         getDebugTraceCanvas(): splitTime.Canvas {
-            return this._levelTraces.getDebugTraceCanvas()
+            return this.getLevelTraces().getDebugTraceCanvas()
         }
 
         getRegion(): Region {
@@ -80,6 +102,7 @@ namespace splitTime {
         }
 
         getPosition(positionId: string): splitTime.Position {
+            this.ensureHasFile()
             if (!this.positions[positionId]) {
                 throw new Error(
                     'Level "' +

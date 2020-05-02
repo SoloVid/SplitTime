@@ -99,7 +99,7 @@ module.exports = function(grunt) {
         for(var i = 0; i < arguments.length; i++) {
             args.push(arguments[i] || "");
         }
-        return path.join.apply(path, args).replace(/\\/, "/");
+        return path.join.apply(path, args).replace(/\\/g, "/");
     }
 
     grunt.registerTask('tsc', function(projectName) {

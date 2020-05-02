@@ -103,19 +103,8 @@ namespace splitTime {
          * @param seconds 
          * @param includeRelated 
          */
-        setTime(seconds: game_seconds, includeRelated: boolean = false): void {
+        setTime(seconds: game_seconds): void {
             this.time = seconds
-
-            if(includeRelated) {
-                try {
-                    this.isAlreadyVisited = true
-                    for (const timelineRelation of this.timelineRelations) {
-                        timelineRelation.otherTimeline.setTime(seconds * timelineRelation.otherSecondsPerMySecond, true)
-                    }
-                } finally {
-                    this.isAlreadyVisited = false
-                }
-            }
         }
 
         advance(seconds: game_seconds, includeRelated: boolean = true): void {
