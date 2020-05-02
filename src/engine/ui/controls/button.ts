@@ -7,6 +7,7 @@ namespace splitTime.controls {
         _onUp: (callback: () => splitTime.CallbackResult) => void
         _isDown: () => boolean
         constructor(
+            private readonly keyboard: Keyboard,
             onDown?: (callback: () => void) => void,
             onUp?: (callback: () => void) => void,
             isDown?: () => boolean
@@ -73,13 +74,13 @@ namespace splitTime.controls {
             }
 
             for (var i = 0; i < keyCodes.length; i++) {
-                KEYBOARD_INSTANCE.onDown(keyCodes[i], runDownCallbacks)
-                KEYBOARD_INSTANCE.afterUp(keyCodes[i], runUpCallbacks)
+                this.keyboard.onDown(keyCodes[i], runDownCallbacks)
+                this.keyboard.afterUp(keyCodes[i], runUpCallbacks)
             }
 
             this.isDown = function() {
                 for (var i = 0; i < keyCodes.length; i++) {
-                    if (KEYBOARD_INSTANCE.isKeyDown(keyCodes[i])) {
+                    if (this.keyboard.isKeyDown(keyCodes[i])) {
                         return true
                     }
                 }

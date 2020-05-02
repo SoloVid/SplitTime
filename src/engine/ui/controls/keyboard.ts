@@ -89,7 +89,4 @@ namespace splitTime.controls {
             this.getUpCallbacks(keyCode).run()
         }
     }
-
-    // FTODO: maybe make not singleton
-    export const KEYBOARD_INSTANCE = __DOM__ ? new Keyboard(document) : ({} as Keyboard)
 }

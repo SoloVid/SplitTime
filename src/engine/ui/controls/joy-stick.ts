@@ -7,13 +7,17 @@ namespace splitTime.controls {
     export class JoyStick {
         private keyboardGroups: KeyboardDirectionGroup[] = []
 
+        constructor(
+            private readonly keyboard: Keyboard
+        ) {}
+
         getDirection(): number | null {
             var x = 0
             var y = 0
             for (const group of this.keyboardGroups) {
                 let down = false
                 for (const keyCode of group.keyCodes) {
-                    if (KEYBOARD_INSTANCE.isKeyDown(keyCode)) {
+                    if (this.keyboard.isKeyDown(keyCode)) {
                         down = true
                         break
                     }
@@ -55,7 +59,7 @@ namespace splitTime.controls {
 
             for (const group of this.keyboardGroups) {
                 for (const keyCode of group.keyCodes) {
-                    KEYBOARD_INSTANCE.onDown(keyCode, innerCallback)
+                    this.keyboard.onDown(keyCode, innerCallback)
                 }
             }
         }
