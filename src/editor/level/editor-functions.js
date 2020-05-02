@@ -234,6 +234,7 @@ function createLevel(type) {
         background: "",
         type: type,
         layers: [],
+        traces: [],
         positions: [],
         props: []
     };

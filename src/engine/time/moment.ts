@@ -4,9 +4,14 @@ namespace splitTime.time {
         private amountOfTime: game_seconds | null = null
         private relativeOtherMoment: Moment | undefined
 
-        constructor() {}
+        /**
+         * @param amountOfTime You should probably only specify the time if this is the beginning of a timeline
+         */
+        constructor(amountOfTime: game_seconds | null = null) {
+            this.amountOfTime = amountOfTime
+        }
 
-        setTime(amountOfTime: game_seconds, relativeTo?: Moment) {
+        setTime(amountOfTime: game_seconds, relativeTo: Moment) {
             defer()
             if (this.amountOfTime !== null) {
                 throw new Error("Time of moment has already been set")

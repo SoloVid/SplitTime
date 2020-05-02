@@ -1,4 +1,31 @@
 namespace splitTime {
+
+    export interface ReadonlyCoordinates2D {
+        readonly x: number
+        readonly y: number
+    }
+
+    export class Coordinates2D implements ReadonlyCoordinates2D {
+        constructor(
+            public x: number = 0,
+            public y: number = 0
+        ) {}
+    }
+
+    export interface ReadonlyCoordinates3D {
+        readonly x: number
+        readonly y: number
+        readonly z: number
+    }
+
+    export class Coordinates3D {
+        constructor(
+            public x: number = 0,
+            public y: number = 0,
+            public z: number = 0
+        ) {}
+    }
+
     export interface ILevelLocation {
         getX(): number
         getY(): number

@@ -85,7 +85,7 @@ function setupEventHandlers() {
     $(document).keyup(function(event) {
         if(event.which == 16) {
             ctrlDown = false;
-        } else if(event.which == 32) {
+        } else if(event.which == 27) { // esc
             console.log("export of level JSON:");
             console.log(exportLevel());
         }

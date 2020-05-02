@@ -1,14 +1,14 @@
 namespace splitTime {
-    var BUFFER = 10000
+    const BUFFER = 10000
 
     export class DataSortedByOneValue {
-        bucketSize: any
-        maxValue: any
-        valueLookup32: any[]
-        sortedByValue: { value: any; ref: number; object: {} }[]
-        reverseSortLookup: { [ref: number]: int }
-        constructor(maxValue: int, bucketSize: int) {
-            this.bucketSize = bucketSize || 32
+        private readonly bucketSize: int
+        private readonly maxValue: int
+        private readonly valueLookup32: any[]
+        private readonly sortedByValue: { value: any; ref: number; object: {} }[]
+        private readonly reverseSortLookup: { [ref: number]: int }
+        constructor(maxValue: int, bucketSize: int = 32) {
+            this.bucketSize = bucketSize
             this.maxValue = maxValue
             this.valueLookup32 = new Array(
                 Math.ceil(maxValue / this.bucketSize)
@@ -32,7 +32,7 @@ namespace splitTime {
             this.reverseSortLookup[1] = 1
         }
 
-        _getBeyondMaxValue() {
+        private _getBeyondMaxValue() {
             return this.maxValue + BUFFER
         }
 
@@ -68,7 +68,7 @@ namespace splitTime {
             }
         }
 
-        resortUpward(ref: number, value: number) {
+        private resortUpward(ref: number, value: number) {
             var currentIndex = this.reverseSortLookup[ref]
             var oldObject = this.sortedByValue[currentIndex].object
             var oldValue = this.sortedByValue[currentIndex].value
@@ -105,7 +105,7 @@ namespace splitTime {
             }
         }
 
-        resortDownward(ref: int, value: number) {
+        private resortDownward(ref: int, value: number) {
             var currentIndex = this.reverseSortLookup[ref]
             var oldObject = this.sortedByValue[currentIndex].object
             var oldValue = this.sortedByValue[currentIndex].value

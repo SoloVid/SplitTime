@@ -1,12 +1,16 @@
 namespace splitTime {
     export class LevelLoader {
-        fileData: level.FileData | null = null
+        private fileData: level.FileData | null = null
         _addingProps: boolean
-        loadPromise: splitTime.Pledge
+        private loadPromise: splitTime.Pledge
 
         constructor(private readonly level: Level) {
             this._addingProps = false
             this.loadPromise = new splitTime.Pledge()
+        }
+
+        hasData(): boolean {
+            return this.fileData !== null
         }
 
         load(

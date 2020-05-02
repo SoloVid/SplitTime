@@ -35,6 +35,7 @@ namespace splitTime {
         dir = 3
 
         GRAVITY = -1280
+        // For gravity etc., auto-applied z-axis motion in pixels per second
         zVelocity = 0
         height = 32
 
@@ -88,9 +89,6 @@ namespace splitTime {
         }
         get level() {
             return this.getLevel()
-        }
-        set level(newLevel) {
-            this.setLevel(newLevel, true)
         }
         get halfBaseLength() {
             return Math.round(this.baseLength / 2)
@@ -323,7 +321,11 @@ namespace splitTime {
             }
         }
 
-        setLevel(
+        clearLevel(): void {
+            this.setLevel(null)
+        }
+
+        private setLevel(
             level: splitTime.Level | null,
             includeChildren: boolean = false
         ) {

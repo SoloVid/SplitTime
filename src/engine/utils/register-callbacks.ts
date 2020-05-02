@@ -42,26 +42,12 @@ namespace splitTime {
             return promise
         }
 
-        /**
-         * @deprecated use {@link splitTime.RegisterCallbacks#register} instead
-         */
-        registerCallback(callback: Callback) {
-            this.register(callback)
-        }
-
         register(handler: Callback) {
             if (this._isRunningCallbacks) {
                 this._listAwaitingRegistration.push(handler)
             } else {
                 this._handlers.push(handler)
             }
-        }
-
-        /**
-         * @deprecated use {@link splitTime.RegisterCallbacks#remove} instead
-         */
-        removeCallback(callback: Callback) {
-            this.remove(callback)
         }
 
         remove(handler: Callback) {
@@ -74,13 +60,6 @@ namespace splitTime {
                     }
                 }
             }
-        }
-
-        /**
-         * @deprecated use {@link splitTime.RegisterCallbacks#run} instead
-         */
-        runCallbacks(data?: any) {
-            this.run(data)
         }
 
         run(

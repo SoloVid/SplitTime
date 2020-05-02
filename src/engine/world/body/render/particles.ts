@@ -327,7 +327,7 @@ namespace splitTime.particles {
             )
             tempBody.drawable = this
             this.registerParticlesGoneHandler(function() {
-                tempBody.setLevel(null)
+                tempBody.clearLevel()
             })
         }
     }
