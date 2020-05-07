@@ -80,10 +80,6 @@ namespace splitTime {
             this.transitionInProgress = false
         }
 
-        queueTransition(level: Level): Promise<any> {
-            return Promise.resolve().then(() => this.transition(level))
-        }
-
         isTransitioning(): boolean {
             return this.transitionInProgress
         }

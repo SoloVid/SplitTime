@@ -50,7 +50,7 @@ namespace splitTime {
             var levelName = levelData.fileName.replace(/\.json$/, "")
             var level = perspective.world.getLevel(levelName)
             promiseCollection.push(
-                level.load(G.WORLD, levelData).then(incrementAndUpdateLoading)
+                level.load(perspective.world, levelData).then(incrementAndUpdateLoading)
             )
         }
 

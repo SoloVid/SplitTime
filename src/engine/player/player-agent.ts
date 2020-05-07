@@ -17,10 +17,8 @@ namespace splitTime.player {
                 body
             )
             this.freezeUntil = Number.NEGATIVE_INFINITY
-            /** @type {G.Ability|null} */
             this.jumpAbility = null
             this.jumpCooldown = 0.1
-            /** @type {G.Ability|null} */
             this.specialAbility = null
             this.specialCooldown = 0.1
         }
