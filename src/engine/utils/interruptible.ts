@@ -4,8 +4,8 @@ namespace splitTime {
     }
 
     export namespace instanceOf {
-        export function Interruptible(obj: any): obj is Interruptible {
-            return typeof obj === "object" && typeof obj.interrupt === "function"
+        export function Interruptible(obj: unknown): obj is Interruptible {
+            return !!obj && typeof obj === "object" && typeof (obj as Interruptible).interrupt === "function"
         }
     }
 }

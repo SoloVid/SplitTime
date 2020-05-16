@@ -1,10 +1,10 @@
 namespace splitTime {
     export const STOP_CALLBACKS = "SC"
     export type CallbackResult = void | "SC"
-    type CallbackFunction = (data?: any) => CallbackResult
+    type CallbackFunction = (data?: unknown) => CallbackResult
     type CallbackObject =
-        | { [method: string]: (data?: any) => CallbackResult }
-        | any
+        | { [method: string]: CallbackFunction }
+        | object
     type Callback = CallbackFunction | CallbackObject
 
     export enum CopingMechanism {
@@ -18,7 +18,7 @@ namespace splitTime {
         private _isRunningCallbacks: boolean = false
         private _listAwaitingRegistration: Callback[] = []
         private _listAwaitingRemoval: Callback[] = []
-        private _allowedObjectMethods: any[] = []
+        private _allowedObjectMethods: string[] = []
         constructor(allowedObjectMethodsPattern?: object) {
             if (allowedObjectMethodsPattern) {
                 for (var methodName in allowedObjectMethodsPattern) {
@@ -34,7 +34,7 @@ namespace splitTime {
         waitForOnce() {
             var promise = new splitTime.Pledge()
 
-            this.register(function(data: any) {
+            this.register(function(data: unknown) {
                 promise.resolve(data)
                 return true
             })
@@ -63,7 +63,7 @@ namespace splitTime {
         }
 
         run(
-            data?: any,
+            data?: unknown,
             exceptionCoping: CopingMechanism = CopingMechanism.RETHROW
         ) {
             this._isRunningCallbacks = true
@@ -95,10 +95,10 @@ namespace splitTime {
             this._isRunningCallbacks = false
 
             while (this._listAwaitingRegistration.length > 0) {
-                this.register(this._listAwaitingRegistration.shift())
+                this.register(this._listAwaitingRegistration.shift()!)
             }
             while (this._listAwaitingRemoval.length > 0) {
-                this.remove(this._listAwaitingRemoval.shift())
+                this.remove(this._listAwaitingRemoval.shift()!)
             }
         }
 
@@ -106,15 +106,16 @@ namespace splitTime {
             return this._handlers.length
         }
 
-        private _callFunction(registered: Callback, data: any) {
+        private _callFunction(registered: Callback, data: unknown) {
             if (typeof registered === "function") {
                 return registered(data)
             }
 
             for (var i = 0; i < this._allowedObjectMethods.length; i++) {
                 var allowedMethod = this._allowedObjectMethods[i]
-                if (typeof registered[allowedMethod] === "function") {
-                    return registered[allowedMethod](data)
+                const obj = registered as { [funcName: string] : (param?: unknown) => CallbackResult}
+                if (typeof obj[allowedMethod] === "function") {
+                    return obj[allowedMethod](data)
                 }
             }
 

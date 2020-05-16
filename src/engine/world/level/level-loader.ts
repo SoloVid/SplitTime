@@ -16,7 +16,7 @@ namespace splitTime {
         load(
             world: World,
             levelData: splitTime.level.FileData
-        ): PromiseLike<any> {
+        ): PromiseLike<void> {
             const levelLoadPromises: PromiseLike<unknown>[] = []
 
             world.getRegion(levelData.region).addLevel(this.level)
@@ -92,12 +92,12 @@ namespace splitTime {
             }
 
             const aggregatePromise = Promise.all(levelLoadPromises)
-            this.setLoadPromise(aggregatePromise)
+            this.setLoadPromise(aggregatePromise.then())
 
-            return aggregatePromise
+            return aggregatePromise.then()
         }
 
-        setLoadPromise(actualLoadPromise: Promise<any>) {
+        setLoadPromise(actualLoadPromise: Promise<void>) {
             var me = this
             actualLoadPromise.then(function() {
                 me.loadPromise.resolve()

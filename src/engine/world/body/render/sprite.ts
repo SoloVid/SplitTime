@@ -131,15 +131,16 @@ namespace splitTime {
                 stance = "default"
             }
 
-            var dirMap = this.stances[stance]
-            if (!(dirMap instanceof Object)) {
-                column = dirMap
+            const dirSpec = this.stances[stance]
+            if (!(dirSpec instanceof Object)) {
+                column = dirSpec
             } else {
+                const dirMap = dirSpec as { [dir: string]: int }
                 //If shorten intermediate directions to cardinal if they are not specified
-                if (dir in dirMap) {
-                    column = (dirMap as any)[dir]
-                } else if (simpleDir && simpleDir in dirMap) {
-                    column = (dirMap as any)[simpleDir]
+                if (typeof dirMap[dir] !== "undefined") {
+                    column = dirMap[dir]
+                } else if (simpleDir && typeof dirMap[simpleDir] !== "undefined") {
+                    column = dirMap[simpleDir]
                 } else {
                     log.warn(
                         "Stance " + stance + " missing direction " + dir

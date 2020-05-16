@@ -2,12 +2,12 @@ namespace splitTime.particles {
     export class Particle {
         seed: number
         age: number
-        x: any
-        y: any
-        vx: any
-        vy: any
-        accX: any
-        accY: any
+        x: number
+        y: number
+        vx: number
+        vy: number
+        accX: number
+        accY: number
         radius: number
         r: number
         g: number
@@ -49,11 +49,11 @@ namespace splitTime.particles {
             // };
         }
 
-        getFillStyle() {
+        getFillStyle(): string {
             return "rgb(" + this.r + "," + this.g + "," + this.b + ")"
         }
 
-        advanceTime(emitter: ParticleEmitter, msPassed: number) {
+        advanceTime(emitter: ParticleEmitter, msPassed: number): void {
             splitTime.particles.applyBasicPhysics(emitter, this, msPassed)
             splitTime.particles.applyLazyEffect(emitter, this, msPassed)
             splitTime.particles.applyColorShift(emitter, this, msPassed)
@@ -61,7 +61,7 @@ namespace splitTime.particles {
             // this.updateHandler(emitter, this, msPassed);
         }
 
-        isOccasion(howOften: number, msPassed: number) {
+        isOccasion(howOften: number, msPassed: number): boolean {
             var ageOffset = howOften * this.seed
             return (
                 Math.floor((this.age + ageOffset) / howOften) !==
@@ -74,7 +74,7 @@ namespace splitTime.particles {
         emitter: ParticleEmitter,
         particle: Particle,
         msPassed: number
-    ) {
+    ): void {
         var seconds = msPassed / 1000
         particle.x += particle.vx * seconds
         particle.y += particle.vy * seconds
@@ -87,7 +87,7 @@ namespace splitTime.particles {
         emitter: ParticleEmitter,
         particle: Particle,
         msPassed: number
-    ) {
+    ): void {
         var HOW_OFTEN = emitter.lazyIntervalMs
         var HOW_DRASTIC = emitter.lazyMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
@@ -100,7 +100,7 @@ namespace splitTime.particles {
         emitter: ParticleEmitter,
         particle: Particle,
         msPassed: number
-    ) {
+    ): void {
         var HOW_OFTEN = emitter.colorShiftIntervalMs
         var HOW_DRASTIC = emitter.colorShiftMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
@@ -117,7 +117,7 @@ namespace splitTime.particles {
         emitter: ParticleEmitter,
         particle: Particle,
         msPassed: number
-    ) {
+    ): void {
         var HOW_OFTEN = emitter.opacityShiftIntervalMs
         var HOW_DRASTIC = emitter.opacityShiftMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
@@ -150,14 +150,14 @@ namespace splitTime.particles {
     }
 
     export class ParticleEmitter implements splitTime.body.Drawable {
-        _particles: any[]
+        _particles: Particle[]
         _lastParticleGenerated: number
         _currentTime: number
         maxParticleAgeMs: number
         stopEmissionsAfter: number
         generateIntervalMs: number
-        location: any
-        generateParticle: any
+        location: ReadonlyCoordinates3D
+        generateParticle: (emitter: ParticleEmitter) => Particle
         _particlesGoneHandlers: splitTime.RegisterCallbacks
         xres: number
         yres: number
@@ -168,7 +168,7 @@ namespace splitTime.particles {
         colorShiftIntervalMs: number
         colorShiftMagnitude: number
         constructor(
-            location: any,
+            location: ReadonlyCoordinates3D,
             particleGenerator: (emitter: ParticleEmitter) => Particle
         ) {
             this._particles = []
@@ -309,7 +309,7 @@ namespace splitTime.particles {
             // TODO maybe
         }
 
-        registerParticlesGoneHandler(handler: any) {
+        registerParticlesGoneHandler(handler: () => void) {
             this._particlesGoneHandlers.register(handler)
         }
 

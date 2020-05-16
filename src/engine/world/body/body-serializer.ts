@@ -10,7 +10,7 @@ namespace splitTime.body {
     export class BodySerializer implements file.ObjectSerializer<Body> {
         constructor(private readonly templateManager: TemplateManager) {}
 
-        isT(thing: any): thing is Body {
+        isT(thing: unknown): thing is Body {
             return thing instanceof Body
         }
 

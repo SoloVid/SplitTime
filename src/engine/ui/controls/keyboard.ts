@@ -52,7 +52,7 @@ namespace splitTime.controls {
             this.getUpCallbacks(keyCode).register(callback)
         }
 
-        //Sets variables useful for determining what keys are down at any time.
+        //Sets variables useful for determining what keys are down at given time.
         public onKeyDown(e: KeyboardEvent) {
             var keyCode = e.which || e.keyCode
 

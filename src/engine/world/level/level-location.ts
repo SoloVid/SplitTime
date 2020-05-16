@@ -5,6 +5,13 @@ namespace splitTime {
         readonly y: number
     }
 
+    export namespace instanceOf {
+        export function ReadonlyCoordinates2D(thing: unknown): thing is ReadonlyCoordinates2D {
+            const coords = thing as ReadonlyCoordinates2D
+            return typeof coords.x === "number" && typeof coords.y === "number"
+        }
+    }
+
     export class Coordinates2D implements ReadonlyCoordinates2D {
         constructor(
             public x: number = 0,
@@ -31,6 +38,16 @@ namespace splitTime {
         getY(): number
         getZ(): number
         getLevel(): splitTime.Level
+    }
+
+    export namespace instanceOf {
+        export function ILevelLocation(thing: unknown): thing is ILevelLocation {
+            const location = thing as ILevelLocation
+            return typeof location.getX === "function" &&
+                typeof location.getY === "function" &&
+                typeof location.getZ === "function" &&
+                typeof location.getLevel === "function"
+        }
     }
 
     export interface ILevelLocation2 {

@@ -159,14 +159,14 @@ namespace splitTime.body.collisions {
             if (ady > 0 && pixelsMovedY > 0) {
                 var yMoved = currentY - oldY
                 var newYFromSteps = oldY + yMoved
-                // Subtract off any overshoot
+                // Subtract off overshoot
                 var actualNewY = newYFromSteps - (dyRounded - dy)
                 this.mover.body.setY(actualNewY)
             }
             if (adx > 0 && pixelsMovedX > 0) {
                 var xMoved = currentX - oldX
                 var newXFromSteps = oldX + xMoved
-                // Subtract off any overshoot
+                // Subtract off overshoot
                 var actualNewX = newXFromSteps - (dxRounded - dx)
                 this.mover.body.setX(actualNewX)
             }

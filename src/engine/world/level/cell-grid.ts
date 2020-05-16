@@ -209,7 +209,7 @@ namespace splitTime.level {
             body: splitTime.Body,
             whitelistArea: WhereIsBody,
             blacklistArea: WhereIsBody,
-            callback: (body: splitTime.Body, x: int, y: int, z: int) => any
+            callback: (body: splitTime.Body, x: int, y: int, z: int) => void
         ) {
             var iX, iY, iZ
 
@@ -346,7 +346,7 @@ namespace splitTime.level {
             exMaxX: number,
             exMaxY: number,
             exMaxZ: number,
-            callback: (arg0: splitTime.Body) => any
+            callback: (arg0: splitTime.Body) => void
         ) {
             var bodiesHit: { [bodyRef: number]: true } = {}
             for (

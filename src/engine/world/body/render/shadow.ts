@@ -3,8 +3,8 @@ namespace splitTime.body {
         realBody: Body
         shadowBody: Body
         minRadius: number
-        maxRadius: any
-        radius: any
+        maxRadius: number
+        radius: number
         constructor(body: splitTime.Body) {
             this.realBody = body
             this.shadowBody = new splitTime.Body()

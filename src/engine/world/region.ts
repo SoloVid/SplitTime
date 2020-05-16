@@ -60,12 +60,12 @@ namespace splitTime {
             }
         }
 
-        loadForPlay(world: World): PromiseLike<any> {
+        loadForPlay(world: World): PromiseLike<void> {
             var promises = []
             for (var i = 0; i < this.levels.length; i++) {
                 promises.push(this.levels[i].loadForPlay(world))
             }
-            return Promise.all(promises)
+            return Promise.all(promises).then()
         }
 
         unloadLevels() {

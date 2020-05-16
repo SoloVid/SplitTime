@@ -5,19 +5,17 @@ namespace splitTime.debug {
     var debugDiv: HTMLElement | null = null
     var debugInfo: { [key: string]: DebugValue } = {}
 
-    export function attachDebug(parent: HTMLElement) {
-        debugDiv = document.createElement("div")
-        parent.appendChild(debugDiv)
-    }
-
     var DEBOUNCE = 100
     var LIFE = 2000
     var frameStabilizer: FrameStabilizer
-    defer(() => {
-        frameStabilizer = new splitTime.FrameStabilizer(DEBOUNCE)
-    })
 
-    export function setDebugValue(key: string, value: any) {
+    export function attachDebug(parent: HTMLElement) {
+        debugDiv = document.createElement("div")
+        parent.appendChild(debugDiv)
+        frameStabilizer = new splitTime.FrameStabilizer(DEBOUNCE)
+    }
+
+    export function setDebugValue(key: string, value: unknown) {
         if (!splitTime.debug.ENABLED) {
             return
         }
@@ -91,7 +89,7 @@ namespace splitTime.debug {
     }
 
     class DebugValue {
-        value: any = null
+        value: unknown = null
         timeUpdated: number = 0
         constructor(public readonly key: string) {}
     }

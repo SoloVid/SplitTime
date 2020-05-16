@@ -156,15 +156,16 @@ module.exports = function(grunt) {
                 'build/tsjs/compiler-defines.debug.js',
                 'build/tsjs/environment.js',
                 'build/tsjs/defer.def.js',
-                'build/tsjs/engine/**/*.js',
-                'build/tsjs/defer.run.js'
+                'build/tsjs/engine/**/*.js'
             ];
             concatFilesWithSourceMaps(files, 'build/engine-without-dom-libraries.js');
+
             files = [
                 'node_modules/howler/dist/howler.min.js',
                 'build/engine-without-dom-libraries.js',
             ];
             concatFilesWithSourceMaps(files, 'build/engine.js');
+
             files = [
                 'build/engine-without-dom-libraries.js',
                 'build/tsjs/test-runner/**/*.js',

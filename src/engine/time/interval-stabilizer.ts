@@ -2,9 +2,9 @@ namespace splitTime {
     export class IntervalStabilizer implements Signaler {
         msPerFrame: number
         maxCounter: number
-        currentTimeGetter: any
-        _counterSetAt: any
-        _previousCounterSetAt: any
+        currentTimeGetter: () => number
+        _counterSetAt: number = Number.NEGATIVE_INFINITY
+        _previousCounterSetAt: number = Number.NEGATIVE_INFINITY
         _counter: number = 0
         _isClockFrame: boolean = false
         constructor(

@@ -16,6 +16,7 @@ namespace splitTime {
         public readonly timeMs: game_ms
         constructor(
             public readonly time: game_seconds,
+            // FTODO: Can we get rid of "any" here?
             public readonly instance: time.EventInstance<any>
         ) {
             this.timeMs = toMs(this.time)
@@ -48,7 +49,7 @@ namespace splitTime {
 
         constructor(public readonly id: string) {}
 
-        registerTimeAdvanceListener(listener: (delta: game_seconds) => any): void {
+        registerTimeAdvanceListener(listener: (delta: game_seconds) => void): void {
             this.timeAdvanceListeners.register(listener)
         }
 
@@ -219,8 +220,8 @@ namespace splitTime {
     }
 
     export namespace instanceOf {
-        export function TimeNotified(obj: any): obj is TimeNotified {
-            return typeof obj.notifyTimeAdvance === "function"
+        export function TimeNotified(obj: unknown): obj is TimeNotified {
+            return typeof (obj as TimeNotified).notifyTimeAdvance === "function"
         }
     }
 }

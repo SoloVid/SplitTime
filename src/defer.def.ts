@@ -5,6 +5,9 @@ var __deferredWaiting = true
  * Wait until all code is loaded (i.e. run) before running this callback.
  * Recommended to use a lambda.
  * @param callback to be run after all code has been loaded
+ *
+ * Note: This function should not be called from engine code
+ * because the engine should not have runtime code or globals.
  */
 function defer(callback: () => void): void
 /**

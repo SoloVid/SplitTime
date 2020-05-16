@@ -1,6 +1,6 @@
 namespace splitTime.file {
     export class ObjectSerializerPool {
-        private readonly objectSerializers: { [id: string]: ObjectSerializer<any> } = {}
+        private readonly objectSerializers: { [id: string]: ObjectSerializer<unknown> } = {}
 
         constructor() {
         }
@@ -32,7 +32,7 @@ namespace splitTime.file {
         getSerializerById<T>(id: string): ObjectSerializer<T> {
             const s = this.objectSerializers[id]
             assert(!!s, "Serializer \"" + id + "\" not found")
-            return s
+            return s as ObjectSerializer<T>
         }
         
         getSerializerId<T>(serializer: ObjectSerializer<T>): string {

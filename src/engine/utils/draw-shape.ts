@@ -62,7 +62,7 @@ namespace splitTime.utils {
             extraBuffer.context.translate(-0.5, -0.5)
         }
 
-        // Now we're going to remove any color that isn't fully opaque
+        // Now we're going to remove all color that isn't fully opaque
         const sx = Math.max(0, extents.minX - 1)
         const sy = Math.max(0, extents.minY - 1)
         const sw = Math.min(extraBuffer.width, extents.maxX + 1) - sx

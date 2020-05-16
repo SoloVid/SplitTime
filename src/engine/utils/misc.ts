@@ -6,7 +6,7 @@ namespace splitTime {
     if(__DOM__) {
         // from https://stackoverflow.com/a/2161748/4639640
         var scripts = document.getElementsByTagName("script")
-        var path = scripts[scripts.length - 1].src.split("?")[0] // remove any ?query
+        var path = scripts[scripts.length - 1].src.split("?")[0] // remove ?query
         SCRIPT_DIRECTORY = path
             .split("/")
             .slice(0, -1)

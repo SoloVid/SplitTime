@@ -49,7 +49,7 @@ namespace splitTime {
         load(
             world: World,
             levelData: splitTime.level.FileData
-        ): PromiseLike<any> {
+        ): PromiseLike<void> {
             return this.loader.load(world, levelData)
         }
 
@@ -169,7 +169,7 @@ namespace splitTime {
             }
         }
 
-        forEachBody(callback: (body: splitTime.Body) => any) {
+        forEachBody(callback: (body: splitTime.Body) => void) {
             for (var i = 0; i < this.bodies.length; i++) {
                 callback(this.bodies[i])
             }

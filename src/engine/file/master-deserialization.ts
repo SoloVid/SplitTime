@@ -3,7 +3,7 @@ namespace splitTime.file {
         private idPromisePairs: { objectId: int; promise: splitTime.Pledge }[] = []
 
         constructor(
-            private readonly idObjectPairs: { id: int; object: any }[] = []
+            private readonly idObjectPairs: { id: int; object: unknown }[] = []
         ) {}
 
         deserialize<T>(id: int): PromiseLike<T> {
@@ -40,7 +40,7 @@ namespace splitTime.file {
         private getObject<T>(objectId: int): T | null {
             for (const pair of this.idObjectPairs) {
                 if (pair.id === objectId) {
-                    return pair.object
+                    return pair.object as T
                 }
             }
             return null
@@ -49,7 +49,7 @@ namespace splitTime.file {
 
     export class MasterDeserialization {
         public readonly data: serialized_format_t
-        private idObjectPairs: { id: int; object: any }[] = []
+        private idObjectPairs: { id: int; object: unknown }[] = []
         private secondPass: DeserializeSecondPass
 
         constructor(

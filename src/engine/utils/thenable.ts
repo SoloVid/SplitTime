@@ -4,8 +4,9 @@ namespace splitTime {
     }
 
     export namespace instanceOf {
-        export function Thenable<T>(obj: any): obj is Thenable<T> {
-            return typeof obj === "object" && typeof obj.then === "function"
+        export function Thenable<T>(obj: unknown): obj is Thenable<T> {
+            const objWithThen = obj as { then: undefined | Function }
+            return !!obj && typeof obj === "object" && !!obj && typeof objWithThen.then === "function"
         }
     }
 }

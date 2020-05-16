@@ -4,8 +4,8 @@ namespace splitTime {
     export class DataSortedByOneValue {
         private readonly bucketSize: int
         private readonly maxValue: int
-        private readonly valueLookup32: any[]
-        private readonly sortedByValue: { value: any; ref: number; object: {} }[]
+        private readonly valueLookup32: number[]
+        private readonly sortedByValue: { value: number; ref: number; object: {} }[]
         private readonly reverseSortLookup: { [ref: number]: int }
         constructor(maxValue: int, bucketSize: int = 32) {
             this.bucketSize = bucketSize
@@ -36,7 +36,7 @@ namespace splitTime {
             return this.maxValue + BUFFER
         }
 
-        add(ref: int, object: any) {
+        add(ref: int, object: object) {
             this.sortedByValue.push({
                 value: this._getBeyondMaxValue(),
                 ref: ref,
@@ -150,7 +150,7 @@ namespace splitTime {
         forEachInRange(
             valueStart: int,
             valueEndEx: int,
-            callback: (arg0: object) => any
+            callback: (arg0: object) => void
         ): boolean {
             // if(Math.floor(valueStart) !== valueStart) {
             //     console.warn("Non-integer value: " + valueStart);
@@ -191,7 +191,7 @@ namespace splitTime {
          * @param {function(Object)} callback - function that will be called for each item in the sorted list
          * @return {boolean} found - true if there is something in the list
          */
-        forEachInList(callback: (arg0: object) => any): boolean {
+        forEachInList(callback: (arg0: object) => void): boolean {
             var found = false
             for (
                 var iSorted = 0;
