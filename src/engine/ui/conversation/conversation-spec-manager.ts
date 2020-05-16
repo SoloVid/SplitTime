@@ -9,7 +9,7 @@ namespace splitTime.conversation {
         }
 
         register(id: string, setup: SetupFunc): ConversationSpec {
-            const spec = new ConversationSpec(id, setup)
+            const spec = new ConversationSpec(id, setup, this)
             this.specs[id] = spec
             return spec
         }

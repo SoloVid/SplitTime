@@ -4,7 +4,10 @@ namespace splitTime {
         _addingProps: boolean
         private loadPromise: splitTime.Pledge
 
-        constructor(private readonly level: Level) {
+        constructor(
+            private readonly level: Level,
+            private readonly levelData: splitTime.level.FileData
+        ) {
             this._addingProps = false
             this.loadPromise = new splitTime.Pledge()
         }
@@ -13,22 +16,19 @@ namespace splitTime {
             return this.fileData !== null
         }
 
-        load(
-            world: World,
-            levelData: splitTime.level.FileData
-        ): PromiseLike<void> {
-            const levelLoadPromises: PromiseLike<unknown>[] = []
+        readFileData(
+            world: World
+        ): void {
+            world.getRegion(this.levelData.region).addLevel(this.level)
 
-            world.getRegion(levelData.region).addLevel(this.level)
-
-            this.fileData = levelData
-            this.level.type = levelData.type
-            this.level.width = levelData.width || 0;
-            this.level.height = levelData.height || 0;
+            this.fileData = this.levelData
+            this.level.type = this.levelData.type
+            this.level.width = this.levelData.width || 0;
+            this.level.height = this.levelData.height || 0;
 
             this.level.lowestLayerZ = 0
             this.level.highestLayerZ = 0
-            for (const trace of levelData.traces) {
+            for (const trace of this.levelData.traces) {
                 if (trace.z < this.level.lowestLayerZ) {
                     this.level.lowestLayerZ = +trace.z
                 }
@@ -40,18 +40,13 @@ namespace splitTime {
             this.level.yWidth = this.level.height + this.level.highestLayerZ
             this.level._cellGrid = new level.CellGrid(this.level)
 
-            this.level.background = levelData.background
-            if (this.level.background) {
-                var loadProm = G.ASSETS.images
-                    .load(this.level.background)
-                levelLoadPromises.push(loadProm)
-            }
-            this.level.backgroundOffsetX = levelData.backgroundOffsetX
-            this.level.backgroundOffsetY = levelData.backgroundOffsetY
+            this.level.background = this.levelData.background
+            this.level.backgroundOffsetX = this.levelData.backgroundOffsetX
+            this.level.backgroundOffsetY = this.levelData.backgroundOffsetY
 
             //Pull positions from file
-            for (var i = 0; i < levelData.positions.length; i++) {
-                var posObj = levelData.positions[i]
+            for (var i = 0; i < this.levelData.positions.length; i++) {
+                var posObj = this.levelData.positions[i]
                 var position = new splitTime.Position(
                     this.level,
                     +posObj.x,
@@ -68,7 +63,7 @@ namespace splitTime {
                 }
             }
 
-            for (const rawTrace of levelData.traces) {
+            for (const rawTrace of this.levelData.traces) {
                 var type = rawTrace.type
                 switch (type) {
                     case splitTime.Trace.Type.TRANSPORT:
@@ -90,11 +85,6 @@ namespace splitTime {
                         )
                 }
             }
-
-            const aggregatePromise = Promise.all(levelLoadPromises)
-            this.setLoadPromise(aggregatePromise.then())
-
-            return aggregatePromise.then()
         }
 
         setLoadPromise(actualLoadPromise: Promise<void>) {
@@ -154,8 +144,12 @@ namespace splitTime {
             this._addingProps = false
         }
 
+        async loadAssets(world: World): Promise<void> {
+            await G.ASSETS.images.load(this.level.background)
+        }
+
         async loadForPlay(world: World): Promise<void> {
-            await this.loadPromise
+            await this.loadAssets(world)
 
             this.refetchBodies()
             assert(this.fileData !== null, "Level must have file data to be loaded")

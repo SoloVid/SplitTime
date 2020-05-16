@@ -213,15 +213,23 @@
     <script type="text/x-template" id="rendered-trace-template">
         <g>
             <polyline
-                    v-show="trace.displayed"
+                    v-show="trace.displayed && hasClose"
                     v-on:dblclick="edit"
                     v-on:mousedown.left="track(null)"
                     v-on:mouseenter="toggleHighlight(true)"
                     v-on:mouseleave="toggleHighlight(false)"
                     v-bind:points="points"
                     v-bind:fill="traceFill"
+            ></polyline>
+            <polyline
+                    v-show="trace.displayed"
+                    v-on:dblclick="edit"
+                    v-on:mousedown.left="track(null)"
+                    v-on:mouseenter="toggleHighlight(true)"
+                    v-on:mouseleave="toggleHighlight(false)"
+                    v-bind:points="points"
                     v-bind:stroke="traceStroke"
-                    v-bind:fill-opacity="traceOpacity"
+                    fill="none"
             ></polyline>
             <circle
                     class="hoverable"

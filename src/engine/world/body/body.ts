@@ -292,12 +292,12 @@ namespace splitTime {
             }
         }
 
-        putInLocation(location: ILevelLocation, includeChildren = false) {
+        putInLocation(location: ILevelLocation2, includeChildren = false) {
             this.put(
-                location.getLevel(),
-                location.getX(),
-                location.getY(),
-                location.getZ(),
+                location.level,
+                location.x,
+                location.y,
+                location.z,
                 includeChildren
             )
         }
@@ -438,6 +438,6 @@ namespace splitTime {
         }
 
         // Generally equates to pixels per second (game time)
-        spd = 2
+        spd = 16
     }
 }

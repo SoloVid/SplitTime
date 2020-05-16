@@ -1,12 +1,17 @@
 namespace splitTime.conversation {
-    export type MidConversationCallback = () => (void | ObjectCallbacks<void>)
-
     export class MidConversationAction {
         private parent: SectionSpec | null = null
+        private readonly midEventAction: time.MidEventAction
 
         constructor(
-            public readonly callback: MidConversationCallback
-        ) {}
+            callback: time.MidEventCallback
+        ) {
+            this.midEventAction = new time.MidEventAction(callback)
+        }
+
+        run() {
+            return this.midEventAction.run()
+        }
 
         setParent(parent: SectionSpec): void {
             assert(this.parent === null, "MidConversationAction parent can only be set once")

@@ -78,7 +78,7 @@ namespace splitTime {
 
         getLocationId() {
             return (
-                this.level +
+                this.getLevel().id +
                 ":" +
                 this.offsetX +
                 "," +

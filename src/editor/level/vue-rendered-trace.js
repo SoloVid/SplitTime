@@ -102,9 +102,6 @@ Vue.component("rendered-trace", {
         traceStroke: function() {
             return this.hasClose ? "black" : safeGetColor(this.trace);
         },
-        traceOpacity: function() {
-            return this.hasClose ? 1 : 0;
-        },
         traceShadowFill: function() {
             return this.trace.isHighlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR;
         },
@@ -112,7 +109,7 @@ Vue.component("rendered-trace", {
             return "black";
         },
         traceShadowDisplayed: function() {
-            return this.height > 0;
+            return this.hasClose && this.height > 0;
         }
     },
     methods: {

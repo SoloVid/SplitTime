@@ -145,8 +145,8 @@ module.exports = function(grunt) {
             files = ([
                 'build/engine.js',
                 'build/tsjs/defer.def.js',
-                ]).concat(compiledSourceFilesSorted).concat([
                 projectRoot + '/build/generated/**/*.js',
+                ]).concat(compiledSourceFilesSorted).concat([
                 'build/tsjs/defer.run.js'
             ]);
             concatFilesWithSourceMaps(files, projectRoot + '/dist/game.js');

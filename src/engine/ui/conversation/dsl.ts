@@ -4,7 +4,7 @@ namespace splitTime.conversation {
     export interface DSL {
         say(speaker: Speaker, line: string): void
         section(sectionSetup: () => void): SectionChain
-        do(action: MidConversationCallback): void
+        do(action: time.MidEventCallback): void
         // waitUntil(condition: Condition): void
     }
 

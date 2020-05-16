@@ -20,7 +20,7 @@ namespace splitTime.conversation {
             return new SectionBuilderFluentReturn(newSectionBuilder, this)
         }
 
-        do(action: MidConversationCallback): void {
+        do(action: time.MidEventCallback): void {
             this.sectionBuilder.append(new MidConversationAction(action))
         }
 

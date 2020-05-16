@@ -9,10 +9,8 @@ namespace splitTime.agent {
 
     export class ControlledCollisionMovement implements splitTime.TimeNotified {
         private body: splitTime.Body
-        private targetBoardX: number | null = null
-        private targetBoardY: number | null = null
-        private targetScreenX: number | null = null
-        private targetScreenY: number | null = null
+        private targetLevelLocation: ReadonlyCoordinates3D | null = null
+        private targetScreenLocation: ReadonlyCoordinates2D | null = null
         private targetDirection: number | null = null
         private ladder: EngagedLadder | null = null
 
@@ -24,13 +22,11 @@ namespace splitTime.agent {
             this.resetTarget()
         }
 
-        setWalkingTowardBoardLocation(x: number, y: number) {
-            this.targetBoardX = x
-            this.targetBoardY = y
+        setWalkingTowardBoardLocation(coords: ReadonlyCoordinates3D) {
+            this.targetLevelLocation = coords
         }
-        setWalkingTowardScreenLocation(x: number, y: number) {
-            this.targetScreenX = x
-            this.targetScreenY = y
+        setWalkingTowardScreenLocation(coords: ReadonlyCoordinates2D) {
+            this.targetScreenLocation = coords
         }
         setWalkingDirection(dir: number) {
             this.targetDirection = dir
@@ -100,26 +96,17 @@ namespace splitTime.agent {
         }
 
         resetTarget() {
-            this.targetBoardX = null
-            this.targetBoardY = null
-            this.targetScreenX = null
-            this.targetScreenY = null
+            this.targetLevelLocation = null
+            this.targetScreenLocation = null
             this.targetDirection = null
         }
 
         getWalkingDirection() {
             if (this.targetDirection !== null) {
                 return this.targetDirection
-            } else if (
-                this.targetBoardX !== null &&
-                this.targetBoardY !== null
-            ) {
-                // TODO: return some calculation
-                return 0
-            } else if (
-                this.targetScreenX !== null &&
-                this.targetScreenY !== null
-            ) {
+            } else if (this.targetLevelLocation !== null) {
+                return direction.fromToThing(this.body, this.targetLevelLocation)
+            } else if (this.targetScreenLocation !== null) {
                 // TODO: some other calculation
                 return 0
             }

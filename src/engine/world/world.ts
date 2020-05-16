@@ -1,5 +1,17 @@
 namespace splitTime {
     export class World {
+
+        constructor(levels: level.FileData[] = G._GAME_DATA.levels) {
+            for (const levelData of levels) {
+                const levelId = levelData.fileName.replace(/\.json$/, "")
+                const level = new Level(levelId, levelData)
+                this.levelMap[levelId] = level
+            }
+            for (const levelId in this.levelMap) {
+                this.levelMap[levelId].readFileData(this)
+            }
+        }
+
         private readonly timeMap: { [id: string]: Timeline } = {}
         getTimeline(timeId: string): Timeline {
             if (!this.timeMap[timeId]) {
@@ -25,7 +37,7 @@ namespace splitTime {
         private readonly levelMap: { [id: string]: Level } = {}
         getLevel(levelId: string): Level {
             if (!this.levelMap[levelId]) {
-                this.levelMap[levelId] = new Level(levelId)
+                throw new Error("Level \"" + levelId + "\" not found")
             }
             return this.levelMap[levelId]
         }

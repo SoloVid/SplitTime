@@ -57,6 +57,16 @@ namespace splitTime {
         level: splitTime.Level
     }
 
+    export namespace instanceOf {
+        export function ILevelLocation2(thing: unknown): thing is ILevelLocation2 {
+            const location = thing as ILevelLocation2
+            return typeof location.x === "number" &&
+                typeof location.y === "number" &&
+                typeof location.z === "number" &&
+                location.level instanceof Level
+        }
+    }
+
     export namespace level {
         export function copyLocation(location: ILevelLocation2) {
             return {
@@ -65,6 +75,14 @@ namespace splitTime {
                 y: location.y,
                 z: location.z
             }
+        }
+
+        export function areCoordinatesEquivalent(coords1: ReadonlyCoordinates2D, coords2: ReadonlyCoordinates2D): boolean
+        export function areCoordinatesEquivalent(coords1: ReadonlyCoordinates3D, coords2: ReadonlyCoordinates3D): boolean
+        export function areCoordinatesEquivalent(coords1: ReadonlyCoordinates3D | ReadonlyCoordinates2D, coords2: ReadonlyCoordinates3D | ReadonlyCoordinates2D): boolean {
+            return coords1.x === coords2.x &&
+                coords1.y === coords2.y &&
+                (coords1 as ReadonlyCoordinates3D).z === (coords2 as ReadonlyCoordinates3D).z
         }
 
         export function areLocationsEquivalent(location1: ILevelLocation2, location2: ILevelLocation2) {

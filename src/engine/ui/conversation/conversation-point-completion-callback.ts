@@ -5,7 +5,7 @@ namespace splitTime.conversation {
             private readonly breadCrumbs: BreadCrumbs
         ) {}
 
-        call(): void {
+        callBack(): void {
             this.conversation.notifyNodeCompletion(this.breadCrumbs)
         }
     }

@@ -24,9 +24,13 @@ namespace splitTime {
         lowestLayerZ: int = 0
         highestLayerZ: int = 0
         _levelTraces: level.Traces | null = null
-        constructor(levelId: string) {
+        constructor(levelId: string, levelData: level.FileData) {
             this.id = levelId
-            this.loader = new LevelLoader(this)
+            this.loader = new LevelLoader(this, levelData)
+        }
+
+        readFileData(world: World): void {
+            this.loader.readFileData(world)
         }
 
         /**
@@ -50,7 +54,7 @@ namespace splitTime {
             world: World,
             levelData: splitTime.level.FileData
         ): PromiseLike<void> {
-            return this.loader.load(world, levelData)
+            return this.loader.loadAssets(world)
         }
 
         getCellGrid(): splitTime.level.CellGrid {

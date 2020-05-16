@@ -128,11 +128,11 @@ namespace splitTime.conversation {
 
         private launchEvent(event: MidConversationAction, nodeId: BreadCrumbs): Interruptible | null {
             const callback = new ConversationPointCompletionCallback(this, nodeId)
-            const eventReturn = event.callback()
+            const eventReturn = event.run()
             if(eventReturn instanceof ObjectCallbacks) {
                 eventReturn.register(callback)
             } else {
-                callback.call()
+                callback.callBack()
             }
             if(instanceOf.Interruptible(eventReturn)) {
                 return eventReturn
