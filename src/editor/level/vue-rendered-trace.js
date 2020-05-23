@@ -65,8 +65,8 @@ Vue.component("rendered-trace", {
         pointsStairsSlope: function() {
             var that = this;
             var pointsArray = safeExtractTraceArray(this.trace.vertices);
-            if(this.trace.type === splitTime.Trace.Type.STAIRS && !!this.trace.direction && pointsArray.length >= 3) {
-                var officialTrace = splitTime.Trace.fromRaw(this.trace);
+            if(this.trace.type === splitTime.trace.Type.STAIRS && !!this.trace.direction && pointsArray.length >= 3) {
+                var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace);
                 var extremes = officialTrace.calculateStairsExtremes();
                 var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y);
                 var stairsLength = stairsVector.magnitude;

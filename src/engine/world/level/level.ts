@@ -109,6 +109,10 @@ namespace splitTime {
             return this.positions[positionId]
         }
 
+        getPositionMap(): { [id: string]: Position } {
+            return this.positions
+        }
+
         registerEnterFunction(fun: () => void) {
             this.enterFunction = fun
         }

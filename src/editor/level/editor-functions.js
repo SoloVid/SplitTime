@@ -70,8 +70,8 @@ function addNewTrace(layerIndex, type) {
     var height = levelObject.layers.length > layerIndex + 1 ?
         levelObject.layers[layerIndex + 1].z - z :
         DEFAULT_HEIGHT;
-    if(type === splitTime.Trace.Type.GROUND) {
-        type = splitTime.Trace.Type.SOLID;
+    if(type === splitTime.trace.Type.GROUND) {
+        type = splitTime.trace.Type.SOLID;
         height = 0;
     }
     var trace = {
@@ -97,8 +97,8 @@ function safeGetColor(trace) {
         return "rgba(255, 255, 0, 0.8)";
     }
     var type = trace.type;
-    if(type === splitTime.Trace.Type.SOLID && +trace.height === 0) {
-        type = splitTime.Trace.Type.GROUND;
+    if(type === splitTime.trace.Type.SOLID && +trace.height === 0) {
+        type = splitTime.trace.Type.GROUND;
     }
     for(var i = 0; i < vueApp.traceOptions.length; i++) {
         if(vueApp.traceOptions[i].type === type) {
@@ -109,7 +109,7 @@ function safeGetColor(trace) {
 }
 function safeExtractTraceArray(traceStr) {
     var normalizedTraceStr = normalizeTraceStr(traceStr);
-    return splitTime.Trace.extractArray(normalizedTraceStr);
+    return splitTime.trace.interpretPointString(normalizedTraceStr);
 }
 
 function normalizeTraceStr(traceStr) {

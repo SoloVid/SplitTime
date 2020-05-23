@@ -112,7 +112,7 @@ namespace splitTime.direction {
                 toThing.getY()
             )
         }
-        if (instanceOf.ReadonlyCoordinates2D(fromThing) && instanceOf.ReadonlyCoordinates2D(toThing)) {
+        if (instanceOf.Coordinates2D(fromThing) && instanceOf.Coordinates2D(toThing)) {
             return splitTime.direction.fromTo(
                 fromThing.x,
                 fromThing.y,

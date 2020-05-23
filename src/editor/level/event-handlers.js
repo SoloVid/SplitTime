@@ -162,7 +162,7 @@ function setupEventHandlers() {
                 if(!pathInProgress) {
                     var trace = addNewTrace(vueApp.activeLayer, typeSelected);
 
-                    if(typeSelected == splitTime.Trace.Type.PATH && !ctrlDown) {
+                    if(typeSelected == splitTime.trace.Type.PATH && !ctrlDown) {
                         trace.vertices = positionPoint;
                     } else {
                         trace.vertices = literalPoint;
@@ -171,7 +171,7 @@ function setupEventHandlers() {
                     pathInProgress = trace;
                 } else {
                     if(!ctrlDown) {
-                        if(pathInProgress.type == splitTime.Trace.Type.PATH) {
+                        if(pathInProgress.type == splitTime.trace.Type.PATH) {
                             if(closestPosition) {
                                 pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint;
                             }

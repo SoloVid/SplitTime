@@ -6,9 +6,9 @@ namespace splitTime {
     }
 
     export namespace instanceOf {
-        export function ReadonlyCoordinates2D(thing: unknown): thing is ReadonlyCoordinates2D {
+        export function Coordinates2D(thing: unknown): thing is Coordinates2D {
             const coords = thing as ReadonlyCoordinates2D
-            return typeof coords.x === "number" && typeof coords.y === "number"
+            return !!thing && typeof coords.x === "number" && typeof coords.y === "number"
         }
     }
 
@@ -43,7 +43,8 @@ namespace splitTime {
     export namespace instanceOf {
         export function ILevelLocation(thing: unknown): thing is ILevelLocation {
             const location = thing as ILevelLocation
-            return typeof location.getX === "function" &&
+            return !!thing &&
+                typeof location.getX === "function" &&
                 typeof location.getY === "function" &&
                 typeof location.getZ === "function" &&
                 typeof location.getLevel === "function"
@@ -60,7 +61,8 @@ namespace splitTime {
     export namespace instanceOf {
         export function ILevelLocation2(thing: unknown): thing is ILevelLocation2 {
             const location = thing as ILevelLocation2
-            return typeof location.x === "number" &&
+            return !!thing &&
+                typeof location.x === "number" &&
                 typeof location.y === "number" &&
                 typeof location.z === "number" &&
                 location.level instanceof Level
@@ -82,6 +84,7 @@ namespace splitTime {
         export function areCoordinatesEquivalent(coords1: ReadonlyCoordinates3D | ReadonlyCoordinates2D, coords2: ReadonlyCoordinates3D | ReadonlyCoordinates2D): boolean {
             return coords1.x === coords2.x &&
                 coords1.y === coords2.y &&
+                // TODO: This check falls apart for mixed types
                 (coords1 as ReadonlyCoordinates3D).z === (coords2 as ReadonlyCoordinates3D).z
         }
 

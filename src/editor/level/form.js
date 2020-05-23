@@ -255,14 +255,14 @@ function showEditorTrace(trace) {
     ];
 
     switch(trace.type) {
-        case splitTime.Trace.Type.STAIRS:
+        case splitTime.trace.Type.STAIRS:
             fields.push({key: "direction"});
             break;
-        case splitTime.Trace.Type.EVENT:
+        case splitTime.trace.Type.EVENT:
             fields.push({key: "event"});
             break;
-        case splitTime.Trace.Type.POINTER:
-        case splitTime.Trace.Type.TRANSPORT:
+        case splitTime.trace.Type.POINTER:
+        case splitTime.trace.Type.TRANSPORT:
             fields.push({key: "level"});
             fields.push({key: "offsetX", type: "number"});
             fields.push({key: "offsetY", type: "number"});

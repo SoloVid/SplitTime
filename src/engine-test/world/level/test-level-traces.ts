@@ -2,12 +2,17 @@ namespace splitTime.level {
     const levelTracesTests = {}
     splitTime.test.group(levelTracesTests, "Level Traces Tests", level)
 
+    function makeTrace(type: string, points: string, z: number, height: number): Trace {
+        const t = new Trace(new trace.TraceSpec(type, points))
+        t.spec.z = z
+        t.spec.height = height
+        return t
+    }
+
     // This test is simple and intended to cover cases of different volumes requested
     splitTime.test.scenario(levelTracesTests, "Collisions with an ordinary cube solid", t => {
         const squarePoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
-        cubeTrace.z = 10
-        cubeTrace.height = 10
+        const cubeTrace = makeTrace(trace.Type.SOLID, squarePoints, 10, 10)
 
         var levelTraces = new Traces([cubeTrace], 30, 30)
 
@@ -71,10 +76,8 @@ namespace splitTime.level {
     // Stairs are complicated, so this is a simple test to check they generally work OK
     splitTime.test.scenario(levelTracesTests, "Collisions with stairs work", t => {
         const stairsPoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const stairsTrace = new Trace(Trace.Type.STAIRS, stairsPoints)
-        stairsTrace.z = 10
-        stairsTrace.height = 10
-        stairsTrace.direction = direction.interpret("E")
+        const stairsTrace = makeTrace(trace.Type.STAIRS, stairsPoints, 10, 10)
+        stairsTrace.spec.direction = direction.interpret("E")
 
         var levelTraces = new Traces([stairsTrace], 30, 30)
 
@@ -104,14 +107,10 @@ namespace splitTime.level {
     // particularly with stairs being split across layers
     splitTime.test.scenario(levelTracesTests, "Collisions with stairs and cube", t => {
         const squarePoints = "(10, 10) (10, 15) (15, 15) (15, 10) (close)"
-        const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
-        cubeTrace.z = 15
-        cubeTrace.height = 5
+        const cubeTrace = makeTrace(trace.Type.SOLID, squarePoints, 15, 5)
         const stairsPoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const stairsTrace = new Trace(Trace.Type.STAIRS, stairsPoints)
-        stairsTrace.z = 10
-        stairsTrace.height = 10
-        stairsTrace.direction = direction.interpret("E")
+        const stairsTrace = makeTrace(trace.Type.STAIRS, stairsPoints, 10, 10)
+        stairsTrace.spec.direction = direction.interpret("E")
 
         var levelTraces = new Traces([stairsTrace, cubeTrace], 30, 30)
 
@@ -143,9 +142,7 @@ namespace splitTime.level {
     // This test is intended to cover ground
     splitTime.test.scenario(levelTracesTests, "Collisions with ground trace", t => {
         const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
-        const groundTrace = new Trace(Trace.Type.SOLID, groundPoints)
-        groundTrace.z = 15
-        groundTrace.height = 0
+        const groundTrace = makeTrace(trace.Type.SOLID, groundPoints, 15, 0)
 
         // Unfortunately, the order is important here at the present
         var levelTraces = new Traces([groundTrace], 30, 30)
@@ -171,13 +168,9 @@ namespace splitTime.level {
     // This test is intended to cover ground mixed with other stuff
     splitTime.test.scenario(levelTracesTests, "Collisions with ground and cube", t => {
         const squarePoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
-        cubeTrace.z = 10
-        cubeTrace.height = 10
+        const cubeTrace = makeTrace(trace.Type.SOLID, squarePoints, 10, 10)
         const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
-        const groundTrace = new Trace(Trace.Type.SOLID, groundPoints)
-        groundTrace.z = 15
-        groundTrace.height = 0
+        const groundTrace = makeTrace(trace.Type.SOLID, groundPoints, 15, 0)
 
         // Unfortunately, the order is important here at the present
         var levelTraces = new Traces([cubeTrace, groundTrace], 30, 30)
