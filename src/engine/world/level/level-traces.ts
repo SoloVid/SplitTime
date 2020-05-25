@@ -267,14 +267,7 @@ namespace splitTime.level {
                     extraBuffer.context.fillRect(0, 0, extraBuffer.width, extraBuffer.height)
                     extraBuffer.context.globalCompositeOperation = prevEbGop
 
-                    // try {
-                    //     holderCtx.save()
-                    //     holderCtx.rect(x, y, this.traceBinWidth, this.traceBinWidth)
-                    //     holderCtx.clip()
-                        holderCtx.drawImage(extraBuffer.element, 0, 0)
-                    // } finally {
-                    //     holderCtx.restore()
-                    // }
+                    holderCtx.drawImage(extraBuffer.element, 0, 0)
                 }
             }
         }

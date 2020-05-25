@@ -147,13 +147,13 @@ namespace splitTime.level {
         testTraces([smallCube.trace, pointer1.trace, pointer2.trace, eventBox.trace],
             (coords, collisionInfo) => {
                 t.assert(smallCube.overlaps(coords) === collisionInfo.containsSolid,
-                    "Should be solid at " + coordsStr(coords))
+                    "smallCube at " + coordsStr(coords))
                 t.assert(pointer1.overlaps(coords) === !!collisionInfo.pointerTraces[pointer1Level.id],
-                    "Should be pointer1 at " + coordsStr(coords))
+                    "pointer1 at " + coordsStr(coords))
                 t.assert(pointer2.overlaps(coords) === !!collisionInfo.pointerTraces[pointer2Level.id],
-                    "Should be pointer2 at " + coordsStr(coords))
+                    "pointer2 at " + coordsStr(coords))
                 t.assert(eventBox.overlaps(coords) === !!collisionInfo.events[eventId],
-                    "Should be event at " + coordsStr(coords))
+                    "eventBox at " + coordsStr(coords))
 
                 if (pointer1.overlaps(coords) && pointer2.overlaps(coords)) {
                     demonstratedOverlappingPointers = true
@@ -253,24 +253,24 @@ namespace splitTime.level {
     const pointer1Level = new splitTime.Level("pointer1-level", dummyFileData)
     pointer1.trace.level = pointer1Level
     pointer1.trace.offsetX = 1
-    pointer1.trace.offsetX = 1
-    pointer1.trace.offsetX = 1
+    pointer1.trace.offsetY = 1
+    pointer1.trace.offsetZ = 1
 
     // We want this second one to overlap with the first
     const pointer2Vertices = "(16, 16) (16, 24) (24, 24) (24, 16) (close)"
     const pointer2 = {
-        trace: makeTrace(trace.Type.POINTER, pointer1Vertices, 16, 8),
+        trace: makeTrace(trace.Type.POINTER, pointer2Vertices, 12, 9),
         overlaps: function(coords: Coordinates3D) {
             return coords.x >= 16 && coords.x <= 24
                 && coords.y >= 16 && coords.y <= 24
-                && coords.z >= 16 && coords.z < 24
+                && coords.z >= 12 && coords.z < 21
         }
     }
     const pointer2Level = new splitTime.Level("pointer2-level", dummyFileData)
     pointer2.trace.level = pointer2Level
     pointer2.trace.offsetX = 2
-    pointer2.trace.offsetX = 2
-    pointer2.trace.offsetX = 2
+    pointer2.trace.offsetY = 2
+    pointer2.trace.offsetZ = 2
 
     // Also trying to make this one overlap
     const eventVertices = "(14, 14) (14, 17) (17, 17) (17, 14) (close)"
