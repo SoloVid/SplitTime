@@ -32,12 +32,6 @@ namespace splitTime.trace {
         return colorToType[r + "," + g + "," + b + "," + a]
     }
 
-    export function getSolidColor(height: number) {
-        var g = Math.min(Math.max(0, +height), 255)
-        var b = 0
-        return "rgba(" + RColor.SOLID + ", " + g + ", " + b + ", 1)"
-    }
-
     export function getEventColor(id: number) {
         var b = id % 256
         var g = Math.floor(id / 256)

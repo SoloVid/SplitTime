@@ -1,7 +1,7 @@
 namespace splitTime.utils {
     export function drawShapeOpaque(
         points: (ReadonlyCoordinates2D | null)[],
-        target: GenericCanvasRenderingContext2D,
+        target: GenericCanvasRenderingContext2D | null,
         extraBuffer: splitTime.Canvas,
         color: string | CanvasGradient
     ): void {
@@ -81,6 +81,8 @@ namespace splitTime.utils {
 
         // Draw that opacified data to the target canvas
         extraBuffer.context.putImageData(imageData, sx, sy)
-        target.drawImage(extraBuffer.element, 0, 0)
+        if (target !== null) {
+            target.drawImage(extraBuffer.element, 0, 0)
+        }
     }
 }

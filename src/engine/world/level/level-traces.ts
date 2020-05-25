@@ -2,16 +2,12 @@ namespace splitTime.level {
     export namespace traces {
         export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
 
-        export class ZRange {
-            constructor(public minZ: number, public exMaxZ: number) {}
-        }
-
         export class CollisionInfo {
             containsSolid: boolean
             levels: { [levelId: string]: Level | null }
             pointerTraces: { [levelId: string]: splitTime.Trace }
             zBlockedTopEx: int
-            events: { [eventId: string]: ZRange }
+            events: { [eventId: string]: true }
             constructor() {
                 this.containsSolid = false
                 this.levels = {}
@@ -24,13 +20,17 @@ namespace splitTime.level {
 
     export class Traces {
         private width: int
+        private yWidth: int
         private layerZs: int[]
         private layerCount: int
         private layerFuncData: ImageData[]
-        private nextFunctionId: int
-        private internalEventIdMap: { [intId: number]: string }
-        private nextPointerId: int
-        private internalPointerTraceMap: { [intId: number]: splitTime.Trace }
+        // This value could potentially be exposed or calculated dynamically.
+        // There is a hard limit of 16 traces per pixel in the current paradigm,
+        // so this value determines the largest area affected by this
+        // technical limitation.
+        private readonly traceBinWidth: int = 16
+        private readonly layerSpecialTraceBins: (Trace[] | null)[][] = []
+        private readonly binsWide: int
         private debugTraceCanvas: splitTime.Canvas | null = null
 
         constructor(
@@ -39,13 +39,10 @@ namespace splitTime.level {
             levelYWidth: int
         ) {
             this.width = levelWidth
+            this.binsWide = Math.ceil(this.width / this.traceBinWidth)
+            this.yWidth = levelYWidth
             this.layerZs = []
             this.layerFuncData = []
-
-            this.internalEventIdMap = {}
-            this.internalPointerTraceMap = {}
-            this.nextFunctionId = 1
-            this.nextPointerId = 1
 
             const holderCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
             const holderCtx = holderCanvas.context
@@ -79,6 +76,8 @@ namespace splitTime.level {
                 iLayer < this.layerCount;
                 iLayer++
             ) {
+                this.layerSpecialTraceBins.push(Array(Math.ceil(levelWidth / this.traceBinWidth) * Math.ceil(levelYWidth / this.traceBinWidth)).fill(null))
+
                 holderCtx.clearRect(
                     0,
                     0,
@@ -89,28 +88,28 @@ namespace splitTime.level {
                 const layerZ = this.layerZs[iLayer]
                 // This operation is safe because there should be a sentinel
                 const nextLayerZ = this.layerZs[iLayer + 1]
-
-                // holderCtx.translate(0.5, 0.5)
+                const specialTraceBins = this.layerSpecialTraceBins[iLayer]
 
                 const existingGCO = holderCtx.globalCompositeOperation
+
                 // The operation we want here is to take the brighter of the pixels.
                 // According to MDN, that should be "lighten."
                 // However, "lighten" seems to be an alias for "lighter" (additive)
                 // in all three major browsers I tried.
-                // holderCtx.globalCompositeOperation = "lighten"
+                // So instead, we just sorted all of the solid traces first.
+                holderCtx.globalCompositeOperation = "source-over"
                 for (const trace of tracesSortedFromBottomToTop) {
                     this.drawPartialSolidTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ)
                 }
-                holderCtx.globalCompositeOperation = existingGCO
-                // We are drawing these in a separate loop because in the future
-                // we want these to be additively drawn ("lighter") while the solids are drawn normally
+
+                holderCtx.globalCompositeOperation = "lighter"
                 for (const trace of this.traces) {
-                    this.drawPartialSpecialTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ)
+                    this.drawPartialSpecialTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ, specialTraceBins)
                 }
 
-                // TODO: traces related to props
+                holderCtx.globalCompositeOperation = existingGCO
 
-                // holderCtx.translate(-0.5, -0.5)
+                // TODO: traces related to props
 
                 this.layerFuncData[iLayer] = holderCtx.getImageData(
                     0,
@@ -172,8 +171,8 @@ namespace splitTime.level {
             const minZRelativeToTrace = minZ - spec.z
             const traceHeightFromMinZ = spec.z + spec.height - minZ
             const pixelHeight = constrain(traceHeightFromMinZ, 0, maxHeight)
-            const groundColor = splitTime.trace.getSolidColor(0)
-            const topColor = splitTime.trace.getSolidColor(pixelHeight)
+            const groundColor = "rgba(" + 1 + ", 0, 0, 1)"
+            const topColor = "rgba(" + Math.min(255, pixelHeight + 1) + ", 0, 0, 1)"
             const noColor = "rgba(0, 0, 0, 0)"
             switch (spec.type) {
                 case splitTime.trace.Type.SOLID:
@@ -212,77 +211,72 @@ namespace splitTime.level {
             }
         }
 
-        private drawPartialSpecialTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, extraBuffer: splitTime.Canvas, minZ: int, exMaxZ: int): void {
+        private drawPartialSpecialTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, extraBuffer: splitTime.Canvas, minZ: int, exMaxZ: int, specialTraceBins: (Trace[] | null)[]): void {
             const spec = trace.spec
             if (!isOverlap(spec.z, spec.height, minZ, exMaxZ - minZ)) {
                 return
             }
-            // FTODO: support adding multiple in same pixel
-            // Will require additive blending and probably
-            // also cell-based lookups
             switch (spec.type) {
                 case splitTime.trace.Type.EVENT:
-                    const eventStringId = spec.eventId
-                    assert(eventStringId !== null, "Event trace must have an event")
-                    const eventIntId = this.nextFunctionId++
-                    this.internalEventIdMap[eventIntId] = eventStringId
-                    const functionColor = splitTime.trace.getEventColor(
-                        eventIntId
-                    )
-                    trace.drawColor(
-                        holderCtx,
-                        extraBuffer,
-                        functionColor
-                    )
-                    break
                 case splitTime.trace.Type.POINTER:
-                    const pointerIntId = this.nextPointerId++
-                    this.internalPointerTraceMap[pointerIntId] = trace
-                    const pointerColor = splitTime.trace.getPointerColor(
-                        pointerIntId
-                    )
-                    trace.drawColor(
-                        holderCtx,
-                        extraBuffer,
-                        pointerColor
-                    )
-                    break
                 case splitTime.trace.Type.TRANSPORT:
-                    const transportStringId = trace.getLocationId()
-                    const transportIntId = this.nextFunctionId++
-                    this.internalEventIdMap[
-                        transportIntId
-                    ] = transportStringId
-                    const transportColor = splitTime.trace.getEventColor(
-                        transportIntId
-                    )
-                    trace.drawColor(
-                        holderCtx,
-                        extraBuffer,
-                        transportColor
-                    )
-                    break
+                    // Do nothing. We're just trying to weed out the other types.
+                    break;
+                default:
+                    return
             }
-        }
 
-        private getEventIdFromPixel(r: number, g: number, b: number, a: number) {
-            var eventIntId = splitTime.trace.getEventIdFromColor(r, g, b, a)
-            return this.internalEventIdMap[eventIntId]
-        }
+            trace.drawColor(
+                null,
+                extraBuffer,
+                // This color is arbitrary. We'll replace it later.
+                "rgba(255, 255, 255, 1)"
+            )
 
-        /**
-         * @return {splitTime.Trace}
-         */
-        private getPointerTraceFromPixel(
-            r: number,
-            g: number,
-            b: number,
-            a: number
-        ): splitTime.Trace {
-            var pointerIntId = splitTime.trace.getPointerIdFromColor(r, g, b, a)
-            const pointerTrace = this.internalPointerTraceMap[pointerIntId]
-            assert(!!pointerTrace, "Pointer trace not found: " + pointerIntId)
-            return pointerTrace
+            const imageData = extraBuffer.context.getImageData(0, 0, extraBuffer.width, extraBuffer.height)
+
+            for (let y = 0; y < this.yWidth; y += this.traceBinWidth) {
+                for (let x = 0; x < this.width; x += this.traceBinWidth) {
+                    extraBuffer.context.clearRect(
+                        0,
+                        0,
+                        extraBuffer.width,
+                        extraBuffer.height
+                    )
+                    // It's not well documented online, but the 4th and 5th parameters
+                    // offset into both the source and destination canvases.
+                    extraBuffer.context.putImageData(imageData, 0, 0, x, y, this.traceBinWidth, this.traceBinWidth)
+
+                    const binIndex = y / this.traceBinWidth * this.binsWide + x / this.traceBinWidth
+                    if (specialTraceBins[binIndex] === null) {
+                        specialTraceBins[binIndex] = []
+                    }
+                    const bin = specialTraceBins[binIndex]!
+                    const traceId = bin.length
+                    assert(traceId < 16, "More than 16 traces too closely overlapping")
+                    bin.push(trace)
+                    const traceShortId = (0x1 << traceId)
+                    const g = (traceShortId >>> 8) & 0xF
+                    const b = traceShortId & 0xF
+                    const color = "rgba(0, " + g + ", " + b + ", 1)"
+
+                    // Change the color of the trace already drawn
+                    const prevEbGop = extraBuffer.context.globalCompositeOperation
+                    extraBuffer.context.globalCompositeOperation = "source-in"
+                    extraBuffer.context.fillStyle = color
+                    extraBuffer.context.fillRect(0, 0, extraBuffer.width, extraBuffer.height)
+                    extraBuffer.context.globalCompositeOperation = prevEbGop
+
+                    // try {
+                    //     holderCtx.save()
+                    //     holderCtx.rect(x, y, this.traceBinWidth, this.traceBinWidth)
+                    //     holderCtx.clip()
+                        holderCtx.drawImage(extraBuffer.element, 0, 0)
+                    // } finally {
+                    //     holderCtx.restore()
+                    // }
+                }
+            }
         }
 
         /**
@@ -367,51 +361,53 @@ namespace splitTime.level {
             var g = imageData.data[dataIndex++]
             var b = imageData.data[dataIndex++]
             var a = imageData.data[dataIndex++]
+
+            if (r > 0) {
+                var height = layerZ + (r - 1)
+                if (height >= minZ) {
+                    collisionInfo.containsSolid = true
+                    collisionInfo.zBlockedTopEx = Math.max(
+                        height,
+                        collisionInfo.zBlockedTopEx
+                    )
+                }
+            }
+
             let isOtherLevel = false
-            if (a === 255) {
-                switch (r) {
-                    case splitTime.trace.RColor.SOLID:
-                        var height = layerZ + g
-                        if (height >= minZ) {
-                            collisionInfo.containsSolid = true
-                            collisionInfo.zBlockedTopEx = Math.max(
-                                height,
-                                collisionInfo.zBlockedTopEx
-                            )
+            if (g > 0 || b > 0) {
+                const shortFlags = (g << 8) | b
+                const bin = this.layerSpecialTraceBins[layer][
+                    Math.floor(y / this.traceBinWidth) * this.binsWide + Math.floor(x / this.traceBinWidth)
+                ]
+                if (bin !== null) {
+                    for (let i = 0; i < bin.length; i++) {
+                        const flag = (shortFlags >>> i) & 0x1
+                        if (flag === 0) {
+                            continue
                         }
-                        break
-                    case splitTime.trace.RColor.EVENT:
-                        if (ignoreEvents) {
-                            break
-                        }
-                        // TODO: check event height
-                        var eventId = this.getEventIdFromPixel(r, g, b, a)
-                        if (!collisionInfo.events[eventId]) {
-                            collisionInfo.events[eventId] = new traces.ZRange(
-                                minZ,
-                                exMaxZ
-                            )
-                        } else {
-                            collisionInfo.events[eventId].minZ = Math.min(
-                                minZ,
-                                collisionInfo.events[eventId].minZ
-                            )
-                            collisionInfo.events[eventId].exMaxZ = Math.max(
-                                exMaxZ,
-                                collisionInfo.events[eventId].exMaxZ
-                            )
-                        }
-                        break
-                    case splitTime.trace.RColor.POINTER:
-                        isOtherLevel = true
-                        var trace = this.getPointerTraceFromPixel(r, g, b, a)
+                        const trace = bin[i]
                         if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.z, trace.spec.height)) {
-                            break
+                            continue
                         }
-                        assert(!!trace.level, "Pointer trace has no level")
-                        collisionInfo.pointerTraces[trace.level.id] = trace
-                        collisionInfo.levels[trace.level.id] = trace.level
-                        break
+                        const spec = trace.spec
+                        switch (spec.type) {
+                            case splitTime.trace.Type.EVENT:
+                                assert(spec.eventId !== null, "Event trace has no ID")
+                                collisionInfo.events[spec.eventId] = true
+                                break;
+                            case splitTime.trace.Type.TRANSPORT:
+                                collisionInfo.events[spec.getLocationId()] = true
+                                break;
+                            case splitTime.trace.Type.POINTER:
+                                isOtherLevel = true
+                                assert(!!trace.level, "Pointer trace has no level")
+                                collisionInfo.pointerTraces[trace.level.id] = trace
+                                collisionInfo.levels[trace.level.id] = trace.level
+                                break;
+                            default:
+                                throw new Error("Unexpected trace type " + spec.type)
+                        }
+                    }
                 }
             }
 

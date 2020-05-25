@@ -44,7 +44,7 @@ namespace splitTime {
         }
 
         drawColor(
-            target: GenericCanvasRenderingContext2D,
+            target: GenericCanvasRenderingContext2D | null,
             extraBuffer: splitTime.Canvas,
             color: string | CanvasGradient,
             offsetPos = { x: 0, y: 0 }
