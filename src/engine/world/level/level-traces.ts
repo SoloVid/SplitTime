@@ -226,50 +226,87 @@ namespace splitTime.level {
                     return
             }
 
+            const colorsAlreadyPicked: light.Color[] = []
+            const that = this
+            function getColor(x: int, y: int): light.Color {
+                const binIndex = Math.floor(y / that.traceBinWidth) * that.binsWide + Math.floor(x / that.traceBinWidth)
+                if (!!colorsAlreadyPicked[binIndex]) {
+                    return colorsAlreadyPicked[binIndex]
+                }
+                if (specialTraceBins[binIndex] === null) {
+                    specialTraceBins[binIndex] = []
+                }
+                const bin = specialTraceBins[binIndex]!
+                const traceId = bin.length
+                assert(traceId < 16, "More than 16 traces too closely overlapping")
+                bin.push(trace)
+                const traceShortId = (0x1 << traceId)
+                const g = (traceShortId >>> 8) & 0xF
+                const b = traceShortId & 0xF
+                const color = new light.Color(0, g, b)
+                colorsAlreadyPicked[binIndex] = color
+                return color
+            }
+
             trace.drawColor(
-                null,
+                holderCtx,
                 extraBuffer,
-                // This color is arbitrary. We'll replace it later.
-                "rgba(255, 255, 255, 1)"
+                getColor
             )
 
-            const imageData = extraBuffer.context.getImageData(0, 0, extraBuffer.width, extraBuffer.height)
+            // const imageData = extraBuffer.context.getImageData(0, 0, extraBuffer.width, extraBuffer.height)
+            // const imageDataAsInts = new Uint32Array(imageData.data.buffer)
 
-            for (let y = 0; y < this.yWidth; y += this.traceBinWidth) {
-                for (let x = 0; x < this.width; x += this.traceBinWidth) {
-                    extraBuffer.context.clearRect(
-                        0,
-                        0,
-                        extraBuffer.width,
-                        extraBuffer.height
-                    )
-                    // It's not well documented online, but the 4th and 5th parameters
-                    // offset into both the source and destination canvases.
-                    extraBuffer.context.putImageData(imageData, 0, 0, x, y, this.traceBinWidth, this.traceBinWidth)
+            // for (let y = 0; y < this.yWidth; y += this.traceBinWidth) {
+            //     for (let x = 0; x < this.width; x += this.traceBinWidth) {
+            //         if (!this.hasSomeColor(imageDataAsInts, imageData.width, x, y, this.traceBinWidth, this.traceBinWidth)) {
+            //             continue
+            //         }
 
-                    const binIndex = y / this.traceBinWidth * this.binsWide + x / this.traceBinWidth
-                    if (specialTraceBins[binIndex] === null) {
-                        specialTraceBins[binIndex] = []
+            //         extraBuffer.context.clearRect(
+            //             0,
+            //             0,
+            //             extraBuffer.width,
+            //             extraBuffer.height
+            //         )
+            //         // It's not well documented online, but the 4th and 5th parameters
+            //         // offset into both the source and destination canvases.
+            //         extraBuffer.context.putImageData(imageData, 0, 0, x, y, this.traceBinWidth, this.traceBinWidth)
+
+            //         const binIndex = y / this.traceBinWidth * this.binsWide + x / this.traceBinWidth
+            //         if (specialTraceBins[binIndex] === null) {
+            //             specialTraceBins[binIndex] = []
+            //         }
+            //         const bin = specialTraceBins[binIndex]!
+            //         const traceId = bin.length
+            //         assert(traceId < 16, "More than 16 traces too closely overlapping")
+            //         bin.push(trace)
+            //         const traceShortId = (0x1 << traceId)
+            //         const g = (traceShortId >>> 8) & 0xF
+            //         const b = traceShortId & 0xF
+            //         const color = "rgba(0, " + g + ", " + b + ", 1)"
+
+            //         // Change the color of the trace already drawn
+            //         const prevEbGop = extraBuffer.context.globalCompositeOperation
+            //         extraBuffer.context.globalCompositeOperation = "source-in"
+            //         extraBuffer.context.fillStyle = color
+            //         extraBuffer.context.fillRect(0, 0, extraBuffer.width, extraBuffer.height)
+            //         extraBuffer.context.globalCompositeOperation = prevEbGop
+
+            //         holderCtx.drawImage(extraBuffer.element, 0, 0)
+            //     }
+            // }
+        }
+
+        private hasSomeColor(canvasData: Uint32Array, canvasWidth: int, startX: int, startY: int, width: int, height: int): boolean {
+            for (let y = startY; y < startY + height; y++) {
+                for (let x = startX; x < startX + width; x++) {
+                    if (canvasData[y * canvasWidth + x] > 0) {
+                        return true
                     }
-                    const bin = specialTraceBins[binIndex]!
-                    const traceId = bin.length
-                    assert(traceId < 16, "More than 16 traces too closely overlapping")
-                    bin.push(trace)
-                    const traceShortId = (0x1 << traceId)
-                    const g = (traceShortId >>> 8) & 0xF
-                    const b = traceShortId & 0xF
-                    const color = "rgba(0, " + g + ", " + b + ", 1)"
-
-                    // Change the color of the trace already drawn
-                    const prevEbGop = extraBuffer.context.globalCompositeOperation
-                    extraBuffer.context.globalCompositeOperation = "source-in"
-                    extraBuffer.context.fillStyle = color
-                    extraBuffer.context.fillRect(0, 0, extraBuffer.width, extraBuffer.height)
-                    extraBuffer.context.globalCompositeOperation = prevEbGop
-
-                    holderCtx.drawImage(extraBuffer.element, 0, 0)
                 }
             }
+            return false
         }
 
         /**

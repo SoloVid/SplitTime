@@ -3,7 +3,7 @@ namespace splitTime.utils {
         points: (ReadonlyCoordinates2D | null)[],
         target: GenericCanvasRenderingContext2D | null,
         extraBuffer: splitTime.Canvas,
-        color: string | CanvasGradient
+        color: string | CanvasGradient | ((x: int, y: int) => light.Color)
     ): void {
         extraBuffer.context.clearRect(
             0,
@@ -25,8 +25,13 @@ namespace splitTime.utils {
         try {
             extraBuffer.context.translate(0.5, 0.5)
 
-            extraBuffer.context.strokeStyle = color
-            extraBuffer.context.fillStyle = color
+            if (typeof color === "function") {
+                extraBuffer.context.strokeStyle = "#FFFFFF"
+                extraBuffer.context.fillStyle = "#FFFFFF"
+            } else {
+                extraBuffer.context.strokeStyle = color
+                extraBuffer.context.fillStyle = color
+            }
             extraBuffer.context.beginPath()
 
             let newX = points[0].x
@@ -76,6 +81,11 @@ namespace splitTime.utils {
                 data[i + 1] = 0
                 data[i + 2] = 0
                 data[i + 3] = 0
+            } else if (typeof color === "function") {
+                const rgb = color(sx + ((i / 4) % imageData.width), sy + (Math.floor(i / 4 / imageData.width)))
+                data[i + 0] = rgb.r
+                data[i + 1] = rgb.g
+                data[i + 2] = rgb.b
             }
         }
 

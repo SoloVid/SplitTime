@@ -46,7 +46,7 @@ namespace splitTime {
         drawColor(
             target: GenericCanvasRenderingContext2D | null,
             extraBuffer: splitTime.Canvas,
-            color: string | CanvasGradient,
+            color: string | CanvasGradient | ((x: int, y: int) => light.Color),
             offsetPos = { x: 0, y: 0 }
         ) {
             return this.spec.drawColor(target, extraBuffer, color, offsetPos)
