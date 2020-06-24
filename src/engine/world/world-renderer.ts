@@ -19,7 +19,7 @@ namespace splitTime {
         constructor(
             private readonly camera: Camera,
             private readonly see: GenericCanvasRenderingContext2D,
-            private readonly currentLevelGetter: level_getter,
+            private readonly levelManager: LevelManager,
             private readonly playerBodyGetter: body_getter
         ) {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
@@ -45,7 +45,7 @@ namespace splitTime {
                 return
             }
 
-            const currentLevel = this.currentLevelGetter()
+            const currentLevel = this.levelManager.getCurrent()
             if (!currentLevel) {
                 throw new Error("currentLevel is not initialized")
             }
@@ -147,15 +147,15 @@ namespace splitTime {
                 )
                 this.snapshot.context.globalAlpha = 1
             }
-
+                        
             //If the active player is switching regions  
             if(playerBody?.inRegionTransition){                
                 //Fade to white
                 if (this.fadeOut < 1) {
                     this.fadeOut += this.FADE_INCREMENT
                 } else {
-                    playerBody.inRegionTransition = false
-                    playerBody.finishRegionTransition()
+                    playerBody.finishLevelTransition()
+                    this.levelManager.finishRegionTransition()
 
                     //Switch from fading out to fading in
                     this.fadeIn = 1

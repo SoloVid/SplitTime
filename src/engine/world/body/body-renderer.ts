@@ -47,18 +47,35 @@ namespace splitTime.body {
             node.canvReq = canvReq
             node.shouldBeDrawnThisFrame = true
             node.isPlayer = isPlayer
+
+            //Fade in/out for level transitions
+            if(body.inLevelTransition) {
+                //for the active player, only fade in/out on region transitions
+                if(node.isPlayer && !body.inRegionTransition) {
+                    body.finishLevelTransition()
+                }
+                else {
+                    node.targetOpacity = 0
+                    if (node.opacity <= 0 && node.targetOpacity == 0) {
+                        node.targetOpacity = 1
+                        body.finishLevelTransition()
+                    }
+                }
+            }
         }
 
         private _getBodyNode(body: splitTime.Body): BodyNode {
-            // If the body is unaccounted or misplaced, set up a new node
+            // If the node is in the map, return it.
             if (body.ref in this._bodyToNodeIndexMap) {
                 const node = this._nodes[this._bodyToNodeIndexMap[body.ref]]
                 if (node) {
-                    if (node.body !== body) {
+                    if (node.body == body) {
                         return node
                     }
                 }
             }
+
+            // Otherwise, if the body is unaccounted or misplaced, set up a new node
             var node = new BodyNode(body)
             for (var i = 0; i <= this._nodes.length; i++) {
                 if (!this._nodes[i]) {
@@ -283,15 +300,18 @@ namespace splitTime.body {
                         }
                     }
 
-                    //Fade in gradually based on the number of overlapping pixels
-                    var crossFadeFactor = Math.min(
-                        overlappingPixels / CROSS_FADE_PIXELS,
-                        1
-                    )
-                    var pixelsFactor =
-                        crossFadeFactor *
-                        nodeInFront.drawable.playerOcclusionFadeFactor
-                    nodeInFront.targetOpacity = 1 - pixelsFactor
+                    //If the body is not already in a level transition
+                    if(!nodeInFront.body.inLevelTransition){
+                        //Fade gradually based on the number of overlapping pixels
+                        var crossFadeFactor = Math.min(
+                            overlappingPixels / CROSS_FADE_PIXELS,
+                            1
+                        )
+                        var pixelsFactor =
+                            crossFadeFactor *
+                            nodeInFront.drawable.playerOcclusionFadeFactor
+                        nodeInFront.targetOpacity = 1 - pixelsFactor
+                    }
                 }
             }
         }
@@ -337,7 +357,7 @@ namespace splitTime.body {
             //Draw the body
             node.drawable.draw(this.ctx)
 
-            //Reset opacity settings back to 1 ("not opaque")
+            //Reset opacity settings back to default (1 - "not opaque")
             this.ctx.globalAlpha = 1
             node.targetOpacity = 1
 
@@ -377,7 +397,7 @@ namespace splitTime.body {
     }
 
     /**
-     * returns true if body1's backside is more forward than body2's frontside
+     * returns true if body1's backside is more forward than body2's front side
      *
      * @param {splitTime.Body} body1
      * @param {splitTime.Body} body2

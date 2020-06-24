@@ -44,13 +44,10 @@ namespace splitTime {
         const perspective = g.perspective
         g.performanceCheckpoint("start loop", 999999)
 
-        if (perspective.levelManager.isTransitioning()) {
-            // FTODO: don't skip rest of frame
-            return
-        }
-
+        //Initiate level transition if applicable
         const isCurrentLevelSet = perspective.levelManager.isCurrentSet()
         if (
+            !perspective.levelManager.isTransitioning() &&
             perspective.playerBody &&
             (!isCurrentLevelSet ||
                 perspective.playerBody.getLevel() !==
@@ -60,6 +57,7 @@ namespace splitTime {
                 perspective.playerBody.getLevel()
             )
             g.performanceCheckpoint("level transition", 10)
+            
             // FTODO: don't skip rest of frame
             return
         }

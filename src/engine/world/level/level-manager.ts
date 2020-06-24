@@ -8,6 +8,7 @@ namespace splitTime {
         private readonly world: World
         private currentLevel: Level | null = null
         private transitionInProgress: boolean = false
+        private regionTransitionInProgress: boolean = false
 
         private transitionStartListener: transition_listener | null = null
         private transitionEndListener: transition_listener | null = null
@@ -25,7 +26,11 @@ namespace splitTime {
         }
 
         /**
+         * Transition to a new level
+         * 
          * STOP!!! This method should ONLY be called by the main game loop.
+         * 
+         * @param level - the destination level
          */
         async transition(level: Level): Promise<void> {
             if (this.transitionInProgress) {
@@ -44,8 +49,12 @@ namespace splitTime {
             const enteringLevel = level
             const exitingLevel = this.currentLevel
 
-            var changeRegion =
-                !exitingLevel ||
+            //If this is the initial transition at the start of a game
+            var gameLoading = !exitingLevel 
+            
+            //This will be true if we are changing regions, but not true for the initial game load
+            this.regionTransitionInProgress =
+                exitingLevel !== null &&
                 exitingLevel.getRegion() !== enteringLevel.getRegion()
 
             //********Leave current level
@@ -58,7 +67,7 @@ namespace splitTime {
 
             if (exitingLevel) {
                 exitingLevel.runExitFunction()
-                if (changeRegion) {
+                if (this.regionTransitionInProgress) {
                     exitingLevel.getRegion().unloadLevels()
                 }
             }
@@ -67,7 +76,7 @@ namespace splitTime {
 
             this.currentLevel = enteringLevel
 
-            if (changeRegion) {
+            if (gameLoading || this.regionTransitionInProgress) {
                 await enteringLevel.getRegion().loadForPlay(this.world)
             }
 
@@ -86,6 +95,14 @@ namespace splitTime {
 
         isTransitioning(): boolean {
             return this.transitionInProgress
+        }
+
+        isTransitioningRegions(): boolean {
+            return this.regionTransitionInProgress
+        }
+
+        finishRegionTransition() {
+            this.regionTransitionInProgress = false
         }
 
         isCurrentSet(): boolean {

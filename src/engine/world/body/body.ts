@@ -11,6 +11,7 @@ namespace splitTime {
         mover: splitTime.body.Mover
         speechBox: splitTime.body.SpeechBox
 
+        inLevelTransition: boolean
         inRegionTransition: boolean
         transitionLevel: Level | null
         transitionX: number
@@ -61,6 +62,7 @@ namespace splitTime {
             this.speechBox = new splitTime.body.SpeechBox(this, 42)
 
             //Initialize variables used for region transitions
+            this.inLevelTransition = false
             this.inRegionTransition = false
             this.transitionLevel = null
             this.transitionX = -1
@@ -233,10 +235,11 @@ namespace splitTime {
 
         /**
          * 
-         * When the active player is transitioning to a new region and the transition
+         * When the body is transitioning to a new level and the transition
          * animation is complete, this function puts the body in the new location.
          */
-        finishRegionTransition() {
+        finishLevelTransition() {
+            this.inLevelTransition = false
             this.inRegionTransition = false
             
             // Use the arguments that we saved from the initial call to put()
@@ -269,15 +272,20 @@ namespace splitTime {
             includeChildren = false,
             finishTransition = false
         ){
-            //If we are switching regions, wait for the world renderer to do the transition animation
+            //If we are switching levels
             if(
                 !finishTransition &&
                 this._level !== null &&
                 level !== null &&
-                this._level?.getRegion() !== level.getRegion()
+                this._level !== level
             ) {
-                this.inRegionTransition = true
-
+                this.inLevelTransition = true
+                
+                //If this is a region transition
+                if(level.region !== this._level.region) {
+                    this.inRegionTransition = true
+                }
+                
                 //Don't put the body in the next level yet, but save the location
                 //information to be used once the transition animation is finished.
                 this.transitionLevel = level
