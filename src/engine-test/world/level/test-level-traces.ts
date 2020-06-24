@@ -2,39 +2,16 @@ namespace splitTime.level {
     const levelTracesTests = {}
     splitTime.test.group(levelTracesTests, "Level Traces Tests", level)
 
-    // This test is simple and intended to cover cases of different volumes requested
-    splitTime.test.scenario(levelTracesTests, "Collisions with an ordinary cube solid", t => {
-        const squarePoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
-        cubeTrace.z = 10
-        cubeTrace.height = 10
-
-        var levelTraces = new Traces([cubeTrace], 30, 30);
-
-        // Pixel by pixel
-        for (let x = 0; x < 30; x++) {
-            for (let y = 0; y < 30; y++) {
-                for (let z = 0; z < 30; z++) {
-                    const collisionInfo = new traces.CollisionInfo()
-                    levelTraces.calculateVolumeCollision(collisionInfo, x, 1, y, 1, z, z + 1)
-                    const coordsStr = "(" + x + ", " + y + ", " + z + ")"
-                    if (
-                        (x < 10 || x > 20)
-                        || (y < 10 || y > 20)
-                        || (z < 10 || z > 20)
-                    ) {
-                        t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the cube at " + coordsStr)
-                    } else {
-                        t.assert(collisionInfo.containsSolid, "We should be colliding with the cube at " + coordsStr)
-                    }
-                }
-            }
-        }
+    // This test covers the most volume we use to check collisions,
+    // but we're keeping this plane-checking testing to a minimum
+    // because it is a little more unwieldy for the complicated cases later.
+    splitTime.test.scenario(levelTracesTests, "Plane collisions with cube", t => {
+        var levelTraces = new Traces([largeCube.trace], width, length)
 
         // x by x
-        for (let x = 0; x < 30; x++) {
+        for (let x = 0; x < width; x++) {
             const collisionInfo = new traces.CollisionInfo()
-            levelTraces.calculateVolumeCollision(collisionInfo, x, 1, 0, 30, 0, 30)
+            levelTraces.calculateVolumeCollision(collisionInfo, x, 1, 0, length, 0, height)
             const coordsStr = "x = " + x
             if (x < 10 || x > 20) {
                 t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the cube at " + coordsStr)
@@ -44,9 +21,9 @@ namespace splitTime.level {
         }
 
         // y by y
-        for (let y = 0; y < 30; y++) {
+        for (let y = 0; y < length; y++) {
             const collisionInfo = new traces.CollisionInfo()
-            levelTraces.calculateVolumeCollision(collisionInfo, 0, 30, y, 1, 0, 30)
+            levelTraces.calculateVolumeCollision(collisionInfo, 0, width, y, 1, 0, height)
             const coordsStr = "y = " + y
             if (y < 10 || y > 20) {
                 t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the cube at " + coordsStr)
@@ -56,9 +33,9 @@ namespace splitTime.level {
         }
 
         // z by z
-        for (let z = 0; z < 30; z++) {
+        for (let z = 0; z < height; z++) {
             const collisionInfo = new traces.CollisionInfo()
-            levelTraces.calculateVolumeCollision(collisionInfo, 0, 30, 0, 30, z, z + 1)
+            levelTraces.calculateVolumeCollision(collisionInfo, 0, width, 0, length, z, z + 1)
             const coordsStr = "z = " + z
             if (z < 10 || z > 20) {
                 t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the cube at " + coordsStr)
@@ -68,139 +45,280 @@ namespace splitTime.level {
         }
     })
 
-    // Stairs are complicated, so this is a simple test to check they generally work OK
-    splitTime.test.scenario(levelTracesTests, "Collisions with stairs work", t => {
-        const stairsPoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const stairsTrace = new Trace(Trace.Type.STAIRS, stairsPoints)
-        stairsTrace.z = 10
-        stairsTrace.height = 10
-        stairsTrace.direction = direction.interpret("E")
-
-        var levelTraces = new Traces([stairsTrace], 30, 30);
-
-        for (let x = 0; x < 30; x++) {
-            for (let y = 0; y < 30; y++) {
-                for (let z = 0; z < 30; z++) {
-                    const collisionInfo = new traces.CollisionInfo()
-                    levelTraces.calculateVolumeCollision(collisionInfo, x, 1, y, 1, z, z + 1)
-                    const coordsStr = "(" + x + ", " + y + ", " + z + ")"
-                    if (
-                        (x < 10 || x > 20)
-                        || (y < 10 || y > 20)
-                        || (z < 10 || z > 20)
-                        // As x increases (since E), stair steps up
-                        || (z > x)
-                    ) {
-                        t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the stairs at " + coordsStr)
-                    } else {
-                        t.assert(collisionInfo.containsSolid, "We should be colliding with the stairs at " + coordsStr)
-                    }
-                }
+    // Cover the basics with just points. This should be basically
+    // the same as the previous (plane-based) test but verify that
+    // the collisions are detected the same when looking at each point.
+    splitTime.test.scenario(levelTracesTests, "Point collisions with cube", t => {
+        testTraces([largeCube.trace], (coords, collisionInfo) => {
+            if (largeCube.overlaps(coords)) {
+                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+            } else {
+                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
-        }
+        })
+    })
+
+    // Stairs are complicated, so this is a simple test to check they generally work OK
+    splitTime.test.scenario(levelTracesTests, "Collisions with stairs", t => {
+        testTraces([stairs.trace], (coords, collisionInfo) => {
+            if (stairs.overlaps(coords)) {
+                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+            } else {
+                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
+            }
+        })
     })
 
     // This test combines stuff to make sure auto-layer-splitting stuff works properly,
     // particularly with stairs being split across layers
     splitTime.test.scenario(levelTracesTests, "Collisions with stairs and cube", t => {
-        const squarePoints = "(10, 10) (10, 15) (15, 15) (15, 10) (close)"
-        const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
-        cubeTrace.z = 15
-        cubeTrace.height = 5
-        const stairsPoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const stairsTrace = new Trace(Trace.Type.STAIRS, stairsPoints)
-        stairsTrace.z = 10
-        stairsTrace.height = 10
-        stairsTrace.direction = direction.interpret("E")
-
-        var levelTraces = new Traces([stairsTrace, cubeTrace], 30, 30);
-
-        for (let x = 0; x < 30; x++) {
-            for (let y = 0; y < 30; y++) {
-                for (let z = 0; z < 30; z++) {
-                    const collisionInfo = new traces.CollisionInfo()
-                    levelTraces.calculateVolumeCollision(collisionInfo, x, 1, y, 1, z, z + 1)
-                    const coordsStr = "(" + x + ", " + y + ", " + z + ")"
-                    const isNotInCube = (x < 10 || x > 15)
-                        || (y < 10 || y > 15)
-                        || (z < 15 || z > 20)
-                    const isNotInStairs = (x < 10 || x > 20)
-                        || (y < 10 || y > 20)
-                        || (z < 10 || z > 20)
-                        // As x increases (since E), stair steps up
-                        || (z > x)
-
-                    if (isNotInCube && isNotInStairs) {
-                        t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr)
-                    } else {
-                        t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr)
-                    }
-                }
+        testTraces([stairs.trace, smallCube.trace], (coords, collisionInfo) => {
+            if (smallCube.overlaps(coords) || stairs.overlaps(coords)) {
+                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+            } else {
+                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
-        }
+        })
     })
 
-    // This test is intended to cover ground
+    // This test is intended to cover some ground (pun intended)
     splitTime.test.scenario(levelTracesTests, "Collisions with ground trace", t => {
-        const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
-        const groundTrace = new Trace(Trace.Type.SOLID, groundPoints)
-        groundTrace.z = 15
-        groundTrace.height = 0
-
-        // Unfortunately, the order is important here at the present
-        var levelTraces = new Traces([groundTrace], 30, 30);
-
-        // Pixel by pixel
-        for (let x = 0; x < 30; x++) {
-            for (let y = 0; y < 30; y++) {
-                for (let z = 0; z < 30; z++) {
-                    const collisionInfo = new traces.CollisionInfo()
-                    levelTraces.calculateVolumeCollision(collisionInfo, x, 1, y, 1, z, z + 1)
-                    const coordsStr = "(" + x + ", " + y + ", " + z + ")"
-                    const isNotInGround = z !== 15
-                    if (isNotInGround) {
-                        t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with ground at " + coordsStr)
-                    } else {
-                        t.assert(collisionInfo.containsSolid, "We should be colliding with ground at " + coordsStr)
-                    }
-                }
+        testTraces([ground.trace], (coords, collisionInfo) => {
+            if (ground.overlaps(coords)) {
+                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+            } else {
+                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
-        }
+        })
     })
 
     // This test is intended to cover ground mixed with other stuff
-    // This test is currently failing, presumably because of weird compositing issues?
     splitTime.test.scenario(levelTracesTests, "Collisions with ground and cube", t => {
-        const squarePoints = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
-        const cubeTrace = new Trace(Trace.Type.SOLID, squarePoints)
-        cubeTrace.z = 10
-        cubeTrace.height = 10
-        const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
-        const groundTrace = new Trace(Trace.Type.SOLID, groundPoints)
-        groundTrace.z = 15
-        groundTrace.height = 0
+        testTraces([largeCube.trace, ground.trace], (coords, collisionInfo) => {
+            if (largeCube.overlaps(coords) || ground.overlaps(coords)) {
+                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+            } else {
+                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
+            }
+        })
+    })
 
-        // Unfortunately, the order is important here at the present
-        var levelTraces = new Traces([cubeTrace, groundTrace], 30, 30);
+    splitTime.test.scenario(levelTracesTests, "Pointer trace", t => {
+        testTraces([pointer1.trace], (coords, collisionInfo) => {
+            t.assert(!collisionInfo.containsSolid, "Pointer trace should not be solid at " + coordsStr(coords))
+            const levels = collisionInfo.levels
+            const pointerTraces = collisionInfo.pointerTraces
+            // There should be no more than one here because we're checking
+            // one pixel and there is one pointer trace.
+            // FTODO: Is this a problem that it could be 0 or 1?
+            // The zero case seems to come from referencing coordinates that are
+            // undefined according to the traces specified.
+            t.assert(Object.keys(levels).length <= 1, "Should be no more than one level at " + coordsStr(coords))
+            if (pointer1.overlaps(coords)) {
+                t.assert(Object.keys(pointerTraces).length === 1, "Should be one pointer at " + coordsStr(coords))
+                t.assert(pointer1Level === levels[pointer1Level.id], "Expecting pointer1 level at " + coordsStr(coords))
+                const actualTrace = pointerTraces[pointer1Level.id]
+                t.assert(pointer1.trace === actualTrace, "Expecting pointer1 level trace at " + coordsStr(coords))
+            } else {
+                t.assert(Object.keys(pointerTraces).length === 0, "Should be no pointer at " + coordsStr(coords))
+            }
+        })
+    })
 
-        // Pixel by pixel
-        for (let x = 0; x < 30; x++) {
-            for (let y = 0; y < 30; y++) {
-                for (let z = 0; z < 30; z++) {
-                    const collisionInfo = new traces.CollisionInfo()
-                    levelTraces.calculateVolumeCollision(collisionInfo, x, 1, y, 1, z, z + 1)
-                    const coordsStr = "(" + x + ", " + y + ", " + z + ")"
-                    const isNotInCube = (x < 10 || x > 20)
-                        || (y < 10 || y > 20)
-                        || (z < 10 || z > 20)
-                    const isNotInGround = z !== 15
-                    if (isNotInCube && isNotInGround) {
-                        t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr)
-                    } else {
-                        t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr)
-                    }
+    splitTime.test.scenario(levelTracesTests, "Event trace", t => {
+        testTraces([eventBox.trace], (coords, collisionInfo) => {
+            t.assert(!collisionInfo.containsSolid, "Event trace should not be solid at " + coordsStr(coords))
+            const events = collisionInfo.events
+            if (eventBox.overlaps(coords)) {
+                t.assert(Object.keys(events).length === 1, "Should be one event at " + coordsStr(coords))
+                t.assert(!!events[eventId], "Expecting specific event at " + coordsStr(coords))
+                // FTODO: test ZRange?
+            } else {
+                t.assert(Object.keys(events).length === 0, "Should be no event at " + coordsStr(coords))
+            }
+        })
+    })
+
+    splitTime.test.scenario(levelTracesTests, "Overlapping traces", t => {
+        let demonstratedOverlappingPointers = false
+        let demonstratedOverlappingEvent = false
+        let demonstratedOverlappingSolid = false
+        let demonstratedOverlappingAll = false
+        testTraces([smallCube.trace, pointer1.trace, pointer2.trace, eventBox.trace],
+            (coords, collisionInfo) => {
+                t.assert(smallCube.overlaps(coords) === collisionInfo.containsSolid,
+                    "smallCube at " + coordsStr(coords))
+                t.assert(pointer1.overlaps(coords) === !!collisionInfo.pointerTraces[pointer1Level.id],
+                    "pointer1 at " + coordsStr(coords))
+                t.assert(pointer2.overlaps(coords) === !!collisionInfo.pointerTraces[pointer2Level.id],
+                    "pointer2 at " + coordsStr(coords))
+                t.assert(eventBox.overlaps(coords) === !!collisionInfo.events[eventId],
+                    "eventBox at " + coordsStr(coords))
+
+                if (pointer1.overlaps(coords) && pointer2.overlaps(coords)) {
+                    demonstratedOverlappingPointers = true
+                }
+                if (eventBox.overlaps(coords) && (
+                        smallCube.overlaps(coords) || pointer1.overlaps(coords) || pointer2.overlaps(coords)
+                    )
+                ) {
+                    demonstratedOverlappingEvent = true
+                }
+                if (smallCube.overlaps(coords) && (
+                        eventBox.overlaps(coords) || pointer1.overlaps(coords) || pointer2.overlaps(coords)
+                    )
+                ) {
+                    demonstratedOverlappingSolid = true
+                }
+                if (
+                    smallCube.overlaps(coords)
+                    && (pointer1.overlaps(coords) || pointer2.overlaps(coords))
+                    && eventBox.overlaps(coords)
+                ) {
+                    demonstratedOverlappingAll = true
+                }
+            }
+        )
+        assert(demonstratedOverlappingPointers, "Test should demonstrate overlapping pointers")
+        assert(demonstratedOverlappingEvent, "Test should demonstrate overlapping event")
+        assert(demonstratedOverlappingSolid, "Test should demonstrate overlapping solid")
+        assert(demonstratedOverlappingAll, "Test should demonstrate overlapping all types")
+    })
+
+    const width = 30
+    const length = 30
+    const height = 30
+
+    const largeSquareVertices = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
+    const largeCube = {
+        trace: makeTrace(trace.Type.SOLID, largeSquareVertices, 10, 10),
+        overlaps: function(coords: Coordinates3D) {
+            return coords.x >= 10 && coords.x <= 20
+                && coords.y >= 10 && coords.y <= 20
+                && coords.z >= 10 && coords.z <= 20
+        }
+    }
+
+    const smallSquareVertices = "(10, 10) (10, 15) (15, 15) (15, 10) (close)"
+    const smallCube = {
+        trace: makeTrace(trace.Type.SOLID, smallSquareVertices, 15, 5),
+        overlaps: function(coords: Coordinates3D) {
+            return coords.x >= 10 && coords.x <= 15
+                && coords.y >= 10 && coords.y <= 15
+                && coords.z >= 15 && coords.z <= 20
+        }
+    }
+
+    const stairs = {
+        trace: makeTrace(trace.Type.STAIRS, largeSquareVertices, 10, 10),
+        overlaps: function(coords: Coordinates3D) {
+            return largeCube.overlaps(coords)
+                // As x increases (since E), stair steps up
+                && coords.z <= coords.x
+        }
+    }
+    stairs.trace.spec.direction = direction.interpret("E")
+
+    const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
+    const ground = {
+        trace: makeTrace(trace.Type.SOLID, groundPoints, 15, 0),
+        overlaps: function(coords: Coordinates3D) {
+            return coords.z === 15
+        }
+    }
+
+    const dummyFileData: splitTime.level.FileData = {
+        fileName: "file",
+        type: "action",
+        region: "region",
+        width: width,
+        height: height,
+        background: "background",
+        backgroundOffsetX: 0,
+        backgroundOffsetY: 0,
+        traces: [],
+        props: [],
+        positions: []
+    }
+
+    const pointer1Vertices = "(12, 12) (12, 21) (21, 21) (21, 12) (close)"
+    const pointer1 = {
+        trace: makeTrace(trace.Type.POINTER, pointer1Vertices, 12, 9),
+        overlaps: function(coords: Coordinates3D) {
+            return coords.x >= 12 && coords.x <= 21
+                && coords.y >= 12 && coords.y <= 21
+                && coords.z >= 12 && coords.z < 21
+        }
+    }
+    const pointer1Level = new splitTime.Level("pointer1-level", dummyFileData)
+    pointer1.trace.level = pointer1Level
+    pointer1.trace.offsetX = 1
+    pointer1.trace.offsetY = 1
+    pointer1.trace.offsetZ = 1
+
+    // We want this second one to overlap with the first
+    const pointer2Vertices = "(16, 16) (16, 24) (24, 24) (24, 16) (close)"
+    const pointer2 = {
+        trace: makeTrace(trace.Type.POINTER, pointer2Vertices, 12, 9),
+        overlaps: function(coords: Coordinates3D) {
+            return coords.x >= 16 && coords.x <= 24
+                && coords.y >= 16 && coords.y <= 24
+                && coords.z >= 12 && coords.z < 21
+        }
+    }
+    const pointer2Level = new splitTime.Level("pointer2-level", dummyFileData)
+    pointer2.trace.level = pointer2Level
+    pointer2.trace.offsetX = 2
+    pointer2.trace.offsetY = 2
+    pointer2.trace.offsetZ = 2
+
+    // Also trying to make this one overlap
+    const eventVertices = "(14, 14) (14, 17) (17, 17) (17, 14) (close)"
+    const eventBox = {
+        trace: makeTrace(trace.Type.EVENT, eventVertices, 14, 3),
+        overlaps: function(coords: Coordinates3D) {
+            return coords.x >= 14 && coords.x <= 17
+                && coords.y >= 14 && coords.y <= 17
+                && coords.z >= 14 && coords.z < 17
+        }
+    }
+    const eventId = "test-event"
+    eventBox.trace.spec.eventId = eventId
+
+    function testTraces(
+        traces: Trace[],
+        pointCallback: (coords: Coordinates3D, collisionInfo: traces.CollisionInfo) => void
+    ) {
+        const levelTraces = new Traces(traces, width, length)
+        forAllPixels(coords => {
+            const collisionInfo = new splitTime.level.traces.CollisionInfo()
+            levelTraces.calculateVolumeCollision(collisionInfo, coords.x, 1, coords.y, 1, coords.z, coords.z + 1)
+            pointCallback(coords, collisionInfo)
+        })
+    }
+
+    function coordsStr(coords: Coordinates3D) {
+        return "(" + coords.x + ", " + coords.y + ", " + coords.z + ")"
+    }
+
+    function forAllPixels(callback: (coords: Coordinates3D) => void) {
+        for (let x = 0; x < width; x++) {
+            for (let y = 0; y < length; y++) {
+                for (let z = 0; z < height; z++) {
+                    callback({
+                        x: x,
+                        y: y,
+                        z: z
+                    })
                 }
             }
         }
-    })
+    }
+
+    function makeTrace(type: string, points: string, z: number, height: number): Trace {
+        const t = new Trace(new trace.TraceSpec(type, points))
+        t.spec.z = z
+        t.spec.height = height
+        return t
+    }
 }

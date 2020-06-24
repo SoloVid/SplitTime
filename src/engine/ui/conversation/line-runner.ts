@@ -18,8 +18,12 @@ namespace splitTime.conversation {
             this.speakers = line.getParent().getSpeakers()
         }
 
+        onInteract(): void {
+            this.conversation.tryInterrupt(this.nodeId) || this.dialog.advance()
+        }
+
         private registerHandlers() {
-            this.dialog.registerPlayerInteractHandler(() => this.conversation.tryInterrupt(this.nodeId))
+            this.dialog.registerPlayerInteractHandler(() => this.onInteract())
             this.dialog.registerDismissHandler(() => this.conversation.tryCancel(this.nodeId) && this.stop())
             this.dialog.registerDialogEndHandler(() => this.stop())
         }

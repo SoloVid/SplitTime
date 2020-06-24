@@ -3,6 +3,11 @@ namespace splitTime.controls {
         private keyDown: { [keyCode: number]: boolean } = {}
 
         constructor(eventElement: HTMLElement | Document) {
+            // The key event cancellations mess with editor functionality
+            if (__EDITOR__) {
+                return
+            }
+
             // FTODO: Is the cast going to cause problems here?
             eventElement.addEventListener("keydown", event => {
                 return this.onKeyDown(event as KeyboardEvent)
@@ -47,7 +52,7 @@ namespace splitTime.controls {
             this.getUpCallbacks(keyCode).register(callback)
         }
 
-        //Sets variables useful for determining what keys are down at any time.
+        //Sets variables useful for determining what keys are down at given time.
         public onKeyDown(e: KeyboardEvent) {
             var keyCode = e.which || e.keyCode
 
@@ -84,7 +89,4 @@ namespace splitTime.controls {
             this.getUpCallbacks(keyCode).run()
         }
     }
-
-    // FTODO: maybe make not singleton
-    export const KEYBOARD_INSTANCE = __DOM__ ? new Keyboard(document) : ({} as Keyboard)
 }

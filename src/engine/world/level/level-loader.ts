@@ -1,31 +1,34 @@
 namespace splitTime {
     export class LevelLoader {
-        fileData: level.FileData | null = null
+        private fileData: level.FileData | null = null
         _addingProps: boolean
-        loadPromise: splitTime.Pledge
+        private loadPromise: splitTime.Pledge
 
-        constructor(private readonly level: Level) {
+        constructor(
+            private readonly level: Level,
+            private readonly levelData: splitTime.level.FileData
+        ) {
             this._addingProps = false
             this.loadPromise = new splitTime.Pledge()
         }
 
-        load(
-            world: World,
-            levelData: splitTime.level.FileData
-        ): PromiseLike<any> {
-            const levelLoadPromises: PromiseLike<unknown>[] = []
+        hasData(): boolean {
+            return this.fileData !== null
+        }
 
-            world.getRegion(levelData.region).addLevel(this.level)
+        readFileData(
+            world: World
+        ): void {
+            world.getRegion(this.levelData.region).addLevel(this.level)
 
-            this.fileData = levelData
-            this.level.type = levelData.type
-            // this.width = levelData.width || 0;
-            // this.height = levelData.height || 0;
-            // this.yWidth = levelData.yWidth || 0;
+            this.fileData = this.levelData
+            this.level.type = this.levelData.type
+            this.level.width = this.levelData.width || 0;
+            this.level.height = this.levelData.height || 0;
 
             this.level.lowestLayerZ = 0
             this.level.highestLayerZ = 0
-            for (const trace of levelData.traces) {
+            for (const trace of this.levelData.traces) {
                 if (trace.z < this.level.lowestLayerZ) {
                     this.level.lowestLayerZ = +trace.z
                 }
@@ -34,33 +37,16 @@ namespace splitTime {
                 }
             }
 
-            var that = this
-            function onLoadImage(backgroundImg: {
-                height: number
-                width: number
-            }) {
-                if (backgroundImg.height > that.level.height) {
-                    that.level.height = backgroundImg.height
-                    that.level.yWidth = that.level.height + that.level.highestLayerZ
-                }
-                if (backgroundImg.width > that.level.width) {
-                    that.level.width = backgroundImg.width
-                }
+            this.level.yWidth = this.level.height + this.level.highestLayerZ
+            this.level._cellGrid = new level.CellGrid(this.level)
 
-                that.level._cellGrid = new level.CellGrid(that.level)
-            }
-
-            this.level.background = levelData.background
-            if (this.level.background) {
-                var loadProm = G.ASSETS.images
-                    .load(this.level.background)
-                    .then(onLoadImage)
-                levelLoadPromises.push(loadProm)
-            }
+            this.level.background = this.levelData.background
+            this.level.backgroundOffsetX = this.levelData.backgroundOffsetX
+            this.level.backgroundOffsetY = this.levelData.backgroundOffsetY
 
             //Pull positions from file
-            for (var i = 0; i < levelData.positions.length; i++) {
-                var posObj = levelData.positions[i]
+            for (var i = 0; i < this.levelData.positions.length; i++) {
+                var posObj = this.levelData.positions[i]
                 var position = new splitTime.Position(
                     this.level,
                     +posObj.x,
@@ -77,13 +63,14 @@ namespace splitTime {
                 }
             }
 
-            for (const rawTrace of levelData.traces) {
-                var type = rawTrace.type
-                switch (type) {
-                    case splitTime.Trace.Type.TRANSPORT:
-                        var trace = splitTime.Trace.fromRaw(rawTrace, world)
-                        const pointerOffset = trace.getPointerOffset()
-                        var transportTraceId = trace.getLocationId()
+            for (const rawTrace of this.levelData.traces) {
+                const traceSpec = trace.TraceSpec.fromRaw(rawTrace)
+                const t = new Trace(traceSpec)
+                t.load(this.level, world)
+                switch (traceSpec.type) {
+                    case trace.Type.TRANSPORT:
+                        const pointerOffset = t.getPointerOffset()
+                        var transportTraceId = traceSpec.getLocationId()
                         this.level.registerEvent(
                             transportTraceId,
                             (function(trace, level) {
@@ -95,22 +82,34 @@ namespace splitTime {
                                         body.z + pointerOffset.offsetZ
                                     )
                                 }
-                            })(trace, level)
+                            })(t, level)
                         )
+                        break;
+                    case trace.Type.PATH:
+                        this.connectPositionsFromPath(t.spec)
+                        break;
                 }
             }
-
-            const aggregatePromise = Promise.all(levelLoadPromises)
-            this.setLoadPromise(aggregatePromise)
-
-            return aggregatePromise
         }
 
-        setLoadPromise(actualLoadPromise: Promise<any>) {
-            var me = this
-            actualLoadPromise.then(function() {
-                me.loadPromise.resolve()
-            })
+        connectPositionsFromPath(traceSpec: trace.TraceSpec) {
+            const points = traceSpec.vertices
+            for (let i = 0; i < points.length; i++) {
+                const point1 = points[i]
+                if (typeof point1 === "string") {
+                    const position1 = this.level.getPosition(point1)
+                    for (let j = i + 1; j < points.length; j++) {
+                        const point2 = points[j]
+                        if (typeof point2 === "string") {
+                            const position2 = this.level.getPosition(point2)
+                            const midPoints = trace.extractCoordinates(points.slice(i + 1, j))
+                            position1.registerPath(position2, midPoints.slice())
+                            position2.registerPath(position1, midPoints.slice().reverse())
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         refetchBodies() {
@@ -163,13 +162,23 @@ namespace splitTime {
             this._addingProps = false
         }
 
+        async loadAssets(world: World): Promise<void> {
+            await G.ASSETS.images.load(this.level.background)
+        }
+
         async loadForPlay(world: World): Promise<void> {
-            await this.loadPromise
+            await this.loadAssets(world)
 
             this.refetchBodies()
             assert(this.fileData !== null, "Level must have file data to be loaded")
+            const traceSpecs = this.fileData.traces.map(t => trace.TraceSpec.fromRaw(t))
+            const traces = traceSpecs.map(spec => {
+                const trace = new Trace(spec)
+                trace.load(this.level, world)
+                return trace
+            })
             this.level._levelTraces = new splitTime.level.Traces(
-                this.fileData.traces.map(t => Trace.fromRaw(t, world)),
+                traces,
                 this.level.width,
                 this.level.yWidth
             )

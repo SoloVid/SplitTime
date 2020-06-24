@@ -1,12 +1,14 @@
 namespace splitTime {
-    type body_getter = () => Body | null
-    type level_getter = () => Level
+    type LevelGetter = () => Level
 
+    /**
+     * This class tracks the position of the camera in the game world.
+     */
     export class Camera {
         public readonly SCREEN_WIDTH: int
         public readonly SCREEN_HEIGHT: int
 
-        private actualFocusPoint: { x: number; y: number; z: number } = {
+        private actualFocusPoint: Coordinates3D = {
             x: 0,
             y: 0,
             z: 0
@@ -14,13 +16,12 @@ namespace splitTime {
 
         private currentLevel: splitTime.Level | null = null
 
-        /** @type {{x: number, y: number, z: number}[]} */
-        private focusPoints: { x: number; y: number; z: number }[] = []
+        private focusPoints: Coordinates3D[] = []
 
         constructor(
             width: int,
             height: int,
-            private readonly currentLevelGetter: level_getter
+            private readonly currentLevelGetter: LevelGetter
         ) {
             this.SCREEN_WIDTH = width
             this.SCREEN_HEIGHT = height
@@ -29,13 +30,13 @@ namespace splitTime {
         getFocusPoint() {
             return this.actualFocusPoint
         }
-        setFocusPoint(point: { x: number; y: number; z: number }) {
+        setFocusPoint(point: Coordinates3D) {
             this.focusPoints = [point]
         }
-        addFocusPoint(point: { x: number; y: number; z: number }) {
+        addFocusPoint(point: Coordinates3D) {
             this.focusPoints.push(point)
         }
-        removeFocusPoint(point: { x: number; y: number; z: number }) {
+        removeFocusPoint(point: Coordinates3D) {
             for (var i = 0; i < this.focusPoints.length; i++) {
                 if (point === this.focusPoints[i]) {
                     this.focusPoints.splice(i, 1)
@@ -44,11 +45,7 @@ namespace splitTime {
             }
         }
 
-        getRelativeToScreen(thing: {
-            x: number
-            y: number
-            z: number
-        }): { x: number; y: number } {
+        getRelativeToScreen(thing: Coordinates3D): Coordinates2D {
             var screen = this.getScreenCoordinates()
             return {
                 x: thing.x - screen.x,
@@ -59,7 +56,7 @@ namespace splitTime {
         /**
          * Get the coordinates of the screen relative to the board (determined by the body in focus)
          */
-        getScreenCoordinates(): { x: number; y: number } {
+        getScreenCoordinates(): Coordinates2D {
             var screen = {
                 // fallback case if focused body is close to close edge of board
                 x: 0,

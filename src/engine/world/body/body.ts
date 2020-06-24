@@ -36,6 +36,7 @@ namespace splitTime {
         dir = 3
 
         GRAVITY = -1280
+        // For gravity etc., auto-applied z-axis motion in pixels per second
         zVelocity = 0
         height = 32
 
@@ -90,9 +91,6 @@ namespace splitTime {
         }
         get level() {
             return this.getLevel()
-        }
-        set level(newLevel) {
-            this.setLevel(newLevel, true)
         }
         get halfBaseLength() {
             return Math.round(this.baseLength / 2)
@@ -302,12 +300,12 @@ namespace splitTime {
             }
         }
 
-        putInLocation(location: ILevelLocation, includeChildren = false) {
+        putInLocation(location: ILevelLocation2, includeChildren = false) {
             this.put(
-                location.getLevel(),
-                location.getX(),
-                location.getY(),
-                location.getZ(),
+                location.level,
+                location.x,
+                location.y,
+                location.z,
                 includeChildren
             )
         }
@@ -331,7 +329,11 @@ namespace splitTime {
             }
         }
 
-        setLevel(
+        clearLevel(): void {
+            this.setLevel(null)
+        }
+
+        private setLevel(
             level: splitTime.Level | null,
             includeChildren: boolean = false
         ) {
@@ -404,7 +406,7 @@ namespace splitTime {
                     if (Math.abs(this.zVelocity) > ZILCH) {
                         var expectedDZ = this.zVelocity * delta
                         var actualDZ = this.mover.zeldaVerticalBump(expectedDZ)
-                        if (Math.abs(actualDZ) <= ZILCH) {
+                        if (Math.abs(actualDZ) < Math.abs(expectedDZ)) {
                             this.zVelocity = 0
                         }
                     }
@@ -444,6 +446,6 @@ namespace splitTime {
         }
 
         // Generally equates to pixels per second (game time)
-        spd = 2
+        spd = 16
     }
 }

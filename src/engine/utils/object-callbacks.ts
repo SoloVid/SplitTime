@@ -1,7 +1,7 @@
 namespace splitTime {
     /**
      * This class intended to be very similar to RegisterCallbacks or Promise
-     * but with the advantage of accomodating serialization.
+     * but with the advantage of accommodating serialization.
      * (Objects are easier to serialize than functions/lambdas.)
      */
     export class ObjectCallbacks<T> {
@@ -18,7 +18,7 @@ namespace splitTime {
 
         register(callback: Callback<T>): void {
             this.callbacks.push(callback);
-            this.registerCallbacks.register((data: T) => callback.call(data));
+            this.registerCallbacks.register((data: T) => callback.callBack(data));
         }
 
         /**

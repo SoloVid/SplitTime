@@ -53,7 +53,9 @@ namespace splitTime.conversation {
             this.current = newCurrent
             newCurrent.handlers.setUp()
             if(action instanceof Line) {
-                newCurrent.interruptibleEvent = this.launchLine(action, breadCrumbs)
+                const lineRunner = this.launchLine(action, breadCrumbs)
+                newCurrent.interruptibleEvent = lineRunner
+                newCurrent.handlers.onInteract = () => lineRunner.onInteract()
             } else if(action instanceof MidConversationAction) {
                 newCurrent.interruptibleEvent = this.launchEvent(action, breadCrumbs)
             } else {
@@ -120,7 +122,7 @@ namespace splitTime.conversation {
             this.enactBreadCrumbs(nodeId.getNextInterrupted(interruptible))
         }
 
-        private launchLine(line: Line, nodeId: BreadCrumbs): Interruptible {
+        private launchLine(line: Line, nodeId: BreadCrumbs): LineRunner {
             const lineRunner = new LineRunner(this, nodeId, line, this.helper)
             lineRunner.start()
             return lineRunner
@@ -128,11 +130,11 @@ namespace splitTime.conversation {
 
         private launchEvent(event: MidConversationAction, nodeId: BreadCrumbs): Interruptible | null {
             const callback = new ConversationPointCompletionCallback(this, nodeId)
-            const eventReturn = event.callback()
+            const eventReturn = event.run()
             if(eventReturn instanceof ObjectCallbacks) {
                 eventReturn.register(callback)
             } else {
-                callback.call()
+                callback.callBack()
             }
             if(instanceOf.Interruptible(eventReturn)) {
                 return eventReturn

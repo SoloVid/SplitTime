@@ -99,7 +99,7 @@ module.exports = function(grunt) {
         for(var i = 0; i < arguments.length; i++) {
             args.push(arguments[i] || "");
         }
-        return path.join.apply(path, args).replace(/\\/, "/");
+        return path.join.apply(path, args).replace(/\\/g, "/");
     }
 
     grunt.registerTask('tsc', function(projectName) {
@@ -126,17 +126,29 @@ module.exports = function(grunt) {
         });
     });
 
+    function countSlashesInPath(path) {
+        return (path.replace(/\\\\?/g, "/").match(/\//g) || []).length;
+    }
+
     grunt.registerTask('concat-mapped', function(projectName) {
         var files;
         if(projectName) {
             var projectRoot = "projects/" + projectName;
-            files = [
+            var compiledSourceFiles = grunt.file.expand(projectRoot + '/build/tsjs/**/*.js');
+            // We're sorting by the number of slashes in the path ascending
+            // so as to put the top-level directory files before the innermost directory files.
+            var compiledSourceFilesSorted = compiledSourceFiles.sort(function(a, b) {
+                var slashesInA = countSlashesInPath(a);
+                var slashesInB = countSlashesInPath(b);
+                return slashesInA - slashesInB;
+            });
+            files = ([
                 'build/engine.js',
                 'build/tsjs/defer.def.js',
-                projectRoot + '/build/tsjs/**/*.js',
                 projectRoot + '/build/generated/**/*.js',
+                ]).concat(compiledSourceFilesSorted).concat([
                 'build/tsjs/defer.run.js'
-            ];
+            ]);
             concatFilesWithSourceMaps(files, projectRoot + '/dist/game.js');
         } else {
             files = [
@@ -144,15 +156,16 @@ module.exports = function(grunt) {
                 'build/tsjs/compiler-defines.debug.js',
                 'build/tsjs/environment.js',
                 'build/tsjs/defer.def.js',
-                'build/tsjs/engine/**/*.js',
-                'build/tsjs/defer.run.js'
+                'build/tsjs/engine/**/*.js'
             ];
             concatFilesWithSourceMaps(files, 'build/engine-without-dom-libraries.js');
+
             files = [
                 'node_modules/howler/dist/howler.min.js',
                 'build/engine-without-dom-libraries.js',
             ];
             concatFilesWithSourceMaps(files, 'build/engine.js');
+
             files = [
                 'build/engine-without-dom-libraries.js',
                 'build/tsjs/test-runner/**/*.js',

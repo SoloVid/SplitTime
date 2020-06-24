@@ -6,7 +6,7 @@ namespace splitTime {
     export class RegionSerializer implements file.ObjectSerializer<Region> {
         constructor(private readonly world: World) {}
 
-        isT(thing: any): thing is Region {
+        isT(thing: unknown): thing is Region {
             return thing instanceof Region
         }
 

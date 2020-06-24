@@ -77,8 +77,8 @@ namespace splitTime.body.collisions {
 
                     //If the body is out of bounds on the x axis
                     if (
-                        newX + halfLength >= level.width ||
-                        newX - halfLength < 0
+                        (iHat > 0 && newX + halfLength >= level.width) ||
+                        (iHat < 0 && newX - halfLength < 0)
                     ) {
                         outX = true
                     } else {
@@ -118,8 +118,8 @@ namespace splitTime.body.collisions {
                     const newY = currentY + jHat
                     //Check if out of bounds on the y axis
                     if (
-                        newY + halfLength >= level.yWidth ||
-                        newY - halfLength < 0
+                        (jHat > 0 && newY + halfLength >= level.yWidth) ||
+                        (jHat < 0 && newY - halfLength < 0)
                     ) {
                         outY = true
                     } else {
@@ -159,14 +159,14 @@ namespace splitTime.body.collisions {
             if (ady > 0 && pixelsMovedY > 0) {
                 var yMoved = currentY - oldY
                 var newYFromSteps = oldY + yMoved
-                // Subtract off any overshoot
+                // Subtract off overshoot
                 var actualNewY = newYFromSteps - (dyRounded - dy)
                 this.mover.body.setY(actualNewY)
             }
             if (adx > 0 && pixelsMovedX > 0) {
                 var xMoved = currentX - oldX
                 var newXFromSteps = oldX + xMoved
-                // Subtract off any overshoot
+                // Subtract off overshoot
                 var actualNewX = newXFromSteps - (dxRounded - dx)
                 this.mover.body.setX(actualNewX)
             }

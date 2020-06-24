@@ -1,25 +1,14 @@
 namespace splitTime {
-    export class Position implements ILevelLocation {
-        readonly level: splitTime.Level
-        readonly x: number
-        readonly y: number
-        readonly z: number
-        readonly dir: number
-        readonly stance: string
+    export class Position implements ILevelLocation, ILevelLocation2 {
+        private readonly pathsToOtherPositions: PathToPosition[] = []
         constructor(
-            level: Level,
-            x: number,
-            y: number,
-            z: number,
-            dir: number,
-            stance: string
+            readonly level: Level,
+            readonly x: number,
+            readonly y: number,
+            readonly z: number,
+            readonly dir: number,
+            readonly stance: string
         ) {
-            this.level = level
-            this.x = x
-            this.y = y
-            this.z = z
-            this.dir = dir
-            this.stance = stance
         }
 
         getLevel() {
@@ -34,5 +23,26 @@ namespace splitTime {
         getZ(): number {
             return this.z
         }
+
+        // TODO: need to make 3D coordinates here
+        registerPath(otherPosition: Position, path: Coordinates2D[]): void {
+            this.pathsToOtherPositions.push(new PathToPosition(otherPosition, path))
+        }
+
+        getPathTo(coordinates: Coordinates2D): Coordinates2D[] {
+            for (const p of this.pathsToOtherPositions) {
+                if (level.areCoordinatesEquivalent(coordinates, p.otherPosition)) {
+                    return p.path
+                }
+            }
+            return []
+        }
+    }
+
+    class PathToPosition {
+        constructor(
+            public readonly otherPosition: Position,
+            public readonly path: Coordinates2D[]
+        ) {}
     }
 }

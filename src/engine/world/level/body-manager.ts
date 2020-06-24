@@ -7,10 +7,10 @@ namespace splitTime.level {
      */
     function forEachBodyAtValue(
         value: int,
-        callback: (arg0: splitTime.Body) => any,
-        bodiesSortHolder: BodiesSortedByOneValue
+        callback: (arg0: splitTime.Body) => void,
+        bodiesSortHolder: BodiesSortedByOneValue | null
     ): boolean {
-        if (!bodiesSortHolder) {
+        if (bodiesSortHolder === null) {
             console.warn("Attempting to use BodyOrganizer before initialized")
             return false
         }
@@ -49,14 +49,14 @@ namespace splitTime.level {
 
     export class BodyOrganizer {
         _initialized: boolean
-        _bodies: any[]
+        _bodies: Body[]
         _bodySet: { [ref: number]: boolean }
-        _sortedByXLeft: any
-        _sortedByXRight: any
-        _sortedByYTop: any
-        _sortedByYBottom: any
-        _sortedByZTop: any
-        _sortedByZBottom: any
+        _sortedByXLeft: BodiesSortedByOneValue | null = null
+        _sortedByXRight: BodiesSortedByOneValue | null = null
+        _sortedByYTop: BodiesSortedByOneValue | null = null
+        _sortedByYBottom: BodiesSortedByOneValue | null = null
+        _sortedByZTop: BodiesSortedByOneValue | null = null
+        _sortedByZBottom: BodiesSortedByOneValue | null = null
         /**
          * A class for arranging bodies for collisions
          * @param {splitTime.Level} [level]
@@ -116,12 +116,12 @@ namespace splitTime.level {
                 return
             }
 
-            this._sortedByXLeft.addBody(body)
-            this._sortedByXRight.addBody(body)
-            this._sortedByYTop.addBody(body)
-            this._sortedByYBottom.addBody(body)
-            this._sortedByZTop.addBody(body)
-            this._sortedByZBottom.addBody(body)
+            this._sortedByXLeft!.addBody(body)
+            this._sortedByXRight!.addBody(body)
+            this._sortedByYTop!.addBody(body)
+            this._sortedByYBottom!.addBody(body)
+            this._sortedByZTop!.addBody(body)
+            this._sortedByZBottom!.addBody(body)
 
             this.resort(body)
         }
@@ -140,12 +140,12 @@ namespace splitTime.level {
                 return
             }
 
-            this._sortedByXLeft.removeBody(body)
-            this._sortedByXRight.removeBody(body)
-            this._sortedByYTop.removeBody(body)
-            this._sortedByYBottom.removeBody(body)
-            this._sortedByZTop.removeBody(body)
-            this._sortedByZBottom.removeBody(body)
+            this._sortedByXLeft!.removeBody(body)
+            this._sortedByXRight!.removeBody(body)
+            this._sortedByYTop!.removeBody(body)
+            this._sortedByYBottom!.removeBody(body)
+            this._sortedByZTop!.removeBody(body)
+            this._sortedByZBottom!.removeBody(body)
         }
 
         /**
@@ -165,49 +165,47 @@ namespace splitTime.level {
             var roundY = Math.floor(body.getY())
             var roundZ = Math.floor(body.getZ())
 
-            this._sortedByXLeft.resortBody(body, roundX - halfBaseLength)
-            this._sortedByXRight.resortBody(body, roundX + halfBaseLength)
-            this._sortedByYTop.resortBody(body, roundY - halfBaseLength)
-            this._sortedByYBottom.resortBody(body, roundY + halfBaseLength)
-            this._sortedByZTop.resortBody(body, roundZ + roundHeight)
-            this._sortedByZBottom.resortBody(body, roundZ)
+            this._sortedByXLeft!.resortBody(body, roundX - halfBaseLength)
+            this._sortedByXRight!.resortBody(body, roundX + halfBaseLength)
+            this._sortedByYTop!.resortBody(body, roundY - halfBaseLength)
+            this._sortedByYBottom!.resortBody(body, roundY + halfBaseLength)
+            this._sortedByZTop!.resortBody(body, roundZ + roundHeight)
+            this._sortedByZBottom!.resortBody(body, roundZ)
         }
 
         /**
-         * Check if any bodies are present with left at specified x.
+         * Check if bodies are present with left at specified x.
          * If so, run callback for each one.
-         * @param {int} x
-         * @param {function(splitTime.Body)} [callback]
-         * @return {boolean} whether any bodies were found
+         * @return whether bodies were found
          */
-        forEachXLeft(x: int, callback: (body: splitTime.Body) => any): boolean {
+        forEachXLeft(x: int, callback: (body: splitTime.Body) => void): boolean {
             return forEachBodyAtValue(x, callback, this._sortedByXLeft)
         }
 
-        forEachXRight(x: int, callback: (body: splitTime.Body) => any) {
+        forEachXRight(x: int, callback: (body: splitTime.Body) => void) {
             return forEachBodyAtValue(x, callback, this._sortedByXRight)
         }
 
-        forEachYTop(y: int, callback: (body: splitTime.Body) => any) {
+        forEachYTop(y: int, callback: (body: splitTime.Body) => void) {
             return forEachBodyAtValue(y, callback, this._sortedByYTop)
         }
 
-        forEachYBottom(y: int, callback: (body: splitTime.Body) => any) {
+        forEachYBottom(y: int, callback: (body: splitTime.Body) => void) {
             return forEachBodyAtValue(y, callback, this._sortedByYBottom)
         }
 
-        forEachZTop(z: int, callback: (body: splitTime.Body) => any) {
+        forEachZTop(z: int, callback: (body: splitTime.Body) => void) {
             return forEachBodyAtValue(z, callback, this._sortedByZTop)
         }
 
-        forEachZBottom(z: int, callback: (body: splitTime.Body) => any) {
+        forEachZBottom(z: int, callback: (body: splitTime.Body) => void) {
             return forEachBodyAtValue(z, callback, this._sortedByZBottom)
         }
     }
 
     class BodiesSortedByOneValue {
         max32Value: number
-        valueLookup32: any[]
+        valueLookup32: number[]
         sortedByValue: { value: number; body: Body | { ref: int } }[]
         reverseSortLookup: number[]
 

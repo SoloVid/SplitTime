@@ -11,8 +11,8 @@ namespace splitTime.body {
 
     export class Mover {
         body: splitTime.Body
-        bodyExt: any
-        dir: any
+        bodyExt: BodyExt
+        dir: direction_t | null = null
         horizontal: collisions.Horizontal
         vertical: collisions.Vertical
         constructor(body: Body) {
@@ -23,6 +23,8 @@ namespace splitTime.body {
             this.vertical = new collisions.Vertical(this)
         }
 
+        // This value should be at least 1 for stairs to work,
+        // but even higher if stairs are ever to be steeper than 45 degrees.
         static VERTICAL_FUDGE = 4
 
         /**
@@ -56,10 +58,9 @@ namespace splitTime.body {
          * Check that body is in current region
          */
         ensureInRegion() {
-            // TODO: maybe reimplement this?
-            // if(this.body.getLevel().getRegion() !== splitTime.Region.getCurrent()) {
-            //     throw new Error("Attempt to do zelda movement for body not in current region");
-            // }
+            if(!this.body.level.isLoaded()) {
+                throw new Error("Attempt to do zelda movement for body not in current region");
+            }
         }
 
         /**

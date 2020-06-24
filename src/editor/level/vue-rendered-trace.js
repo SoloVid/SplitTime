@@ -12,6 +12,19 @@ Vue.component("rendered-trace", {
         height: function() {
             return this.trace.height;
         },
+        vertices: function() {
+            var that = this;
+            var pointsArray = safeExtractTraceArray(this.trace.vertices);
+            return pointsArray.filter(function(point) {
+                return !!point;
+            }).map(function(point) {
+                return {
+                    x: point.x,
+                    y: point.y,
+                    z: that.trace.z
+                };
+            });
+        },
         points: function() {
             var that = this;
             var pointsArray = safeExtractTraceArray(this.trace.vertices);
@@ -52,8 +65,8 @@ Vue.component("rendered-trace", {
         pointsStairsSlope: function() {
             var that = this;
             var pointsArray = safeExtractTraceArray(this.trace.vertices);
-            if(this.trace.type === splitTime.Trace.Type.STAIRS && !!this.trace.direction && pointsArray.length >= 3) {
-                var officialTrace = splitTime.Trace.fromRaw(this.trace);
+            if(this.trace.type === splitTime.trace.Type.STAIRS && !!this.trace.direction && pointsArray.length >= 3) {
+                var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace);
                 var extremes = officialTrace.calculateStairsExtremes();
                 var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y);
                 var stairsLength = stairsVector.magnitude;
@@ -89,9 +102,6 @@ Vue.component("rendered-trace", {
         traceStroke: function() {
             return this.hasClose ? "black" : safeGetColor(this.trace);
         },
-        traceOpacity: function() {
-            return this.hasClose ? 1 : 0;
-        },
         traceShadowFill: function() {
             return this.trace.isHighlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR;
         },
@@ -99,24 +109,27 @@ Vue.component("rendered-trace", {
             return "black";
         },
         traceShadowDisplayed: function() {
-            return this.height > 0;
+            return this.hasClose && this.height > 0;
         }
     },
     methods: {
         edit: function() {
             showEditorTrace(this.trace);
         },
-        track: function() {
+        track: function(point) {
             if(pathInProgress) {
                 return;
             }
-            follower = this.trace;
+            follower = {
+                trace: this.trace,
+                point: point
+            };
         },
         toggleHighlight: function(highlight) {
-            if(mouseDown || pathInProgress) {
+            if(mouseDown) {
                 return;
             }
-            this.trace.isHighlighted = highlight;
+            this.trace.isHighlighted = highlight && !pathInProgress;
         }
     }
 });

@@ -70,8 +70,8 @@ function addNewTrace(layerIndex, type) {
     var height = levelObject.layers.length > layerIndex + 1 ?
         levelObject.layers[layerIndex + 1].z - z :
         DEFAULT_HEIGHT;
-    if(type === splitTime.Trace.Type.GROUND) {
-        type = splitTime.Trace.Type.SOLID;
+    if(type === splitTime.trace.Type.GROUND) {
+        type = splitTime.trace.Type.SOLID;
         height = 0;
     }
     var trace = {
@@ -97,8 +97,8 @@ function safeGetColor(trace) {
         return "rgba(255, 255, 0, 0.8)";
     }
     var type = trace.type;
-    if(type === splitTime.Trace.Type.SOLID && +trace.height === 0) {
-        type = splitTime.Trace.Type.GROUND;
+    if(type === splitTime.trace.Type.SOLID && +trace.height === 0) {
+        type = splitTime.trace.Type.GROUND;
     }
     for(var i = 0; i < vueApp.traceOptions.length; i++) {
         if(vueApp.traceOptions[i].type === type) {
@@ -109,7 +109,7 @@ function safeGetColor(trace) {
 }
 function safeExtractTraceArray(traceStr) {
     var normalizedTraceStr = normalizeTraceStr(traceStr);
-    return splitTime.Trace.extractArray(normalizedTraceStr);
+    return splitTime.trace.interpretPointString(normalizedTraceStr);
 }
 
 function normalizeTraceStr(traceStr) {
@@ -152,10 +152,19 @@ function moveFollower(dx, dy) {
     if(!toMove) {
         return;
     }
-    if(toMove.vertices !== undefined) {
-        var regex = /\((-?[\d]+), (-?[\d]+)\)/g;
-        var pointString = toMove.vertices;
-        toMove.vertices = pointString.replace(regex, function(match, p1, p2) {
+    if(toMove.trace !== undefined) {
+        var trace = toMove.trace;
+        var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g;
+        if (toMove.point) {
+            regex = new RegExp("\\((" + toMove.point.x + "),\\s*(" + toMove.point.y + ")\\)", "g");
+            toMove.point = {
+                x: toMove.point.x + dx,
+                y: toMove.point.y + dy,
+                z: toMove.point.z,
+            };
+        }
+        var pointString = trace.vertices;
+        trace.vertices = pointString.replace(regex, function(match, p1, p2) {
             var newX = Number(p1) + dx;
             var newY = Number(p2) + dy;
             return "(" + newX + ", " + newY + ")";
@@ -203,16 +212,6 @@ function downloadFile() {
     document.body.removeChild(pom);
 }
 
-function resizeBoardCheck(imgEl) {
-    var layerWidth = imgEl.width;
-    var layerHeight = imgEl.height;
-
-    if(layerWidth > vueApp.levelWidth || layerHeight > vueApp.levelHeight) {
-        vueApp.levelWidth = layerWidth;
-        vueApp.levelHeight = layerHeight;
-    }
-}
-
 function getPixelsPerPixel() {
     return levelObject.type === "TRPG" ? 32 : 1;
 }
@@ -231,9 +230,14 @@ function createLevel(type) {
 
     levelObject = {
         region: "",
+        width: 640,
+        height: 480,
         background: "",
+        backgroundOffsetX: 0,
+        backgroundOffsetY: 0,
         type: type,
         layers: [],
+        traces: [],
         positions: [],
         props: []
     };

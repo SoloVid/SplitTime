@@ -8,7 +8,7 @@ namespace splitTime.file {
         | { [key: number]: jsonable }
     export type json = string
 
-    export function toJsonable(thing: any): jsonable {
+    export function toJsonable(thing: unknown): jsonable {
         return JSON.parse(JSON.stringify(thing))
     }
 
@@ -54,16 +54,17 @@ namespace splitTime.file {
 }
 
 namespace splitTime.instanceOf {
-    export function jsonable(obj: any): obj is file.jsonable {
-        const type = typeof obj
+    export function jsonable(thing: unknown): thing is file.jsonable {
+        const type = typeof thing
         switch (type) {
             case "boolean":
             case "number":
             case "string":
                 return true
             case "object":
-                const prototype = Object.getPrototypeOf(obj)
+                const prototype = Object.getPrototypeOf(thing)
                 if (prototype === Object.prototype) {
+                    const obj = thing as { [key: string]: unknown }
                     for (const key in obj) {
                         if (!jsonable(obj[key])) {
                             return false
@@ -71,7 +72,7 @@ namespace splitTime.instanceOf {
                     }
                     return true
                 } else if (prototype === Array.prototype) {
-                    const arr = obj as any[]
+                    const arr = thing as unknown[]
                     for (const item of arr) {
                         if (!jsonable(item)) {
                             return false

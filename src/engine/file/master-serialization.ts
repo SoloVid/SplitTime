@@ -2,7 +2,7 @@ namespace splitTime.file {
     export class MasterSerialization implements AnySerializer {
         public readonly data: serialized_format_t = {}
         private nextUniqueId: int = 10
-        private idObjectPairs: { id: int; object: any }[] = []
+        private idObjectPairs: { id: int; object: object }[] = []
 
         constructor(
             private readonly objectSerializerPool: ObjectSerializerPool

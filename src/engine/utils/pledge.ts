@@ -1,15 +1,16 @@
 namespace splitTime {
-    export class Pledge implements PromiseLike<any> {
+    export class Pledge implements PromiseLike<unknown> {
         callBacks: Function[]
         babyPromises: Pledge[]
         resolved: boolean = false
-        data: any
+        data: unknown
         constructor() {
             this.callBacks = []
             this.babyPromises = []
         }
+        // FTODO: Can we remove these "any"s?
         then(
-            callBack?: (data?: any) => any | PromiseLike<any>,
+            callBack?: (data?: unknown) => (any | PromiseLike<unknown>),
             onRejected?: any
         ): PromiseLike<any> {
             if (!(callBack instanceof Function)) {
@@ -32,7 +33,7 @@ namespace splitTime {
             }
         }
 
-        resolve(data?: any) {
+        resolve(data?: unknown) {
             if (this.resolved) {
                 console.warn("Promise already resolved")
                 return
@@ -74,12 +75,12 @@ namespace splitTime {
             return this.resolved
         }
 
-        static as(data?: any) {
+        static as(data?: unknown) {
             var prom = new splitTime.Pledge()
             prom.resolve(data)
             return prom
         }
-        static when(arr: splitTime.Pledge[]): PromiseLike<any> {
+        static when(arr: splitTime.Pledge[]): PromiseLike<unknown> {
             if (!Array.isArray(arr)) {
                 var newArr = new Array(arguments.length)
                 for (var i = 0; i < arguments.length; i++) {
@@ -89,9 +90,9 @@ namespace splitTime {
             }
 
             var prom = new splitTime.Pledge()
-            var results: any[] = []
+            var results: unknown[] = []
 
-            function addResult(index: number, data: any) {
+            function addResult(index: number, data: unknown) {
                 results[index] = data
             }
 
@@ -106,7 +107,7 @@ namespace splitTime {
             }
 
             function makeSingleResolveHandler(index: number) {
-                return function(data: any) {
+                return function(data: unknown) {
                     addResult(index, data)
                     checkResolve()
                 }
@@ -129,7 +130,7 @@ namespace splitTime {
             var prom = new splitTime.Pledge()
             var isResolved = false
 
-            function callback(data: any) {
+            function callback(data: unknown) {
                 if (!isResolved) {
                     isResolved = true
                     prom.resolve(data)
@@ -162,5 +163,14 @@ namespace splitTime {
             }, ms)
             return promise
         }
+    }
+
+    export function getPlaceholderPledge(): Pledge {
+        const ARBITRARY_PLACEHOLDER_TIME = 1000
+        const pledge = new Pledge()
+        setTimeout(() => {
+            pledge.resolve()
+        }, ARBITRARY_PLACEHOLDER_TIME)
+        return pledge
     }
 }

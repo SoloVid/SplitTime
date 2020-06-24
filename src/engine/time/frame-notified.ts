@@ -7,8 +7,8 @@ namespace splitTime {
     }
 
     export namespace instanceOf {
-        export function FrameNotified(obj: any): obj is FrameNotified {
-            return typeof obj.notifyFrameUpdate === "function"
+        export function FrameNotified(obj: unknown): obj is FrameNotified {
+            return typeof (obj as FrameNotified).notifyFrameUpdate === "function"
         }
     }
 }

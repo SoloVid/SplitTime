@@ -2,7 +2,7 @@ namespace splitTime {
     type transition_listener = (
         oldLevel: Level | null,
         newLevel: Level
-    ) => PromiseLike<any>
+    ) => PromiseLike<void>
 
     export class LevelManager {
         private readonly world: World
@@ -41,7 +41,8 @@ namespace splitTime {
             }
 
             if (level === this.currentLevel) {
-                return splitTime.Pledge.as()
+                await splitTime.Pledge.as()
+                return
             }
 
             this.transitionInProgress = true
@@ -87,10 +88,6 @@ namespace splitTime {
             enteringLevel.runEnterFunction()
 
             this.transitionInProgress = false
-        }
-
-        queueTransition(level: Level): Promise<any> {
-            return Promise.resolve().then(() => this.transition(level))
         }
 
         isTransitioning(): boolean {

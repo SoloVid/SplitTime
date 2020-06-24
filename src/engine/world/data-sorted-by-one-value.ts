@@ -1,14 +1,14 @@
 namespace splitTime {
-    var BUFFER = 10000
+    const BUFFER = 10000
 
     export class DataSortedByOneValue {
-        bucketSize: any
-        maxValue: any
-        valueLookup32: any[]
-        sortedByValue: { value: any; ref: number; object: {} }[]
-        reverseSortLookup: { [ref: number]: int }
-        constructor(maxValue: int, bucketSize: int) {
-            this.bucketSize = bucketSize || 32
+        private readonly bucketSize: int
+        private readonly maxValue: int
+        private readonly valueLookup32: number[]
+        private readonly sortedByValue: { value: number; ref: number; object: {} }[]
+        private readonly reverseSortLookup: { [ref: number]: int }
+        constructor(maxValue: int, bucketSize: int = 32) {
+            this.bucketSize = bucketSize
             this.maxValue = maxValue
             this.valueLookup32 = new Array(
                 Math.ceil(maxValue / this.bucketSize)
@@ -32,11 +32,11 @@ namespace splitTime {
             this.reverseSortLookup[1] = 1
         }
 
-        _getBeyondMaxValue() {
+        private _getBeyondMaxValue() {
             return this.maxValue + BUFFER
         }
 
-        add(ref: int, object: any) {
+        add(ref: int, object: object) {
             this.sortedByValue.push({
                 value: this._getBeyondMaxValue(),
                 ref: ref,
@@ -68,7 +68,7 @@ namespace splitTime {
             }
         }
 
-        resortUpward(ref: number, value: number) {
+        private resortUpward(ref: number, value: number) {
             var currentIndex = this.reverseSortLookup[ref]
             var oldObject = this.sortedByValue[currentIndex].object
             var oldValue = this.sortedByValue[currentIndex].value
@@ -105,7 +105,7 @@ namespace splitTime {
             }
         }
 
-        resortDownward(ref: int, value: number) {
+        private resortDownward(ref: int, value: number) {
             var currentIndex = this.reverseSortLookup[ref]
             var oldObject = this.sortedByValue[currentIndex].object
             var oldValue = this.sortedByValue[currentIndex].value
@@ -150,7 +150,7 @@ namespace splitTime {
         forEachInRange(
             valueStart: int,
             valueEndEx: int,
-            callback: (arg0: object) => any
+            callback: (arg0: object) => void
         ): boolean {
             // if(Math.floor(valueStart) !== valueStart) {
             //     console.warn("Non-integer value: " + valueStart);
@@ -191,7 +191,7 @@ namespace splitTime {
          * @param {function(Object)} callback - function that will be called for each item in the sorted list
          * @return {boolean} found - true if there is something in the list
          */
-        forEachInList(callback: (arg0: object) => any): boolean {
+        forEachInList(callback: (arg0: object) => void): boolean {
             var found = false
             for (
                 var iSorted = 0;

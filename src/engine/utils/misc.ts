@@ -6,7 +6,7 @@ namespace splitTime {
     if(__DOM__) {
         // from https://stackoverflow.com/a/2161748/4639640
         var scripts = document.getElementsByTagName("script")
-        var path = scripts[scripts.length - 1].src.split("?")[0] // remove any ?query
+        var path = scripts[scripts.length - 1].src.split("?")[0] // remove ?query
         SCRIPT_DIRECTORY = path
             .split("/")
             .slice(0, -1)
@@ -66,6 +66,12 @@ namespace splitTime {
     export function mod(n: number, base: number) {
         return ((n % base) + base) % base
     }
+
+    // From https://stackoverflow.com/a/10073788/4639640
+    export function pad(n: number, width: int, padChar: string = "0") {
+        let nStr = n + '';
+        return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join(padChar) + nStr;
+      }
 
     export function isOverlap(x1: number, length1: number, x2: number, length2: number) {
         var noOverlap =

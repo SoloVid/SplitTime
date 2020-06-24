@@ -15,7 +15,7 @@ namespace splitTime.assets {
 
     class HowlContainer {
         howl: Howl | null = null
-        soundId: any
+        soundId: number | null = null
         isLoaded: boolean = false
         isPausing: boolean = false
         musicGroup: string
@@ -74,7 +74,6 @@ namespace splitTime.assets {
             }
 
             var sound = this.sounds[handle]
-            var soundID = sound.soundId
             var currentVolume
             var fadeIn = false
 
@@ -82,14 +81,16 @@ namespace splitTime.assets {
             loop = typeof loop !== "undefined" ? loop : sound.isLooping
 
             if (sound.howl) {
-                if (restartIfPlaying) {
+                if (restartIfPlaying && sound.soundId !== null) {
                     sound.howl.seek(0, sound.soundId)
                 }
                 if (loop) {
                     //Note: this assumes we only have one looping background track at a time.
                     fadeIn = this.crossFadeSimilar(sound)
                 }
-                sound.howl.play(soundID)
+                if (sound.soundId !== null) {
+                    sound.howl.play(sound.soundId)
+                }
                 if (fadeIn) {
                     currentVolume = sound.howl?.volume() || 0
                     sound.howl.fade(currentVolume, 1, FADE_DURATION_MS)
@@ -132,7 +133,7 @@ namespace splitTime.assets {
                     }
                 })
                 sound.howl = howl
-                soundID = howl.play()
+                sound.soundId = howl.play()
             }
         }
 

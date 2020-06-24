@@ -1,50 +1,64 @@
 namespace splitTime {
+    type EventCallback = ((triggeringBody: Body) => void) | ((triggeringBody: Body, eventId: string) => void)
+
     export class Level {
         id: string
         private loader: LevelLoader
         private loaded: boolean = false
-        private events: { [id: string]: (triggeringBody: Body) => void }
+        private events: { [id: string]: EventCallback } = {}
         private enterFunction: (() => void) | null = null
         private exitFunction: (() => void) | null = null
-        private positions: { [id: string]: Position }
-        region: Region | null
-        bodies: Body[]
-        background: string
-        _cellGrid: level.CellGrid | null
-        weather: WeatherSettings
-        _props: any[]
+        private positions: { [id: string]: Position } = {}
+        region: Region | null = null
+        bodies: Body[] = []
+        background: string = ""
+        backgroundOffsetX: int = 0
+        backgroundOffsetY: int = 0
+        _cellGrid: level.CellGrid | null = null
+        weather: WeatherSettings = new WeatherSettings()
+        _props: Body[] = []
         type: "action" | null = null
         width: int = 0
         height: int = 0
         yWidth: int = 0
         lowestLayerZ: int = 0
         highestLayerZ: int = 0
-        _levelTraces: any
-        constructor(levelId: string) {
+        _levelTraces: level.Traces | null = null
+        constructor(levelId: string, levelData: level.FileData) {
             this.id = levelId
-            this.loader = new LevelLoader(this)
-            this.events = {}
-            this.positions = {}
-            this.region = null
-            this.bodies = []
-            this.background = ""
+            this.loader = new LevelLoader(this, levelData)
+        }
 
-            // this._bodyOrganizer = new splitTime.Level.BodyOrganizer();
-            this._cellGrid = null
+        readFileData(world: World): void {
+            this.loader.readFileData(world)
+        }
 
-            this.weather = new WeatherSettings()
+        /**
+         * A level can be referenced but not have a level file.
+         * This method is to help protect against that.
+         */
+        private ensureHasFile(): void | never {
+            if (!this.loader.hasData()) {
+                throw new Error("Not level file found associated with " + this.id)
+            }
+        }
 
-            this._props = []
+        private ensureLoaded(): void | never {
+            this.ensureHasFile()
+            if (!this.isLoaded()) {
+                throw new Error("Level " + this.id + " is not currently loaded")
+            }
         }
 
         load(
             world: World,
             levelData: splitTime.level.FileData
-        ): PromiseLike<any> {
-            return this.loader.load(world, levelData)
+        ): PromiseLike<void> {
+            return this.loader.loadAssets(world)
         }
 
         getCellGrid(): splitTime.level.CellGrid {
+            this.ensureLoaded()
             if (!this._cellGrid) {
                 throw new Error("CellGrid unavailable")
             }
@@ -52,6 +66,10 @@ namespace splitTime {
         }
 
         getLevelTraces(): splitTime.level.Traces {
+            this.ensureLoaded()
+            if (!this._levelTraces) {
+                throw new Error("Level traces unavailable")
+            }
             return this._levelTraces
         }
 
@@ -65,7 +83,7 @@ namespace splitTime {
         }
 
         getDebugTraceCanvas(): splitTime.Canvas {
-            return this._levelTraces.getDebugTraceCanvas()
+            return this.getLevelTraces().getDebugTraceCanvas()
         }
 
         getRegion(): Region {
@@ -78,6 +96,7 @@ namespace splitTime {
         }
 
         getPosition(positionId: string): splitTime.Position {
+            this.ensureHasFile()
             if (!this.positions[positionId]) {
                 throw new Error(
                     'Level "' +
@@ -90,6 +109,10 @@ namespace splitTime {
             return this.positions[positionId]
         }
 
+        getPositionMap(): { [id: string]: Position } {
+            return this.positions
+        }
+
         registerEnterFunction(fun: () => void) {
             this.enterFunction = fun
         }
@@ -98,7 +121,7 @@ namespace splitTime {
             this.exitFunction = fun
         }
 
-        registerEvent(eventId: string, callback: (triggeringBody: Body) => void) {
+        registerEvent(eventId: string, callback: EventCallback) {
             this.events[eventId] = callback
         }
 
@@ -127,7 +150,7 @@ namespace splitTime {
                         'Event "' + eventId + '" not found for level ' + that.id
                     )
                 }
-            return fun(triggeringBody)
+            return fun(triggeringBody, eventId)
         }
 
         runEvents(eventIds: string[], triggeringBody: Body) {
@@ -154,7 +177,7 @@ namespace splitTime {
             }
         }
 
-        forEachBody(callback: (body: splitTime.Body) => any) {
+        forEachBody(callback: (body: splitTime.Body) => void) {
             for (var i = 0; i < this.bodies.length; i++) {
                 callback(this.bodies[i])
             }

@@ -16,6 +16,21 @@ namespace splitTime.direction {
     export const SE = 3.5
     export const ES = SE
 
+    const lookup: { [dir: string]: direction_t } = {
+        "E": E,
+        "N": N,
+        "W": W,
+        "S": S,
+        "NE": NE,
+        "EN": EN,
+        "NW": NW,
+        "WN": WN,
+        "SW": SW,
+        "WS": WS,
+        "SE": SE,
+        "ES": ES
+    }
+
     export function interpret(inputDir: string | number): direction_t {
         if (typeof inputDir === "string") {
             if (isNaN(+inputDir)) {
@@ -28,8 +43,8 @@ namespace splitTime.direction {
     }
 
     export function fromString(stringDir: string): direction_t {
-        if (stringDir in splitTime.direction) {
-            return (splitTime.direction as any)[stringDir]
+        if (typeof lookup[stringDir] !== "undefined") {
+            return lookup[stringDir]
         } else {
             log.warn("Invalid direction: " + stringDir)
             return -1
@@ -82,11 +97,14 @@ namespace splitTime.direction {
         toThing: ILevelLocation
     ): direction_t
     export function fromToThing(
-        fromThing: { x: number; y: number },
-        toThing: { x: number; y: number }
+        fromThing: ReadonlyCoordinates2D,
+        toThing: ReadonlyCoordinates2D
     ): direction_t
-    export function fromToThing(fromThing: any, toThing: any): direction_t {
-        if (typeof fromThing.getX === "function") {
+    export function fromToThing(
+        fromThing: ReadonlyCoordinates2D | ILevelLocation,
+        toThing: ReadonlyCoordinates2D | ILevelLocation
+    ): direction_t {
+        if (instanceOf.ILevelLocation(fromThing) && instanceOf.ILevelLocation(toThing)) {
             return splitTime.direction.fromTo(
                 fromThing.getX(),
                 fromThing.getY(),
@@ -94,12 +112,15 @@ namespace splitTime.direction {
                 toThing.getY()
             )
         }
-        return splitTime.direction.fromTo(
-            fromThing.x,
-            fromThing.y,
-            toThing.x,
-            toThing.y
-        )
+        if (instanceOf.Coordinates2D(fromThing) && instanceOf.Coordinates2D(toThing)) {
+            return splitTime.direction.fromTo(
+                fromThing.x,
+                fromThing.y,
+                toThing.x,
+                toThing.y
+            )
+        }
+        throw new Error("Types of from and to should be matched")
     }
 
     export function simplifyToCardinal(realDir: string | number | null) {

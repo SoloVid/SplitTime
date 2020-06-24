@@ -12,9 +12,9 @@ namespace splitTime {
         private readonly bodyRenderer: body.Renderer
         private readonly weatherRenderer: WeatherRenderer
         
-        private fadeOut: number
-        private fadeIn: number
-        private FADE_INCREMENT: number
+        private fadeOutAmount: number
+        private fadeInAmount: number
+        private readonly FADE_INCREMENT: number
 
         constructor(
             private readonly camera: Camera,
@@ -25,8 +25,8 @@ namespace splitTime {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
 
-            this.fadeOut = 0
-            this.fadeIn = 0
+            this.fadeOutAmount = 0
+            this.fadeInAmount = 0
             this.FADE_INCREMENT = 0.1
 
             this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
@@ -36,7 +36,7 @@ namespace splitTime {
             )
 
             this.bodyRenderer = new body.Renderer(this.camera)
-            this.weatherRenderer = new WeatherRenderer(this.camera, this.buffer.context)
+            this.weatherRenderer = new WeatherRenderer(this.camera)
         }
 
         renderBoardState(forceCalculate: boolean) {
@@ -52,18 +52,9 @@ namespace splitTime {
 
             const screen = this.camera.getScreenCoordinates()
 
-            //Black out screen (mainly for the case of board being smaller than the screen)
-            this.buffer.context.fillStyle = "#000000"
-            this.buffer.context.fillRect(
-                0,
-                0,
-                this.SCREEN_WIDTH,
-                this.SCREEN_HEIGHT
-            )
-
             this.bodyRenderer.notifyNewFrame(screen, this.snapshot.context)
             var bodies = currentLevel.getBodies()
-            var playerBody = this.playerBodyGetter()        
+            var playerBody = this.playerBodyGetter()
 
             for (var iBody = 0; iBody < bodies.length; iBody++) {
                 var body = bodies[iBody]
@@ -89,20 +80,6 @@ namespace splitTime {
                 this.SCREEN_HEIGHT
             )
 
-            // if(splitTime.process == "TRPG")
-            // {
-            // 	//Draw blue range squares
-            // 	if(index == splitTime.cTeam[splitTime.currentPlayer].z && splitTime.cTeam[splitTime.currentPlayer].squares)
-            // 	{
-            // 		for(second = 0; second < splitTime.cTeam[splitTime.currentPlayer].squares.length; second++)
-            // 		{
-            // 			splitTime.see.fillStyle = "rgba(0, 100, 255, .5)";
-            // 			splitTime.see.fillRect(splitTime.cTeam[splitTime.currentPlayer].squares[second].x*32 - splitTime.wX, splitTime.cTeam[splitTime.currentPlayer].squares[second].y*32 - splitTime.wY, 32, 32);
-            // 			//splitTime.see.drawImage(splitTime.image.get("blueSquare.png"), 0, 0, 32, 32, splitTime.cTeam[splitTime.currentPlayer].squares[second].x*32 - splitTime.wX, splitTime.cTeam[splitTime.currentPlayer].squares[second].y*32 - splitTime.wY, 32, 32);
-            // 		}
-            // 	}
-            // }
-
             this.bodyRenderer.render()
             this.snapshot.context.globalAlpha = 1
 
@@ -119,8 +96,8 @@ namespace splitTime {
                 //Note: this single call on a perform test is a huge percentage of CPU usage.
                 this.snapshot.context.drawImage(
                     G.ASSETS.images.get(currentLevel.getBackgroundImage()),
-                    screen.x + xBackShift,
-                    screen.y + yBackShift,
+                    screen.x + xBackShift - currentLevel.backgroundOffsetX,
+                    screen.y + yBackShift - currentLevel.backgroundOffsetY,
                     this.SCREEN_WIDTH - 2 * xBackShift,
                     this.SCREEN_HEIGHT - 2 * yBackShift,
                     xBackShift,
@@ -129,6 +106,15 @@ namespace splitTime {
                     this.SCREEN_HEIGHT - 2 * yBackShift
                 )
             }
+
+            // Fill in the rest of the background with black (mainly for the case of board being smaller than the screen)
+            this.snapshot.context.fillStyle = "#000000"
+            this.snapshot.context.fillRect(
+                0,
+                0,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
+            )
 
             this.snapshot.context.globalCompositeOperation = "source-over"
 
@@ -149,50 +135,42 @@ namespace splitTime {
             }
                         
             //If the active player is switching regions  
-            if(playerBody?.inRegionTransition){                
+            if(playerBody?.inRegionTransition) {
                 //Fade to white
-                if (this.fadeOut < 1) {
-                    this.fadeOut += this.FADE_INCREMENT
+                if (this.fadeOutAmount < 1) {
+                    this.fadeOutAmount += this.FADE_INCREMENT
                 } else {
                     playerBody.finishLevelTransition()
                     this.levelManager.finishRegionTransition()
 
                     //Switch from fading out to fading in
-                    this.fadeIn = 1
-                    this.fadeOut = 0
-                }                
-            } else if (this.fadeIn > 0) {
+                    this.fadeInAmount = 1
+                    this.fadeOutAmount = 0
+                }
+            } else if (this.fadeInAmount > 0) {
                 //Continue fading in
-                this.fadeIn -= this.FADE_INCREMENT
+                this.fadeInAmount -= this.FADE_INCREMENT
             }
-         
+
+            this.weatherRenderer.render(currentLevel, this.snapshot.context)
+
+            this.buffer.context.drawImage(this.snapshot.element, 0, 0)
+
             //Draw the (semi-)transparent rectangle for fading in/out
-            var transparencyValue = this.fadeOut + this.fadeIn
-            this.snapshot.context.fillStyle = "rgba(255,255,255," + transparencyValue + ")"
-            this.snapshot.context.fillRect(
+            var transparencyValue = this.fadeOutAmount + this.fadeInAmount
+            this.buffer.context.fillStyle = "rgba(255,255,255," + transparencyValue + ")"
+            this.buffer.context.fillRect(
                 0,
                 0,
                 this.SCREEN_WIDTH,
                 this.SCREEN_HEIGHT
             )
             
-            this.buffer.context.drawImage(this.snapshot.element, 0, 0)
-
-            this.weatherRenderer.render(currentLevel)
-
-            //Display current splitTime.player stats
-            // splitTime.see.fillStyle="#FFFFFF";
-            // splitTime.see.font="12px Verdana";
-            // splitTime.see.fillText(splitTime.player[splitTime.currentPlayer].name + ": " + splitTime.player[splitTime.currentPlayer].hp + " HP | " + splitTime.player[splitTime.currentPlayer].strg + " Strength | " + splitTime.player[splitTime.currentPlayer].spd + " Agility", 10, 20);
-            //
-            // splitTime.Timeline.renderClock(splitTime.see); //in time.js
-
             //Save screen into snapshot
             this.see.drawImage(this.buffer.element, 0, 0)
-            this.snapshot.context.drawImage(this.buffer.element, 0, 0)
 
-            for (iBody = 0; iBody < bodies.length; iBody++) {
-                var drawable = bodies[iBody].drawable
+            for (const body of bodies) {
+                const drawable = body.drawable
                 if (
                     drawable &&
                     typeof drawable.cleanupAfterRender === "function"
@@ -201,6 +179,16 @@ namespace splitTime {
                 }
                 // TODO: maybe cleanup shadows?
             }
+        }
+
+        fadeTo(color: string = "rgba(0, 0, 0, 1)"): PromiseLike<void> {
+            log.warn("TODO: fade here")
+            return getPlaceholderPledge()
+        }
+
+        fadeIn(): PromiseLike<void> {
+            log.warn("TODO: fade in (if not already faded in)")
+            return getPlaceholderPledge()
         }
     }
 }

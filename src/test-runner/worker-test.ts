@@ -1,5 +1,5 @@
 namespace splitTime.testRunner {
-    declare function postMessage(message: any): void
+    declare function postMessage(message: unknown): void
 
     defer(() => {
         const tests = splitTime.test.getScenarios();

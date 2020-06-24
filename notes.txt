@@ -3,19 +3,10 @@ This file is here as a mixture of TODOs and implementation thought experiments. 
 Let's call "Bodys" NPCs in this doc.
 
 - Events, particularly paths, ought to be easy to set up.
-- Events should be divorced from NPCs (despite their close relationship). This necessitates NPC IDs, almost certainly specified by developer.
 - API should allow developer to easily specify an event where NPC moves through a series of positions.
 - Since we already have traces in the level editor, it would be cool to be able to make path traces.
     - Path traces ought to be able to bind to positions (one-way or two-way?) so that the engine knows how to handle a call to move from one position to another.
     - Positions ought to be able to bind to multiple paths, but there probably would never be a case to allow two different paths between the same two positions.
-- The trace editor could be expanded more.
-    - Allow user to move individual points in trace.
-    - Allow user to add points to mid-trace?
-    - Provide several kinds of traces. (solid, void, path, stair-up, stair-down, function, bounds?)
-    - Abstract colors out. (e.g. "function" and "MySpecialEncounter" instead of (100,0,X) since X could easily be set at runtime)
-    - Closing a trace should be reconsidered. Currently, a closed trace is filled in, but one might want to close a path.
-    - Allow show/hide of traces.
-    - Allow user to somehow link path traces to two different positions?
 - Traces could be more exposed to the developer.
     - Allow developer to access traces anytime?
     - Let developer define different traces and the behavior of loading them in?
@@ -38,18 +29,6 @@ Let's call "Bodys" NPCs in this doc.
     - If current event is the only thing that is in dynamic memory, we only need to store it on save. This means each piece of chain needs to have an ID so we can later match up the current event to its reconstructed static-memory equivalent.
     - Perhaps have user specify an ID for a chain and then automatically tack on a counter to each piece?
     - What about dynamic events (i.e. events not hard-defined in code, perhaps parameterized based on template and player decisions)? Do they exist? How do we handle them? Maybe still reference a static event but perhaps allow developer to attach a simple parameter object to the event chain which will be saved.
-
-- Other thoughts on save/load
-    - Actions should all be preemptible. There are a number of time when actions should just end. They are not meant to be lasting. It is way too complicated to make actions fully serializable especially with their functions and object references.
-    - Actions should be terminated upon leaving the board (though not necessarily when switching between subparties).
-    - Actions should be terminated upon save because an action's termination may affect the stable state of the game.
-    - My classic example of a problematic action is jumping. Jumping cannot just be interrupted and done because that would leave the character on the layer above with no way of getting down.
-    - Actions should be able to override a forceEnd function or something like that to have a chance to clean up the mess they made.
-    - If the developer really wants to make an action that cannot be interrupted, it is their responsibility to ensure player cannot save the game or leave the board.
-    - The paradigm pretty much necessitates that characters are not imbued with new, highly customized (parameterized) actions dynamically during the game but are simply given all their actions at the initialization of the game.
-    - Items might provide an opportunity for somewhat more dynamic actions.
-    - Actions could have conditions for use based on some character stats or flags.
-    - Items should probably be stored in the character object as an array of strings (or some kind of simple object array with quantities).
 
 ### Conversation
 

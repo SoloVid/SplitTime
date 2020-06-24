@@ -6,7 +6,7 @@ namespace splitTime.level {
     export class LevelSerializer implements file.ObjectSerializer<Level> {
         constructor(private readonly world: World) {}
 
-        isT(thing: any): thing is Level {
+        isT(thing: unknown): thing is Level {
             return thing instanceof Level
         }
 

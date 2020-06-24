@@ -1,6 +1,7 @@
 namespace splitTime.conversation {
     export class ConversationHandlers {
-        private onInteractLambda = () => this.onInteract()
+        private readonly onInteractLambda = () => this.onInteract()
+        onInteract = () => this.onInteractDefault()
         private isTornDown = false
 
         constructor(
@@ -10,7 +11,7 @@ namespace splitTime.conversation {
             private readonly helper: RunnerHelper
         ) {}
 
-        onInteract(): void {
+        private onInteractDefault(): void {
             this.conversation.tryInterrupt(this.nodeId)
         }
 

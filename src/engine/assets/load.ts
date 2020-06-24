@@ -9,7 +9,7 @@ namespace G {
 }
 
 namespace splitTime {
-    export function load(perspective: Perspective) {
+    export function load(perspective: Perspective): PromiseLike<void> {
         const loadingScreen = new LoadingScreen(perspective.view)
         loadingScreen.show()
 
@@ -17,7 +17,7 @@ namespace splitTime {
         var itemsToLoad =
             masterData.levels.length + masterData.preloadedImageFiles.length
         var itemsLoaded = 0
-        var promiseCollection: PromiseLike<any>[] = []
+        var promiseCollection: PromiseLike<void>[] = []
 
         function incrementAndUpdateLoading() {
             itemsLoaded++
@@ -50,10 +50,10 @@ namespace splitTime {
             var levelName = levelData.fileName.replace(/\.json$/, "")
             var level = perspective.world.getLevel(levelName)
             promiseCollection.push(
-                level.load(G.WORLD, levelData).then(incrementAndUpdateLoading)
+                level.load(perspective.world, levelData).then(incrementAndUpdateLoading)
             )
         }
 
-        return Promise.all(promiseCollection)
+        return Promise.all(promiseCollection).then()
     }
 }

@@ -31,7 +31,7 @@ namespace splitTime {
             splitTime.debug.setDebugValue("FPS", displayFPS)
 
             if (splitTime.debug.ENABLED) {
-                splitTime.debug.renderCanvas(perspective.view.see)
+                splitTime.debug.renderCanvas(perspective.view)
             }
         }
     }
@@ -97,7 +97,7 @@ namespace splitTime {
         }
 
         if (perspective.hud) {
-            perspective.hud.render(perspective.view.see)
+            perspective.hud.render(perspective.view)
             g.performanceCheckpoint("render HUD")
         }
     }

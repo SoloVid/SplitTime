@@ -14,7 +14,7 @@ $(document).ready(function() {
     });
 
     $fields.on("keyup", "input", function(event) {
-        if(event.which == 13) {
+        if(event.which == 13) { // enter
             $saveButton.click();
         }
     });
@@ -39,13 +39,12 @@ $(document).ready(function() {
             if(layer === editingThing) {
                 levelObject.layers.splice(iLayer, 1);
                 iLayer--;
-            } else {
-                for(var iTrace = 0; iTrace < layer.traces.length; iTrace++) {
-                    if(layer.traces[iTrace] === editingThing) {
-                        layer.traces.splice(iTrace, 1);
-                        iTrace--;
-                    }
-                }
+            }
+        }
+        for(var iTrace = 0; iTrace < levelObject.traces.length; iTrace++) {
+            if(levelObject.traces[iTrace] === editingThing) {
+                levelObject.traces.splice(iTrace, 1);
+                iTrace--;
             }
         }
         for(var iProp = 0; iProp < levelObject.props.length; iProp++) {
@@ -141,7 +140,23 @@ function showEditorLevel() {
             key: "region"
         },
         {
+            key: "width",
+            type: "number"
+        },
+        {
+            key: "height",
+            type: "number"
+        },
+        {
             key: "background"
+        },
+        {
+            key: "backgroundOffsetX",
+            type: "number"
+        },
+        {
+            key: "backgroundOffsetY",
+            type: "number"
         }
     ]);
 }
@@ -240,14 +255,14 @@ function showEditorTrace(trace) {
     ];
 
     switch(trace.type) {
-        case splitTime.Trace.Type.STAIRS:
+        case splitTime.trace.Type.STAIRS:
             fields.push({key: "direction"});
             break;
-        case splitTime.Trace.Type.EVENT:
+        case splitTime.trace.Type.EVENT:
             fields.push({key: "event"});
             break;
-        case splitTime.Trace.Type.POINTER:
-        case splitTime.Trace.Type.TRANSPORT:
+        case splitTime.trace.Type.POINTER:
+        case splitTime.trace.Type.TRANSPORT:
             fields.push({key: "level"});
             fields.push({key: "offsetX", type: "number"});
             fields.push({key: "offsetY", type: "number"});

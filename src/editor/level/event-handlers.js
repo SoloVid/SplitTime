@@ -1,3 +1,5 @@
+window.__EDITOR_CONSTANT__ = true;
+
 var levelObject = {
     fileName: "",
     type: "",
@@ -48,13 +50,12 @@ function setupEventHandlers() {
         event.preventDefault();
     });
 
-    setInterval(function(event) {
-        if(document.getElementsByClassName("background").length > 0) {
-            resizeBoardCheck(document.getElementsByClassName("background")[0]);
-        }
-    }, 1000);
-
     $(document).keydown(function(event) {
+        switch (event.target.tagName.toLowerCase()) {
+            case "input":
+            case "textarea":
+                return;
+        }
 
         var specialKey = true;
         switch(event.which) {
@@ -83,9 +84,9 @@ function setupEventHandlers() {
     });
 
     $(document).keyup(function(event) {
-        if(event.which == 16) {
+        if(event.which == 16) { // shift
             ctrlDown = false;
-        } else if(event.which == 32) {
+        } else if(event.which == 27) { // esc
             console.log("export of level JSON:");
             console.log(exportLevel());
         }
@@ -161,7 +162,7 @@ function setupEventHandlers() {
                 if(!pathInProgress) {
                     var trace = addNewTrace(vueApp.activeLayer, typeSelected);
 
-                    if(typeSelected == splitTime.Trace.Type.PATH && !ctrlDown) {
+                    if(typeSelected == splitTime.trace.Type.PATH && !ctrlDown) {
                         trace.vertices = positionPoint;
                     } else {
                         trace.vertices = literalPoint;
@@ -170,7 +171,7 @@ function setupEventHandlers() {
                     pathInProgress = trace;
                 } else {
                     if(!ctrlDown) {
-                        if(pathInProgress.type == splitTime.Trace.Type.PATH) {
+                        if(pathInProgress.type == splitTime.trace.Type.PATH) {
                             if(closestPosition) {
                                 pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint;
                             }

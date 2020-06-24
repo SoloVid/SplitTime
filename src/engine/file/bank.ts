@@ -3,13 +3,7 @@ namespace splitTime.file {
         private onNewCallbacks: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         private onLoadCallbacks: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
 
-        constructor(private id: string | number) {}
-
-        // This function is only here because of the singleton pattern.
-        // FTODO: consider removing to reduce singletons
-        setId(id: string | number) {
-            this.id = id
-        }
+        constructor(private readonly id: string | number) {}
 
         /**
          * Register a callback to be run when a new file is create before onLoad callbacks run
@@ -40,13 +34,4 @@ namespace splitTime.file {
             // TODO: implement
         }
     }
-}
-
-namespace G {
-    // This object is a convenience for game code and should not be used in engine code
-    export var FILE_BANK: splitTime.file.Bank
-
-    defer(() => {
-        FILE_BANK = new splitTime.file.Bank("DEFAULT")
-    })
 }

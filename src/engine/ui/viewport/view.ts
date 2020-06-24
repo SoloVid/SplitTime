@@ -1,4 +1,9 @@
 namespace splitTime.ui {
+    /**
+     * This is the actual viewing window for the player to see the game.
+     * Right now it is just a wrapper for a canvas, but it could
+     * be changed a bit for other platforms.
+     */
     export class View {
         public readonly seeB: splitTime.Canvas
         public readonly see: GenericCanvasRenderingContext2D
