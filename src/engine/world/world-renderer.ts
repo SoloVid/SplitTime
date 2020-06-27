@@ -12,9 +12,14 @@ namespace splitTime {
         private readonly bodyRenderer: body.Renderer
         private readonly weatherRenderer: WeatherRenderer
         
+        private fadingOut: boolean
         private fadeOutAmount: number
         private fadeInAmount: number
         private readonly FADE_INCREMENT: number
+        private fadeToRGB: string
+        private fadeToTransparency: number
+        private fadeOutPromise: splitTime.Pledge
+        private fadeInPromise: splitTime.Pledge
 
         constructor(
             private readonly camera: Camera,
@@ -25,9 +30,14 @@ namespace splitTime {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
 
+            this.fadingOut = false
             this.fadeOutAmount = 0
             this.fadeInAmount = 0
-            this.FADE_INCREMENT = 0.1
+            this.FADE_INCREMENT = 0.05
+            this.fadeToRGB = "0,0,0"
+            this.fadeToTransparency = 0
+            this.fadeInPromise = new splitTime.Pledge()
+            this.fadeOutPromise = new splitTime.Pledge()
 
             this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
             this.snapshot = new splitTime.Canvas(
@@ -134,31 +144,43 @@ namespace splitTime {
                 this.snapshot.context.globalAlpha = 1
             }
                         
-            //If the active player is switching regions  
+            //If the active player is switching regions
             if(playerBody?.inRegionTransition) {
                 //Fade to white
-                if (this.fadeOutAmount < 1) {
-                    this.fadeOutAmount += this.FADE_INCREMENT
-                } else {
-                    playerBody.finishLevelTransition()
+                this.fadeTo(255,255,255,1).then(() => {
+                    //After fading to white, do the actual transition and start fading in
+                    playerBody?.finishLevelTransition()
                     this.levelManager.finishRegionTransition()
-
-                    //Switch from fading out to fading in
-                    this.fadeInAmount = 1
-                    this.fadeOutAmount = 0
+                    this.fadeIn()
+                })
+            } 
+            
+            //If we need to fade the screen out
+            if(this.fadingOut) {
+                this.fadeOutAmount += this.FADE_INCREMENT
+                
+                //If we are now done fading out
+                if (this.fadeOutAmount >= this.fadeToTransparency) {
+                    this.fadeOutAmount = this.fadeToTransparency
+                    this.fadingOut = false
+                    this.fadeOutPromise.resolve()
                 }
-            } else if (this.fadeInAmount > 0) {
-                //Continue fading in
+            } else if (this.fadeInAmount > 0) {  //If we need to fade back in
                 this.fadeInAmount -= this.FADE_INCREMENT
+                
+                //If we are now done fading in
+                if (this.fadeInAmount <= 0) {
+                    this.fadeInAmount = 0
+                    this.fadeInPromise.resolve()
+                }
             }
 
             this.weatherRenderer.render(currentLevel, this.snapshot.context)
-
             this.buffer.context.drawImage(this.snapshot.element, 0, 0)
 
             //Draw the (semi-)transparent rectangle for fading in/out
             var transparencyValue = this.fadeOutAmount + this.fadeInAmount
-            this.buffer.context.fillStyle = "rgba(255,255,255," + transparencyValue + ")"
+            this.buffer.context.fillStyle = "rgba(" + this.fadeToRGB + "," + transparencyValue + ")"
             this.buffer.context.fillRect(
                 0,
                 0,
@@ -181,14 +203,32 @@ namespace splitTime {
             }
         }
 
-        fadeTo(color: string = "rgba(0, 0, 0, 1)"): PromiseLike<void> {
-            log.warn("TODO: fade here")
-            return getPlaceholderPledge()
+        
+        /**
+         * Fades the screen gradually to the target color (defaults to black if no parameters are passed)
+         * 
+         * @param r - r value of the target color (default: 0)
+         * @param g - g value of the target color (default: 0)
+         * @param b - b value of the target color (default: 0)
+         * @param transparency - target transparency value (defaults to 1)
+         */
+        fadeTo(r: number = 0, g: number = 0, b: number = 0, transparency: number = 1): PromiseLike<void> {
+            //TODO: check to make sure the target rgba value is valid
+            this.fadeToRGB = "" + r + "," + g + "," + b
+            this.fadeToTransparency = transparency
+            this.fadingOut = true
+            this.fadeOutPromise = new splitTime.Pledge()
+            return this.fadeOutPromise
         }
 
+        /**
+         * Switch from fading out to fading in
+         */
         fadeIn(): PromiseLike<void> {
-            log.warn("TODO: fade in (if not already faded in)")
-            return getPlaceholderPledge()
+            this.fadeInAmount = this.fadeToTransparency
+            this.fadeOutAmount = 0
+            this.fadeInPromise = new splitTime.Pledge()
+            return this.fadeInPromise
         }
     }
 }
