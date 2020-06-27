@@ -18,6 +18,7 @@ namespace splitTime {
         transitionY: number
         transitionZ: number
         transitionIncludeChildren: boolean
+        private putTransitionPromise: splitTime.Pledge | undefined
         
         drawable: splitTime.body.Drawable | null = null
         lightIntensity = 0
@@ -206,21 +207,23 @@ namespace splitTime {
         }
 
         /**
-         * Put this body in the specified level at the specified coordinates.
+         * Put this body in the specified level at the specified coordinates. Returns a promise that will 
+         * be resolved when any applicable transition animations have finished and the body has been put
+         * into the requested level.
          *
          * @param level - the level to put the body into
          * @param x - the x coordinate of the target location
          * @param y - the y coordinate of the target location
          * @param z - the z coordinate of the target location
          * @param includeChildren - whether or not to put the children of this body in the specified location as well
-         */         
+         */  
         put(
             level: Level | null,
             x: number,
             y: number,
             z: number,
             includeChildren = false
-        ) {
+        ): PromiseLike<void> {
             this.putWithTransition(
                 level,
                 x,
@@ -229,6 +232,8 @@ namespace splitTime {
                 includeChildren,
                 false
             )
+            this.putTransitionPromise = new splitTime.Pledge()
+            return this.putTransitionPromise
         }
 
         /**
@@ -297,11 +302,12 @@ namespace splitTime {
                 this.setX(x, includeChildren)
                 this.setY(y, includeChildren)
                 this.setZ(z, includeChildren)
+                this.putTransitionPromise?.resolve()
             }
         }
 
-        putInLocation(location: ILevelLocation2, includeChildren = false) {
-            this.put(
+        putInLocation(location: ILevelLocation2, includeChildren = false): PromiseLike<void>  {
+            return this.put(
                 location.level,
                 location.x,
                 location.y,
@@ -310,8 +316,8 @@ namespace splitTime {
             )
         }
 
-        putInPosition(position: Position, includeChildren = false) {
-            this.put(
+        putInPosition(position: Position, includeChildren = false): PromiseLike<void>  {
+            var returnPromise = this.put(
                 position.getLevel(),
                 position.getX(),
                 position.getY(),
@@ -327,6 +333,7 @@ namespace splitTime {
                     true
                 )
             }
+            return returnPromise
         }
 
         clearLevel(): void {
