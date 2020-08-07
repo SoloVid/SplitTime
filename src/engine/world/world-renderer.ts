@@ -20,13 +20,16 @@ namespace splitTime {
         private fadeToTransparency: number
         private fadeOutPromise: splitTime.Pledge
         private fadeInPromise: splitTime.Pledge
+        private see: GenericCanvasRenderingContext2D
 
         constructor(
             private readonly camera: Camera,
-            private readonly see: GenericCanvasRenderingContext2D,
+            private readonly view: splitTime.ui.View,
             private readonly levelManager: LevelManager,
             private readonly playerBodyGetter: body_getter
         ) {
+            this.see = view.see
+
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
 
@@ -46,7 +49,7 @@ namespace splitTime {
             )
 
             this.bodyRenderer = new body.Renderer(this.camera)
-            this.weatherRenderer = new WeatherRenderer(this.camera)
+            this.weatherRenderer = new WeatherRenderer(this.camera, this.view)
         }
 
         renderBoardState(forceCalculate: boolean) {
