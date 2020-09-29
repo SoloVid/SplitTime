@@ -74,7 +74,7 @@ namespace splitTime.player {
                 this.movementAgent.setWalkingDirection(dir)
             }
 
-            if (!this.isFrozen()) {
+            if (!this.isFrozen() && this.body.getLevel().isLoaded()) {
                 this.movementAgent.notifyTimeAdvance(delta)
             }
         }

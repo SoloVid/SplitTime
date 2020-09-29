@@ -49,17 +49,14 @@ namespace splitTime.body {
             node.isPlayer = isPlayer
 
             //Fade in/out for level transitions
-            if(body.inLevelTransition) {
-                //for the active player, only fade in/out on region transitions
-                if(node.isPlayer && !body.inRegionTransition) {
-                    body.finishLevelTransition()
-                }
-                else {
-                    node.targetOpacity = 0
-                    if (node.opacity <= 0 && node.targetOpacity == 0) {
-                        node.targetOpacity = 1
-                        body.finishLevelTransition()
-                    }
+            if (body.fadeEnteringLevelPromise) {
+                // FTODO: This feels a little disingenuous to resolve
+                // here because the fade hasn't actually finished
+                body.fadeEnteringLevelPromise.resolve()
+                body.fadeEnteringLevelPromise = null;
+                if (!isPlayer) {
+                    node.opacity = 0
+                    node.targetOpacity = 1
                 }
             }
         }
@@ -301,7 +298,7 @@ namespace splitTime.body {
                     }
 
                     //If the body is not already in a level transition
-                    if(!nodeInFront.body.inLevelTransition){
+                    if(!nodeInFront.body.fadeEnteringLevelPromise){
                         //Fade gradually based on the number of overlapping pixels
                         var crossFadeFactor = Math.min(
                             overlappingPixels / CROSS_FADE_PIXELS,

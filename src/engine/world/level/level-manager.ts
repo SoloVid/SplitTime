@@ -51,8 +51,8 @@ namespace splitTime {
             const exitingLevel = this.currentLevel
 
             //If this is the initial transition at the start of a game
-            var gameLoading = !exitingLevel 
-            
+            const gameLoading = !exitingLevel 
+
             //This will be true if we are changing regions, but not true for the initial game load
             this.regionTransitionInProgress =
                 exitingLevel !== null &&
@@ -60,8 +60,6 @@ namespace splitTime {
 
             //********Leave current level
 
-            // TODO: move to listener
-            // splitTime.process = "loading";
             if (this.transitionStartListener) {
                 await this.transitionStartListener(exitingLevel, enteringLevel)
             }
@@ -81,11 +79,10 @@ namespace splitTime {
                 await enteringLevel.getRegion().loadForPlay(this.world)
             }
 
-            // splitTime.process = enteringLevel.type as string;
+            enteringLevel.runEnterFunction()
             if (this.transitionEndListener) {
                 await this.transitionEndListener(exitingLevel, enteringLevel)
             }
-            enteringLevel.runEnterFunction()
 
             this.transitionInProgress = false
         }
