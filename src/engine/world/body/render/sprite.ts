@@ -32,7 +32,7 @@ namespace splitTime {
         omniDir = false
         rotate = 0
 
-        opacity = 1
+        opacityModifier = 1
         playerOcclusionFadeFactor = 0
         stance = splitTime.Sprite.DEFAULT_STANCE
         requestedStance = splitTime.Sprite.DEFAULT_STANCE
@@ -51,6 +51,8 @@ namespace splitTime {
                 W: 3
             }
         }
+
+        light: body.Light | null = null
 
         private getImage(): HTMLImageElement {
             return G.ASSETS.images.get(this.img)
@@ -95,7 +97,7 @@ namespace splitTime {
             var x = -Math.round(crop.xres / 2) - this.baseOffX
             var y = -crop.yres - this.baseOffY
 
-            ctx.globalAlpha = ctx.globalAlpha * this.opacity
+            ctx.globalAlpha = ctx.globalAlpha * this.opacityModifier
 
             ctx.drawImage(
                 tImg,
@@ -239,6 +241,10 @@ namespace splitTime {
             }
         }
 
+        getLight(): body.Light | null {
+            return this.light
+        }
+
         clone(): splitTime.Sprite {
             var clone = new splitTime.Sprite(this.img)
             clone.xres = this.xres
@@ -247,7 +253,7 @@ namespace splitTime {
             clone.baseOffY = this.baseOffY
             clone.omniDir = this.omniDir
             clone.rotate = this.rotate
-            clone.opacity = this.opacity
+            clone.opacityModifier = this.opacityModifier
             clone.playerOcclusionFadeFactor = this.playerOcclusionFadeFactor
             clone.stance = this.stance
             clone.requestedStance = this.requestedStance
@@ -256,6 +262,7 @@ namespace splitTime {
             clone.dir = this.dir
             clone.requestedDir = this.requestedDir
             clone.stances = this.stances
+            clone.light = this.light
             return clone
         }
     }

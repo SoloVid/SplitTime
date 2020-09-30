@@ -3,16 +3,15 @@ namespace splitTime.body {
         sourceBody: Body,
         location: ILevelLocation2
     ): Body {
-        if (sourceBody.drawable instanceof Sprite) {
-            var tempSprite = sourceBody.drawable.clone()
-            var tempBody = new Body()
-            tempBody.baseLength = 0
-            tempBody.putInLocation(location)
-            tempBody.drawable = tempSprite
-            return tempBody
-        } else {
-            throw new Error("Body doesn't have a Sprite object as drawable; so can't draw ghost")
+        if (sourceBody.drawable === null) {
+            throw new Error("Body doesn't have a drawable; so can't create ghost")
         }
+        const tempDrawable = sourceBody.drawable.clone()
+        const tempBody = new Body()
+        tempBody.baseLength = 0
+        tempBody.putInLocation(location)
+        tempBody.drawable = tempDrawable
+        return tempBody
     }
 
     export function fadeInBody(
@@ -21,24 +20,20 @@ namespace splitTime.body {
         maxOpacity: number = 1,
         speed: number = 2
     ): PromiseLike<void> {
-        const sprite = body.drawable
-        if (!(sprite instanceof Sprite)) {
-            if (splitTime.debug.ENABLED) {
-                splitTime.log.warn(
-                    "Body doesn't have a Sprite object as drawable; so can't fade in"
-                )
-            }
+        const d = body.drawable
+        if (d === null) {
+            // Nothing to fade in
             return Pledge.as();
         }
 
-        sprite.opacity = startOpacity
+        d.opacityModifier = startOpacity
 
         const pledge = new Pledge()
         body.registerTimeAdvanceListener(delta => {
             var dOpacity = speed * delta
-            sprite.opacity += dOpacity
-            if (sprite.opacity >= maxOpacity) {
-                sprite.opacity = maxOpacity
+            d.opacityModifier += dOpacity
+            if (d.opacityModifier >= maxOpacity) {
+                d.opacityModifier = maxOpacity
                 pledge.resolve()
                 return STOP_CALLBACKS
             }
@@ -52,25 +47,21 @@ namespace splitTime.body {
         startOpacity = 1,
         speed: number = 2
     ): PromiseLike<void> {
-        const sprite = body.drawable
-        if (!(sprite instanceof Sprite)) {
-            if (splitTime.debug.ENABLED) {
-                splitTime.log.warn(
-                    "Body doesn't have a Sprite object as drawable; so can't fade in"
-                )
-            }
+        const d = body.drawable
+        if (d === null) {
+            // Nothing to fade out
             return Pledge.as();
         }
 
-        sprite.opacity = startOpacity
+        d.opacityModifier = startOpacity
 
         const pledge = new Pledge()
         body.registerTimeAdvanceListener(delta => {
             var dOpacity = speed * delta
-            sprite.opacity -= dOpacity
+            d.opacityModifier -= dOpacity
 
-            if (sprite.opacity <= 0) {
-                sprite.opacity = 0
+            if (d.opacityModifier <= 0) {
+                d.opacityModifier = 0
                 pledge.resolve()
                 return STOP_CALLBACKS
             }

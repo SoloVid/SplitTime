@@ -25,5 +25,14 @@ namespace splitTime {
             }
             this.context = ctx
         }
+
+        withCleanTransform(callback: () => void): void {
+            this.context.setTransform(1, 0, 0, 1, 0, 0)
+            try {
+                callback()
+            } finally {
+                this.context.setTransform(1, 0, 0, 1, 0, 0)
+            }
+        }
     }
 }

@@ -156,38 +156,22 @@ namespace splitTime {
 
             this.buffer.context.globalCompositeOperation = "lighter"
 
-            var bodies = level.getBodies()
+            const bodies = level.getBodies()
             for (const body of bodies) {
-                if (body.lightIntensity > 0) {
-                    var xCoord = body.x - screen.x
-                    var yCoord = body.y - body.z - screen.y
-                    var grd = this.buffer.context.createRadialGradient(
-                        xCoord,
-                        yCoord,
-                        1,
-                        xCoord,
-                        yCoord,
-                        body.lightRadius
-                    )
-                    grd.addColorStop(
-                        0,
-                        "rgba(255, 255, 255, " +
-                            body.lightIntensity +
-                            ")"
-                    )
-                    grd.addColorStop(1, "rgba(255, 255, 255, 0)")
-                    this.buffer.context.fillStyle = grd
-                    this.buffer.context.beginPath()
-                    this.buffer.context.arc(
-                        xCoord,
-                        yCoord,
-                        150,
-                        0,
-                        2 * Math.PI
-                    )
-                    this.buffer.context.closePath()
-                    this.buffer.context.fill()
+                const drawable = body.drawable
+                const light = drawable?.getLight()
+                if (!drawable || !light) {
+                    continue
                 }
+                const xCoord = body.x - screen.x
+                const yCoord = body.y - body.z - screen.y
+                this.buffer.withCleanTransform(() => {
+                    this.buffer.context.translate(
+                        Math.round(xCoord),
+                        Math.round(yCoord)
+                    )
+                    light.applyLighting(this.buffer.context, drawable.opacityModifier)
+                })
             }
 
             // Return to default

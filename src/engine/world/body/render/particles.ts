@@ -167,6 +167,7 @@ namespace splitTime.particles {
         opacityShiftMagnitude: number
         colorShiftIntervalMs: number
         colorShiftMagnitude: number
+        lightIntensity: number = 0
         constructor(
             location: ReadonlyCoordinates3D,
             particleGenerator: (emitter: ParticleEmitter) => Particle
@@ -196,6 +197,7 @@ namespace splitTime.particles {
         }
 
         playerOcclusionFadeFactor = 0.3
+        opacityModifier: number = 1
 
         spawn(n: number) {
             n = n || 1
@@ -294,6 +296,19 @@ namespace splitTime.particles {
             }
         }
 
+        applyLighting(ctx: GenericCanvasRenderingContext2D, intensity: number): void {
+            if (this.lightIntensity <= 0 || intensity <= 0) {
+                return
+            }
+            const initialAlpha = ctx.globalAlpha
+            try {
+                ctx.globalAlpha = intensity * this.lightIntensity
+                this.draw(ctx)
+            } finally {
+                ctx.globalAlpha = initialAlpha
+            }
+        }
+
         notifyFrameUpdate(delta: number) {
             // Do nothing
         }
@@ -329,6 +344,14 @@ namespace splitTime.particles {
             this.registerParticlesGoneHandler(function() {
                 tempBody.clearLevel()
             })
+        }
+
+        getLight(): ParticleEmitter {
+            return this
+        }
+
+        clone(): ParticleEmitter {
+            throw new Error("not yet implemented")
         }
     }
 }

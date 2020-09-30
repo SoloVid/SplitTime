@@ -1,6 +1,7 @@
 namespace splitTime.body {
     export interface Drawable extends FrameNotified, TimeNotified {
         playerOcclusionFadeFactor: number
+        opacityModifier: number
 
         getCanvasRequirements(
             x: number,
@@ -12,6 +13,10 @@ namespace splitTime.body {
 
         prepareForRender(): void
         cleanupAfterRender(): void
+
+        getLight(): Light | null
+
+        clone(): Drawable
     }
 
     export class CanvasRequirements {

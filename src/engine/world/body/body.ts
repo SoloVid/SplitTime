@@ -14,8 +14,6 @@ namespace splitTime {
         fadeEnteringLevelPromise: Pledge | null
 
         drawable: splitTime.body.Drawable | null = null
-        lightIntensity = 0
-        lightRadius = 150
         shadow = false
 
         private _level: splitTime.Level | null = null
