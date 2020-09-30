@@ -41,27 +41,10 @@ module.exports = function(grunt) {
                     '<%= grunt.config("projectPath") %>dist/game.min.js': ['<%= grunt.config("projectPath") %>dist/game.js']
                 }
             }
-        },
-        jshint: {
-            options: {
-                // options here to override JSHint defaults
-                // '-W061': true, //ignore "eval can be harmful"
-                // '-W054': true, //ignore "the Function constructor is a form of eval"
-                // '-W069': true, //ignore dot operator preference over brackets
-                globals: {
-                    jQuery: true,
-                    console: true,
-                    document: true,
-                    splitTime: true
-                },
-                reporterOutput: ""
-            },
-            default: ['Gruntfile.js', 'src/editor/**/*.js'],
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-sync');
 
     grunt.registerTask('build', 'Build game project or just engine', function(projectName) {
