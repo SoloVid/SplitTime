@@ -136,3 +136,7 @@ textarea {
 .hoverable:hover {
     outline: 4px solid yellow;
 }
+
+.indent {
+    margin-left: 10px;
+}

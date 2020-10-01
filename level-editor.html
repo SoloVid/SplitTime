@@ -55,6 +55,7 @@
                     <span title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;
                         &#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">Traces</span>
                     <div v-for="(traceOption) in traceOptions"
+                         v-bind:key="traceOption.type"
                          class="option"
                          v-bind:style="{ color: 'white', backgroundColor: traceOption.color }"
                          v-on:click="selectTraceOption(traceOption.type)"
@@ -65,7 +66,7 @@
                 </div>
             </div>
             <div id="layerMenuVue" class="menu" style="right:0px;">
-                <ul>
+                <div>
                     <menu-layer
                             v-for="(layer, index) in level.layers"
                             v-bind:key="index"
@@ -73,11 +74,11 @@
                             v-bind:layer="layer"
                             v-bind:index="index"
                     ></menu-layer>
-                </ul>
+                </div>
                 <div class="option" v-on:click.left="createLayer">Add Layer</div>
             </div>
             <div id="infoPane" class="menu" style="left: 0; top: auto; bottom: 0; width: auto;">
-                <span v-for="(value, name) in info">
+                <span v-for="(value, name) in info" v-bind:key="name">
                     {{ name }}: {{ value }}
                 </span>
             </div>
@@ -97,79 +98,79 @@
     </div>
 
     <script type="text/x-template" id="menu-layer-template">
-        <li>
+        <div>
+            <input type="checkbox" v-model="layer.displayed"/>
             <strong v-on:click="edit" class="pointer">
                 <span v-show="!layer.id">Layer {{ index }}</span>
                 <span v-show="layer.id">{{layer.id}}</span>
             </strong>
-            <input type="checkbox" v-model="layer.displayed"/>
-            <div v-show="traces.length > 0">
-            <div>
-                Traces
-                <input type="checkbox"
-                       v-bind:checked="allTracesDisplayed"
-                       v-on:click.left="toggleAllTracesDisplayed"
-                />
+            <div class="indent">
+                <div v-show="traces.length > 0">
+                    <div>
+                        <input type="checkbox"
+                            v-bind:checked="allTracesDisplayed"
+                            v-on:click.left="toggleAllTracesDisplayed"
+                        />
+                        Traces
+                    </div>
+                    <div class="indent">
+                        <div v-for="(trace, traceIndex) in traces"
+                            v-on:mouseenter="trace.isHighlighted = true"
+                            v-on:mouseleave="trace.isHighlighted = false"
+                        >
+                            <input type="checkbox" v-model="trace.displayed"/>
+                            <span v-on:click.left="editTrace(trace)" class="pointer">
+                                <span v-show="!trace.id">Trace {{ traceIndex }}</span>
+                                <span v-show="trace.id">{{trace.id}}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div v-show="props.length > 0">
+                    <div>
+                        <input type="checkbox"
+                            v-bind:checked="allPropsDisplayed"
+                            v-on:click.left="toggleAllPropsDisplayed"
+                        />
+                        Props
+                    </div>
+                    <div class="indent">
+                        <div v-for="(prop, index) in props"
+                            v-on:mouseenter="prop.isHighlighted = true"
+                            v-on:mouseleave="prop.isHighlighted = false"
+                        >
+                            <input type="checkbox" v-model="prop.displayed"/>
+                            <span v-on:click.left="editProp(prop)" class="pointer">
+                                <span v-show="!prop.id">Prop {{ index }}</span>
+                                <span v-show="prop.id">{{prop.id}}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div v-show="positions.length > 0">
+                    <div>
+                        <input type="checkbox"
+                            v-bind:checked="allPositionsDisplayed"
+                            v-on:click.left="toggleAllPositionsDisplayed"
+                        />
+                        Positions
+                    </div>
+                    <div class="indent">
+                        <div v-for="(position, index) in positions"
+                            v-on:mouseenter="position.isHighlighted = true"
+                            v-on:mouseleave="position.isHighlighted = false"
+                            style="list-style-type: disc"
+                        >
+                            <input type="checkbox" v-model="position.displayed"/>
+                            <span v-on:click.left="editPosition(position)" class="pointer">
+                                <span v-show="!position.id">Position {{ index }}</span>
+                                <span v-show="position.id">{{position.id}}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <ul>
-                <li v-for="(trace, traceIndex) in traces"
-                    v-on:mouseenter="trace.isHighlighted = true"
-                    v-on:mouseleave="trace.isHighlighted = false"
-                    style="list-style-type: circle"
-                >
-                    <span v-on:click.left="editTrace(trace)" class="pointer">
-                        <span v-show="!trace.id">Trace {{ traceIndex }}</span>
-                        <span v-show="trace.id">{{trace.id}}</span>
-                    </span>
-                    <input type="checkbox" v-model="trace.displayed"/>
-                </li>
-            </ul>
-            </div>
-            <div v-show="props.length > 0">
-            <div>
-                Props
-                <input type="checkbox"
-                       v-bind:checked="allPropsDisplayed"
-                       v-on:click.left="toggleAllPropsDisplayed"
-                />
-            </div>
-            <ul>
-                <li v-for="(prop, index) in props"
-                    v-on:mouseenter="prop.isHighlighted = true"
-                    v-on:mouseleave="prop.isHighlighted = false"
-                    style="list-style-type: square"
-                >
-                    <span v-on:click.left="editProp(prop)" class="pointer">
-                        <span v-show="!prop.id">Prop {{ index }}</span>
-                        <span v-show="prop.id">{{prop.id}}</span>
-                    </span>
-                    <input type="checkbox" v-model="prop.displayed"/>
-                </li>
-            </ul>
-            </div>
-            <div v-show="positions.length > 0">
-            <div>
-                Positions
-                <input type="checkbox"
-                       v-bind:checked="allPositionsDisplayed"
-                       v-on:click.left="toggleAllPositionsDisplayed"
-                />
-            </div>
-            <ul>
-                <li v-for="(position, index) in positions"
-                    v-on:mouseenter="position.isHighlighted = true"
-                    v-on:mouseleave="position.isHighlighted = false"
-                    style="list-style-type: disc"
-                >
-                    <span v-on:click.left="editPosition(position)" class="pointer">
-                        <span v-show="!position.id">Position {{ index }}</span>
-                        <span v-show="position.id">{{position.id}}</span>
-                    </span>
-                    <input type="checkbox" v-model="position.displayed"/>
-                </li>
-            </ul>
-            </div>
-        </li>
+        </div>
     </script>
 
     <svg
