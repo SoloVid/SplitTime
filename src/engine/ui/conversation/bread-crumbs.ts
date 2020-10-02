@@ -91,7 +91,7 @@ namespace splitTime.conversation {
                     if(nextCrumbs !== null) {
                         return new BreadCrumbs(nextCrumbs)
                     }
-                    return this.getNextRelative(this.crumbs.slice(iCrumb + 1))
+                    return this.getNextRelative(this.crumbs.slice(0, iCrumb + 1))
                 }
             }
             throw new Error("No cancellation (not found in hierarchy related to these bread crumbs)")
