@@ -5,7 +5,7 @@ namespace splitTime {
     type CallbackObject =
         | { [method: string]: CallbackFunction }
         | object
-    type Callback = CallbackFunction | CallbackObject
+    export type Callback = CallbackFunction | CallbackObject
 
     export enum CopingMechanism {
         RETHROW,

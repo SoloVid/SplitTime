@@ -34,6 +34,7 @@ namespace splitTime.agent {
                 if (this.sprite) {
                     this.sprite.requestStance("walk", this.body.dir)
                 }
+                // TODO: how are we going to handle hills?
                 if (this.body.level.isLoaded()) {
                     this.body.mover.horizontal.zeldaStep(
                         this.body.dir,

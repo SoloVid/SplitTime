@@ -1,5 +1,5 @@
 namespace splitTime.agent {
-    class StageCallback implements Callback<void> {
+    class StageCallback implements SimpleCallback<void> {
         constructor(
             private readonly pathWalker: PathWalker,
             private readonly stage: int
@@ -27,7 +27,7 @@ namespace splitTime.agent {
         }
     }
 
-    export class PathWalker implements TimeNotified {
+    export class PathWalker implements npc.Behavior {
         private lastKnownLocation: Coordinates2D | Position | null = null
         private nextStageIndex: int = 0
         private currentWalk: CurrentWalk | null = null
@@ -36,20 +36,13 @@ namespace splitTime.agent {
         private readonly completionCallbacks = new ObjectCallbacks<void>()
 
         constructor(
+            private readonly pathSpec: PathSpec,
             private readonly npc: Npc,
-            private readonly pathSpec: PathSpec
         ) {
             const builder = new PathDslBuilder()
             pathSpec.setup(builder)
             this.stages = builder.build()
         }
-
-        start(): void {
-            this.nextStep()
-            this.npc.setDirectedBehavior(this)
-            this.isStarted = true
-        }
-
         isComplete(): boolean {
             return this.isStarted && this.nextStageIndex > this.stages.length
         }
@@ -58,7 +51,16 @@ namespace splitTime.agent {
             return this.completionCallbacks
         }
 
+        notifySuspension(): void {
+            throw new Error("Method not implemented.")
+        }
+
         notifyTimeAdvance(delta: splitTime.game_seconds): void {
+            if (!this.isStarted) {
+                this.nextStep()
+                this.isStarted = true
+            }
+
             if (this.currentWalk === null) {
                 return
             }
@@ -105,7 +107,6 @@ namespace splitTime.agent {
             this.currentWalk = null
             const stageIndex = this.nextStageIndex++
             if (stageIndex >= this.stages.length) {
-                this.npc.stopBehavior(this)
                 this.completionCallbacks.run()
                 return
             }
@@ -153,7 +154,7 @@ namespace splitTime.agent {
         const approxDist = Math.abs(a.x - b.x) +
         Math.abs(a.y - b.y) +
         Math.abs(a.z - b.z)
-        const CLOSE_ENOUGH = 1
+        const CLOSE_ENOUGH = 4
         return approxDist < CLOSE_ENOUGH
     }
 }

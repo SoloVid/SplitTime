@@ -6,17 +6,17 @@ namespace splitTime {
      */
     export class ObjectCallbacks<T> {
         private registerCallbacks: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks();
-        private readonly callbacks: Callback<T>[] = [];
+        private readonly callbacks: SimpleCallback<T>[] = [];
 
         constructor() {
 
         }
 
-        getCallbacks(): readonly Callback<T>[] {
+        getCallbacks(): readonly SimpleCallback<T>[] {
             return this.callbacks;
         }
 
-        register(callback: Callback<T>): void {
+        register(callback: SimpleCallback<T>): void {
             this.callbacks.push(callback);
             this.registerCallbacks.register((data: T) => callback.callBack(data));
         }
@@ -24,7 +24,7 @@ namespace splitTime {
         /**
          * An alias for register() that provides a Promise-like interface
          */
-        then(callback: Callback<T>): void {
+        then(callback: SimpleCallback<T>): void {
             this.register(callback);
         }
 
