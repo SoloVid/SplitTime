@@ -72,9 +72,6 @@ namespace splitTime {
             timeline.notifyFrameUpdate(secondsForFrame)
             g.performanceCheckpoint("timeline frame update")
 
-            region.notifyFrameUpdate(secondsForFrame)
-            g.performanceCheckpoint("region frame update")
-
             g.notifyListenersFrameUpdate(secondsForFrame)
             g.performanceCheckpoint("notify listeners of update")
 

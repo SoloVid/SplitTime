@@ -48,12 +48,6 @@ namespace splitTime {
             return this.levels
         }
 
-        notifyFrameUpdate(delta: real_seconds) {
-            for (var iLevel = 0; iLevel < this.levels.length; iLevel++) {
-                this.levels[iLevel].notifyFrameUpdate(delta)
-            }
-        }
-
         notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
             for (var iLevel = 0; iLevel < this.levels.length; iLevel++) {
                 this.levels[iLevel].notifyTimeAdvance(delta, absoluteTime)

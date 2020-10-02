@@ -56,10 +56,6 @@ namespace splitTime.body {
             ctx.fill()
         }
 
-        notifyFrameUpdate(delta: number) {
-            // Do nothing
-        }
-
         notifyTimeAdvance(delta: number) {
             // Do nothing
         }

@@ -223,10 +223,6 @@ namespace splitTime {
             this.requestStance(splitTime.Sprite.DEFAULT_STANCE, this.dir, true)
         }
 
-        notifyFrameUpdate(delta: number) {
-            // Don't care about real time
-        }
-
         notifyTimeAdvance(delta: number) {
             this._timeMs += delta * 1000
         }

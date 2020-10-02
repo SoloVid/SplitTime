@@ -159,12 +159,6 @@ namespace splitTime {
             }
         }
 
-        notifyFrameUpdate(delta: real_seconds) {
-            this.forEachBody(function(body) {
-                body.notifyFrameUpdate(delta)
-            })
-        }
-
         notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
             this.forEachBody(function(body) {
                 body.notifyTimeAdvance(delta, absoluteTime)

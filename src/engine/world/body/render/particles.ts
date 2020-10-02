@@ -296,10 +296,6 @@ namespace splitTime.particles {
             }
         }
 
-        notifyFrameUpdate(delta: number) {
-            // Do nothing
-        }
-
         notifyTimeAdvance(delta: number) {
             this.advanceTime(delta * 1000)
         }

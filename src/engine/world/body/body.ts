@@ -5,9 +5,9 @@ namespace splitTime {
         template: string | null = null
         id: string = "NOT SET"
         ref: int
-        private frameUpdateHandlers: splitTime.RegisterCallbacks
         private timeAdvanceListeners: splitTime.RegisterCallbacks
         private playerInteractHandlers: splitTime.RegisterCallbacks
+        private readonly customEvents: { [id: string]: splitTime.RegisterCallbacks } = {}
         mover: splitTime.body.Mover
         speechBox: splitTime.body.SpeechBox
 
@@ -41,9 +41,6 @@ namespace splitTime {
         // TODO: remove parameter when moving templates elsewhere
         constructor() {
             this.ref = nextRef++
-            this.frameUpdateHandlers = new splitTime.RegisterCallbacks({
-                notifyFrameUpdate: null
-            })
             this.timeAdvanceListeners = new splitTime.RegisterCallbacks({
                 notifyTimeAdvance: null
             })
@@ -290,20 +287,6 @@ namespace splitTime {
             return this.getLevel().getRegion()
         }
 
-        notifyFrameUpdate(delta: real_seconds) {
-            this.frameUpdateHandlers.run(delta)
-            try {
-                if (
-                    this.drawable &&
-                    splitTime.instanceOf.FrameNotified(this.drawable)
-                ) {
-                    this.drawable.notifyFrameUpdate(delta)
-                }
-            } catch (e) {
-                splitTime.log.error(e)
-            }
-        }
-
         notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
             const ZILCH = 0.00001
             const cappedDelta = Math.min(delta, absoluteTime - this._time)
@@ -359,6 +342,22 @@ namespace splitTime {
         }
         deregisterPlayerInteractHandler(handler: () => void) {
             this.playerInteractHandlers.remove(handler)
+        }
+
+        registerEventListener(id: string, handler: (data: unknown) => CallbackResult) {
+            this.getCustomEventCallbacks(id).register(handler)
+        }
+        triggerEvent(id: string, data: unknown) {
+            if (id in this.customEvents) {
+                this.getCustomEventCallbacks(id).run(data)
+            }
+        }
+
+        private getCustomEventCallbacks(id: string): RegisterCallbacks {
+            if (!(id in this.customEvents)) {
+                this.customEvents[id] = new RegisterCallbacks()
+            }
+            return this.customEvents[id]
         }
 
         // Generally equates to pixels per second (game time)
