@@ -6,6 +6,7 @@ namespace splitTime.player {
         jumpCooldown: splitTime.game_seconds
         specialAbility: ability.IAbility | null
         specialCooldown: splitTime.game_seconds
+        attackAbility: ability.IAbility | null
 
         constructor(
             private readonly playerManager: PlayerManager,
@@ -21,6 +22,7 @@ namespace splitTime.player {
             this.jumpCooldown = 0.1
             this.specialAbility = null
             this.specialCooldown = 0.1
+            this.attackAbility = null
         }
 
         setJumpAbility(ability: ability.IAbility) {
@@ -29,6 +31,10 @@ namespace splitTime.player {
 
         setSpecialAbility(ability: ability.IAbility) {
             this.specialAbility = ability
+        }
+
+        setAttackAbility(ability: ability.IAbility) {
+            this.attackAbility = ability
         }
 
         doJump() {
@@ -49,7 +55,11 @@ namespace splitTime.player {
                 }
             }
         }
-        doAttack() {}
+        doAttack() {
+            if (!this.isFrozen() && this.attackAbility) {
+                this.attackAbility.use()
+            }
+        }
 
         setLadder(eventId: string, direction: splitTime.direction_t) {
             this.movementAgent.setLadder(eventId, direction)

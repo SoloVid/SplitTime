@@ -25,7 +25,7 @@ namespace splitTime {
         childrenBolted: Body[] = []
         childrenLoose: Body[] = []
 
-        dir = 3
+        dir: direction_t = 3
 
         GRAVITY = -1280
         // For gravity etc., auto-applied z-axis motion in pixels per second

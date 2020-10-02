@@ -150,52 +150,34 @@ namespace splitTime.particles {
     }
 
     export class ParticleEmitter implements splitTime.body.Drawable {
-        _particles: Particle[]
-        _lastParticleGenerated: number
-        _currentTime: number
-        maxParticleAgeMs: number
+        _particles: Particle[] = []
+        _lastParticleGenerated: number = 0
+        _currentTime: number = 0
+        maxParticleAgeMs: number = 5000
         /** How long to generate particles */
-        stopEmissionsAfter: number
+        stopEmissionsAfter: number = 0
         /** Milliseconds between particle generations */
-        generateIntervalMs: number
+        generateIntervalMs: number = 100
+        /** 1 means the max amount come out right at the beginning */
+        explosiveness: number = 0
         location: ReadonlyCoordinates3D
         generateParticle: (emitter: ParticleEmitter) => Particle
-        _particlesGoneHandlers: splitTime.RegisterCallbacks
-        xres: number
-        yres: number
-        lazyIntervalMs: number
-        lazyMagnitude: number
-        opacityShiftIntervalMs: number
-        opacityShiftMagnitude: number
-        colorShiftIntervalMs: number
-        colorShiftMagnitude: number
+        _particlesGoneHandlers: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
+        xres: number = 100
+        yres: number = 100
+        lazyIntervalMs: number = 2000
+        lazyMagnitude: number = 0
+        opacityShiftIntervalMs: number = 2000
+        opacityShiftMagnitude: number = 0
+        colorShiftIntervalMs: number = 2000
+        colorShiftMagnitude: number = 0
         lightIntensity: number = 0
         constructor(
             location: ReadonlyCoordinates3D,
             particleGenerator: (emitter: ParticleEmitter) => Particle
         ) {
-            this._particles = []
-            this._lastParticleGenerated = -1000
-            this._currentTime = 0
-            this.maxParticleAgeMs = 5000
-            this.stopEmissionsAfter = 0
-            this.generateIntervalMs = 100
             this.location = location
             this.generateParticle = particleGenerator || generateDefaultParticle
-
-            this._particlesGoneHandlers = new splitTime.RegisterCallbacks()
-
-            this.xres = 100
-            this.yres = 100
-
-            this.lazyIntervalMs = 2000
-            this.lazyMagnitude = 0
-
-            this.opacityShiftIntervalMs = 2000
-            this.opacityShiftMagnitude = 0
-
-            this.colorShiftIntervalMs = 2000
-            this.colorShiftMagnitude = 0
         }
 
         playerOcclusionFadeFactor = 0.3
@@ -238,8 +220,11 @@ namespace splitTime.particles {
                 this.stopEmissionsAfter <= 0 ||
                 this._currentTime <= this.stopEmissionsAfter
             ) {
-                var timePassedSinceLastGeneration =
+                let timePassedSinceLastGeneration =
                     this._currentTime - this._lastParticleGenerated
+                if (this._lastParticleGenerated === 0) {
+                    timePassedSinceLastGeneration += this.explosiveness * this.maxParticleAgeMs
+                }
                 var randomFactor = Math.random() / 2 + 0.75
                 var howManyToSpawn = Math.round(
                     (randomFactor * timePassedSinceLastGeneration) /
