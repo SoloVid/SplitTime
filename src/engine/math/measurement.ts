@@ -1,3 +1,7 @@
+namespace splitTime {
+    export type pixels_t = number
+}
+
 namespace splitTime.measurement {
     export function distanceEasy(
         x1: number,

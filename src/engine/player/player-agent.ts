@@ -7,6 +7,7 @@ namespace splitTime.player {
         specialAbility: ability.IAbility | null
         specialCooldown: splitTime.game_seconds
         attackAbility: ability.IAbility | null
+        attackCooldown: splitTime.game_seconds
 
         constructor(
             private readonly playerManager: PlayerManager,
@@ -23,6 +24,7 @@ namespace splitTime.player {
             this.specialAbility = null
             this.specialCooldown = 0.1
             this.attackAbility = null
+            this.attackCooldown = 0.1
         }
 
         setJumpAbility(ability: ability.IAbility) {
@@ -57,7 +59,10 @@ namespace splitTime.player {
         }
         doAttack() {
             if (!this.isFrozen() && this.attackAbility) {
-                this.attackAbility.use()
+                const used = this.attackAbility.use()
+                if (used) {
+                    this.freezeUntil = this.body.getLevel().getRegion().getTime() + this.attackCooldown
+                }
             }
         }
 

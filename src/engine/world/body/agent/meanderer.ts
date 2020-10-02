@@ -1,12 +1,11 @@
 namespace splitTime.agent {
     class BaseMeanderer {
         pixels: number = 0
-        wait: number = 0
         counter: Signaler | null = null
-        
+
         constructor(private readonly body: splitTime.Body) {
         }
-        
+
         regularMotion(delta: game_seconds, newSteps: number, newDir: direction_t) {
             if(this.pixels > 0) {
                 if (this.body.drawable instanceof Sprite) {
@@ -34,7 +33,7 @@ namespace splitTime.agent {
         }
     }
     
-    export class RandomMeandering implements TimeNotified {
+    export class RandomMeandering implements TimeNotified, npc.Behavior {
         private base: BaseMeanderer
         constructor(
             private readonly body: Body,
@@ -42,7 +41,15 @@ namespace splitTime.agent {
         ) {
             this.base = new BaseMeanderer(body)
         }
-        
+
+        isComplete(): boolean {
+            return false
+        }
+
+        notifySuspension(): void {
+            // Do nothing
+        }
+
         notifyTimeAdvance(delta: game_seconds): void {
             if (this.levelManager.getCurrent() !== this.body.level) {
                 return
@@ -50,22 +57,38 @@ namespace splitTime.agent {
             this.base.regularMotion(delta, randomInt(16) + 16, direction.getRandom())
         }
     }
-    export class LineMeandering implements TimeNotified {
+    export class LineMeandering implements TimeNotified, npc.Behavior {
         private base: BaseMeanderer
         constructor(private readonly body: Body) {
             this.base = new BaseMeanderer(body)
         }
         
+        isComplete(): boolean {
+            return false
+        }
+
+        notifySuspension(): void {
+            // Do nothing
+        }
+
         notifyTimeAdvance(delta: game_seconds): void {
             this.base.regularMotion(delta, 64, Math.round((this.body.dir + 2)%4))
         }
     }
-    export class SquareMeandering implements TimeNotified {
+    export class SquareMeandering implements TimeNotified, npc.Behavior {
         private base: BaseMeanderer
         constructor(private readonly body: Body) {
             this.base = new BaseMeanderer(body)
         }
         
+        isComplete(): boolean {
+            return false
+        }
+
+        notifySuspension(): void {
+            // Do nothing
+        }
+
         notifyTimeAdvance(delta: game_seconds): void {
             this.base.regularMotion(delta, 64, Math.round((this.body.dir + 1)%4))
         }

@@ -30,7 +30,7 @@ namespace splitTime.body {
         /**
          * Zelda step with input direction
          */
-        zeldaBump(distance: number, direction: number): boolean {
+        zeldaBump(distance: pixels_t, direction: direction_t): boolean {
             this.ensureInRegion()
             //Prevent infinite recursion
             if (
