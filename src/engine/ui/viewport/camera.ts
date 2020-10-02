@@ -104,14 +104,15 @@ namespace splitTime {
             return screen
         }
 
-        SCREEN_LAZY_FACTOR = 0.25
+        CAMERA_MIN_MOVE = 2
+        SCREEN_LAZY_FACTOR = 0.5
 
         private getScreenMoveSpeed(dx: number) {
             var MAX_STEP = 100
             var curveValue = Math.abs(
                 Math.pow(dx / (MAX_STEP * this.SCREEN_LAZY_FACTOR), 2)
             )
-            return Math.min(curveValue + 0.4, MAX_STEP)
+            return Math.max(Math.min(curveValue + 0.4, MAX_STEP), this.CAMERA_MIN_MOVE)
         }
 
         notifyFrameUpdate(delta: number) {

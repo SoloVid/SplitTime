@@ -14,7 +14,7 @@ namespace splitTime.conversation {
             private readonly starter: Starter
         ) {
             this.eventSpec = new splitTime.time.EventSpec(this.id, () => {
-                console.log("Start " + this.id)
+                log.debug("Start " + this.id)
                 this.starter.start(this)
             })
         }
