@@ -154,7 +154,9 @@ namespace splitTime.particles {
         _lastParticleGenerated: number
         _currentTime: number
         maxParticleAgeMs: number
+        /** How long to generate particles */
         stopEmissionsAfter: number
+        /** Milliseconds between particle generations */
         generateIntervalMs: number
         location: ReadonlyCoordinates3D
         generateParticle: (emitter: ParticleEmitter) => Particle
@@ -209,7 +211,7 @@ namespace splitTime.particles {
 
         advanceTime(msPassed: number) {
             var STEP = 40
-            for (var i = 0; i < msPassed; i += STEP) {
+            for (var i = 0; i < msPassed - STEP; i += STEP) {
                 this._advanceTimeStep(STEP)
             }
             this._advanceTimeStep(msPassed % STEP)

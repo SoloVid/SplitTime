@@ -147,6 +147,9 @@ namespace splitTime {
                 this.snapshot.context.globalAlpha = 1
             }
 
+            this.weatherRenderer.render(currentLevel, this.snapshot.context)
+            this.buffer.context.drawImage(this.snapshot.element, 0, 0)
+
             //If we need to fade the screen out
             if(this.fadingOut) {
                 // We have this separate so that the final draw call finishes first
@@ -168,9 +171,6 @@ namespace splitTime {
                     this.fadeInPromise.resolve()
                 }
             }
-
-            this.weatherRenderer.render(currentLevel, this.snapshot.context)
-            this.buffer.context.drawImage(this.snapshot.element, 0, 0)
 
             //Draw the (semi-)transparent rectangle for fading in/out
             var transparencyValue = this.fadeOutAmount + this.fadeInAmount

@@ -163,13 +163,20 @@ namespace splitTime {
                 if (!drawable || !light) {
                     continue
                 }
-                const xCoord = body.x - screen.x
-                const yCoord = body.y - body.z - screen.y
                 this.buffer.withCleanTransform(() => {
-                    this.buffer.context.translate(
-                        Math.round(xCoord),
-                        Math.round(yCoord)
-                    )
+                    // FTODO: Don't duplicate with what's in BodyRenderer
+                    const canvReq = drawable.getCanvasRequirements(body.x, body.y, body.z)
+                    if (canvReq.translateOrigin) {
+                        this.buffer.context.translate(
+                            Math.round(canvReq.x - screen.x),
+                            Math.round(canvReq.y - canvReq.z - screen.y)
+                        )
+                    } else {
+                        this.buffer.context.translate(
+                            Math.round(0 - screen.x),
+                            Math.round(0 - screen.y)
+                        )
+                    }
                     light.applyLighting(this.buffer.context, drawable.opacityModifier)
                 })
             }
