@@ -186,7 +186,7 @@ namespace splitTime.direction {
     export function areWithin90Degrees(
         dir1: direction_t,
         dir2: direction_t,
-        howMany90Degrees: int = 1
+        howMany90Degrees: number = 1
     ): boolean {
         howMany90Degrees = howMany90Degrees
         var dDir = Math.abs(dir1 - dir2)
@@ -204,5 +204,46 @@ namespace splitTime.direction {
             radians = -radians
         }
         return radians
+    }
+
+    /**
+     * Convert from radians to SplitTime representation of direction
+     * @param radians direction in radians
+     * @param invert (default true) change from y-axis down to up
+     */
+    export function fromRadians(radians: number, invert: boolean = true): direction_t {
+        if (invert) {
+            radians = -radians
+        }
+        let direction = mod(radians / (Math.PI / 2), 4)
+        return direction
+    }
+
+    export function approach(oldDir: direction_t, targetDir: direction_t, step: number): direction_t {
+        if (oldDir > 3 && targetDir < 1) {
+            const stepDir = (oldDir + step) % 4
+            if (stepDir > 3) {
+                // Haven't passed zero
+                return stepDir
+            }
+            if (stepDir > targetDir) {
+                // Overshot
+                return targetDir
+            }
+            return stepDir
+        }
+        if (oldDir < 1 && targetDir > 3) {
+            const stepDir = (oldDir - step + 4) % 4
+            if (stepDir < 1) {
+                // Haven't passed zero
+                return stepDir
+            }
+            if (stepDir < targetDir) {
+                // Overshot
+                return targetDir
+            }
+            return stepDir
+        }
+        return splitTime.approachValue(oldDir, targetDir, step)
     }
 }
