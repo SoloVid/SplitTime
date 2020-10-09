@@ -73,14 +73,14 @@ namespace splitTime {
                         var transportTraceId = traceSpec.getLocationId()
                         this.level.registerEvent(
                             transportTraceId,
-                            (function(trace, level) {
+                            ((trace, level) => {
                                 return (body: splitTime.Body) => {
-                                    body.put(
-                                        pointerOffset.level,
-                                        body.x + pointerOffset.offsetX,
-                                        body.y + pointerOffset.offsetY,
-                                        body.z + pointerOffset.offsetZ
-                                    )
+                                    splitTime.body.smoothPut(body, {
+                                        level: pointerOffset.level,
+                                        x: body.x + pointerOffset.offsetX,
+                                        y: body.y + pointerOffset.offsetY,
+                                        z: body.z + pointerOffset.offsetZ
+                                    })
                                 }
                             })(t, level)
                         )

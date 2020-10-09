@@ -224,8 +224,8 @@ namespace splitTime {
         unload(): void {
             //TODO: give listeners a chance to clean up
 
-            this.loader.unload()
             this.loaded = false
+            this.loader.unload()
         }
 
         isLoaded(): boolean {

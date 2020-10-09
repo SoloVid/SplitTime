@@ -16,7 +16,7 @@ namespace splitTime {
 
         private currentLevel: splitTime.Level | null = null
 
-        private focusPoints: Coordinates3D[] = []
+        private focusPoints: ILevelLocation2[] = []
 
         constructor(
             width: int,
@@ -30,13 +30,13 @@ namespace splitTime {
         getFocusPoint() {
             return this.actualFocusPoint
         }
-        setFocusPoint(point: Coordinates3D) {
+        setFocusPoint(point: ILevelLocation2) {
             this.focusPoints = [point]
         }
-        addFocusPoint(point: Coordinates3D) {
+        addFocusPoint(point: ILevelLocation2) {
             this.focusPoints.push(point)
         }
-        removeFocusPoint(point: Coordinates3D) {
+        removeFocusPoint(point: ILevelLocation2) {
             for (var i = 0; i < this.focusPoints.length; i++) {
                 if (point === this.focusPoints[i]) {
                     this.focusPoints.splice(i, 1)
@@ -124,11 +124,25 @@ namespace splitTime {
                 z: 0
             }
 
+            let pointsChosen = 0
             for (var i = 0; i < this.focusPoints.length; i++) {
-                targetFocus.x += this.focusPoints[i].x / this.focusPoints.length
-                targetFocus.y += this.focusPoints[i].y / this.focusPoints.length
-                targetFocus.z += this.focusPoints[i].z / this.focusPoints.length
+                if (this.focusPoints[i].level === this.currentLevel) {
+                    pointsChosen++
+                    targetFocus.x += this.focusPoints[i].x
+                    targetFocus.y += this.focusPoints[i].y
+                    targetFocus.z += this.focusPoints[i].z
+                }
             }
+
+            if (pointsChosen === 0) {
+                // If we didn't have any points to focus on,
+                // don't move camera
+                return
+            }
+
+            targetFocus.x /= pointsChosen
+            targetFocus.y /= pointsChosen
+            targetFocus.z /= pointsChosen
 
             if (this.currentLevel !== existingLevel) {
                 this.actualFocusPoint = targetFocus

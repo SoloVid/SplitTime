@@ -48,7 +48,7 @@ namespace splitTime.body {
                 this.body.getZ()
             )
             if (whereTo !== null) {
-                this.body.put(whereTo.level, whereTo.x, whereTo.y, whereTo.z)
+                smoothPut(this.body, whereTo)
             }
         }
 

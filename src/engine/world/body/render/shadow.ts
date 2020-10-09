@@ -16,7 +16,7 @@ namespace splitTime.body {
             this.maxRadius = this.shadowBody.baseLength
             this.radius = this.maxRadius
         }
-        opacity = 1
+        opacityModifier: number = 1
         playerOcclusionFadeFactor = 0
 
         getCanvasRequirements(x: number, y: number, z: number) {
@@ -85,6 +85,14 @@ namespace splitTime.body {
         }
         cleanupAfterRender() {
             // Do nothing
+        }
+
+        getLight(): null {
+            return null
+        }
+
+        clone(): Shadow {
+            throw new Error("Shadows aren't meant to be cloned. Not implemented.")
         }
     }
 }

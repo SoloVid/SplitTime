@@ -143,27 +143,18 @@ namespace splitTime {
                 )
                 this.snapshot.context.globalAlpha = 1
             }
-                        
-            //If the active player is switching regions
-            if(playerBody?.inRegionTransition) {
-                //Fade to white
-                this.fadeTo(255,255,255,1).then(() => {
-                    //After fading to white, do the actual transition and start fading in
-                    playerBody?.finishLevelTransition()
-                    this.levelManager.finishRegionTransition()
-                    this.fadeIn()
-                })
-            } 
-            
+
             //If we need to fade the screen out
             if(this.fadingOut) {
-                this.fadeOutAmount += this.FADE_INCREMENT
-                
-                //If we are now done fading out
+                // We have this separate so that the final draw call finishes first
                 if (this.fadeOutAmount >= this.fadeToTransparency) {
-                    this.fadeOutAmount = this.fadeToTransparency
                     this.fadingOut = false
                     this.fadeOutPromise.resolve()
+                }
+
+                this.fadeOutAmount += this.FADE_INCREMENT
+                if (this.fadeOutAmount >= this.fadeToTransparency) {
+                    this.fadeOutAmount = this.fadeToTransparency
                 }
             } else if (this.fadeInAmount > 0) {  //If we need to fade back in
                 this.fadeInAmount -= this.FADE_INCREMENT
@@ -203,7 +194,10 @@ namespace splitTime {
             }
         }
 
-        
+        isAlreadyFaded(): boolean {
+            return this.fadeOutAmount > 0
+        }
+
         /**
          * Fades the screen gradually to the target color (defaults to black if no parameters are passed)
          * 

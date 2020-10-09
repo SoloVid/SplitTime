@@ -1,5 +1,5 @@
 namespace splitTime {
-    export class InFrontOfBody {
+    export class InFrontOfBody implements ILevelLocation2 {
         constructor(
             private readonly body: Body,
             private readonly howFar: number
