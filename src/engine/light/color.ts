@@ -9,10 +9,7 @@ namespace splitTime.light {
             // Default setting is "not transparent" (alpha value of 1)
             if (this.a == undefined) {
                 this.a = 1
-            }
-
-            //Check to make sure the target rgba value is valid
-            
+            }           
         }
 
         /**
@@ -30,11 +27,12 @@ namespace splitTime.light {
         }
 
         /**
-         * Returns true if this color object is a valid RGBA color in CSS 
+         * Returns true if the string can be evaluated as a valid color in CSS
+         * @param colorString 
          */
-        isValidColor(RgbaString: string): boolean {
+        isValidColor(colorString: string): boolean {
             var style = new Option().style
-            style.color = RgbaString          
+            style.color = colorString
             return style.color !== ''
         }
     }
