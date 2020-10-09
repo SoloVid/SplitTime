@@ -22,7 +22,7 @@ namespace splitTime {
                 if (oldLevel === null || oldLevel.region === newLevel.region || this.worldRenderer.isAlreadyFaded()) {
                     return Pledge.as()
                 }
-                return this.worldRenderer.fadeTo(255, 255, 255)
+                return this.worldRenderer.fadeTo(new splitTime.light.Color(255,255,255))
             })
             this.levelManager.onTransitionEnd((oldLevel, newLevel) => {
                 if (oldLevel === null || oldLevel.region === newLevel.region) {

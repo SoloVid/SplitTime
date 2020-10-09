@@ -16,7 +16,7 @@ namespace splitTime {
         private fadeOutAmount: number
         private fadeInAmount: number
         private readonly FADE_INCREMENT: number
-        private fadeToRGB: string
+        private fadeToColor: splitTime.light.Color
         private fadeToTransparency: number
         private fadeOutPromise: splitTime.Pledge
         private fadeInPromise: splitTime.Pledge
@@ -37,7 +37,7 @@ namespace splitTime {
             this.fadeOutAmount = 0
             this.fadeInAmount = 0
             this.FADE_INCREMENT = 0.05
-            this.fadeToRGB = "0,0,0"
+            this.fadeToColor = new splitTime.light.Color(0,0,0)
             this.fadeToTransparency = 0
             this.fadeInPromise = new splitTime.Pledge()
             this.fadeOutPromise = new splitTime.Pledge()
@@ -173,8 +173,8 @@ namespace splitTime {
             }
 
             //Draw the (semi-)transparent rectangle for fading in/out
-            var transparencyValue = this.fadeOutAmount + this.fadeInAmount
-            this.buffer.context.fillStyle = "rgba(" + this.fadeToRGB + "," + transparencyValue + ")"
+            this.buffer.context.fillStyle = this.fadeToColor.toRgbaString()
+            this.buffer.context.globalAlpha = this.fadeOutAmount + this.fadeInAmount
             this.buffer.context.fillRect(
                 0,
                 0,
@@ -184,6 +184,9 @@ namespace splitTime {
             
             //Save screen into snapshot
             this.see.drawImage(this.buffer.element, 0, 0)
+
+            // reset global alpha
+            this.buffer.context.globalAlpha = 1
 
             for (const body of bodies) {
                 const drawable = body.drawable
@@ -204,15 +207,18 @@ namespace splitTime {
         /**
          * Fades the screen gradually to the target color (defaults to black if no parameters are passed)
          * 
-         * @param r - r value of the target color (default: 0)
-         * @param g - g value of the target color (default: 0)
-         * @param b - b value of the target color (default: 0)
-         * @param transparency - target transparency value (defaults to 1)
+         * @param fadeToColor - the color that we want to fade to
          */
-        fadeTo(r: number = 0, g: number = 0, b: number = 0, transparency: number = 1): PromiseLike<void> {
-            //TODO: check to make sure the target rgba value is valid
-            this.fadeToRGB = "" + r + "," + g + "," + b
-            this.fadeToTransparency = transparency
+        fadeTo(color?: splitTime.light.Color): PromiseLike<void> {
+            if (color != undefined){
+                this.fadeToColor.r = color.r
+                this.fadeToColor.g = color.g
+                this.fadeToColor.b = color.b
+                
+                if (color.a != undefined) {
+                    this.fadeToTransparency = color.a
+                }
+            }
             this.fadingOut = true
             this.fadeOutPromise = new splitTime.Pledge()
             return this.fadeOutPromise

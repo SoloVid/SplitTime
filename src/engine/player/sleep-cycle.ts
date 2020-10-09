@@ -11,7 +11,7 @@ namespace splitTime.player {
         ) {
             this.stamina.registerKOListener(() => {
                 splitTime.log.debug("KO!")
-                this.worldRenderer.fadeTo(0,0,0).then(() => {
+                this.worldRenderer.fadeTo(new splitTime.light.Color(0,0,0)).then(() => {
                     this.onKO()
                     this.worldRenderer.fadeIn()
                 })
@@ -32,7 +32,7 @@ namespace splitTime.player {
 
                 // TODO: add oversleep?
                 if (this.stamina.isConscious()) {
-                    this.worldRenderer.fadeTo(0,0,0).then(() => {
+                    this.worldRenderer.fadeTo(new splitTime.light.Color(0,0,0)).then(() => {
                         this.onWake()
                         this.worldRenderer.fadeIn()
                     })
