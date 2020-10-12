@@ -1,6 +1,6 @@
 namespace splitTime.debug {
     export var ENABLED = true // Master switch
-    export var DRAW_TRACES = true
+    export var DRAW_TRACES = false
 
     var debugDiv: HTMLElement | null = null
     var debugInfo: { [key: string]: DebugValue } = {}
