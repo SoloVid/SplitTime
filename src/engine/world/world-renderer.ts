@@ -207,14 +207,11 @@ namespace splitTime {
          * @param fadeToColor - the color that we want to fade to
          */
         fadeTo(color?: splitTime.light.Color): PromiseLike<void> {
-            if (color != undefined){
+            if (color !== undefined){
                 this.fadeToColor.r = color.r
                 this.fadeToColor.g = color.g
                 this.fadeToColor.b = color.b
-                
-                if (color.a != undefined) {
-                    this.fadeToTransparency = color.a
-                }
+                this.fadeToTransparency = color.a
             }
             this.fadingOut = true
             this.fadeOutPromise = new splitTime.Pledge()
