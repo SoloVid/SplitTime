@@ -6,20 +6,18 @@ namespace splitTime {
     const COUNTER_BASE = 25600
 
     export class WeatherRenderer {
-        private readonly VIEW_WIDTH: int
-        private readonly VIEW_HEIGHT: int
+        private readonly SCREEN_WIDTH: int
+        private readonly SCREEN_HEIGHT: int
 
         private readonly buffer: splitTime.Canvas
 
         constructor(
-            private readonly camera: Camera,
-            private readonly view: splitTime.ui.View
+            private readonly camera: Camera
         ) {
-            // These are the dimensions of the entire window, not the dimensions of a particular level.
-            this.VIEW_WIDTH = view.width
-            this.VIEW_HEIGHT = view.height
+            this.SCREEN_WIDTH = camera.SCREEN_WIDTH
+            this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
             
-            this.buffer = new splitTime.Canvas(this.VIEW_WIDTH, this.VIEW_HEIGHT)
+            this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
         }
 
         render(level: Level, ctx: GenericCanvasRenderingContext2D) {
@@ -33,9 +31,9 @@ namespace splitTime {
             if (level.weather.isRaining) {
                 ctx.drawImage(
                     G.ASSETS.images.get(RAIN_IMAGE),
-                    -((counter % 100) / 100) * this.VIEW_WIDTH,
-                    ((counter % 25) / 25) * this.VIEW_HEIGHT -
-                        this.VIEW_HEIGHT
+                    -((counter % 100) / 100) * this.SCREEN_WIDTH,
+                    ((counter % 25) / 25) * this.SCREEN_HEIGHT -
+                        this.SCREEN_HEIGHT
                 )
             }
             if (level.weather.isCloudy) {
@@ -62,8 +60,8 @@ namespace splitTime {
                     ctx.fillRect(
                         0,
                         0,
-                        this.VIEW_WIDTH,
-                        this.VIEW_HEIGHT
+                        this.SCREEN_WIDTH,
+                        this.SCREEN_HEIGHT
                     )
                 }
             }
@@ -81,58 +79,58 @@ namespace splitTime {
                 image,
                 left,
                 top,
-                this.VIEW_WIDTH,
-                this.VIEW_HEIGHT,
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT,
                 0,
                 0,
-                this.VIEW_WIDTH,
-                this.VIEW_HEIGHT
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
             )
 
             var xEnd = image.naturalWidth - left
-            if (xEnd < this.VIEW_WIDTH) {
+            if (xEnd < this.SCREEN_WIDTH) {
                 // Draw upper right tile if needed
                 ctx.drawImage(
                     image,
                     0,
                     top,
-                    this.VIEW_WIDTH,
-                    this.VIEW_HEIGHT,
+                    this.SCREEN_WIDTH,
+                    this.SCREEN_HEIGHT,
                     xEnd,
                     0,
-                    this.VIEW_WIDTH,
-                    this.VIEW_HEIGHT
+                    this.SCREEN_WIDTH,
+                    this.SCREEN_HEIGHT
                 )
             }
 
             var yEnd = image.naturalHeight - top
-            if (yEnd < this.VIEW_HEIGHT) {
+            if (yEnd < this.SCREEN_HEIGHT) {
                 // Draw lower left tile if needed
                 ctx.drawImage(
                     image,
                     left,
                     0,
-                    this.VIEW_WIDTH,
-                    this.VIEW_HEIGHT,
+                    this.SCREEN_WIDTH,
+                    this.SCREEN_HEIGHT,
                     0,
                     yEnd,
-                    this.VIEW_WIDTH,
-                    this.VIEW_HEIGHT
+                    this.SCREEN_WIDTH,
+                    this.SCREEN_HEIGHT
                 )
             }
 
-            if (xEnd < this.VIEW_WIDTH && yEnd < this.VIEW_HEIGHT) {
+            if (xEnd < this.SCREEN_WIDTH && yEnd < this.SCREEN_HEIGHT) {
                 // Draw lower right tile if needed
                 ctx.drawImage(
                     image,
                     0,
                     0,
-                    this.VIEW_WIDTH,
-                    this.VIEW_HEIGHT,
+                    this.SCREEN_WIDTH,
+                    this.SCREEN_HEIGHT,
                     xEnd,
                     yEnd,
-                    this.VIEW_WIDTH,
-                    this.VIEW_HEIGHT
+                    this.SCREEN_WIDTH,
+                    this.SCREEN_HEIGHT
                 )
             }
         }
@@ -142,16 +140,16 @@ namespace splitTime {
             this.buffer.context.clearRect(
                 0,
                 0,
-                this.VIEW_WIDTH,
-                this.VIEW_HEIGHT
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
             )
             //Fill with light
             this.buffer.context.fillStyle = level.weather.getAmbientLight()
             this.buffer.context.fillRect(
                 0,
                 0,
-                this.VIEW_WIDTH,
-                this.VIEW_HEIGHT
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
             )
 
             this.buffer.context.globalCompositeOperation = "lighter"
@@ -190,8 +188,8 @@ namespace splitTime {
                 this.buffer.element,
                 0,
                 0,
-                this.VIEW_WIDTH,
-                this.VIEW_HEIGHT
+                this.SCREEN_WIDTH,
+                this.SCREEN_HEIGHT
             )
 
             //Return to default splitTime.image layering

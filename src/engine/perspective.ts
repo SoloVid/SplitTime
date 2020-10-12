@@ -36,7 +36,7 @@ namespace splitTime {
             )
             this.worldRenderer = new WorldRenderer(
                 this.camera,
-                this.view,
+                this.view.see,
                 this.levelManager,
                 () => this.playerBody                
             )
