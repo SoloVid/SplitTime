@@ -1,0 +1,109 @@
+{
+    "region": "region1",
+    "width": 576,
+    "height": 576,
+    "background": "hall/hall-floor1.png",
+    "backgroundOffsetX": 32,
+    "backgroundOffsetY": 32,
+    "type": "action",
+    "layers": [
+        {
+            "id": "main-floor",
+            "z": 0
+        },
+        {
+            "id": "mezzanine",
+            "z": 64
+        },
+        {
+            "id": "floor2",
+            "z": 192
+        }
+    ],
+    "traces": [
+        {
+            "type": "solid",
+            "vertices": "(49, 171) (46, 523) (530, 524) (525, 172) (45, 172) (37, 157) (532, 156) (538, 533) (36, 533) (37, 161) (close)",
+            "id": "outside-wall",
+            "z": 0,
+            "height": 256
+        },
+        {
+            "type": "solid",
+            "vertices": "(44, 172) (44, 233) (525, 231) (527, 169) (close)",
+            "id": "platform",
+            "z": 0,
+            "height": 64
+        },
+        {
+            "type": "stairs",
+            "vertices": "(46, 235) (46, 325) (117, 325) (117, 236) (close)",
+            "id": "stairs-up-to-mezzanine",
+            "z": 0,
+            "height": 64,
+            "direction": "N"
+        },
+        {
+            "type": "transport",
+            "vertices": "(244, 519) (245, 544) (315, 544) (311, 518) (close)",
+            "id": "door",
+            "z": 0,
+            "height": 64,
+            "level": "outside1",
+            "offsetX": 378,
+            "offsetY": 255,
+            "offsetZ": 0
+        },
+        {
+            "type": "stairs",
+            "vertices": "(448, 233) (445, 394) (527, 394) (527, 231) (close)",
+            "id": "stairs-to-floor2",
+            "z": 64,
+            "height": 128,
+            "direction": "S"
+        },
+        {
+            "type": "pointer",
+            "vertices": "(32, 160) (32, 544) (544, 544) (544, 160) (close)",
+            "id": "pointer-to-floor2",
+            "z": 192,
+            "height": 128,
+            "level": "hall/hall-floor2",
+            "offsetX": 0,
+            "offsetY": -64,
+            "offsetZ": -192
+        },
+        {
+            "type": "pointer",
+            "vertices": "(-11, -18) (-8, 625) (594, 625) (595, -19) (-11, -18) (40, 161) (533, 164) (535, 530) (40, 528) (40, 163) (close)",
+            "z": 0,
+            "height": 256,
+            "id": "pointer-to-outside",
+            "level": "outside1",
+            "offsetX": 378,
+            "offsetY": 210,
+            "offsetZ": 0
+        }
+    ],
+    "positions": [
+        {
+            "id": "door",
+            "template": "",
+            "x": 280,
+            "y": 522,
+            "z": 0,
+            "dir": "N",
+            "stance": "default"
+        },
+        {
+            "id": "man-idle",
+            "template": "other-man",
+            "x": 273,
+            "y": 379,
+            "z": 0,
+            "dir": "S",
+            "stance": "default"
+        }
+    ],
+    "props": []
+}

@@ -1,7 +1,8 @@
-build/
-dist/
-projects/
-node_modules/
+/build/
+/dist/
+/projects/*
+!/projects/example/
+/node_modules/
 Thumbs.db
 desktop.ini
 

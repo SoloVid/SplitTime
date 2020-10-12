@@ -1,0 +1,89 @@
+{
+    "region": "region1",
+    "width": 576,
+    "height": 512,
+    "background": "hall/hall-floor2.png",
+    "backgroundOffsetX": 32,
+    "backgroundOffsetY": 32,
+    "type": "action",
+    "layers": [
+        {
+            "id": "floor1",
+            "z": -128
+        },
+        {
+            "id": "main-floor",
+            "z": 0
+        },
+        {
+            "id": "roof",
+            "z": 128
+        }
+    ],
+    "traces": [
+        {
+            "type": "pointer",
+            "vertices": "(42, -31) (46, 334) (533, 336) (525, -25) (close)",
+            "id": "pointer-to-floor1",
+            "z": -128,
+            "height": 128,
+            "level": "hall/hall-floor1",
+            "offsetX": 0,
+            "offsetY": 64,
+            "offsetZ": 192
+        },
+        {
+            "type": "solid",
+            "vertices": "(48, 107) (45, 459) (529, 460) (524, 108) (47, 104) (40, 92) (534, 97) (540, 473) (34, 468) (40, 92) (close)",
+            "id": "outside-wall",
+            "z": 0,
+            "height": 256
+        },
+        {
+            "type": "solid",
+            "vertices": "(46, 104) (44, 460) (532, 462) (528, 328) (446, 328) (446, 166) (526, 168) (527, 105) (close)",
+            "id": "floor",
+            "z": 0,
+            "height": 0
+        },
+        {
+            "type": "pointer",
+            "vertices": "(0, 0) (-4, 543) (532, 542) (522, 0) (close)",
+            "id": "pointer-to-roof",
+            "z": 128,
+            "height": 128,
+            "level": "outside1",
+            "offsetX": 378,
+            "offsetY": 274,
+            "offsetZ": 192
+        },
+        {
+            "type": "event",
+            "vertices": "(241, 366) (241, 370) (280, 370) (280, 366) (close)",
+            "z": 0,
+            "height": 128,
+            "id": "ladder-to-roof",
+            "event": "ladder-to-roof"
+        },
+        {
+            "type": "solid",
+            "vertices": "(241, 364) (241, 366) (280, 366) (280, 364) (close)",
+            "z": 0,
+            "height": 128,
+            "id": "ladder-to-roof-back"
+        },
+        {
+            "type": "pointer",
+            "vertices": "(-24, -28) (41, 91) (37, 466) (536, 469) (533, 97) (44, 93) (-14, -28) (600, -22) (603, 560) (-22, 552) (close)",
+            "z": -128,
+            "height": 256,
+            "id": "pointer-to-outside",
+            "level": "outside1",
+            "offsetX": 378,
+            "offsetY": 274,
+            "offsetZ": 192
+        }
+    ],
+    "positions": [],
+    "props": []
+}
