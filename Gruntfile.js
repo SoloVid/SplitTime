@@ -156,6 +156,11 @@ module.exports = function(grunt) {
                 'build/tsjs/defer.run.js'
             ];
             concatFilesWithSourceMaps(files, 'build/engine-test.js');
+            files = [
+                'build/engine.js',
+                'build/tsjs/editor/level/**/*.js'
+            ];
+            concatFilesWithSourceMaps(files, 'build/editor-level.js');
         }
     });
 
