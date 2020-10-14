@@ -236,6 +236,7 @@ namespace splitTime.level {
         background: "background",
         backgroundOffsetX: 0,
         backgroundOffsetY: 0,
+        layers: [],
         traces: [],
         props: [],
         positions: []

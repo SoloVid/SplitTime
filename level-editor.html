@@ -9,13 +9,13 @@
     <div id="app">
         <div id="navmenu">
             <ul>
-                <li><a v-on:click="createLevel();">New Level</a></li>
-                <li><a v-on:click="clickFileChooser();">Load Level</a>
+                <li class="pointer"><a v-on:click="createLevel();">New Level</a></li>
+                <li class="pointer"><a v-on:click="clickFileChooser();">Load Level</a>
                     <input id="fileChooser" type="file" accept=".json" style="display:none">
                 </li>
-                <li><a v-on:click="downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
+                <li class="pointer"><a v-on:click="downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
                 </li>
-                <li><a v-on:click="showEditorLevel();">Edit Settings</a></li>
+                <li class="pointer"><a v-on:click="showEditorLevel();">Edit Settings</a></li>
             </ul>
         </div>
         <div id="editorTools">

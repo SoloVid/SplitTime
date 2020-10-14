@@ -1,176 +1,106 @@
-
-// declare function loadBodyFromTemplate(templateName: string): splitTime.Body
-
-// declare function getBodyImage(body: splitTime.Body): string
-
-// declare function getAnimationFrameCrop(body: splitTime.Body, dir: string | splitTime.direction_t, stance: string): unknown
-
-// declare function getSpriteOffset(body: splitTime.Body): splitTime.Coordinates2D
-
-// declare function showEditorProp(prop: any): void
-
-// declare let pathInProgress: boolean
-// declare let mouseDown: boolean
-// declare let follower: any
-
 namespace splitTime.editor.level {
     export interface RenderedProp {
-        prop: any
+        prop: Prop
         body: Body
-        styleObject: string
+        styleObject: object
         imgSrc: string
         positionLeft: int
         positionTop: int
         width: int
         height: int
-        crop: any
-        spriteOffset: any
+        crop: math.Rect
+        spriteOffset: Coordinates2D
         edit(): void
         track(): void
         toggleHighlight(highlight: boolean): void
     }
-
-    // export class Prop {
-    //     isHighlighted: boolean = false
-    // }
-
-    namespace renderedProp {
-        function styleObject(this: RenderedProp) {
-            return {
-                outline: this.prop.isHighlighted ? "2px solid yellow" : "",
-                backgroundColor: this.prop.isHighlighted ? "yellow" : "initial",
-                position: 'absolute',
-                overflow: 'hidden',
-                left: this.positionLeft + 'px',
-                top: this.positionTop + 'px',
-                width: this.width + 'px',
-                height: this.height + 'px'
-            }
+    
+    function styleObject(this: RenderedProp): object {
+        return {
+            outline: this.prop.metadata.highlighted ? "2px solid yellow" : "",
+            backgroundColor: this.prop.metadata.highlighted ? "yellow" : "initial",
+            position: 'absolute',
+            overflow: 'hidden',
+            left: this.positionLeft + 'px',
+            top: this.positionTop + 'px',
+            width: this.width + 'px',
+            height: this.height + 'px'
         }
-        
-        function body(this: RenderedProp) {
-            return loadBodyFromTemplate(this.prop.template);
-        }
-        function imgSrc(this: RenderedProp) {
-            return getBodyImage(this.body);
-        }
-        function positionLeft(this: RenderedProp) {
-            return this.prop.x - this.crop.xres/2 - this.spriteOffset.x;
-        }
-        function positionTop(this: RenderedProp) {
-            return this.prop.y - this.prop.z - this.crop.yres + this.body.baseLength/2 - this.spriteOffset.y;
-        }
-        function width(this: RenderedProp) {
-            return this.crop.xres;
-        }
-        function height(this: RenderedProp) {
-            return this.crop.yres;
-        }
-        function crop(this: RenderedProp) {
-            return getAnimationFrameCrop(this.body, this.prop.dir, this.prop.stance);
-        }
-        function spriteOffset(this: RenderedProp) {
-            return getSpriteOffset(this.body);
-        }
-
-        function edit(this: RenderedProp): void {
-            showEditorProp(this.prop);
-        }
-        function track(this: RenderedProp): void {
-            if(pathInProgress) {
-                return;
-            }
-            follower = this.prop;
-        }
-        function toggleHighlight(this: RenderedProp, highlight: boolean): void {
-            if(mouseDown || pathInProgress) {
-                return;
-            }
-            this.prop.isHighlighted = highlight;
-        }
-
-        Vue.component("rendered-prop", {
-            props: {
-                prop: Object
-            },
-            template: `
-                <div
-                    v-show="prop.displayed"
-                    class="draggable prop"
-                    v-on:dblclick="edit"
-                    v-on:mousedown.left="track"
-                    v-on:mouseenter="toggleHighlight(true)"
-                    v-on:mouseleave="toggleHighlight(false)"
-                    v-bind:style="styleObject"
-                >
-                    <img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.sx + 'px', top: -crop.sy + 'px' }"/>
-                </div>
-            `,
-            // computed: {
-            //     styleObject: styleObject,
-            //     body: body,
-            //     imgSrc: imgSrc,
-            //     positionLeft: positionLeft,
-            //     positionTop: positionTop,
-            //     width: width,
-            //     height: height,
-            //     crop: crop,
-            //     spriteOffset: spriteOffset
-            // },
-            computed: {
-                styleObject,
-                body,
-                imgSrc,
-                positionLeft,
-                positionTop,
-                width,
-                height,
-                crop,
-                spriteOffset
-            },
-            methods: {
-                edit,
-                track,
-                toggleHighlight
-            }
-        })
     }
-
-    // function loadBodyFromTemplate(templateName: string) {
-    //     try {
-    //         return G.BODY_TEMPLATES.getInstance(templateName);
-    //     } catch(e) {
-    //         return new splitTime.Body();
-    //     }
-    // }
     
-    // function getBodyImage(body: Body) {
-    //     if(body.drawable instanceof splitTime.Sprite) {
-    //         return imgSrc(body.drawable.img);
-    //     }
-    //     return subImg;
-    // }
+    function body(this: RenderedProp): splitTime.Body {
+        return loadBodyFromTemplate(this.prop.obj.template);
+    }
+    function imgSrc(this: RenderedProp): string {
+        return getBodyImage(this.body);
+    }
+    function positionLeft(this: RenderedProp): number {
+        return this.prop.obj.x - this.crop.width/2 - this.spriteOffset.x;
+    }
+    function positionTop(this: RenderedProp): number {
+        return this.prop.obj.y - this.prop.obj.z - this.crop.height + this.body.baseLength/2 - this.spriteOffset.y;
+    }
+    function width(this: RenderedProp): number {
+        return this.crop.width;
+    }
+    function height(this: RenderedProp): number {
+        return this.crop.height;
+    }
+    function crop(this: RenderedProp): math.Rect {
+        return getAnimationFrameCrop(this.body, this.prop.obj.dir, this.prop.obj.stance);
+    }
+    function spriteOffset(this: RenderedProp): Coordinates2D {
+        return getSpriteOffset(this.body);
+    }
     
-    // function getAnimationFrameCrop(body: Body, dir: string | direction_t, stance: string) {
-    //     if(body.drawable instanceof splitTime.Sprite) {
-    //         return body.drawable.getAnimationFrameCrop(splitTime.direction.interpret(dir), stance, 0);
-    //     }
-    //     // FTODO: more solid default
-    //     return {
-    //         xres: 32,
-    //         yres: 64,
-    //         sx: 0,
-    //         sy: 0
-    //     };
-    // }
+    function edit(this: RenderedProp): void {
+        showEditorProp(this.prop);
+    }
+    function track(this: RenderedProp): void {
+        if(pathInProgress) {
+            return;
+        }
+        follower = { obj: this.prop, point: null };
+    }
+    function toggleHighlight(this: RenderedProp, highlight: boolean): void {
+        if(mouseDown || pathInProgress) {
+            return;
+        }
+        this.prop.metadata.highlighted = highlight;
+    }
     
-    // function getSpriteOffset(body: Body) {
-    //     if(body.drawable instanceof splitTime.Sprite) {
-    //         return {
-    //             x: body.drawable.baseOffX,
-    //             y: body.drawable.baseOffY
-    //         };
-    //     }
-    //     return { x: 0, y: 0 };
-    // }
+    Vue.component("rendered-prop", {
+        props: {
+            prop: Object
+        },
+        template: `
+<div
+    v-show="prop.metadata.displayed"
+    class="draggable prop"
+    v-on:dblclick="edit"
+    v-on:mousedown.left="track"
+    v-on:mouseenter="toggleHighlight(true)"
+    v-on:mouseleave="toggleHighlight(false)"
+    v-bind:style="styleObject"
+>
+    <img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.x + 'px', top: -crop.y + 'px' }"/>
+</div>
+        `,
+        computed: {
+            styleObject,
+            body,
+            imgSrc,
+            positionLeft,
+            positionTop,
+            width,
+            height,
+            crop,
+            spriteOffset
+        },
+        methods: {
+            edit,
+            track,
+            toggleHighlight
+        }
+    })
 }

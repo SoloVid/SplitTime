@@ -1,69 +1,69 @@
 namespace splitTime.editor.level {
     export interface VueRenderedLayer {
-        level: any
-        layer: any
+        level: Level
+        layer: Layer
         index: number
         width: number
         height: number
         isActive: boolean
-        containerWidth: any
-        containerHeight: any
-        viewBox: any
-        layerAboveZ: any
-        layerHeight: any
-        styleObject: any
-        thingsStyleObject: any
-        traces: any
-        props: any
-        positions: any
+        containerWidth: number
+        containerHeight: number
+        viewBox: string
+        layerAboveZ: number
+        layerHeight: number
+        styleObject: object
+        thingsStyleObject: object
+        traces: Trace[]
+        props: Prop[]
+        positions: Position[]
     }
 
 
-    function containerWidth(this: VueRenderedLayer): any {
+    function containerWidth(this: VueRenderedLayer): number {
         return this.width + 2*EDITOR_PADDING;
     }
-    function containerHeight(this: VueRenderedLayer): any {
-        var addedHeight = this.level.layers.length > 0 ? this.level.layers[this.level.layers.length - 1].z : 0;
+    function containerHeight(this: VueRenderedLayer): number {
+        var addedHeight = this.level.layers.length > 0 ? this.level.layers[this.level.layers.length - 1].obj.z : 0;
         return this.height + 2*EDITOR_PADDING + addedHeight;
     }
-    function viewBox(this: VueRenderedLayer): any {
+    function viewBox(this: VueRenderedLayer): string {
         return "" + -EDITOR_PADDING + " " + -EDITOR_PADDING + " " + this.containerWidth + " " + this.containerHeight;
     }
     function layerAboveZ(this: VueRenderedLayer): number {
         var layerAbove = this.level.layers[this.index + 1];
-        return layerAbove ? layerAbove.z : Number.MAX_VALUE;
+        return layerAbove ? layerAbove.obj.z : Number.MAX_VALUE;
     }
     function layerHeight(this: VueRenderedLayer): number {
-        return this.layerAboveZ - this.layer.z;
+        return this.layerAboveZ - this.layer.obj.z;
     }
-    function styleObject(this: VueRenderedLayer): any {
+    function styleObject(this: VueRenderedLayer): object {
         return {
             pointerEvents: this.isActive ? "initial" : "none"
         };
     }
-    function thingsStyleObject(this: VueRenderedLayer): any {
+    function thingsStyleObject(this: VueRenderedLayer): object {
         return {
             position: "relative",
             left: EDITOR_PADDING + "px",
             top: EDITOR_PADDING + "px"
         };
     }
-    function traces(this: VueRenderedLayer): any {
+    function traces(this: VueRenderedLayer): Trace[] {
         var that = this;
-        return this.level.traces.filter(function(trace: any) {
-            return trace.z >= that.layer.z && trace.z < that.layerAboveZ;
+        return this.level.traces.filter(trace => {
+            return trace.obj.z >= that.layer.obj.z && trace.obj.z < that.layerAboveZ;
         });
     }
-    function props(this: VueRenderedLayer): any {
+    function props(this: VueRenderedLayer): Prop[] {
         var that = this;
-        return this.level.props.filter(function(prop: any) {
-            return prop.z >= that.layer.z && prop.z < that.layerAboveZ;
+        return this.level.props.filter(prop => {
+            return prop.obj.z >= that.layer.obj.z && prop.obj.z < that.layerAboveZ;
         });
     }
-    function positions(this: VueRenderedLayer): any {
+    function positions(this: VueRenderedLayer): Position[] {
         var that = this;
-        return this.level.positions.filter(function(pos: any) {
-            return pos.z >= that.layer.z && pos.z < that.layerAboveZ;
+        return this.level.positions.filter(pos => {
+            return pos.obj.z >= that.layer.obj.z && pos.obj.z < that.layerAboveZ;
         });
     }
 
@@ -78,27 +78,27 @@ namespace splitTime.editor.level {
             isActive: Boolean
         },
         template: `
-    <div v-show="layer.displayed" v-bind:style="styleObject">
-        <svg
-                style="position:absolute"
-                v-bind:width="containerWidth"
-                v-bind:height="containerHeight"
-                v-bind:viewBox="viewBox"
-        >
-            <rendered-trace v-for="(trace, traceIndex) in traces"
-                            v-bind:trace="trace"
-                            v-bind:index="traceIndex"
-            ></rendered-trace>
-        </svg>
-        <div v-bind:style="thingsStyleObject">
-            <rendered-prop v-for="(prop, propIndex) in props"
-                        v-bind:prop="prop"
-            ></rendered-prop>
-            <rendered-position v-for="(position, posIndex) in positions"
-                            v-bind:position="position"
-            ></rendered-position>
-        </div>
+<div v-show="layer.metadata.displayed" v-bind:style="styleObject">
+    <svg
+            style="position:absolute"
+            v-bind:width="containerWidth"
+            v-bind:height="containerHeight"
+            v-bind:viewBox="viewBox"
+    >
+        <rendered-trace v-for="(trace, traceIndex) in traces"
+                        v-bind:trace="trace"
+                        v-bind:index="traceIndex"
+        ></rendered-trace>
+    </svg>
+    <div v-bind:style="thingsStyleObject">
+        <rendered-prop v-for="(prop, propIndex) in props"
+                    v-bind:prop="prop"
+        ></rendered-prop>
+        <rendered-position v-for="(position, posIndex) in positions"
+                        v-bind:position="position"
+        ></rendered-position>
     </div>
+</div>
         `,
         computed: {
             containerWidth,

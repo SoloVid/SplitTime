@@ -1,37 +1,49 @@
 (window as any)["__EDITOR_CONSTANT__"] = true;
 
 namespace splitTime.editor.level {
-    export var levelObject = {
-        fileName: "",
-        type: "",
-        region: "",
-        layers: [],
-        props: [],
-        positions: []
-    } as any;
-    export var fileName = "";
-    export var mode = "position";
-    export var typeSelected: any;
+    export let levelObject: Level
+    defer(() => {
+        levelObject = new Level();
+    })
+    export let fileName: string = "";
+    export let mode: string = "position";
+    export let typeSelected: string = trace.Type.SOLID;
     
-    export var EDITOR_PADDING = 32;
-    export var mouseX = 0;
-    export var mouseY = 0;
-    export var mouseLevelX = 0;
-    export var mouseLevelY = 0;
-    export var mouseDown = false;
-    export var ctrlDown = false;
+    export let EDITOR_PADDING = 32;
+    export let mouseX = 0;
+    export let mouseY = 0;
+    export let mouseLevelX = 0;
+    export let mouseLevelY = 0;
+    export let mouseDown = false;
+    export let ctrlDown = false;
     
-    export var cancelNextContextMenu = false;
+    export let cancelNextContextMenu = false;
     
-    export var follower: any = null;
-    export var lastFollower: any = null;
-    export var pathInProgress: any = null;
+    export type Followable = { obj: Trace, point: Coordinates2D } | { obj: Prop | Position, point: null } | null
+
+    export let follower: Followable = null;
+    export let lastFollower: Followable = null;
+    export let pathInProgress: splitTime.level.file_data.Trace | null = null;
+
+    export let subImg: string = "";
     
-    export var subImg: any;
-    export var ctx: any;
-    export var subImg2: any;
-    
+    function makePlaceholderImage() {
+        const element = $("#subImg").get(0) as HTMLCanvasElement;
+        const ctx = element.getContext("2d");
+        if (!ctx) {
+            throw new Error("Failed to get context for placeholder image")
+        }
+
+        const width = 32
+        const height = 64
+        ctx.fillStyle = "#CD96CD";
+        ctx.fillRect(5, 5, width - 10, height - 10);
+        return element.toDataURL();
+    }
+
     export function setupEventHandlers() {
+        subImg = makePlaceholderImage()
+
         window.onbeforeunload = function() {
             return true;
         };
@@ -120,7 +132,7 @@ namespace splitTime.editor.level {
         });
         
         $(document.body).on("click", ".option", function() {
-            pathInProgress = false;
+            pathInProgress = null;
         });
         
         $(document).mousemove(function(event) {
@@ -140,7 +152,7 @@ namespace splitTime.editor.level {
             var layerIndex = vueApp.activeLayer;
             var layer = levelObject.layers[layerIndex];
             if(layer) {
-                vueApp.info.z = layer.z || 0
+                vueApp.info.z = layer.obj.z || 0
                 vueApp.info.x = mouseLevelX
                 vueApp.info.y = mouseLevelY + (vueApp.info.z || 0)
             }
@@ -151,12 +163,12 @@ namespace splitTime.editor.level {
         });
         
         $(document.body).on("mouseup", "#layers", function(event) {
-            var z = levelObject.layers[vueApp.activeLayer].z;
+            var z = levelObject.layers[vueApp.activeLayer].obj.z;
             var yOnLayer = mouseLevelY + z;
             if(mode == "trace") {
                 var literalPoint = "(" + Math.floor(mouseLevelX/getPixelsPerPixel()) + ", " + Math.floor(mouseLevelY/getPixelsPerPixel() + z) + ")";
                 var closestPosition = findClosestPosition(mouseLevelX, yOnLayer);
-                var positionPoint = closestPosition ? "(pos:" + closestPosition.id + ")" : "";
+                var positionPoint = closestPosition ? "(pos:" + closestPosition.obj.id + ")" : "";
                 if(event.which == 1) { // left click
                     if(pathInProgress) {
                         if(typeSelected == "path" && ctrlDown) {

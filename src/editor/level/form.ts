@@ -1,7 +1,14 @@
 namespace splitTime.editor.level {
     
-    var editingThing: any;
-    var editFields: any[] = [];
+    interface FieldSpec {
+        key: string
+        readonly?: boolean
+        type?: string
+        title?: string
+    }
+
+    var editingThing: unknown;
+    var editFields: FieldSpec[] = [];
     
     $(document).ready(function() {
         var $back = $("#XMLEditorBack");
@@ -24,7 +31,7 @@ namespace splitTime.editor.level {
         $saveButton.click(function(event) {
             for(var i = 0; i < editFields.length; i++) {
                 var field = editFields[i];
-                Vue.set(editingThing, field.key, getEditorValue(field));
+                Vue.set(editingThing as object, field.key, getEditorValue(field));
                 // editingThing[field.key] = getEditorValue(field);
             }
             
@@ -66,7 +73,7 @@ namespace splitTime.editor.level {
         });
     });
     
-    export function showEditor(thing: any, fields: any[]) {
+    function showEditor(thing: any, fields: FieldSpec[]) {
         $("#XMLEditorFields").empty();
         editingThing = thing;
         editFields = fields;
@@ -127,7 +134,7 @@ namespace splitTime.editor.level {
         firstInput.focus();
     }
     
-    export function getEditorValue(field: any) {
+    function getEditorValue(field: any) {
         var strVal = $("#FIELD" + field.key).val();
         switch(field.type) {
             case "number":
@@ -163,8 +170,8 @@ namespace splitTime.editor.level {
         ]);
     }
     
-    export function showEditorLayer(layer: any) {
-        showEditor(layer, [
+    export function showEditorLayer(layer: Layer) {
+        showEditor(layer.obj, [
             {
                 key: "id"
             },
@@ -175,37 +182,8 @@ namespace splitTime.editor.level {
         ]);
     }
     
-    export function showEditorProp(prop: any) {
-        showEditor(prop, [
-            {
-                key: "id"
-            },
-            {
-                key: "template"
-            },
-            {
-                key: "x",
-                type: "number"
-            },
-            {
-                key: "y",
-                type: "number"
-            },
-            {
-                key: "z",
-                type: "number"
-            },
-            {
-                key: "dir"
-            },
-            {
-                key: "stance"
-            }
-        ]);
-    }
-    
-    export function showEditorPosition(position: any) {
-        showEditor(position, [
+    export function showEditorProp(prop: Prop) {
+        showEditor(prop.obj, [
             {
                 key: "id"
             },
@@ -233,7 +211,36 @@ namespace splitTime.editor.level {
         ]);
     }
     
-    export function showEditorTrace(trace: any) {
+    export function showEditorPosition(position: Position) {
+        showEditor(position.obj, [
+            {
+                key: "id"
+            },
+            {
+                key: "template"
+            },
+            {
+                key: "x",
+                type: "number"
+            },
+            {
+                key: "y",
+                type: "number"
+            },
+            {
+                key: "z",
+                type: "number"
+            },
+            {
+                key: "dir"
+            },
+            {
+                key: "stance"
+            }
+        ]);
+    }
+    
+    export function showEditorTrace(trace: Trace) {
         var fields = [
             {
                 key: "id"
@@ -256,7 +263,7 @@ namespace splitTime.editor.level {
             }
         ];
         
-        switch(trace.type) {
+        switch(trace.obj.type) {
             case splitTime.trace.Type.STAIRS:
             fields.push({key: "direction"});
             break;
@@ -272,6 +279,6 @@ namespace splitTime.editor.level {
             break;
         }
         
-        showEditor(trace, fields);
+        showEditor(trace.obj, fields);
     }
 }

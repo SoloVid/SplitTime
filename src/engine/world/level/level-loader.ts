@@ -147,7 +147,7 @@ namespace splitTime {
                     if (
                         obj.drawable &&
                         (prop.playerOcclusionFadeFactor ||
-                            prop.playerOcclusionFadeFactor === "0")
+                            prop.playerOcclusionFadeFactor === 0)
                     ) {
                         obj.drawable.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor
                     }

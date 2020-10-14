@@ -2,7 +2,8 @@ namespace splitTime {
     let nextRef = 10
 
     export class Sprite implements splitTime.body.Drawable {
-        private img: string
+        // TODO: make this private (probably)
+        img: string
         private _timeMs: number
         private _frameSignaler: Signaler
         ref: int
@@ -89,36 +90,31 @@ namespace splitTime {
         _drawSimple(ctx: GenericCanvasRenderingContext2D) {
             var tImg = this.getImage()
 
-            var crop = this.getAnimationFrameCrop(
+            const crop = this.getAnimationFrameCrop(
                 this.dir,
                 this.stance,
                 this.frame
             )
-            var x = -Math.round(crop.xres / 2) - this.baseOffX
-            var y = -crop.yres - this.baseOffY
+            var x = -Math.round(crop.width / 2) - this.baseOffX
+            var y = -crop.height - this.baseOffY
 
             ctx.globalAlpha = ctx.globalAlpha * this.opacityModifier
 
             ctx.drawImage(
                 tImg,
-                crop.sx,
-                crop.sy,
-                crop.xres,
-                crop.yres,
+                crop.x,
+                crop.y,
+                crop.width,
+                crop.height,
                 x,
                 y,
-                crop.xres,
-                crop.yres
+                crop.width,
+                crop.height
             )
         }
 
-        getAnimationFrameCrop(numDir: number, stance: string, frame: int) {
-            var crop = {
-                xres: this.xres,
-                yres: this.yres,
-                sx: 0,
-                sy: this.yres * frame
-            }
+        getAnimationFrameCrop(numDir: number, stance: string, frame: int): math.Rect {
+            const crop = math.Rect.make(0, this.yres * frame, this.xres, this.yres)
 
             var column = 0
             var dir = splitTime.direction.toString(numDir)
@@ -151,7 +147,7 @@ namespace splitTime {
                 }
             }
 
-            crop.sx = this.xres * column
+            crop.x = this.xres * column
             return crop
         }
 

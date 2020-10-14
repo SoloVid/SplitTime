@@ -1,24 +1,24 @@
 namespace splitTime.editor.level {
     export interface VueRenderedPosition {
-        position: any
-        styleObject: any
-        body: any
-        imgSrc: any
-        positionLeft: any
-        positionTop: any
-        width: any
-        height: any
-        crop: any
-        spriteOffset: any
-        edit(): any
-        track(): any
-        toggleHighlight(highlight: boolean): any
+        position: Position
+        styleObject: object
+        body: splitTime.Body
+        imgSrc: string
+        positionLeft: number
+        positionTop: number
+        width: number
+        height: number
+        crop: math.Rect
+        spriteOffset: Coordinates2D
+        edit(): void
+        track(): void
+        toggleHighlight(highlight: boolean): void
     }
 
-    function styleObject(this: VueRenderedPosition): any {
+    function styleObject(this: VueRenderedPosition): object {
         return {
-            outline: this.position.isHighlighted ? "2px solid yellow" : "",
-            backgroundColor: this.position.isHighlighted ? "yellow" : "initial",
+            outline: this.position.metadata.highlighted ? "2px solid yellow" : "",
+            backgroundColor: this.position.metadata.highlighted ? "yellow" : "initial",
             position: 'absolute',
             overflow: 'hidden',
             left: this.positionLeft + 'px',
@@ -27,30 +27,30 @@ namespace splitTime.editor.level {
             height: this.height + 'px'
         };
     }
-    function body(this: VueRenderedPosition): any {
-        return loadBodyFromTemplate(this.position.template);
+    function body(this: VueRenderedPosition): splitTime.Body {
+        return loadBodyFromTemplate(this.position.obj.template);
     }
-    function imgSrc(this: VueRenderedPosition): any {
+    function imgSrc(this: VueRenderedPosition): string {
         return getBodyImage(this.body);
     }
-    function positionLeft(this: VueRenderedPosition): any {
+    function positionLeft(this: VueRenderedPosition): number {
         // console.log(this.position);
         // console.log(this.body);
-        return this.position.x - this.crop.xres/2 - this.spriteOffset.x;
+        return this.position.obj.x - this.crop.width/2 - this.spriteOffset.x;
     }
-    function positionTop(this: VueRenderedPosition): any {
-        return this.position.y - this.position.z - this.crop.yres + this.body.baseLength/2 - this.spriteOffset.y;
+    function positionTop(this: VueRenderedPosition): number {
+        return this.position.obj.y - this.position.obj.z - this.crop.height + this.body.baseLength/2 - this.spriteOffset.y;
     }
-    function width(this: VueRenderedPosition): any {
-        return this.crop.xres;
+    function width(this: VueRenderedPosition): number {
+        return this.crop.width;
     }
-    function height(this: VueRenderedPosition): any {
-        return this.crop.yres;
+    function height(this: VueRenderedPosition): number {
+        return this.crop.height;
     }
-    function crop(this: VueRenderedPosition): any {
-        return getAnimationFrameCrop(this.body, this.position.dir, this.position.stance);
+    function crop(this: VueRenderedPosition): math.Rect {
+        return getAnimationFrameCrop(this.body, this.position.obj.dir, this.position.obj.stance);
     }
-    function spriteOffset(this: VueRenderedPosition): any {
+    function spriteOffset(this: VueRenderedPosition): Coordinates2D {
         return getSpriteOffset(this.body);
     }
 
@@ -61,13 +61,13 @@ namespace splitTime.editor.level {
         if(pathInProgress) {
             return;
         }
-        follower = this.position;
+        follower = { obj: this.position, point: null };
     }
     function toggleHighlight(this: VueRenderedPosition, highlight: boolean) {
         if(mouseDown || pathInProgress) {
             return;
         }
-        this.position.isHighlighted = highlight;
+        this.position.metadata.highlighted = highlight;
     }
 
 
@@ -76,17 +76,17 @@ namespace splitTime.editor.level {
             position: Object
         },
         template: `
-    <div
-        v-show="position.displayed"
-        class="draggable position"
-        v-on:dblclick="edit"
-        v-on:mousedown.left="track"
-        v-on:mouseenter="toggleHighlight(true)"
-        v-on:mouseleave="toggleHighlight(false)"
-        v-bind:style="styleObject"
-    >
-        <img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.sx + 'px', top: -crop.sy + 'px' }"/>
-    </div>
+<div
+    v-show="position.metadata.displayed"
+    class="draggable position"
+    v-on:dblclick="edit"
+    v-on:mousedown.left="track"
+    v-on:mouseenter="toggleHighlight(true)"
+    v-on:mouseleave="toggleHighlight(false)"
+    v-bind:style="styleObject"
+>
+    <img v-bind:src="imgSrc" v-bind:style="{ position: 'absolute', left: -crop.x + 'px', top: -crop.y + 'px' }"/>
+</div>
         `,
         computed: {
             styleObject,
