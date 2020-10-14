@@ -6,6 +6,6 @@ import * as _jquery from 'jquery'
 import * as _path from 'path'
 
 export const express: typeof _express
-export const fs: typeof _fs
+declare const fs: typeof _fs
 declare const $: typeof _jquery
-export const path: typeof _path
+declare const path: typeof _path
