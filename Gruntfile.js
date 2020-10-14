@@ -163,7 +163,10 @@ module.exports = function(grunt) {
             ];
             concatFilesWithSourceMaps(files, 'build/editor-server-lib.js');
 
+            grunt.file.write('build/generated/environment-ext.js',
+                'var __ROOT__ = "' + __dirname.replace(/\\/g, "\\\\") + '";\n')
             files = [
+                'build/generated/environment-ext.js',
                 'build/engine.js',
                 'build/editor-server-lib.js',
                 'build/tsjs/editor/server/main.js',

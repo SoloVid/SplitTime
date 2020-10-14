@@ -1,4 +1,11 @@
 namespace splitTime.editor.level {
+    var projectName = window.location.hash.substring(1);
+    while(!projectName) {
+        projectName = prompt("Project folder name:") || "";
+    }
+    window.location.hash = "#" + projectName;
+    export var projectPath = "projects/" + projectName + "/";
+
     export interface VueApp {
         info: {
             x: number | undefined,
@@ -53,6 +60,8 @@ namespace splitTime.editor.level {
     export let vueApp: VueApp
 
     $(document).ready(function() {
+        setupEventHandlers();
+
         vueApp = new Vue({
             el: '#app',
             data: {
@@ -112,10 +121,10 @@ namespace splitTime.editor.level {
                 selectModeOption,
                 selectTraceOption,
                 createLayer,
-                createLevel: createLevel,
-                clickFileChooser: clickFileChooser,
-                downloadFile: downloadFile,
-                showEditorLevel: showEditorLevel
+                createLevel,
+                clickFileChooser,
+                downloadFile,
+                showEditorLevel
             }
         }) as VueApp
     })
