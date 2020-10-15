@@ -1,5 +1,6 @@
 namespace splitTime.editor.level {
     export interface RenderedProp {
+        levelEditorShared: LevelEditorShared
         prop: Prop
         body: Body
         styleObject: object
@@ -57,27 +58,34 @@ namespace splitTime.editor.level {
         showEditorProp(this.prop);
     }
     function track(this: RenderedProp): void {
-        if(pathInProgress) {
+        if(this.levelEditorShared.shouldDragBePrevented()) {
             return;
         }
-        follower = { obj: this.prop, point: null };
+        this.levelEditorShared.follow({
+            shift: (dx, dy) => {
+                this.prop.obj.x += dx
+                this.prop.obj.y += dy
+            }
+        })
     }
     function toggleHighlight(this: RenderedProp, highlight: boolean): void {
-        if(mouseDown || pathInProgress) {
-            return;
+        if(this.levelEditorShared.shouldDragBePrevented()) {
+            this.prop.metadata.highlighted = false
+            return
         }
-        this.prop.metadata.highlighted = highlight;
+        this.prop.metadata.highlighted = highlight
     }
     
     Vue.component("rendered-prop", {
         props: {
+            levelEditorShared: Object,
             prop: Object
         },
         template: `
 <div
     v-show="prop.metadata.displayed"
     class="draggable prop"
-    v-on:dblclick="edit"
+    v-on:dblclick.prevent="edit"
     v-on:mousedown.left="track"
     v-on:mouseenter="toggleHighlight(true)"
     v-on:mouseleave="toggleHighlight(false)"

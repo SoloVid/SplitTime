@@ -1,131 +1,257 @@
 namespace splitTime.editor.level {
-    var projectName = window.location.hash.substring(1);
+    var projectName = window.location.hash.substring(1)
     while(!projectName) {
-        projectName = prompt("Project folder name:") || "";
+        projectName = prompt("Project folder name:") || ""
     }
-    window.location.hash = "#" + projectName;
-    export var projectPath = "projects/" + projectName + "/";
+    window.location.hash = "#" + projectName
+    export var projectPath = "projects/" + projectName + "/"
 
-    export interface VueApp {
-        info: {
-            x: number | undefined,
-            y: number | undefined,
-            z: number | undefined
+    class GlobalEditorStuff implements GlobalEditorShared {
+        followers: Followable[] | null = null
+        previousFollowers: Followable[] | null = null
+        
+        setFollowers(newFollowers: Followable[]): void {
+            this.previousFollowers = this.followers
+            this.followers = newFollowers
         }
-        level: Level
-        activeLayer: number
-        traceOptions: {
-            type: string,
-            color: string,
-            help: string
-        }[]
-        backgroundSrc: string
-        containerWidth: number
-        containerHeight: number
-        leftPadding: number
-        topPadding: number
-        selectModeOption(mode: string): void
-        selectTraceOption(type: string): void
-        createLayer(): void
+    }
+    
+    export interface VueEditor extends VueComponent {
+        inputs: UserInputs
+        level: Level | null
+        globalEditorStuff: GlobalEditorStuff
+        createLevel(): void
+        clickFileChooser(): void
+        downloadLevel(): void
+        editLevelSettings(): void
+        moveFollowers(dx: number, dy: number, fallbackToPrevious?: boolean): void
+        handleMouseMove(event: MouseEvent): void
+        handleMouseDown(event: MouseEvent): void
+        handleMouseUp(event: MouseEvent): void
+        handleKeyDown(event: KeyboardEvent): void
+        handleKeyUp(event: KeyboardEvent): void
+        handleFileChange(event: Event): void
     }
 
-    function backgroundSrc(this: VueApp): string {
-        return imgSrc(this.level.background);
-    }
-    function containerWidth(this: VueApp): number {
-        return this.level.width + 2*EDITOR_PADDING;
-    }
-    function containerHeight(this: VueApp): number {
-        var addedHeight = this.level.layers.length > 0 ? this.level.layers[this.level.layers.length - 1].obj.z : 0;
-        return this.level.height + 2*EDITOR_PADDING + addedHeight;
-    }
-    function leftPadding(this: VueApp): number {
-        return EDITOR_PADDING + this.level.backgroundOffsetX;
-    }
-    function topPadding(this: VueApp): number {
-        return EDITOR_PADDING + this.level.backgroundOffsetY;
-    }
-
-    function selectModeOption(this: VueApp, mode: string): void {
-        setMode(mode);
-    }
-    function selectTraceOption(this: VueApp, type: string): void {
-        typeSelected = type;
-        setMode("trace");
-    }
-    function createLayer(this: VueApp): void {
-        addNewLayer();
-    }
-
-    export let vueApp: VueApp
-
-    $(document).ready(function() {
-        setupEventHandlers();
-
-        vueApp = new Vue({
-            el: '#app',
-            data: {
-                info: {
-                    x: undefined,
-                    y: undefined,
-                    z: undefined
-                },
-                level: levelObject,
-                activeLayer: 0,
-                traceOptions: [
-                    {
-                        type: splitTime.trace.Type.SOLID,
-                        color: "rgba(0, 0, 255, .7)",
-                        help: "Completely impenetrable areas bodies may not pass through (but may sit on top)"
-                    },
-                    {
-                        type: splitTime.trace.Type.STAIRS,
-                        color: "rgba(0, 200, 0, .7)",
-                        help: "Solid trace slope up to the next layer"
-                    },
-                    {
-                        type: splitTime.trace.Type.GROUND,
-                        color: TRACE_GROUND_COLOR,
-                        help: "Zero-height solid trace, perfect for bridges"
-                    },
-                    {
-                        type: splitTime.trace.Type.EVENT,
-                        color: "rgba(255, 0, 0, .7)",
-                        help: "Indicates area of the level which will trigger a function call when a body moves into the area"
-                    },
-                    {
-                        type: splitTime.trace.Type.PATH,
-                        color: "rgba(0, 0, 0, 1)",
-                        help: "Link positions together for walking purposes"
-                    },
-                    {
-                        type: splitTime.trace.Type.POINTER,
-                        color: "rgba(100, 50, 100, .8)",
-                        help: "Link to another level. Traces from that level will affect this area, and a body fully moved into the pointer trace will be transported to that level."
-                    },
-                    {
-                        type: splitTime.trace.Type.TRANSPORT,
-                        color: "rgba(200, 100, 10, .8)",
-                        help: "Link to another level regardless of what's on the other side. Note: You'll want to use opposite values for pairs of these traces, but be careful not to overlap the traces and leave enough room for the maximum expected base between."
-                    }
-                ]
-            },
-            computed: {
-                backgroundSrc,
-                containerWidth,
-                containerHeight,
-                leftPadding,
-                topPadding
-            },
-            methods: {
-                selectModeOption,
-                selectTraceOption,
-                createLayer,
-                createLevel,
-                clickFileChooser,
-                downloadFile,
-                showEditorLevel
+    function createLevel(this: VueEditor) {
+        if(this.level && this.level.layers.length > 0) {
+            if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
+                return;
             }
-        }) as VueApp
+        }
+
+        this.level = new Level()
+        this.level.layers.push(withMetadata("layer", {
+            id: "",
+            z: 0
+        }))
+        updatePageTitle(this.level);
+    }
+
+    function clickFileChooser(this: VueEditor) {
+        this.$refs.fileInput.click()
+    }
+
+    function downloadLevel(this: VueEditor): void {
+        if (this.level === null) {
+            return
+        }
+
+        this.level.fileName = prompt("File name?", this.level.fileName) || "";
+        if(!this.level.fileName) {
+            return;
+        }
+        if(!this.level.fileName.endsWith(".json")) {
+            this.level.fileName += ".json";
+        }
+
+        var jsonText = exportLevel(this.level);
+
+        updatePageTitle(this.level);
+        downloadFile(this.level.fileName, jsonText)
+    }
+
+    function editLevelSettings(this: VueEditor): void {
+        if (!this.level) {
+            return
+        }
+        showEditorLevel(this.level)
+    }
+
+    function moveFollowers(this: VueEditor, dx: number, dy: number, fallbackToPrevious: boolean = true): void {
+        let toMove = this.globalEditorStuff.followers
+        if (fallbackToPrevious && toMove === null) {
+            toMove = this.globalEditorStuff.previousFollowers
+        }
+        if (toMove === null) {
+            toMove = []
+        }
+        for (const t of toMove) {
+            t.shift(dx, dy)
+        }
+    }
+
+    function handleMouseMove(this: VueEditor, event: MouseEvent): void {
+        const oldX = this.inputs.mouse.x
+        const oldY = this.inputs.mouse.y
+        this.inputs.mouse.x = event.pageX
+        this.inputs.mouse.y = event.pageY
+        const dx = this.inputs.mouse.x - oldX
+        const dy = this.inputs.mouse.y - oldY
+        this.moveFollowers(dx, dy, false)
+        // TODO: prevent default?
+    }
+
+    function handleMouseDown(this: VueEditor, event: MouseEvent): void {
+        this.inputs.mouse.isDown = true;
+    }
+
+    function handleMouseUp(this: VueEditor, event: MouseEvent): void {
+        this.inputs.mouse.isDown = false
+        this.globalEditorStuff.previousFollowers = this.globalEditorStuff.followers
+        this.globalEditorStuff.followers = null
+}
+
+    function handleKeyDown(this: VueEditor, event: KeyboardEvent): void {
+        // TODO: resolve types
+        const element = event.target as any
+        switch (element.tagName.toLowerCase()) {
+            case "input":
+            case "textarea":
+            return
+        }
+        
+        const keycode = splitTime.controls.keyboard.keycode
+        var specialKey = true
+        switch(event.which) {
+            case keycode.SHIFT:
+                this.inputs.ctrlDown = true
+                break
+            case keycode.LEFT:
+                this.moveFollowers(-1, 0)
+                break
+            case keycode.UP:
+                this.moveFollowers(0, -1)
+                break
+            case keycode.RIGHT:
+                this.moveFollowers(1, 0)
+                break
+            case keycode.DOWN:
+                this.moveFollowers(0, 1)
+                break
+            default:
+                specialKey = false
+        }
+        
+        if(specialKey) {
+            event.preventDefault()
+        }
+    }
+
+    function handleKeyUp(this: VueEditor, event: KeyboardEvent): void {
+        const keycode = splitTime.controls.keyboard.keycode
+        if(event.which == keycode.SHIFT) { // shift
+            this.inputs.ctrlDown = false
+        } else if(event.which == keycode.ESC) { // esc
+            if (this.level === null) {
+                console.log("No level to export")
+            } else {
+                console.log("export of level JSON:")
+                console.log(exportLevel(this.level))
+            }
+        }
+    }
+
+    function handleFileChange(this: VueEditor, event: Event): void {
+        assert(event.target !== null, "File change event has null target?")
+        const inputElement = event.target as HTMLInputElement
+        const fileList = inputElement.files
+        assert(fileList !== null, "No files")
+        const f = fileList[0]
+        if (f) {
+            var r = new FileReader()
+            r.onload = e => {
+                if (!e.target) {
+                    throw new Error("No target?")
+                }
+                var contents = e.target.result
+                if (typeof contents !== "string") {
+                    throw new Error("Contents not string?")
+                }
+                this.level = importLevel(contents)
+                this.level.fileName = f.name
+                updatePageTitle(this.level)
+            };
+            r.readAsText(f)
+        } else {
+            alert("Failed to load file")
+        }
+    }
+
+    Vue.component("st-editor", {
+        template: `
+<div
+    v-on:mousemove="handleMouseMove"
+    v-on:mousedown="handleMouseDown"
+    v-on:mouseup="handleMouseUp"
+    v-on:keydown="handleKeyDown"
+    v-on:keyup="handleKeyUp"
+    >
+    <div id="navmenu">
+        <ul>
+            <li class="pointer"><a v-on:click="createLevel">New Level</a></li>
+            <li class="pointer"><a v-on:click="clickFileChooser">Load Level</a>
+                <input
+                    ref="fileInput"
+                    type="file"
+                    accept=".json"
+                    style="display:none"
+                    v-on:change="handleFileChange"
+                />
+            </li>
+            <li class="pointer">
+                <a
+                    v-on:click="downloadLevel"
+                    title="After downloading the level, relocate it to use it in the engine."
+                >Download File (Save)</a>
+            </li>
+            <li class="pointer"><a v-on:click="editLevelSettings">Edit Settings</a></li>
+        </ul>
+    </div>
+    <level-editor
+        v-if="level"
+        :editor-inputs="inputs"
+        :editor-global-stuff="globalEditorStuff"
+        :level="level"
+    ></level-editor>
+</div>
+        `,
+        data: function (){
+            return {
+                inputs: {
+                    mouse: {
+                        x: 0,
+                        y: 0,
+                        isDown: false
+                    },
+                    ctrlDown: false
+                },
+                level: null,
+                globalEditorStuff: new GlobalEditorStuff()
+            }
+        },
+        methods: {
+            createLevel,
+            clickFileChooser,
+            downloadLevel,
+            editLevelSettings,
+            moveFollowers,
+            handleMouseMove,
+            handleMouseDown,
+            handleMouseUp,
+            handleKeyDown,
+            handleKeyUp,
+            handleFileChange
+        }
     })
 }

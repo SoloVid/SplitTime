@@ -7,6 +7,7 @@ namespace splitTime.editor.level {
         title?: string
     }
 
+    let editingLevel: Level | null = null
     var editingThing: unknown;
     var editFields: FieldSpec[] = [];
     
@@ -39,32 +40,36 @@ namespace splitTime.editor.level {
         });
         
         $("#deleteThing").click(function(event) {
+            if(editingLevel === null) {
+                console.error("No level from which to delete")
+                return
+            }
             if(!confirm("Are you sure you want to delete this?")) {
                 return;
             }
             
-            for(var iLayer = 0; iLayer < levelObject.layers.length; iLayer++) {
-                var layer = levelObject.layers[iLayer];
+            for(var iLayer = 0; iLayer < editingLevel.layers.length; iLayer++) {
+                var layer = editingLevel.layers[iLayer];
                 if(layer === editingThing) {
-                    levelObject.layers.splice(iLayer, 1);
+                    editingLevel.layers.splice(iLayer, 1);
                     iLayer--;
                 }
             }
-            for(var iTrace = 0; iTrace < levelObject.traces.length; iTrace++) {
-                if(levelObject.traces[iTrace] === editingThing) {
-                    levelObject.traces.splice(iTrace, 1);
+            for(var iTrace = 0; iTrace < editingLevel.traces.length; iTrace++) {
+                if(editingLevel.traces[iTrace] === editingThing) {
+                    editingLevel.traces.splice(iTrace, 1);
                     iTrace--;
                 }
             }
-            for(var iProp = 0; iProp < levelObject.props.length; iProp++) {
-                if(levelObject.props[iProp] === editingThing) {
-                    levelObject.props.splice(iProp, 1);
+            for(var iProp = 0; iProp < editingLevel.props.length; iProp++) {
+                if(editingLevel.props[iProp] === editingThing) {
+                    editingLevel.props.splice(iProp, 1);
                     iProp--;
                 }
             }
-            for(var iPos = 0; iPos < levelObject.positions.length; iPos++) {
-                if(levelObject.positions[iPos] === editingThing) {
-                    levelObject.positions.splice(iPos, 1);
+            for(var iPos = 0; iPos < editingLevel.positions.length; iPos++) {
+                if(editingLevel.positions[iPos] === editingThing) {
+                    editingLevel.positions.splice(iPos, 1);
                     iPos--;
                 }
             }
@@ -143,8 +148,8 @@ namespace splitTime.editor.level {
         return strVal;
     }
     
-    export function showEditorLevel() {
-        showEditor(levelObject, [
+    export function showEditorLevel(level: Level) {
+        showEditor(level, [
             {
                 key: "region"
             },

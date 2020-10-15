@@ -1,5 +1,6 @@
 namespace splitTime.editor.level {
     export interface VueRenderedLayer {
+        levelEditorShared: LevelEditorShared
         level: Level
         layer: Layer
         index: number
@@ -70,6 +71,7 @@ namespace splitTime.editor.level {
 
     Vue.component("rendered-layer", {
         props: {
+            levelEditorShared: Object,
             level: Object,
             layer: Object,
             index: Number,
@@ -86,16 +88,19 @@ namespace splitTime.editor.level {
             v-bind:viewBox="viewBox"
     >
         <rendered-trace v-for="(trace, traceIndex) in traces"
-                        v-bind:trace="trace"
-                        v-bind:index="traceIndex"
+            v-bind:level-editor-shared="levelEditorShared"
+            v-bind:trace="trace"
+            v-bind:index="traceIndex"
         ></rendered-trace>
     </svg>
     <div v-bind:style="thingsStyleObject">
         <rendered-prop v-for="(prop, propIndex) in props"
-                    v-bind:prop="prop"
+            v-bind:level-editor-shared="levelEditorShared"
+            v-bind:prop="prop"
         ></rendered-prop>
         <rendered-position v-for="(position, posIndex) in positions"
-                        v-bind:position="position"
+            v-bind:level-editor-shared="levelEditorShared"
+            v-bind:position="position"
         ></rendered-position>
     </div>
 </div>

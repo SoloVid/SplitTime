@@ -178,6 +178,7 @@ module.exports = function(grunt) {
                 'build/engine.js',
                 'build/editor-server-lib.js',
                 'build/tsjs/editor/client/**/*.js',
+                // 'build/tsjs/editor/client/test.js',
                 'build/tsjs/defer.run.js'
             ];
             concatFilesWithSourceMaps(files, 'build/editor-client.js');

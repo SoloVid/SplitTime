@@ -1,5 +1,6 @@
 namespace splitTime.editor.level {
     export interface VueRenderedPosition {
+        levelEditorShared: LevelEditorShared
         position: Position
         styleObject: object
         body: splitTime.Body
@@ -58,28 +59,35 @@ namespace splitTime.editor.level {
         showEditorPosition(this.position);
     }
     function track(this: VueRenderedPosition) {
-        if(pathInProgress) {
+        if(this.levelEditorShared.shouldDragBePrevented()) {
             return;
         }
-        follower = { obj: this.position, point: null };
+        this.levelEditorShared.follow({
+            shift: (dx, dy) => {
+                this.position.obj.x += dx
+                this.position.obj.y += dy
+            }
+        })
     }
     function toggleHighlight(this: VueRenderedPosition, highlight: boolean) {
-        if(mouseDown || pathInProgress) {
-            return;
+        if(this.levelEditorShared.shouldDragBePrevented()) {
+            this.position.metadata.highlighted = false
+            return
         }
-        this.position.metadata.highlighted = highlight;
+        this.position.metadata.highlighted = highlight
     }
 
 
     Vue.component("rendered-position", {
         props: {
+            levelEditorShared: Object,
             position: Object
         },
         template: `
 <div
     v-show="position.metadata.displayed"
     class="draggable position"
-    v-on:dblclick="edit"
+    v-on:dblclick.prevent="edit"
     v-on:mousedown.left="track"
     v-on:mouseenter="toggleHighlight(true)"
     v-on:mouseleave="toggleHighlight(false)"

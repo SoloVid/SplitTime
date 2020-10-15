@@ -1,7 +1,7 @@
 namespace splitTime.editor.level {
-    export function setMode(name: string) { mode = name; }
-    
-    export function exportLevel(): string {
+    export const DEFAULT_HEIGHT = 64;
+
+    export function exportLevel(levelObject: Level): string {
         const levelFile: splitTime.level.FileData = {
             fileName: levelObject.fileName,
             type: "action",
@@ -19,8 +19,9 @@ namespace splitTime.editor.level {
         return JSON.stringify(levelFile, null, 4);
     }
     
-    export function importLevel(levelText: string): void {
+    export function importLevel(levelText: string): Level {
         const levelFile = JSON.parse(levelText) as splitTime.level.FileData
+        const levelObject = new Level()
         levelObject.fileName = levelFile.fileName
         levelObject.region = levelFile.region
         levelObject.width = levelFile.width
@@ -32,28 +33,10 @@ namespace splitTime.editor.level {
         levelObject.traces = levelFile.traces.map(t => withMetadata("trace", t))
         levelObject.props = levelFile.props.map(p => withMetadata("prop", p))
         levelObject.positions = levelFile.positions.map(p => withMetadata("position", p))
-        vueApp.level = levelObject;
+        return levelObject
     }
     
-    var DEFAULT_HEIGHT = 64;
-    
-    export function addNewLayer() {
-        var assumedRelativeZ = DEFAULT_HEIGHT;
-        if(levelObject.layers.length > 1) {
-            assumedRelativeZ = Math.abs(levelObject.layers[1].obj.z - levelObject.layers[0].obj.z);
-        }
-        var z = 0;
-        if(levelObject.layers.length > 0) {
-            var previousLayer = levelObject.layers[levelObject.layers.length - 1];
-            z = previousLayer.obj.z + assumedRelativeZ;
-        }
-        levelObject.layers.push(withMetadata("layer", {
-            id: "",
-            z: z
-        }))
-    }
-    
-    export function addNewTrace(layerIndex: int, type: string) {
+    export function addNewTrace(levelObject: Level, layerIndex: int, type: string) {
         var z = levelObject.layers[layerIndex].obj.z;
         var height = levelObject.layers.length > layerIndex + 1 ?
         levelObject.layers[layerIndex + 1].obj.z - z :
@@ -94,19 +77,19 @@ namespace splitTime.editor.level {
         if(type === splitTime.trace.Type.SOLID && +trace.obj.height === 0) {
             type = splitTime.trace.Type.GROUND;
         }
-        for(var i = 0; i < vueApp.traceOptions.length; i++) {
-            if(vueApp.traceOptions[i].type === type) {
-                return vueApp.traceOptions[i].color;
+        for(var i = 0; i < traceOptions.length; i++) {
+            if(traceOptions[i].type === type) {
+                return traceOptions[i].color;
             }
         }
         return "rgba(255, 255, 255, 1)";
     }
-    export function safeExtractTraceArray(traceStr: string): (ReadonlyCoordinates2D | null)[] {
+    export function safeExtractTraceArray(levelObject: Level, traceStr: string): (ReadonlyCoordinates2D | null)[] {
         const pointSpecs = splitTime.trace.interpretPointString(traceStr)
-        return splitTime.trace.convertPositions(pointSpecs, getPositionMap())
+        return splitTime.trace.convertPositions(pointSpecs, getPositionMap(levelObject))
     }
 
-    function getPositionMap(): { [id: string]: ReadonlyCoordinates2D } {
+    function getPositionMap(levelObject: Level): { [id: string]: ReadonlyCoordinates2D } {
         const positionMap: { [id: string]: ReadonlyCoordinates2D } = {}
         for(const p of levelObject.positions) {
             positionMap[p.obj.id] = p.obj
@@ -114,7 +97,7 @@ namespace splitTime.editor.level {
         return positionMap
     }
 
-    export function findClosestPosition(x: number, y: number): Position | null {
+    export function findClosestPosition(levelObject: Level, x: number, y: number): Position | null {
         let closestDistance = Number.MAX_SAFE_INTEGER
         let closestPosition: Position | null = null
 
@@ -130,142 +113,28 @@ namespace splitTime.editor.level {
 
         return closestPosition
     }
-    
-    export function moveFollower(dx: number, dy: number) {
-        var toMove = follower || lastFollower;
-        if(!toMove) {
-            return;
-        }
-        if(toMove.obj.type === "trace") {
-            var trace = toMove.obj;
-            var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g;
-            if (toMove.point) {
-                regex = new RegExp("\\((" + toMove.point.x + "),\\s*(" + toMove.point.y + ")\\)", "g");
-                toMove.point = {
-                    x: toMove.point.x + dx,
-                    y: toMove.point.y + dy
-                };
-            }
-            var pointString = trace.obj.vertices;
-            trace.obj.vertices = pointString.replace(regex, function(match, p1, p2) {
-                var newX = Number(p1) + dx;
-                var newY = Number(p2) + dy;
-                return "(" + newX + ", " + newY + ")";
-            });
-        } else {
-            toMove.obj.obj.x += dx;
-            toMove.obj.obj.y += dy;
-        }
-    }
-    
-    export function updatePageTitle() {
-        var title = fileName ? fileName : "untitled";
-        if (levelObject.region) {
-            title += " (" + levelObject.region + ")";
+
+    export function updatePageTitle(level: Level) {
+        var title = level.fileName ? level.fileName : "untitled";
+        if (level.region) {
+            title += " (" + level.region + ")";
         }
         document.title = title;
     }
     
-    export function clickFileChooser() {
-        $("#fileChooser").click();
-    }
-    
-    export function downloadFile() {
-        var jsonText = exportLevel();
-        
-        fileName = prompt("File name?", fileName) || "";
-        if(!fileName) {
-            return;
-        }
-        if(!fileName.endsWith(".json")) {
-            fileName += ".json";
-        }
-        
-        updatePageTitle();
-        
+    export function downloadFile(fileName: string, contents: string): void {
         var pom = document.createElement('a');
-        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonText));
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents));
         pom.setAttribute('download', fileName);
-        
+
         pom.style.display = 'none';
         document.body.appendChild(pom);
-        
+
         pom.click();
-        
+
         document.body.removeChild(pom);
     }
-    
-    export function getPixelsPerPixel() {
-        return 1
-    }
-    
-    export function createLevel() {
-        if(levelObject.layers.length > 0) {
-            if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
-                return;
-            }
-        }
 
-        levelObject = new Level()
-        
-        vueApp.level = levelObject;
-        vueApp.createLayer();
-        
-        $("#editorTools").show();
-        
-        updatePageTitle();
-    }
-    
-    export function createObject(type: string) {
-        if(type == "position") {
-            return createPosition()
-        } else if(type == "prop") {
-            return createProp()
-        }
-    }
-    
-    export function createPosition() {
-        var layerIndex = vueApp.activeLayer;
-        var z = levelObject.layers[layerIndex].obj.z;
-        var x = mouseLevelX;
-        var y = mouseLevelY + z;
-        
-        var object = {
-            id: "",
-            template: "",
-            x: x,
-            y: y,
-            z: z,
-            dir: "S",
-            stance: "default"
-        }
-        const newThing = withMetadata<"position", splitTime.level.file_data.Position>("position", object)
-        levelObject.positions.push(newThing);
-        showEditorPosition(newThing);
-    }
-    
-    export function createProp() {
-        var layerIndex = vueApp.activeLayer;
-        var z = levelObject.layers[layerIndex].obj.z;
-        var x = mouseLevelX;
-        var y = mouseLevelY + z;
-        
-        var object = {
-            id: "",
-            template: "",
-            x: x,
-            y: y,
-            z: z,
-            dir: "S",
-            stance: "default",
-            playerOcclusionFadeFactor: 0
-        }
-
-        const newThing = withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)
-        levelObject.props.push(newThing);
-        showEditorProp(newThing);
-    }
-    
     export function loadBodyFromTemplate(templateName: string) {
         try {
             return G.BODY_TEMPLATES.getInstance(templateName);
@@ -274,11 +143,29 @@ namespace splitTime.editor.level {
         }
     }
     
+    function makePlaceholderImage(): string {
+        const tempCanvas = new splitTime.Canvas(256, 256)
+        const ctx = tempCanvas.element.getContext("2d");
+        if (!ctx) {
+            throw new Error("Failed to get context for placeholder image")
+        }
+
+        const width = 32
+        const height = 64
+        ctx.fillStyle = "#CD96CD";
+        ctx.fillRect(5, 5, width - 10, height - 10);
+        return (tempCanvas.element as HTMLCanvasElement).toDataURL();
+    }
+
+    let placeholderImageUrl: string | null = null
     export function getBodyImage(body: splitTime.Body) {
         if(body.drawable instanceof splitTime.Sprite) {
             return imgSrc(body.drawable.img);
         }
-        return subImg;
+        if (placeholderImageUrl === null) {
+            placeholderImageUrl = makePlaceholderImage()
+        }
+        return placeholderImageUrl;
     }
     
     export function getAnimationFrameCrop(body: splitTime.Body, dir: string | splitTime.direction_t, stance: string): math.Rect {

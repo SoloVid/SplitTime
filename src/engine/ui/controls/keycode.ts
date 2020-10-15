@@ -7,6 +7,9 @@ namespace splitTime.controls.keyboard.keycode {
 
     export const SPACE = 32
     export const ENTER = 13
+    export const SHIFT = 16
+    export const CTRL = 17
+    export const ESC = 27
 
     export const A = 65
     export const B = 66

@@ -1,115 +1,27 @@
 <!DOCTYPE HTML>
 <html>
     <head>
+        <script>
+            window.__EDITOR_CONSTANT__ = true;
+        </script>
         <script src="node_modules/vue/dist/vue.js"></script>
         <script src="node_modules/jquery/dist/jquery.min.js"></script>
         <link rel="stylesheet" href="src/editor/client/style.css">
+        <script src="build/editor-client.js"></script>
     </head>
     <body>
-    <div id="app">
-        <div id="navmenu">
-            <ul>
-                <li class="pointer"><a v-on:click="createLevel();">New Level</a></li>
-                <li class="pointer"><a v-on:click="clickFileChooser();">Load Level</a>
-                    <input id="fileChooser" type="file" accept=".json" style="display:none">
-                </li>
-                <li class="pointer"><a v-on:click="downloadFile();" title="After downloading the level, relocate it to use it in the engine.">Download File (Save)</a>
-                </li>
-                <li class="pointer"><a v-on:click="showEditorLevel();">Edit Settings</a></li>
-            </ul>
-        </div>
-        <div id="editorTools">
-            <div id="layers" v-bind:style="{ width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }">
-                <img v-if="!!backgroundSrc" class="background" v-bind:src="backgroundSrc" v-bind:style="{ left: leftPadding + 'px', top: topPadding + 'px' }"/>
-                <rendered-layer
-                        v-for="(layer, layerIndex) in level.layers"
-                        v-bind:key="layerIndex"
-                        v-bind:level="level"
-                        v-bind:layer="layer"
-                        v-bind:index="layerIndex"
-                        v-bind:width="level.width"
-                        v-bind:height="level.height"
-                        v-bind:is-active="layerIndex === activeLayer"
-                ></rendered-layer>
-            </div>
-
-            <div class="menu" style="left:0px;width:100px">
-                Tools:
-                <div class="option"
-                     v-on:click="selectModeOption('position')"
-                     title="Positions are handles for locations that Actors may occupy or paths may lead to and from.&#013;&#013;NPCs are generally people or things that have dynamic properties.&#013;NPCs are loaded at game start and transcend the board (i.e. they are not actually tied to the board and may be moved to other boards).
-                    &#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties."
-                    >Position</div>
-                <div class="option"
-                     v-on:click="selectModeOption('prop')"
-                     title="Props are loaded on level entrance and are destroyed on level exit. They are used in few processes, and slow down performance less than NPCs&#013;Props are generally static (or animated) graphical elements Bodys can walk behind or in front of.
-                    &#013;Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone&#013;Double-click to open properties."
-                    >Prop</div>
-                <br>
-                Active Layer:
-                <select id="activeLayer" v-model="activeLayer">
-                    <option v-for="(layer, index) in level.layers" v-bind:value="index">{{ layer.id || ("Layer " + index) }}</option>
-                </select>
-                <br><br>
-                <div id="traceOptions">
-                    <span title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;
-                        &#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">Traces</span>
-                    <div v-for="(traceOption) in traceOptions"
-                         v-bind:key="traceOption.type"
-                         class="option"
-                         v-bind:style="{ color: 'white', backgroundColor: traceOption.color }"
-                         v-on:click="selectTraceOption(traceOption.type)"
-                         v-bind:title="traceOption.help"
-                    >
-                        {{ traceOption.type }}
-                    </div>
-                </div>
-            </div>
-            <div id="layerMenuVue" class="menu" style="right:0px;">
-                <div>
-                    <menu-layer
-                            v-for="(layer, index) in level.layers"
-                            v-bind:key="index"
-                            v-bind:level="level"
-                            v-bind:layer="layer"
-                            v-bind:index="index"
-                    ></menu-layer>
-                </div>
-                <div class="option" v-on:click.left="createLayer">Add Layer</div>
-            </div>
-            <div id="infoPane" class="menu" style="left: 0; top: auto; bottom: 0; width: auto;">
-                <span v-for="(value, name) in info" v-bind:key="name">
-                    {{ name }}: {{ value }}
-                </span>
-            </div>
-
+        <div id="app">
+            <st-editor></st-editor>
         </div>
 
-        <canvas id="subImg" width="256" height="256" style="display:none"></canvas>
-        <canvas id="subImg2" width="320" height="320" style="display:none"></canvas>
-    </div>
+        <script>
+            new Vue({
+                el: "#app"
+            });
 
-    <div id="XMLEditorBack" class="backdrop">
-        <div id="XMLEditor">
-            <div id="XMLEditorFields"></div>
-            <button id="saveChanges" style="right:0;">Save Changes</button>
-            <button id="deleteThing">Delete This</button>
-        </div>
-    </div>
-
-    <svg
-        style="position: absolute; pointer-events: none;"
-    >
-        <defs>
-            <pattern id="up-arrows-pattern" x="0" y="0" width="20" height="25" patternUnits="userSpaceOnUse">
-                <polyline
-                    points="5,8 10,0 10,20 10,0 15,8"
-                    stroke="rgba(0, 0, 0, 0.7)" stroke-width="1.5" fill="none"
-                ></polyline>
-            </pattern>
-        </defs>
-    </svg>
-
-    <script src="build/editor-client.js"></script>
+            window.onbeforeunload = function() {
+                return true;
+            };
+        </script>
     </body>
 </html>

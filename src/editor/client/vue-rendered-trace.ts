@@ -1,11 +1,13 @@
 namespace splitTime.editor.level {
 
     export interface VueRenderedTrace {
+        levelEditorShared: LevelEditorShared
         trace: Trace
         index: number
         hasClose: boolean
         height: number
         vertices: Coordinates3D[]
+        pointsArray: (ReadonlyCoordinates2D | null)[]
         points: string
         pointsShadow: string
         pointsStairsSlope: string
@@ -23,14 +25,14 @@ namespace splitTime.editor.level {
     export const TRACE_GROUND_HIGHLIGHT_COLOR = "rgba(200, 200, 50, .5)";
 
     function hasClose(this: VueRenderedTrace): boolean {
-        var pointArray = safeExtractTraceArray(this.trace.obj.vertices);
+        var pointArray = this.pointsArray
         return pointArray.length > 0 && pointArray.pop() === null;
     }
     function height(this: VueRenderedTrace): number {
         return this.trace.obj.height;
     }
     function vertices(this: VueRenderedTrace): Coordinates3D[] {
-        var pointsArray = safeExtractTraceArray(this.trace.obj.vertices);
+        var pointsArray = this.pointsArray
         const nonNullPoints = pointsArray.filter(point => {
             return point !== null;
         }) as ReadonlyCoordinates2D[]
@@ -42,9 +44,14 @@ namespace splitTime.editor.level {
             };
         });
     }
+
+    function pointsArray(this: VueRenderedTrace): (ReadonlyCoordinates2D | null)[] {
+        return safeExtractTraceArray(this.levelEditorShared.getLevel(), this.trace.obj.vertices)
+    }
+
     function points(this: VueRenderedTrace): string {
         var that = this;
-        var pointsArray = safeExtractTraceArray(this.trace.obj.vertices);
+        var pointsArray = this.pointsArray
         return pointsArray.reduce(function(pointsStr, point) {
             var y;
             if(point !== null) {
@@ -58,7 +65,7 @@ namespace splitTime.editor.level {
         }, "");
     }
     function pointsShadow(this: VueRenderedTrace): string {
-        const pointsArray2D = safeExtractTraceArray(this.trace.obj.vertices)
+        const pointsArray2D = this.pointsArray
         const pointsArray3D = pointsArray2D.map(point => {
             if(!point) {
                 return null
@@ -84,7 +91,7 @@ namespace splitTime.editor.level {
     }
     function pointsStairsSlope(this: VueRenderedTrace): string {
         var that = this;
-        const pointsArray2D = safeExtractTraceArray(this.trace.obj.vertices)
+        const pointsArray2D = this.pointsArray
         let pointsArray3D: (Coordinates3D | null)[] = []
         if(this.trace.obj.type === splitTime.trace.Type.STAIRS && !!this.trace.obj.direction && pointsArray2D.length >= 3) {
             var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace.obj);
@@ -138,25 +145,43 @@ namespace splitTime.editor.level {
     function edit(this: VueRenderedTrace): void {
         showEditorTrace(this.trace);
     }
-    function track(this: VueRenderedTrace, point: Coordinates2D): void {
-        if(pathInProgress) {
+    function track(this: VueRenderedTrace, point?: Coordinates2D): void {
+        if(this.levelEditorShared.shouldDragBePrevented()) {
             return;
         }
-        follower = {
-            obj: this.trace,
-            point: point
+        const trace = this.trace.obj
+        const follower = {
+            shift: (dx: number, dy: number) => {
+                var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
+                if (point) {
+                    regex = new RegExp("\\((" + point.x + "),\\s*(" + point.y + ")\\)", "g");
+                    point = {
+                        x: point.x + dx,
+                        y: point.y + dy
+                    };
+                }
+                var pointString = trace.vertices;
+                trace.vertices = pointString.replace(regex, function(match, p1, p2) {
+                    var newX = Number(p1) + dx;
+                    var newY = Number(p2) + dy;
+                    return "(" + newX + ", " + newY + ")";
+                })
+            }
         }
+        this.levelEditorShared.follow(follower)
     }
     function toggleHighlight(this: VueRenderedTrace, highlight: boolean): void {
-        if(mouseDown) {
-            return;
+        if(this.levelEditorShared.shouldDragBePrevented()) {
+            this.trace.metadata.highlighted = false
+            return
         }
-        this.trace.metadata.highlighted = highlight && !pathInProgress;
+        this.trace.metadata.highlighted = highlight;
     }
 
 
     Vue.component("rendered-trace", {
         props: {
+            levelEditorShared: Object,
             trace: Object,
             index: Number
         },
@@ -164,7 +189,7 @@ namespace splitTime.editor.level {
 <g>
     <polyline
             v-show="trace.metadata.displayed && hasClose"
-            v-on:dblclick="edit"
+            v-on:dblclick.prevent="edit"
             v-on:mousedown.left="track(null)"
             v-on:mouseenter="toggleHighlight(true)"
             v-on:mouseleave="toggleHighlight(false)"
@@ -217,6 +242,7 @@ namespace splitTime.editor.level {
             hasClose,
             height,
             vertices,
+            pointsArray,
             points,
             pointsShadow,
             pointsStairsSlope,
