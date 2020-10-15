@@ -1,5 +1,51 @@
 This file is here as a mixture of TODOs and implementation thought experiments. Since opportunities to work on the engine are sparse, my thoughts here help me to keep track of what I've been thinking.
 
+Identified engine enhancements
+- Split baseLength up into x and y
+- Do sprite-splitting in rendering
+
+
+
+I want a box/sprite/frame/image/prop editor.
+- Shows background image
+- Allow subdivide image into arbitrary rectangles
+    - Shortcut for all same size in strict grid
+- Can stick body (cuboid) on each frame/box
+    - Either all at same time or per frame
+    - Modify position, base length, and height
+- Can stick any number of traces on each frame/box
+    - Either all same time or per frame
+- Show all view or single frame/box
+- Animation preview
+- Build creates objects from all of these that can be used to initialize bodies, props, sprites, tilesets, etc.
+- No body specified probably has some zero defaults
+- Different sized bodies on different frames presents issue for using as template for body (TODO: resolve)
+
+
+Level editor enhancements
+- Instead of layers in editor, allow arbitrary groupings with default z
+- Allow locking groups so they can't be interacted with
+    - More generally, add additional flag; instead of single checkbox for show/hide, two toggle options for show/hide and locked/unlocked
+- Actually sort objects by engine rendering logic
+- Create concept of "level linkages"
+    - Rather than specifying all params for level relationships in pointer/transport traces, use some shared level linkage structure
+    - For create/edit user should be able to drag levels graphically one over the other to align
+- Allow reload assets (maybe)
+- Allow saving levels directly (i.e. make a server)
+- Maybe only load engine code for editor and then run game code (to generate drop downs) on server
+- Auto-complete drop-downs instead of blank text fields
+- Allow grid snapping
+- Graphically present something like tileset (could be set of props) to user in level editor
+- Undo functionality, probably whole-sale saving state of editor
+
+
+Server considerations
+- Cache busting
+    - Include modified time in query string for assets
+    - Set Cache-Control no-store for game.js
+
+
+
 Let's call "Bodys" NPCs in this doc.
 
 - Events, particularly paths, ought to be easy to set up.
