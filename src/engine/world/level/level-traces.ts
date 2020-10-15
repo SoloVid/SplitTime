@@ -127,7 +127,7 @@ namespace splitTime.level {
                 // Since this canvas is for debugging, brighten up the colors a bit
                 const imageData = ctx.getImageData(0, 0, this.debugTraceCanvas.width, this.debugTraceCanvas.height)
                 for (let i = 0; i < imageData.data.length; i++) {
-                    imageData.data[i] *= 200;
+                    imageData.data[i] *= 200
                 }
                 ctx.putImageData(imageData, 0, 0)
             }
@@ -230,7 +230,7 @@ namespace splitTime.level {
                 case splitTime.trace.Type.POINTER:
                 case splitTime.trace.Type.TRANSPORT:
                     // Do nothing. We're just trying to weed out the other types.
-                    break;
+                    break
                 default:
                     return
             }
@@ -379,16 +379,16 @@ namespace splitTime.level {
                             case splitTime.trace.Type.EVENT:
                                 assert(spec.eventId !== null, "Event trace has no ID")
                                 collisionInfo.events[spec.eventId] = true
-                                break;
+                                break
                             case splitTime.trace.Type.TRANSPORT:
                                 collisionInfo.events[spec.getLocationId()] = true
-                                break;
+                                break
                             case splitTime.trace.Type.POINTER:
                                 isOtherLevel = true
                                 assert(!!trace.level, "Pointer trace has no level")
                                 collisionInfo.pointerTraces[trace.level.id] = trace
                                 collisionInfo.levels[trace.level.id] = trace.level
-                                break;
+                                break
                             default:
                                 throw new Error("Unexpected trace type " + spec.type)
                         }

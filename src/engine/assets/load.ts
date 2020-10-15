@@ -26,27 +26,22 @@ namespace splitTime {
 
         G.ASSETS = new splitTime.Assets(splitTime.getScriptDirectory())
 
-        var i, fileName
-        for (i = 0; i < masterData.preloadedImageFiles.length; i++) {
-            fileName = masterData.preloadedImageFiles[i]
+        for (const preloadedImageFileName of masterData.preloadedImageFiles) {
             promiseCollection.push(
                 G.ASSETS.images
-                    .load("preloaded/" + fileName, fileName, true)
+                    .load("preloaded/" + preloadedImageFileName, preloadedImageFileName, true)
                     .then(incrementAndUpdateLoading)
             )
         }
 
-        for (i = 0; i < masterData.musicFiles.length; i++) {
-            fileName = masterData.musicFiles[i]
-            G.ASSETS.audio.registerMusic(fileName)
+        for (const musicFileName of masterData.musicFiles) {
+            G.ASSETS.audio.registerMusic(musicFileName)
         }
-        for (i = 0; i < masterData.soundEffectFiles.length; i++) {
-            fileName = masterData.soundEffectFiles[i]
-            G.ASSETS.audio.registerSoundEffect(fileName)
+        for (const soundFxFile of masterData.soundEffectFiles) {
+            G.ASSETS.audio.registerSoundEffect(soundFxFile)
         }
 
-        for (i = 0; i < masterData.levels.length; i++) {
-            var levelData = masterData.levels[i]
+        for (const levelData of masterData.levels) {
             var levelName = levelData.fileName.replace(/\.json$/, "")
             var level = perspective.world.getLevel(levelName)
             promiseCollection.push(

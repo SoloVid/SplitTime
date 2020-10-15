@@ -1,5 +1,5 @@
 namespace splitTime.editor.level {
-    export const DEFAULT_HEIGHT = 64;
+    export const DEFAULT_HEIGHT = 64
 
     export function exportLevel(levelObject: Level): string {
         const levelFile: splitTime.level.FileData = {
@@ -16,7 +16,7 @@ namespace splitTime.editor.level {
             props: levelObject.props.map(p => p.obj),
             positions: levelObject.positions.map(p => p.obj)
         }
-        return JSON.stringify(levelFile, null, 4);
+        return JSON.stringify(levelFile, null, 4)
     }
     
     export function importLevel(levelText: string): Level {
@@ -37,13 +37,13 @@ namespace splitTime.editor.level {
     }
     
     export function addNewTrace(levelObject: Level, layerIndex: int, type: string) {
-        var z = levelObject.layers[layerIndex].obj.z;
+        var z = levelObject.layers[layerIndex].obj.z
         var height = levelObject.layers.length > layerIndex + 1 ?
         levelObject.layers[layerIndex + 1].obj.z - z :
-        DEFAULT_HEIGHT;
+        DEFAULT_HEIGHT
         if(type === splitTime.trace.Type.GROUND) {
-            type = splitTime.trace.Type.SOLID;
-            height = 0;
+            type = splitTime.trace.Type.SOLID
+            height = 0
         }
         var trace = {
             id: "",
@@ -57,32 +57,32 @@ namespace splitTime.editor.level {
             offsetX: "",
             offsetY: "",
             offsetZ: ""
-        };
-        levelObject.traces.push(withMetadata("trace", trace));
-        return trace;
+        }
+        levelObject.traces.push(withMetadata("trace", trace))
+        return trace
     }
     
     export function imgSrc(fileName: string) {
         if(!fileName) {
-            return "";
+            return ""
         }
-        return projectPath + splitTime.IMAGE_DIR + "/" + fileName;
+        return projectPath + splitTime.IMAGE_DIR + "/" + fileName
     }
     
     export function safeGetColor(trace: Trace) {
         if(trace.metadata.highlighted) {
-            return "rgba(255, 255, 0, 0.8)";
+            return "rgba(255, 255, 0, 0.8)"
         }
-        let type = trace.obj.type;
+        let type = trace.obj.type
         if(type === splitTime.trace.Type.SOLID && +trace.obj.height === 0) {
-            type = splitTime.trace.Type.GROUND;
+            type = splitTime.trace.Type.GROUND
         }
-        for(var i = 0; i < traceOptions.length; i++) {
-            if(traceOptions[i].type === type) {
-                return traceOptions[i].color;
+        for(const traceOption of traceOptions) {
+            if(traceOption.type === type) {
+                return traceOption.color
             }
         }
-        return "rgba(255, 255, 255, 1)";
+        return "rgba(255, 255, 255, 1)"
     }
     export function safeExtractTraceArray(levelObject: Level, traceStr: string): (ReadonlyCoordinates2D | null)[] {
         const pointSpecs = splitTime.trace.interpretPointString(traceStr)
@@ -115,57 +115,57 @@ namespace splitTime.editor.level {
     }
 
     export function updatePageTitle(level: Level) {
-        var title = level.fileName ? level.fileName : "untitled";
+        var title = level.fileName ? level.fileName : "untitled"
         if (level.region) {
-            title += " (" + level.region + ")";
+            title += " (" + level.region + ")"
         }
-        document.title = title;
+        document.title = title
     }
     
     export function downloadFile(fileName: string, contents: string): void {
-        var pom = document.createElement('a');
-        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents));
-        pom.setAttribute('download', fileName);
+        var pom = document.createElement('a')
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents))
+        pom.setAttribute('download', fileName)
 
-        pom.style.display = 'none';
-        document.body.appendChild(pom);
+        pom.style.display = 'none'
+        document.body.appendChild(pom)
 
-        pom.click();
+        pom.click()
 
-        document.body.removeChild(pom);
+        document.body.removeChild(pom)
     }
 
     export function loadBodyFromTemplate(templateName: string) {
         try {
-            return G.BODY_TEMPLATES.getInstance(templateName);
+            return G.BODY_TEMPLATES.getInstance(templateName)
         } catch(e) {
-            return new splitTime.Body();
+            return new splitTime.Body()
         }
     }
     
     function makePlaceholderImage(): string {
         const tempCanvas = new splitTime.Canvas(256, 256)
-        const ctx = tempCanvas.element.getContext("2d");
+        const ctx = tempCanvas.element.getContext("2d")
         if (!ctx) {
             throw new Error("Failed to get context for placeholder image")
         }
 
         const width = 32
         const height = 64
-        ctx.fillStyle = "#CD96CD";
-        ctx.fillRect(5, 5, width - 10, height - 10);
-        return (tempCanvas.element as HTMLCanvasElement).toDataURL();
+        ctx.fillStyle = "#CD96CD"
+        ctx.fillRect(5, 5, width - 10, height - 10)
+        return (tempCanvas.element as HTMLCanvasElement).toDataURL()
     }
 
     let placeholderImageUrl: string | null = null
     export function getBodyImage(body: splitTime.Body) {
         if(body.drawable instanceof splitTime.Sprite) {
-            return imgSrc(body.drawable.img);
+            return imgSrc(body.drawable.img)
         }
         if (placeholderImageUrl === null) {
             placeholderImageUrl = makePlaceholderImage()
         }
-        return placeholderImageUrl;
+        return placeholderImageUrl
     }
     
     export function getAnimationFrameCrop(body: splitTime.Body, dir: string | splitTime.direction_t, stance: string): math.Rect {
@@ -181,8 +181,8 @@ namespace splitTime.editor.level {
             return {
                 x: body.drawable.baseOffX,
                 y: body.drawable.baseOffY
-            };
+            }
         }
-        return { x: 0, y: 0 };
+        return { x: 0, y: 0 }
     }
 }

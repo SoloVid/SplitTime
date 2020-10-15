@@ -67,8 +67,8 @@ namespace splitTime.conversation {
                 const crumb = crumbs[i]
                 if(crumb instanceof InterruptibleSpec) {
                     // Skip past next array since we don't want to go successively through interruptibles
-                    i--;
-                    continue;
+                    i--
+                    continue
                 }
                 if(crumb instanceof SpotInArray) {
                     const array = crumb.array

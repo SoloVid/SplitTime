@@ -1,9 +1,9 @@
 namespace splitTime.math {
     export class Rect {
-        private _x: number = 0;
-        private _y: number = 0;
-        private _width: number = 0;
-        private _height: number = 0;
+        private _x: number = 0
+        private _y: number = 0
+        private _width: number = 0
+        private _height: number = 0
 
         private constructor() {}
 

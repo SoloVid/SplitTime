@@ -21,28 +21,28 @@ namespace splitTime.editor.level {
         toggleHighlight(highlight: boolean): void
     }
 
-    export const TRACE_GROUND_COLOR = "rgba(100, 100, 100, .5)";
-    export const TRACE_GROUND_HIGHLIGHT_COLOR = "rgba(200, 200, 50, .5)";
+    export const TRACE_GROUND_COLOR = "rgba(100, 100, 100, .5)"
+    export const TRACE_GROUND_HIGHLIGHT_COLOR = "rgba(200, 200, 50, .5)"
 
     function hasClose(this: VueRenderedTrace): boolean {
         var pointArray = this.pointsArray
-        return pointArray.length > 0 && pointArray.pop() === null;
+        return pointArray.length > 0 && pointArray.pop() === null
     }
     function height(this: VueRenderedTrace): number {
-        return this.trace.obj.height;
+        return this.trace.obj.height
     }
     function vertices(this: VueRenderedTrace): Coordinates3D[] {
         var pointsArray = this.pointsArray
         const nonNullPoints = pointsArray.filter(point => {
-            return point !== null;
+            return point !== null
         }) as ReadonlyCoordinates2D[]
         return nonNullPoints.map(point => {
             return {
                 x: point.x,
                 y: point.y,
                 z: this.trace.obj.z
-            };
-        });
+            }
+        })
     }
 
     function pointsArray(this: VueRenderedTrace): (ReadonlyCoordinates2D | null)[] {
@@ -50,19 +50,18 @@ namespace splitTime.editor.level {
     }
 
     function points(this: VueRenderedTrace): string {
-        var that = this;
+        var that = this
         var pointsArray = this.pointsArray
-        return pointsArray.reduce(function(pointsStr, point) {
-            var y;
+        return pointsArray.map(point => {
             if(point !== null) {
-                y = point.y - that.trace.obj.z;
-                return pointsStr + " " + point.x + "," + y;
+                const y = point.y - that.trace.obj.z
+                return point.x + "," + y
             } else if(pointsArray.length > 0 && pointsArray[0] !== null) {
-                y = pointsArray[0].y - that.trace.obj.z;
-                return pointsStr + " " + pointsArray[0].x + "," + y;
+                const y = pointsArray[0].y - that.trace.obj.z
+                return pointsArray[0].x + "," + y
             }
-            return pointsStr;
-        }, "");
+            return ""
+        }).join(" ")
     }
     function pointsShadow(this: VueRenderedTrace): string {
         const pointsArray2D = this.pointsArray
@@ -76,95 +75,95 @@ namespace splitTime.editor.level {
                 z: this.trace.obj.z + this.trace.obj.height
             }
             return point3D
-        });
+        })
         return pointsArray3D.reduce((pointsStr, point) => {
-            var y;
+            var y
             if(point !== null) {
-                y = point.y - point.z;
-                return pointsStr + " " + point.x + "," + y;
+                y = point.y - point.z
+                return pointsStr + " " + point.x + "," + y
             } else if(pointsArray3D.length > 0 && pointsArray3D[0] !== null) {
-                y = pointsArray3D[0].y - pointsArray3D[0].z;
-                return pointsStr + " " + pointsArray3D[0].x + "," + y;
+                y = pointsArray3D[0].y - pointsArray3D[0].z
+                return pointsStr + " " + pointsArray3D[0].x + "," + y
             }
-            return pointsStr;
-        }, "");
+            return pointsStr
+        }, "")
     }
     function pointsStairsSlope(this: VueRenderedTrace): string {
-        var that = this;
+        var that = this
         const pointsArray2D = this.pointsArray
         let pointsArray3D: (Coordinates3D | null)[] = []
         if(this.trace.obj.type === splitTime.trace.Type.STAIRS && !!this.trace.obj.direction && pointsArray2D.length >= 3) {
-            var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace.obj);
-            var extremes = officialTrace.calculateStairsExtremes();
-            var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y);
-            var stairsLength = stairsVector.magnitude;
-            var totalDZ = that.trace.obj.height;
+            var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace.obj)
+            var extremes = officialTrace.calculateStairsExtremes()
+            var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y)
+            var stairsLength = stairsVector.magnitude
+            var totalDZ = that.trace.obj.height
             pointsArray3D = pointsArray2D.map(point => {
                 if(!point) {
-                    return point;
+                    return point
                 }
-                var partUpVector = new splitTime.Vector2D(point.x - extremes.bottom.x, point.y - extremes.bottom.y); 
-                var distanceUp = stairsVector.times(partUpVector.dot(stairsVector) / (stairsLength * stairsLength)).magnitude;
-                var height = Math.min(Math.round(totalDZ * (distanceUp / stairsLength)), totalDZ);
+                var partUpVector = new splitTime.Vector2D(point.x - extremes.bottom.x, point.y - extremes.bottom.y) 
+                var distanceUp = stairsVector.times(partUpVector.dot(stairsVector) / (stairsLength * stairsLength)).magnitude
+                var height = Math.min(Math.round(totalDZ * (distanceUp / stairsLength)), totalDZ)
                 const point3D = {
                     x: point.x,
                     y: point.y,
                     z: that.trace.obj.z + height
                 }
-                return point3D;
-            });
+                return point3D
+            })
         }
         return pointsArray3D.reduce(function(pointsStr, point) {
-            var y;
+            var y
             if(point !== null) {
-                y = point.y - point.z;
-                return pointsStr + " " + point.x + "," + y;
+                y = point.y - point.z
+                return pointsStr + " " + point.x + "," + y
             } else if(pointsArray3D.length > 0 && pointsArray3D[0] !== null) {
-                y = pointsArray3D[0].y - pointsArray3D[0].z;
-                return pointsStr + " " + pointsArray3D[0].x + "," + y;
+                y = pointsArray3D[0].y - pointsArray3D[0].z
+                return pointsStr + " " + pointsArray3D[0].x + "," + y
             }
-            return pointsStr;
-        }, "");
+            return pointsStr
+        }, "")
     }
     function traceFill(this: VueRenderedTrace): string {
-        return safeGetColor(this.trace);
+        return safeGetColor(this.trace)
     }
     function traceStroke(this: VueRenderedTrace): string {
-        return this.hasClose ? "black" : safeGetColor(this.trace);
+        return this.hasClose ? "black" : safeGetColor(this.trace)
     }
     function traceShadowFill(this: VueRenderedTrace): string {
-        return this.trace.metadata.highlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR;
+        return this.trace.metadata.highlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR
     }
     function traceShadowStroke(this: VueRenderedTrace): string {
-        return "black";
+        return "black"
     }
     function traceShadowDisplayed(this: VueRenderedTrace): boolean {
-        return this.hasClose && this.height > 0;
+        return this.hasClose && this.height > 0
     }
 
     function edit(this: VueRenderedTrace): void {
-        showEditorTrace(this.trace);
+        showEditorTrace(this.trace)
     }
     function track(this: VueRenderedTrace, point?: Coordinates2D): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {
-            return;
+            return
         }
         const trace = this.trace.obj
         const follower = {
             shift: (dx: number, dy: number) => {
                 var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
                 if (point) {
-                    regex = new RegExp("\\((" + point.x + "),\\s*(" + point.y + ")\\)", "g");
+                    regex = new RegExp("\\((" + point.x + "),\\s*(" + point.y + ")\\)", "g")
                     point = {
                         x: point.x + dx,
                         y: point.y + dy
-                    };
+                    }
                 }
-                var pointString = trace.vertices;
+                var pointString = trace.vertices
                 trace.vertices = pointString.replace(regex, function(match, p1, p2) {
-                    var newX = Number(p1) + dx;
-                    var newY = Number(p2) + dy;
-                    return "(" + newX + ", " + newY + ")";
+                    var newX = Number(p1) + dx
+                    var newY = Number(p2) + dy
+                    return "(" + newX + ", " + newY + ")"
                 })
             }
         }
@@ -175,7 +174,7 @@ namespace splitTime.editor.level {
             this.trace.metadata.highlighted = false
             return
         }
-        this.trace.metadata.highlighted = highlight;
+        this.trace.metadata.highlighted = highlight
     }
 
 
@@ -193,8 +192,8 @@ namespace splitTime.editor.level {
             v-on:mousedown.left="track(null)"
             v-on:mouseenter="toggleHighlight(true)"
             v-on:mouseleave="toggleHighlight(false)"
-            v-bind:points="points"
-            v-bind:fill="traceFill"
+            :points="points"
+            :fill="traceFill"
     ></polyline>
     <polyline
             v-show="trace.metadata.displayed"
@@ -202,37 +201,37 @@ namespace splitTime.editor.level {
             v-on:mousedown.left="track(null)"
             v-on:mouseenter="toggleHighlight(true)"
             v-on:mouseleave="toggleHighlight(false)"
-            v-bind:points="points"
-            v-bind:stroke="traceStroke"
+            :points="points"
+            :stroke="traceStroke"
             fill="none"
     ></polyline>
     <circle
             class="hoverable"
             v-for="(vertex) in vertices"
-            v-bind:cx="vertex.x"
-            v-bind:cy="vertex.y - vertex.z"
+            :cx="vertex.x"
+            :cy="vertex.y - vertex.z"
             r="3"
             v-on:mousedown.left="track(vertex)"
     />
     <polyline
             v-show="trace.metadata.displayed"
-            v-bind:points="pointsStairsSlope"
+            :points="pointsStairsSlope"
             stroke="red" stroke-width="5" fill="none"
             v-if="pointsStairsSlope"
             style="pointer-events: none;"
     ></polyline>
     <polyline
             v-show="trace.metadata.displayed"
-            v-bind:points="pointsStairsSlope"
+            :points="pointsStairsSlope"
             stroke="black" stroke-width="2" stroke-dasharray="10,5" fill="url(#up-arrows-pattern)"
             v-if="pointsStairsSlope"
             style="pointer-events: none;"
     ></polyline>
     <polyline
             v-show="trace.metadata.displayed"
-            v-bind:points="pointsShadow"
-            v-bind:fill="traceShadowFill"
-            v-bind:stroke="traceShadowStroke"
+            :points="pointsShadow"
+            :fill="traceShadowFill"
+            :stroke="traceShadowStroke"
             v-if="traceShadowDisplayed"
             style="pointer-events: none;"
     ></polyline>
@@ -257,5 +256,5 @@ namespace splitTime.editor.level {
             track,
             toggleHighlight
         }
-    });
+    })
 }

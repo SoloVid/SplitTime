@@ -38,7 +38,7 @@ namespace splitTime.menu {
 
         // TODO: potentially split up into logic and rendering
         render() {
-            // this.handleMenu();
+            // this.handleMenu()
 
             //Draw splitTime.Menu background
             if (this.spec.background) {
@@ -185,7 +185,7 @@ namespace splitTime.menu {
                         this.spec.point.length
                 } while (iPoint != prevPoint)
                 this.currentPoint = bestPoint
-                //		this.currentPoint = (this.spec.point.length + this.currentPoint - 1)%this.spec.point.length;
+                //		this.currentPoint = (this.spec.point.length + this.currentPoint - 1)%this.spec.point.length
             } else if (controlDirection === splitTime.direction.E) {
                 //Right
                 do //While index point does not equal original point
@@ -239,7 +239,7 @@ namespace splitTime.menu {
                     iPoint = (iPoint + 1) % this.spec.point.length
                 } while (iPoint != prevPoint)
                 this.currentPoint = bestPoint
-                //this.currentPoint = (this.currentPoint + 1)%this.spec.point.length;
+                //this.currentPoint = (this.currentPoint + 1)%this.spec.point.length
             } else if (controlDirection === splitTime.direction.S) {
                 //Down
                 do //While index point does not equal original point
@@ -293,7 +293,7 @@ namespace splitTime.menu {
                     iPoint = (iPoint + 1) % this.spec.point.length
                 } while (iPoint != prevPoint)
                 this.currentPoint = bestPoint
-                //		this.currentPoint = (this.currentPoint + 1)%this.spec.point.length;
+                //		this.currentPoint = (this.currentPoint + 1)%this.spec.point.length
             }
         }
     }

@@ -13,5 +13,5 @@ const __WORKER__ = typeof importScripts === 'function'
 const __EDITOR__ = __DOM__ && typeof ((window as any)["__EDITOR_CONSTANT__"]) !== "undefined"
 
 if(__NODE__) {
-    require('source-map-support').install();
+    require('source-map-support').install()
 }

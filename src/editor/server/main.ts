@@ -23,7 +23,7 @@ app.post('*', express.json(), (req, res) => {
         res.statusCode = statusCode
     }
     res.send(JSON.stringify(liteResponse.responseBody))
-});
+})
 
 // Fallback to 404
 app.get("*", (req, res) => {

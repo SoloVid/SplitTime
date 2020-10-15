@@ -36,7 +36,7 @@ namespace splitTime.editor.level {
     function createLevel(this: VueEditor) {
         if(this.level && this.level.layers.length > 0) {
             if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
-                return;
+                return
             }
         }
 
@@ -45,7 +45,7 @@ namespace splitTime.editor.level {
             id: "",
             z: 0
         }))
-        updatePageTitle(this.level);
+        updatePageTitle(this.level)
     }
 
     function clickFileChooser(this: VueEditor) {
@@ -57,17 +57,17 @@ namespace splitTime.editor.level {
             return
         }
 
-        this.level.fileName = prompt("File name?", this.level.fileName) || "";
+        this.level.fileName = prompt("File name?", this.level.fileName) || ""
         if(!this.level.fileName) {
-            return;
+            return
         }
         if(!this.level.fileName.endsWith(".json")) {
-            this.level.fileName += ".json";
+            this.level.fileName += ".json"
         }
 
-        var jsonText = exportLevel(this.level);
+        var jsonText = exportLevel(this.level)
 
-        updatePageTitle(this.level);
+        updatePageTitle(this.level)
         downloadFile(this.level.fileName, jsonText)
     }
 
@@ -103,7 +103,7 @@ namespace splitTime.editor.level {
     }
 
     function handleMouseDown(this: VueEditor, event: MouseEvent): void {
-        this.inputs.mouse.isDown = true;
+        this.inputs.mouse.isDown = true
     }
 
     function handleMouseUp(this: VueEditor, event: MouseEvent): void {
@@ -181,7 +181,7 @@ namespace splitTime.editor.level {
                 this.level = importLevel(contents)
                 this.level.fileName = f.name
                 updatePageTitle(this.level)
-            };
+            }
             r.readAsText(f)
         } else {
             alert("Failed to load file")

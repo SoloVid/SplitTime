@@ -50,8 +50,8 @@ namespace splitTime.editor.level {
     }
 
     function info(this: VueLevelEditor): { [name: string]: string | number } {
-        const layerIndex = this.activeLayer;
-        const layer = this.level.layers[layerIndex];
+        const layerIndex = this.activeLayer
+        const layer = this.level.layers[layerIndex]
         const layerZ = layer ? layer.obj.z : 0
         return {
             "x": this.inputs.mouse.x,
@@ -88,20 +88,20 @@ namespace splitTime.editor.level {
     }
 
     function backgroundSrc(this: VueLevelEditor): string {
-        return imgSrc(this.level.background);
+        return imgSrc(this.level.background)
     }
     function containerWidth(this: VueLevelEditor): number {
-        return this.level.width + 2*EDITOR_PADDING;
+        return this.level.width + 2*EDITOR_PADDING
     }
     function containerHeight(this: VueLevelEditor): number {
-        var addedHeight = this.level.layers.length > 0 ? this.level.layers[this.level.layers.length - 1].obj.z : 0;
-        return this.level.height + 2*EDITOR_PADDING + addedHeight;
+        var addedHeight = this.level.layers.length > 0 ? this.level.layers[this.level.layers.length - 1].obj.z : 0
+        return this.level.height + 2*EDITOR_PADDING + addedHeight
     }
     function leftPadding(this: VueLevelEditor): number {
-        return EDITOR_PADDING + this.level.backgroundOffsetX;
+        return EDITOR_PADDING + this.level.backgroundOffsetX
     }
     function topPadding(this: VueLevelEditor): number {
-        return EDITOR_PADDING + this.level.backgroundOffsetY;
+        return EDITOR_PADDING + this.level.backgroundOffsetY
     }
 
     function selectModeOption(this: VueLevelEditor, mode: Mode): void {
@@ -114,14 +114,14 @@ namespace splitTime.editor.level {
     }
 
     function createLayer(this: VueLevelEditor): void {
-        var assumedRelativeZ = DEFAULT_HEIGHT;
+        var assumedRelativeZ = DEFAULT_HEIGHT
         if(this.level.layers.length > 1) {
-            assumedRelativeZ = Math.abs(this.level.layers[1].obj.z - this.level.layers[0].obj.z);
+            assumedRelativeZ = Math.abs(this.level.layers[1].obj.z - this.level.layers[0].obj.z)
         }
-        var z = 0;
+        var z = 0
         if(this.level.layers.length > 0) {
-            var previousLayer = this.level.layers[this.level.layers.length - 1];
-            z = previousLayer.obj.z + assumedRelativeZ;
+            var previousLayer = this.level.layers[this.level.layers.length - 1]
+            z = previousLayer.obj.z + assumedRelativeZ
         }
         this.level.layers.push(withMetadata("layer", {
             id: "",
@@ -130,10 +130,10 @@ namespace splitTime.editor.level {
     }
 
     function createPosition(this: VueLevelEditor) {
-        var layerIndex = this.activeLayer;
-        var z = this.level.layers[layerIndex].obj.z;
-        var x = this.inputs.mouse.x;
-        var y = this.inputs.mouse.y + z;
+        var layerIndex = this.activeLayer
+        var z = this.level.layers[layerIndex].obj.z
+        var x = this.inputs.mouse.x
+        var y = this.inputs.mouse.y + z
         
         var object = {
             id: "",
@@ -145,15 +145,15 @@ namespace splitTime.editor.level {
             stance: "default"
         }
         const newThing = withMetadata<"position", splitTime.level.file_data.Position>("position", object)
-        this.level.positions.push(newThing);
-        showEditorPosition(newThing);
+        this.level.positions.push(newThing)
+        showEditorPosition(newThing)
     }
     
     function createProp(this: VueLevelEditor) {
-        var layerIndex = this.activeLayer;
-        var z = this.level.layers[layerIndex].obj.z;
-        var x = this.inputs.mouse.x;
-        var y = this.inputs.mouse.y + z;
+        var layerIndex = this.activeLayer
+        var z = this.level.layers[layerIndex].obj.z
+        var x = this.inputs.mouse.x
+        var y = this.inputs.mouse.y + z
         
         var object = {
             id: "",
@@ -167,20 +167,20 @@ namespace splitTime.editor.level {
         }
 
         const newThing = withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)
-        this.level.props.push(newThing);
-        showEditorProp(newThing);
+        this.level.props.push(newThing)
+        showEditorProp(newThing)
     }
 
     function handleContextMenu(this: VueLevelEditor, event: Event): void {
         if(this.cancelNextContextMenu) {
-            event.preventDefault();
+            event.preventDefault()
         }
-        this.cancelNextContextMenu = false;
+        this.cancelNextContextMenu = false
     }
 
     function handleMouseUp(this: VueLevelEditor, event: MouseEvent): void {
-        const z = this.level.layers[this.activeLayer].obj.z;
-        const yOnLayer = this.inputs.mouse.y + z;
+        const z = this.level.layers[this.activeLayer].obj.z
+        const yOnLayer = this.inputs.mouse.y + z
         const x = this.inputs.mouse.x
         const isLeftClick = event.which === 1
         const isRightClick = event.which === 3
@@ -188,41 +188,41 @@ namespace splitTime.editor.level {
             var literalPoint = "(" +
                 Math.floor(x) + ", " +
                 Math.floor(yOnLayer) + ")"
-            var closestPosition = findClosestPosition(this.level, this.inputs.mouse.x, yOnLayer);
-            var positionPoint = closestPosition ? "(pos:" + closestPosition.obj.id + ")" : "";
+            var closestPosition = findClosestPosition(this.level, this.inputs.mouse.x, yOnLayer)
+            var positionPoint = closestPosition ? "(pos:" + closestPosition.obj.id + ")" : ""
             if(isLeftClick) {
                 if(this.pathInProgress) {
                     if(this.typeSelected == "path" && this.inputs.ctrlDown) {
-                        this.pathInProgress.vertices = this.pathInProgress.vertices + " " + positionPoint;
+                        this.pathInProgress.vertices = this.pathInProgress.vertices + " " + positionPoint
                     } else {
-                        this.pathInProgress.vertices = this.pathInProgress.vertices + " " + literalPoint;
+                        this.pathInProgress.vertices = this.pathInProgress.vertices + " " + literalPoint
                     }
                 }
             } else if(isRightClick) {
                 if(!this.pathInProgress) {
-                    var trace = addNewTrace(this.level, this.activeLayer, this.typeSelected);
+                    var trace = addNewTrace(this.level, this.activeLayer, this.typeSelected)
                     
                     if(this.typeSelected == splitTime.trace.Type.PATH && !this.inputs.ctrlDown) {
-                        trace.vertices = positionPoint;
+                        trace.vertices = positionPoint
                     } else {
-                        trace.vertices = literalPoint;
+                        trace.vertices = literalPoint
                     }
                     
-                    this.pathInProgress = trace;
+                    this.pathInProgress = trace
                 } else {
                     if(!this.inputs.ctrlDown) {
                         if(this.pathInProgress.type == splitTime.trace.Type.PATH) {
                             if(closestPosition) {
-                                this.pathInProgress.vertices = this.pathInProgress.vertices + " " + positionPoint;
+                                this.pathInProgress.vertices = this.pathInProgress.vertices + " " + positionPoint
                             }
                         }
                         else {
-                            this.pathInProgress.vertices = this.pathInProgress.vertices + " (close)";
+                            this.pathInProgress.vertices = this.pathInProgress.vertices + " (close)"
                         }
                     }
-                    this.pathInProgress = null;
+                    this.pathInProgress = null
                 }
-                this.cancelNextContextMenu = true;
+                this.cancelNextContextMenu = true
             }
         } else if(this.mode === "position") {
             if(isRightClick) {
@@ -251,12 +251,12 @@ namespace splitTime.editor.level {
             id="layers"
             v-on:dragstart.prevent
             v-on:dblclick.prevent
-            v-bind:style="{ width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }"
+            :style="{ width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }"
         >
-            <img v-if="!!backgroundSrc" class="background" v-bind:src="backgroundSrc" v-bind:style="{ left: leftPadding + 'px', top: topPadding + 'px' }"/>
+            <img v-if="!!backgroundSrc" class="background" :src="backgroundSrc" :style="{ left: leftPadding + 'px', top: topPadding + 'px' }"/>
             <rendered-layer
                     v-for="(layer, layerIndex) in level.layers"
-                    :key="layerIndex"
+                    :key="layer.metadata.editorId"
                     :level-editor-shared="sharedStuff"
                     :level="level"
                     :layer="layer"
@@ -282,18 +282,18 @@ namespace splitTime.editor.level {
             <br>
             Active Layer:
             <select id="activeLayer" v-model="activeLayer">
-                <option v-for="(layer, index) in level.layers" v-bind:value="index">{{ layer.id || ("Layer " + index) }}</option>
+                <option v-for="(layer, index) in level.layers" :value="index">{{ layer.id || ("Layer " + index) }}</option>
             </select>
             <br><br>
             <div id="traceOptions">
                 <span title="Traces define Bodys' (actually just NPCs and players) interaction with the level.&#013;
                     &#013;Right-click to create new.&#013;Left-click to add points to started trace.&#013;Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;Left-click to drag.&#013;Shift+left-click to clone.&#013;Double-click to open properties.">Traces</span>
                 <div v-for="(traceOption) in traceOptions"
-                    v-bind:key="traceOption.type"
+                    :key="traceOption.type"
                     class="option"
-                    v-bind:style="{ color: 'white', backgroundColor: traceOption.color }"
+                    :style="{ color: 'white', backgroundColor: traceOption.color }"
                     v-on:click="selectTraceOption(traceOption.type)"
-                    v-bind:title="traceOption.help"
+                    :title="traceOption.help"
                 >
                     {{ traceOption.type }}
                 </div>
@@ -303,10 +303,10 @@ namespace splitTime.editor.level {
             <div>
                 <menu-layer
                         v-for="(layer, index) in level.layers"
-                        v-bind:key="index"
-                        v-bind:level="level"
-                        v-bind:layer="layer"
-                        v-bind:index="index"
+                        :key="index"
+                        :level="level"
+                        :layer="layer"
+                        :index="index"
                 ></menu-layer>
             </div>
             <div class="option" v-on:click.left="createLayer">Add Layer</div>
@@ -335,7 +335,7 @@ namespace splitTime.editor.level {
     </svg>
 
     <div id="infoPane" class="menu" style="left: 0; top: auto; bottom: 0; width: auto;">
-        <span v-for="(value, name) in info" v-bind:key="name">
+        <span v-for="(value, name) in info" :key="name">
             {{ name }}: {{ value }}
         </span>
     </div>
@@ -371,6 +371,6 @@ namespace splitTime.editor.level {
                 handleContextMenu,
                 handleMouseUp
             }
-        });
+        })
     })
 }

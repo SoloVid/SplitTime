@@ -21,72 +21,72 @@ namespace splitTime.editor.level {
     }
 
     function layerAboveZ(this: VueMenuLayer): number {
-        var layerAbove = this.level.layers[this.index + 1];
-        return layerAbove ? layerAbove.obj.z : Number.MAX_VALUE;
+        var layerAbove = this.level.layers[this.index + 1]
+        return layerAbove ? layerAbove.obj.z : Number.MAX_VALUE
     }
     function layerHeight(this: VueMenuLayer): number {
-        return this.layerAboveZ - this.layer.obj.z;
+        return this.layerAboveZ - this.layer.obj.z
     }
     function traces(this: VueMenuLayer): Trace[] {
         return this.level.traces.filter(trace => {
-            return trace.obj.z >= this.layer.obj.z && trace.obj.z < this.layerAboveZ;
-        });
+            return trace.obj.z >= this.layer.obj.z && trace.obj.z < this.layerAboveZ
+        })
     }
     function props(this: VueMenuLayer): Prop[] {
         return this.level.props.filter(prop => {
-            return prop.obj.z >= this.layer.obj.z && prop.obj.z < this.layerAboveZ;
-        });
+            return prop.obj.z >= this.layer.obj.z && prop.obj.z < this.layerAboveZ
+        })
     }
     function positions(this: VueMenuLayer): Position[] {
         return this.level.positions.filter(pos => {
-            return pos.obj.z >= this.layer.obj.z && pos.obj.z < this.layerAboveZ;
-        });
+            return pos.obj.z >= this.layer.obj.z && pos.obj.z < this.layerAboveZ
+        })
     }
     function allTracesDisplayed(this: VueMenuLayer): boolean {
         return this.traces.every(trace => {
-            return trace.metadata.displayed;
-        });
+            return trace.metadata.displayed
+        })
     }
     function allPropsDisplayed(this: VueMenuLayer): boolean {
         return this.props.every(prop => {
-            return prop.metadata.displayed;
-        });
+            return prop.metadata.displayed
+        })
     }
     function allPositionsDisplayed(this: VueMenuLayer): boolean {
         return this.positions.every(pos => {
-            return pos.metadata.displayed;
-        });
+            return pos.metadata.displayed
+        })
     }
 
     function edit(this: VueMenuLayer): void {
-        showEditorLayer(this.layer);
+        showEditorLayer(this.layer)
     }
     function editTrace(this: VueMenuLayer, trace: Trace): void {
-        showEditorTrace(trace);
+        showEditorTrace(trace)
     }
     function editProp(this: VueMenuLayer, prop: Prop): void {
-        showEditorProp(prop);
+        showEditorProp(prop)
     }
     function editPosition(this: VueMenuLayer, position: Position): void {
-        showEditorPosition(position);
+        showEditorPosition(position)
     }
     function toggleAllTracesDisplayed(this: VueMenuLayer): void {
-        var displayed = this.allTracesDisplayed;
+        var displayed = this.allTracesDisplayed
         this.traces.forEach(trace => {
-            trace.metadata.displayed = !displayed;
-        });
+            trace.metadata.displayed = !displayed
+        })
     }
     function toggleAllPropsDisplayed(this: VueMenuLayer): void {
-        var displayed = this.allPropsDisplayed;
+        var displayed = this.allPropsDisplayed
         this.props.forEach(prop => {
-            prop.metadata.displayed = !displayed;
-        });
+            prop.metadata.displayed = !displayed
+        })
     }
     function toggleAllPositionsDisplayed(this: VueMenuLayer): void {
-        var displayed = this.allPositionsDisplayed;
+        var displayed = this.allPositionsDisplayed
         this.positions.forEach(pos => {
-            pos.metadata.displayed = !displayed;
-        });
+            pos.metadata.displayed = !displayed
+        })
     }
 
     Vue.component("menu-layer", {
@@ -106,7 +106,7 @@ namespace splitTime.editor.level {
             <div v-show="traces.length > 0">
                 <div>
                     <input type="checkbox"
-                        v-bind:checked="allTracesDisplayed"
+                        :checked="allTracesDisplayed"
                         v-on:click.left="toggleAllTracesDisplayed"
                     />
                     Traces
@@ -127,7 +127,7 @@ namespace splitTime.editor.level {
             <div v-show="props.length > 0">
                 <div>
                     <input type="checkbox"
-                        v-bind:checked="allPropsDisplayed"
+                        :checked="allPropsDisplayed"
                         v-on:click.left="toggleAllPropsDisplayed"
                     />
                     Props
@@ -148,7 +148,7 @@ namespace splitTime.editor.level {
             <div v-show="positions.length > 0">
                 <div>
                     <input type="checkbox"
-                        v-bind:checked="allPositionsDisplayed"
+                        :checked="allPositionsDisplayed"
                         v-on:click.left="toggleAllPositionsDisplayed"
                     />
                     Positions
@@ -189,5 +189,5 @@ namespace splitTime.editor.level {
             toggleAllPropsDisplayed,
             toggleAllPositionsDisplayed
         }
-    });
+    })
 }
