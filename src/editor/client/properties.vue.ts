@@ -11,6 +11,8 @@ namespace splitTime.editor.level {
         thing: { [key: string]: unknown }
         fieldKey: string
         fieldOptions: FieldOptions
+        // data
+        isTempEmpty: boolean
         // computed
         propertyExists: boolean
         rawValue: string | number
@@ -18,6 +20,12 @@ namespace splitTime.editor.level {
         value: unknown
         inputType: "string" | "textarea" | "number"
         isReadonly: boolean
+    }
+
+    function data(this: VueObjectProperty) {
+        return {
+            isTempEmpty: false
+        }
     }
 
     function propertyExists(this: VueObjectProperty): boolean {
@@ -28,6 +36,9 @@ namespace splitTime.editor.level {
         if (!this.propertyExists) {
             throw new Error("Can't access raw value (" + this.fieldKey + ") when it doesn't exist!")
         }
+        // if (this.isTempEmpty) {
+        //     return ""
+        // }
         const value = this.thing[this.fieldKey]
         if (typeof value !== "number" && typeof value !== "string") {
             throw new Error("Value (" + this.fieldKey + ") isn't a string or number")
@@ -41,9 +52,14 @@ namespace splitTime.editor.level {
         }
         const oldValue = this.rawValue
         if (typeof newValue !== typeof oldValue) {
+            if (typeof oldValue === "number" && !newValue) {
+                this.isTempEmpty = true
+                return
+            }
             throw new Error("Can't set value (" + this.fieldKey + ") to different type")
         }
         this.thing[this.fieldKey] = newValue
+        this.isTempEmpty = false
     }
 
     function title(this: VueObjectProperty): string {
@@ -91,9 +107,13 @@ namespace splitTime.editor.level {
         template: `
 <div>
     <h3>{{ title }}</h3>
-    <template v-for="(fieldOptions, key) in fields">
-        <object-property :thing="thing" :fieldKey="key" :fieldOptions="fieldOptions"></object-property>
-    </template>
+    <object-property
+        v-for="(fieldOptions, key) in fields"
+        :key="title + key"
+        :thing="thing"
+        :fieldKey="key"
+        :fieldOptions="fieldOptions"
+    ></object-property>
 </div>
         `
     })
@@ -104,6 +124,7 @@ namespace splitTime.editor.level {
             fieldKey: String,
             fieldOptions: Object
         },
+        data,
         computed: {
             propertyExists,
             rawValue: {
