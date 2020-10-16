@@ -6,6 +6,7 @@ namespace splitTime.file {
         | jsonable[]
         | { [key: string]: jsonable }
         | { [key: number]: jsonable }
+    export type MadeJsonable<T> = { [K in keyof T]: T[K] }
     export type json = string
 
     export function toJsonable(thing: unknown): jsonable {

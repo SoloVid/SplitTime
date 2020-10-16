@@ -5,9 +5,9 @@ namespace splitTime.editor.server {
             this.editorTsApiBacking.api
         ]
 
-        handle(url: string, body: file.jsonable): serverLite.ActualResponse {
+        async handle(url: string, body: file.jsonable): Promise<serverLite.ActualResponse> {
             for (const api of this.apis) {
-                const response = api.handle(url, body)
+                const response = await api.handle(url, body)
                 if (response !== null) {
                     return response
                 }

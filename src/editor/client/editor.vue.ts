@@ -1,10 +1,15 @@
 namespace splitTime.editor.level {
-    export let projectName = ""
-    export let projectPath = ""
-
     class GlobalEditorStuff implements GlobalEditorShared {
         followers: Followable[] | null = null
         previousFollowers: Followable[] | null = null
+
+        constructor(
+            private readonly editor: VueEditor
+        ) {}
+
+        get server(): ServerLiaison {
+            return this.editor.server
+        }
         
         setFollowers(newFollowers: Followable[]): void {
             this.previousFollowers = this.followers
@@ -13,6 +18,8 @@ namespace splitTime.editor.level {
     }
     
     interface VueEditor extends VueComponent {
+        // props
+        server: ServerLiaison
         // data
         inputs: UserInputs
         level: Level | null
@@ -30,6 +37,24 @@ namespace splitTime.editor.level {
         handleKeyDown(event: KeyboardEvent): void
         handleKeyUp(event: KeyboardEvent): void
         handleFileChange(event: Event): void
+    }
+
+    function data(this: VueEditor){
+        return {
+            inputs: {
+                mouse: {
+                    x: 0,
+                    y: 0,
+                    isDown: false
+                },
+                ctrlDown: false
+            },
+            level: null,
+            globalEditorStuff: new GlobalEditorStuff(this),
+            supervisorControl: {
+                triggerSettings: () => {}
+            }
+        }
     }
 
     function createLevel(this: VueEditor) {
@@ -64,7 +89,7 @@ namespace splitTime.editor.level {
             this.level.fileName += ".json"
         }
 
-        var jsonText = exportLevel(this.level)
+        var jsonText = exportLevelJson(this.level)
 
         updatePageTitle(this.level)
         downloadFile(this.level.fileName, jsonText)
@@ -188,23 +213,10 @@ namespace splitTime.editor.level {
     }
 
     Vue.component("st-editor", {
-        data: function (){
-            return {
-                inputs: {
-                    mouse: {
-                        x: 0,
-                        y: 0,
-                        isDown: false
-                    },
-                    ctrlDown: false
-                },
-                level: null,
-                globalEditorStuff: new GlobalEditorStuff(),
-                supervisorControl: {
-                    triggerSettings: () => {}
-                }
-            }
+        props: {
+            server: Object
         },
+        data,
         methods: {
             createLevel,
             clickFileChooser,

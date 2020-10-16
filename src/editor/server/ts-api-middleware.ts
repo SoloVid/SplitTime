@@ -1,5 +1,5 @@
 namespace splitTime.editor.server {
-    type Handler = (request: file.jsonable) => file.jsonable
+    type Handler = (request: file.jsonable) => (file.jsonable | PromiseLike<file.jsonable>)
 
     interface IdRequest {
         id: string
@@ -48,7 +48,7 @@ namespace splitTime.editor.server {
             return response.json() // parses JSON response into native JavaScript objects
         }
 
-        handle(url: string, body: file.jsonable): serverLite.Response {
+        async handle(url: string, body: file.jsonable): Promise<serverLite.Response> {
             if (url !== this.url) {
                 return null
             }
@@ -62,7 +62,7 @@ namespace splitTime.editor.server {
                 }
             }
             try {
-                const response = this.handlerMap[requestJson.id](requestJson.requestData)
+                const response = await this.handlerMap[requestJson.id](requestJson.requestData)
                 return {
                     responseBody: response
                 }

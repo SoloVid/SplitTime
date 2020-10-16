@@ -26,6 +26,7 @@ namespace splitTime.editor.level {
     export type Mode = "position" | "prop" | "trace"
     
     export interface GlobalEditorShared {
+        readonly server: ServerLiaison
         setFollowers(newFollowers: Followable[]): void
     }
 
@@ -34,6 +35,7 @@ namespace splitTime.editor.level {
         readonly mode: Mode
         readonly typeSelected: string
         readonly level: Level
+        readonly server: ServerLiaison
         pathInProgress: splitTime.level.file_data.Trace | null
         propertiesPaneStuff: ObjectProperties
         /** Stuff to display to the user */

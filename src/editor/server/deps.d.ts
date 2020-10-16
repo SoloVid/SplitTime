@@ -5,8 +5,10 @@ export as namespace _dependencies
 
 import * as _express from 'express'
 import * as _fs from 'fs'
+import { promises as _fsPromises } from 'fs'
 import * as _path from 'path'
 
 export const express: typeof _express
 export const fs: typeof _fs
+export const fsPromises: typeof _fsPromises
 export const path: typeof _path

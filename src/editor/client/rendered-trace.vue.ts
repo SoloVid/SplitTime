@@ -1,9 +1,10 @@
 namespace splitTime.editor.level {
-
     interface VueRenderedTrace {
         // props
         levelEditorShared: LevelEditorShared
         trace: Trace
+        // data
+        uid: string
         // computed
         hasClose: boolean
         height: number
@@ -17,6 +18,10 @@ namespace splitTime.editor.level {
         traceShadowFill: string
         traceShadowStroke: string
         traceShadowDisplayed: boolean
+        otherLevelDisplayed: boolean
+        // asyncComputed
+        otherLevel: splitTime.level.FileData
+        otherLevelImgSrc: string
         // methods
         edit(): void
         track(point: Coordinates2D): void
@@ -128,6 +133,9 @@ namespace splitTime.editor.level {
         }, "")
     }
     function traceFill(this: VueRenderedTrace): string {
+        if (this.otherLevelDisplayed && this.otherLevelImgSrc) {
+            return "url(#img-" + this.uid + ")"
+        }
         return safeGetColor(this.trace)
     }
     function traceStroke(this: VueRenderedTrace): string {
@@ -141,6 +149,22 @@ namespace splitTime.editor.level {
     }
     function traceShadowDisplayed(this: VueRenderedTrace): boolean {
         return this.hasClose && this.height > 0
+    }
+    function otherLevelDisplayed(this: VueRenderedTrace): boolean {
+        const isTypeOtherLevel = this.trace.obj.type === splitTime.trace.Type.POINTER ||
+            this.trace.obj.type === splitTime.trace.Type.TRANSPORT
+        return isTypeOtherLevel && this.trace.metadata.highlighted
+    }
+
+    async function otherLevel(this: VueRenderedTrace): Promise<splitTime.level.FileData> {
+        if (!this.trace.obj.level) {
+            return exportLevel(new Level())
+        }
+        const s = this.levelEditorShared.server
+        return s.api.levelJson.fetch(s.withProject({ levelId: this.trace.obj.level }))
+    }
+    function otherLevelImgSrc(this: VueRenderedTrace): PromiseLike<string> {
+        return this.levelEditorShared.server.imgSrc(this.otherLevel.background)
     }
 
     function edit(this: VueRenderedTrace): void {
@@ -185,6 +209,11 @@ namespace splitTime.editor.level {
             levelEditorShared: Object,
             trace: Object
         },
+        data: function() {
+            return {
+                uid: generateUID()
+            }
+        },
         computed: {
             hasClose,
             height,
@@ -197,7 +226,18 @@ namespace splitTime.editor.level {
             traceStroke,
             traceShadowFill,
             traceShadowStroke,
-            traceShadowDisplayed
+            traceShadowDisplayed,
+            otherLevelDisplayed
+        },
+        asyncComputed: {
+            otherLevel: {
+                get: otherLevel,
+                default: exportLevel(new Level())
+            },
+            otherLevelImgSrc: {
+                get: otherLevelImgSrc,
+                default: ""
+            }
         },
         methods: {
             edit,
@@ -206,6 +246,24 @@ namespace splitTime.editor.level {
         },
         template: `
 <g>
+    <defs>
+        <pattern
+            v-if="otherLevelDisplayed"
+            :id="'img-' + uid"
+            :x="-trace.obj.offsetX"
+            :y="-trace.obj.offsetY + trace.obj.offsetZ"
+            :width="otherLevel.width + 1000"
+            :height="otherLevel.height + 1000"
+            patternUnits="userSpaceOnUse"
+        >
+            <image
+                :width="otherLevel.width"
+                :height="otherLevel.height"
+                preserveAspectRatio="none"
+                :href="otherLevelImgSrc"
+            />
+        </pattern>
+    </defs>
     <polyline
             v-show="trace.metadata.displayed && hasClose"
             v-on:dblclick.prevent="edit"
@@ -243,7 +301,7 @@ namespace splitTime.editor.level {
     <polyline
             v-show="trace.metadata.displayed"
             :points="pointsStairsSlope"
-            stroke="black" stroke-width="2" stroke-dasharray="10,5" fill="url(#up-arrows-pattern)"
+            stroke="black" stroke-width="2" stroke-dasharray="10,5" :fill="'url(#img-' + uid + ')'"
             v-if="pointsStairsSlope"
             style="pointer-events: none;"
     ></polyline>

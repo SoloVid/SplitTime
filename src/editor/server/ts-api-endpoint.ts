@@ -6,7 +6,7 @@ namespace splitTime.editor.server {
             private readonly id: string
         ) {}
 
-        serve(handler: (request: Request) => Response): void {
+        serve(handler: (request: Request) => (Response | PromiseLike<Response>)): void {
             this.middleware.serve(this.id, requestJson => {
                 const request = requestJson as Request
                 return handler(request)

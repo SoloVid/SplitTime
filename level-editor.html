@@ -5,16 +5,18 @@
             window.__EDITOR_CONSTANT__ = true;
         </script>
         <script src="node_modules/vue/dist/vue.js"></script>
+        <script src="node_modules/vue-async-computed/dist/vue-async-computed.js"></script>
         <script src="node_modules/jquery/dist/jquery.min.js"></script>
         <link rel="stylesheet" href="src/editor/client/style.css">
         <script src="build/editor-client.js"></script>
     </head>
     <body>
         <div id="app">
-            <st-editor></st-editor>
+            <st-editor
+                :server="serverLiaison"
+            ></st-editor>
         </div>
 
-        
         <svg
             style="position: absolute; pointer-events: none;"
         >
@@ -29,21 +31,23 @@
         </svg>
 
         <script>
-            new Vue({
-                el: "#app"
-            });
-
-            window.onbeforeunload = function() {
-                return true;
-            };
-
             var projectName = window.location.hash.substring(1);
             while(!projectName) {
                 projectName = prompt("Project folder name:") || "";
             }
             window.location.hash = "#" + projectName;
-            splitTime.editor.level.projectName = projectName;
-            splitTime.editor.level.projectPath = "projects/" + projectName + "/";
+            var serverLiaison = new splitTime.editor.level.ServerLiaison(projectName);
+
+            new Vue({
+                el: "#app",
+                data: {
+                    serverLiaison: serverLiaison
+                }
+            });
+
+            window.onbeforeunload = function() {
+                return true;
+            };
         </script>
     </body>
 </html>

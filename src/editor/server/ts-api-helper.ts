@@ -12,7 +12,7 @@ namespace splitTime.editor.server {
             return new TsApiEndpoint(this.middleware, "" + this.nextId++)
         }
 
-        handle(url: string, body: file.jsonable): serverLite.Response {
+        handle(url: string, body: file.jsonable): PromiseLike<serverLite.Response> {
             return this.middleware.handle(url, body)
         }
     }

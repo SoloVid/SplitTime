@@ -6,13 +6,14 @@ namespace splitTime.editor.level {
         // computed
         styleObject: object
         body: splitTime.Body
-        imgSrc: string
         positionLeft: number
         positionTop: number
         width: number
         height: number
         crop: math.Rect
         spriteOffset: Coordinates2D
+        // asyncComputed
+        imgSrc: string
         // methods
         edit(): void
         track(): void
@@ -34,9 +35,6 @@ namespace splitTime.editor.level {
     function body(this: VueRenderedPosition): splitTime.Body {
         return loadBodyFromTemplate(this.position.obj.template)
     }
-    function imgSrc(this: VueRenderedPosition): string {
-        return getBodyImage(this.body)
-    }
     function positionLeft(this: VueRenderedPosition): number {
         return this.position.obj.x - this.crop.width/2 - this.spriteOffset.x
     }
@@ -54,6 +52,10 @@ namespace splitTime.editor.level {
     }
     function spriteOffset(this: VueRenderedPosition): Coordinates2D {
         return getSpriteOffset(this.body)
+    }
+
+    function imgSrc(this: VueRenderedPosition): PromiseLike<string> {
+        return getBodyImage(this.body, this.levelEditorShared.server)
     }
 
     function edit(this: VueRenderedPosition) {
@@ -87,13 +89,15 @@ namespace splitTime.editor.level {
         computed: {
             styleObject,
             body,
-            imgSrc,
             positionLeft,
             positionTop,
             width,
             height,
             crop,
             spriteOffset
+        },
+        asyncComputed: {
+            imgSrc
         },
         methods: {
             edit,

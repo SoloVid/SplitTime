@@ -9,11 +9,12 @@ namespace splitTime.editor.level {
         level: Level
         inputs: UserInputs
         position: Coordinates2D
-        backgroundSrc: string
         containerWidth: number
         containerHeight: number
         leftPadding: number
         topPadding: number
+        // asyncComputed
+        backgroundSrc: string
         // methods
         createPosition(): void
         createProp(): void
@@ -53,9 +54,6 @@ namespace splitTime.editor.level {
         }
     }
 
-    function backgroundSrc(this: VueLevelGraphicalEditor): string {
-        return imgSrc(this.level.background)
-    }
     function containerWidth(this: VueLevelGraphicalEditor): number {
         return this.level.width + 2*EDITOR_PADDING
     }
@@ -68,6 +66,10 @@ namespace splitTime.editor.level {
     }
     function topPadding(this: VueLevelGraphicalEditor): number {
         return EDITOR_PADDING + this.level.backgroundOffsetY
+    }
+
+    function backgroundSrc(this: VueLevelGraphicalEditor): PromiseLike<string> {
+        return this.levelEditorShared.server.imgSrc(this.level.background)
     }
 
     function createPosition(this: VueLevelGraphicalEditor) {
@@ -204,11 +206,13 @@ namespace splitTime.editor.level {
             level,
             inputs,
             position,
-            backgroundSrc,
             containerWidth,
             containerHeight,
             leftPadding,
             topPadding
+        },
+        asyncComputed: {
+            backgroundSrc
         },
         methods: {
             createPosition,

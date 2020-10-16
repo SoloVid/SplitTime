@@ -16,8 +16,8 @@ app.use(express.static(__ROOT__ + '/projects'))
 app.use(express.static(__ROOT__))
 
 const apiServer = new splitTime.editor.server.ApiServer()
-app.post('*', express.json(), (req, res) => {
-    const liteResponse = apiServer.handle(req.url, req.body)
+app.post('*', express.json(), async (req, res) => {
+    const liteResponse = await apiServer.handle(req.url, req.body)
     const statusCode = liteResponse.statusCode
     if (statusCode) {
         res.statusCode = statusCode

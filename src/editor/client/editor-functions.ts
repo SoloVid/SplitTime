@@ -1,8 +1,8 @@
 namespace splitTime.editor.level {
     export const DEFAULT_HEIGHT = 64
 
-    export function exportLevel(levelObject: Level): string {
-        const levelFile: splitTime.level.FileData = {
+    export function exportLevel(levelObject: Level): splitTime.level.FileData {
+        return {
             fileName: levelObject.fileName,
             type: "action",
             region: levelObject.region,
@@ -16,7 +16,10 @@ namespace splitTime.editor.level {
             props: levelObject.props.map(p => p.obj),
             positions: levelObject.positions.map(p => p.obj)
         }
-        return JSON.stringify(levelFile, null, 4)
+    }
+
+    export function exportLevelJson(levelObject: Level): file.json {
+        return JSON.stringify(exportLevel(levelObject), null, 4)
     }
     
     export function importLevel(levelText: string): Level {
@@ -67,7 +70,9 @@ namespace splitTime.editor.level {
         if(!fileName) {
             return ""
         }
-        return projectPath + splitTime.IMAGE_DIR + "/" + fileName
+        return ""
+        // TODO: fix
+        // return projectPath + splitTime.IMAGE_DIR + "/" + fileName
     }
     
     export function safeGetColor(trace: Trace) {
@@ -159,9 +164,9 @@ namespace splitTime.editor.level {
     }
 
     let placeholderImageUrl: string | null = null
-    export function getBodyImage(body: splitTime.Body) {
+    export async function getBodyImage(body: splitTime.Body, server: ServerLiaison): Promise<string> {
         if(body.drawable instanceof splitTime.Sprite) {
-            return imgSrc(body.drawable.img)
+            return server.imgSrc(body.drawable.img)
         }
         if (placeholderImageUrl === null) {
             placeholderImageUrl = makePlaceholderImage()

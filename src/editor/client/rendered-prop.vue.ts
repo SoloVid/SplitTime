@@ -6,13 +6,14 @@ namespace splitTime.editor.level {
         // computed
         body: Body
         styleObject: object
-        imgSrc: string
         positionLeft: int
         positionTop: int
         width: int
         height: int
         crop: math.Rect
         spriteOffset: Coordinates2D
+        // asyncComputed
+        imgSrc: string
         // methods
         edit(): void
         track(): void
@@ -35,9 +36,6 @@ namespace splitTime.editor.level {
     function body(this: RenderedProp): splitTime.Body {
         return loadBodyFromTemplate(this.prop.obj.template)
     }
-    function imgSrc(this: RenderedProp): string {
-        return getBodyImage(this.body)
-    }
     function positionLeft(this: RenderedProp): number {
         return this.prop.obj.x - this.crop.width/2 - this.spriteOffset.x
     }
@@ -56,7 +54,11 @@ namespace splitTime.editor.level {
     function spriteOffset(this: RenderedProp): Coordinates2D {
         return getSpriteOffset(this.body)
     }
-    
+
+    function imgSrc(this: RenderedProp): PromiseLike<string> {
+        return getBodyImage(this.body, this.levelEditorShared.server)
+    }
+
     function edit(this: RenderedProp): void {
         this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(this.prop)
     }
@@ -87,13 +89,15 @@ namespace splitTime.editor.level {
         computed: {
             styleObject,
             body,
-            imgSrc,
             positionLeft,
             positionTop,
             width,
             height,
             crop,
             spriteOffset
+        },
+        asyncComputed: {
+            imgSrc
         },
         methods: {
             edit,

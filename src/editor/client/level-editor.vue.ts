@@ -17,6 +17,10 @@ namespace splitTime.editor.level {
             return this.editor.level
         }
 
+        get server(): ServerLiaison {
+            return this.editor.editorGlobalStuff.server
+        }
+
         setMode(mode: Mode, subType?: string): void {
             this.mode = mode
             if (subType) {
