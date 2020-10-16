@@ -17,6 +17,7 @@ namespace splitTime.editor.level {
         inputs: UserInputs
         level: Level | null
         globalEditorStuff: GlobalEditorStuff
+        supervisorControl: EditorSupervisorControl
         // methods
         createLevel(): void
         clickFileChooser(): void
@@ -73,7 +74,7 @@ namespace splitTime.editor.level {
         if (!this.level) {
             return
         }
-        showEditorLevel(this.level)
+        this.supervisorControl.triggerSettings()
     }
 
     function moveFollowers(this: VueEditor, dx: number, dy: number, fallbackToPrevious: boolean = true): void {
@@ -198,7 +199,10 @@ namespace splitTime.editor.level {
                     ctrlDown: false
                 },
                 level: null,
-                globalEditorStuff: new GlobalEditorStuff()
+                globalEditorStuff: new GlobalEditorStuff(),
+                supervisorControl: {
+                    triggerSettings: () => {}
+                }
             }
         },
         methods: {
@@ -247,6 +251,7 @@ namespace splitTime.editor.level {
         v-if="level"
         :editor-inputs="inputs"
         :editor-global-stuff="globalEditorStuff"
+        :supervisor-control="supervisorControl"
         :level="level"
     ></level-editor>
 </div>

@@ -58,7 +58,7 @@ namespace splitTime.editor.level {
     }
     
     function edit(this: RenderedProp): void {
-        showEditorProp(this.prop)
+        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(this.prop)
     }
     function track(this: RenderedProp): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {

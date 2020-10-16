@@ -19,6 +19,10 @@ namespace splitTime.editor.level {
         ctrlDown: boolean
     }
 
+    export interface EditorSupervisorControl {
+        triggerSettings(): void
+    }
+
     export type Mode = "position" | "prop" | "trace"
     
     export interface GlobalEditorShared {

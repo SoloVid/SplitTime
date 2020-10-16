@@ -36,7 +36,7 @@ namespace splitTime.editor.level {
         return levelObject
     }
     
-    export function addNewTrace(levelObject: Level, layerIndex: int, type: string) {
+    export function addNewTrace(levelObject: Level, layerIndex: int, type: string): Trace {
         var z = levelObject.layers[layerIndex].obj.z
         var height = levelObject.layers.length > layerIndex + 1 ?
         levelObject.layers[layerIndex + 1].obj.z - z :
@@ -45,7 +45,7 @@ namespace splitTime.editor.level {
             type = splitTime.trace.Type.SOLID
             height = 0
         }
-        var trace = {
+        const traceObj = {
             id: "",
             type: type,
             vertices: "",
@@ -58,7 +58,8 @@ namespace splitTime.editor.level {
             offsetY: "",
             offsetZ: ""
         }
-        levelObject.traces.push(withMetadata("trace", trace))
+        const trace = withMetadata<"trace", splitTime.level.file_data.Trace>("trace", traceObj)
+        levelObject.traces.push(trace)
         return trace
     }
     
@@ -184,22 +185,5 @@ namespace splitTime.editor.level {
             }
         }
         return { x: 0, y: 0 }
-    }
-
-    export function getLevelPropertiesStuff(level: Level): ObjectProperties {
-        const fieldObject = {
-            region: {},
-            width: {},
-            height: {},
-            background: {},
-            backgroundOffsetX: {},
-            backgroundOffsetY: {}
-        }
-        type SimplifiedLevel = { [K in keyof typeof fieldObject]: string | number }
-        return {
-            title: "Level Properties",
-            thing: level as SimplifiedLevel,
-            fields: fieldObject
-        }
     }
 }

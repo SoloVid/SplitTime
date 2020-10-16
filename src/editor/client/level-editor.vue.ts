@@ -37,6 +37,7 @@ namespace splitTime.editor.level {
         // props
         editorInputs: UserInputs
         editorGlobalStuff: GlobalEditorShared
+        supervisorControl: EditorSupervisorControl
         level: Level
         // data
         sharedStuff: LevelEditorShared
@@ -45,6 +46,8 @@ namespace splitTime.editor.level {
         position: Coordinates2D
         editorWidth: number
         editorHeight: number
+        // methods
+        onSupervisorControlChange(): void
     }
 
     function inputs(this: VueLevelEditor): UserInputs {
@@ -87,13 +90,21 @@ namespace splitTime.editor.level {
         return this.$el.clientHeight
     }
 
+    function onSupervisorControlChange(this: VueLevelEditor): void {
+        this.supervisorControl.triggerSettings = () => {
+            this.sharedStuff.propertiesPaneStuff = getLevelPropertiesStuff(this.level)
+        }
+    }
+
     Vue.component("level-editor", {
         props: {
             editorInputs: Object,
             editorGlobalStuff: Object,
+            supervisorControl: Object,
             level: Object
         },
         data: function() {
+            (this as VueLevelEditor).onSupervisorControlChange()
             return {
                 sharedStuff: new SharedStuff(this as VueLevelEditor)
             }
@@ -105,6 +116,10 @@ namespace splitTime.editor.level {
             editorHeight
         },
         methods: {
+            onSupervisorControlChange
+        },
+        watch: {
+            supervisorControl: onSupervisorControlChange
         },
         template: `
 <div>

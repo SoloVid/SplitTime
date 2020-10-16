@@ -1,6 +1,7 @@
 namespace splitTime.editor.level {
     interface VueMenuLayer {
         // props
+        levelEditorShared: LevelEditorShared
         level: Level
         layer: Layer
         index: number
@@ -62,16 +63,16 @@ namespace splitTime.editor.level {
     }
 
     function edit(this: VueMenuLayer): void {
-        showEditorLayer(this.layer)
+        this.levelEditorShared.propertiesPaneStuff = getLayerPropertiesStuff(this.layer)
     }
     function editTrace(this: VueMenuLayer, trace: Trace): void {
-        showEditorTrace(trace)
+        this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace)
     }
     function editProp(this: VueMenuLayer, prop: Prop): void {
-        showEditorProp(prop)
+        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(prop)
     }
     function editPosition(this: VueMenuLayer, position: Position): void {
-        showEditorPosition(position)
+        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(position)
     }
     function toggleAllTracesDisplayed(this: VueMenuLayer): void {
         var displayed = this.allTracesDisplayed
@@ -94,6 +95,7 @@ namespace splitTime.editor.level {
 
     Vue.component("menu-layer", {
         props: {
+            levelEditorShared: Object,
             level: Object,
             layer: Object,
             index: Number

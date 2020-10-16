@@ -144,7 +144,7 @@ namespace splitTime.editor.level {
     }
 
     function edit(this: VueRenderedTrace): void {
-        showEditorTrace(this.trace)
+        this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(this.trace)
     }
     function track(this: VueRenderedTrace, point?: Coordinates2D): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {

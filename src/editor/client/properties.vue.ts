@@ -26,22 +26,22 @@ namespace splitTime.editor.level {
 
     function getRawValue(this: VueObjectProperty): string | number {
         if (!this.propertyExists) {
-            throw new Error("Can't access raw value when it doesn't exist!")
+            throw new Error("Can't access raw value (" + this.fieldKey + ") when it doesn't exist!")
         }
         const value = this.thing[this.fieldKey]
         if (typeof value !== "number" && typeof value !== "string") {
-            throw new Error("Value isn't a string or number")
+            throw new Error("Value (" + this.fieldKey + ") isn't a string or number")
         }
         return value
     }
 
     function setRawValue(this: VueObjectProperty, newValue: unknown): void {
         if (!this.propertyExists) {
-            throw new Error("Can't access raw value when it doesn't exist!")
+            throw new Error("Can't access raw value (" + this.fieldKey + ") when it doesn't exist!")
         }
         const oldValue = this.rawValue
         if (typeof newValue !== typeof oldValue) {
-            throw new Error("Can't set value to different type")
+            throw new Error("Can't set value (" + this.fieldKey + ") to different type")
         }
         this.thing[this.fieldKey] = newValue
     }
@@ -71,7 +71,7 @@ namespace splitTime.editor.level {
             }
             return "string"
         }
-        throw new Error("Property is not a number or string")
+        throw new Error("Property (" + this.fieldKey + ") is not a number or string")
     }
 
     function isReadonly(this: VueObjectProperty): boolean {

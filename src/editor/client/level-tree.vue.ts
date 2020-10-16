@@ -49,6 +49,7 @@ namespace splitTime.editor.level {
         <menu-layer
                 v-for="(layer, index) in levelEditorShared.level.layers"
                 :key="index"
+                :level-editor-shared="levelEditorShared"
                 :level="level"
                 :layer="layer"
                 :index="index"

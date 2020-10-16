@@ -57,7 +57,7 @@ namespace splitTime.editor.level {
     }
 
     function edit(this: VueRenderedPosition) {
-        showEditorPosition(this.position)
+        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(this.position)
     }
     function track(this: VueRenderedPosition) {
         if(this.levelEditorShared.shouldDragBePrevented()) {

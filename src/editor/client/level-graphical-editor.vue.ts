@@ -87,7 +87,7 @@ namespace splitTime.editor.level {
         }
         const newThing = withMetadata<"position", splitTime.level.file_data.Position>("position", object)
         this.level.positions.push(newThing)
-        showEditorPosition(newThing)
+        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(newThing)
     }
     
     function createProp(this: VueLevelGraphicalEditor) {
@@ -109,7 +109,7 @@ namespace splitTime.editor.level {
 
         const newThing = withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)
         this.level.props.push(newThing)
-        showEditorProp(newThing)
+        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(newThing)
     }
 
     function handleContextMenu(this: VueLevelGraphicalEditor, event: Event): void {
@@ -145,12 +145,13 @@ namespace splitTime.editor.level {
                     var trace = addNewTrace(this.level, this.levelEditorShared.activeLayer, this.levelEditorShared.typeSelected)
                     
                     if(this.levelEditorShared.typeSelected == splitTime.trace.Type.PATH && !this.inputs.ctrlDown) {
-                        trace.vertices = positionPoint
+                        trace.obj.vertices = positionPoint
                     } else {
-                        trace.vertices = literalPoint
+                        trace.obj.vertices = literalPoint
                     }
                     
-                    this.levelEditorShared.pathInProgress = trace
+                    this.levelEditorShared.pathInProgress = trace.obj
+                    this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace)
                 } else {
                     if(!this.inputs.ctrlDown) {
                         if(pathInProgress.type == splitTime.trace.Type.PATH) {
