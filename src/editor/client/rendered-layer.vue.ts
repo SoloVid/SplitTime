@@ -1,5 +1,6 @@
 namespace splitTime.editor.level {
-    export interface VueRenderedLayer {
+    interface VueRenderedLayer {
+        // props
         levelEditorShared: LevelEditorShared
         level: Level
         layer: Layer
@@ -7,6 +8,7 @@ namespace splitTime.editor.level {
         width: number
         height: number
         isActive: boolean
+        // computed
         containerWidth: number
         containerHeight: number
         viewBox: string
@@ -79,6 +81,18 @@ namespace splitTime.editor.level {
             height: Number,
             isActive: Boolean
         },
+        computed: {
+            containerWidth,
+            containerHeight,
+            viewBox,
+            layerAboveZ,
+            layerHeight,
+            styleObject,
+            thingsStyleObject,
+            traces,
+            props,
+            positions
+        },
         template: `
 <div v-show="layer.metadata.displayed" :style="styleObject">
     <svg
@@ -101,24 +115,12 @@ namespace splitTime.editor.level {
             :prop="prop"
         ></rendered-prop>
         <rendered-position v-for="(position, posIndex) in positions"
-            :key="prop.metadata.editorId"
+            :key="position.metadata.editorId"
             :level-editor-shared="levelEditorShared"
             :position="position"
         ></rendered-position>
     </div>
 </div>
-        `,
-        computed: {
-            containerWidth,
-            containerHeight,
-            viewBox,
-            layerAboveZ,
-            layerHeight,
-            styleObject,
-            thingsStyleObject,
-            traces,
-            props,
-            positions
-        }
+        `
     })
 }

@@ -1,10 +1,6 @@
 namespace splitTime.editor.level {
-    var projectName = window.location.hash.substring(1)
-    while(!projectName) {
-        projectName = prompt("Project folder name:") || ""
-    }
-    window.location.hash = "#" + projectName
-    export var projectPath = "projects/" + projectName + "/"
+    export let projectName = ""
+    export let projectPath = ""
 
     class GlobalEditorStuff implements GlobalEditorShared {
         followers: Followable[] | null = null
@@ -16,10 +12,12 @@ namespace splitTime.editor.level {
         }
     }
     
-    export interface VueEditor extends VueComponent {
+    interface VueEditor extends VueComponent {
+        // data
         inputs: UserInputs
         level: Level | null
         globalEditorStuff: GlobalEditorStuff
+        // methods
         createLevel(): void
         clickFileChooser(): void
         downloadLevel(): void
@@ -110,7 +108,7 @@ namespace splitTime.editor.level {
         this.inputs.mouse.isDown = false
         this.globalEditorStuff.previousFollowers = this.globalEditorStuff.followers
         this.globalEditorStuff.followers = null
-}
+    }
 
     function handleKeyDown(this: VueEditor, event: KeyboardEvent): void {
         // TODO: resolve types
@@ -154,10 +152,10 @@ namespace splitTime.editor.level {
             this.inputs.ctrlDown = false
         } else if(event.which == keycode.ESC) { // esc
             if (this.level === null) {
-                console.log("No level to export")
+                log.debug("No level to export")
             } else {
-                console.log("export of level JSON:")
-                console.log(exportLevel(this.level))
+                log.debug("export of level JSON:")
+                log.debug(exportLevel(this.level))
             }
         }
     }
@@ -189,6 +187,33 @@ namespace splitTime.editor.level {
     }
 
     Vue.component("st-editor", {
+        data: function (){
+            return {
+                inputs: {
+                    mouse: {
+                        x: 0,
+                        y: 0,
+                        isDown: false
+                    },
+                    ctrlDown: false
+                },
+                level: null,
+                globalEditorStuff: new GlobalEditorStuff()
+            }
+        },
+        methods: {
+            createLevel,
+            clickFileChooser,
+            downloadLevel,
+            editLevelSettings,
+            moveFollowers,
+            handleMouseMove,
+            handleMouseDown,
+            handleMouseUp,
+            handleKeyDown,
+            handleKeyUp,
+            handleFileChange
+        },
         template: `
 <div
     v-on:mousemove="handleMouseMove"
@@ -225,33 +250,6 @@ namespace splitTime.editor.level {
         :level="level"
     ></level-editor>
 </div>
-        `,
-        data: function (){
-            return {
-                inputs: {
-                    mouse: {
-                        x: 0,
-                        y: 0,
-                        isDown: false
-                    },
-                    ctrlDown: false
-                },
-                level: null,
-                globalEditorStuff: new GlobalEditorStuff()
-            }
-        },
-        methods: {
-            createLevel,
-            clickFileChooser,
-            downloadLevel,
-            editLevelSettings,
-            moveFollowers,
-            handleMouseMove,
-            handleMouseDown,
-            handleMouseUp,
-            handleKeyDown,
-            handleKeyUp,
-            handleFileChange
-        }
+        `
     })
 }

@@ -1,7 +1,9 @@
 namespace splitTime.editor.level {
-    export interface VueRenderedPosition {
+    interface VueRenderedPosition {
+        // props
         levelEditorShared: LevelEditorShared
         position: Position
+        // computed
         styleObject: object
         body: splitTime.Body
         imgSrc: string
@@ -11,6 +13,7 @@ namespace splitTime.editor.level {
         height: number
         crop: math.Rect
         spriteOffset: Coordinates2D
+        // methods
         edit(): void
         track(): void
         toggleHighlight(highlight: boolean): void
@@ -35,8 +38,6 @@ namespace splitTime.editor.level {
         return getBodyImage(this.body)
     }
     function positionLeft(this: VueRenderedPosition): number {
-        // console.log(this.position)
-        // console.log(this.body)
         return this.position.obj.x - this.crop.width/2 - this.spriteOffset.x
     }
     function positionTop(this: VueRenderedPosition): number {
@@ -83,19 +84,6 @@ namespace splitTime.editor.level {
             levelEditorShared: Object,
             position: Object
         },
-        template: `
-<div
-    v-show="position.metadata.displayed"
-    class="draggable position"
-    v-on:dblclick.prevent="edit"
-    v-on:mousedown.left="track"
-    v-on:mouseenter="toggleHighlight(true)"
-    v-on:mouseleave="toggleHighlight(false)"
-    :style="styleObject"
->
-    <img :src="imgSrc" :style="{ position: 'absolute', left: -crop.x + 'px', top: -crop.y + 'px' }"/>
-</div>
-        `,
         computed: {
             styleObject,
             body,
@@ -111,6 +99,19 @@ namespace splitTime.editor.level {
             edit,
             track,
             toggleHighlight
-        }
+        },
+        template: `
+<div
+    v-show="position.metadata.displayed"
+    class="draggable position"
+    v-on:dblclick.prevent="edit"
+    v-on:mousedown.left="track"
+    v-on:mouseenter="toggleHighlight(true)"
+    v-on:mouseleave="toggleHighlight(false)"
+    :style="styleObject"
+>
+    <img :src="imgSrc" :style="{ position: 'absolute', left: -crop.x + 'px', top: -crop.y + 'px' }"/>
+</div>
+        `
     })
 }

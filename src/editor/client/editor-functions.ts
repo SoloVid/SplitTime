@@ -185,4 +185,21 @@ namespace splitTime.editor.level {
         }
         return { x: 0, y: 0 }
     }
+
+    export function getLevelPropertiesStuff(level: Level): ObjectProperties {
+        const fieldObject = {
+            region: {},
+            width: {},
+            height: {},
+            background: {},
+            backgroundOffsetX: {},
+            backgroundOffsetY: {}
+        }
+        type SimplifiedLevel = { [K in keyof typeof fieldObject]: string | number }
+        return {
+            title: "Level Properties",
+            thing: level as SimplifiedLevel,
+            fields: fieldObject
+        }
+    }
 }

@@ -1,7 +1,9 @@
 namespace splitTime.editor.level {
-    export interface RenderedProp {
+    interface RenderedProp {
+        // props
         levelEditorShared: LevelEditorShared
         prop: Prop
+        // computed
         body: Body
         styleObject: object
         imgSrc: string
@@ -11,6 +13,7 @@ namespace splitTime.editor.level {
         height: int
         crop: math.Rect
         spriteOffset: Coordinates2D
+        // methods
         edit(): void
         track(): void
         toggleHighlight(highlight: boolean): void
@@ -81,19 +84,6 @@ namespace splitTime.editor.level {
             levelEditorShared: Object,
             prop: Object
         },
-        template: `
-<div
-    v-show="prop.metadata.displayed"
-    class="draggable prop"
-    v-on:dblclick.prevent="edit"
-    v-on:mousedown.left="track"
-    v-on:mouseenter="toggleHighlight(true)"
-    v-on:mouseleave="toggleHighlight(false)"
-    :style="styleObject"
->
-    <img :src="imgSrc" :style="{ position: 'absolute', left: -crop.x + 'px', top: -crop.y + 'px' }"/>
-</div>
-        `,
         computed: {
             styleObject,
             body,
@@ -109,6 +99,19 @@ namespace splitTime.editor.level {
             edit,
             track,
             toggleHighlight
-        }
+        },
+        template: `
+<div
+    v-show="prop.metadata.displayed"
+    class="draggable prop"
+    v-on:dblclick.prevent="edit"
+    v-on:mousedown.left="track"
+    v-on:mouseenter="toggleHighlight(true)"
+    v-on:mouseleave="toggleHighlight(false)"
+    :style="styleObject"
+>
+    <img :src="imgSrc" :style="{ position: 'absolute', left: -crop.x + 'px', top: -crop.y + 'px' }"/>
+</div>
+        `
     })
 }

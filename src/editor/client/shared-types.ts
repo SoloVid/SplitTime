@@ -24,10 +24,29 @@ namespace splitTime.editor.level {
     export interface GlobalEditorShared {
         setFollowers(newFollowers: Followable[]): void
     }
-    
+
     export interface LevelEditorShared {
-        getLevel(): Level
+        activeLayer: number
+        readonly mode: Mode
+        readonly typeSelected: string
+        readonly level: Level
+        pathInProgress: splitTime.level.file_data.Trace | null
+        propertiesPaneStuff: ObjectProperties
+        /** Stuff to display to the user */
+        readonly info: { [name: string]: string | number }
+        setMode(mode: Mode, subType?: string): void
         shouldDragBePrevented(): boolean
         follow(follower: Followable): void
+    }
+
+    export interface FieldOptions {
+        readonly?: boolean
+        title?: string
+    }
+
+    export interface ObjectProperties {
+        title: string,
+        thing: { [key: string]: string | number }
+        fields: { [key: string]: FieldOptions }
     }
 }

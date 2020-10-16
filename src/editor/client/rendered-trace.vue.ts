@@ -1,9 +1,10 @@
 namespace splitTime.editor.level {
 
-    export interface VueRenderedTrace {
+    interface VueRenderedTrace {
+        // props
         levelEditorShared: LevelEditorShared
         trace: Trace
-        index: number
+        // computed
         hasClose: boolean
         height: number
         vertices: Coordinates3D[]
@@ -16,6 +17,7 @@ namespace splitTime.editor.level {
         traceShadowFill: string
         traceShadowStroke: string
         traceShadowDisplayed: boolean
+        // methods
         edit(): void
         track(point: Coordinates2D): void
         toggleHighlight(highlight: boolean): void
@@ -26,7 +28,7 @@ namespace splitTime.editor.level {
 
     function hasClose(this: VueRenderedTrace): boolean {
         var pointArray = this.pointsArray
-        return pointArray.length > 0 && pointArray.pop() === null
+        return pointArray.length > 0 && pointArray[pointArray.length - 1] === null
     }
     function height(this: VueRenderedTrace): number {
         return this.trace.obj.height
@@ -46,7 +48,7 @@ namespace splitTime.editor.level {
     }
 
     function pointsArray(this: VueRenderedTrace): (ReadonlyCoordinates2D | null)[] {
-        return safeExtractTraceArray(this.levelEditorShared.getLevel(), this.trace.obj.vertices)
+        return safeExtractTraceArray(this.levelEditorShared.level, this.trace.obj.vertices)
     }
 
     function points(this: VueRenderedTrace): string {
@@ -181,8 +183,26 @@ namespace splitTime.editor.level {
     Vue.component("rendered-trace", {
         props: {
             levelEditorShared: Object,
-            trace: Object,
-            index: Number
+            trace: Object
+        },
+        computed: {
+            hasClose,
+            height,
+            vertices,
+            pointsArray,
+            points,
+            pointsShadow,
+            pointsStairsSlope,
+            traceFill,
+            traceStroke,
+            traceShadowFill,
+            traceShadowStroke,
+            traceShadowDisplayed
+        },
+        methods: {
+            edit,
+            track,
+            toggleHighlight
         },
         template: `
 <g>
@@ -236,25 +256,6 @@ namespace splitTime.editor.level {
             style="pointer-events: none;"
     ></polyline>
 </g>
-        `,
-        computed: {
-            hasClose,
-            height,
-            vertices,
-            pointsArray,
-            points,
-            pointsShadow,
-            pointsStairsSlope,
-            traceFill,
-            traceStroke,
-            traceShadowFill,
-            traceShadowStroke,
-            traceShadowDisplayed
-        },
-        methods: {
-            edit,
-            track,
-            toggleHighlight
-        }
+        `
     })
 }

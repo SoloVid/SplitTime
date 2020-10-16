@@ -18,10 +18,6 @@ namespace splitTime.editor.level {
         ) {}
     }
 
-    // interface ExplicitlyTyped<T> {
-    //     type: T
-    // }
-
     export class Level {
         fileName: string = ""
         region: string = ""
@@ -40,9 +36,4 @@ namespace splitTime.editor.level {
     export type Trace = ObjectWithEditorMetadata<"trace", splitTime.level.file_data.Trace>
     export type Prop = ObjectWithEditorMetadata<"prop", splitTime.level.file_data.Prop>
     export type Position = ObjectWithEditorMetadata<"position", splitTime.level.file_data.Position>
-
-    // export type Layer = splitTime.level.file_data.Layer & EditorEntity
-    // export type Trace = splitTime.level.file_data.Trace & EditorEntity
-    // export type Prop = splitTime.level.file_data.Prop & EditorEntity
-    // export type Position = splitTime.level.file_data.Position & EditorEntity
 }

@@ -14,6 +14,20 @@
             <st-editor></st-editor>
         </div>
 
+        
+        <svg
+            style="position: absolute; pointer-events: none;"
+        >
+            <defs>
+                <pattern id="up-arrows-pattern" x="0" y="0" width="20" height="25" patternUnits="userSpaceOnUse">
+                    <polyline
+                        points="5,8 10,0 10,20 10,0 15,8"
+                        stroke="rgba(0, 0, 0, 0.7)" stroke-width="1.5" fill="none"
+                    ></polyline>
+                </pattern>
+            </defs>
+        </svg>
+
         <script>
             new Vue({
                 el: "#app"
@@ -22,6 +36,14 @@
             window.onbeforeunload = function() {
                 return true;
             };
+
+            var projectName = window.location.hash.substring(1);
+            while(!projectName) {
+                projectName = prompt("Project folder name:") || "";
+            }
+            window.location.hash = "#" + projectName;
+            splitTime.editor.level.projectName = projectName;
+            splitTime.editor.level.projectPath = "projects/" + projectName + "/";
         </script>
     </body>
 </html>
