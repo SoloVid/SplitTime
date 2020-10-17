@@ -66,9 +66,10 @@ namespace splitTime.file {
     type DefinitelyNotJsonable = (() => any) | undefined
 
     // From https://github.com/microsoft/TypeScript/issues/1897#issuecomment-580962081
-    export type IsJsonable<T> = T extends DefinitelyNotJsonable
-        ? never
-        : T extends primitive
+    // The use of tuples in this first condition side-steps
+    // distributive conditional types (see https://github.com/microsoft/TypeScript/issues/29368#issuecomment-453529532)
+    export type IsJsonable<T> = [Extract<T, DefinitelyNotJsonable>] extends [never]
+        ? T extends primitive
             // Primitive is acceptable
             ? T
             : T extends (infer U)[]
@@ -77,19 +78,52 @@ namespace splitTime.file {
                 : T extends object
                     ? {
                         // Iterate over keys in object case
-                        // [P in keyof T]: IsJsonable<T[P]>
-                        [P in keyof T]: T[P] extends jsonable
-                            ? T[P]
-                            // I don't understand this part, and it didn't seem to work for me
-                            // : Pick<T, P> extends Required<Pick<T, P>>
-                            // ? never
-                            : T[P] extends DefinitelyNotJsonable
-                                // Don't allow function or undefined
-                                ? never
-                                : IsJsonable<T[P]>
+                        [P in keyof T]: IsJsonable<T[P]>
+                        // [P in keyof T]: T[P] extends jsonable
+                        //     ? T[P]
+                        //     // I don't understand this part, and it didn't seem to work for me
+                        //     // : Pick<T, P> extends Required<Pick<T, P>>
+                        //     // ? never
+                        //     : T[P] extends DefinitelyNotJsonable
+                        //         // Don't allow function or undefined
+                        //         ? never
+                        //         : IsJsonable<T[P]>
                     }
                     // any other non-object no bueno
                     : never
+        : never
+
+    type Same<T> = T
+    type nu = number & undefined
+    type un = unknown extends never ? "yes" : "no"
+    type un2 = never extends unknown ? "yes" : "no"
+    type UJ = IsJsonable<undefined | number>
+
+    // type blah = [K in (number | undefined)]
+
+    type YN<T> = T extends undefined ? "yes" : "no"
+    type YNB<T> = Same<T> extends undefined ? "yes" : "no"
+    type YNC<T> = [T] extends [undefined] ? "yes" : "no"
+    type YNZ<T, U> = [T] extends [U] ? "yes" : "no"
+    type EXT1 = [Extract<undefined, DefinitelyNotJsonable>]
+    type EXT2 = [Extract<undefined | number, DefinitelyNotJsonable>]
+    type EXT3 = [Extract<number, DefinitelyNotJsonable>]
+    type NEV1 = never extends undefined ? "yes" : "no"
+    type NEV2 = undefined extends never ? "yes" : "no"
+    type YNY<T, U> = [Extract<T, U>] extends [U] ? [Extract<T, U>] extends [never] ? "no2" : "yes" : "no1"
+    type YNY2<T, U> = [Extract<T, U>] extends [never] ? "no" : "yes"
+    type YN0 = (undefined | number) extends undefined ? "yes" : "no"
+    type YN10 = number extends (number | undefined) ? "yes" : "no"
+    type YN1 = YN<undefined | number>
+    type YN1B = YNB<undefined | number>
+    type YN1C = YNC<undefined | number>
+    type YN2 = (undefined extends undefined ? "yes" : "no") | (number extends undefined ? "yes" : "no")
+    type YN31Z = YNZ<undefined, DefinitelyNotJsonable>
+    type YN32Z = YNZ<undefined | number, DefinitelyNotJsonable>
+    type YN33Z = YNZ<number, DefinitelyNotJsonable>
+    type YN31Y = YNY2<undefined, DefinitelyNotJsonable>
+    type YN32Y = YNY2<undefined | number, DefinitelyNotJsonable>
+    type YN33Y = YNY2<number, DefinitelyNotJsonable>
 
     type FD = level.FileData
     type FDP = FD extends primitive ? "yes" : "no"
