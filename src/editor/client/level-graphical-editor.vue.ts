@@ -1,13 +1,13 @@
 namespace splitTime.editor.level {
-    interface VueLevelGraphicalEditor extends VueComponent {
+    interface VueLevelGraphicalEditor extends client.VueComponent {
         // props
-        editorInputs: UserInputs
+        editorInputs: client.UserInputs
         levelEditorShared: LevelEditorShared
         // data
         cancelNextContextMenu: boolean
         // computed
         level: Level
-        inputs: UserInputs
+        inputs: client.UserInputs
         position: Coordinates2D
         containerWidth: number
         containerHeight: number
@@ -27,7 +27,7 @@ namespace splitTime.editor.level {
         return this.levelEditorShared.level
     }
 
-    function inputs(this: VueLevelGraphicalEditor): UserInputs {
+    function inputs(this: VueLevelGraphicalEditor): client.UserInputs {
         const mouse = {
             x: this.editorInputs.mouse.x - this.position.x - EDITOR_PADDING,
             y: this.editorInputs.mouse.y - this.position.y - EDITOR_PADDING,

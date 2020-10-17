@@ -1,5 +1,5 @@
 namespace splitTime.editor.level {
-    interface VueLevelEditorTools extends VueComponent {
+    interface VueLevelEditorTools extends client.VueComponent {
         // props
         levelEditorShared: LevelEditorShared
         // data

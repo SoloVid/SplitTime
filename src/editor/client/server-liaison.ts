@@ -1,4 +1,4 @@
-namespace splitTime.editor.level {
+namespace splitTime.editor.client {
     export class ServerLiaison {
         api = new server.EditorTsApi()
 

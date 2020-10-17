@@ -43,7 +43,7 @@ namespace splitTime.level {
             dir: string
             stance: string
             // FTODO: clean up
-            playerOcclusionFadeFactor: undefined | number
+            playerOcclusionFadeFactor: null | number
         }
 
         export interface Position {

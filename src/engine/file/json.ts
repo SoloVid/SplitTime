@@ -32,33 +32,34 @@ namespace splitTime.file {
                                 // Recursive call for children
                                 IsJsonable<T[P]>
                         }
-                        // Otherwise any other non-object no bueno
-                        : never
+                        // Check if there is nothing else besides unknown in the type
+                        : [Exclude<T, unknown>] extends [never]
+                            // Then if unknown is in the type...
+                            ? unknown extends T
+                                // I submit to you: unknown
+                                ? unknown
+                                // Otherwise any other non-object no bueno
+                                : never
+                            : never
             // Otherwise non-jsonable type union was found not empty
             : never
 
     export type json = string
 
+    type a = unknown extends string ? "yes" : "no"
+    type a1 = unknown extends (string | unknown) ? "yes" : "no"
+
     type JustNonNeverKeys<T> = { [K in keyof T]: T[K] extends never ? never : K }[keyof T]
     type MadeJsonableInner<T> = T extends object ? { [K in JustNonNeverKeys<T>]: MadeJsonableInner<T[K]> } : T
     export type MadeJsonable<T> = MadeJsonableInner<IsJsonable<T>>
-
-    type nevobj1 = never extends object ? "yes" : "no"
-    type nevobj2 = object extends never ? "yes" : "no"
-    type nevnum = number extends never ? "yes" : "no"
-    type c0 = IsJsonable<() => void>
-    type c = MadeJsonable<() => void>
-    type c01 = IsJsonable<splitTime.Level["region"]>
-    type c1 = MadeJsonable<splitTime.Level["region"]>
-    type c2 = MadeJsonable<splitTime.Level>
-    type d = { [K in keyof { a: number, b: never, c: null }]: true}
-    type d1 = { [K in JustNonNeverKeys<{ a: number, b: never, c: null }>]: true }
-    type d2 = object extends IsJsonable<splitTime.Level["region"]> ? "yes" : "no"
 
     export function toJsonable<T>(thing: T): MadeJsonable<T> {
         // FTODO: maybe actually strip out keys?
         return JSON.parse(JSON.stringify(thing)) as MadeJsonable<T>
     }
+
+    /** @deprecated doesn't actually work as intended; use IsJsonable paradigm instead */
+    export type jsonable = primitive | jsonable[] | { [key: string]: jsonable }
 
     class JsonType {
         public constructor(public readonly id: string) {}

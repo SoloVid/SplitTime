@@ -6,4 +6,7 @@ namespace splitTime.editor.level {
         const test2Response = await api.test2.fetch(3)
         log.debug(test2Response)
     }
+    defer(() => {
+        exerciseApi()
+    })
 }

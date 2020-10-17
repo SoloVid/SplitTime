@@ -1,3 +1,26 @@
+namespace splitTime.editor {
+    export function updatePageTitle(level: editor.level.Level) {
+        var title = level.fileName ? level.fileName : "untitled"
+        if (level.region) {
+            title += " (" + level.region + ")"
+        }
+        document.title = title
+    }
+    
+    export function downloadFile(fileName: string, contents: string): void {
+        var pom = document.createElement('a')
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents))
+        pom.setAttribute('download', fileName)
+
+        pom.style.display = 'none'
+        document.body.appendChild(pom)
+
+        pom.click()
+
+        document.body.removeChild(pom)
+    }
+}
+
 namespace splitTime.editor.level {
     export const DEFAULT_HEIGHT = 64
 
@@ -120,27 +143,6 @@ namespace splitTime.editor.level {
         return closestPosition
     }
 
-    export function updatePageTitle(level: Level) {
-        var title = level.fileName ? level.fileName : "untitled"
-        if (level.region) {
-            title += " (" + level.region + ")"
-        }
-        document.title = title
-    }
-    
-    export function downloadFile(fileName: string, contents: string): void {
-        var pom = document.createElement('a')
-        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(contents))
-        pom.setAttribute('download', fileName)
-
-        pom.style.display = 'none'
-        document.body.appendChild(pom)
-
-        pom.click()
-
-        document.body.removeChild(pom)
-    }
-
     export function loadBodyFromTemplate(templateName: string) {
         try {
             return G.BODY_TEMPLATES.getInstance(templateName)
@@ -164,7 +166,7 @@ namespace splitTime.editor.level {
     }
 
     let placeholderImageUrl: string | null = null
-    export async function getBodyImage(body: splitTime.Body, server: ServerLiaison): Promise<string> {
+    export async function getBodyImage(body: splitTime.Body, server: client.ServerLiaison): Promise<string> {
         if(body.drawable instanceof splitTime.Sprite) {
             return server.imgSrc(body.drawable.img)
         }

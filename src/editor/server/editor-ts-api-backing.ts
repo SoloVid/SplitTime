@@ -15,7 +15,7 @@ namespace splitTime.editor.server {
                 const fileName = request.data.levelId + ".json"
                 const path = this.getFilePath(request.projectId, "levels", fileName)
                 const result = await this.nodeLibs.fsPromises.readFile(path)
-                return JSON.parse(result.toString())
+                return JSON.parse(result.toString()) as splitTime.level.FileData
             })
             this.api.imageInfo.serve(async request => {
                 const path = this.getFilePath(request.projectId, "images", request.data.imageId)

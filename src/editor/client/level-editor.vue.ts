@@ -17,7 +17,7 @@ namespace splitTime.editor.level {
             return this.editor.level
         }
 
-        get server(): ServerLiaison {
+        get server(): client.ServerLiaison {
             return this.editor.editorGlobalStuff.server
         }
 
@@ -32,21 +32,21 @@ namespace splitTime.editor.level {
             return this.editor.inputs.mouse.isDown || this.pathInProgress !== null
         }
 
-        follow(follower: Followable): void {
+        follow(follower: client.Followable): void {
             this.editor.editorGlobalStuff.setFollowers([follower])
         }
     }
 
-    interface VueLevelEditor extends VueComponent {
+    interface VueLevelEditor extends client.VueComponent {
         // props
-        editorInputs: UserInputs
+        editorInputs: client.UserInputs
         editorGlobalStuff: GlobalEditorShared
-        supervisorControl: EditorSupervisorControl
+        supervisorControl: client.EditorSupervisorControl
         level: Level
         // data
         sharedStuff: LevelEditorShared
         // computed
-        inputs: UserInputs
+        inputs: client.UserInputs
         position: Coordinates2D
         editorWidth: number
         editorHeight: number
@@ -54,7 +54,7 @@ namespace splitTime.editor.level {
         onSupervisorControlChange(): void
     }
 
-    function inputs(this: VueLevelEditor): UserInputs {
+    function inputs(this: VueLevelEditor): client.UserInputs {
         const mouse = {
             x: this.editorInputs.mouse.x - this.position.x - EDITOR_PADDING,
             y: this.editorInputs.mouse.y - this.position.y - EDITOR_PADDING,

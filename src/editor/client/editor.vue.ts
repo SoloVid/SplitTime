@@ -1,30 +1,30 @@
-namespace splitTime.editor.level {
-    class GlobalEditorStuff implements GlobalEditorShared {
-        followers: Followable[] | null = null
-        previousFollowers: Followable[] | null = null
+namespace splitTime.editor {
+    class GlobalEditorStuff implements level.GlobalEditorShared {
+        followers: client.Followable[] | null = null
+        previousFollowers: client.Followable[] | null = null
 
         constructor(
             private readonly editor: VueEditor
         ) {}
 
-        get server(): ServerLiaison {
+        get server(): client.ServerLiaison {
             return this.editor.server
         }
         
-        setFollowers(newFollowers: Followable[]): void {
+        setFollowers(newFollowers: client.Followable[]): void {
             this.previousFollowers = this.followers
             this.followers = newFollowers
         }
     }
     
-    interface VueEditor extends VueComponent {
+    interface VueEditor extends client.VueComponent {
         // props
-        server: ServerLiaison
+        server: client.ServerLiaison
         // data
-        inputs: UserInputs
-        level: Level | null
+        inputs: client.UserInputs
+        level: editor.level.Level | null
         globalEditorStuff: GlobalEditorStuff
-        supervisorControl: EditorSupervisorControl
+        supervisorControl: client.EditorSupervisorControl
         // methods
         createLevel(): void
         clickFileChooser(): void
@@ -64,8 +64,8 @@ namespace splitTime.editor.level {
             }
         }
 
-        this.level = new Level()
-        this.level.layers.push(withMetadata("layer", {
+        this.level = new level.Level()
+        this.level.layers.push(level.withMetadata("layer", {
             id: "",
             z: 0
         }))
@@ -89,7 +89,7 @@ namespace splitTime.editor.level {
             this.level.fileName += ".json"
         }
 
-        var jsonText = exportLevelJson(this.level)
+        var jsonText = level.exportLevelJson(this.level)
 
         updatePageTitle(this.level)
         downloadFile(this.level.fileName, jsonText)
@@ -181,7 +181,7 @@ namespace splitTime.editor.level {
                 log.debug("No level to export")
             } else {
                 log.debug("export of level JSON:")
-                log.debug(exportLevel(this.level))
+                log.debug(level.exportLevel(this.level))
             }
         }
     }
@@ -202,7 +202,7 @@ namespace splitTime.editor.level {
                 if (typeof contents !== "string") {
                     throw new Error("Contents not string?")
                 }
-                this.level = importLevel(contents)
+                this.level = level.importLevel(contents)
                 this.level.fileName = f.name
                 updatePageTitle(this.level)
             }

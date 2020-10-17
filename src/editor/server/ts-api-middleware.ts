@@ -1,29 +1,31 @@
 namespace splitTime.editor.server {
-    type Handler = (request: file.jsonable) => (file.jsonable | PromiseLike<file.jsonable>)
+    // type Handler<RequestType, ResponseType> = (request: file.IsJsonable<RequestType>) => (file.IsJsonable<ResponseType> | PromiseLike<file.IsJsonable<ResponseType>>)
+    type Handler<RequestType, ResponseType> = (request: RequestType) => (ResponseType | PromiseLike<ResponseType>)
 
-    interface IdRequest {
+    interface IdRequest<T> {
         id: string
-        requestData: file.jsonable
+        requestData: file.IsJsonable<T>
     }
 
-    export class TsApiMiddleware implements serverLite.Server {
-        private readonly handlerMap: { [id: string]: Handler } = {}
+    export class TsApiMiddleware implements serverLite.Server<unknown, unknown> {
+        private readonly handlerMap: { [id: string]: Handler<file.IsJsonable<unknown>, file.IsJsonable<unknown>> } = {}
 
         constructor(
             private readonly url: string
         ) {}
 
-        serve(id: string, handler: Handler): void {
+        serve<RequestType, ResponseType>(id: string, handler: Handler<file.IsJsonable<RequestType>, file.IsJsonable<ResponseType>>): void {
             if (!__NODE__) {
                 throw new Error("Endpoints can only be served on Node server")
             }
             if (id in this.handlerMap) {
                 throw new Error("Endpoint already registered")
             }
-            this.handlerMap[id] = handler
+            // FTODO: re-evaluate this type-cast
+            this.handlerMap[id] = handler as Handler<unknown, unknown>
         }
 
-        async fetch(id: string, data: file.jsonable): Promise<file.jsonable> {
+        async fetch<RequestType, ResponseType>(id: string, data: file.IsJsonable<RequestType>): Promise<file.IsJsonable<ResponseType>> {
             if (__NODE__) {
                 throw new Error("Endpoints can only be fetched from client")
             }
@@ -42,19 +44,21 @@ namespace splitTime.editor.server {
                 body: JSON.stringify(requestJson)
             })
             if (response.status > 399) {
-                throw new Error("Request failed")
+                throw new Error("Request failed: " + response.body)
             }
-            
-            return response.json() // parses JSON response into native JavaScript objects
+
+            // Trust cast because from #handle()
+            return response.json()
         }
 
-        async handle(url: string, body: file.jsonable): Promise<serverLite.Response> {
+        async handle<RequestType, ResponseType>(url: string, body: file.IsJsonable<RequestType>):
+                Promise<serverLite.Response<ResponseType>> {
             if (url !== this.url) {
                 return null
             }
-            // Cast should be safe because it should have come from fetch()
             // FTODO: actually do type check
-            const requestJson = body as unknown as IdRequest
+            // Trust cast because from #fetch()
+            const requestJson = body as unknown as IdRequest<RequestType>
             if (!(requestJson.id in this.handlerMap)) {
                 return {
                     statusCode: 404,
@@ -64,7 +68,7 @@ namespace splitTime.editor.server {
             try {
                 const response = await this.handlerMap[requestJson.id](requestJson.requestData)
                 return {
-                    responseBody: response
+                    responseBody: response as unknown as file.IsJsonable<ResponseType>
                 }
             } catch (e: unknown) {
                 console.log(e)

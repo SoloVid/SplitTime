@@ -17,10 +17,9 @@ app.use(express.static(__ROOT__))
 
 const apiServer = new splitTime.editor.server.ApiServer()
 app.post('*', express.json(), async (req, res) => {
-    const liteResponse = await apiServer.handle(req.url, req.body)
-    const statusCode = liteResponse.statusCode
-    if (statusCode) {
-        res.statusCode = statusCode
+    const liteResponse = await apiServer.handle<unknown>(req.url, req.body)
+    if ("statusCode" in liteResponse) {
+        res.statusCode = liteResponse.statusCode
     }
     res.send(JSON.stringify(liteResponse.responseBody))
 })
