@@ -2,26 +2,18 @@ namespace splitTime.trace {
     export class TraceSpec {
         type: string
         vertices: TracePointSpec[]
-        z: number
-        height: number
-        level: string | null
-        offsetX: number | null
-        offsetY: number | null
-        offsetZ: number | null
-        direction: direction_t | null
-        eventId: string | null
+        z: number = 0
+        height: number = 0
+        level: string = ""
+        offsetX: number = 0
+        offsetY: number = 0
+        offsetZ: number = 0
+        direction: direction_t | null = null
+        eventId: string = ""
 
         constructor(type: string, vertices: string) {
             this.type = type
             this.vertices = interpretPointString(vertices)
-            this.z = 0
-            this.height = 0
-            this.level = null
-            this.offsetX = null
-            this.offsetY = null
-            this.offsetZ = null
-            this.direction = null
-            this.eventId = null
         }
 
         /**
@@ -42,10 +34,10 @@ namespace splitTime.trace {
                     break
                 case Type.POINTER:
                 case Type.TRANSPORT:
-                    trace.level = rawTrace.level || null
-                    trace.offsetX = +rawTrace.offsetX
-                    trace.offsetY = +rawTrace.offsetY
-                    trace.offsetZ = +rawTrace.offsetZ
+                    trace.level = rawTrace.level
+                    trace.offsetX = rawTrace.offsetX
+                    trace.offsetY = rawTrace.offsetY
+                    trace.offsetZ = rawTrace.offsetZ
                     break
             }
             return trace

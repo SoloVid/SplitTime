@@ -43,6 +43,19 @@ namespace splitTime.math {
         set height(val: number) {
             this._height = val
         }
-        
+
+        get x2(): number {
+            return this._x + this._width
+        }
+        set x2(val: number) {
+            this._width = val - this._x
+        }
+
+        get y2(): number {
+            return this._y + this._height
+        }
+        set y2(val: number) {
+            this._height = val - this._y
+        }
     }
 }

@@ -2,202 +2,120 @@ namespace splitTime {
     let nextRef = 10
 
     export class Sprite implements splitTime.body.Drawable {
-        // TODO: make this private (probably)
-        img: string
-        private _timeMs: number
-        private _frameSignaler: Signaler
-        ref: int
-        constructor(img: string) {
-            this.img = img
-            this._timeMs = 0
-            this._frameSignaler = new splitTime.IntervalStabilizer(
-                200,
-                1,
-                () => {
-                    return this._timeMs
-                }
-            )
+        private _time: game_seconds = Number.NEGATIVE_INFINITY
+        private _timeFrameStarted: game_seconds = Number.NEGATIVE_INFINITY
+        readonly ref: int
+        constructor(
+            private readonly collage: Readonly<Collage>
+        ) {
             this.ref = nextRef++
         }
 
-        static DEFAULT_STANCE = "default"
+        static DEFAULT_STANCE = "$DEFAULT_STANCE$"
 
         private autoReset: boolean = true
-
-        xres = 32
-        yres = 64
-
-        baseOffX = 0
-        baseOffY = 0
 
         omniDir = false
         rotate = 0
 
         opacityModifier = 1
         playerOcclusionFadeFactor = 0
-        stance = splitTime.Sprite.DEFAULT_STANCE
-        requestedStance = splitTime.Sprite.DEFAULT_STANCE
-        requestedFrameReset = false
-        frame = 0
-        dir = splitTime.direction.S
-        requestedDir = splitTime.direction.S
-
-        stances: {
-            [x: string]: { S: number; N: number; E: number; W: number } | number
-        } = {
-            [Sprite.DEFAULT_STANCE]: {
-                S: 0,
-                N: 1,
-                E: 2,
-                W: 3
-            }
-        }
+        private stance = splitTime.Sprite.DEFAULT_STANCE
+        private requestedStance = splitTime.Sprite.DEFAULT_STANCE
+        private requestedFrameReset = false
+        private frame = 0
+        private dir = splitTime.direction.S
+        private requestedDir = splitTime.direction.S
 
         light: body.Light | null = null
 
         private getImage(): HTMLImageElement {
-            return G.ASSETS.images.get(this.img)
+            return G.ASSETS.images.get(this.collage.image)
         }
 
-        getCanvasRequirements(x: number, y: number, z: number) {
+        private getCurrentParcel(): collage.Parcel {
+            if (this.stance === Sprite.DEFAULT_STANCE) {
+                return this.collage.getDefaultParcel(this.dir)
+            }
+            return this.collage.getParcel(this.stance, this.dir)
+        }
+
+        private getCurrentFrame(): collage.Frame {
+            return this.getCurrentParcel().getFrame(this.frame)
+        }
+
+        getDesiredOrigin(whereDefaultWouldBe: Coordinates3D): Coordinates3D {
+            return whereDefaultWouldBe
+        }
+
+        getCanvasRequirements(): splitTime.body.CanvasRequirements {
+            const frame = this.getCurrentFrame()
             return new splitTime.body.CanvasRequirements(
-                Math.round(x),
-                Math.round(y),
-                Math.round(z),
-                this.xres,
-                this.yres
+                math.Rect.make(
+                    0 - frame.box.width / 2 + frame.offset.x,
+                    0 - frame.box.height + frame.offset.y,
+                    frame.box.width,
+                    frame.box.height
+                )
             )
         }
 
         draw(ctx: GenericCanvasRenderingContext2D) {
-            // if(!this.canSee) {return;}
-
             ctx.rotate(this.rotate)
 
-            //splitTime.onBoard.bodies is displayed partially transparent depending on health (<= 50% transparent)
-            //ctx.globalAlpha = (this.hp + this.strg)/(2*this.strg);
-
             this._drawSimple(ctx)
-
-            // this.seeAction();
-            // this.seeStatus();
 
             //ctx.rotate(-this.rotate);
 
             this.rotate = 0
         }
 
-        _drawSimple(ctx: GenericCanvasRenderingContext2D) {
+        private _drawSimple(ctx: GenericCanvasRenderingContext2D) {
             var tImg = this.getImage()
 
-            const crop = this.getAnimationFrameCrop(
-                this.dir,
-                this.stance,
-                this.frame
-            )
-            var x = -Math.round(crop.width / 2) - this.baseOffX
-            var y = -crop.height - this.baseOffY
+            const frame = this.getCurrentFrame()
+            var x = -Math.round(frame.box.width / 2) - frame.offset.x
+            var y = -frame.box.height - frame.offset.y
 
             ctx.globalAlpha = ctx.globalAlpha * this.opacityModifier
 
             ctx.drawImage(
                 tImg,
-                crop.x,
-                crop.y,
-                crop.width,
-                crop.height,
+                frame.box.x,
+                frame.box.y,
+                frame.box.width,
+                frame.box.height,
                 x,
                 y,
-                crop.width,
-                crop.height
+                frame.box.width,
+                frame.box.height
             )
         }
 
-        getAnimationFrameCrop(numDir: number, stance: string, frame: int): math.Rect {
-            const crop = math.Rect.make(0, this.yres * frame, this.xres, this.yres)
-
-            var column = 0
-            var dir = splitTime.direction.toString(numDir)
-            var simpleDir = splitTime.direction.simplifyToCardinal(dir)
-
-            //Allow for non-complicated spritesheets with one column
-            if (!this.stances) {
-                return crop
-            }
-
-            if (!stance || !(stance in this.stances)) {
-                stance = "default"
-            }
-
-            const dirSpec = this.stances[stance]
-            if (!(dirSpec instanceof Object)) {
-                column = dirSpec
-            } else {
-                const dirMap = dirSpec as { [dir: string]: int }
-                //If shorten intermediate directions to cardinal if they are not specified
-                if (typeof dirMap[dir] !== "undefined") {
-                    column = dirMap[dir]
-                } else if (simpleDir && typeof dirMap[simpleDir] !== "undefined") {
-                    column = dirMap[simpleDir]
-                } else {
-                    log.warn(
-                        "Stance " + stance + " missing direction " + dir
-                    )
-                    column = 0
-                }
-            }
-
-            crop.x = this.xres * column
-            return crop
+        private setFrame(newFrame: int) {
+            this.frame = newFrame
+            this._timeFrameStarted - this._time
         }
 
-        finalizeFrame() {
+        private finalizeFrame() {
             if (
-                this.stance != this.requestedStance ||
+                this.stance !== this.requestedStance ||
                 this.requestedFrameReset
             ) {
                 this.frame = 0
+                this._timeFrameStarted = this._time
             } else {
                 //Only update on frame tick
-                if (this._frameSignaler.isSignaling()) {
-                    var mod = this.getAnimationFramesAvailable()
-                    if (mod > 0) {
-                        this.frame++
-                        this.frame %= mod
-                    } else {
-                        this.frame = 0
-                    }
+                while (this._time > this._timeFrameStarted + this.getCurrentFrame().duration) {
+                    this._timeFrameStarted = this._timeFrameStarted + this.getCurrentFrame().duration
+                    this.frame = (this.frame + 1) % this.getCurrentParcel().frames.length
                 }
             }
         }
 
-        getAnimationFramesAvailable(): int {
-            var calculation = Math.floor(this.getImage().height / this.yres)
-            if (isNaN(calculation)) {
-                if (splitTime.debug.ENABLED) {
-                    splitTime.log.warn(
-                        this.img +
-                            " not loaded yet for frame count calculation for " +
-                            this.ref
-                    )
-                }
-                return 1
-            } else {
-                return calculation
-            }
-        }
-
-        finalizeStance() {
-            //Allow for non-complicated sprite sheets with one column
-            if (!this.stances) {
-                return
-            }
-
-            if (
-                !this.requestedStance ||
-                !(this.requestedStance in this.stances)
-            ) {
-                this.requestedStance = "default"
+        private finalizeStance() {
+            if (!this.requestedStance || !this.collage.hasParcel(this.requestedStance)) {
+                this.requestedStance = Sprite.DEFAULT_STANCE
             }
             this.stance = this.requestedStance
             this.dir = this.requestedDir
@@ -219,8 +137,8 @@ namespace splitTime {
             this.requestStance(splitTime.Sprite.DEFAULT_STANCE, this.dir, true)
         }
 
-        notifyTimeAdvance(delta: number) {
-            this._timeMs += delta * 1000
+        notifyTimeAdvance(delta: game_seconds) {
+            this._time += delta
         }
 
         prepareForRender() {
@@ -238,11 +156,7 @@ namespace splitTime {
         }
 
         clone(): splitTime.Sprite {
-            var clone = new splitTime.Sprite(this.img)
-            clone.xres = this.xres
-            clone.yres = this.yres
-            clone.baseOffX = this.baseOffX
-            clone.baseOffY = this.baseOffY
+            var clone = new splitTime.Sprite(this.collage)
             clone.omniDir = this.omniDir
             clone.rotate = this.rotate
             clone.opacityModifier = this.opacityModifier
@@ -253,7 +167,6 @@ namespace splitTime {
             clone.frame = this.frame
             clone.dir = this.dir
             clone.requestedDir = this.requestedDir
-            clone.stances = this.stances
             clone.light = this.light
             return clone
         }

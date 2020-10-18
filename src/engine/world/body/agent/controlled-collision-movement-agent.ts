@@ -50,8 +50,8 @@ namespace splitTime.agent {
                     // FTODO: should this check more/different part of Body than base?
                     const baseCollisionCheck = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
                         this.body.level,
-                        this.body.x - this.body.halfBaseLength, this.body.baseLength,
-                        this.body.y - this.body.halfBaseLength, this.body.baseLength,
+                        this.body.getLeft(), this.body.width,
+                        this.body.getTopY(), this.body.depth,
                         this.body.z, 1,
                         [this.body]
                     )
@@ -114,8 +114,11 @@ namespace splitTime.agent {
         }
 
         private get sprite(): splitTime.Sprite | null {
-            if (this.body.drawable instanceof splitTime.Sprite) {
-                return this.body.drawable
+            // TODO: re-evaluate extracting sprite
+            for (const drawable of this.body.drawables) {
+                if (drawable instanceof splitTime.Sprite) {
+                    return drawable
+                }
             }
             return null
         }

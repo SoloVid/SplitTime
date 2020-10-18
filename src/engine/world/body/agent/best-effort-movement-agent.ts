@@ -67,10 +67,7 @@ namespace splitTime.agent {
         }
 
         private get sprite(): splitTime.Sprite | null {
-            if (this.body.drawable instanceof splitTime.Sprite) {
-                return this.body.drawable
-            }
-            return null
+            return splitTime.body.tryExtractSprite(this.body)
         }
     }
 }

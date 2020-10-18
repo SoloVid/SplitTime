@@ -67,7 +67,8 @@ namespace splitTime.body.collisions {
             var currentY = oldY
             var currentZ = this.mover.body.getZ()
 
-            var halfLength = this.mover.body.halfBaseLength
+            const halfWidth = this.mover.body.width / 2
+            const halfDepth = this.mover.body.depth / 2
 
             var eventIdSet = {}
             let mightMoveLevels = false
@@ -77,8 +78,8 @@ namespace splitTime.body.collisions {
 
                     //If the body is out of bounds on the x axis
                     if (
-                        (iHat > 0 && newX + halfLength >= level.width) ||
-                        (iHat < 0 && newX - halfLength < 0)
+                        (iHat > 0 && newX + halfWidth >= level.width) ||
+                        (iHat < 0 && newX - halfWidth < 0)
                     ) {
                         outX = true
                     } else {
@@ -118,8 +119,8 @@ namespace splitTime.body.collisions {
                     const newY = currentY + jHat
                     //Check if out of bounds on the y axis
                     if (
-                        (jHat > 0 && newY + halfLength >= level.yWidth) ||
-                        (jHat < 0 && newY - halfLength < 0)
+                        (jHat > 0 && newY + halfDepth >= level.yWidth) ||
+                        (jHat < 0 && newY - halfDepth < 0)
                     ) {
                         outY = true
                     } else {

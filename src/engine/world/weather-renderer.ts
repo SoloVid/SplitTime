@@ -156,27 +156,21 @@ namespace splitTime {
 
             const bodies = level.getBodies()
             for (const body of bodies) {
-                const drawable = body.drawable
-                const light = drawable?.getLight()
-                if (!drawable || !light) {
-                    continue
-                }
-                this.buffer.withCleanTransform(() => {
-                    // FTODO: Don't duplicate with what's in BodyRenderer
-                    const canvReq = drawable.getCanvasRequirements(body.x, body.y, body.z)
-                    if (canvReq.translateOrigin) {
-                        this.buffer.context.translate(
-                            Math.round(canvReq.x - screen.x),
-                            Math.round(canvReq.y - canvReq.z - screen.y)
-                        )
-                    } else {
-                        this.buffer.context.translate(
-                            Math.round(0 - screen.x),
-                            Math.round(0 - screen.y)
-                        )
+                for (const drawable of body.drawables) {
+                    const light = drawable.getLight()
+                    if (!light) {
+                        continue
                     }
-                    light.applyLighting(this.buffer.context, drawable.opacityModifier)
-                })
+                    this.buffer.withCleanTransform(() => {
+                        // FTODO: Don't duplicate with what's in BodyRenderer
+                        const desiredOrigin = drawable.getDesiredOrigin(body)
+                        this.buffer.context.translate(
+                            Math.round(desiredOrigin.x - screen.x),
+                            Math.round(desiredOrigin.y - desiredOrigin.z - screen.y)
+                        )
+                        light.applyLighting(this.buffer.context, drawable.opacityModifier)
+                    })
+                }
             }
 
             // Return to default

@@ -34,17 +34,24 @@ namespace splitTime.body {
          * receives a body that needs to be rendered (called by BoardRenderer)
          */
         feedBody(body: splitTime.Body, isPlayer: boolean) {
-            if (!body.drawable) {
+            if (body.drawables.length === 0) {
                 return
             }
-            var canvReq = body.drawable.getCanvasRequirements(
-                body.x,
-                body.y,
-                body.z
-            )
+            const drawArea = math.Rect.make(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0, 0)
+            for (const drawable of body.drawables) {
+                const singleDrawArea = drawable.getCanvasRequirements().rect
+                singleDrawArea.x += body.x
+                //Combine y and z axes to get the "screen y" position,
+                // which is the y location on the 2D screen
+                singleDrawArea.y += body.y - body.z
+                drawArea.x = Math.min(drawArea.x, singleDrawArea.x)
+                drawArea.x2 = Math.max(drawArea.x2, singleDrawArea.x2)
+                drawArea.y = Math.min(drawArea.y, singleDrawArea.y)
+                drawArea.y2 = Math.max(drawArea.y2, singleDrawArea.y2)
+            }
             var node = this._getBodyNode(body)
-            node.drawable = body.drawable
-            node.canvReq = canvReq
+            node.drawables = body.drawables
+            node.drawArea = drawArea
             node.shouldBeDrawnThisFrame = true
             node.isPlayer = isPlayer
 
@@ -128,55 +135,36 @@ namespace splitTime.body {
             var nodesOnScreen = this._getNodesOnScreen()
             //For each node
             for (var i = 0; i < nodesOnScreen.length; i++) {
-                var node = nodesOnScreen[i]
-                var canvReq = node.canvReq
+                const node = nodesOnScreen[i]
+                const drawArea = node.drawArea
                 //FTODO: revisit
-                if (!canvReq) {
+                if (!drawArea) {
                     continue
                 }
-                //Combine y and z axes to get the "screen y" position, which is the y location on the 2D screen
-                var nodeBottom = canvReq.y - canvReq.z
-
-                //Half width/height is used for determining the edge of
-                //  the visible body relative to the y position (bottom)
-                //  and x position (center of the body).
-                var halfWidth = canvReq.width / 2
-                var height = canvReq.height
 
                 //For each other node we haven't visited yet
                 for (var h = i + 1; h < nodesOnScreen.length; h++) {
-                    var otherNode = nodesOnScreen[h]
-                    var otherCanvReq = otherNode.canvReq
+                    const otherNode = nodesOnScreen[h]
+                    const otherDrawArea = otherNode.drawArea
                     //FTODO: revisit
-                    if (!otherCanvReq) {
+                    if (!otherDrawArea) {
                         continue
                     }
 
-                    var otherNodeBottom = otherCanvReq.y - otherCanvReq.z
-                    var otherHeight = otherCanvReq.height
-
-                    var yDiffVal1 = nodeBottom - (otherNodeBottom - otherHeight)
-                    var yDiffVal2 = otherNodeBottom - (nodeBottom - height)
+                    const yDiffVal1 = drawArea.y2 - otherDrawArea.y
+                    const yDiffVal2 = otherDrawArea.y2 - drawArea.y
 
                     //Skip if the two bodies don't overlap on the screen's y axis (top to bottom)
                     if (yDiffVal1 > 0 && yDiffVal2 > 0) {
-                        var otherHalfWidth = otherCanvReq.width / 2
-
-                        var xDiffVal1 =
-                            otherCanvReq.x +
-                            otherHalfWidth -
-                            (canvReq.x - halfWidth)
-                        var xDiffVal2 =
-                            canvReq.x +
-                            halfWidth -
-                            (otherCanvReq.x - otherHalfWidth)
+                        const xDiffVal1 = otherDrawArea.x2 - drawArea.x
+                        const xDiffVal2 = drawArea.x2 - otherDrawArea.x
 
                         //Skip if the two bodies don't overlap on the x axis (left to right)
                         if (xDiffVal1 > 0 && xDiffVal2 > 0) {
-                            var bottomDiff = Math.abs(
-                                otherNodeBottom - nodeBottom
+                            const bottomDiff = Math.abs(
+                                otherDrawArea.y2 - drawArea.y2
                             )
-                            var overlappingPixels = Math.min(
+                            const overlappingPixels = Math.min(
                                 xDiffVal1,
                                 xDiffVal2,
                                 yDiffVal1,
@@ -199,16 +187,11 @@ namespace splitTime.body {
             for (var i = 0; i < this._nodes.length; i++) {
                 var node = this._nodes[i]
                 if (node) {
-                    var canvReq = node.canvReq
+                    const drawArea = node.drawArea
                     //FTODO: revisit
-                    if (!canvReq) {
+                    if (!drawArea) {
                         continue
                     }
-
-                    //Combine y and z axes to get the "screen y" position,
-                    //which is the y location of the bottom of
-                    //the node on the 2D screen
-                    var nodeScreenY = canvReq.y - canvReq.z
 
                     //optimization for not drawing if out of bounds
                     var screen = this.camera.getScreenCoordinates()
@@ -217,10 +200,10 @@ namespace splitTime.body {
 
                     //If the body is in bounds
                     if (
-                        nodeScreenY >= screen.y &&
-                        canvReq.x + canvReq.width / 2 >= screen.x &&
-                        nodeScreenY - canvReq.height <= screenBottom &&
-                        canvReq.x - canvReq.width / 2 <= screenRightEdge
+                        drawArea.y2 >= screen.y &&
+                        drawArea.x2 >= screen.x &&
+                        drawArea.y <= screenBottom &&
+                        drawArea.x <= screenRightEdge
                     ) {
                         nodesOnScreen.push(node)
                     } else {
@@ -263,85 +246,71 @@ namespace splitTime.body {
         }
 
         /**
-         * @param {BodyNode} nodeInFront
-         * @param {BodyNode} nodeBehind
-         * @param {int} overlappingPixels - the number of pixels by which the two are overlapping
-         * @private
+         * @param overlappingPixels - the number of pixels by which the two are overlapping
          */
         private _fadeOccludingSprite(
             nodeInFront: BodyNode,
             nodeBehind: BodyNode,
             overlappingPixels: int
         ) {
-            if (!nodeInFront.drawable) {
-                return
-            }
-            //If this sprite has the "playerOcclusionFadeFactor" property set to a value greater than zero, fade it out when player is behind
-            if (nodeInFront.drawable.playerOcclusionFadeFactor > 0.01) {
-                //If the active player is behind an object, lower the opacity
-                if (nodeBehind.isPlayer) {
-                    var CROSS_FADE_PIXELS = 32
+            for (const drawable of nodeInFront.drawables) {
+                //If this sprite has the "playerOcclusionFadeFactor" property set to a value greater than zero, fade it out when player is behind
+                if (drawable.playerOcclusionFadeFactor > 0.01) {
+                    //If the active player is behind an object, lower the opacity
+                    if (nodeBehind.isPlayer) {
+                        var CROSS_FADE_PIXELS = 32
 
-                    if (splitTime.debug.ENABLED) {
-                        if (
-                            nodeInFront.drawable.playerOcclusionFadeFactor <
-                                0 ||
-                            nodeInFront.drawable.playerOcclusionFadeFactor > 1
-                        ) {
-                            console.error(
-                                "Sprite specified with playerOcclusionFadeFactor invalid value: " +
-                                    nodeInFront.drawable
-                                        .playerOcclusionFadeFactor
-                            )
-                            return
+                        if (splitTime.debug.ENABLED) {
+                            if (
+                                drawable.playerOcclusionFadeFactor <
+                                    0 ||
+                                drawable.playerOcclusionFadeFactor > 1
+                            ) {
+                                console.error(
+                                    "Sprite specified with playerOcclusionFadeFactor invalid value: " +
+                                        drawable.playerOcclusionFadeFactor
+                                )
+                                return
+                            }
                         }
-                    }
 
-                    //If the body is not already in a level transition
-                    if(!nodeInFront.body.fadeEnteringLevelPromise){
-                        //Fade gradually based on the number of overlapping pixels
-                        var crossFadeFactor = Math.min(
-                            overlappingPixels / CROSS_FADE_PIXELS,
-                            1
-                        )
-                        var pixelsFactor =
-                            crossFadeFactor *
-                            nodeInFront.drawable.playerOcclusionFadeFactor
-                        nodeInFront.targetOpacity = 1 - pixelsFactor
+                        //If the body is not already in a level transition
+                        if(!nodeInFront.body.fadeEnteringLevelPromise){
+                            //Fade gradually based on the number of overlapping pixels
+                            var crossFadeFactor = Math.min(
+                                overlappingPixels / CROSS_FADE_PIXELS,
+                                1
+                            )
+                            var pixelsFactor =
+                                crossFadeFactor *
+                                drawable.playerOcclusionFadeFactor
+                            // TODO: Only apply this to single drawable
+                            nodeInFront.targetOpacity = 1 - pixelsFactor
+                        }
                     }
                 }
             }
         }
 
         drawBodyTo(node: BodyNode) {
+            for (const drawable of node.drawables) {
+                this.drawBodyDrawable(node, drawable)
+            }
+        }
+
+        private drawBodyDrawable(node: BodyNode, drawable: Drawable): void {
             //FTODO: revisit
             if (!this.ctx || !this.screen) {
                 return
             }
             // TODO: potentially give the body a cleared personal canvas if requested
 
-            var canvReq = node.canvReq
-            //FTODO: revisit
-            if (!canvReq) {
-                return
-            }
-
-            if (!node.drawable) {
-                return
-            }
-
             // Translate origin to body location
-            if (canvReq.translateOrigin) {
-                this.ctx.translate(
-                    Math.round(canvReq.x - this.screen.x),
-                    Math.round(canvReq.y - canvReq.z - this.screen.y)
-                )
-            } else {
-                this.ctx.translate(
-                    Math.round(0 - this.screen.x),
-                    Math.round(0 - this.screen.y)
-                )
-            }
+            const translateOriginTarget = drawable.getDesiredOrigin(node.body)
+            this.ctx.translate(
+                Math.round(translateOriginTarget.x - this.screen.x),
+                Math.round(translateOriginTarget.y - translateOriginTarget.z - this.screen.y)
+            )
 
             //Set the opacity for this body, but ease toward it
             node.opacity = splitTime.approachValue(
@@ -352,7 +321,7 @@ namespace splitTime.body {
             this.ctx.globalAlpha = node.opacity
 
             //Draw the body
-            node.drawable.draw(this.ctx)
+            drawable.draw(this.ctx)
 
             //Reset opacity settings back to default (1 - "not opaque")
             this.ctx.globalAlpha = 1
@@ -400,32 +369,24 @@ namespace splitTime.body {
      * @param {splitTime.Body} body2
      */
     function isInFront(body1: splitTime.Body, body2: splitTime.Body) {
-        return body1.y - body1.halfBaseLength >= body2.y + body2.halfBaseLength
+        return body1.y - body1.depth / 2 >= body2.y + body2.depth / 2
     }
 
     class BodyNode {
-        shouldBeDrawnThisFrame: boolean
+        shouldBeDrawnThisFrame: boolean = false
         isPlayer: boolean = false
-        visitedThisFrame: boolean
+        visitedThisFrame: boolean = false
         overlappingWithPlayer: boolean = false
-        drawable: splitTime.body.Drawable | null
-        canvReq: splitTime.body.CanvasRequirements | null
+        drawables: splitTime.body.Drawable[]
+        drawArea: math.Rect | null = null
         body: splitTime.Body
-        /** @type {BodyNode[]} bodies drawn before this one */
-        before: BodyNode[]
-        opacity: number
-        targetOpacity: number
+        /** bodies drawn before this one */
+        before: BodyNode[] = []
+        opacity: number = 1
+        targetOpacity: number = 1
         constructor(body: splitTime.Body) {
             this.body = body
-            this.drawable = body.drawable
-            this.before = []
-
-            this.canvReq = null
-
-            this.visitedThisFrame = false
-            this.shouldBeDrawnThisFrame = false
-            this.opacity = 1
-            this.targetOpacity = 1
+            this.drawables = body.drawables
         }
     }
 }

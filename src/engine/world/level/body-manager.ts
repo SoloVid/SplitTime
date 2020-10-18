@@ -159,16 +159,17 @@ namespace splitTime.level {
                 return
             }
 
-            var halfBaseLength = Math.round(body.baseLength / 2)
-            var roundHeight = Math.round(body.height)
-            var roundX = Math.floor(body.getX())
-            var roundY = Math.floor(body.getY())
-            var roundZ = Math.floor(body.getZ())
+            const halfWidth = Math.round(body.width / 2)
+            const halfDepth = Math.round(body.depth / 2)
+            const roundHeight = Math.round(body.height)
+            const roundX = Math.floor(body.getX())
+            const roundY = Math.floor(body.getY())
+            const roundZ = Math.floor(body.getZ())
 
-            this._sortedByXLeft!.resortBody(body, roundX - halfBaseLength)
-            this._sortedByXRight!.resortBody(body, roundX + halfBaseLength)
-            this._sortedByYTop!.resortBody(body, roundY - halfBaseLength)
-            this._sortedByYBottom!.resortBody(body, roundY + halfBaseLength)
+            this._sortedByXLeft!.resortBody(body, roundX - halfWidth)
+            this._sortedByXRight!.resortBody(body, roundX + halfWidth)
+            this._sortedByYTop!.resortBody(body, roundY - halfDepth)
+            this._sortedByYBottom!.resortBody(body, roundY + halfDepth)
             this._sortedByZTop!.resortBody(body, roundZ + roundHeight)
             this._sortedByZBottom!.resortBody(body, roundZ)
         }

@@ -46,8 +46,7 @@ namespace splitTime.direction {
         if (typeof lookup[stringDir] !== "undefined") {
             return lookup[stringDir]
         } else {
-            log.warn("Invalid direction: " + stringDir)
-            return -1
+            throw new Error("Invalid direction: " + stringDir)
         }
     }
     export function toString(numDir: direction_t): string {

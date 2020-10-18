@@ -8,8 +8,11 @@ namespace splitTime.agent {
 
         regularMotion(delta: game_seconds, newSteps: number, newDir: direction_t) {
             if(this.pixels > 0) {
-                if (this.body.drawable instanceof Sprite) {
-                    this.body.drawable.requestStance("walk", newDir)
+                // TODO: re-evaluate
+                for (const drawable of this.body.drawables) {
+                    if (drawable instanceof Sprite) {
+                        drawable.requestStance("walk", newDir)
+                    }
                 }
                 var pixelsThisFrame = delta * this.body.spd
                 this.body.mover.zeldaBump(this.body.dir, pixelsThisFrame)

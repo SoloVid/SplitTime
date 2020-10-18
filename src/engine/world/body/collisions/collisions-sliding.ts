@@ -12,8 +12,6 @@ namespace splitTime.body.collisions {
 
             this.mover.bodyExt.sliding = true
 
-            var halfBase = Math.round(this.mover.body.baseLength / 2)
-
             var x = Math.floor(this.mover.body.getX())
             var y = Math.floor(this.mover.body.getY())
             var z = Math.floor(this.mover.body.getZ())
@@ -34,11 +32,11 @@ namespace splitTime.body.collisions {
                 var testX =
                     x +
                     splitTime.direction.getXSign(direction) *
-                        (halfBase + howFarAway)
+                        (me.mover.body.width / 2 + howFarAway)
                 var testY =
                     y +
                     splitTime.direction.getYSign(direction) *
-                        (halfBase + howFarAway)
+                        (me.mover.body.depth / 2 + howFarAway)
                 levelTraces.calculatePixelColumnCollisionInfo(
                     collisionInfo,
                     testX,

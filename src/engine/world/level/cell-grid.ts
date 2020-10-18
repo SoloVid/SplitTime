@@ -187,7 +187,7 @@ namespace splitTime.level {
                 whereIsBodyNow,
                 removeFromCell
             )
-            if (body.baseLength > 0 && body.height > 0) {
+            if (body.width > 0 && body.depth > 0 && body.height > 0) {
                 this._adjustCellClaims(
                     body,
                     whereIsBodyNow,
@@ -425,9 +425,9 @@ namespace splitTime.level {
         constructor(cellGrid: splitTime.level.CellGrid, body?: splitTime.Body) {
             if (body) {
                 const left = body.getLeft()
-                const right = left + body.baseLength
+                const right = left + body.width
                 const yTop = body.getTopY()
-                const yBottom = yTop + body.baseLength
+                const yBottom = yTop + body.depth
                 const zBottom = body.getZ()
                 const zTop = zBottom + body.height
 
@@ -451,14 +451,14 @@ namespace splitTime.level {
     function isXOverlap(minX: number, exMaxX: number, body: Body) {
         var bodyLeft = body.getLeft()
         var noOverlap =
-            exMaxX <= bodyLeft || bodyLeft + body.baseLength <= minX
+            exMaxX <= bodyLeft || bodyLeft + body.width <= minX
         return !noOverlap
     }
 
     function isYOverlap(minY: number, exMaxY: number, body: Body) {
         var bodyTop = body.getTopY()
         var noOverlap =
-            exMaxY <= bodyTop || bodyTop + body.baseLength <= minY
+            exMaxY <= bodyTop || bodyTop + body.depth <= minY
         return !noOverlap
     }
 

@@ -69,9 +69,9 @@ namespace splitTime {
             for (var iBody = 0; iBody < bodies.length; iBody++) {
                 var body = bodies[iBody]
                 this.bodyRenderer.feedBody(body, body === playerBody)
-                if (body.drawable) {
-                    if (typeof body.drawable.prepareForRender === "function") {
-                        body.drawable.prepareForRender()
+                for (const drawable of body.drawables) {
+                    if (typeof drawable.prepareForRender === "function") {
+                        drawable.prepareForRender()
                     }
                 }
                 if (body.shadow) {
@@ -186,12 +186,12 @@ namespace splitTime {
             this.buffer.context.globalAlpha = 1
 
             for (const body of bodies) {
-                const drawable = body.drawable
-                if (
-                    drawable &&
-                    typeof drawable.cleanupAfterRender === "function"
-                ) {
-                    drawable.cleanupAfterRender()
+                for (const drawable of body.drawables) {
+                    if (
+                        typeof drawable.cleanupAfterRender === "function"
+                    ) {
+                        drawable.cleanupAfterRender()
+                    }
                 }
                 // TODO: maybe cleanup shadows?
             }

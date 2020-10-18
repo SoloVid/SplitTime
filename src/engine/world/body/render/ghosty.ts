@@ -1,16 +1,34 @@
 namespace splitTime.body {
+
+    /** @deprecated need to develop some patterns that don't involve this */
+    export function extractSprite(body: Body): Sprite {
+        const sprite = tryExtractSprite(body)
+        if (sprite === null) {
+            throw new Error("No Sprite associated with Body")
+        }
+        return sprite
+    }
+
+    /** @deprecated need to develop some patterns that don't involve this */
+    export function tryExtractSprite(body: Body): Sprite | null {
+        for (const drawable of body.drawables) {
+            if (drawable instanceof Sprite) {
+                return drawable
+            }
+        }
+        return null
+    }
+
     export function createGhost(
         sourceBody: Body,
         location: ILevelLocation2
     ): Body {
-        if (sourceBody.drawable === null) {
-            throw new Error("Body doesn't have a drawable; so can't create ghost")
-        }
-        const tempDrawable = sourceBody.drawable.clone()
+        const tempDrawable = extractSprite(sourceBody).clone()
         const tempBody = new Body()
-        tempBody.baseLength = 0
+        tempBody.width = 0
+        tempBody.depth = 0
         tempBody.putInLocation(location)
-        tempBody.drawable = tempDrawable
+        tempBody.drawables.push(tempDrawable)
         return tempBody
     }
 
@@ -20,12 +38,20 @@ namespace splitTime.body {
         maxOpacity: number = 1,
         speed: number = 2
     ): PromiseLike<void> {
-        const d = body.drawable
-        if (d === null) {
-            // Nothing to fade in
-            return Pledge.as();
+        const promises = []
+        for (const d of body.drawables) {
+            promises.push(fadeInBodyDrawable(body, d, startOpacity, maxOpacity, speed))
         }
+        return Pledge.when(promises) as PromiseLike<void>
+    }
 
+    function fadeInBodyDrawable(
+        body: Body,
+        d: Drawable,
+        startOpacity: number = 0,
+        maxOpacity: number = 1,
+        speed: number = 2
+    ): Pledge {
         d.opacityModifier = startOpacity
 
         const pledge = new Pledge()
@@ -47,12 +73,19 @@ namespace splitTime.body {
         startOpacity = 1,
         speed: number = 2
     ): PromiseLike<void> {
-        const d = body.drawable
-        if (d === null) {
-            // Nothing to fade out
-            return Pledge.as();
+        const promises = []
+        for (const d of body.drawables) {
+            promises.push(fadeOutBodyDrawable(body, d, startOpacity, speed))
         }
+        return Pledge.when(promises) as PromiseLike<void>
+    }
 
+    function fadeOutBodyDrawable(
+        body: Body,
+        d: Drawable,
+        startOpacity = 1,
+        speed: number = 2
+    ): Pledge {
         d.opacityModifier = startOpacity
 
         const pledge = new Pledge()

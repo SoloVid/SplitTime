@@ -136,20 +136,22 @@ namespace splitTime {
                         typeof prop.dir === "string"
                             ? splitTime.direction.fromString(prop.dir)
                             : +prop.dir
-                    if (obj.drawable instanceof Sprite) {
-                        obj.drawable.requestStance(
-                            prop.stance,
-                            obj.dir,
-                            true,
-                            true
-                        )
-                    }
-                    if (
-                        obj.drawable &&
-                        (prop.playerOcclusionFadeFactor ||
-                            prop.playerOcclusionFadeFactor === 0)
-                    ) {
-                        obj.drawable.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor
+                    // TODO: re-evaluate
+                    for (const drawable of obj.drawables) {
+                        if (drawable instanceof Sprite) {
+                            drawable.requestStance(
+                                prop.stance,
+                                obj.dir,
+                                true,
+                                true
+                            )
+                        }
+                        if (
+                            (prop.playerOcclusionFadeFactor ||
+                                prop.playerOcclusionFadeFactor === 0)
+                        ) {
+                            drawable.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor
+                        }
                     }
                 } else {
                     splitTime.log.error(

@@ -1,5 +1,6 @@
 namespace splitTime.level {
     export interface FileData {
+        /** @deprecated this feels broken */
         fileName: string
         type: "action"
         region: string
@@ -13,6 +14,9 @@ namespace splitTime.level {
         props: file_data.Prop[]
         positions: file_data.Position[]
     }
+
+    // Expect compiler error if FileData is not jsonable
+    let testFileDataJsonable: file.IsJsonable<FileData, false> = {} as FileData
 
     export namespace file_data {
         export interface Layer {
@@ -29,9 +33,9 @@ namespace splitTime.level {
             direction: string // for stairs
             event: string // for events
             level: string // for pointers
-            offsetX: string // for pointers
-            offsetY: string // for pointers
-            offsetZ: string // for pointers
+            offsetX: number // for pointers
+            offsetY: number // for pointers
+            offsetZ: number // for pointers
         }
 
         export interface Prop {

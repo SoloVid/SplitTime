@@ -8,24 +8,25 @@ namespace splitTime.body {
         constructor(body: splitTime.Body) {
             this.realBody = body
             this.shadowBody = new splitTime.Body()
-            this.shadowBody.drawable = this
-            this.shadowBody.baseLength = body.baseLength
+            this.shadowBody.drawables.push(this)
+            this.shadowBody.width = body.width
+            this.shadowBody.depth = body.depth
             this.shadowBody.height = 0
 
             this.minRadius = 4
-            this.maxRadius = this.shadowBody.baseLength
+            this.maxRadius = Math.max(this.shadowBody.width, this.shadowBody.depth)
             this.radius = this.maxRadius
         }
         opacityModifier: number = 1
         playerOcclusionFadeFactor = 0
 
-        getCanvasRequirements(x: number, y: number, z: number) {
+        getDesiredOrigin(whereDefaultWouldBe: Coordinates3D): Coordinates3D {
+            return whereDefaultWouldBe
+        }
+
+        getCanvasRequirements(): CanvasRequirements {
             return new splitTime.body.CanvasRequirements(
-                Math.round(x),
-                Math.round(y),
-                Math.round(z),
-                this.radius,
-                this.radius
+                math.Rect.make(-this.radius / 2, -this.radius / 2, this.radius, this.radius)
             )
         }
 
@@ -65,8 +66,8 @@ namespace splitTime.body {
             const minBottom = this.realBody.z - maxFallDist
             const shadowFallInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
                 this.realBody.level,
-                this.realBody.x - this.realBody.halfBaseLength, this.realBody.baseLength,
-                this.realBody.y - this.realBody.halfBaseLength, this.realBody.baseLength,
+                this.realBody.getLeft(), this.realBody.width,
+                this.realBody.getTopY(), this.realBody.depth,
                 minBottom, maxFallDist + 1,
                 [this.realBody],
                 true
