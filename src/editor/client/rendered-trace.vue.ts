@@ -23,7 +23,6 @@ namespace splitTime.editor.level {
         otherLevel: splitTime.level.FileData
         otherLevelImgSrc: string
         // methods
-        edit(): void
         track(point: Coordinates2D): void
         toggleHighlight(highlight: boolean): void
     }
@@ -167,9 +166,6 @@ namespace splitTime.editor.level {
         return this.levelEditorShared.server.imgSrc(this.otherLevel.background)
     }
 
-    function edit(this: VueRenderedTrace): void {
-        this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(this.trace)
-    }
     function track(this: VueRenderedTrace, point?: Coordinates2D): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {
             return
@@ -194,6 +190,7 @@ namespace splitTime.editor.level {
             }
         }
         this.levelEditorShared.follow(follower)
+        this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(this.trace)
     }
     function toggleHighlight(this: VueRenderedTrace, highlight: boolean): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {
@@ -240,7 +237,6 @@ namespace splitTime.editor.level {
             }
         },
         methods: {
-            edit,
             track,
             toggleHighlight
         },
@@ -266,7 +262,7 @@ namespace splitTime.editor.level {
     </defs>
     <polyline
             v-show="trace.metadata.displayed && hasClose"
-            v-on:dblclick.prevent="edit"
+            v-on:dblclick.prevent
             v-on:mousedown.left="track(null)"
             v-on:mouseenter="toggleHighlight(true)"
             v-on:mouseleave="toggleHighlight(false)"
@@ -275,7 +271,7 @@ namespace splitTime.editor.level {
     ></polyline>
     <polyline
             v-show="trace.metadata.displayed"
-            v-on:dblclick="edit"
+            v-on:dblclick
             v-on:mousedown.left="track(null)"
             v-on:mouseenter="toggleHighlight(true)"
             v-on:mouseleave="toggleHighlight(false)"

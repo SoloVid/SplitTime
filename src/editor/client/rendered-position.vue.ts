@@ -5,17 +5,16 @@ namespace splitTime.editor.level {
         position: Position
         // computed
         styleObject: object
-        body: splitTime.Body
-        positionLeft: number
-        positionTop: number
-        width: number
-        height: number
+        body: Body
+        positionLeft: int
+        positionTop: int
+        width: int
+        height: int
         crop: math.Rect
         spriteOffset: Coordinates2D
         // asyncComputed
         imgSrc: string
         // methods
-        edit(): void
         track(): void
         toggleHighlight(highlight: boolean): void
     }
@@ -32,6 +31,7 @@ namespace splitTime.editor.level {
             height: this.height + 'px'
         }
     }
+
     function body(this: VueRenderedPosition): splitTime.Body {
         return loadBodyFromTemplate(this.position.obj.template)
     }
@@ -58,9 +58,6 @@ namespace splitTime.editor.level {
         return getBodyImage(this.body, this.levelEditorShared.server)
     }
 
-    function edit(this: VueRenderedPosition) {
-        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(this.position)
-    }
     function track(this: VueRenderedPosition) {
         if(this.levelEditorShared.shouldDragBePrevented()) {
             return
@@ -71,6 +68,7 @@ namespace splitTime.editor.level {
                 this.position.obj.y += dy
             }
         })
+        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(this.position)
     }
     function toggleHighlight(this: VueRenderedPosition, highlight: boolean) {
         if(this.levelEditorShared.shouldDragBePrevented()) {
@@ -100,7 +98,6 @@ namespace splitTime.editor.level {
             imgSrc
         },
         methods: {
-            edit,
             track,
             toggleHighlight
         },
@@ -108,7 +105,7 @@ namespace splitTime.editor.level {
 <div
     v-show="position.metadata.displayed"
     class="draggable position"
-    v-on:dblclick.prevent="edit"
+    v-on:dblclick.prevent
     v-on:mousedown.left="track"
     v-on:mouseenter="toggleHighlight(true)"
     v-on:mouseleave="toggleHighlight(false)"

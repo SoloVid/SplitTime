@@ -1,11 +1,11 @@
 namespace splitTime.editor.level {
-    interface RenderedProp {
+    interface VueRenderedProp {
         // props
         levelEditorShared: LevelEditorShared
         prop: Prop
         // computed
-        body: Body
         styleObject: object
+        body: Body
         positionLeft: int
         positionTop: int
         width: int
@@ -15,12 +15,11 @@ namespace splitTime.editor.level {
         // asyncComputed
         imgSrc: string
         // methods
-        edit(): void
         track(): void
         toggleHighlight(highlight: boolean): void
     }
     
-    function styleObject(this: RenderedProp): object {
+    function styleObject(this: VueRenderedProp): object {
         return {
             outline: this.prop.metadata.highlighted ? "2px solid yellow" : "",
             backgroundColor: this.prop.metadata.highlighted ? "yellow" : "initial",
@@ -32,37 +31,34 @@ namespace splitTime.editor.level {
             height: this.height + 'px'
         }
     }
-    
-    function body(this: RenderedProp): splitTime.Body {
+
+    function body(this: VueRenderedProp): splitTime.Body {
         return loadBodyFromTemplate(this.prop.obj.template)
     }
-    function positionLeft(this: RenderedProp): number {
+    function positionLeft(this: VueRenderedProp): number {
         return this.prop.obj.x - this.crop.width/2 - this.spriteOffset.x
     }
-    function positionTop(this: RenderedProp): number {
+    function positionTop(this: VueRenderedProp): number {
         return this.prop.obj.y - this.prop.obj.z - this.crop.height + this.body.baseLength/2 - this.spriteOffset.y
     }
-    function width(this: RenderedProp): number {
+    function width(this: VueRenderedProp): number {
         return this.crop.width
     }
-    function height(this: RenderedProp): number {
+    function height(this: VueRenderedProp): number {
         return this.crop.height
     }
-    function crop(this: RenderedProp): math.Rect {
+    function crop(this: VueRenderedProp): math.Rect {
         return getAnimationFrameCrop(this.body, this.prop.obj.dir, this.prop.obj.stance)
     }
-    function spriteOffset(this: RenderedProp): Coordinates2D {
+    function spriteOffset(this: VueRenderedProp): Coordinates2D {
         return getSpriteOffset(this.body)
     }
 
-    function imgSrc(this: RenderedProp): PromiseLike<string> {
+    function imgSrc(this: VueRenderedProp): PromiseLike<string> {
         return getBodyImage(this.body, this.levelEditorShared.server)
     }
 
-    function edit(this: RenderedProp): void {
-        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(this.prop)
-    }
-    function track(this: RenderedProp): void {
+    function track(this: VueRenderedProp): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {
             return
         }
@@ -72,8 +68,9 @@ namespace splitTime.editor.level {
                 this.prop.obj.y += dy
             }
         })
+        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(this.prop)
     }
-    function toggleHighlight(this: RenderedProp, highlight: boolean): void {
+    function toggleHighlight(this: VueRenderedProp, highlight: boolean): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {
             this.prop.metadata.highlighted = false
             return
@@ -100,7 +97,6 @@ namespace splitTime.editor.level {
             imgSrc
         },
         methods: {
-            edit,
             track,
             toggleHighlight
         },
@@ -108,7 +104,7 @@ namespace splitTime.editor.level {
 <div
     v-show="prop.metadata.displayed"
     class="draggable prop"
-    v-on:dblclick.prevent="edit"
+    v-on:dblclick.prevent
     v-on:mousedown.left="track"
     v-on:mouseenter="toggleHighlight(true)"
     v-on:mouseleave="toggleHighlight(false)"
