@@ -10,7 +10,7 @@ namespace splitTime.file {
 
     type DefinitelyNotJsonable = (() => any) | undefined
 
-    export type IsJsonable<T> =
+    export type IsJsonable<T, AllowUnknown = true> =
         // Check if there are any non-jsonable types represented in the union
         // Note: use of tuples in this first condition side-steps distributive conditional types
         // (see https://github.com/microsoft/TypeScript/issues/29368#issuecomment-453529532)
@@ -22,7 +22,7 @@ namespace splitTime.file {
                 // Otherwise check if array
                 : T extends (infer U)[]
                     // Arrays are special; just check array element type
-                    ? IsJsonable<U>[]
+                    ? IsJsonable<U, AllowUnknown>[]
                     // Otherwise check if object
                     : T extends object
                         // It's an object
@@ -30,17 +30,20 @@ namespace splitTime.file {
                             // Iterate over keys in object case
                             [P in keyof T]:
                                 // Recursive call for children
-                                IsJsonable<T[P]>
+                                IsJsonable<T[P], AllowUnknown>
                         }
-                        // Check if there is nothing else besides unknown in the type
-                        : [Exclude<T, unknown>] extends [never]
-                            // Then if unknown is in the type...
-                            ? unknown extends T
-                                // I submit to you: unknown
-                                ? unknown
-                                // Otherwise any other non-object no bueno
+                        // Gate the subsequent checks behind whether we're allowing unknown or not
+                        : AllowUnknown extends false
+                            ? never
+                            // Check if there is anything else besides unknown in the type
+                            : [Exclude<T, unknown>] extends [never]
+                                // Then if unknown is in the type...
+                                ? unknown extends T
+                                    // I submit to you: unknown
+                                    ? unknown
+                                    // Otherwise any other non-object no bueno
+                                    : never
                                 : never
-                            : never
             // Otherwise non-jsonable type union was found not empty
             : never
 
