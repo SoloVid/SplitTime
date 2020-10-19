@@ -27,7 +27,7 @@ namespace splitTime.file {
             height: int
         }
 
-        // TBD name: parcel? animation? animated entity? setup? kit?
+        // TBD name: montage? parcel? animation? animated entity? setup? kit?
         /**
          * Component of {@link Collage}, specifically used in JSON file format.
          */

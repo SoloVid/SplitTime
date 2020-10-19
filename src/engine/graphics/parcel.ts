@@ -18,7 +18,39 @@ namespace splitTime.collage {
             return this.frames[index]
         }
 
-        // getOverallArea(): Coordinates2D {
-        // }
+        getDuration(): game_seconds {
+            return this.frames.reduce((sum, frame) => {
+                return sum + frame.duration
+            }, 0)
+        }
+
+        getFrameAt(timeThrough: game_seconds): Frame {
+            const timeWithin = timeThrough % this.getDuration()
+            let countingThrough = 0
+            for (const frame of this.frames) {
+                countingThrough += frame.duration
+                if (countingThrough > timeWithin) {
+                    return frame
+                }
+            }
+            throw new Error("Frame not found (impossible unless 0 frames?)")
+        }
+
+        /**
+         * The individual frames could be drawn all over the place.
+         * This method returns a rectangle that contains room for all of them.
+         * Returned box is relative to body positioned at (0, 0, 0).
+         */
+        getOverallArea(): math.Rect {
+            const drawArea = math.Rect.make(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0, 0)
+            for (const frame of this.frames) {
+                const singleDrawArea = frame.getTargetBox(this.bodySpec)
+                drawArea.x = Math.min(drawArea.x, singleDrawArea.x)
+                drawArea.x2 = Math.max(drawArea.x2, singleDrawArea.x2)
+                drawArea.y = Math.min(drawArea.y, singleDrawArea.y)
+                drawArea.y2 = Math.max(drawArea.y2, singleDrawArea.y2)
+            }
+            return drawArea
+        }
     }
 }

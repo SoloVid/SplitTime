@@ -13,15 +13,17 @@ namespace splitTime.collage {
         ) {}
 
         /**
-         * Given the body dimensions and current position, where should the frame be drawn to?
-         * Return coordinates are 2D relative to level squashed from 3D to 2D coordinates.
+         * Given the body dimensions (and body at (0, 0, 0)), where should the frame be drawn to?
+         * Returned box is relative to squashed (0, 0, 0) coordinates of associated body.
          */
-        getTargetPosition(bodySpec: file.collage.BodySpec, coordinates: Coordinates3D): Readonly<Coordinates2D> {
-            const nonOffset = getTopLeft(bodySpec, coordinates, this.box)
-            return {
-                x: nonOffset.x + this.offset.x,
-                y: nonOffset.y + this.offset.y
-            }
+        getTargetBox(bodySpec: file.collage.BodySpec): math.Rect {
+            const nonOffset = getDefaultTopLeft(bodySpec, this.box)
+            return math.Rect.make(
+                nonOffset.x + this.offset.x,
+                nonOffset.y + this.offset.y,
+                this.box.width,
+                this.box.height
+            )
         }
     }
 
@@ -37,15 +39,15 @@ namespace splitTime.collage {
         }
     }
 
-    /**
-     * Unlike {@link getDefaultTopLeft}, this function gets the top left given an actual position
-     * rather than just relative to (0, 0, 0).
-     */
-    export function getTopLeft(bodySpec: file.collage.BodySpec, coordinates: Coordinates3D, frameBox: Readonly<math.Rect>): Coordinates2D {
-        const defaultTopLeft = getDefaultTopLeft(bodySpec, frameBox)
-        return {
-            x: coordinates.x + defaultTopLeft.x,
-            y: coordinates.y - coordinates.z + defaultTopLeft.y
-        }
-    }
+    // /**
+    //  * Unlike {@link getDefaultTopLeft}, this function gets the top left given an actual position
+    //  * rather than just relative to (0, 0, 0).
+    //  */
+    // export function getTopLeft(bodySpec: file.collage.BodySpec, coordinates: Coordinates3D, frameBox: Readonly<math.Rect>): Coordinates2D {
+    //     const defaultTopLeft = getDefaultTopLeft(bodySpec, frameBox)
+    //     return {
+    //         x: coordinates.x + defaultTopLeft.x,
+    //         y: coordinates.y - coordinates.z + defaultTopLeft.y
+    //     }
+    // }
 }

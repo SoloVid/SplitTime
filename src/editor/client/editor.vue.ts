@@ -1,5 +1,5 @@
 namespace splitTime.editor {
-    class GlobalEditorStuff implements level.GlobalEditorShared {
+    class GlobalEditorStuff implements client.GlobalEditorShared {
         followers: client.Followable[] | null = null
         previousFollowers: client.Followable[] | null = null
 
@@ -9,6 +9,10 @@ namespace splitTime.editor {
 
         get server(): client.ServerLiaison {
             return this.editor.server
+        }
+
+        get time(): game_seconds {
+            return this.editor.time
         }
         
         setFollowers(newFollowers: client.Followable[]): void {
@@ -20,6 +24,7 @@ namespace splitTime.editor {
     interface VueEditor extends client.VueComponent {
         // props
         server: client.ServerLiaison
+        time: game_seconds
         // data
         fileBrowserStartPath: string
         showFileSelect: boolean
@@ -238,6 +243,8 @@ namespace splitTime.editor {
             updatePageTitle(this.level)
         } else if (splitTime.file.instanceOf.Collage(fileObject)) {
             this.collage = fileObject
+            log.debug(fileObject)
+            log.debug(splitTime.collage.makeCollageFromFile(fileObject))
         } else {
             alert("Editing this file type is not supported. Is it possible your data is corrupted?")
         }
@@ -250,7 +257,8 @@ namespace splitTime.editor {
 
     Vue.component("st-editor", {
         props: {
-            server: Object
+            server: Object,
+            time: Number
         },
         data,
         methods: {
@@ -307,6 +315,13 @@ namespace splitTime.editor {
             ></file-browser>
         </div>
     </div>
+    <collage-editor
+        v-if="collage"
+        :editor-inputs="inputs"
+        :editor-global-stuff="globalEditorStuff"
+        :supervisor-control="supervisorControl"
+        :collage="collage"
+    ></collage-editor>
     <level-editor
         v-if="level"
         :editor-inputs="inputs"
@@ -314,9 +329,6 @@ namespace splitTime.editor {
         :supervisor-control="supervisorControl"
         :level="level"
     ></level-editor>
-    <div
-        v-if="collage"
-    ><h1>Collage Editor Placeholder</h1></div>
 </div>
         `
     })
