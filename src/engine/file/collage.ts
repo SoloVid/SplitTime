@@ -43,4 +43,51 @@ namespace splitTime.file {
             height: int
         }
     }
+
+    export namespace instanceOf {
+        export function Collage(thing: unknown): thing is file.Collage {
+            return type.isA(thing, type.object<file.Collage>({
+                image: type.string,
+                frames: type.array(type.object({
+                    id: type.string,
+                    x: type.int,
+                    y: type.int,
+                    width: type.int,
+                    height: type.int
+                })),
+                parcels: type.array(type.object({
+                    id: type.string,
+                    direction: type.string,
+                    frames: type.array(type.object({
+                        frameId: type.string,
+                        offsetX: type.int,
+                        offsetY: type.int,
+                        duration: type.number
+                    })),
+                    body: type.object({
+                        width: type.int,
+                        depth: type.int,
+                        height: type.int
+                    }),
+                    traces: type.array(type.object({
+                        id: type.string,
+                        type: type.string,
+                        vertices: type.string,
+                        z: type.number,
+                        height: type.number,
+                        direction: type.string,
+                        event: type.string,
+                        level: type.string,
+                        offsetX: type.number,
+                        offsetY: type.number,
+                        offsetZ: type.number
+                    }))
+                })),
+                defaultParcelId: type.string
+            }))
+        }
+        defer(() => {
+            Collage({})
+        })
+    }
 }
