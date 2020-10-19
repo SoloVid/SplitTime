@@ -1,15 +1,24 @@
 namespace splitTime.file {
+    /**
+     * Serializable form of {@link splitTime.Collage}, specifically used in JSON file format.
+     */
     export interface Collage {
         image: string
         frames: collage.Frame[]
         parcels: collage.Parcel[]
+        /** Reference to a {@link collage.Parcel} in {@link Collage#parcels} */
         defaultParcelId: string
     }
 
-    // Expect compiler error if Collage is not jsonable
+    // Expect compiler error here if Collage is not jsonable
     let testCollageJsonable: IsJsonable<Collage, false> = {} as Collage
 
     export namespace collage {
+        /**
+         * Component of {@link Collage}, specifically used in JSON file format.
+         * 
+         * Unlike {@link splitTime.collage.Frame}, a single Frame may be used by multiple {@link Parcel}s.
+         */
         export interface Frame {
             id: string
             x: int
@@ -19,6 +28,9 @@ namespace splitTime.file {
         }
 
         // TBD name: parcel? animation? animated entity? setup? kit?
+        /**
+         * Component of {@link Collage}, specifically used in JSON file format.
+         */
         export interface Parcel {
             id: string
             direction: string
@@ -27,7 +39,13 @@ namespace splitTime.file {
             traces: level.file_data.Trace[]
         }
 
+        /**
+         * Component of {@link Parcel}, specifically used in JSON file format.
+         * 
+         * This type is more similar to {@link splitTime.collage.Frame} than {@link Frame} is.
+         */
         export interface ParcelFrame {
+            /** Reference to a {@link Frame} object within this {@link Collage#frames} */
             frameId: string
             offsetX: int
             offsetY: int
@@ -86,8 +104,5 @@ namespace splitTime.file {
                 defaultParcelId: type.string
             }))
         }
-        defer(() => {
-            Collage({})
-        })
     }
 }

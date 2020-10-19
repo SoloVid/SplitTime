@@ -10,6 +10,15 @@ namespace splitTime.file {
 
     type DefinitelyNotJsonable = (() => any) | undefined
 
+    /**
+     * Returns an unsatisfiable type (will have never components) if the type T
+     * is not a simple object that may be demonstrably converted to JSON without loss.
+     *
+     * Use this type to wrap parameter types or return types that should be able to convert to JSON.
+     *
+     * If AllowUnknown is true, unknown components will result in unknown.
+     * If AllowUnknown is false, unknown components will result in an unsatisfiable type (a never).
+     */
     export type IsJsonable<T, AllowUnknown = true> =
         // Check if there are any non-jsonable types represented in the union
         // Note: use of tuples in this first condition side-steps distributive conditional types
@@ -54,6 +63,10 @@ namespace splitTime.file {
 
     type JustNonNeverKeys<T> = { [K in keyof T]: T[K] extends never ? never : K }[keyof T]
     type MadeJsonableInner<T> = T extends object ? { [K in JustNonNeverKeys<T>]: MadeJsonableInner<T[K]> } : T
+    /**
+     * Create a slimmer form of type T which will satisfy {@link IsJsonable<T>}.
+     * In other words, this will strip out function and undefined components of type T.
+     */
     export type MadeJsonable<T> = MadeJsonableInner<IsJsonable<T>>
 
     export function toJsonable<T>(thing: T): MadeJsonable<T> {

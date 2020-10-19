@@ -1,9 +1,17 @@
 namespace splitTime {
     const DEFAULT_PARCEL_DIR = 9999
+    /**
+     * Image (e.g. sprite sheet or tile map) with a bunch of associated metadata.
+     * 
+     * A collage has a single image that is split up into a bunch of {@link Frame}s (boxes).
+     * These boxes may then be combined into {@link Parcel}s which are animations
+     * combined with some physics metadata.
+     */
     export class Collage {
         private readonly parcelMap: { [id: string]: { [direction: number]: collage.Parcel }} = {}
 
         constructor(
+            /** Path of image backing this Collage */
             readonly image: string,
             readonly parcels: readonly Readonly<collage.Parcel>[],
             private readonly defaultParcelId: string

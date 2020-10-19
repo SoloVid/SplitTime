@@ -1,5 +1,4 @@
 namespace splitTime.editor.server {
-    // type Handler<RequestType, ResponseType> = (request: file.IsJsonable<RequestType>) => (file.IsJsonable<ResponseType> | PromiseLike<file.IsJsonable<ResponseType>>)
     type Handler<RequestType, ResponseType> = (request: RequestType) => (ResponseType | PromiseLike<ResponseType>)
 
     interface IdRequest<T> {
@@ -7,6 +6,12 @@ namespace splitTime.editor.server {
         requestData: file.IsJsonable<T>
     }
 
+    /**
+     * Type-unsafe backing for {@link TsApiEndpoint} to handle client/server communications
+     *
+     * Really, almost no one should touch this class's interface.
+     * Use {@link TsApiEndpoint} or {@link TsApiHelper} instead.
+     */
     export class TsApiMiddleware implements serverLite.Server<unknown, unknown> {
         private readonly handlerMap: { [id: string]: Handler<file.IsJsonable<unknown>, file.IsJsonable<unknown>> } = {}
 

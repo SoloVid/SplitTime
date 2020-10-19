@@ -1,4 +1,7 @@
 namespace splitTime.collage {
+    /**
+     * Animation of {@link Collage} {@link Frame}s with associated physics metadata
+     */
     export class Parcel {
         constructor(
             readonly id: string,
@@ -14,5 +17,8 @@ namespace splitTime.collage {
             }
             return this.frames[index]
         }
+
+        // getOverallArea(): Coordinates2D {
+        // }
     }
 }

@@ -1,8 +1,14 @@
 namespace splitTime.collage {
+    /**
+     * A single frame of animation as part of a {@link Parcel} of a {@link Collage}
+     */
     export class Frame {
         constructor(
+            /** Where inside the larger collage image this frame is */
             readonly box: Readonly<math.Rect>,
+            /** How should this frame (image) be offset from the default position relative to body */
             readonly offset: Readonly<Coordinates2D>,
+            /** How long should this frame play */
             readonly duration: game_seconds
         ) {}
 
