@@ -13,12 +13,18 @@ namespace splitTime.editor.server {
             })
             this.api.levelJson.serve(async request => {
                 const fileName = request.data.levelId + ".json"
-                const path = this.getFilePath(request.projectId, "levels", fileName)
+                const path = this.getFilePath(request.projectId, LEVEL_DIR, fileName)
                 const result = await this.nodeLibs.fsPromises.readFile(path)
                 return JSON.parse(result.toString()) as splitTime.level.FileData
             })
+            this.api.collageJson.serve(async request => {
+                const fileName = request.data.collageId + ".json"
+                const path = this.getFilePath(request.projectId, COLLAGE_DIR, fileName)
+                const result = await this.nodeLibs.fsPromises.readFile(path)
+                return JSON.parse(result.toString()) as splitTime.file.Collage
+            })
             this.api.imageInfo.serve(async request => {
-                const path = this.getFilePath(request.projectId, "images", request.data.imageId)
+                const path = this.getFilePath(request.projectId, IMAGE_DIR, request.data.imageId)
                 const stats = await this.nodeLibs.fsPromises.stat(path)
                 return {
                     webPath: this.toWebPath(path),

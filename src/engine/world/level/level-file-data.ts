@@ -1,7 +1,5 @@
 namespace splitTime.level {
     export interface FileData {
-        /** @deprecated this feels broken */
-        fileName: string
         type: "action"
         region: string
         width: int
@@ -40,24 +38,74 @@ namespace splitTime.level {
 
         export interface Prop {
             id: string
-            template: string
+            collage: string
+            parcel: string
             x: number
             y: number
             z: number
             dir: string
-            stance: string
             // FTODO: clean up
-            playerOcclusionFadeFactor: null | number
+            playerOcclusionFadeFactor: number
         }
 
         export interface Position {
             id: string
-            template: string
+            collage: string
+            parcel: string
             x: number
             y: number
             z: number
             dir: string
-            stance: string
+        }
+    }
+
+    export namespace instanceOf {
+        export function FileData(thing: unknown): thing is FileData {
+            return type.isA(thing, type.object<level.FileData>({
+                type: type.other<"action">(t => t === "action"),
+                region: type.string,
+                width: type.int,
+                height: type.int,
+                background: type.string,
+                backgroundOffsetX: type.int,
+                backgroundOffsetY: type.int,
+                layers: type.array(type.object({
+                    id: type.string,
+                    z: type.number
+                })),
+                traces: type.array(type.object({
+                    id: type.string,
+                    type: type.string,
+                    vertices: type.string,
+                    z: type.number,
+                    height: type.number,
+                    direction: type.string,
+                    event: type.string,
+                    level: type.string,
+                    offsetX: type.number,
+                    offsetY: type.number,
+                    offsetZ: type.number
+                })),
+                props: type.array(type.object({
+                    id: type.string,
+                    collage: type.string,
+                    parcel: type.string,
+                    x: type.number,
+                    y: type.number,
+                    z: type.number,
+                    dir: type.string,
+                    playerOcclusionFadeFactor: type.number
+                })),
+                positions: type.array(type.object({
+                    id: type.string,
+                    collage: type.string,
+                    parcel: type.string,
+                    x: type.number,
+                    y: type.number,
+                    z: type.number,
+                    dir: type.string
+                }))
+            }))
         }
     }
 }

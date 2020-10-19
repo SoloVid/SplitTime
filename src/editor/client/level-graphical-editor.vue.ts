@@ -80,16 +80,16 @@ namespace splitTime.editor.level {
         
         var object = {
             id: "",
-            template: "",
+            collage: "",
+            parcel: "",
             x: x,
             y: y,
             z: z,
-            dir: "S",
-            stance: "default"
+            dir: "S"
         }
         const newThing = withMetadata<"position", splitTime.level.file_data.Position>("position", object)
         this.level.positions.push(newThing)
-        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(newThing)
+        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(newThing.obj)
     }
     
     function createProp(this: VueLevelGraphicalEditor) {
@@ -100,18 +100,18 @@ namespace splitTime.editor.level {
         
         var object = {
             id: "",
-            template: "",
+            collage: "",
+            parcel: "",
             x: x,
             y: y,
             z: z,
             dir: "S",
-            stance: "default",
             playerOcclusionFadeFactor: 0
         }
 
         const newThing = withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)
         this.level.props.push(newThing)
-        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(newThing)
+        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(newThing.obj)
     }
 
     function handleContextMenu(this: VueLevelGraphicalEditor, event: Event): void {

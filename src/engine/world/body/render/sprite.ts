@@ -6,7 +6,8 @@ namespace splitTime {
         private _timeFrameStarted: game_seconds = Number.NEGATIVE_INFINITY
         readonly ref: int
         constructor(
-            private readonly collage: Readonly<Collage>
+            private readonly collageId: string,
+            private readonly defaultParcelId?: string
         ) {
             this.ref = nextRef++
         }
@@ -29,12 +30,19 @@ namespace splitTime {
 
         light: body.Light | null = null
 
+        private get collage(): Readonly<Collage> {
+            return G.ASSETS.collages.get(this.collageId)
+        }
+
         private getImage(): HTMLImageElement {
             return G.ASSETS.images.get(this.collage.image)
         }
 
         private getCurrentParcel(): collage.Parcel {
             if (this.stance === Sprite.DEFAULT_STANCE) {
+                if (this.defaultParcelId) {
+                    return this.collage.getParcel(this.defaultParcelId)
+                }
                 return this.collage.getDefaultParcel(this.dir)
             }
             return this.collage.getParcel(this.stance, this.dir)
@@ -90,11 +98,6 @@ namespace splitTime {
                 frame.box.width,
                 frame.box.height
             )
-        }
-
-        private setFrame(newFrame: int) {
-            this.frame = newFrame
-            this._timeFrameStarted - this._time
         }
 
         private finalizeFrame() {
@@ -156,7 +159,7 @@ namespace splitTime {
         }
 
         clone(): splitTime.Sprite {
-            var clone = new splitTime.Sprite(this.collage)
+            var clone = new splitTime.Sprite(this.collageId)
             clone.omniDir = this.omniDir
             clone.rotate = this.rotate
             clone.opacityModifier = this.opacityModifier

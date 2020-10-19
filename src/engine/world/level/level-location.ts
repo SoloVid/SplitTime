@@ -1,28 +1,16 @@
 namespace splitTime {
-
-    export interface ReadonlyCoordinates2D {
-        readonly x: number
-        readonly y: number
-    }
-
-    export namespace instanceOf {
-        export function Coordinates2D(thing: unknown): thing is Coordinates2D {
-            const coords = thing as ReadonlyCoordinates2D
-            return !!thing && typeof coords.x === "number" && typeof coords.y === "number"
-        }
-    }
-
-    export class Coordinates2D implements ReadonlyCoordinates2D {
+    export class Coordinates2D {
         constructor(
             public x: number = 0,
             public y: number = 0
         ) {}
     }
 
-    export interface ReadonlyCoordinates3D {
-        readonly x: number
-        readonly y: number
-        readonly z: number
+    export namespace instanceOf {
+        export function Coordinates2D(thing: unknown): thing is Coordinates2D {
+            const coords = thing as Readonly<Coordinates2D>
+            return !!thing && typeof coords.x === "number" && typeof coords.y === "number"
+        }
     }
 
     export class Coordinates3D {
@@ -79,13 +67,13 @@ namespace splitTime {
             }
         }
 
-        export function areCoordinatesEquivalent(coords1: ReadonlyCoordinates2D, coords2: ReadonlyCoordinates2D): boolean
-        export function areCoordinatesEquivalent(coords1: ReadonlyCoordinates3D, coords2: ReadonlyCoordinates3D): boolean
-        export function areCoordinatesEquivalent(coords1: ReadonlyCoordinates3D | ReadonlyCoordinates2D, coords2: ReadonlyCoordinates3D | ReadonlyCoordinates2D): boolean {
+        export function areCoordinatesEquivalent(coords1: Readonly<Coordinates2D>, coords2: Readonly<Coordinates2D>): boolean
+        export function areCoordinatesEquivalent(coords1: Readonly<Coordinates3D>, coords2: Readonly<Coordinates3D>): boolean
+        export function areCoordinatesEquivalent(coords1: Readonly<Coordinates3D> | Readonly<Coordinates2D>, coords2: Readonly<Coordinates3D> | Readonly<Coordinates2D>): boolean {
             return coords1.x === coords2.x &&
                 coords1.y === coords2.y &&
                 // TODO: This check falls apart for mixed types
-                (coords1 as ReadonlyCoordinates3D).z === (coords2 as ReadonlyCoordinates3D).z
+                (coords1 as Readonly<Coordinates3D>).z === (coords2 as Readonly<Coordinates3D>).z
         }
 
         export function areLocationsEquivalent(location1: ILevelLocation2, location2: ILevelLocation2) {

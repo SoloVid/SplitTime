@@ -6,7 +6,8 @@ namespace splitTime.type {
 
     // NoInfer<T> idea from rom https://stackoverflow.com/a/56688073/4639640
     type NoInfer<T> = [T][T extends unknown ? 0 : never]
-    export function other<T = never>(callback: NoInfer<T> extends never ? never : (thing: unknown) => boolean): TypeChecker<NoInfer<T>> {
+    type IfNotNever<T, U> = T extends never ? never : U
+    export function other<T = never>(callback: IfNotNever<NoInfer<T>, (thing: unknown) => boolean>): TypeChecker<NoInfer<T>> {
         return function(thing: unknown): thing is T {
             return callback(thing)
         }
@@ -18,8 +19,8 @@ namespace splitTime.type {
     export const boolean = other<boolean>(thing => typeof thing === "boolean")
 
     type NotArray<T> = T extends unknown[] ? never : T
-    type ObjectDefinition<T> = { [K in keyof T]: TypeChecker<T[K]> }
-    export function object<T extends object>(definition: ObjectDefinition<NotArray<T>>): TypeChecker<T> {
+    type ObjectTypeDefinition<T> = { [K in keyof T]: TypeChecker<T[K]> }
+    export function object<T extends object>(definition: ObjectTypeDefinition<NotArray<T>>): TypeChecker<T> {
         return function(thing: unknown): thing is T {
             if (typeof thing !== "object") {
                 return false
@@ -33,8 +34,12 @@ namespace splitTime.type {
                 if (!(key in thing)) {
                     return false
                 }
-                // FTODO: This is type unsafe
-                if (!isA(thing, definition[key])) {
+                const checker = definition[key]
+                // FTODO: This is technically type unsafe as far as the type assertion goes
+                // because the for loop keeps us from precisely knowing what the type of definition[key] is.
+                // However, if the static type checking on this "object" function signature
+                // is correct, there shouldn't be a run-time problem.
+                if (!isA(thing, checker)) {
                     return false
                 }
             }
@@ -48,8 +53,8 @@ namespace splitTime.type {
     }
 
     type ArrayItemType<T> = T extends (infer U)[] ? U : never
-    type ArrayDefinition<T> = TypeChecker<ArrayItemType<T>>
-    export function array<T extends unknown[]>(checker: ArrayDefinition<T>): TypeChecker<T> {
+    type ArrayTypeDefinition<T> = TypeChecker<ArrayItemType<T>>
+    export function array<T extends unknown[]>(checker: ArrayTypeDefinition<T>): TypeChecker<T> {
         return function(thing: unknown): thing is T {
             if (!Array.isArray(thing)) {
                 return false

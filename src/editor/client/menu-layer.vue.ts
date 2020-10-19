@@ -69,10 +69,10 @@ namespace splitTime.editor.level {
         this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace)
     }
     function editProp(this: VueMenuLayer, prop: Prop): void {
-        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(prop)
+        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(prop.obj)
     }
     function editPosition(this: VueMenuLayer, position: Position): void {
-        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(position)
+        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(position.obj)
     }
     function toggleAllTracesDisplayed(this: VueMenuLayer): void {
         var displayed = this.allTracesDisplayed

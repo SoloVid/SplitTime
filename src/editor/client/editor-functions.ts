@@ -26,7 +26,6 @@ namespace splitTime.editor.level {
 
     export function exportLevel(levelObject: Level): splitTime.level.FileData {
         return {
-            fileName: levelObject.fileName,
             type: "action",
             region: levelObject.region,
             width: levelObject.width,
@@ -48,7 +47,6 @@ namespace splitTime.editor.level {
     export function importLevel(levelText: string): Level {
         const levelFile = JSON.parse(levelText) as splitTime.level.FileData
         const levelObject = new Level()
-        levelObject.fileName = levelFile.fileName
         levelObject.region = levelFile.region
         levelObject.width = levelFile.width
         levelObject.height = levelFile.height
@@ -80,9 +78,9 @@ namespace splitTime.editor.level {
             direction: "",
             event: "",
             level: "",
-            offsetX: "",
-            offsetY: "",
-            offsetZ: ""
+            offsetX: 0,
+            offsetY: 0,
+            offsetZ: 0
         }
         const trace = withMetadata<"trace", splitTime.level.file_data.Trace>("trace", traceObj)
         levelObject.traces.push(trace)
@@ -113,13 +111,13 @@ namespace splitTime.editor.level {
         }
         return "rgba(255, 255, 255, 1)"
     }
-    export function safeExtractTraceArray(levelObject: Level, traceStr: string): (ReadonlyCoordinates2D | null)[] {
+    export function safeExtractTraceArray(levelObject: Level, traceStr: string): (Readonly<Coordinates2D> | null)[] {
         const pointSpecs = splitTime.trace.interpretPointString(traceStr)
         return splitTime.trace.convertPositions(pointSpecs, getPositionMap(levelObject))
     }
 
-    function getPositionMap(levelObject: Level): { [id: string]: ReadonlyCoordinates2D } {
-        const positionMap: { [id: string]: ReadonlyCoordinates2D } = {}
+    function getPositionMap(levelObject: Level): { [id: string]: Readonly<Coordinates2D> } {
+        const positionMap: { [id: string]: Readonly<Coordinates2D> } = {}
         for(const p of levelObject.positions) {
             positionMap[p.obj.id] = p.obj
         }
@@ -166,31 +164,10 @@ namespace splitTime.editor.level {
     }
 
     let placeholderImageUrl: string | null = null
-    export async function getBodyImage(body: splitTime.Body, server: client.ServerLiaison): Promise<string> {
-        if(body.drawable instanceof splitTime.Sprite) {
-            return server.imgSrc(body.drawable.img)
-        }
+    export function getPlaceholderImage(): string {
         if (placeholderImageUrl === null) {
             placeholderImageUrl = makePlaceholderImage()
         }
         return placeholderImageUrl
-    }
-    
-    export function getAnimationFrameCrop(body: splitTime.Body, dir: string | splitTime.direction_t, stance: string): math.Rect {
-        if(body.drawable instanceof splitTime.Sprite) {
-            return body.drawable.getAnimationFrameCrop(splitTime.direction.interpret(dir), stance, 0)
-        }
-        // FTODO: more solid default
-        return math.Rect.make(0, 0, 32, 64)
-    }
-    
-    export function getSpriteOffset(body: splitTime.Body): Coordinates2D {
-        if(body.drawable instanceof splitTime.Sprite) {
-            return {
-                x: body.drawable.baseOffX,
-                y: body.drawable.baseOffY
-            }
-        }
-        return { x: 0, y: 0 }
     }
 }

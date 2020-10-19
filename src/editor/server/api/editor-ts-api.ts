@@ -9,6 +9,10 @@ namespace splitTime.editor.server {
             WithProject<{ levelId: string }>,
             splitTime.level.FileData
         >
+        collageJson: TsApiEndpoint<
+            WithProject<{ collageId: string }>,
+            splitTime.file.Collage
+        >
         imageInfo: TsApiEndpoint<
             WithProject<{ imageId: string }>,
             { webPath: string, timeModifiedString: string }
@@ -17,11 +21,12 @@ namespace splitTime.editor.server {
         private helper: TsApiHelper
 
         constructor() {
-            this.projectFiles = new ProjectFileTsApi(EditorTsApi.url)
             const a = this.helper = new TsApiHelper(EditorTsApi.url)
+            this.projectFiles = new ProjectFileTsApi(EditorTsApi.url)
             this.test1 = a.endpoint()
             this.test2 = a.endpoint()
             this.levelJson = a.endpoint()
+            this.collageJson = a.endpoint()
             this.imageInfo = a.endpoint()
         }
 

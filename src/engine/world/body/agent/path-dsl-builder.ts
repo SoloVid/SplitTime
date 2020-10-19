@@ -1,7 +1,7 @@
 namespace splitTime.agent {
     export class Walk {
         constructor(
-            public readonly location: ReadonlyCoordinates2D | ReadonlyCoordinates3D,
+            public readonly location: Readonly<Coordinates2D> | Readonly<Coordinates3D>,
             public readonly options: WalkOptions | null = null
         ) {}
     }
@@ -15,7 +15,7 @@ namespace splitTime.agent {
             
         }
 
-        walk(location: ReadonlyCoordinates2D | ReadonlyCoordinates3D, options?: WalkOptions): void {
+        walk(location: Readonly<Coordinates2D> | Readonly<Coordinates3D>, options?: WalkOptions): void {
             this.steps.push(new Walk(location, options))
         }
         transport(location: ILevelLocation2): void {

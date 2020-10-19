@@ -53,7 +53,8 @@ namespace splitTime {
                     +posObj.y,
                     +posObj.z,
                     splitTime.direction.interpret(posObj.dir),
-                    posObj.stance
+                    // TODO: resolve confusion or "parcel" and "stance"
+                    posObj.parcel
                 )
 
                 if (posObj.id) {
@@ -126,40 +127,21 @@ namespace splitTime {
             //Pull board objects from file
             for (var iProp = 0; iProp < this.fileData.props.length; iProp++) {
                 var prop = this.fileData.props[iProp]
-                var template = prop.template
-
-                var obj = G.BODY_TEMPLATES.getInstance(template)
-                if (obj) {
-                    obj.id = prop.id
-                    obj.put(this.level, +prop.x, +prop.y, +prop.z, true)
-                    obj.dir =
-                        typeof prop.dir === "string"
-                            ? splitTime.direction.fromString(prop.dir)
-                            : +prop.dir
-                    // TODO: re-evaluate
-                    for (const drawable of obj.drawables) {
-                        if (drawable instanceof Sprite) {
-                            drawable.requestStance(
-                                prop.stance,
-                                obj.dir,
-                                true,
-                                true
-                            )
-                        }
-                        if (
-                            (prop.playerOcclusionFadeFactor ||
-                                prop.playerOcclusionFadeFactor === 0)
-                        ) {
-                            drawable.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor
-                        }
-                    }
-                } else {
-                    splitTime.log.error(
-                        'Template "' +
-                            template +
-                            '" not found for instantiating prop'
-                    )
+                const collageParcel = G.ASSETS.collages.get(prop.collage).getParcel(prop.parcel)
+                // const sprite = new Sprite(prop.collage, prop.parcel)
+                const sprite = new Sprite(prop.collage)
+                sprite.playerOcclusionFadeFactor = prop.playerOcclusionFadeFactor
+                const body = new Body()
+                body.width = collageParcel.bodySpec.width
+                body.depth = collageParcel.bodySpec.depth
+                body.height = collageParcel.bodySpec.height
+                body.drawables.push(sprite)
+                body.id = prop.id
+                body.put(this.level, +prop.x, +prop.y, +prop.z, true)
+                if (prop.dir !== "") {
+                    body.dir = splitTime.direction.interpret(prop.dir)
                 }
+                sprite.requestStance(prop.parcel, body.dir, true, true)
             }
             this._addingProps = false
         }

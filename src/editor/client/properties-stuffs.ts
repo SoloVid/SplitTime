@@ -29,38 +29,39 @@ namespace splitTime.editor.level {
         }
     }
     
-    export function getPropPropertiesStuff(prop: Prop): ObjectProperties {
+    export function getPropPropertiesStuff(prop: splitTime.level.file_data.Prop): ObjectProperties {
         const fields = {
             id: {},
-            template: {},
+            collage: {},
+            parcel: {},
             x: {},
             y: {},
             z: {},
             dir: {},
-            stance: {}
+            playerOcclusionFadeFactor: {}
         }
         type SimplifiedProp = { [K in keyof Required<typeof fields>]: string | number }
         return {
             title: "Prop Properties",
-            thing: prop.obj as SimplifiedProp,
+            thing: prop as SimplifiedProp,
             fields
         }
     }
     
-    export function getPositionPropertiesStuff(position: Position): ObjectProperties {
+    export function getPositionPropertiesStuff(position: splitTime.level.file_data.Position): ObjectProperties {
         const fields = {
             id: {},
-            template: {},
+            collage: {},
+            parcel: {},
             x: {},
             y: {},
             z: {},
-            dir: {},
-            stance: {}
+            dir: {}
         }
         type SimplifiedPosition = { [K in keyof Required<typeof fields>]: string | number }
         return {
             title: "Position Properties",
-            thing: position.obj as SimplifiedPosition,
+            thing: position as SimplifiedPosition,
             fields
         }
     }

@@ -42,7 +42,8 @@ namespace splitTime {
                 throw new Error("Parcel " + id + " not found in collage")
             }
             const bucket = this.parcelMap[id]
-            const dirKey = direction === undefined ? DEFAULT_PARCEL_DIR : splitTime.direction.interpret(direction)
+            const dirKey = direction === undefined ? DEFAULT_PARCEL_DIR :
+                splitTime.direction.interpret(direction)
             if (dirKey in bucket) {
                 return bucket[dirKey]
             }
@@ -54,28 +55,33 @@ namespace splitTime {
         }
     }
 
-    export function makeCollageFromFile(file: file.Collage): Collage {
-        const framesRectMap: { [id: string]: math.Rect } = {}
-        for (const fileFrame of file.frames) {
-            framesRectMap[fileFrame.id] = math.Rect.make(fileFrame.x, fileFrame.y, fileFrame.width, fileFrame.height)
+    export namespace collage {
+        export function makeCollageFromFile(file: file.Collage): Collage {
+            const framesRectMap: { [id: string]: math.Rect } = {}
+            for (const fileFrame of file.frames) {
+                framesRectMap[fileFrame.id] =
+                    math.Rect.make(fileFrame.x, fileFrame.y, fileFrame.width, fileFrame.height)
+            }
+            return new Collage(file.image, file.parcels.map(fileParcel => {
+                const dir = !fileParcel.direction ? null :
+                    splitTime.direction.interpret(fileParcel.direction)
+                return new collage.Parcel(fileParcel.id,
+                    dir,
+                    fileParcel.frames.map(fpf => {
+                        if (!(fpf.frameId in framesRectMap)) {
+                            throw new Error("Could not find frame " + fpf.frameId +
+                                " for parcel " + fileParcel.id)
+                        }
+                        return new collage.Frame(
+                            framesRectMap[fpf.frameId],
+                            new Coordinates2D(fpf.offsetX, fpf.offsetY),
+                            fpf.duration
+                        )
+                    }),
+                    fileParcel.body,
+                    fileParcel.traces
+                )
+            }), file.defaultParcelId)
         }
-        return new Collage(file.image, file.parcels.map(fileParcel => {
-            const dir = !fileParcel.direction ? null : splitTime.direction.interpret(fileParcel.direction)
-            return new collage.Parcel(fileParcel.id,
-                dir,
-                fileParcel.frames.map(fpf => {
-                    if (!(fpf.frameId in framesRectMap)) {
-                        throw new Error("Could not find frame " + fpf.frameId + " for parcel " + fileParcel.id)
-                    }
-                    return new collage.Frame(
-                        framesRectMap[fpf.frameId],
-                        new Coordinates2D(fpf.offsetX, fpf.offsetY),
-                        fpf.duration
-                    )
-                }),
-                fileParcel.body,
-                fileParcel.traces
-            )
-        }), file.defaultParcelId)
     }
 }

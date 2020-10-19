@@ -160,7 +160,7 @@ namespace splitTime.particles {
         generateIntervalMs: number = 100
         /** 1 means the max amount come out right at the beginning */
         explosiveness: number = 0
-        location: ReadonlyCoordinates3D
+        location: Readonly<Coordinates3D>
         generateParticle: (emitter: ParticleEmitter) => Particle
         _particlesGoneHandlers: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         xres: number = 100
@@ -173,7 +173,7 @@ namespace splitTime.particles {
         colorShiftMagnitude: number = 0
         lightIntensity: number = 0
         constructor(
-            location: ReadonlyCoordinates3D,
+            location: Readonly<Coordinates3D>,
             particleGenerator: (emitter: ParticleEmitter) => Particle
         ) {
             this.location = location

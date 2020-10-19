@@ -1,8 +1,8 @@
 namespace splitTime.agent {
     export class BestEffortMovementAgent implements splitTime.TimeNotified {
         private body: splitTime.Body
-        private targetLevelLocation: ReadonlyCoordinates3D | null = null
-        private targetScreenLocation: ReadonlyCoordinates2D | null = null
+        private targetLevelLocation: Readonly<Coordinates3D> | null = null
+        private targetScreenLocation: Readonly<Coordinates2D> | null = null
         private targetDirection: number | null = null
 
         public constructor(body: splitTime.Body) {
@@ -13,10 +13,10 @@ namespace splitTime.agent {
             this.resetTarget()
         }
 
-        setWalkingTowardBoardLocation(coords: ReadonlyCoordinates3D) {
+        setWalkingTowardBoardLocation(coords: Readonly<Coordinates3D>) {
             this.targetLevelLocation = coords
         }
-        setWalkingTowardScreenLocation(coords: ReadonlyCoordinates2D) {
+        setWalkingTowardScreenLocation(coords: Readonly<Coordinates2D>) {
             this.targetScreenLocation = coords
         }
         setWalkingDirection(dir: number) {

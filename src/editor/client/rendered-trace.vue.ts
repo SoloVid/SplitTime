@@ -9,7 +9,7 @@ namespace splitTime.editor.level {
         hasClose: boolean
         height: number
         vertices: Coordinates3D[]
-        pointsArray: (ReadonlyCoordinates2D | null)[]
+        pointsArray: (Readonly<Coordinates2D> | null)[]
         points: string
         pointsShadow: string
         pointsStairsSlope: string
@@ -41,7 +41,7 @@ namespace splitTime.editor.level {
         var pointsArray = this.pointsArray
         const nonNullPoints = pointsArray.filter(point => {
             return point !== null
-        }) as ReadonlyCoordinates2D[]
+        }) as Readonly<Coordinates2D>[]
         return nonNullPoints.map(point => {
             return {
                 x: point.x,
@@ -51,7 +51,7 @@ namespace splitTime.editor.level {
         })
     }
 
-    function pointsArray(this: VueRenderedTrace): (ReadonlyCoordinates2D | null)[] {
+    function pointsArray(this: VueRenderedTrace): (Readonly<Coordinates2D> | null)[] {
         return safeExtractTraceArray(this.levelEditorShared.level, this.trace.obj.vertices)
     }
 

@@ -109,16 +109,16 @@ namespace splitTime.editor.level {
         ></rendered-trace>
     </svg>
     <div :style="thingsStyleObject">
-        <rendered-prop v-for="(prop, propIndex) in props"
+        <rendered-proposition v-for="(prop, propIndex) in props"
             :key="prop.metadata.editorId"
             :level-editor-shared="levelEditorShared"
             :prop="prop"
-        ></rendered-prop>
-        <rendered-position v-for="(position, posIndex) in positions"
+        ></rendered-proposition>
+        <rendered-proposition v-for="(position, posIndex) in positions"
             :key="position.metadata.editorId"
             :level-editor-shared="levelEditorShared"
             :position="position"
-        ></rendered-position>
+        ></rendered-proposition>
     </div>
 </div>
         `

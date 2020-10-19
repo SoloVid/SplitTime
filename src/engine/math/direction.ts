@@ -96,12 +96,12 @@ namespace splitTime.direction {
         toThing: ILevelLocation
     ): direction_t
     export function fromToThing(
-        fromThing: ReadonlyCoordinates2D,
-        toThing: ReadonlyCoordinates2D
+        fromThing: Readonly<Coordinates2D>,
+        toThing: Readonly<Coordinates2D>
     ): direction_t
     export function fromToThing(
-        fromThing: ReadonlyCoordinates2D | ILevelLocation,
-        toThing: ReadonlyCoordinates2D | ILevelLocation
+        fromThing: Readonly<Coordinates2D> | ILevelLocation,
+        toThing: Readonly<Coordinates2D> | ILevelLocation
     ): direction_t {
         if (instanceOf.ILevelLocation(fromThing) && instanceOf.ILevelLocation(toThing)) {
             return splitTime.direction.fromTo(
