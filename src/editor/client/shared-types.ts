@@ -7,6 +7,7 @@ namespace splitTime.editor {
         export interface VueComponent {
             $el: HTMLElement | undefined
             $refs: { [ key: string ]: HTMLElement }
+            $emit(eventId: string, ...rest: unknown[]): void
         }
 
         export type UserInputs = {

@@ -1,10 +1,10 @@
 namespace splitTime.editor.server {
     export interface FileEntry {
-        fileType: "directory" | "file"
+        type: "directory" | "file"
         name: string
         parentPath: string
         timeModified: number
-        size: Date
+        size: number
     }
 
     export class ProjectFileTsApi implements serverLite.Server {
@@ -15,6 +15,18 @@ namespace splitTime.editor.server {
             WithProject<{ directory: string }>,
             FileEntry[]
         >
+        readFile: TsApiEndpoint<
+            WithProject<{ filePath: string }>,
+            { base64Contents: string }
+        >
+        writeFile: TsApiEndpoint<
+            WithProject<{ filePath: string, base64Contents: string }>,
+            null
+        >
+        deleteFile: TsApiEndpoint<
+            WithProject<{ filePath: string }>,
+            null
+        >
 
         private helper: TsApiHelper
 
@@ -22,6 +34,9 @@ namespace splitTime.editor.server {
             this.url = baseUrl + ProjectFileTsApi.urlTail
             const a = this.helper = new TsApiHelper(this.url)
             this.directoryListing = a.endpoint()
+            this.readFile = a.endpoint()
+            this.writeFile = a.endpoint()
+            this.deleteFile = a.endpoint()
         }
 
         handle(url: string, body: unknown): PromiseLike<serverLite.Response> {

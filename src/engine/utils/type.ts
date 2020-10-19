@@ -28,6 +28,7 @@ namespace splitTime.type {
             if (thing === null) {
                 return false
             }
+            const thingMap = thing as { [key: string]: unknown }
             const keysAllowed: string[] = []
             for (const key in definition) {
                 keysAllowed.push(key)
@@ -39,7 +40,7 @@ namespace splitTime.type {
                 // because the for loop keeps us from precisely knowing what the type of definition[key] is.
                 // However, if the static type checking on this "object" function signature
                 // is correct, there shouldn't be a run-time problem.
-                if (!isA(thing, checker)) {
+                if (!isA(thingMap[key], checker)) {
                     return false
                 }
             }

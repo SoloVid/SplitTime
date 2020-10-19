@@ -21,7 +21,10 @@ namespace splitTime.editor {
         // props
         server: client.ServerLiaison
         // data
+        fileBrowserStartPath: string
+        showFileSelect: boolean
         inputs: client.UserInputs
+        collage: file.Collage | null
         level: editor.level.Level | null
         globalEditorStuff: GlobalEditorStuff
         supervisorControl: client.EditorSupervisorControl
@@ -37,10 +40,14 @@ namespace splitTime.editor {
         handleKeyDown(event: KeyboardEvent): void
         handleKeyUp(event: KeyboardEvent): void
         handleFileChange(event: Event): void
+        onServerFileSelected(filePath: string): void
+        openFileSelect(): void
     }
 
-    function data(this: VueEditor){
+    function data(this: VueEditor): Partial<VueEditor> {
         return {
+            fileBrowserStartPath: "",
+            showFileSelect: false,
             inputs: {
                 mouse: {
                     x: 0,
@@ -49,6 +56,7 @@ namespace splitTime.editor {
                 },
                 ctrlDown: false
             },
+            collage: null,
             level: null,
             globalEditorStuff: new GlobalEditorStuff(this),
             supervisorControl: {
@@ -212,6 +220,34 @@ namespace splitTime.editor {
         }
     }
 
+    async function onServerFileSelected(this: VueEditor, filePath: string): Promise<void> {
+        this.showFileSelect = false
+        log.debug("File selected: " + filePath)
+        if (!filePath) {
+            log.debug("Canceled.")
+            return
+        }
+        const response = await this.server.api.projectFiles.readFile.fetch(
+            this.server.withProject({ filePath }))
+        const contents = atob(response.base64Contents)
+        const fileObject = JSON.parse(contents)
+        log.debug(fileObject)
+        if (splitTime.level.instanceOf.FileData(fileObject)) {
+            this.level = level.importLevel(contents)
+            this.level.fileName = filePath
+            updatePageTitle(this.level)
+        } else if (splitTime.file.instanceOf.Collage(fileObject)) {
+            this.collage = fileObject
+        } else {
+            alert("Editing this file type is not supported. Is it possible your data is corrupted?")
+        }
+    }
+
+    function openFileSelect(this: VueEditor): void {
+        this.fileBrowserStartPath = ""
+        this.showFileSelect = true
+    }
+
     Vue.component("st-editor", {
         props: {
             server: Object
@@ -228,36 +264,48 @@ namespace splitTime.editor {
             handleMouseUp,
             handleKeyDown,
             handleKeyUp,
-            handleFileChange
+            handleFileChange,
+            onServerFileSelected,
+            openFileSelect
         },
         template: `
 <div
-    v-on:mousemove="handleMouseMove"
-    v-on:mousedown="handleMouseDown"
-    v-on:mouseup="handleMouseUp"
-    v-on:keydown="handleKeyDown"
-    v-on:keyup="handleKeyUp"
+    @mousemove="handleMouseMove"
+    @mousedown="handleMouseDown"
+    @mouseup="handleMouseUp"
+    @keydown="handleKeyDown"
+    @keyup="handleKeyUp"
     >
     <div id="navmenu">
         <ul>
-            <li class="pointer"><a v-on:click="createLevel">New Level</a></li>
-            <li class="pointer"><a v-on:click="clickFileChooser">Load Level</a>
+            <li class="pointer"><a @click="createLevel">New Level</a></li>
+            <li class="pointer"><a @click="openFileSelect">Load Level</a>
                 <input
                     ref="fileInput"
                     type="file"
                     accept=".json"
                     style="display:none"
-                    v-on:change="handleFileChange"
+                    @change="handleFileChange"
                 />
             </li>
             <li class="pointer">
                 <a
-                    v-on:click="downloadLevel"
+                    @click="downloadLevel"
                     title="After downloading the level, relocate it to use it in the engine."
                 >Download File (Save)</a>
             </li>
-            <li class="pointer"><a v-on:click="editLevelSettings">Edit Settings</a></li>
+            <li class="pointer"><a @click="editLevelSettings">Edit Settings</a></li>
         </ul>
+    </div>
+    <div class="modal-backdrop" v-if="showFileSelect">
+        <div class="modal-body">
+            <file-browser
+                :editor-inputs="inputs"
+                :editor-global-stuff="globalEditorStuff"
+                :request-directory="fileBrowserStartPath"
+                @file-selected="onServerFileSelected"
+            ></file-browser>
+        </div>
     </div>
     <level-editor
         v-if="level"
@@ -266,6 +314,9 @@ namespace splitTime.editor {
         :supervisor-control="supervisorControl"
         :level="level"
     ></level-editor>
+    <div
+        v-if="collage"
+    ><h1>Collage Editor Placeholder</h1></div>
 </div>
         `
     })

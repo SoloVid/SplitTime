@@ -30,8 +30,12 @@ namespace splitTime.editor.server {
             this.imageInfo = a.endpoint()
         }
 
-        handle(url: string, body: unknown): PromiseLike<serverLite.Response<unknown>> {
-            return this.helper.handle(url, body)
+        async handle(url: string, body: unknown): Promise<serverLite.Response<unknown>> {
+            const myResponse = await this.helper.handle(url, body)
+            if (myResponse !== null) {
+                return myResponse
+            }
+            return await this.projectFiles.handle(url, body)
         }
     }
 }

@@ -7,6 +7,7 @@
         <script src="node_modules/vue/dist/vue.js"></script>
         <script src="node_modules/vue-async-computed/dist/vue-async-computed.js"></script>
         <script src="node_modules/jquery/dist/jquery.min.js"></script>
+        <link href="node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
         <link rel="stylesheet" href="src/editor/client/style.css">
         <script src="build/editor-client.js"></script>
     </head>
@@ -36,7 +37,7 @@
                 projectName = prompt("Project folder name:") || "";
             }
             window.location.hash = "#" + projectName;
-            var serverLiaison = new splitTime.editor.level.ServerLiaison(projectName);
+            var serverLiaison = new splitTime.editor.client.ServerLiaison(projectName);
 
             new Vue({
                 el: "#app",

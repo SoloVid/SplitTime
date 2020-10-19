@@ -3,58 +3,153 @@ namespace splitTime.editor.client {
         // props
         editorInputs: UserInputs
         editorGlobalStuff: level.GlobalEditorShared
-        supervisorControl: EditorSupervisorControl
-        level: Level
+        requestDirectory: string
+        // data
+        currentDirectory: string
+        filesInDirectory: server.FileEntry[]
+        isLoading: boolean
+        selectedFile: server.FileEntry | null
+        stack: string[]
         // computed
-        position: Coordinates2D
-        editorWidth: number
-        editorHeight: number
+        // methods
+        backDirectory(): void
+        changeDirectory(directoryFullPath: string, skipPushStack?: boolean): Promise<void>
+        selectFile(file: server.FileEntry): void
     }
 
-    function position(this: VueFileBrowser): Coordinates2D {
-        if (!this.$el) {
-            return {
-                x: 0,
-                y: 0
-            }
-        }
-        const $pos = $(this.$el).position()
+    function data(this: VueFileBrowser): Partial<VueFileBrowser> {
         return {
-            x: $pos.left,
-            y: $pos.top
+            currentDirectory: this.requestDirectory || "",
+            filesInDirectory: [],
+            isLoading: true,
+            stack: [],
+            selectedFile: null
         }
     }
 
-    function editorWidth(this: VueFileBrowser): number {
-        if (!this.$el) {
-            return 0
+    function backDirectory(this: VueFileBrowser): void {
+        if (this.stack.length === 0) {
+            throw new Error("Stack is empty")
         }
-        return this.$el.clientWidth
+        this.changeDirectory(this.stack.pop() as string, true)
     }
-    function editorHeight(this: VueFileBrowser): number {
-        if (!this.$el) {
-            return 0
+
+    async function changeDirectory(this: VueFileBrowser, directoryFullPath: string, skipPushStack: boolean = false): Promise<void> {
+        this.selectedFile = null
+        this.isLoading = true
+        const s = this.editorGlobalStuff.server
+        const requestData = s.withProject({ directory: directoryFullPath })
+        try {
+            this.filesInDirectory = await s.api.projectFiles.directoryListing.fetch(requestData)
+            this.filesInDirectory.sort((a, b) => {
+                if (a.type === "directory" && b.type === "file") {
+                    return -1
+                }
+                if (a.type === "file" && b.type === "directory") {
+                    return 1
+                }
+                return a.name.localeCompare(b.name)
+            })
+            if (!skipPushStack) {
+                this.stack.push(this.currentDirectory)
+            }
+            this.currentDirectory = directoryFullPath
+        } finally {
+            this.isLoading = false
         }
-        return this.$el.clientHeight
+    }
+
+    function selectFile(this: VueFileBrowser, file: server.FileEntry | null): void {
+        if (!file) {
+            this.$emit("file-selected", "")
+            return
+        }
+
+        const fileFullPath = file.parentPath + "/" + file.name
+        if (file.type === "file") {
+            // TODO: make it how I want it to be
+            this.$emit("file-selected", fileFullPath)
+            return
+        }
+        this.changeDirectory(fileFullPath)
+    }
+
+    function onMounted(this: VueFileBrowser): void {
+        this.changeDirectory(this.requestDirectory, true)
     }
 
     Vue.component("file-browser", {
         props: {
             editorInputs: Object,
             editorGlobalStuff: Object,
-            supervisorControl: Object,
-            level: Object
+            requestDirectory: String
         },
-        data: function() {
-            return {
-            }
-        },
+        data,
         computed: {
-            position,
-            editorWidth,
-            editorHeight
         },
+        methods: {
+            backDirectory,
+            changeDirectory,
+            selectFile
+        },
+        filters: {
+            date: function(ms: number) {
+                const d = new Date(ms)
+                return (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear() + " " + d.getHours() + ":" + d.getMinutes()
+            },
+            byteString: formatBytes
+        },
+        mounted: onMounted,
         template: `
+<div>
+    <table class="row-simple">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Date modified</th>
+                <th style="text-align: right">Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr
+                v-if="stack.length > 0"
+                @dblclick.left="backDirectory"
+                class="pointer"
+            >
+                <td>
+                    <i class="fas fa-fw fa-backward"></i>
+                </td>
+                <td><em>Back</em></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr
+                v-for="file in filesInDirectory"
+                @click.left="selectedFile = file"
+                @dblclick.left="selectFile(file)"
+                :class="{ pointer: true, active: file === selectedFile }"
+            >
+                <td>
+                    <i v-if="file.type === 'file'" class="fas fa-fw fa-file"></i>
+                    <i v-if="file.type === 'directory'" class="fas fa-fw fa-folder"></i>
+                </td>
+                <td>{{ file.name }}</td>
+                <td>{{ file.timeModified | date }}</td>
+                <td style="text-align: right">
+                    <span v-show="file.type !== 'directory'">
+                        {{ file.size | byteString }}
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br/>
+    <div class="right">
+        <a class="btn" v-show="selectedFile !== null" @click="selectFile(selectedFile)">Select</a>
+        <a class="btn" @click="selectFile(null)">Cancel</a>
+    </div>
+</div>
         `
     })
 }

@@ -1,10 +1,26 @@
-canvas {
-    image-rendering: optimizeSpeed;             /* Older versions of FF          */
-    image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
-    image-rendering: -webkit-optimize-contrast; /* Safari                        */
-    image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
-    image-rendering: pixelated;                 /* Awesome future-browsers       */
-    -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+* {
+    font-family: Sans-Serif;
+}
+
+.left { float: left; }
+.right { float: right; }
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn, input[type='submit'] {
+    font-size: medium;
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+    color: white;
+    padding: 10px;
+    background-color: black;
+    margin: 2px;
+    border: none;
+    border-radius: 5px;
+    transition: background-color .5s, color .5s, box-shadow .5s;
 }
 
 #navmenu {
@@ -13,7 +29,7 @@ canvas {
     left: 0;
     top: 0;
     width: 100%;
-    z-index: 200;
+    z-index: 1;
 }
 #navmenu ul {
     margin: 0;
@@ -90,8 +106,22 @@ canvas {
     cursor: pointer;
 }
 
-.backdrop {
-    display: none;
+table.row-simple {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.row-simple th, table.row-simple td {
+    border-bottom: 1px solid #ddd;
+    padding-left: 5px;
+    padding-right: 5px;
+    text-align: left;
+}
+
+tr:hover {background-color: #f5f5f5;}
+tr.active {background-color: #dadada;}
+
+.modal-backdrop {
     position: fixed;
     z-index: 10;
     top: 0;
@@ -101,7 +131,7 @@ canvas {
     background-color: rgba(50, 50, 50, .5)
 }
 
-#XMLEditor {
+.modal-body {
     display: block;
     overflow: auto;
     position: relative;

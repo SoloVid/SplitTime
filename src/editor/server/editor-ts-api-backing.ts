@@ -1,7 +1,9 @@
 namespace splitTime.editor.server {
     export class EditorTsApiBacking {
         public readonly api = new EditorTsApi()
+        private readonly projectFiles = new ProjectFileTsApiBacking(this.api.projectFiles)
         private readonly nodeLibs = new NodeLibs()
+        private readonly pathHelper = new PathHelper()
 
         constructor() {
             this.api.test1.serve(request => "Here's your string! " + request)
@@ -13,33 +15,24 @@ namespace splitTime.editor.server {
             })
             this.api.levelJson.serve(async request => {
                 const fileName = request.data.levelId + ".json"
-                const path = this.getFilePath(request.projectId, LEVEL_DIR, fileName)
+                const path = this.pathHelper.getFilePath(request.projectId, LEVEL_DIR, fileName)
                 const result = await this.nodeLibs.fsPromises.readFile(path)
                 return JSON.parse(result.toString()) as splitTime.level.FileData
             })
             this.api.collageJson.serve(async request => {
                 const fileName = request.data.collageId + ".json"
-                const path = this.getFilePath(request.projectId, COLLAGE_DIR, fileName)
+                const path = this.pathHelper.getFilePath(request.projectId, COLLAGE_DIR, fileName)
                 const result = await this.nodeLibs.fsPromises.readFile(path)
                 return JSON.parse(result.toString()) as splitTime.file.Collage
             })
             this.api.imageInfo.serve(async request => {
-                const path = this.getFilePath(request.projectId, IMAGE_DIR, request.data.imageId)
+                const path = this.pathHelper.getFilePath(request.projectId, IMAGE_DIR, request.data.imageId)
                 const stats = await this.nodeLibs.fsPromises.stat(path)
                 return {
-                    webPath: this.toWebPath(path),
+                    webPath: this.pathHelper.toWebPath(path),
                     timeModifiedString: "" + stats.mtimeMs
                 }
             })
-        }
-
-        private toWebPath(filePath: string): string {
-            const relPath = this.nodeLibs.path.relative(__ROOT__, filePath)
-            return "/" + relPath.split(this.nodeLibs.path.sep).join(this.nodeLibs.path.posix.sep)
-        }
-
-        private getFilePath(projectId: string, directory: string, file: string): string {
-            return this.nodeLibs.path.join(__ROOT__, "projects", projectId, directory, file)
         }
     }
 }

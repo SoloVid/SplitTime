@@ -49,7 +49,7 @@ namespace splitTime.editor.server {
                 body: JSON.stringify(requestJson)
             })
             if (response.status > 399) {
-                throw new Error("Request failed: " + response.body)
+                throw new Error("Request failed: " + response.text())
             }
 
             // Trust cast because from #handle()
