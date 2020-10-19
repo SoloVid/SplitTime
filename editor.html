@@ -15,6 +15,7 @@
         <div id="app">
             <st-editor
                 :server="serverLiaison"
+                :time="time"
             ></st-editor>
         </div>
 
@@ -39,16 +40,22 @@
             window.location.hash = "#" + projectName;
             var serverLiaison = new splitTime.editor.client.ServerLiaison(projectName);
 
-            new Vue({
+            var vueApp = new Vue({
                 el: "#app",
                 data: {
-                    serverLiaison: serverLiaison
+                    serverLiaison: serverLiaison,
+                    time: 0
                 }
             });
 
             window.onbeforeunload = function() {
                 return true;
             };
+
+            var TIME_INTERVAL = 50;
+            window.setInterval(function() {
+                vueApp.time += TIME_INTERVAL / 1000;
+            }, TIME_INTERVAL);
         </script>
     </body>
 </html>

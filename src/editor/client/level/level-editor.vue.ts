@@ -5,7 +5,7 @@ namespace splitTime.editor.level {
         typeSelected: string = trace.Type.SOLID
         pathInProgress: splitTime.level.file_data.Trace | null = null
         readonly info = {}
-        propertiesPaneStuff: ObjectProperties
+        propertiesPaneStuff: client.ObjectProperties
 
         constructor(
             private editor: VueLevelEditor
@@ -19,6 +19,10 @@ namespace splitTime.editor.level {
 
         get server(): client.ServerLiaison {
             return this.editor.editorGlobalStuff.server
+        }
+
+        get time(): game_seconds {
+            return this.editor.editorGlobalStuff.time
         }
 
         setMode(mode: Mode, subType?: string): void {
@@ -40,7 +44,7 @@ namespace splitTime.editor.level {
     interface VueLevelEditor extends client.VueComponent {
         // props
         editorInputs: client.UserInputs
-        editorGlobalStuff: GlobalEditorShared
+        editorGlobalStuff: client.GlobalEditorShared
         supervisorControl: client.EditorSupervisorControl
         level: Level
         // data

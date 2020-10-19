@@ -34,7 +34,7 @@ namespace splitTime.editor.level {
             },
             data: function() {
                 return {
-                    traceOptions
+                    traceOptions: client.traceOptions
                 }
             },
             computed: {

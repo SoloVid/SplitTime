@@ -87,15 +87,6 @@ namespace splitTime.editor.level {
         return trace
     }
     
-    export function imgSrc(fileName: string) {
-        if(!fileName) {
-            return ""
-        }
-        return ""
-        // TODO: fix
-        // return projectPath + splitTime.IMAGE_DIR + "/" + fileName
-    }
-    
     export function safeGetColor(trace: Trace) {
         if(trace.metadata.highlighted) {
             return "rgba(255, 255, 0, 0.8)"
@@ -104,7 +95,7 @@ namespace splitTime.editor.level {
         if(type === splitTime.trace.Type.SOLID && +trace.obj.height === 0) {
             type = splitTime.trace.Type.GROUND
         }
-        for(const traceOption of traceOptions) {
+        for(const traceOption of client.traceOptions) {
             if(traceOption.type === type) {
                 return traceOption.color
             }
@@ -141,14 +132,6 @@ namespace splitTime.editor.level {
         return closestPosition
     }
 
-    export function loadBodyFromTemplate(templateName: string) {
-        try {
-            return G.BODY_TEMPLATES.getInstance(templateName)
-        } catch(e) {
-            return new splitTime.Body()
-        }
-    }
-    
     function makePlaceholderImage(): string {
         const tempCanvas = new splitTime.Canvas(256, 256)
         const ctx = tempCanvas.element.getContext("2d")

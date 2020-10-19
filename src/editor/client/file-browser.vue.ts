@@ -2,7 +2,7 @@ namespace splitTime.editor.client {
     interface VueFileBrowser extends VueComponent {
         // props
         editorInputs: UserInputs
-        editorGlobalStuff: level.GlobalEditorShared
+        editorGlobalStuff: client.GlobalEditorShared
         requestDirectory: string
         // data
         currentDirectory: string

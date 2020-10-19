@@ -2,14 +2,16 @@ namespace splitTime.editor.level {
     /** Shared component for either prop or position */
     interface VueRenderedProposition {
         // props
+        cssClass: string | { [className: string]: boolean }
         levelEditorShared: LevelEditorShared
         p: Prop | Position
         // computed
         body: file.collage.BodySpec
-        frame: collage.Frame
+        combinedCssClass: (string | { [className: string]: boolean })[]
+        frame: splitTime.collage.Frame
         framePosition: Coordinates2D
         imgSrc: string
-        parcel: collage.Parcel
+        parcel: splitTime.collage.Parcel
         positionLeft: int
         positionTop: int
         styleObject: object
@@ -24,14 +26,19 @@ namespace splitTime.editor.level {
         return this.parcel.bodySpec
     }
 
-    function frame(this: VueRenderedProposition): collage.Frame {
-        // TODO: iterate frames over time
-        const frame = 0
-        return this.parcel.frames[frame]
+    function combinedCssClass(this: VueRenderedProposition): (string | { [className: string]: boolean })[] {
+        return ["draggable", this.cssClass]
+    }
+
+    function frame(this: VueRenderedProposition): splitTime.collage.Frame {
+        return this.parcel.getFrameAt(this.levelEditorShared.time)
     }
 
     function framePosition(this: VueRenderedProposition): Coordinates2D {
-        return this.frame.getTargetPosition(this.body, this.p.obj)
+        const box = this.frame.getTargetBox(this.body)
+        box.x += this.p.obj.x
+        box.y += this.p.obj.y - this.p.obj.z
+        return box
     }
 
     function imgSrc(this: VueRenderedProposition): string {
@@ -41,7 +48,7 @@ namespace splitTime.editor.level {
         return this.collage.image
     }
 
-    function parcel(this: VueRenderedProposition): collage.Parcel {
+    function parcel(this: VueRenderedProposition): splitTime.collage.Parcel {
         if (this.p.obj.parcel === "") {
             return this.collage.getDefaultParcel(this.p.obj.dir)
         }
@@ -102,11 +109,13 @@ namespace splitTime.editor.level {
 
     Vue.component("rendered-proposition", {
         props: {
+            cssClass: Object,
             levelEditorShared: Object,
             p: Object
         },
         computed: {
             body,
+            combinedCssClass,
             frame,
             framePosition,
             imgSrc,
@@ -129,7 +138,7 @@ namespace splitTime.editor.level {
         template: `
 <div
     v-show="prop.metadata.displayed"
-    class="draggable prop"
+    :class="cssClassCombined"
     v-on:dblclick.prevent
     v-on:mousedown.left="track"
     v-on:mouseenter="toggleHighlight(true)"

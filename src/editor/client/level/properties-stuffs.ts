@@ -1,5 +1,5 @@
 namespace splitTime.editor.level {
-    export function getLevelPropertiesStuff(level: Level): ObjectProperties {
+    export function getLevelPropertiesStuff(level: Level): client.ObjectProperties {
         const fieldObject = {
             region: {},
             width: {},
@@ -16,7 +16,7 @@ namespace splitTime.editor.level {
         }
     }
 
-    export function getLayerPropertiesStuff(layer: Layer): ObjectProperties {
+    export function getLayerPropertiesStuff(layer: Layer): client.ObjectProperties {
         const fields = {
             id: {},
             z: {}
@@ -29,7 +29,7 @@ namespace splitTime.editor.level {
         }
     }
     
-    export function getPropPropertiesStuff(prop: splitTime.level.file_data.Prop): ObjectProperties {
+    export function getPropPropertiesStuff(prop: splitTime.level.file_data.Prop): client.ObjectProperties {
         const fields = {
             id: {},
             collage: {},
@@ -48,7 +48,7 @@ namespace splitTime.editor.level {
         }
     }
     
-    export function getPositionPropertiesStuff(position: splitTime.level.file_data.Position): ObjectProperties {
+    export function getPositionPropertiesStuff(position: splitTime.level.file_data.Position): client.ObjectProperties {
         const fields = {
             id: {},
             collage: {},
@@ -66,19 +66,19 @@ namespace splitTime.editor.level {
         }
     }
     
-    export function getTracePropertiesStuff(trace: Trace): ObjectProperties {
+    export function getTracePropertiesStuff(trace: Trace): client.ObjectProperties {
         interface TraceFieldOptions {
-            id: FieldOptions
-            type: FieldOptions
-            vertices: FieldOptions
-            z: FieldOptions
-            height: FieldOptions
-            direction?: FieldOptions
-            event?: FieldOptions
-            level?: FieldOptions
-            offsetX?: FieldOptions
-            offsetY?: FieldOptions
-            offsetZ?: FieldOptions
+            id: client.FieldOptions
+            type: client.FieldOptions
+            vertices: client.FieldOptions
+            z: client.FieldOptions
+            height: client.FieldOptions
+            direction?: client.FieldOptions
+            event?: client.FieldOptions
+            level?: client.FieldOptions
+            offsetX?: client.FieldOptions
+            offsetY?: client.FieldOptions
+            offsetZ?: client.FieldOptions
         }
         let fields: TraceFieldOptions = {
             id: {},
@@ -111,7 +111,7 @@ namespace splitTime.editor.level {
         return {
             title: "Trace Properties",
             thing: trace.obj as SimplifiedTrace,
-            fields: fields as unknown as { [key: string]: FieldOptions }
+            fields: fields as unknown as { [key: string]: client.FieldOptions }
         }
     }
 }

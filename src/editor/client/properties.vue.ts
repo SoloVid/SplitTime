@@ -1,4 +1,15 @@
-namespace splitTime.editor.level {
+namespace splitTime.editor.client {
+    export interface FieldOptions {
+        readonly?: boolean
+        title?: string
+    }
+
+    export interface ObjectProperties {
+        title: string,
+        thing: { [key: string]: string | number }
+        fields: { [key: string]: FieldOptions }
+    }
+
     interface VueObjectProperties {
         // props
         title: string,

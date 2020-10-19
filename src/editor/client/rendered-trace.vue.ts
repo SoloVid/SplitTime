@@ -27,9 +27,6 @@ namespace splitTime.editor.level {
         toggleHighlight(highlight: boolean): void
     }
 
-    export const TRACE_GROUND_COLOR = "rgba(100, 100, 100, .5)"
-    export const TRACE_GROUND_HIGHLIGHT_COLOR = "rgba(200, 200, 50, .5)"
-
     function hasClose(this: VueRenderedTrace): boolean {
         var pointArray = this.pointsArray
         return pointArray.length > 0 && pointArray[pointArray.length - 1] === null
@@ -141,7 +138,7 @@ namespace splitTime.editor.level {
         return this.hasClose ? "black" : safeGetColor(this.trace)
     }
     function traceShadowFill(this: VueRenderedTrace): string {
-        return this.trace.metadata.highlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR
+        return this.trace.metadata.highlighted ? client.TRACE_GROUND_HIGHLIGHT_COLOR : client.TRACE_GROUND_COLOR
     }
     function traceShadowStroke(this: VueRenderedTrace): string {
         return "black"

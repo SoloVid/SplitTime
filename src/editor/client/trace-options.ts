@@ -1,4 +1,7 @@
-namespace splitTime.editor.level {
+namespace splitTime.editor.client {
+    export const TRACE_GROUND_COLOR = "rgba(100, 100, 100, .5)"
+    export const TRACE_GROUND_HIGHLIGHT_COLOR = "rgba(200, 200, 50, .5)"
+
     export const traceOptions = [
         {
             type: splitTime.trace.Type.SOLID,

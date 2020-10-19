@@ -111,11 +111,13 @@ namespace splitTime.editor.level {
     <div :style="thingsStyleObject">
         <rendered-proposition v-for="(prop, propIndex) in props"
             :key="prop.metadata.editorId"
+            css-class="prop"
             :level-editor-shared="levelEditorShared"
             :prop="prop"
         ></rendered-proposition>
         <rendered-proposition v-for="(position, posIndex) in positions"
             :key="position.metadata.editorId"
+            css-class="position"
             :level-editor-shared="levelEditorShared"
             :position="position"
         ></rendered-proposition>
