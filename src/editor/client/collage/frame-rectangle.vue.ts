@@ -3,6 +3,7 @@ namespace splitTime.editor.collage {
         // props
         collageEditorShared: CollageEditorShared
         frame: file.collage.Frame
+        offset: Coordinates2D
         // data
         // computed
         collage: file.Collage
@@ -32,7 +33,8 @@ namespace splitTime.editor.collage {
     Vue.component("frame-rectangle", {
         props: {
             collageEditorShared: Object,
-            frame: Object
+            frame: Object,
+            offset: Object
         },
         data,
         computed: {
@@ -47,8 +49,8 @@ namespace splitTime.editor.collage {
         template: `
 <g>
     <rect
-        :x="frame.x"
-        :y="frame.y"
+        :x="frame.x + offset.x"
+        :y="frame.y + offset.y"
         :width="frame.width"
         :height="frame.height"
         :stroke="traceStroke"

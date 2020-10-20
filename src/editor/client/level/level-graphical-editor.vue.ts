@@ -223,12 +223,12 @@ namespace splitTime.editor.level {
         },
         template: `
 <div
-    id="layers"
+    class="level-area"
     v-on:dragstart.prevent
     v-on:dblclick.prevent
     v-on:mousemove="handleMouseMove"
-    :style="{ width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }"
-    >
+    :style="{ position: 'relative', width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }"
+>
     <img v-if="!!backgroundSrc" class="background" :src="backgroundSrc" :style="{ left: leftPadding + 'px', top: topPadding + 'px' }"/>
     <rendered-layer
             v-for="(layer, layerIndex) in level.layers"

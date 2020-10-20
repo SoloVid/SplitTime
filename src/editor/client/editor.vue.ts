@@ -284,26 +284,14 @@ namespace splitTime.editor {
     @keydown="handleKeyDown"
     @keyup="handleKeyUp"
     >
-    <div id="navmenu">
-        <ul>
-            <li class="pointer"><a @click="createLevel">New Level</a></li>
-            <li class="pointer"><a @click="openFileSelect">Load Level</a>
-                <input
-                    ref="fileInput"
-                    type="file"
-                    accept=".json"
-                    style="display:none"
-                    @change="handleFileChange"
-                />
-            </li>
-            <li class="pointer">
-                <a
-                    @click="downloadLevel"
-                    title="After downloading the level, relocate it to use it in the engine."
-                >Download File (Save)</a>
-            </li>
-            <li class="pointer"><a @click="editLevelSettings">Edit Settings</a></li>
-        </ul>
+    <div class="menu-bar">
+        <a @click="createLevel">New Level</a>
+        <a @click="openFileSelect">Open</a>
+        <a
+            @click="downloadLevel"
+            title="After downloading the level, relocate it to use it in the engine."
+        >Download File (Save)</a>
+        <a @click="editLevelSettings">Edit Settings</a>
     </div>
     <div class="modal-backdrop" v-if="showFileSelect">
         <div class="modal-body">

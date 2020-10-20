@@ -120,18 +120,17 @@ namespace splitTime.editor.collage {
             supervisorControl: onSupervisorControlChange
         },
         template: `
-<div>
+<div style="display: flex; flex-flow: row wrap;">
     <collage-layout
+        class="standard-margin"
         :editor-inputs="editorInputs"
         :collage-editor-shared="sharedStuff"
     ></collage-layout>
-    <div>
-        <montage
-            v-for="m in collage.montages"
-            :collage-editor-shared="sharedStuff"
-            :montage="m"
-        ></montage>
-    </div>
+    <collage-showcase
+        class="standard-margin"
+        style="flex-grow: 1;"
+        :collage-editor-shared="sharedStuff"
+    ></collage-showcase>
 </div>
         `
     })

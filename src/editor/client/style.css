@@ -2,6 +2,11 @@
     font-family: Sans-Serif;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
 .left { float: left; }
 .right { float: right; }
 .center {
@@ -23,54 +28,26 @@
     transition: background-color .5s, color .5s, box-shadow .5s;
 }
 
-#navmenu {
-    position: fixed;
-    margin: 0;
-    left: 0;
-    top: 0;
-    width: 100%;
-    z-index: 1;
-}
-#navmenu ul {
-    margin: 0;
-    padding: 0;
+.menu-bar {
     border-top: thin solid black;
     border-bottom: thin solid black;
-    list-style-type: none; list-style-image: none;
     padding: 5px 0px 5px 0px;
     background-color: white;
 }
-#navmenu li {display: inline; }
-#navmenu ul li a {
+.menu-bar a {
+    cursor: pointer;
     text-decoration:none;
     margin: 0px;
     padding: 5px 10px 5px 10px;
     color: black;
-    font-family: Verdana, sans-serif;
     font-size: 12px;
     font-weight: bold;
 }
-.menu .option:hover, #navmenu ul li a:hover {
+.menu .option:hover, .menu-bar a:hover {
     color: white;
     background-color: lightgreen;
 }
-.background {
-    position: absolute;
-    margin: 0px;
-    left: 0px;
-    top: 0;
-    cursor: crosshair;
-    padding-right: 300px;
-}
-#layers {
-    position: absolute;
-    left: 110px;
-    top: 40px;
-    right: 250px;
-    /*width: 100%;
-    height: 100%;*/
-    padding: 0;
-    margin: 0px;
+.level-area {
     cursor: crosshair;
     background-color: black;
 }
@@ -89,8 +66,6 @@
 
 .menu .option
 {
-    /*width:32px;
-    height:32px;*/
     border: 1px solid black;
     margin: 4px;
     padding: 2px;
@@ -98,11 +73,6 @@
 }
 
 .pointer {
-    cursor: pointer;
-}
-
-#layerMenu > div
-{
     cursor: pointer;
 }
 
@@ -144,22 +114,13 @@ tr.active {background-color: #dadada;}
     padding: 15px;
 }
 
-.draggable {
-    /*cursor: all-scroll;*/
-}
-
 .draggable.position img {
     opacity: .5;
-    background-color: #CD96CD;
+    background-color: #cd96cd94;
 }
 
 textarea {
     width: 100%;
-}
-
-#editorTools {
-    padding: 0;
-    margin: 0;
 }
 
 .hoverable:hover {
@@ -168,4 +129,19 @@ textarea {
 
 .indent {
     margin-left: 10px;
+}
+
+.standard-margin {
+    margin: 1rem;
+}
+
+/* From https://gist.github.com/dfrankland/f6fed3e3ccc42e3de482b324126f9542 */
+.transparency-checkerboard-background {
+    background-image:
+      linear-gradient(45deg, #ccc 25%, transparent 25%), 
+      linear-gradient(135deg, #ccc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #ccc 75%),
+      linear-gradient(135deg, transparent 75%, #ccc 75%);
+    background-size:12px 12px; /* Must be a square */
+    background-position:0 0, 6px 0, 6px -6px, 0px 6px; /* Must be half of one side of the square */
 }

@@ -61,22 +61,23 @@ namespace splitTime.editor.collage {
         methods: {
         },
         template: `
-<div style="position: relative;">
-    <img
-        v-if="!!backgroundSrc"
-        class="background"
-        :src="backgroundSrc"
-        :style="{ position: 'absolute', 'left': editorPadding + 'px', 'top': editorPadding + 'px' }"
-    />
+<div
+    style="position: relative;"
+    class="transparency-checkerboard-background"
+>
+    <div :style="{ padding: editorPadding + 'px' }">
+        <img
+            v-if="!!backgroundSrc"
+            :src="backgroundSrc"
+        />
+    </div>
     <svg
-        style="position:absolute"
-        :width="containerWidth"
-        :height="containerHeight"
-        :viewBox="viewBox"
+        style="position:absolute; left: 0; top: 0; width: 100%; height: 100%"
     >
         <frame-rectangle v-for="frame in collage.frames"
             :collage-editor-shared="collageEditorShared"
             :frame="frame"
+            :offset="{x: editorPadding, y: editorPadding}"
         ></frame-rectangle>
     </svg>
 </div>

@@ -101,21 +101,20 @@ namespace splitTime.editor.level {
             :height="containerHeight"
             :viewBox="viewBox"
     >
-        <rendered-trace v-for="(trace, traceIndex) in traces"
+        <rendered-trace v-for="trace in traces"
             :key="trace.metadata.editorId"
             :level-editor-shared="levelEditorShared"
             :trace="trace"
-            :index="traceIndex"
         ></rendered-trace>
     </svg>
     <div :style="thingsStyleObject">
-        <rendered-proposition v-for="(prop, propIndex) in props"
+        <rendered-proposition v-for="prop in props"
             :key="prop.metadata.editorId"
             css-class="prop"
             :level-editor-shared="levelEditorShared"
             :prop="prop"
         ></rendered-proposition>
-        <rendered-proposition v-for="(position, posIndex) in positions"
+        <rendered-proposition v-for="position in positions"
             :key="position.metadata.editorId"
             css-class="position"
             :level-editor-shared="levelEditorShared"

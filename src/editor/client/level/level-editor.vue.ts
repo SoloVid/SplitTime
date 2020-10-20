@@ -131,7 +131,7 @@ namespace splitTime.editor.level {
         },
         template: `
 <div>
-    <div id="editorTools">
+    <div>
         <div ref="layersContainer">
             <level-graphical-editor
                 :editor-inputs="editorInputs"
