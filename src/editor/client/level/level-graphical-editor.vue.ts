@@ -81,7 +81,7 @@ namespace splitTime.editor.level {
         var object = {
             id: "",
             collage: "",
-            parcel: "",
+            montage: "",
             x: x,
             y: y,
             z: z,
@@ -101,7 +101,7 @@ namespace splitTime.editor.level {
         var object = {
             id: "",
             collage: "",
-            parcel: "",
+            montage: "",
             x: x,
             y: y,
             z: z,

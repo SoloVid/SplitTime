@@ -7,7 +7,7 @@ namespace splitTime {
         readonly ref: int
         constructor(
             private readonly collageId: string,
-            private readonly defaultParcelId?: string
+            private readonly defaultMontageId?: string
         ) {
             this.ref = nextRef++
         }
@@ -38,18 +38,18 @@ namespace splitTime {
             return G.ASSETS.images.get(this.collage.image)
         }
 
-        private getCurrentParcel(): collage.Parcel {
+        private getCurrentMontage(): collage.Montage {
             if (this.stance === Sprite.DEFAULT_STANCE) {
-                if (this.defaultParcelId) {
-                    return this.collage.getParcel(this.defaultParcelId)
+                if (this.defaultMontageId) {
+                    return this.collage.getMontage(this.defaultMontageId)
                 }
-                return this.collage.getDefaultParcel(this.dir)
+                return this.collage.getDefaultMontage(this.dir)
             }
-            return this.collage.getParcel(this.stance, this.dir)
+            return this.collage.getMontage(this.stance, this.dir)
         }
 
         private getCurrentFrame(): collage.Frame {
-            return this.getCurrentParcel().getFrame(this.frame)
+            return this.getCurrentMontage().getFrame(this.frame)
         }
 
         getDesiredOrigin(whereDefaultWouldBe: Coordinates3D): Coordinates3D {
@@ -111,13 +111,13 @@ namespace splitTime {
                 //Only update on frame tick
                 while (this._time > this._timeFrameStarted + this.getCurrentFrame().duration) {
                     this._timeFrameStarted = this._timeFrameStarted + this.getCurrentFrame().duration
-                    this.frame = (this.frame + 1) % this.getCurrentParcel().frames.length
+                    this.frame = (this.frame + 1) % this.getCurrentMontage().frames.length
                 }
             }
         }
 
         private finalizeStance() {
-            if (!this.requestedStance || !this.collage.hasParcel(this.requestedStance)) {
+            if (!this.requestedStance || !this.collage.hasMontage(this.requestedStance)) {
                 this.requestedStance = Sprite.DEFAULT_STANCE
             }
             this.stance = this.requestedStance

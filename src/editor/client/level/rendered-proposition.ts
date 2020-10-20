@@ -11,7 +11,7 @@ namespace splitTime.editor.level {
         frame: splitTime.collage.Frame
         framePosition: Coordinates2D
         imgSrc: string
-        parcel: splitTime.collage.Parcel
+        montage: splitTime.collage.Montage
         positionLeft: int
         positionTop: int
         styleObject: object
@@ -23,7 +23,7 @@ namespace splitTime.editor.level {
     }
     
     function body(this: VueRenderedProposition): file.collage.BodySpec {
-        return this.parcel.bodySpec
+        return this.montage.bodySpec
     }
 
     function combinedCssClass(this: VueRenderedProposition): (string | { [className: string]: boolean })[] {
@@ -31,7 +31,7 @@ namespace splitTime.editor.level {
     }
 
     function frame(this: VueRenderedProposition): splitTime.collage.Frame {
-        return this.parcel.getFrameAt(this.levelEditorShared.time)
+        return this.montage.getFrameAt(this.levelEditorShared.time)
     }
 
     function framePosition(this: VueRenderedProposition): Coordinates2D {
@@ -48,11 +48,11 @@ namespace splitTime.editor.level {
         return this.collage.image
     }
 
-    function parcel(this: VueRenderedProposition): splitTime.collage.Parcel {
-        if (this.p.obj.parcel === "") {
-            return this.collage.getDefaultParcel(this.p.obj.dir)
+    function montage(this: VueRenderedProposition): splitTime.collage.Montage {
+        if (this.p.obj.montage === "") {
+            return this.collage.getDefaultMontage(this.p.obj.dir)
         }
-        return this.collage.getParcel(this.p.obj.parcel, this.p.obj.dir)
+        return this.collage.getMontage(this.p.obj.montage, this.p.obj.dir)
     }
 
     function positionLeft(this: VueRenderedProposition): number {
@@ -119,7 +119,7 @@ namespace splitTime.editor.level {
             frame,
             framePosition,
             imgSrc,
-            parcel,
+            montage,
             positionLeft,
             positionTop,
             styleObject

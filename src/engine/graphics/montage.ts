@@ -2,7 +2,7 @@ namespace splitTime.collage {
     /**
      * Animation of {@link Collage} {@link Frame}s with associated physics metadata
      */
-    export class Parcel {
+    export class Montage {
         constructor(
             readonly id: string,
             readonly direction: direction_t | null,

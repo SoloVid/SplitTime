@@ -4,30 +4,30 @@ namespace splitTime {
      * Image (e.g. sprite sheet or tile map) with a bunch of associated metadata.
      * 
      * A collage has a single image that is split up into a bunch of {@link Frame}s (boxes).
-     * These boxes may then be combined into {@link Parcel}s which are animations
+     * These boxes may then be combined into {@link Montage}s which are animations
      * combined with some physics metadata.
      */
     export class Collage {
-        private readonly parcelMap: { [id: string]: { [direction: number]: collage.Parcel }} = {}
+        private readonly montageMap: { [id: string]: { [direction: number]: collage.Montage }} = {}
 
         constructor(
             /** Path of image backing this Collage */
             readonly image: string,
-            readonly parcels: readonly Readonly<collage.Parcel>[],
-            private readonly defaultParcelId: string
+            readonly montages: readonly Readonly<collage.Montage>[],
+            private readonly defaultMontageId: string
         ) {
             // Construct map
-            for (const parcel of parcels) {
-                const id = parcel.id
-                if (!(id in this.parcelMap)) {
-                    this.parcelMap[id] = {}
+            for (const montage of montages) {
+                const id = montage.id
+                if (!(id in this.montageMap)) {
+                    this.montageMap[id] = {}
                 }
-                const dir = parcel.direction === null ? DEFAULT_PARCEL_DIR : parcel.direction
-                this.parcelMap[id][dir] = parcel
+                const dir = montage.direction === null ? DEFAULT_PARCEL_DIR : montage.direction
+                this.montageMap[id][dir] = montage
             }
-            // Make sure there is a default for each parcel
-            for (const id in this.parcelMap) {
-                const bucket = this.parcelMap[id]
+            // Make sure there is a default for each montage
+            for (const id in this.montageMap) {
+                const bucket = this.montageMap[id]
                 if (!(DEFAULT_PARCEL_DIR in bucket)) {
                     for (const dir in bucket) {
                         bucket[DEFAULT_PARCEL_DIR] = bucket[dir]
@@ -36,20 +36,20 @@ namespace splitTime {
                 }
             }
 
-            if (!this.hasParcel(defaultParcelId)) {
-                throw new Error("Default parcel " + defaultParcelId + " not found in collage")
+            if (!this.hasMontage(defaultMontageId)) {
+                throw new Error("Default montage " + defaultMontageId + " not found in collage")
             }
         }
 
-        hasParcel(id: string): boolean {
-            return id in this.parcelMap
+        hasMontage(id: string): boolean {
+            return id in this.montageMap
         }
 
-        getParcel(id: string, direction?: direction_t | string): collage.Parcel {
-            if (!this.hasParcel(id)) {
-                throw new Error("Parcel " + id + " not found in collage")
+        getMontage(id: string, direction?: direction_t | string): collage.Montage {
+            if (!this.hasMontage(id)) {
+                throw new Error("Montage " + id + " not found in collage")
             }
-            const bucket = this.parcelMap[id]
+            const bucket = this.montageMap[id]
             const dirKey = direction === undefined ? DEFAULT_PARCEL_DIR :
                 splitTime.direction.interpret(direction)
             if (dirKey in bucket) {
@@ -58,8 +58,8 @@ namespace splitTime {
             return bucket[DEFAULT_PARCEL_DIR]
         }
 
-        getDefaultParcel(direction?: direction_t | string): collage.Parcel {
-            return this.getParcel(this.defaultParcelId, direction)
+        getDefaultMontage(direction?: direction_t | string): collage.Montage {
+            return this.getMontage(this.defaultMontageId, direction)
         }
     }
 
@@ -70,15 +70,15 @@ namespace splitTime {
                 framesRectMap[fileFrame.id] =
                     math.Rect.make(fileFrame.x, fileFrame.y, fileFrame.width, fileFrame.height)
             }
-            return new Collage(file.image, file.parcels.map(fileParcel => {
-                const dir = !fileParcel.direction ? null :
-                    splitTime.direction.interpret(fileParcel.direction)
-                return new collage.Parcel(fileParcel.id,
+            return new Collage(file.image, file.montages.map(fileMontage => {
+                const dir = !fileMontage.direction ? null :
+                    splitTime.direction.interpret(fileMontage.direction)
+                return new collage.Montage(fileMontage.id,
                     dir,
-                    fileParcel.frames.map(fpf => {
+                    fileMontage.frames.map(fpf => {
                         if (!(fpf.frameId in framesRectMap)) {
                             throw new Error("Could not find frame " + fpf.frameId +
-                                " for parcel " + fileParcel.id)
+                                " for montage " + fileMontage.id)
                         }
                         return new collage.Frame(
                             framesRectMap[fpf.frameId],
@@ -86,10 +86,10 @@ namespace splitTime {
                             fpf.duration
                         )
                     }),
-                    fileParcel.body,
-                    fileParcel.traces
+                    fileMontage.body,
+                    fileMontage.traces
                 )
-            }), file.defaultParcelId)
+            }), file.defaultMontageId)
         }
     }
 }

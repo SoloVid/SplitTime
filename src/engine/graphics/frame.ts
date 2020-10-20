@@ -1,6 +1,6 @@
 namespace splitTime.collage {
     /**
-     * A single frame of animation as part of a {@link Parcel} of a {@link Collage}
+     * A single frame of animation as part of a {@link Montage} of a {@link Collage}
      */
     export class Frame {
         constructor(

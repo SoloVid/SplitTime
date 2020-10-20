@@ -3,12 +3,12 @@ namespace splitTime.editor.collage {
     interface VueMontage {
         // props
         collageEditorShared: CollageEditorShared
-        montage: file.collage.Parcel
+        montage: file.collage.Montage
         // computed
         frame: splitTime.collage.Frame
         frameTargetBox: math.Rect
         overallArea: math.Rect
-        realMontage: splitTime.collage.Parcel
+        realMontage: splitTime.collage.Montage
         containerStyle: object
         imageDivStyle: object
         // asyncComputed
@@ -28,9 +28,9 @@ namespace splitTime.editor.collage {
         return this.realMontage.getOverallArea()
     }
 
-    function realMontage(this: VueMontage): splitTime.collage.Parcel {
+    function realMontage(this: VueMontage): splitTime.collage.Montage {
         const dir = this.montage.direction === "" ? undefined : this.montage.direction
-        return this.collageEditorShared.realCollage.getParcel(this.montage.id, dir)
+        return this.collageEditorShared.realCollage.getMontage(this.montage.id, dir)
     }
 
     function containerStyle(this: VueMontage): object {

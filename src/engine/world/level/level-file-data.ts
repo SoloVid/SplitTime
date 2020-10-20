@@ -39,7 +39,7 @@ namespace splitTime.level {
         export interface Prop {
             id: string
             collage: string
-            parcel: string
+            montage: string
             x: number
             y: number
             z: number
@@ -51,7 +51,7 @@ namespace splitTime.level {
         export interface Position {
             id: string
             collage: string
-            parcel: string
+            montage: string
             x: number
             y: number
             z: number
@@ -89,7 +89,7 @@ namespace splitTime.level {
                 props: type.array(type.object({
                     id: type.string,
                     collage: type.string,
-                    parcel: type.string,
+                    montage: type.string,
                     x: type.number,
                     y: type.number,
                     z: type.number,
@@ -99,7 +99,7 @@ namespace splitTime.level {
                 positions: type.array(type.object({
                     id: type.string,
                     collage: type.string,
-                    parcel: type.string,
+                    montage: type.string,
                     x: type.number,
                     y: type.number,
                     z: type.number,

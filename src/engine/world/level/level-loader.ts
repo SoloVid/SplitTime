@@ -53,8 +53,8 @@ namespace splitTime {
                     +posObj.y,
                     +posObj.z,
                     splitTime.direction.interpret(posObj.dir),
-                    // TODO: resolve confusion or "parcel" and "stance"
-                    posObj.parcel
+                    // TODO: resolve confusion of "montage" and "stance"
+                    posObj.montage
                 )
 
                 if (posObj.id) {
@@ -127,21 +127,21 @@ namespace splitTime {
             //Pull board objects from file
             for (var iProp = 0; iProp < this.fileData.props.length; iProp++) {
                 var prop = this.fileData.props[iProp]
-                const collageParcel = G.ASSETS.collages.get(prop.collage).getParcel(prop.parcel)
-                // const sprite = new Sprite(prop.collage, prop.parcel)
+                const collageMontage = G.ASSETS.collages.get(prop.collage).getMontage(prop.montage)
+                // const sprite = new Sprite(prop.collage, prop.montage)
                 const sprite = new Sprite(prop.collage)
                 sprite.playerOcclusionFadeFactor = prop.playerOcclusionFadeFactor
                 const body = new Body()
-                body.width = collageParcel.bodySpec.width
-                body.depth = collageParcel.bodySpec.depth
-                body.height = collageParcel.bodySpec.height
+                body.width = collageMontage.bodySpec.width
+                body.depth = collageMontage.bodySpec.depth
+                body.height = collageMontage.bodySpec.height
                 body.drawables.push(sprite)
                 body.id = prop.id
                 body.put(this.level, +prop.x, +prop.y, +prop.z, true)
                 if (prop.dir !== "") {
                     body.dir = splitTime.direction.interpret(prop.dir)
                 }
-                sprite.requestStance(prop.parcel, body.dir, true, true)
+                sprite.requestStance(prop.montage, body.dir, true, true)
             }
             this._addingProps = false
         }

@@ -5,9 +5,9 @@ namespace splitTime.file {
     export interface Collage {
         image: string
         frames: collage.Frame[]
-        parcels: collage.Parcel[]
-        /** Reference to a {@link collage.Parcel} in {@link Collage#parcels} */
-        defaultParcelId: string
+        montages: collage.Montage[]
+        /** Reference to a {@link collage.Montage} in {@link Collage#montages} */
+        defaultMontageId: string
     }
 
     // Expect compiler error here if Collage is not jsonable
@@ -17,7 +17,7 @@ namespace splitTime.file {
         /**
          * Component of {@link Collage}, specifically used in JSON file format.
          * 
-         * Unlike {@link splitTime.collage.Frame}, a single Frame may be used by multiple {@link Parcel}s.
+         * Unlike {@link splitTime.collage.Frame}, a single Frame may be used by multiple {@link Montage}s.
          */
         export interface Frame {
             id: string
@@ -27,24 +27,23 @@ namespace splitTime.file {
             height: int
         }
 
-        // TBD name: montage? parcel? animation? animated entity? setup? kit?
         /**
          * Component of {@link Collage}, specifically used in JSON file format.
          */
-        export interface Parcel {
+        export interface Montage {
             id: string
             direction: string
-            frames: ParcelFrame[]
+            frames: MontageFrame[]
             body: BodySpec
             traces: level.file_data.Trace[]
         }
 
         /**
-         * Component of {@link Parcel}, specifically used in JSON file format.
+         * Component of {@link Montage}, specifically used in JSON file format.
          * 
          * This type is more similar to {@link splitTime.collage.Frame} than {@link Frame} is.
          */
-        export interface ParcelFrame {
+        export interface MontageFrame {
             /** Reference to a {@link Frame} object within this {@link Collage#frames} */
             frameId: string
             offsetX: int
@@ -73,7 +72,7 @@ namespace splitTime.file {
                     width: type.int,
                     height: type.int
                 })),
-                parcels: type.array(type.object({
+                montages: type.array(type.object({
                     id: type.string,
                     direction: type.string,
                     frames: type.array(type.object({
@@ -101,7 +100,7 @@ namespace splitTime.file {
                         offsetZ: type.number
                     }))
                 })),
-                defaultParcelId: type.string
+                defaultMontageId: type.string
             }))
         }
     }

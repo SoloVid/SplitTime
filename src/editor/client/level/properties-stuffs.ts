@@ -33,7 +33,7 @@ namespace splitTime.editor.level {
         const fields = {
             id: {},
             collage: {},
-            parcel: {},
+            montage: {},
             x: {},
             y: {},
             z: {},
@@ -52,7 +52,7 @@ namespace splitTime.editor.level {
         const fields = {
             id: {},
             collage: {},
-            parcel: {},
+            montage: {},
             x: {},
             y: {},
             z: {},

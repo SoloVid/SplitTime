@@ -127,7 +127,7 @@ namespace splitTime.editor.collage {
     ></collage-layout>
     <div>
         <montage
-            v-for="m in collage.parcels"
+            v-for="m in collage.montages"
             :collage-editor-shared="sharedStuff"
             :montage="m"
         ></montage>
