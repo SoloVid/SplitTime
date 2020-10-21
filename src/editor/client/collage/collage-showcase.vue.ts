@@ -24,33 +24,19 @@ namespace splitTime.editor.collage {
     }
 
     function widestMontageWidth(this: VueCollageShowcase): number {
-        return this.collageEditorShared.realCollage.montages.reduce((maxWidth, m) => {
+        const width = this.collageEditorShared.realCollage.montages.reduce((maxWidth, m) => {
             const mWidth = m.getOverallArea().width
             return Math.max(maxWidth, mWidth)
         }, 0)
+        console.log("widest: " + width)
+        return width
     }
 
     function createNewMontage(this: VueCollageShowcase): void {
-        let frameIndex = this.collage.montages.length
-        let frameId = "Montage " + frameIndex
-        while (this.collage.frames.some(f => f.id === frameId)) {
-            frameIndex++
-            frameId = "Montage " + frameIndex
-        }
-        const defaultBodySpec = {
-            width: 16,
-            depth: 16,
-            height: 48
-        }
-        const newMontage: file.collage.Montage = {
-            id: frameId,
-            direction: "",
-            frames: [],
-            body: defaultBodySpec,
-            traces: []
-        }
+        const collageHelper = new CollageHelper(this.collage)
+        const newMontage = collageHelper.newMontage()
         this.collage.montages.push(newMontage)
-        this.collageEditorShared.selectMontage(newMontage)
+        this.collageEditorShared.selectMontage(newMontage, true)
     }
 
     Vue.component("collage-showcase", {
@@ -72,11 +58,10 @@ namespace splitTime.editor.collage {
         template: `
 <div :style="gridStyle">
     <template v-for="m in collage.montages">
-    <montage
-        style="overflow: none;"
-        :collage-editor-shared="collageEditorShared"
-        :montage="m"
-    ></montage>
+        <montage
+            :collage-editor-shared="collageEditorShared"
+            :montage="m"
+        ></montage>
     </template>
     <div
         @mousedown.left="createNewMontage"

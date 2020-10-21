@@ -153,7 +153,7 @@ namespace splitTime.editor.level {
                     }
                     
                     this.levelEditorShared.pathInProgress = trace.obj
-                    this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace)
+                    this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace.obj)
                 } else {
                     if(!this.inputs.ctrlDown) {
                         if(pathInProgress.type == splitTime.trace.Type.PATH) {

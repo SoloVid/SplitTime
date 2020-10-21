@@ -3,7 +3,10 @@ namespace splitTime.editor.collage {
         // props
         collageEditorShared: CollageEditorShared
         montage: file.collage.Montage
+        // data
+        placeholderImgSrc: string
         // computed
+        fileMontageFrame: file.collage.MontageFrame
         frame: splitTime.collage.Frame
         frameTargetBox: math.Rect
         overallArea: math.Rect
@@ -12,7 +15,18 @@ namespace splitTime.editor.collage {
         frameDivStyle: object
         // asyncComputed
         // methods
-        setActiveMontage(): void
+        setActiveMontage(event: MouseEvent): void
+    }
+
+    function data(this: VueMontage): Partial<VueMontage> {
+        return {
+            placeholderImgSrc: level.getPlaceholderImage()
+        }
+    }
+
+    function fileMontageFrame(this: VueMontage): file.collage.MontageFrame {
+        const montageFrameIndex = this.realMontage.frames.indexOf(this.frame)
+        return this.montage.frames[montageFrameIndex]
     }
 
     function frame(this: VueMontage): splitTime.collage.Frame {
@@ -36,7 +50,8 @@ namespace splitTime.editor.collage {
         return {
             position: 'relative',
             width: this.overallArea.width + 'px',
-            height: this.overallArea.height + 'px'
+            height: this.overallArea.height + 'px',
+            outline: this.montage === this.collageEditorShared.selectedMontage ? "4px solid red" : "none"
         }
     }
 
@@ -48,8 +63,9 @@ namespace splitTime.editor.collage {
         }
     }
 
-    function setActiveMontage(this: VueMontage): void {
-        this.collageEditorShared.selectMontage(this.montage)
+    function setActiveMontage(this: VueMontage, event: MouseEvent): void {
+        const alsoSetProperties = !(event as PropertiesEvent).propertiesPanelSet
+        this.collageEditorShared.selectMontage(this.montage, alsoSetProperties)
     }
 
     Vue.component("montage", {
@@ -57,7 +73,9 @@ namespace splitTime.editor.collage {
             collageEditorShared: Object,
             montage: Object
         },
+        data,
         computed: {
+            fileMontageFrame,
             frame,
             frameTargetBox,
             overallArea,
@@ -72,18 +90,27 @@ namespace splitTime.editor.collage {
         },
         template: `
 <div
-    :style="containerStyle"
-    class="transparency-checkerboard-background"
     @mousedown.left="setActiveMontage"
 >
+    <div style="overflow: hidden;">
+        <img v-if="montage.frames.length === 0" :src="placeholderImgSrc"/>
+    </div>
     <div
-        :style="frameDivStyle"
+        v-if="montage.frames.length > 0"
+        :style="containerStyle"
+        class="transparency-checkerboard-background"
     >
-        <montage-frame
-            :collage-editor-shared="collageEditorShared"
-            :frame="frame"
-            :montage="montage"
-        ></montage-frame>
+        <div
+            :style="frameDivStyle"
+        >
+            <montage-frame
+                :collage-editor-shared="collageEditorShared"
+                :montage="montage"
+                :montage-frame="fileMontageFrame"
+                :edit-affects-all-frames="true"
+                :highlight="false"
+            ></montage-frame>
+        </div>
     </div>
 </div>
         `

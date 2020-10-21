@@ -2,12 +2,15 @@ namespace splitTime.editor.collage {
     interface VueMontageFrame {
         // props
         collageEditorShared: CollageEditorShared
-        frame: splitTime.collage.Frame
         montage: file.collage.Montage
+        montageFrame: file.collage.MontageFrame
+        editAffectsAllFrames: boolean
+        highlight: boolean
         // data
         editorPadding: number
         // computed
         body: file.collage.BodySpec
+        frame: splitTime.collage.Frame
         frameTargetBox: math.Rect
         bodyFrontRectRelative: math.Rect
         imageDivStyle: object
@@ -15,10 +18,17 @@ namespace splitTime.editor.collage {
         // asyncComputed
         imgSrc: string
         // methods
+        trackBody(event: MouseEvent): void
     }
 
     function body(this: VueMontageFrame): file.collage.BodySpec {
         return this.montage.body
+    }
+
+    function frame(this: VueMontageFrame): splitTime.collage.Frame {
+        const montageIndex = this.collageEditorShared.collage.montages.indexOf(this.montage)
+        const montageFrameIndex = this.montage.frames.indexOf(this.montageFrame)
+        return this.collageEditorShared.realCollage.montages[montageIndex].frames[montageFrameIndex]
     }
 
     function frameTargetBox(this: VueMontageFrame): math.Rect {
@@ -39,7 +49,8 @@ namespace splitTime.editor.collage {
             position: 'relative',
             overflow: 'hidden',
             width: this.frameTargetBox.width + 'px',
-            height: this.frameTargetBox.height + 'px'
+            height: this.frameTargetBox.height + 'px',
+            outline: this.highlight ? "4px solid red" : "none"
         }
     }
 
@@ -60,14 +71,34 @@ namespace splitTime.editor.collage {
         return await s.imgSrc(this.collageEditorShared.collage.image)
     }
 
+    function trackBody(this: VueMontageFrame, event: MouseEvent): void {
+        this.collageEditorShared.propertiesPaneStuff = getBodySpecPropertiesStuff(this.body)
+        const affectedMontageFrames = this.editAffectsAllFrames ? this.montage.frames : [this.montageFrame]
+        this.collageEditorShared.follow({
+            shift(dx: number, dy: number) {
+                for (const montageFrame of affectedMontageFrames) {
+                    montageFrame.offsetX -= dx
+                    montageFrame.offsetY -= dy
+                }
+            }
+        })
+        // Somewhat type-unsafe way of letting upper events know they should try to set properties
+        const anyEvent = event as PropertiesEvent
+        anyEvent.propertiesPanelSet = true
+        event.preventDefault()
+    }
+
     Vue.component("montage-frame", {
         props: {
             collageEditorShared: Object,
-            frame: Object,
-            montage: Object
+            montage: Object,
+            montageFrame: Object,
+            editAffectsAllFrames: Boolean,
+            highlight: Boolean
         },
         computed: {
             body,
+            frame,
             frameTargetBox,
             bodyFrontRectRelative,
             imageDivStyle,
@@ -80,6 +111,7 @@ namespace splitTime.editor.collage {
             }
         },
         methods: {
+            trackBody
         },
         template: `
 <div style="position: relative;">
@@ -101,6 +133,7 @@ namespace splitTime.editor.collage {
         />
         <rect
             style="pointer-events: initial;"
+            @mousedown="trackBody"
             :x="bodyFrontRectRelative.x"
             :y="bodyFrontRectRelative.y"
             :width="bodyFrontRectRelative.width"

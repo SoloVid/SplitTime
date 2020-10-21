@@ -19,8 +19,12 @@ namespace splitTime.editor.client {
             if (!fileName) {
                 return ""
             }
-            const info = await this.api.imageInfo.fetch(this.withProject({ imageId: fileName }))
-            return info.webPath + "?" + info.timeModifiedString
+            try {
+                const info = await this.api.imageInfo.fetch(this.withProject({ imageId: fileName }))
+                return info.webPath + "?" + info.timeModifiedString
+            } catch (e: unknown) {
+                return level.getPlaceholderImage()
+            }
         }
     }
 }

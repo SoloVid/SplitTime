@@ -157,17 +157,20 @@ namespace splitTime.editor.client {
         v-if="inputType === 'string'"
         v-model="value"
         :readonly="isReadonly"
+        class="block"
     />
     <textarea
         v-if="inputType === 'textarea'"
         v-model="value"
         :readonly="isReadonly"
+        class="block"
     />
     <input
         v-if="inputType === 'number'"
         type="number"
         v-model.number="value"
         :readonly="isReadonly"
+        class="block"
     />
 </label>
         `

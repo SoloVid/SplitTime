@@ -16,6 +16,7 @@ namespace splitTime.editor.collage {
         backgroundSrc: string
         // methods
         track(point?: Coordinates2D): void
+        addToMontage(): void
     }
 
     function data(this: VueFrameRectangle): Partial<VueFrameRectangle> {
@@ -73,62 +74,17 @@ namespace splitTime.editor.collage {
     }
 
     function track(this: VueFrameRectangle, point?: Coordinates2D): void {
-        // this.collageEditorShared.selectedFrame = this.frame
-        // const left = this.frame.x
-        // const top = this.frame.y
-        // const width = this.frame.width
-        // const height = this.frame.height
-        // const x = point ? point.x : left
-        // const y = point ? point.y : top
-        // let originalPoints: Coordinates2D[]
-        // if (point) {
-        //     originalPoints = [new Coordinates2D(x, y)]
-        // } else {
-        //     originalPoints = [
-        //         new Coordinates2D(x, y),
-        //         new Coordinates2D(x + width, y),
-        //         new Coordinates2D(x, y + height),
-        //         new Coordinates2D(x + width, y + height)
-        //     ]
-        // }
-
-        // const MIN_FRAME_LEN = 4
-        // const snappedMover = new client.GridSnapMover(this.collageEditorShared.gridCell, originalPoints)
-        // const follower = {
-        //     shift: (dx: number, dy: number) => {
-        //         snappedMover.applyDelta(dx, dy)
-        //         const snappedDelta = snappedMover.getSnappedDelta()
-        //         if (!point) {
-        //             this.frame.x = x + snappedDelta.x
-        //         } else if (x === left) {
-        //             const newWidth = width - snappedDelta.x
-        //             if (newWidth > MIN_FRAME_LEN) {
-        //                 this.frame.x = x + snappedDelta.x
-        //                 this.frame.width = newWidth
-        //             }
-        //         } else {
-        //             const newWidth = width + snappedDelta.x
-        //             if (newWidth > MIN_FRAME_LEN) {
-        //                 this.frame.width = newWidth
-        //             }
-        //         }
-        //         if (!point) {
-        //             this.frame.y = y + snappedDelta.y
-        //         } else if (y === top) {
-        //             const newHeight = height - snappedDelta.y
-        //             if (newHeight > MIN_FRAME_LEN) {
-        //                 this.frame.y = y + snappedDelta.y
-        //                 this.frame.height = newHeight
-        //             }
-        //         } else {
-        //             const newHeight = height + snappedDelta.y
-        //             if (newHeight > MIN_FRAME_LEN) {
-        //                 this.frame.height = newHeight
-        //             }
-        //         }
-        //     }
-        // }
         this.collageEditorShared.trackFrame(this.frame, point)
+    }
+
+    function addToMontage(this: VueFrameRectangle): void {
+        const montage = this.collageEditorShared.selectedMontage
+        if (montage === null) {
+            return
+        }
+        const collageHelper = new CollageHelper(this.collage)
+        const newMontageFrame = collageHelper.newMontageFrame(montage, this.frame)
+        montage.frames.push(newMontageFrame)
     }
 
     Vue.component("frame-rectangle", {
@@ -150,7 +106,8 @@ namespace splitTime.editor.collage {
             backgroundSrc
         },
         methods: {
-            track
+            track,
+            addToMontage
         },
         template: `
 <g>
@@ -187,6 +144,7 @@ namespace splitTime.editor.collage {
         stroke-width="2"
         fill="purple"
         @mousedown.left="track()"
+        @dblclick.left="addToMontage"
     />
 </g>
         `,

@@ -66,7 +66,7 @@ namespace splitTime.editor.level {
         }
     }
     
-    export function getTracePropertiesStuff(trace: Trace): client.ObjectProperties {
+    export function getTracePropertiesStuff(trace: splitTime.level.file_data.Trace): client.ObjectProperties {
         interface TraceFieldOptions {
             id: client.FieldOptions
             type: client.FieldOptions
@@ -90,7 +90,7 @@ namespace splitTime.editor.level {
             height: {}
         }
 
-        switch(trace.obj.type) {
+        switch(trace.type) {
             case splitTime.trace.Type.STAIRS:
                 fields.direction = {}
                 break
@@ -110,7 +110,7 @@ namespace splitTime.editor.level {
 
         return {
             title: "Trace Properties",
-            thing: trace.obj as SimplifiedTrace,
+            thing: trace as SimplifiedTrace,
             fields: fields as unknown as { [key: string]: client.FieldOptions }
         }
     }

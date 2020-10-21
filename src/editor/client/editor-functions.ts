@@ -106,12 +106,12 @@ namespace splitTime.editor.level {
         return trace
     }
     
-    export function safeGetColor(trace: Trace) {
-        if(trace.metadata.highlighted) {
+    export function safeGetColor(trace: splitTime.level.file_data.Trace, metadata: client.EditorMetadata) {
+        if(metadata.highlighted) {
             return "rgba(255, 255, 0, 0.8)"
         }
-        let type = trace.obj.type
-        if(type === splitTime.trace.Type.SOLID && +trace.obj.height === 0) {
+        let type = trace.type
+        if(type === splitTime.trace.Type.SOLID && +trace.height === 0) {
             type = splitTime.trace.Type.GROUND
         }
         for(const traceOption of client.traceOptions) {
@@ -151,17 +151,16 @@ namespace splitTime.editor.level {
         return closestPosition
     }
 
+    export const PLACEHOLDER_WIDTH = 64
     function makePlaceholderImage(): string {
-        const tempCanvas = new splitTime.Canvas(256, 256)
+        const tempCanvas = new splitTime.Canvas(PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH)
         const ctx = tempCanvas.element.getContext("2d")
         if (!ctx) {
             throw new Error("Failed to get context for placeholder image")
         }
 
-        const width = 32
-        const height = 64
         ctx.fillStyle = "#CD96CD"
-        ctx.fillRect(5, 5, width - 10, height - 10)
+        ctx.fillRect(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH)
         return (tempCanvas.element as HTMLCanvasElement).toDataURL()
     }
 

@@ -6,10 +6,10 @@ namespace splitTime.editor.collage {
         // computed
         collage: file.Collage
         gridStyle: object
-        realMontage: splitTime.collage.Montage
+        selectedFrameId: string | null
         widestFrameWidth: number
         // methods
-        changeActiveFrame(montage: file.collage.Frame): void
+        selectFrame(montageFrame: file.collage.MontageFrame, event: MouseEvent): void
     }
 
     function collage(this: VueMontageEditor): file.Collage {
@@ -24,9 +24,11 @@ namespace splitTime.editor.collage {
         }
     }
 
-    function realMontage(this: VueMontageEditor): splitTime.collage.Montage {
-        const dir = this.montage.direction === "" ? undefined : this.montage.direction
-        return this.collageEditorShared.realCollage.getMontage(this.montage.id, dir)
+    function selectedFrameId(this: VueMontageEditor): string | null {
+        if (this.collageEditorShared.selectedFrame === null) {
+            return null
+        }
+        return this.collageEditorShared.selectedFrame.id
     }
 
     function widestFrameWidth(this: VueMontageEditor): number {
@@ -35,8 +37,8 @@ namespace splitTime.editor.collage {
         }, 0)
     }
 
-    function changeActiveFrame(this: VueMontageEditor, frame: file.collage.Frame): void {
-        // this.collageEditorShared.selectMontage(montage)
+    function selectFrame(this: VueMontageEditor, montageFrame: file.collage.MontageFrame, event: MouseEvent): void {
+        this.collageEditorShared.selectMontageFrame(montageFrame, !(event as PropertiesEvent).propertiesPanelSet)
     }
 
     Vue.component("montage-editor", {
@@ -51,21 +53,27 @@ namespace splitTime.editor.collage {
         computed: {
             collage,
             gridStyle,
-            realMontage,
+            selectedFrameId,
             widestFrameWidth
         },
         methods: {
-            changeActiveFrame
+            selectFrame
         },
         template: `
 <div :style="gridStyle">
-    <template v-for="frame in realMontage.frames">
+    <div v-if="montage.frames.length === 0">
+        Double-click a frame to add it to this montage.
+    </div>
+    <template v-for="frame in montage.frames">
         <div
+            @mousedown="selectFrame(frame, $event)"
         >
             <montage-frame
                 :collage-editor-shared="collageEditorShared"
-                :frame="frame"
                 :montage="montage"
+                :montage-frame="frame"
+                :edit-affects-all-frames="false"
+                :highlight="frame.frameId === selectedFrameId"
             ></montage-frame>
         </div>
     </template>

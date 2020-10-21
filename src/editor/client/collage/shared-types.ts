@@ -11,11 +11,17 @@ namespace splitTime.editor.collage {
         selectedMontage: file.collage.Montage | null
         readonly server: client.ServerLiaison
         readonly time: game_seconds
-        // propertiesPaneStuff: client.ObjectProperties
+        propertiesPaneStuff: client.ObjectProperties
         /** Stuff to display to the user */
         readonly info: { [name: string]: string | number }
         follow(follower: client.Followable): void
-        selectMontage(montage: file.collage.Montage): void
+        selectFrame(frame: file.collage.Frame, andProperties: boolean): void
+        selectMontage(montage: file.collage.Montage, andProperties: boolean): void
+        selectMontageFrame(montageFrame: file.collage.MontageFrame, andProperties: boolean): void
         trackFrame(frame: file.collage.Frame, point?: Coordinates2D): void
+    }
+
+    export interface PropertiesEvent {
+        propertiesPanelSet?: boolean
     }
 }

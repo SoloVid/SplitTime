@@ -58,13 +58,10 @@ img {
 }
 
 .menu {
-    position: fixed;
-    top: 40px;
-    /*right: 0;*/
-    width: 200px;
-    max-height: 90%;
-    overflow-y: auto;
-    border: 1px solid black;
+    width: 128px;
+    overflow: auto;
+    border-left: 2px solid black;
+    border-right: 2px solid black;
     padding: 4px;
     background-color: white;
 }
@@ -128,7 +125,7 @@ textarea {
     width: 100%;
 }
 
-.hoverable:hover {
+.highlighted, .hoverable:hover {
     outline: 4px solid yellow;
 }
 
@@ -168,4 +165,10 @@ textarea {
 .vertical-bar-separators > *:not(:last-child) {
     /** Parent positioning required for bar positioning */
     position: relative;
+}
+
+input.block, textarea.block {
+    box-sizing: border-box;
+    width: 100%;
+    display: block;
 }

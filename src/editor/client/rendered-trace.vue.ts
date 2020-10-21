@@ -2,7 +2,8 @@ namespace splitTime.editor.level {
     interface VueRenderedTrace {
         // props
         levelEditorShared: LevelEditorShared
-        trace: Trace
+        metadata: client.EditorMetadata
+        trace: splitTime.level.file_data.Trace
         // data
         uid: string
         // computed
@@ -32,7 +33,7 @@ namespace splitTime.editor.level {
         return pointArray.length > 0 && pointArray[pointArray.length - 1] === null
     }
     function height(this: VueRenderedTrace): number {
-        return this.trace.obj.height
+        return this.trace.height
     }
     function vertices(this: VueRenderedTrace): Coordinates3D[] {
         var pointsArray = this.pointsArray
@@ -43,13 +44,13 @@ namespace splitTime.editor.level {
             return {
                 x: point.x,
                 y: point.y,
-                z: this.trace.obj.z
+                z: this.trace.z
             }
         })
     }
 
     function pointsArray(this: VueRenderedTrace): (Readonly<Coordinates2D> | null)[] {
-        return safeExtractTraceArray(this.levelEditorShared.level, this.trace.obj.vertices)
+        return safeExtractTraceArray(this.levelEditorShared.level, this.trace.vertices)
     }
 
     function points(this: VueRenderedTrace): string {
@@ -57,10 +58,10 @@ namespace splitTime.editor.level {
         var pointsArray = this.pointsArray
         return pointsArray.map(point => {
             if(point !== null) {
-                const y = point.y - that.trace.obj.z
+                const y = point.y - that.trace.z
                 return point.x + "," + y
             } else if(pointsArray.length > 0 && pointsArray[0] !== null) {
-                const y = pointsArray[0].y - that.trace.obj.z
+                const y = pointsArray[0].y - that.trace.z
                 return pointsArray[0].x + "," + y
             }
             return ""
@@ -75,7 +76,7 @@ namespace splitTime.editor.level {
             const point3D = {
                 x: point.x,
                 y: point.y,
-                z: this.trace.obj.z + this.trace.obj.height
+                z: this.trace.z + this.trace.height
             }
             return point3D
         })
@@ -95,12 +96,12 @@ namespace splitTime.editor.level {
         var that = this
         const pointsArray2D = this.pointsArray
         let pointsArray3D: (Coordinates3D | null)[] = []
-        if(this.trace.obj.type === splitTime.trace.Type.STAIRS && !!this.trace.obj.direction && pointsArray2D.length >= 3) {
-            var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace.obj)
+        if(this.trace.type === splitTime.trace.Type.STAIRS && !!this.trace.direction && pointsArray2D.length >= 3) {
+            var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace)
             var extremes = officialTrace.calculateStairsExtremes()
             var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y)
             var stairsLength = stairsVector.magnitude
-            var totalDZ = that.trace.obj.height
+            var totalDZ = that.trace.height
             pointsArray3D = pointsArray2D.map(point => {
                 if(!point) {
                     return point
@@ -111,7 +112,7 @@ namespace splitTime.editor.level {
                 const point3D = {
                     x: point.x,
                     y: point.y,
-                    z: that.trace.obj.z + height
+                    z: that.trace.z + height
                 }
                 return point3D
             })
@@ -135,13 +136,13 @@ namespace splitTime.editor.level {
         if (this.otherLevelDisplayed && this.otherLevelImgSrc) {
             return "url(#img-" + this.uid + ")"
         }
-        return safeGetColor(this.trace)
+        return safeGetColor(this.trace, this.metadata)
     }
     function traceStroke(this: VueRenderedTrace): string {
-        return this.hasClose ? "black" : safeGetColor(this.trace)
+        return this.hasClose ? "black" : safeGetColor(this.trace, this.metadata)
     }
     function traceShadowFill(this: VueRenderedTrace): string {
-        return this.trace.metadata.highlighted ? client.TRACE_GROUND_HIGHLIGHT_COLOR : client.TRACE_GROUND_COLOR
+        return this.metadata.highlighted ? client.TRACE_GROUND_HIGHLIGHT_COLOR : client.TRACE_GROUND_COLOR
     }
     function traceShadowStroke(this: VueRenderedTrace): string {
         return "black"
@@ -150,17 +151,17 @@ namespace splitTime.editor.level {
         return this.hasClose && this.height > 0
     }
     function otherLevelDisplayed(this: VueRenderedTrace): boolean {
-        const isTypeOtherLevel = this.trace.obj.type === splitTime.trace.Type.POINTER ||
-            this.trace.obj.type === splitTime.trace.Type.TRANSPORT
-        return isTypeOtherLevel && this.trace.metadata.highlighted
+        const isTypeOtherLevel = this.trace.type === splitTime.trace.Type.POINTER ||
+            this.trace.type === splitTime.trace.Type.TRANSPORT
+        return isTypeOtherLevel && this.metadata.highlighted
     }
 
     async function otherLevel(this: VueRenderedTrace): Promise<splitTime.level.FileData> {
-        if (!this.trace.obj.level) {
+        if (!this.trace.level) {
             return exportLevel(new Level())
         }
         const s = this.levelEditorShared.server
-        return s.api.levelJson.fetch(s.withProject({ levelId: this.trace.obj.level }))
+        return s.api.levelJson.fetch(s.withProject({ levelId: this.trace.level }))
     }
     function otherLevelImgSrc(this: VueRenderedTrace): PromiseLike<string> {
         return this.levelEditorShared.server.imgSrc(this.otherLevel.background)
@@ -170,7 +171,7 @@ namespace splitTime.editor.level {
         if(this.levelEditorShared.shouldDragBePrevented()) {
             return
         }
-        const trace = this.trace.obj
+        const trace = this.trace
         const originalPointString = trace.vertices
         const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
         const traceSpec = splitTime.trace.TraceSpec.fromRaw(trace)
@@ -196,16 +197,17 @@ namespace splitTime.editor.level {
     }
     function toggleHighlight(this: VueRenderedTrace, highlight: boolean): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {
-            this.trace.metadata.highlighted = false
+            this.metadata.highlighted = false
             return
         }
-        this.trace.metadata.highlighted = highlight
+        this.metadata.highlighted = highlight
     }
 
 
     Vue.component("rendered-trace", {
         props: {
             levelEditorShared: Object,
+            metadata: Object,
             trace: Object
         },
         data: function() {
@@ -246,16 +248,22 @@ namespace splitTime.editor.level {
 <g>
     <defs>
         <!-- Window to linked level FTODO: change to showing more than just background -->
-        <!-- Also FTODO: back with black -->
         <pattern
             v-if="otherLevelDisplayed"
             :id="'img-' + uid"
-            :x="-trace.obj.offsetX"
-            :y="-trace.obj.offsetY + trace.obj.offsetZ"
+            :x="-trace.offsetX"
+            :y="-trace.offsetY + trace.offsetZ"
             :width="otherLevel.width + 1000"
             :height="otherLevel.height + 1000"
             patternUnits="userSpaceOnUse"
         >
+            <rect
+                x="0"
+                y="0"
+                :width="otherLevel.width + 1000"
+                :height="otherLevel.height + 1000"
+                fill="black"
+            />
             <image
                 :width="otherLevel.width"
                 :height="otherLevel.height"
@@ -266,7 +274,7 @@ namespace splitTime.editor.level {
     </defs>
     <!-- Base outline and fill -->
     <polyline
-            v-show="trace.metadata.displayed"
+            v-show="metadata.displayed"
             v-on:dblclick.prevent
             v-on:mousedown.left="track(null)"
             v-on:mouseenter="toggleHighlight(true)"
@@ -286,7 +294,7 @@ namespace splitTime.editor.level {
     />
     <!-- Outline for ramp/slope part of stairs; adds more of a 3D look -->
     <polyline
-            v-show="trace.metadata.displayed"
+            v-show="metadata.displayed"
             :points="pointsStairsSlope"
             stroke="red" stroke-width="5" fill="none"
             v-if="pointsStairsSlope"
@@ -294,7 +302,7 @@ namespace splitTime.editor.level {
     ></polyline>
     <!-- Up-arrows fill pattern on ramp/slope plus additional dashed outline on top of the previous -->
     <polyline
-            v-show="trace.metadata.displayed"
+            v-show="metadata.displayed"
             :points="pointsStairsSlope"
             stroke="black" stroke-width="2" stroke-dasharray="10,5" :fill="'url(#up-arrows-pattern)'"
             v-if="pointsStairsSlope"
@@ -302,7 +310,7 @@ namespace splitTime.editor.level {
     ></polyline>
     <!-- Outline and fill for the top (z-axis/height) face area of the trace's volume -->
     <polyline
-            v-show="trace.metadata.displayed"
+            v-show="metadata.displayed"
             :points="pointsShadow"
             :fill="traceShadowFill"
             :stroke="traceShadowStroke"

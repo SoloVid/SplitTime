@@ -114,7 +114,7 @@ namespace splitTime.editor.client {
         <tbody>
             <tr
                 v-if="stack.length > 0"
-                @dblclick.left="backDirectory"
+                @dblclick.left.prevent="backDirectory"
                 class="pointer"
             >
                 <td>
@@ -127,7 +127,7 @@ namespace splitTime.editor.client {
             <tr
                 v-for="file in filesInDirectory"
                 @click.left="selectedFile = file"
-                @dblclick.left="selectFile(file)"
+                @dblclick.left.prevent="selectFile(file)"
                 :class="{ pointer: true, active: file === selectedFile }"
             >
                 <td>

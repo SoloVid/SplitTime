@@ -104,7 +104,8 @@ namespace splitTime.editor.level {
         <rendered-trace v-for="trace in traces"
             :key="trace.metadata.editorId"
             :level-editor-shared="levelEditorShared"
-            :trace="trace"
+            :metadata="trace.metadata"
+            :trace="trace.obj"
         ></rendered-trace>
     </svg>
     <div :style="thingsStyleObject">
