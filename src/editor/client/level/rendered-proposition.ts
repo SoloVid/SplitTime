@@ -93,10 +93,26 @@ namespace splitTime.editor.level {
         if(this.levelEditorShared.shouldDragBePrevented()) {
             return
         }
+        const x = this.p.obj.x
+        const y = this.p.obj.y
+        const bodySpec = this.montage.bodySpec
+        const left = x - bodySpec.width / 2
+        const right = left + bodySpec.width
+        const top = y - bodySpec.depth / 2
+        const bottom = top + bodySpec.depth
+        const originalPoints = [
+            new Coordinates2D(left, top),
+            new Coordinates2D(right, top),
+            new Coordinates2D(left, bottom),
+            new Coordinates2D(right, bottom)
+        ]
+        const snappedMover = new client.GridSnapMover(this.levelEditorShared.gridCell, originalPoints)
         this.levelEditorShared.follow({
             shift: (dx, dy) => {
-                this.p.obj.x += dx
-                this.p.obj.y += dy
+                snappedMover.applyDelta(dx, dy)
+                const snappedDelta = snappedMover.getSnappedDelta()
+                this.p.obj.x = x + snappedDelta.x
+                this.p.obj.y = y + snappedDelta.y
             }
         })
         const obj = this.p.obj

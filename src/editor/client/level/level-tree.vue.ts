@@ -23,7 +23,7 @@ namespace splitTime.editor.level {
             var previousLayer = level.layers[level.layers.length - 1]
             z = previousLayer.obj.z + assumedRelativeZ
         }
-        level.layers.push(withMetadata("layer", {
+        level.layers.push(client.withMetadata("layer", {
             id: "",
             z: z
         }))

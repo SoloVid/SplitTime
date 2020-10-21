@@ -1,6 +1,8 @@
 namespace splitTime.editor.level {
     class SharedStuff implements LevelEditorShared {
         activeLayer: int = 0
+        // TODO: make this editable, hard-set now for testing
+        gridCell = new Vector2D(32, 32)
         mode: Mode = "position"
         typeSelected: string = trace.Type.SOLID
         pathInProgress: splitTime.level.file_data.Trace | null = null

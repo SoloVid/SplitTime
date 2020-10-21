@@ -7,6 +7,10 @@ html, body {
     padding: 0;
 }
 
+img {
+    user-select: none;
+}
+
 .left { float: left; }
 .right { float: right; }
 .center {
@@ -135,6 +139,10 @@ textarea {
     margin: 1rem;
 }
 
+.standard-padding {
+    padding: 1rem;
+}
+
 /* From https://gist.github.com/dfrankland/f6fed3e3ccc42e3de482b324126f9542 */
 .transparency-checkerboard-background {
     background-image:
@@ -144,4 +152,19 @@ textarea {
       linear-gradient(135deg, transparent 75%, #ccc 75%);
     background-size:12px 12px; /* Must be a square */
     background-position:0 0, 6px 0, 6px -6px, 0px 6px; /* Must be half of one side of the square */
+}
+
+/* From https://stackoverflow.com/a/47824568/4639640 */
+.vertical-bar-separators > *:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 25%;
+    width: 2px;
+    height: 50%;
+    background-color:rgb(0, 0, 0);
+}
+.vertical-bar-separators > *:not(:last-child) {
+    /** Parent positioning required for bar positioning */
+    position: relative;
 }

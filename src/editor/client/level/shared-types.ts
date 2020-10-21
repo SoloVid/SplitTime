@@ -5,17 +5,18 @@ namespace splitTime.editor.level {
     
     export interface LevelEditorShared {
         activeLayer: number
-        readonly mode: Mode
-        readonly typeSelected: string
-        readonly level: Level
-        readonly server: client.ServerLiaison
-        readonly time: game_seconds
-        pathInProgress: splitTime.level.file_data.Trace | null
-        propertiesPaneStuff: client.ObjectProperties
+        gridCell: Vector2D
         /** Stuff to display to the user */
         readonly info: { [name: string]: string | number }
+        readonly level: Level
+        readonly mode: Mode
+        pathInProgress: splitTime.level.file_data.Trace | null
+        propertiesPaneStuff: client.ObjectProperties
+        readonly server: client.ServerLiaison
+        readonly time: game_seconds
+        readonly typeSelected: string
+        follow(follower: client.Followable): void
         setMode(mode: Mode, subType?: string): void
         shouldDragBePrevented(): boolean
-        follow(follower: client.Followable): void
     }
 }

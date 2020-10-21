@@ -1,5 +1,4 @@
 namespace splitTime.editor.collage {
-    /** Shared component for either prop or position */
     interface VueMontage {
         // props
         collageEditorShared: CollageEditorShared

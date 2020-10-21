@@ -129,6 +129,9 @@ namespace splitTime.editor.level {
         }, "")
     }
     function traceFill(this: VueRenderedTrace): string {
+        if (!this.hasClose) {
+            return "none"
+        }
         if (this.otherLevelDisplayed && this.otherLevelImgSrc) {
             return "url(#img-" + this.uid + ")"
         }
@@ -168,20 +171,22 @@ namespace splitTime.editor.level {
             return
         }
         const trace = this.trace.obj
+        const originalPointString = trace.vertices
+        const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
+        const traceSpec = splitTime.trace.TraceSpec.fromRaw(trace)
+        const originalPoints = traceSpec.vertices.filter(instanceOf.Coordinates2D)
+        const snappedMover = new client.GridSnapMover(this.levelEditorShared.gridCell, originalPoints)
         const follower = {
             shift: (dx: number, dy: number) => {
+                snappedMover.applyDelta(dx, dy)
+                const snappedDelta = snappedMover.getSnappedDelta()
                 var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
-                if (point) {
-                    regex = new RegExp("\\((" + point.x + "),\\s*(" + point.y + ")\\)", "g")
-                    point = {
-                        x: point.x + dx,
-                        y: point.y + dy
-                    }
+                if (originalPoint) {
+                    regex = new RegExp("\\((" + originalPoint.x + "),\\s*(" + originalPoint.y + ")\\)", "g")
                 }
-                var pointString = trace.vertices
-                trace.vertices = pointString.replace(regex, function(match, p1, p2) {
-                    var newX = Number(p1) + dx
-                    var newY = Number(p2) + dy
+                trace.vertices = originalPointString.replace(regex, function(match, p1, p2) {
+                    var newX = Number(p1) + snappedDelta.x
+                    var newY = Number(p2) + snappedDelta.y
                     return "(" + newX + ", " + newY + ")"
                 })
             }
@@ -240,6 +245,8 @@ namespace splitTime.editor.level {
         template: `
 <g>
     <defs>
+        <!-- Window to linked level FTODO: change to showing more than just background -->
+        <!-- Also FTODO: back with black -->
         <pattern
             v-if="otherLevelDisplayed"
             :id="'img-' + uid"
@@ -257,25 +264,18 @@ namespace splitTime.editor.level {
             />
         </pattern>
     </defs>
+    <!-- Base outline and fill -->
     <polyline
-            v-show="trace.metadata.displayed && hasClose"
+            v-show="trace.metadata.displayed"
             v-on:dblclick.prevent
             v-on:mousedown.left="track(null)"
             v-on:mouseenter="toggleHighlight(true)"
             v-on:mouseleave="toggleHighlight(false)"
             :points="points"
+            :stroke="traceStroke"
             :fill="traceFill"
     ></polyline>
-    <polyline
-            v-show="trace.metadata.displayed"
-            v-on:dblclick
-            v-on:mousedown.left="track(null)"
-            v-on:mouseenter="toggleHighlight(true)"
-            v-on:mouseleave="toggleHighlight(false)"
-            :points="points"
-            :stroke="traceStroke"
-            fill="none"
-    ></polyline>
+    <!-- Points/vertices -->
     <circle
             class="hoverable"
             v-for="(vertex) in vertices"
@@ -284,6 +284,7 @@ namespace splitTime.editor.level {
             r="3"
             v-on:mousedown.left="track(vertex)"
     />
+    <!-- Outline for ramp/slope part of stairs; adds more of a 3D look -->
     <polyline
             v-show="trace.metadata.displayed"
             :points="pointsStairsSlope"
@@ -291,13 +292,15 @@ namespace splitTime.editor.level {
             v-if="pointsStairsSlope"
             style="pointer-events: none;"
     ></polyline>
+    <!-- Up-arrows fill pattern on ramp/slope plus additional dashed outline on top of the previous -->
     <polyline
             v-show="trace.metadata.displayed"
             :points="pointsStairsSlope"
-            stroke="black" stroke-width="2" stroke-dasharray="10,5" :fill="'url(#img-' + uid + ')'"
+            stroke="black" stroke-width="2" stroke-dasharray="10,5" :fill="'url(#up-arrows-pattern)'"
             v-if="pointsStairsSlope"
             style="pointer-events: none;"
     ></polyline>
+    <!-- Outline and fill for the top (z-axis/height) face area of the trace's volume -->
     <polyline
             v-show="trace.metadata.displayed"
             :points="pointsShadow"

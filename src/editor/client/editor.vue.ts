@@ -2,6 +2,7 @@ namespace splitTime.editor {
     class GlobalEditorStuff implements client.GlobalEditorShared {
         followers: client.Followable[] | null = null
         previousFollowers: client.Followable[] | null = null
+        onDeleteCallback = () => {}
 
         constructor(
             private readonly editor: VueEditor
@@ -18,6 +19,10 @@ namespace splitTime.editor {
         setFollowers(newFollowers: client.Followable[]): void {
             this.previousFollowers = this.followers
             this.followers = newFollowers
+        }
+
+        setOnDelete(callback: () => void): void {
+            this.onDeleteCallback = callback
         }
     }
     
@@ -78,7 +83,7 @@ namespace splitTime.editor {
         }
 
         this.level = new level.Level()
-        this.level.layers.push(level.withMetadata("layer", {
+        this.level.layers.push(client.withMetadata("layer", {
             id: "",
             z: 0
         }))
@@ -145,8 +150,10 @@ namespace splitTime.editor {
 
     function handleMouseUp(this: VueEditor, event: MouseEvent): void {
         this.inputs.mouse.isDown = false
-        this.globalEditorStuff.previousFollowers = this.globalEditorStuff.followers
-        this.globalEditorStuff.followers = null
+        if (this.globalEditorStuff.followers !== null) {
+            this.globalEditorStuff.previousFollowers = this.globalEditorStuff.followers
+            this.globalEditorStuff.followers = null
+        }
     }
 
     function handleKeyDown(this: VueEditor, event: KeyboardEvent): void {
@@ -161,6 +168,9 @@ namespace splitTime.editor {
         const keycode = splitTime.controls.keyboard.keycode
         var specialKey = true
         switch(event.which) {
+            case keycode.DEL:
+                this.globalEditorStuff.onDeleteCallback()
+                break;
             case keycode.SHIFT:
                 this.inputs.ctrlDown = true
                 break
@@ -179,7 +189,7 @@ namespace splitTime.editor {
             default:
                 specialKey = false
         }
-        
+
         if(specialKey) {
             event.preventDefault()
         }
@@ -255,6 +265,15 @@ namespace splitTime.editor {
         this.showFileSelect = true
     }
 
+    function onMounted(this: VueEditor): void {
+        window.addEventListener("keydown", e => {
+            this.handleKeyDown(e)
+        });
+        window.addEventListener("keyup", e => {
+            this.handleKeyUp(e)
+        });
+    }
+
     Vue.component("st-editor", {
         props: {
             server: Object,
@@ -276,13 +295,12 @@ namespace splitTime.editor {
             onServerFileSelected,
             openFileSelect
         },
+        mounted: onMounted,
         template: `
 <div
     @mousemove="handleMouseMove"
     @mousedown="handleMouseDown"
     @mouseup="handleMouseUp"
-    @keydown="handleKeyDown"
-    @keyup="handleKeyUp"
     >
     <div class="menu-bar">
         <a @click="createLevel">New Level</a>

@@ -19,6 +19,25 @@ namespace splitTime.editor {
 
         document.body.removeChild(pom)
     }
+
+    // From https://stackoverflow.com/a/26230989/4639640
+    export function getCoords(elem: HTMLElement): { top: int, left: int } {
+        const box = elem.getBoundingClientRect()
+    
+        const body = document.body
+        const docEl = document.documentElement
+    
+        const scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop
+        const scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft
+    
+        const clientTop = docEl.clientTop || body.clientTop || 0
+        const clientLeft = docEl.clientLeft || body.clientLeft || 0
+    
+        const top = box.top + scrollTop - clientTop
+        const left = box.left + scrollLeft - clientLeft
+    
+        return { top: Math.round(top), left: Math.round(left) }
+    }
 }
 
 namespace splitTime.editor.level {
@@ -53,10 +72,10 @@ namespace splitTime.editor.level {
         levelObject.background = levelFile.background
         levelObject.backgroundOffsetX = levelFile.backgroundOffsetX
         levelObject.backgroundOffsetY = levelFile.backgroundOffsetY
-        levelObject.layers = levelFile.layers.map(l => withMetadata("layer", l))
-        levelObject.traces = levelFile.traces.map(t => withMetadata("trace", t))
-        levelObject.props = levelFile.props.map(p => withMetadata("prop", p))
-        levelObject.positions = levelFile.positions.map(p => withMetadata("position", p))
+        levelObject.layers = levelFile.layers.map(l => client.withMetadata("layer", l))
+        levelObject.traces = levelFile.traces.map(t => client.withMetadata("trace", t))
+        levelObject.props = levelFile.props.map(p => client.withMetadata("prop", p))
+        levelObject.positions = levelFile.positions.map(p => client.withMetadata("position", p))
         return levelObject
     }
     
@@ -82,7 +101,7 @@ namespace splitTime.editor.level {
             offsetY: 0,
             offsetZ: 0
         }
-        const trace = withMetadata<"trace", splitTime.level.file_data.Trace>("trace", traceObj)
+        const trace = client.withMetadata<"trace", splitTime.level.file_data.Trace>("trace", traceObj)
         levelObject.traces.push(trace)
         return trace
     }

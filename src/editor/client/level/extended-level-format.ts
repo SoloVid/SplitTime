@@ -1,23 +1,4 @@
 namespace splitTime.editor.level {
-    export class EditorMetadata {
-        displayed: boolean = true
-        editorId: string = splitTime.generateUID()
-        highlighted: boolean = false
-        locked: boolean = false
-    }
-
-    export function withMetadata<TypeString, T>(type: TypeString, obj: T): ObjectWithEditorMetadata<TypeString, T> {
-        return new ObjectWithEditorMetadata(type, obj)
-    }
-
-    export class ObjectWithEditorMetadata<TypeString, T> {
-        constructor(
-            public type: TypeString,
-            public obj: T,
-            public metadata: EditorMetadata = new EditorMetadata()
-        ) {}
-    }
-
     export class Level {
         fileName: string = ""
         region: string = ""
@@ -32,8 +13,8 @@ namespace splitTime.editor.level {
         positions: Position[] = []
     }
 
-    export type Layer = ObjectWithEditorMetadata<"layer", splitTime.level.file_data.Layer>
-    export type Trace = ObjectWithEditorMetadata<"trace", splitTime.level.file_data.Trace>
-    export type Prop = ObjectWithEditorMetadata<"prop", splitTime.level.file_data.Prop>
-    export type Position = ObjectWithEditorMetadata<"position", splitTime.level.file_data.Position>
+    export type Layer = client.ObjectWithEditorMetadata<"layer", splitTime.level.file_data.Layer>
+    export type Trace = client.ObjectWithEditorMetadata<"trace", splitTime.level.file_data.Trace>
+    export type Prop = client.ObjectWithEditorMetadata<"prop", splitTime.level.file_data.Prop>
+    export type Position = client.ObjectWithEditorMetadata<"position", splitTime.level.file_data.Position>
 }

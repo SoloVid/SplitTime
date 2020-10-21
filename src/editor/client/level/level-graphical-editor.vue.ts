@@ -87,7 +87,7 @@ namespace splitTime.editor.level {
             z: z,
             dir: "S"
         }
-        const newThing = withMetadata<"position", splitTime.level.file_data.Position>("position", object)
+        const newThing = client.withMetadata<"position", splitTime.level.file_data.Position>("position", object)
         this.level.positions.push(newThing)
         this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(newThing.obj)
     }
@@ -109,7 +109,7 @@ namespace splitTime.editor.level {
             playerOcclusionFadeFactor: 0
         }
 
-        const newThing = withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)
+        const newThing = client.withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)
         this.level.props.push(newThing)
         this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(newThing.obj)
     }

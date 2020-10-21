@@ -1,36 +1,5 @@
 namespace splitTime.editor.collage {
-    class SharedStuff implements CollageEditorShared {
-        readonly info = {}
-        // propertiesPaneStuff: client.ObjectProperties
-
-        constructor(
-            private editor: VueCollageEditor
-        ) {
-            // this.propertiesPaneStuff = getLevelPropertiesStuff(this.editor.level)
-        }
-
-        get collage(): file.Collage {
-            return this.editor.collage
-        }
-
-        get realCollage(): splitTime.Collage {
-            return splitTime.collage.makeCollageFromFile(this.collage)
-        }
-
-        get server(): client.ServerLiaison {
-            return this.editor.editorGlobalStuff.server
-        }
-
-        get time(): game_seconds {
-            return this.editor.editorGlobalStuff.time
-        }
-
-        // follow(follower: client.Followable): void {
-        //     this.editor.editorGlobalStuff.setFollowers([follower])
-        // }
-    }
-
-    interface VueCollageEditor extends client.VueComponent {
+    export interface VueCollageEditor extends client.VueComponent {
         // props
         editorInputs: client.UserInputs
         editorGlobalStuff: client.GlobalEditorShared
@@ -120,17 +89,19 @@ namespace splitTime.editor.collage {
             supervisorControl: onSupervisorControlChange
         },
         template: `
-<div style="display: flex; flex-flow: row wrap;">
-    <collage-layout
-        class="standard-margin"
-        :editor-inputs="editorInputs"
-        :collage-editor-shared="sharedStuff"
-    ></collage-layout>
-    <collage-showcase
-        class="standard-margin"
-        style="flex-grow: 1;"
-        :collage-editor-shared="sharedStuff"
-    ></collage-showcase>
+<div style="display: flex; flex-flow: row wrap;" class="vertical-bar-separators">
+    <div class="standard-padding">
+        <collage-layout
+            :editor-inputs="editorInputs"
+            :collage-editor-shared="sharedStuff"
+        ></collage-layout>
+    </div>
+    <div class="standard-padding">
+        <collage-showcase
+            style="flex-grow: 1;"
+            :collage-editor-shared="sharedStuff"
+        ></collage-showcase>
+    </div>
 </div>
         `
     })

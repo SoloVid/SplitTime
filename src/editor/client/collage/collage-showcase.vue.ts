@@ -7,6 +7,8 @@ namespace splitTime.editor.collage {
         gridStyle: object
         widestMontageWidth: number
         // methods
+        changeActiveMontage(montage: file.collage.Montage): void
+        createNewMontage(): void
     }
 
     function collage(this: VueCollageShowcase): file.Collage {
@@ -28,6 +30,33 @@ namespace splitTime.editor.collage {
         }, 0)
     }
 
+    function changeActiveMontage(this: VueCollageShowcase, montage: file.collage.Montage): void {
+        this.collageEditorShared.selectMontage(montage)
+    }
+
+    function createNewMontage(this: VueCollageShowcase): void {
+        let frameIndex = this.collage.montages.length
+        let frameId = "Montage " + frameIndex
+        while (this.collage.frames.some(f => f.id === frameId)) {
+            frameIndex++
+            frameId = "Montage " + frameIndex
+        }
+        const defaultBodySpec = {
+            width: 16,
+            depth: 16,
+            height: 48
+        }
+        const newMontage: file.collage.Montage = {
+            id: frameId,
+            direction: "",
+            frames: [],
+            body: defaultBodySpec,
+            traces: []
+        }
+        this.collage.montages.push(newMontage)
+        this.changeActiveMontage(newMontage)
+    }
+
     Vue.component("collage-showcase", {
         props: {
             collageEditorShared: Object
@@ -42,14 +71,25 @@ namespace splitTime.editor.collage {
             widestMontageWidth
         },
         methods: {
+            changeActiveMontage,
+            createNewMontage
         },
         template: `
 <div :style="gridStyle">
+    <template v-for="m in collage.montages">
     <montage
-        v-for="m in collage.montages"
+        @click="changeActiveMontage(m)"
         :collage-editor-shared="collageEditorShared"
         :montage="m"
     ></montage>
+    </template>
+    <div class="standard-padding" style="border: 2px solid black;">
+        <span
+            @click.left="createNewMontage"
+        >
+            <i class="fas fa-plus fa-2x"></i>
+        </span>
+    </div>
 </div>
         `
     })
