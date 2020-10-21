@@ -4,21 +4,15 @@ namespace splitTime.editor.collage {
         collageEditorShared: CollageEditorShared
         montage: file.collage.Montage
         // computed
-        body: file.collage.BodySpec
         frame: splitTime.collage.Frame
         frameTargetBox: math.Rect
         overallArea: math.Rect
         realMontage: splitTime.collage.Montage
         containerStyle: object
-        bodyFrontRectRelative: math.Rect
-        imageDivStyle: object
+        frameDivStyle: object
         // asyncComputed
-        imgSrc: string
         // methods
-    }
-
-    function body(this: VueMontage): file.collage.BodySpec {
-        return this.montage.body
+        setActiveMontage(): void
     }
 
     function frame(this: VueMontage): splitTime.collage.Frame {
@@ -46,29 +40,16 @@ namespace splitTime.editor.collage {
         }
     }
 
-    function bodyFrontRectRelative(this: VueMontage): math.Rect {
-        return math.Rect.make(
-            -this.overallArea.x - this.realMontage.bodySpec.width / 2,
-            -this.overallArea.y - this.realMontage.bodySpec.height,
-            this.realMontage.bodySpec.width,
-            this.realMontage.bodySpec.height
-        )
-    }
-
-    function imageDivStyle(this: VueMontage): object {
+    function frameDivStyle(this: VueMontage): object {
         return {
             position: 'absolute',
-            overflow: 'hidden',
             left: (this.frameTargetBox.x - this.overallArea.x) + 'px',
-            top: (this.frameTargetBox.y - this.overallArea.y) + 'px',
-            width: this.frameTargetBox.width + 'px',
-            height: this.frameTargetBox.height + 'px'
+            top: (this.frameTargetBox.y - this.overallArea.y) + 'px'
         }
     }
 
-    async function imgSrc(this: VueMontage): Promise<string> {
-        const s = this.collageEditorShared.server
-        return await s.imgSrc(this.collageEditorShared.collage.image)
+    function setActiveMontage(this: VueMontage): void {
+        this.collageEditorShared.selectMontage(this.montage)
     }
 
     Vue.component("montage", {
@@ -77,65 +58,33 @@ namespace splitTime.editor.collage {
             montage: Object
         },
         computed: {
-            body,
             frame,
             frameTargetBox,
             overallArea,
             realMontage,
             containerStyle,
-            bodyFrontRectRelative,
-            imageDivStyle
+            frameDivStyle
         },
         asyncComputed: {
-            imgSrc: {
-                get: imgSrc,
-                default: ""
-            }
         },
         methods: {
+            setActiveMontage
         },
         template: `
 <div
     :style="containerStyle"
     class="transparency-checkerboard-background"
+    @mousedown.left="setActiveMontage"
 >
     <div
-        :style="imageDivStyle"
+        :style="frameDivStyle"
     >
-        <img :src="imgSrc" :style="{ position: 'absolute', left: -frame.box.x + 'px', top: -frame.box.y + 'px' }"/>
+        <montage-frame
+            :collage-editor-shared="collageEditorShared"
+            :frame="frame"
+            :montage="montage"
+        ></montage-frame>
     </div>
-    <svg style="position: relative;">
-        <rect
-            :x="bodyFrontRectRelative.x"
-            :y="bodyFrontRectRelative.y + body.height - body.depth"
-            :width="body.width"
-            :height="body.depth"
-            stroke="red"
-            stroke-width="2"
-            stroke-dasharray="2,1"
-            fill="none"
-        />
-        <rect
-            :x="bodyFrontRectRelative.x"
-            :y="bodyFrontRectRelative.y"
-            :width="bodyFrontRectRelative.width"
-            :height="bodyFrontRectRelative.height"
-            fill="url(#diagonal-hatch)"
-            stroke="red"
-            stroke-width="2"
-            stroke-dasharray="2,1"
-        />
-        <rect
-            :x="bodyFrontRectRelative.x"
-            :y="bodyFrontRectRelative.y - body.depth"
-            :width="body.width"
-            :height="body.depth"
-            stroke="red"
-            stroke-width="2"
-            stroke-dasharray="2,1"
-            fill="none"
-        />
-    </svg>
 </div>
         `
     })

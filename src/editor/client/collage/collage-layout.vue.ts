@@ -82,10 +82,11 @@ namespace splitTime.editor.collage {
             frameIndex++
             frameId = "Frame " + frameIndex
         }
+        const gridCell = this.collageEditorShared.gridCell
         const newFrame: file.collage.Frame = {
             id: frameId,
-            x: mouse.x - this.editorPadding,
-            y: mouse.y - this.editorPadding,
+            x: Math.round((mouse.x - this.editorPadding) / gridCell.x) * gridCell.x,
+            y: Math.round((mouse.y - this.editorPadding) / gridCell.y) * gridCell.y,
             width: MIN_FRAME_LEN,
             height: MIN_FRAME_LEN
         }
@@ -135,6 +136,11 @@ namespace splitTime.editor.collage {
             :offset="{x: editorPadding, y: editorPadding}"
         ></frame-rectangle>
     </svg>
+    <grid-lines
+        v-if="collageEditorShared.gridEnabled"
+        :grid-cell="collageEditorShared.gridCell"
+        :origin="{x: editorPadding, y: editorPadding}"
+    ></grid-lines>
 </div>
         `,
     })

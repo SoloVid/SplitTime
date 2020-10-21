@@ -1,5 +1,7 @@
 namespace splitTime.editor {
     class GlobalEditorStuff implements client.GlobalEditorShared {
+        gridEnabled = false
+        cachedGridCell = new Vector2D(32, 32)
         followers: client.Followable[] | null = null
         previousFollowers: client.Followable[] | null = null
         onDeleteCallback = () => {}
@@ -7,6 +9,13 @@ namespace splitTime.editor {
         constructor(
             private readonly editor: VueEditor
         ) {}
+
+        get gridCell(): Vector2D {
+            if (!this.gridEnabled) {
+                return new Vector2D(1, 1)
+            }
+            return this.cachedGridCell
+        }
 
         get server(): client.ServerLiaison {
             return this.editor.server
@@ -175,16 +184,16 @@ namespace splitTime.editor {
                 this.inputs.ctrlDown = true
                 break
             case keycode.LEFT:
-                this.moveFollowers(-1, 0)
+                this.moveFollowers(-this.globalEditorStuff.gridCell.x, 0)
                 break
             case keycode.UP:
-                this.moveFollowers(0, -1)
+                this.moveFollowers(0, -this.globalEditorStuff.gridCell.y)
                 break
             case keycode.RIGHT:
-                this.moveFollowers(1, 0)
+                this.moveFollowers(this.globalEditorStuff.gridCell.x, 0)
                 break
             case keycode.DOWN:
-                this.moveFollowers(0, 1)
+                this.moveFollowers(0, this.globalEditorStuff.gridCell.y)
                 break
             default:
                 specialKey = false
@@ -310,6 +319,18 @@ namespace splitTime.editor {
             title="After downloading the level, relocate it to use it in the engine."
         >Download File (Save)</a>
         <a @click="editLevelSettings">Edit Settings</a>
+        <label>
+            Grid:
+            <input type="checkbox" v-model="globalEditorStuff.gridEnabled"/>
+        </label>
+        <label v-if="globalEditorStuff.gridEnabled">
+            x:
+            <input type="number" v-model.number="globalEditorStuff.gridCell.x" style="width: 48px;"/>
+        </label>
+        <label v-if="globalEditorStuff.gridEnabled">
+            y:
+            <input type="number" v-model.number="globalEditorStuff.gridCell.y" style="width: 48px;"/>
+        </label>
     </div>
     <div class="modal-backdrop" v-if="showFileSelect">
         <div class="modal-body">

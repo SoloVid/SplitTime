@@ -96,7 +96,18 @@ namespace splitTime.editor.collage {
             :collage-editor-shared="sharedStuff"
         ></collage-layout>
     </div>
-    <div class="standard-padding">
+    <div
+        v-if="sharedStuff.selectedMontage"
+        style="flex-grow: 1;"
+        class="standard-padding"
+    >
+        <montage-editor
+            style="flex-grow: 1;"
+            :collage-editor-shared="sharedStuff"
+            :montage="sharedStuff.selectedMontage"
+        ></montage-editor>
+    </div>
+    <div style="flex-grow: 1;" class="standard-padding">
         <collage-showcase
             style="flex-grow: 1;"
             :collage-editor-shared="sharedStuff"

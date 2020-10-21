@@ -1,7 +1,5 @@
 namespace splitTime.editor.collage {
     export class SharedStuff implements CollageEditorShared {
-        // TODO: make this editable, hard-set now for testing
-        gridCell = new Vector2D(32, 32)
         readonly info = {}
         // propertiesPaneStuff: client.ObjectProperties
 
@@ -13,6 +11,14 @@ namespace splitTime.editor.collage {
 
         get collage(): file.Collage {
             return this.editor.collage
+        }
+
+        get gridCell(): Vector2D {
+            return this.editor.editorGlobalStuff.gridCell
+        }
+
+        get gridEnabled(): boolean {
+            return this.editor.editorGlobalStuff.gridEnabled
         }
 
         get realCollage(): splitTime.Collage {

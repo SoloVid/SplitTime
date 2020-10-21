@@ -10,6 +10,8 @@ namespace splitTime.editor.client {
     }
 
     export interface GlobalEditorShared {
+        readonly gridEnabled: boolean
+        readonly gridCell: Vector2D
         readonly server: client.ServerLiaison
         readonly time: game_seconds
         setFollowers(newFollowers: client.Followable[]): void

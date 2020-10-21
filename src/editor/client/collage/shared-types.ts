@@ -5,6 +5,7 @@ namespace splitTime.editor.collage {
     export interface CollageEditorShared {
         readonly collage: file.Collage
         gridCell: Vector2D
+        gridEnabled: boolean
         readonly realCollage: splitTime.Collage
         selectedFrame: file.collage.Frame | null
         selectedMontage: file.collage.Montage | null

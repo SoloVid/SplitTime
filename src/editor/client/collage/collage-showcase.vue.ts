@@ -7,7 +7,6 @@ namespace splitTime.editor.collage {
         gridStyle: object
         widestMontageWidth: number
         // methods
-        changeActiveMontage(montage: file.collage.Montage): void
         createNewMontage(): void
     }
 
@@ -19,7 +18,8 @@ namespace splitTime.editor.collage {
         return {
             display: "grid",
             "grid-template-columns": "repeat(auto-fill, minmax(" + this.widestMontageWidth + "px, 1fr))",
-            "grid-gap": "1rem"
+            "grid-gap": "0.5rem",
+            "align-items": "center"
         }
     }
 
@@ -28,10 +28,6 @@ namespace splitTime.editor.collage {
             const mWidth = m.getOverallArea().width
             return Math.max(maxWidth, mWidth)
         }, 0)
-    }
-
-    function changeActiveMontage(this: VueCollageShowcase, montage: file.collage.Montage): void {
-        this.collageEditorShared.selectMontage(montage)
     }
 
     function createNewMontage(this: VueCollageShowcase): void {
@@ -54,7 +50,7 @@ namespace splitTime.editor.collage {
             traces: []
         }
         this.collage.montages.push(newMontage)
-        this.changeActiveMontage(newMontage)
+        this.collageEditorShared.selectMontage(newMontage)
     }
 
     Vue.component("collage-showcase", {
@@ -71,24 +67,22 @@ namespace splitTime.editor.collage {
             widestMontageWidth
         },
         methods: {
-            changeActiveMontage,
             createNewMontage
         },
         template: `
 <div :style="gridStyle">
     <template v-for="m in collage.montages">
     <montage
-        @click="changeActiveMontage(m)"
+        style="overflow: none;"
         :collage-editor-shared="collageEditorShared"
         :montage="m"
     ></montage>
     </template>
-    <div class="standard-padding" style="border: 2px solid black;">
-        <span
-            @click.left="createNewMontage"
-        >
-            <i class="fas fa-plus fa-2x"></i>
-        </span>
+    <div
+        @mousedown.left="createNewMontage"
+        style="border: 2px solid black; text-align: center;"
+    >
+        <i class="fas fa-plus fa-2x"></i>
     </div>
 </div>
         `
