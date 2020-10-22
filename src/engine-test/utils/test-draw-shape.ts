@@ -7,7 +7,7 @@ namespace splitTime.utils {
         const colorString = color.toRgbaString()    
         t.assert(light.Color.isValidColor(colorString), "Should be a valid color: 255, 100, 1")
         
-        t.assert(light.Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
+        t.assert(!light.Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
 
         const whiteColor = new light.Color("white")
         t.assert(whiteColor.r == 255 && whiteColor.g == 255 && whiteColor.b == 255, "The color name 'white' should resolve to 255, 255, 255")

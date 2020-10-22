@@ -117,19 +117,28 @@ namespace splitTime.light {
         }
 
         /**
-         * Evaluates a string as a color in CSS syntax and returns {r, g, b, a}
+         * Evaluates a string as a color in CSS syntax and returns {r, g, b, a} or null for invalid colors
          * @param colorString the string to evaluate in CSS
          */
         static stringToRgbaData(colorString: string): Uint8ClampedArray | null {
             assert(!__NODE__, "Converting a string to RGBA data isn't available in Node.js")         
+            
             if (!dummyContext) {
-                //Only initialize the dummy context once (and only once we know we need it)
+                //Initialize the dummy context the first time we validate a color
                 dummyContext = new splitTime.Canvas(1,1).context;
-            }                
-            //Use the dummy context to see if CSS syntax will accept the string
+            }
+            //Try setting fillStyle to see if CSS syntax will accept the string
+            //(fillStyle will not change if the color is invalid)
+            dummyContext.fillStyle = "#123456"
             dummyContext.fillStyle = colorString
-            if(dummyContext.fillStyle == '') {
-                return null
+            if (dummyContext.fillStyle === "#123456") {
+                //Double-check to make sure it isn't actually #123456
+                dummyContext.fillStyle = "#000000"
+                dummyContext.fillStyle = colorString
+                if(dummyContext.fillStyle === "#000000") {
+                    //It's an invalid color
+                    return null
+                }
             }
 
             dummyContext.fillRect(0,0,1,1)
