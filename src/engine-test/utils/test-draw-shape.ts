@@ -2,6 +2,20 @@ namespace splitTime.utils {
     const drawShapeTests = {}
     splitTime.test.group(drawShapeTests, "Shape Drawing Tests", utils)
 
+    splitTime.test.scenario(drawShapeTests, "Validate colors", t => {
+        const color = new light.Color(255, 100, 1)
+        const colorString = color.toRgbaString()    
+        t.assert(light.Color.isValidColor(colorString), "Should be a valid color: 255, 100, 1")
+        
+        t.assert(light.Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
+
+        const whiteColor = new light.Color("white")
+        t.assert(whiteColor.r == 255 && whiteColor.g == 255 && whiteColor.b == 255, "The color name 'white' should resolve to 255, 255, 255")
+        
+        const fuchsia = new light.Color("fuchsia")
+        t.assert(fuchsia.r == 255 && fuchsia.g == 0 && fuchsia.b == 255, "The color name 'fuchsia' should resolve to 255, 0, 255")
+    })
+
     splitTime.test.scenario(drawShapeTests, "Draw a square", t => {
         const points = [
             new Coordinates2D(10, 10),
@@ -13,8 +27,8 @@ namespace splitTime.utils {
 
         const target = new splitTime.Canvas(30, 30)
         const buffer = new splitTime.Canvas(target.width, target.height)
-        const color = new light.Color(255, 100, 1)
-
+        const color = new light.Color(255, 100, 1)        
+        
         drawShapeOpaque(points, target.context, buffer, color.toRgbaString())
 
         const outputData = target.context.getImageData(0, 0, target.width, target.height)
