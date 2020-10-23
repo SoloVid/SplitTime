@@ -2,21 +2,19 @@ namespace splitTime.editor.level {
     /** Shared component for either prop or position */
     interface VueRenderedProposition {
         // props
-        cssClass: string | { [className: string]: boolean }
         levelEditorShared: LevelEditorShared
         p: Prop | Position
         // computed
         body: file.collage.BodySpec
-        combinedCssClass: (string | { [className: string]: boolean })[]
         frame: splitTime.collage.Frame
         framePosition: Coordinates2D
-        imgSrc: string
         montage: splitTime.collage.Montage
         positionLeft: int
         positionTop: int
         styleObject: object
         // asyncComputed
-        collage: Collage
+        collage: Collage | null
+        imgSrc: string
         // methods
         toggleHighlight(highlight: boolean): void
         track(): void
@@ -24,10 +22,6 @@ namespace splitTime.editor.level {
     
     function body(this: VueRenderedProposition): file.collage.BodySpec {
         return this.montage.bodySpec
-    }
-
-    function combinedCssClass(this: VueRenderedProposition): (string | { [className: string]: boolean })[] {
-        return ["draggable", this.cssClass]
     }
 
     function frame(this: VueRenderedProposition): splitTime.collage.Frame {
@@ -41,14 +35,21 @@ namespace splitTime.editor.level {
         return box
     }
 
-    function imgSrc(this: VueRenderedProposition): string {
-        if (this.p.obj.collage === "") {
-            return getPlaceholderImage()
-        }
-        return this.collage.image
-    }
-
     function montage(this: VueRenderedProposition): splitTime.collage.Montage {
+        if (this.collage === null) {
+            const tempFrame = new splitTime.collage.Frame(
+                math.Rect.make(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH),
+                new Coordinates2D(),
+                1
+            )
+            const tempBodySpec: file.collage.BodySpec = {
+                width: 32,
+                depth: 32,
+                height: 32
+            }
+            const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [])
+            return tempMontage
+        }
         if (this.p.obj.montage === "") {
             return this.collage.getDefaultMontage(this.p.obj.dir)
         }
@@ -75,10 +76,20 @@ namespace splitTime.editor.level {
         }
     }
 
-    async function collage(this: VueRenderedProposition): Promise<Collage> {
+    async function collage(this: VueRenderedProposition): Promise<Collage | null> {
+        if (this.p.obj.collage === "") {
+            return null
+        }
         const s = this.levelEditorShared.server
         const collageJson = await s.api.collageJson.fetch(s.withProject({ collageId: this.p.obj.collage }))
         return splitTime.collage.makeCollageFromFile(collageJson)
+    }
+
+    async function imgSrc(this: VueRenderedProposition): Promise<string> {
+        if (this.p.obj.collage === "" || this.collage === null) {
+            return getPlaceholderImage()
+        }
+        return await this.levelEditorShared.server.imgSrc(this.collage.image)
     }
 
     function toggleHighlight(this: VueRenderedProposition, highlight: boolean): void {
@@ -125,16 +136,13 @@ namespace splitTime.editor.level {
 
     Vue.component("rendered-proposition", {
         props: {
-            cssClass: Object,
             levelEditorShared: Object,
             p: Object
         },
         computed: {
             body,
-            combinedCssClass,
             frame,
             framePosition,
-            imgSrc,
             montage,
             positionLeft,
             positionTop,
@@ -143,8 +151,11 @@ namespace splitTime.editor.level {
         asyncComputed: {
             collage: {
                 get: collage,
-                // TODO: better default
-                default: {}
+                default: null
+            },
+            imgSrc: {
+                get: imgSrc,
+                default: ""
             }
         },
         methods: {
@@ -153,8 +164,8 @@ namespace splitTime.editor.level {
         },
         template: `
 <div
-    v-show="prop.metadata.displayed"
-    :class="cssClassCombined"
+    v-show="p.metadata.displayed"
+    class="draggable"
     v-on:dblclick.prevent
     v-on:mousedown.left="track"
     v-on:mouseenter="toggleHighlight(true)"

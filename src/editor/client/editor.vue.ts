@@ -352,7 +352,9 @@ namespace splitTime.editor {
     @mousemove="handleMouseMove"
     @mousedown="handleMouseDown"
     @mouseup="handleMouseUp"
-    >
+    class="editor"
+    style="display: flex; flex-flow: column; height: 100vh;"
+>
     <div class="menu-bar">
         <a @click="showNewDialog = true">New</a>
         <a @click="openFileOpen">Open</a>
@@ -402,6 +404,7 @@ namespace splitTime.editor {
         :editor-global-stuff="globalEditorStuff"
         :supervisor-control="supervisorControl"
         :collage="collage"
+        style="flex-grow: 1; overflow: hidden;"
     ></collage-editor>
     <level-editor
         v-if="level"
@@ -409,6 +412,7 @@ namespace splitTime.editor {
         :editor-global-stuff="globalEditorStuff"
         :supervisor-control="supervisorControl"
         :level="level"
+        style="flex-grow: 1; overflow: hidden;"
     ></level-editor>
 </div>
         `

@@ -5,6 +5,7 @@ namespace splitTime.editor.level {
         levelEditorShared: LevelEditorShared
         // data
         cancelNextContextMenu: boolean
+        editorPadding: number
         // computed
         level: Level
         inputs: client.UserInputs
@@ -21,6 +22,13 @@ namespace splitTime.editor.level {
         handleContextMenu(event: Event): void
         handleMouseUp(event: MouseEvent): void
         handleMouseMove(event: MouseEvent): void
+    }
+
+    function data(this: VueLevelGraphicalEditor): Partial<VueLevelGraphicalEditor> {
+        return {
+            cancelNextContextMenu: false,
+            editorPadding: EDITOR_PADDING
+        }
     }
 
     function level(this: VueLevelGraphicalEditor): Level {
@@ -196,12 +204,7 @@ namespace splitTime.editor.level {
             editorInputs: Object,
             levelEditorShared: Object
         },
-        data: function() {
-            return {
-                pathInProgress: null,
-                cancelNextContextMenu: false
-            }
-        },
+        data,
         computed: {
             level,
             inputs,
@@ -229,7 +232,7 @@ namespace splitTime.editor.level {
     v-on:mousemove="handleMouseMove"
     :style="{ position: 'relative', width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }"
 >
-    <img v-if="!!backgroundSrc" class="background" :src="backgroundSrc" :style="{ left: leftPadding + 'px', top: topPadding + 'px' }"/>
+    <img v-if="!!backgroundSrc" class="background" :src="backgroundSrc" :style="{ position: 'absolute', left: leftPadding + 'px', top: topPadding + 'px' }"/>
     <rendered-layer
             v-for="(layer, layerIndex) in level.layers"
             :key="layer.metadata.editorId"
@@ -241,6 +244,11 @@ namespace splitTime.editor.level {
             :height="level.height"
             :is-active="layerIndex === levelEditorShared.activeLayer"
     ></rendered-layer>
+    <grid-lines
+        v-if="levelEditorShared.gridEnabled"
+        :grid-cell="levelEditorShared.gridCell"
+        :origin="{x: editorPadding, y: editorPadding}"
+    ></grid-lines>
 </div>
         `,
     })

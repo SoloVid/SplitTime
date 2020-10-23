@@ -6,6 +6,7 @@ namespace splitTime.editor.level {
     export interface LevelEditorShared {
         activeLayer: number
         gridCell: Vector2D
+        gridEnabled: boolean
         /** Stuff to display to the user */
         readonly info: { [name: string]: string | number }
         readonly level: Level

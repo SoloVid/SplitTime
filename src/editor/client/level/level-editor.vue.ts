@@ -1,8 +1,6 @@
 namespace splitTime.editor.level {
     class SharedStuff implements LevelEditorShared {
         activeLayer: int = 0
-        // TODO: make this editable, hard-set now for testing
-        gridCell = new Vector2D(32, 32)
         mode: Mode = "position"
         typeSelected: string = trace.Type.SOLID
         pathInProgress: splitTime.level.file_data.Trace | null = null
@@ -13,6 +11,14 @@ namespace splitTime.editor.level {
             private editor: VueLevelEditor
         ) {
             this.propertiesPaneStuff = getLevelPropertiesStuff(this.editor.level)
+        }
+
+        get gridCell(): Vector2D {
+            return this.editor.editorGlobalStuff.gridCell
+        }
+
+        get gridEnabled(): boolean {
+            return this.editor.editorGlobalStuff.gridEnabled
         }
 
         get level(): Level {
@@ -132,16 +138,9 @@ namespace splitTime.editor.level {
             supervisorControl: onSupervisorControlChange
         },
         template: `
-<div>
-    <div>
-        <div ref="layersContainer">
-            <level-graphical-editor
-                :editor-inputs="editorInputs"
-                :level-editor-shared="sharedStuff"
-            ></level-graphical-editor>
-        </div>
-
-        <div class="menu" style="left:0px;width:100px">
+<div class="level-editor" style="display: flex; flex-flow: column;">
+    <div class="content" style="flex-grow: 1; overflow: hidden; display: flex;">
+        <div class="menu" style="flex-shrink: 0;">
             <level-editor-tools
                 :level-editor-shared="sharedStuff"
             ></level-editor-tools>
@@ -152,22 +151,22 @@ namespace splitTime.editor.level {
                 :fields="sharedStuff.propertiesPaneStuff.fields"
             ></object-properties>
         </div>
-        <div id="layerMenuVue" class="menu" style="right:0px;">
+
+        <div class="layers-container" ref="layersContainer" style="flex-grow: 1; overflow: auto;">
+            <level-graphical-editor
+                :editor-inputs="editorInputs"
+                :level-editor-shared="sharedStuff"
+            ></level-graphical-editor>
+        </div>
+
+        <div id="layerMenuVue" class="menu" style="flex-shrink: 0;">
             <level-tree
                 :level-editor-shared="sharedStuff"
             ></level-tree>
         </div>
     </div>
 
-    <div id="XMLEditorBack" class="backdrop">
-        <div id="XMLEditor">
-            <div id="XMLEditorFields"></div>
-            <button id="saveChanges" style="right:0;">Save Changes</button>
-            <button id="deleteThing">Delete This</button>
-        </div>
-    </div>
-
-    <div id="infoPane" class="menu" style="left: 0; top: auto; bottom: 0; width: auto;">
+    <div id="info-pane" style="padding: 2px;">
         <span v-for="(value, name) in sharedStuff.info" :key="name">
             {{ name }}: {{ value }}
         </span>

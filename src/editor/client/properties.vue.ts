@@ -114,7 +114,8 @@ namespace splitTime.editor.client {
     async function launchFileBrowser(this: VueObjectProperty): Promise<void> {
         const root = this.fieldOptions.fileBrowserRoot || ""
         const filePath = await this.editorGlobalStuff.openFileSelect(root)
-        this.value = filePath.replace(root + "/", "")
+        const prefixRegex = new RegExp("^/?" + root + "/?")
+        this.value = filePath.replace(prefixRegex, "")
     }
 
     function isReadonly(this: VueObjectProperty): boolean {
