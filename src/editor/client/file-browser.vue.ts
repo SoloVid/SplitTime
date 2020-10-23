@@ -1,30 +1,58 @@
 namespace splitTime.editor.client {
     interface VueFileBrowser extends VueComponent {
         // props
+        confirmActionText: string
         editorInputs: UserInputs
         editorGlobalStuff: client.GlobalEditorShared
-        requestDirectory: string
+        initialDirectory: string
+        initialFileName: string
+        rootDirectory: string
+        showTextBox: boolean
+        title: string
         // data
         currentDirectory: string
         filesInDirectory: server.FileEntry[]
         isLoading: boolean
-        selectedFile: server.FileEntry | null
+        selectedFileName: string
         stack: string[]
         // computed
+        projectDirectory: string
         // methods
         backDirectory(): void
         changeDirectory(directoryFullPath: string, skipPushStack?: boolean): Promise<void>
-        selectFile(file: server.FileEntry): void
+        isDirectory(fileName: string): boolean
+        onClickConfirm(): void
+        onMouseDown(event: MouseEvent): void
+        selectFile(fileName: string): void
     }
 
     function data(this: VueFileBrowser): Partial<VueFileBrowser> {
+        const stack: string[] = []
+        let hitRoot = false
+        const initialDirectoryParts = this.initialDirectory.split("/").filter(p => p !== "")
+        let soFar = ""
+        for (const part of initialDirectoryParts) {
+            if (!hitRoot) {
+                if (soFar === this.rootDirectory) {
+                    hitRoot = true
+                }
+            }
+            if (hitRoot) {
+                stack.push(soFar)
+            }
+            soFar = soFar + "/" + part
+        }
         return {
-            currentDirectory: this.requestDirectory || "",
+            currentDirectory: this.initialDirectory || this.rootDirectory || "",
             filesInDirectory: [],
             isLoading: true,
-            stack: [],
-            selectedFile: null
+            stack,
+            selectedFileName: this.initialFileName || ""
         }
+    }
+
+    function projectDirectory(this: VueFileBrowser): string {
+        return this.editorGlobalStuff.server.projectId
     }
 
     function backDirectory(this: VueFileBrowser): void {
@@ -35,7 +63,7 @@ namespace splitTime.editor.client {
     }
 
     async function changeDirectory(this: VueFileBrowser, directoryFullPath: string, skipPushStack: boolean = false): Promise<void> {
-        this.selectedFile = null
+        this.selectedFileName = ""
         this.isLoading = true
         const s = this.editorGlobalStuff.server
         const requestData = s.withProject({ directory: directoryFullPath })
@@ -59,37 +87,69 @@ namespace splitTime.editor.client {
         }
     }
 
-    function selectFile(this: VueFileBrowser, file: server.FileEntry | null): void {
-        if (!file) {
+    function isDirectory(this: VueFileBrowser, fileName: string): boolean {
+        const matchingFiles = this.filesInDirectory.filter(f => f.name === fileName)
+        if (matchingFiles.length === 0) {
+            return false
+        }
+        const fileInfo = matchingFiles[0]
+        return fileInfo.type === "directory"
+    }
+
+    function onClickConfirm(this: VueFileBrowser): void {
+        this.selectFile(this.selectedFileName)
+    }
+
+    // Per https://stackoverflow.com/a/43321596/4639640
+    function onMouseDown(this: VueFileBrowser, event: MouseEvent): void {
+        // On double+ click
+        if (event.detail > 1) {
+            // We're trying to prevent double-click highlight
+            event.preventDefault();
+        }
+    }
+
+    function selectFile(this: VueFileBrowser, fileName: string): void {
+        if (!fileName) {
             this.$emit("file-selected", "")
             return
         }
 
-        const fileFullPath = file.parentPath + "/" + file.name
-        if (file.type === "file") {
-            // TODO: make it how I want it to be
+        const fileFullPath = this.currentDirectory + "/" + fileName
+        if (this.isDirectory(fileName)) {
+            this.changeDirectory(fileFullPath)
+        } else {
             this.$emit("file-selected", fileFullPath)
-            return
         }
-        this.changeDirectory(fileFullPath)
     }
 
     function onMounted(this: VueFileBrowser): void {
-        this.changeDirectory(this.requestDirectory, true)
+        this.changeDirectory(this.initialDirectory, true)
+        // Reset this because changeDirectory() clears it
+        this.selectedFileName = this.initialFileName
     }
 
     Vue.component("file-browser", {
         props: {
+            confirmActionText: String,
             editorInputs: Object,
             editorGlobalStuff: Object,
-            requestDirectory: String
+            initialDirectory: String,
+            initialFileName: String,
+            rootDirectory: String,
+            showTextBox: Boolean,
+            title: String
         },
         data,
         computed: {
+            projectDirectory
         },
         methods: {
             backDirectory,
             changeDirectory,
+            isDirectory,
+            onClickConfirm,
+            onMouseDown,
             selectFile
         },
         filters: {
@@ -102,6 +162,10 @@ namespace splitTime.editor.client {
         mounted: onMounted,
         template: `
 <div>
+    <!--<h4>{{ title }}</h4>-->
+    <div style="border: 1px solid black; padding: 4px; margin-bottom: 5px;">
+        <em>{{ projectDirectory }}<strong>{{ currentDirectory }}</strong></em>
+    </div>
     <table class="row-simple">
         <thead>
             <tr>
@@ -115,6 +179,7 @@ namespace splitTime.editor.client {
             <tr
                 v-if="stack.length > 0"
                 @dblclick.left.prevent="backDirectory"
+                @mousedown="onMouseDown"
                 class="pointer"
             >
                 <td>
@@ -126,9 +191,10 @@ namespace splitTime.editor.client {
             </tr>
             <tr
                 v-for="file in filesInDirectory"
-                @click.left="selectedFile = file"
-                @dblclick.left.prevent="selectFile(file)"
-                :class="{ pointer: true, active: file === selectedFile }"
+                @click.left="selectedFileName = file.name"
+                @dblclick.left.prevent="selectFile(file.name)"
+                @mousedown="onMouseDown"
+                :class="{ pointer: true, active: file.name === selectedFileName }"
             >
                 <td>
                     <i v-if="file.type === 'file'" class="fas fa-fw fa-file"></i>
@@ -145,9 +211,16 @@ namespace splitTime.editor.client {
         </tbody>
     </table>
     <br/>
+    <div style="display: flex; gap: 0.5rem;" v-if="showTextBox">
+        <div>File&nbsp;Name:</div>
+        <div style="flex-grow: 1">
+            <input v-model="selectedFileName" class="block"/>
+        </div>
+    </div>
+    <br/>
     <div class="right">
-        <a class="btn" v-show="selectedFile !== null" @click="selectFile(selectedFile)">Select</a>
-        <a class="btn" @click="selectFile(null)">Cancel</a>
+        <a class="btn" v-show="selectedFileName !== ''" @click="onClickConfirm">{{ confirmActionText }}</a>
+        <a class="btn" @click="selectFile('')">Cancel</a>
     </div>
 </div>
         `

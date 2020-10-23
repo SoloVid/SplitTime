@@ -61,19 +61,6 @@ namespace splitTime.editor.collage {
         return this.collageEditorShared.server.imgSrc(this.collage.image)
     }
 
-    // function handleKeyDown(this: VueCollageLayout, event: KeyboardEvent): void {
-    //     const keycode = splitTime.controls.keyboard.keycode
-    //     switch(event.which) {
-    //         case keycode.DEL:
-    //             const sf = this.collageEditorShared.selectedFrame
-    //             if (sf !== null) {
-    //                 const index = this.collage.frames.indexOf(sf)
-    //                 this.collage.frames.splice(index, 1)
-    //             }
-    //             break
-    //     }
-    // }
-
     function startNewFrame(this: VueCollageLayout): void {
         const mouse = client.getRelativeMouse(this.editorInputs, this)
         let frameIndex = this.collage.frames.length
@@ -131,6 +118,7 @@ namespace splitTime.editor.collage {
         style="position:absolute; left: 0; top: 0; width: 100%; height: 100%"
     >
         <frame-rectangle v-for="frame in framesSorted"
+            :key="frame.id"
             :collage-editor-shared="collageEditorShared"
             :frame="frame"
             :offset="{x: editorPadding, y: editorPadding}"

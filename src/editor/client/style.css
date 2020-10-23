@@ -1,6 +1,5 @@
 * {
     font-family: Sans-Serif;
-    font-size: 12px;
 }
 
 html, body {
@@ -52,6 +51,9 @@ img {
     color: white;
     background-color: lightgreen;
 }
+.menu-bar * {
+    font-size: 12px;
+}
 .level-area {
     cursor: crosshair;
     background-color: black;
@@ -64,6 +66,7 @@ img {
     border-right: 2px solid black;
     padding: 4px;
     background-color: white;
+    resize: both;
 }
 
 .menu .option

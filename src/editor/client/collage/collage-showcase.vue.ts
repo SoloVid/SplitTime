@@ -28,7 +28,6 @@ namespace splitTime.editor.collage {
             const mWidth = m.getOverallArea().width
             return Math.max(maxWidth, mWidth)
         }, 0)
-        console.log("widest: " + width)
         return width
     }
 
@@ -65,7 +64,7 @@ namespace splitTime.editor.collage {
     </template>
     <div
         @mousedown.left="createNewMontage"
-        style="border: 2px solid black; text-align: center;"
+        style="border: 2px solid black; text-align: center; cursor: pointer;"
     >
         <i class="fas fa-plus fa-2x"></i>
     </div>

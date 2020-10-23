@@ -117,7 +117,7 @@ namespace splitTime.editor.client {
         },
         template: `
 <div>
-    <h3>{{ title }}</h3>
+    <h4>{{ title }}</h4>
     <object-property
         v-for="(fieldOptions, key) in fields"
         :key="title + key"

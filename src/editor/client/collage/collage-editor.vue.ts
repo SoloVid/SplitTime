@@ -88,31 +88,20 @@ namespace splitTime.editor.collage {
             supervisorControl: onSupervisorControlChange
         },
         template: `
-<div style="display: flex; flex-flow: row wrap;" class="vertical-bar-separators">
-    <div class="menu">
-        <object-properties
-            :title="sharedStuff.propertiesPaneStuff.title"
-            :thing="sharedStuff.propertiesPaneStuff.thing"
-            :fields="sharedStuff.propertiesPaneStuff.fields"
-        ></object-properties>
-    </div>
-    <div class="standard-padding">
-        <collage-layout
-            :editor-inputs="editorInputs"
-            :collage-editor-shared="sharedStuff"
-        ></collage-layout>
-    </div>
-    <div style="display: grid; grid-template-columns: minmax(128px, 1fr) minmax(128px, 1fr); gap: 0.5rem;" class="vertical-bar-separators">
-        <div
-            v-if="sharedStuff.selectedMontage"
-            style="flex-grow: 1;"
-            class="standard-padding"
-        >
-            <montage-editor
-                style="flex-grow: 1;"
+<div>
+    <div style="display: flex; flex-flow: row wrap;" class="vertical-bar-separators">
+        <div class="menu">
+            <object-properties
+                :title="sharedStuff.propertiesPaneStuff.title"
+                :thing="sharedStuff.propertiesPaneStuff.thing"
+                :fields="sharedStuff.propertiesPaneStuff.fields"
+            ></object-properties>
+        </div>
+        <div class="standard-padding">
+            <collage-layout
+                :editor-inputs="editorInputs"
                 :collage-editor-shared="sharedStuff"
-                :montage="sharedStuff.selectedMontage"
-            ></montage-editor>
+            ></collage-layout>
         </div>
         <div style="flex-grow: 1;" class="standard-padding">
             <collage-showcase
@@ -121,6 +110,11 @@ namespace splitTime.editor.collage {
             ></collage-showcase>
         </div>
     </div>
+    <montage-editor
+        v-if="!!sharedStuff.selectedMontage"
+        :collage-editor-shared="sharedStuff"
+        :montage="sharedStuff.selectedMontage"
+    ></montage-editor>
 </div>
         `
     })

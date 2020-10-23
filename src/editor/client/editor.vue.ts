@@ -40,8 +40,15 @@ namespace splitTime.editor {
         server: client.ServerLiaison
         time: game_seconds
         // data
-        fileBrowserStartPath: string
-        showFileSelect: boolean
+        fileBrowserAction: "open" | "save"
+        fileBrowserConfirmActionText: string
+        fileBrowserRoot: string
+        fileBrowserShowTextBox: boolean
+        fileBrowserStartDirectory: string
+        fileBrowserStartFileName: string
+        fileBrowserTitle: string
+        lastServerFile: string | null
+        showFileBrowser: boolean
         inputs: client.UserInputs
         collage: file.Collage | null
         level: editor.level.Level | null
@@ -49,9 +56,7 @@ namespace splitTime.editor {
         supervisorControl: client.EditorSupervisorControl
         // methods
         createLevel(): void
-        clickFileChooser(): void
-        downloadLevel(): void
-        editLevelSettings(): void
+        editSettings(): void
         moveFollowers(dx: number, dy: number, fallbackToPrevious?: boolean): void
         handleMouseMove(event: MouseEvent): void
         handleMouseDown(event: MouseEvent): void
@@ -60,13 +65,21 @@ namespace splitTime.editor {
         handleKeyUp(event: KeyboardEvent): void
         handleFileChange(event: Event): void
         onServerFileSelected(filePath: string): void
-        openFileSelect(): void
+        openFileOpen(): void
+        openFileSave(): void
     }
 
     function data(this: VueEditor): Partial<VueEditor> {
         return {
-            fileBrowserStartPath: "",
-            showFileSelect: false,
+            fileBrowserAction: "open",
+            fileBrowserConfirmActionText: "Select",
+            fileBrowserRoot: "",
+            fileBrowserShowTextBox: false,
+            fileBrowserStartDirectory: "",
+            fileBrowserStartFileName: "",
+            fileBrowserTitle: "Select File",
+            lastServerFile: null,
+            showFileBrowser: false,
             inputs: {
                 mouse: {
                     x: 0,
@@ -96,36 +109,14 @@ namespace splitTime.editor {
             id: "",
             z: 0
         }))
-        updatePageTitle(this.level)
+        updatePageTitle("untitled")
     }
 
     function clickFileChooser(this: VueEditor) {
         this.$refs.fileInput.click()
     }
 
-    function downloadLevel(this: VueEditor): void {
-        if (this.level === null) {
-            return
-        }
-
-        this.level.fileName = prompt("File name?", this.level.fileName) || ""
-        if(!this.level.fileName) {
-            return
-        }
-        if(!this.level.fileName.endsWith(".json")) {
-            this.level.fileName += ".json"
-        }
-
-        var jsonText = level.exportLevelJson(this.level)
-
-        updatePageTitle(this.level)
-        downloadFile(this.level.fileName, jsonText)
-    }
-
-    function editLevelSettings(this: VueEditor): void {
-        if (!this.level) {
-            return
-        }
+    function editSettings(this: VueEditor): void {
         this.supervisorControl.triggerSettings()
     }
 
@@ -218,60 +209,73 @@ namespace splitTime.editor {
         }
     }
 
-    function handleFileChange(this: VueEditor, event: Event): void {
-        assert(event.target !== null, "File change event has null target?")
-        const inputElement = event.target as HTMLInputElement
-        const fileList = inputElement.files
-        assert(fileList !== null, "No files")
-        const f = fileList[0]
-        if (f) {
-            var r = new FileReader()
-            r.onload = e => {
-                if (!e.target) {
-                    throw new Error("No target?")
-                }
-                var contents = e.target.result
-                if (typeof contents !== "string") {
-                    throw new Error("Contents not string?")
-                }
-                this.level = level.importLevel(contents)
-                this.level.fileName = f.name
-                updatePageTitle(this.level)
-            }
-            r.readAsText(f)
-        } else {
-            alert("Failed to load file")
-        }
-    }
-
     async function onServerFileSelected(this: VueEditor, filePath: string): Promise<void> {
-        this.showFileSelect = false
-        log.debug("File selected: " + filePath)
+        this.showFileBrowser = false
         if (!filePath) {
-            log.debug("Canceled.")
             return
         }
-        const response = await this.server.api.projectFiles.readFile.fetch(
-            this.server.withProject({ filePath }))
-        const contents = atob(response.base64Contents)
-        const fileObject = JSON.parse(contents)
-        log.debug(fileObject)
-        if (splitTime.level.instanceOf.FileData(fileObject)) {
-            this.level = level.importLevel(contents)
-            this.level.fileName = filePath
-            updatePageTitle(this.level)
-        } else if (splitTime.file.instanceOf.Collage(fileObject)) {
-            this.collage = fileObject
-            log.debug(fileObject)
-            log.debug(splitTime.collage.makeCollageFromFile(fileObject))
-        } else {
-            alert("Editing this file type is not supported. Is it possible your data is corrupted?")
+        this.lastServerFile = null
+        switch (this.fileBrowserAction) {
+            case "open":
+                const response = await this.server.api.projectFiles.readFile.fetch(
+                    this.server.withProject({ filePath }))
+                const contents = atob(response.base64Contents)
+                const fileObject = JSON.parse(contents)
+                if (splitTime.level.instanceOf.FileData(fileObject)) {
+                    this.level = level.importLevel(contents)
+                    updatePageTitle(level.getLevelPageTitle(filePath, this.level))
+                } else if (splitTime.file.instanceOf.Collage(fileObject)) {
+                    this.collage = fileObject
+                    updatePageTitle(filePath)
+                } else {
+                    alert("Editing this file type is not supported. Is it possible your data is corrupted?")
+                }
+                break
+            case "save":
+                let fileContents: file.json
+                if (this.level) {
+                    fileContents = level.exportLevelJson(this.level)
+                } else if (this.collage) {
+                    fileContents = toJson(this.collage)
+                } else {
+                    throw new Error("What are you trying to save?")
+                }
+                await this.server.api.projectFiles.writeFile.fetch(
+                    this.server.withProject({ filePath, base64Contents: btoa(fileContents) })
+                )
+                break
+            default:
+                throw new Error("Unsupported file browser action " + this.fileBrowserAction)
         }
+        this.lastServerFile = filePath
     }
 
-    function openFileSelect(this: VueEditor): void {
-        this.fileBrowserStartPath = ""
-        this.showFileSelect = true
+    function openFileOpen(this: VueEditor): void {
+        this.fileBrowserAction = "open"
+        this.fileBrowserTitle = "Open File"
+        this.fileBrowserConfirmActionText = "Open"
+        this.fileBrowserRoot = ""
+        this.fileBrowserStartDirectory = ""
+        this.fileBrowserShowTextBox = false
+        this.showFileBrowser = true
+    }
+
+    function openFileSave(this: VueEditor): void {
+        let preloadDirectory = ""
+        let preloadFileName = ""
+        if (this.lastServerFile !== null) {
+            const lastSlash = this.lastServerFile.lastIndexOf("/")
+            preloadDirectory = this.lastServerFile.substring(0, lastSlash)
+            preloadFileName = this.lastServerFile.substring(lastSlash + 1)
+        }
+        this.fileBrowserAction = "save"
+        this.fileBrowserTitle = "Save File As"
+        this.fileBrowserConfirmActionText = "Save"
+        this.fileBrowserRoot = ""
+        this.fileBrowserStartDirectory = preloadDirectory
+        this.fileBrowserShowTextBox = true
+        this.fileBrowserStartFileName = preloadFileName
+        this.showFileBrowser = true
     }
 
     function onMounted(this: VueEditor): void {
@@ -292,17 +296,16 @@ namespace splitTime.editor {
         methods: {
             createLevel,
             clickFileChooser,
-            downloadLevel,
-            editLevelSettings,
+            editSettings,
             moveFollowers,
             handleMouseMove,
             handleMouseDown,
             handleMouseUp,
             handleKeyDown,
             handleKeyUp,
-            handleFileChange,
             onServerFileSelected,
-            openFileSelect
+            openFileOpen,
+            openFileSave
         },
         mounted: onMounted,
         template: `
@@ -313,12 +316,9 @@ namespace splitTime.editor {
     >
     <div class="menu-bar">
         <a @click="createLevel">New Level</a>
-        <a @click="openFileSelect">Open</a>
-        <a
-            @click="downloadLevel"
-            title="After downloading the level, relocate it to use it in the engine."
-        >Download File (Save)</a>
-        <a @click="editLevelSettings">Edit Settings</a>
+        <a @click="openFileOpen">Open</a>
+        <a @click="openFileSave">Save</a>
+        <a @click="editSettings">Edit Settings</a>
         <label>
             Grid:
             <input type="checkbox" v-model="globalEditorStuff.gridEnabled"/>
@@ -332,12 +332,17 @@ namespace splitTime.editor {
             <input type="number" v-model.number="globalEditorStuff.gridCell.y" style="width: 48px;"/>
         </label>
     </div>
-    <div class="modal-backdrop" v-if="showFileSelect">
+    <div class="modal-backdrop" v-if="showFileBrowser">
         <div class="modal-body">
             <file-browser
+                :confirm-action-text="fileBrowserConfirmActionText"
                 :editor-inputs="inputs"
                 :editor-global-stuff="globalEditorStuff"
-                :request-directory="fileBrowserStartPath"
+                :initial-directory="fileBrowserStartDirectory"
+                :initial-file-name="fileBrowserStartFileName"
+                :root-directory="fileBrowserRoot"
+                :show-text-box="fileBrowserShowTextBox"
+                :title="fileBrowserTitle"
                 @file-selected="onServerFileSelected"
             ></file-browser>
         </div>

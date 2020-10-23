@@ -1,9 +1,5 @@
 namespace splitTime.editor {
-    export function updatePageTitle(level: editor.level.Level) {
-        var title = level.fileName ? level.fileName : "untitled"
-        if (level.region) {
-            title += " (" + level.region + ")"
-        }
+    export function updatePageTitle(title: string) {
         document.title = title
     }
     
@@ -38,10 +34,22 @@ namespace splitTime.editor {
     
         return { top: Math.round(top), left: Math.round(left) }
     }
+
+    export function toJson<T>(data: file.IsJsonable<T>): file.json {
+        return JSON.stringify(data, null, 4)
+    }
 }
 
 namespace splitTime.editor.level {
     export const DEFAULT_HEIGHT = 64
+
+    export function getLevelPageTitle(filePath: string, level: editor.level.Level): string {
+        let title = filePath ? filePath : "untitled"
+        if (level.region) {
+            title += " (" + level.region + ")"
+        }
+        return title
+    }
 
     export function exportLevel(levelObject: Level): splitTime.level.FileData {
         return {
@@ -60,7 +68,7 @@ namespace splitTime.editor.level {
     }
 
     export function exportLevelJson(levelObject: Level): file.json {
-        return JSON.stringify(exportLevel(levelObject), null, 4)
+        return toJson(exportLevel(levelObject))
     }
     
     export function importLevel(levelText: string): Level {

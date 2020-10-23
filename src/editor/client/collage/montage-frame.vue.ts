@@ -132,7 +132,7 @@ namespace splitTime.editor.collage {
             fill="none"
         />
         <rect
-            style="pointer-events: initial;"
+            style="pointer-events: initial; cursor: grab;"
             @mousedown="trackBody"
             :x="bodyFrontRectRelative.x"
             :y="bodyFrontRectRelative.y"

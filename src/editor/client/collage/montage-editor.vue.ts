@@ -60,7 +60,7 @@ namespace splitTime.editor.collage {
             selectFrame
         },
         template: `
-<div :style="gridStyle">
+<div class="standard-margin standard-padding transparency-checkerboard-background" :style="gridStyle">
     <div v-if="montage.frames.length === 0">
         Double-click a frame to add it to this montage.
     </div>

@@ -1,6 +1,5 @@
 namespace splitTime.editor.level {
     export class Level {
-        fileName: string = ""
         region: string = ""
         width: int = 640
         height: int = 480

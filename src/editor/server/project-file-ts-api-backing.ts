@@ -28,6 +28,17 @@ namespace splitTime.editor.server {
                     base64Contents: result.toString("base64")
                 }
             })
+            this.api.writeFile.serve(async request => {
+                const path = this.pathHelper.getFilePath(request.projectId, request.data.filePath)
+                const contents = Buffer.from(request.data.base64Contents, "base64")
+                await this.nodeLibs.fsPromises.writeFile(path, contents)
+                return null
+            })
+            this.api.deleteFile.serve(async request => {
+                const path = this.pathHelper.getFilePath(request.projectId, request.data.filePath)
+                await this.nodeLibs.fsPromises.unlink(path)
+                return null
+            })
         }
     }
 }

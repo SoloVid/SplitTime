@@ -38,6 +38,10 @@ namespace splitTime.editor.collage {
     }
 
     function overallArea(this: VueMontage): math.Rect {
+        if (this.montage.frames.length === 0) {
+            // FTODO: Consider calculating these values better
+            return math.Rect.make(0, 0, 16, 16)
+        }
         return this.realMontage.getOverallArea()
     }
 
@@ -92,15 +96,18 @@ namespace splitTime.editor.collage {
 <div
     @mousedown.left="setActiveMontage"
 >
-    <div style="overflow: hidden;">
-        <img v-if="montage.frames.length === 0" :src="placeholderImgSrc"/>
-    </div>
     <div
-        v-if="montage.frames.length > 0"
         :style="containerStyle"
         class="transparency-checkerboard-background"
     >
         <div
+            v-if="montage.frames.length === 0"
+            style="overflow: hidden; width: 100%; height: 100%;"
+        >
+            <img v-if="montage.frames.length === 0" :src="placeholderImgSrc"/>
+        </div>
+        <div
+            v-if="montage.frames.length > 0"
             :style="frameDivStyle"
         >
             <montage-frame
