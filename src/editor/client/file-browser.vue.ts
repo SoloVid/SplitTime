@@ -27,13 +27,16 @@ namespace splitTime.editor.client {
     }
 
     function data(this: VueFileBrowser): Partial<VueFileBrowser> {
+        const rootDirectoryParts = this.rootDirectory.split("/").filter(p => p !== "")
+        const normalizedRootDirectory = rootDirectoryParts.map(p => "/" + p).join("")
         const stack: string[] = []
         let hitRoot = false
         const initialDirectoryParts = this.initialDirectory.split("/").filter(p => p !== "")
+        const normalizedInitialDirectory = initialDirectoryParts.map(p => "/" + p).join("")
         let soFar = ""
         for (const part of initialDirectoryParts) {
             if (!hitRoot) {
-                if (soFar === this.rootDirectory) {
+                if (soFar === normalizedRootDirectory) {
                     hitRoot = true
                 }
             }
@@ -43,7 +46,7 @@ namespace splitTime.editor.client {
             soFar = soFar + "/" + part
         }
         return {
-            currentDirectory: this.initialDirectory || this.rootDirectory || "",
+            currentDirectory: normalizedInitialDirectory || normalizedRootDirectory || "",
             filesInDirectory: [],
             isLoading: true,
             stack,
@@ -124,7 +127,7 @@ namespace splitTime.editor.client {
     }
 
     function onMounted(this: VueFileBrowser): void {
-        this.changeDirectory(this.initialDirectory, true)
+        this.changeDirectory(this.currentDirectory, true)
         // Reset this because changeDirectory() clears it
         this.selectedFileName = this.initialFileName
     }

@@ -92,6 +92,7 @@ namespace splitTime.editor.collage {
     <div style="display: flex; flex-flow: row wrap;" class="vertical-bar-separators">
         <div class="menu">
             <object-properties
+                :editor-global-stuff="editorGlobalStuff"
                 :title="sharedStuff.propertiesPaneStuff.title"
                 :thing="sharedStuff.propertiesPaneStuff.thing"
                 :fields="sharedStuff.propertiesPaneStuff.fields"

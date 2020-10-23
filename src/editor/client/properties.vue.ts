@@ -2,6 +2,8 @@ namespace splitTime.editor.client {
     export interface FieldOptions {
         readonly?: boolean
         title?: string
+        isFile?: boolean
+        fileBrowserRoot?: string
     }
 
     export interface ObjectProperties {
@@ -12,13 +14,16 @@ namespace splitTime.editor.client {
 
     interface VueObjectProperties {
         // props
+        editorGlobalStuff: client.GlobalEditorShared
         title: string,
         thing: { [key: string]: string | number }
         fields: { [key: string]: FieldOptions }
     }
 
+    type InputType = "string" | "textarea" | "number" | "file"
     interface VueObjectProperty {
         // props
+        editorGlobalStuff: client.GlobalEditorShared
         thing: { [key: string]: unknown }
         fieldKey: string
         fieldOptions: FieldOptions
@@ -29,8 +34,10 @@ namespace splitTime.editor.client {
         rawValue: string | number
         title: string
         value: unknown
-        inputType: "string" | "textarea" | "number"
+        inputType: InputType
         isReadonly: boolean
+        // methods
+        launchFileBrowser(): void
     }
 
     function data(this: VueObjectProperty) {
@@ -87,11 +94,14 @@ namespace splitTime.editor.client {
         }
     }
 
-    function inputType(this: VueObjectProperty): "string" | "textarea" | "number" {
+    function inputType(this: VueObjectProperty): InputType {
         if (typeof this.rawValue === "number") {
             return "number"
         }
         if (typeof this.rawValue === "string") {
+            if (this.fieldOptions.isFile) {
+                return "file"
+            }
             const TEXTAREA_THRESHOLD = 32
             if (this.rawValue.length > TEXTAREA_THRESHOLD) {
                 return "textarea"
@@ -101,12 +111,19 @@ namespace splitTime.editor.client {
         throw new Error("Property (" + this.fieldKey + ") is not a number or string")
     }
 
+    async function launchFileBrowser(this: VueObjectProperty): Promise<void> {
+        const root = this.fieldOptions.fileBrowserRoot || ""
+        const filePath = await this.editorGlobalStuff.openFileSelect(root)
+        this.value = filePath.replace(root + "/", "")
+    }
+
     function isReadonly(this: VueObjectProperty): boolean {
         return !!this.fieldOptions.readonly
     }
 
     Vue.component("object-properties", {
         props: {
+            editorGlobalStuff: Object,
             title: String,
             thing: Object,
             fields: Object
@@ -121,6 +138,7 @@ namespace splitTime.editor.client {
     <object-property
         v-for="(fieldOptions, key) in fields"
         :key="title + key"
+        :editor-global-stuff="editorGlobalStuff"
         :thing="thing"
         :fieldKey="key"
         :fieldOptions="fieldOptions"
@@ -131,6 +149,7 @@ namespace splitTime.editor.client {
 
     Vue.component("object-property", {
         props: {
+            editorGlobalStuff: Object,
             thing: Object,
             fieldKey: String,
             fieldOptions: Object
@@ -149,6 +168,9 @@ namespace splitTime.editor.client {
             },
             inputType,
             isReadonly
+        },
+        methods: {
+            launchFileBrowser
         },
         template: `
 <label>
@@ -171,6 +193,13 @@ namespace splitTime.editor.client {
         v-model.number="value"
         :readonly="isReadonly"
         class="block"
+    />
+    <input
+        v-if="inputType === 'file'"
+        :value="value"
+        @dblclick.left="launchFileBrowser"
+        :readonly="true"
+        class="block pointer"
     />
 </label>
         `

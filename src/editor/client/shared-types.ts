@@ -14,6 +14,7 @@ namespace splitTime.editor.client {
         readonly gridCell: Vector2D
         readonly server: client.ServerLiaison
         readonly time: game_seconds
+        openFileSelect(rootDirectory: string): PromiseLike<string>
         setFollowers(newFollowers: client.Followable[]): void
         setOnDelete(callback: () => void): void
     }

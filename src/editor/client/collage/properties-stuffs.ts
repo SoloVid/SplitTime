@@ -1,7 +1,10 @@
 namespace splitTime.editor.collage {
     export function getCollagePropertiesStuff(collage: file.Collage): client.ObjectProperties {
         const fieldObject = {
-            image: {},
+            image: {
+                isFile: true,
+                fileBrowserRoot: splitTime.IMAGE_DIR
+            },
             defaultMontageId: {}
         }
         type SimplifiedCollage = { [K in keyof typeof fieldObject]: string | number }

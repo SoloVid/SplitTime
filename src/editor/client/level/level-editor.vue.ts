@@ -146,6 +146,7 @@ namespace splitTime.editor.level {
                 :level-editor-shared="sharedStuff"
             ></level-editor-tools>
             <object-properties
+                :editor-global-stuff="editorGlobalStuff"
                 :title="sharedStuff.propertiesPaneStuff.title"
                 :thing="sharedStuff.propertiesPaneStuff.thing"
                 :fields="sharedStuff.propertiesPaneStuff.fields"

@@ -24,6 +24,12 @@ namespace splitTime.editor {
         get time(): game_seconds {
             return this.editor.time
         }
+
+        openFileSelect(rootDirectory: string): PromiseLike<string> {
+            const pledge = new Pledge()
+            this.editor.openFileSelect(rootDirectory, filePath => pledge.resolve(filePath))
+            return pledge
+        }
         
         setFollowers(newFollowers: client.Followable[]): void {
             this.previousFollowers = this.followers
@@ -35,13 +41,14 @@ namespace splitTime.editor {
         }
     }
     
+    type FileBrowserReturnListener = (filePath: string) => void
     interface VueEditor extends client.VueComponent {
         // props
         server: client.ServerLiaison
         time: game_seconds
         // data
-        fileBrowserAction: "open" | "save"
         fileBrowserConfirmActionText: string
+        fileBrowserReturnListener: (FileBrowserReturnListener) | null
         fileBrowserRoot: string
         fileBrowserShowTextBox: boolean
         fileBrowserStartDirectory: string
@@ -69,12 +76,13 @@ namespace splitTime.editor {
         onServerFileSelected(filePath: string): void
         openFileOpen(): void
         openFileSave(): void
+        openFileSelect(rootDirectory: string, callback: FileBrowserReturnListener): void
     }
 
     function data(this: VueEditor): Partial<VueEditor> {
         return {
-            fileBrowserAction: "open",
             fileBrowserConfirmActionText: "Select",
+            fileBrowserReturnListener: null,
             fileBrowserRoot: "",
             fileBrowserShowTextBox: false,
             fileBrowserStartDirectory: "",
@@ -236,44 +244,28 @@ namespace splitTime.editor {
         if (!filePath) {
             return
         }
-        this.lastServerFile = null
-        switch (this.fileBrowserAction) {
-            case "open":
-                const response = await this.server.api.projectFiles.readFile.fetch(
-                    this.server.withProject({ filePath }))
-                const contents = atob(response.base64Contents)
-                const fileObject = JSON.parse(contents)
-                if (splitTime.level.instanceOf.FileData(fileObject)) {
-                    this.level = level.importLevel(contents)
-                    updatePageTitle(level.getLevelPageTitle(filePath, this.level))
-                } else if (splitTime.file.instanceOf.Collage(fileObject)) {
-                    this.collage = fileObject
-                    updatePageTitle(filePath)
-                } else {
-                    alert("Editing this file type is not supported. Is it possible your data is corrupted?")
-                }
-                break
-            case "save":
-                let fileContents: file.json
-                if (this.level) {
-                    fileContents = level.exportLevelJson(this.level)
-                } else if (this.collage) {
-                    fileContents = toJson(this.collage)
-                } else {
-                    throw new Error("What are you trying to save?")
-                }
-                await this.server.api.projectFiles.writeFile.fetch(
-                    this.server.withProject({ filePath, base64Contents: btoa(fileContents) })
-                )
-                break
-            default:
-                throw new Error("Unsupported file browser action " + this.fileBrowserAction)
-        }
-        this.lastServerFile = filePath
+        assert(this.fileBrowserReturnListener !== null, "Who is waiting for file browser?")
+        this.fileBrowserReturnListener(filePath)
+        this.fileBrowserReturnListener = null
     }
 
     function openFileOpen(this: VueEditor): void {
-        this.fileBrowserAction = "open"
+        this.fileBrowserReturnListener = async filePath => {
+            this.lastServerFile = filePath
+            const response = await this.server.api.projectFiles.readFile.fetch(
+                this.server.withProject({ filePath }))
+            const contents = atob(response.base64Contents)
+            const fileObject = JSON.parse(contents)
+            if (splitTime.level.instanceOf.FileData(fileObject)) {
+                this.level = level.importLevel(contents)
+                updatePageTitle(level.getLevelPageTitle(filePath, this.level))
+            } else if (splitTime.file.instanceOf.Collage(fileObject)) {
+                this.collage = fileObject
+                updatePageTitle(filePath)
+            } else {
+                alert("Editing this file type is not supported. Is it possible your data is corrupted?")
+            }
+        }
         this.fileBrowserTitle = "Open File"
         this.fileBrowserConfirmActionText = "Open"
         this.fileBrowserRoot = ""
@@ -290,13 +282,36 @@ namespace splitTime.editor {
             preloadDirectory = this.lastServerFile.substring(0, lastSlash)
             preloadFileName = this.lastServerFile.substring(lastSlash + 1)
         }
-        this.fileBrowserAction = "save"
+        this.fileBrowserReturnListener = async filePath => {
+            this.lastServerFile = filePath
+            let fileContents: file.json
+            if (this.level) {
+                fileContents = level.exportLevelJson(this.level)
+            } else if (this.collage) {
+                fileContents = toJson(this.collage)
+            } else {
+                throw new Error("What are you trying to save?")
+            }
+            await this.server.api.projectFiles.writeFile.fetch(
+                this.server.withProject({ filePath, base64Contents: btoa(fileContents) })
+            )
+        }
         this.fileBrowserTitle = "Save File As"
         this.fileBrowserConfirmActionText = "Save"
         this.fileBrowserRoot = ""
         this.fileBrowserStartDirectory = preloadDirectory
         this.fileBrowserShowTextBox = true
         this.fileBrowserStartFileName = preloadFileName
+        this.showFileBrowser = true
+    }
+
+    function openFileSelect(this: VueEditor, rootDirectory: string, callback: FileBrowserReturnListener): void {
+        this.fileBrowserReturnListener = callback
+        this.fileBrowserTitle = "Select File"
+        this.fileBrowserConfirmActionText = "Select"
+        this.fileBrowserRoot = rootDirectory
+        this.fileBrowserStartDirectory = rootDirectory
+        this.fileBrowserShowTextBox = false
         this.showFileBrowser = true
     }
 
@@ -328,7 +343,8 @@ namespace splitTime.editor {
             handleKeyUp,
             onServerFileSelected,
             openFileOpen,
-            openFileSave
+            openFileSave,
+            openFileSelect
         },
         mounted: onMounted,
         template: `
