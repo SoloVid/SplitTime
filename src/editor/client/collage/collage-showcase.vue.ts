@@ -28,7 +28,7 @@ namespace splitTime.editor.collage {
             const mWidth = m.getOverallArea().width
             return Math.max(maxWidth, mWidth)
         }, 0)
-        return width
+        return Math.max(width, 16)
     }
 
     function createNewMontage(this: VueCollageShowcase): void {
@@ -64,7 +64,8 @@ namespace splitTime.editor.collage {
     </template>
     <div
         @mousedown.left="createNewMontage"
-        style="border: 2px solid black; text-align: center; cursor: pointer;"
+        title="Add montage"
+        style="text-align: center; cursor: pointer;"
     >
         <i class="fas fa-plus fa-2x"></i>
     </div>

@@ -49,12 +49,14 @@ namespace splitTime.editor {
         fileBrowserTitle: string
         lastServerFile: string | null
         showFileBrowser: boolean
+        showNewDialog: boolean 
         inputs: client.UserInputs
         collage: file.Collage | null
         level: editor.level.Level | null
         globalEditorStuff: GlobalEditorStuff
         supervisorControl: client.EditorSupervisorControl
         // methods
+        createCollage(): void
         createLevel(): void
         editSettings(): void
         moveFollowers(dx: number, dy: number, fallbackToPrevious?: boolean): void
@@ -80,6 +82,7 @@ namespace splitTime.editor {
             fileBrowserTitle: "Select File",
             lastServerFile: null,
             showFileBrowser: false,
+            showNewDialog: false,
             inputs: {
                 mouse: {
                     x: 0,
@@ -97,7 +100,26 @@ namespace splitTime.editor {
         }
     }
 
+    function createCollage(this: VueEditor) {
+        this.showNewDialog = false
+        if(this.collage) {
+            if(!confirm("Are you sure you want to clear the current collage and create a new one?")) {
+                return
+            }
+        }
+
+        this.collage = {
+            image: "",
+            frames: [],
+            montages: [],
+            defaultMontageId: ""
+        }
+
+        updatePageTitle("collage untitled")
+    }
+
     function createLevel(this: VueEditor) {
+        this.showNewDialog = false
         if(this.level && this.level.layers.length > 0) {
             if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
                 return
@@ -109,7 +131,7 @@ namespace splitTime.editor {
             id: "",
             z: 0
         }))
-        updatePageTitle("untitled")
+        updatePageTitle("level untitled")
     }
 
     function clickFileChooser(this: VueEditor) {
@@ -294,6 +316,7 @@ namespace splitTime.editor {
         },
         data,
         methods: {
+            createCollage,
             createLevel,
             clickFileChooser,
             editSettings,
@@ -315,7 +338,7 @@ namespace splitTime.editor {
     @mouseup="handleMouseUp"
     >
     <div class="menu-bar">
-        <a @click="createLevel">New Level</a>
+        <a @click="showNewDialog = true">New</a>
         <a @click="openFileOpen">Open</a>
         <a @click="openFileSave">Save</a>
         <a @click="editSettings">Edit Settings</a>
@@ -331,6 +354,16 @@ namespace splitTime.editor {
             y:
             <input type="number" v-model.number="globalEditorStuff.gridCell.y" style="width: 48px;"/>
         </label>
+    </div>
+    <div class="modal-backdrop" v-if="showNewDialog">
+        <div class="modal-body">
+            <p><strong>What do you want to create?</strong></p>
+            <div>
+                <a class="btn" @click="createLevel">New Level</a>
+                <a class="btn" @click="createCollage">New Collage</a>
+                <a class="btn" @click="showNewDialog = false">Cancel</a>
+            </div>
+        </div>
     </div>
     <div class="modal-backdrop" v-if="showFileBrowser">
         <div class="modal-body">

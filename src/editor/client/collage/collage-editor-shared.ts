@@ -22,7 +22,7 @@ namespace splitTime.editor.collage {
         }
 
         get realCollage(): splitTime.Collage {
-            return splitTime.collage.makeCollageFromFile(this.collage)
+            return splitTime.collage.makeCollageFromFile(this.collage, true)
         }
 
         selectedFrame: file.collage.Frame | null = null

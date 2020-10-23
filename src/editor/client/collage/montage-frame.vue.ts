@@ -38,7 +38,7 @@ namespace splitTime.editor.collage {
     function bodyFrontRectRelative(this: VueMontageFrame): math.Rect {
         return math.Rect.make(
             EDITOR_PADDING - this.frameTargetBox.x - this.body.width / 2,
-            EDITOR_PADDING - this.frameTargetBox.y - this.body.height,
+            EDITOR_PADDING - this.frameTargetBox.y + this.body.depth / 2 - this.body.height,
             this.body.width,
             this.body.height
         )

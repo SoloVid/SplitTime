@@ -14,7 +14,8 @@ namespace splitTime {
             /** Path of image backing this Collage */
             readonly image: string,
             readonly montages: readonly Readonly<collage.Montage>[],
-            private readonly defaultMontageId: string
+            private readonly defaultMontageId: string,
+            allowErrors: boolean = false
         ) {
             // Construct map
             for (const montage of montages) {
@@ -37,7 +38,10 @@ namespace splitTime {
             }
 
             if (!this.hasMontage(defaultMontageId)) {
-                throw new Error("Default montage " + defaultMontageId + " not found in collage")
+                if (!allowErrors) {
+                    throw new Error("Default montage " + defaultMontageId + " not found in collage")
+                }
+                // log.warn("Default montage " + defaultMontageId + " not found in collage")
             }
         }
 
@@ -64,7 +68,7 @@ namespace splitTime {
     }
 
     export namespace collage {
-        export function makeCollageFromFile(file: file.Collage): Collage {
+        export function makeCollageFromFile(file: file.Collage, allowErrors: boolean = false): Collage {
             const framesRectMap: { [id: string]: math.Rect } = {}
             for (const fileFrame of file.frames) {
                 framesRectMap[fileFrame.id] =
@@ -89,7 +93,7 @@ namespace splitTime {
                     fileMontage.body,
                     fileMontage.traces
                 )
-            }), file.defaultMontageId)
+            }), file.defaultMontageId, allowErrors)
         }
     }
 }
