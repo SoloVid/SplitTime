@@ -175,7 +175,7 @@ namespace splitTime.editor.level {
         const originalPointString = trace.vertices
         const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
         const traceSpec = splitTime.trace.TraceSpec.fromRaw(trace)
-        const originalPoints = traceSpec.vertices.filter(instanceOf.Coordinates2D)
+        const originalPoints = point ? [point] : traceSpec.vertices.filter(instanceOf.Coordinates2D)
         const snappedMover = new client.GridSnapMover(this.levelEditorShared.gridCell, originalPoints)
         const follower = {
             shift: (dx: number, dy: number) => {

@@ -62,11 +62,11 @@ img {
 .menu {
     width: 128px;
     overflow: auto;
-    border-left: 2px solid black;
-    border-right: 2px solid black;
+    /* border-left: 2px solid black; */
+    /* border-right: 2px solid black; */
     padding: 4px;
-    background-color: white;
-    resize: horizontal;
+    /* background-color: white; */
+    /* resize: horizontal; */
 }
 
 .menu .option
@@ -168,6 +168,15 @@ textarea {
 .vertical-bar-separators > *:not(:last-child) {
     /** Parent positioning required for bar positioning */
     position: relative;
+}
+
+.vertical-resize-bar {
+    /* position: absolute; */
+    /* top: 0; */
+    width: 4px;
+    height: 100%;
+    background-color:rgb(0, 0, 0);
+    cursor: e-resize
 }
 
 input.block, textarea.block {

@@ -41,7 +41,7 @@ namespace splitTime.editor.level {
         }
 
         shouldDragBePrevented(): boolean {
-            return this.editor.inputs.mouse.isDown || this.pathInProgress !== null
+            return this.editor.editorInputs.mouse.isDown || this.pathInProgress !== null
         }
 
         follow(follower: client.Followable): void {
@@ -58,39 +58,12 @@ namespace splitTime.editor.level {
         // data
         sharedStuff: LevelEditorShared
         // computed
-        inputs: client.UserInputs
-        position: Coordinates2D
         editorWidth: number
         editorHeight: number
         // methods
         onSupervisorControlChange(): void
-    }
-
-    function inputs(this: VueLevelEditor): client.UserInputs {
-        const mouse = {
-            x: this.editorInputs.mouse.x - this.position.x - EDITOR_PADDING,
-            y: this.editorInputs.mouse.y - this.position.y - EDITOR_PADDING,
-            // FTODO: only is down when inside level editor
-            isDown: this.editorInputs.mouse.isDown
-        }
-        return {
-            mouse,
-            ctrlDown: this.editorInputs.ctrlDown
-        }
-    }
-
-    function position(this: VueLevelEditor): Coordinates2D {
-        if (!this.$el) {
-            return {
-                x: 0,
-                y: 0
-            }
-        }
-        const $pos = $(this.$el).position()
-        return {
-            x: $pos.left,
-            y: $pos.top
-        }
+        trackLeftMenuResize(): void
+        trackRightMenuResize(): void
     }
 
     function editorWidth(this: VueLevelEditor): number {
@@ -112,6 +85,29 @@ namespace splitTime.editor.level {
         }
     }
 
+    const MIN_MENU_WIDTH = 32
+    function trackLeftMenuResize(this: VueLevelEditor): void {
+        this.sharedStuff.follow({
+            shift: (dx, dy) => {
+                // const width = this.$refs.leftMenu.clientWidth
+                const width = +this.$refs.leftMenu.style.width.replace(/[^0-9-]/g, "")
+                const newWidth = Math.max(width + dx, MIN_MENU_WIDTH)
+                this.$refs.leftMenu.style.width = newWidth + "px"
+            }
+        })
+    }
+
+    function trackRightMenuResize(this: VueLevelEditor): void {
+        this.sharedStuff.follow({
+            shift: (dx, dy) => {
+                // const width = this.$refs.rightMenu.clientWidth
+                const width = +this.$refs.rightMenu.style.width.replace(/[^0-9-]/g, "")
+                const newWidth = Math.max(width - dx, MIN_MENU_WIDTH)
+                this.$refs.rightMenu.style.width = newWidth + "px"
+            }
+        })
+    }
+
     Vue.component("level-editor", {
         props: {
             editorInputs: Object,
@@ -126,13 +122,13 @@ namespace splitTime.editor.level {
             }
         },
         computed: {
-            inputs,
-            position,
             editorWidth,
             editorHeight
         },
         methods: {
-            onSupervisorControlChange
+            onSupervisorControlChange,
+            trackLeftMenuResize,
+            trackRightMenuResize
         },
         watch: {
             supervisorControl: onSupervisorControlChange
@@ -140,7 +136,7 @@ namespace splitTime.editor.level {
         template: `
 <div class="level-editor" style="display: flex; flex-flow: column;">
     <div class="content" style="flex-grow: 1; overflow: hidden; display: flex;">
-        <div class="menu" style="flex-shrink: 0;">
+        <div ref="leftMenu" class="menu" style="flex-shrink: 0; width: 128px;">
             <level-editor-tools
                 :level-editor-shared="sharedStuff"
             ></level-editor-tools>
@@ -151,6 +147,11 @@ namespace splitTime.editor.level {
                 :fields="sharedStuff.propertiesPaneStuff.fields"
             ></object-properties>
         </div>
+        <div
+            class="vertical-resize-bar"
+            @mousedown.left.prevent="trackLeftMenuResize"
+            style="flex-shrink: 0; right: 0;"
+        ></div>
 
         <div class="layers-container" ref="layersContainer" style="flex-grow: 1; overflow: auto;">
             <level-graphical-editor
@@ -159,7 +160,12 @@ namespace splitTime.editor.level {
             ></level-graphical-editor>
         </div>
 
-        <div id="layerMenuVue" class="menu" style="flex-shrink: 0;">
+        <div
+            class="vertical-resize-bar"
+            @mousedown.left.prevent="trackRightMenuResize"
+            style="flex-shrink: 0; left: 0;"
+        ></div>
+        <div ref="rightMenu" class="menu" style="flex-shrink: 0; width: 128px; position: relative;">
             <level-tree
                 :level-editor-shared="sharedStuff"
             ></level-tree>

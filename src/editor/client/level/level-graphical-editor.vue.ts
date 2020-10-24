@@ -9,7 +9,6 @@ namespace splitTime.editor.level {
         // computed
         level: Level
         inputs: client.UserInputs
-        position: Coordinates2D
         containerWidth: number
         containerHeight: number
         leftPadding: number
@@ -36,29 +35,26 @@ namespace splitTime.editor.level {
     }
 
     function inputs(this: VueLevelGraphicalEditor): client.UserInputs {
+        let position = {
+            x: 0,
+            y: 0
+        }
+        if (this.$el) {
+            const $pos = $(this.$el).position()
+            position = {
+                x: $pos.left,
+                y: $pos.top
+            }
+        }
         const mouse = {
-            x: this.editorInputs.mouse.x - this.position.x - EDITOR_PADDING,
-            y: this.editorInputs.mouse.y - this.position.y - EDITOR_PADDING,
+            x: this.editorInputs.mouse.x - position.x - EDITOR_PADDING,
+            y: this.editorInputs.mouse.y - position.y - EDITOR_PADDING,
             // FTODO: only is down when inside level editor
             isDown: this.editorInputs.mouse.isDown
         }
         return {
             mouse,
             ctrlDown: this.editorInputs.ctrlDown
-        }
-    }
-
-    function position(this: VueLevelGraphicalEditor): Coordinates2D {
-        if (!this.$el) {
-            return {
-                x: 0,
-                y: 0
-            }
-        }
-        const $pos = $(this.$el).position()
-        return {
-            x: $pos.left,
-            y: $pos.top
         }
     }
 
@@ -208,7 +204,6 @@ namespace splitTime.editor.level {
         computed: {
             level,
             inputs,
-            position,
             containerWidth,
             containerHeight,
             leftPadding,
