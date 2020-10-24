@@ -1,40 +1,29 @@
 This file is here as a mixture of TODOs and implementation thought experiments. Since opportunities to work on the engine are sparse, my thoughts here help me to keep track of what I've been thinking.
 
 Identified engine enhancements
-- Split baseLength up into x and y
 - Do sprite-splitting in rendering
 
 
 
 I want a box/sprite/frame/image/prop editor.
-- Shows background image
-- Allow subdivide image into arbitrary rectangles
-    - Shortcut for all same size in strict grid
-- Can stick body (cuboid) on each frame/box
-    - Either all at same time or per frame
-    - Modify position, base length, and height
+- Shortcut for all same size in strict grid?
 - Can stick any number of traces on each frame/box
     - Either all same time or per frame
-- Show all view or single frame/box
-- Animation preview
-- Build creates objects from all of these that can be used to initialize bodies, props, sprites, tilesets, etc.
-- No body specified probably has some zero defaults
 - Different sized bodies on different frames presents issue for using as template for body (TODO: resolve)
 
 
 Level editor enhancements
 - Instead of layers in editor, allow arbitrary groupings with default z
 - Allow locking groups so they can't be interacted with
+    - This actually might not be necessary because of active layer (will be active group) concept in editor
     - More generally, add additional flag; instead of single checkbox for show/hide, two toggle options for show/hide and locked/unlocked
 - Actually sort objects by engine rendering logic
 - Create concept of "level linkages"
     - Rather than specifying all params for level relationships in pointer/transport traces, use some shared level linkage structure
     - For create/edit user should be able to drag levels graphically one over the other to align
+    - This idea may be scrapped as too much work, but I did add a thing for rendering the other image
 - Allow reload assets (maybe)
-- Allow saving levels directly (i.e. make a server)
-- Maybe only load engine code for editor and then run game code (to generate drop downs) on server
 - Auto-complete drop-downs instead of blank text fields
-- Allow grid snapping
 - Graphically present something like tileset (could be set of props) to user in level editor
 - Undo functionality, probably whole-sale saving state of editor
 
@@ -50,9 +39,6 @@ Let's call "Bodys" NPCs in this doc.
 
 - Events, particularly paths, ought to be easy to set up.
 - API should allow developer to easily specify an event where NPC moves through a series of positions.
-- Since we already have traces in the level editor, it would be cool to be able to make path traces.
-    - Path traces ought to be able to bind to positions (one-way or two-way?) so that the engine knows how to handle a call to move from one position to another.
-    - Positions ought to be able to bind to multiple paths, but there probably would never be a case to allow two different paths between the same two positions.
 - Traces could be more exposed to the developer.
     - Allow developer to access traces anytime?
     - Let developer define different traces and the behavior of loading them in?
