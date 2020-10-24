@@ -4,7 +4,7 @@ namespace splitTime.utils {
 
     splitTime.test.scenario(drawShapeTests, "Validate colors", t => {
         const color = new light.Color(255, 100, 1)
-        const colorString = color.toRgbaString()    
+        const colorString = color.toRgbaString()
         t.assert(light.Color.isValidColor(colorString), "Should be a valid color: 255, 100, 1")
         
         t.assert(!light.Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
@@ -27,8 +27,8 @@ namespace splitTime.utils {
 
         const target = new splitTime.Canvas(30, 30)
         const buffer = new splitTime.Canvas(target.width, target.height)
-        const color = new light.Color(255, 100, 1)        
-        
+        const color = new light.Color(255, 100, 1)
+
         drawShapeOpaque(points, target.context, buffer, color.toRgbaString())
 
         const outputData = target.context.getImageData(0, 0, target.width, target.height)

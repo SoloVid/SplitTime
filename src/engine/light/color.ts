@@ -1,7 +1,7 @@
 namespace splitTime.light {
 
-    //This is only used for color validation.  It will not be drawn.
-    var dummyContext: GenericCanvasRenderingContext2D
+    //This is only used for color validation. It will not be drawn.
+    var dummyContext: GenericCanvasRenderingContext2D | null = null
 
     export class Color {
         private cssColorString: string
@@ -40,11 +40,18 @@ namespace splitTime.light {
         }
 
         /**
-         * Creates a Color object from a string or RGB(A) values
-         * 
-         * @param args - either a string that can be evaluated as a color by CSS 
-         *                  or individual number values for r, g, b, and (optionally) a.
+         * Creates a Color object from RGB(A) values
          */
+        constructor(red: number,
+            green: number,
+            blue: number,
+            alpha?: number)
+        /**
+         * Creates a Color object from a string
+         * 
+         * @param args - a string that can be evaluated as a color by CSS 
+         */
+        constructor(colorString: string)
         constructor(...args: [
             red: number,
             green: number,
@@ -121,7 +128,7 @@ namespace splitTime.light {
          * @param colorString the string to evaluate in CSS
          */
         static stringToRgbaData(colorString: string): Uint8ClampedArray | null {
-            assert(!__NODE__, "Converting a string to RGBA data isn't available in Node.js")         
+            assert(!__NODE__, "Converting a string to RGBA data isn't available in Node.js")
             
             if (!dummyContext) {
                 //Initialize the dummy context the first time we validate a color
