@@ -88,7 +88,7 @@ namespace splitTime.editor.level {
         }
         const s = this.levelEditorShared.server
         const collageJson = await s.api.collageJson.fetch(s.withProject({ collageId: this.p.obj.collage }))
-        return splitTime.collage.makeCollageFromFile(collageJson)
+        return splitTime.collage.makeCollageFromFile(collageJson, true)
     }
 
     async function imgSrc(this: VueRenderedProposition): Promise<string> {
@@ -112,18 +112,7 @@ namespace splitTime.editor.level {
         }
         const x = this.p.obj.x
         const y = this.p.obj.y
-        const bodySpec = this.montage.bodySpec
-        const left = x - bodySpec.width / 2
-        const right = left + bodySpec.width
-        const top = y - bodySpec.depth / 2
-        const bottom = top + bodySpec.depth
-        const originalPoints = [
-            new Coordinates2D(left, top),
-            new Coordinates2D(right, top),
-            new Coordinates2D(left, bottom),
-            new Coordinates2D(right, bottom)
-        ]
-        const snappedMover = new client.GridSnapMover(this.levelEditorShared.gridCell, originalPoints)
+        const snappedMover = createSnapMontageMover(this.levelEditorShared.gridCell, this.montage.bodySpec, this.p.obj)
         this.levelEditorShared.follow({
             shift: (dx, dy) => {
                 snappedMover.applyDelta(dx, dy)

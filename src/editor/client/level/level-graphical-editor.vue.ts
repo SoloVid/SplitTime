@@ -8,14 +8,13 @@ namespace splitTime.editor.level {
         editorPadding: number
         sorter: EntitySortHelper
         // computed
-        allEntitiesSorted: (Position | Prop)[]
+        allEntitiesSorted: (Position | Prop | Trace)[]
         backgroundStyleObject: object
         level: Level
         inputs: client.UserInputs
         containerWidth: number
         containerHeight: number
         levelOffsetStyleObject: object
-        tracesSorted: Trace[]
         traceTransform: string
         // asyncComputed
         backgroundSrc: string
@@ -35,7 +34,7 @@ namespace splitTime.editor.level {
         }
     }
 
-    function allEntitiesSorted(this: VueLevelGraphicalEditor): (Position | Prop)[] {
+    function allEntitiesSorted(this: VueLevelGraphicalEditor): (Position | Prop | Trace)[] {
         return this.sorter.getSortedEntities()
     }
 
@@ -93,10 +92,6 @@ namespace splitTime.editor.level {
         }
     }
 
-    function tracesSorted(this: VueLevelGraphicalEditor): Trace[] {
-        return this.level.traces.sort((a, b) => a.obj.z - b.obj.z)
-    }
-
     function traceTransform(this: VueLevelGraphicalEditor): string {
         return "translate(" + EDITOR_PADDING + "," + EDITOR_PADDING + ")"
     }
@@ -105,20 +100,40 @@ namespace splitTime.editor.level {
         return this.levelEditorShared.server.imgSrc(this.level.background)
     }
 
+    function getBestEntityLocation(editor: VueLevelGraphicalEditor): Coordinates3D {
+        const group = getGroupByIndex(editor.level, editor.levelEditorShared.activeGroup)
+        var z = group.defaultZ
+        var x = editor.inputs.mouse.x
+        var y = editor.inputs.mouse.y + z
+        
+        const m = editor.levelEditorShared.selectedMontageObject
+        if (!m) {
+            return new Coordinates3D(x, y, z)
+        }
+        const LARGE_NUMBER = 999
+        const start = new Coordinates2D(-LARGE_NUMBER, -LARGE_NUMBER)
+        const dx = x - start.x
+        const dy = y - start.y
+        const snappedMover = createSnapMontageMover(editor.levelEditorShared.gridCell, m.body, start)
+        snappedMover.applyDelta(dx, dy)
+        const snapped = snappedMover.getSnappedDelta()
+        snapped.x += start.x
+        snapped.y += start.y
+        return new Coordinates3D(snapped.x, snapped.y, z)
+    }
+
     function createPosition(this: VueLevelGraphicalEditor) {
         const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
-        var z = group.defaultZ
-        var x = this.inputs.mouse.x
-        var y = this.inputs.mouse.y + z
+        const loc = getBestEntityLocation(this)
 
         var object = {
             id: "",
             group: group.id,
             collage: this.levelEditorShared.selectedCollage,
             montage: this.levelEditorShared.selectedMontage,
-            x: x,
-            y: y,
-            z: z,
+            x: loc.x,
+            y: loc.y,
+            z: loc.z,
             dir: this.levelEditorShared.selectedMontageDirection
         }
         const newThing = client.withMetadata<"position", splitTime.level.file_data.Position>("position", object)
@@ -128,18 +143,16 @@ namespace splitTime.editor.level {
     
     function createProp(this: VueLevelGraphicalEditor) {
         const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
-        var z = group.defaultZ
-        var x = this.inputs.mouse.x
-        var y = this.inputs.mouse.y + z
+        const loc = getBestEntityLocation(this)
         
         var object = {
             id: "",
             group: group.id,
             collage: this.levelEditorShared.selectedCollage,
             montage: this.levelEditorShared.selectedMontage,
-            x: x,
-            y: y,
-            z: z,
+            x: loc.x,
+            y: loc.y,
+            z: loc.z,
             dir: this.levelEditorShared.selectedMontageDirection,
             playerOcclusionFadeFactor: 0
         }
@@ -164,9 +177,11 @@ namespace splitTime.editor.level {
         const isLeftClick = event.which === 1
         const isRightClick = event.which === 3
         if(this.levelEditorShared.mode === "trace") {
+            const snappedX = Math.round(x / this.levelEditorShared.gridCell.x) * this.levelEditorShared.gridCell.x
+            const snappedY = Math.round(yInGroup / this.levelEditorShared.gridCell.y) * this.levelEditorShared.gridCell.y
             var literalPoint = "(" +
-                Math.floor(x) + ", " +
-                Math.floor(yInGroup) + ")"
+                Math.floor(snappedX) + ", " +
+                Math.floor(snappedY) + ")"
             var closestPosition = findClosestPosition(this.level, this.inputs.mouse.x, yInGroup)
             var positionPoint = closestPosition ? "(pos:" + closestPosition.obj.id + ")" : ""
             const pathInProgress = this.levelEditorShared.pathInProgress
@@ -240,7 +255,6 @@ namespace splitTime.editor.level {
             containerWidth,
             containerHeight,
             levelOffsetStyleObject,
-            tracesSorted,
             traceTransform
         },
         asyncComputed: {
@@ -268,27 +282,32 @@ namespace splitTime.editor.level {
     <div
         v-for="entity in allEntitiesSorted"
         :key="entity.metadata.editorId"
-        class="proposition-container"
-        :style="levelOffsetStyleObject"
+        class="entity"
     >
-        <rendered-proposition
-            class="entity.type"
-            :level-editor-shared="levelEditorShared"
-            :p="entity"
-        ></rendered-proposition>
+        <div
+            v-if="entity.type === 'prop' || entity.type === 'position'"
+            class="proposition-container"
+            :style="levelOffsetStyleObject"
+        >
+            <rendered-proposition
+                class="entity.type"
+                :level-editor-shared="levelEditorShared"
+                :p="entity"
+            ></rendered-proposition>
+        </div>
+        <svg
+            v-if="entity.type === 'trace'"
+            :style="{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', 'pointer-events': 'none' }"
+            class="trace-svg"
+        >
+            <rendered-trace
+                :transform="traceTransform"
+                :level-editor-shared="levelEditorShared"
+                :metadata="entity.metadata"
+                :trace="entity.obj"
+            ></rendered-trace>
+        </svg>
     </div>
-    <svg
-        :style="{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', 'pointer-events': 'none' }"
-        class="trace-svg"
-    >
-        <rendered-trace v-for="trace in tracesSorted"
-            :key="trace.metadata.editorId"
-            :transform="traceTransform"
-            :level-editor-shared="levelEditorShared"
-            :metadata="trace.metadata"
-            :trace="trace.obj"
-        ></rendered-trace>
-    </svg>
 
     <grid-lines
         v-if="levelEditorShared.gridEnabled"

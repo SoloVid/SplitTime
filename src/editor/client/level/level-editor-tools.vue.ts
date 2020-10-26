@@ -29,6 +29,7 @@ namespace splitTime.editor.level {
             this._montage = montage
             this.levelEditorShared.selectedMontage = montage.id
             this.levelEditorShared.selectedMontageDirection = montage.direction
+            this.levelEditorShared.selectedMontageObject = montage
         }
     }
 

@@ -199,4 +199,20 @@ namespace splitTime.editor.level {
         }
         return placeholderImageUrl
     }
+
+    export function createSnapMontageMover(gridCell: Vector2D, bodySpec: file.collage.BodySpec, coords: Coordinates2D): client.GridSnapMover {
+        const x = coords.x
+        const y = coords.y
+        const left = x - bodySpec.width / 2
+        const right = left + bodySpec.width
+        const top = y - bodySpec.depth / 2
+        const bottom = top + bodySpec.depth
+        const originalPoints = [
+            new Coordinates2D(left, top),
+            new Coordinates2D(right, top),
+            new Coordinates2D(left, bottom),
+            new Coordinates2D(right, bottom)
+        ]
+        return new client.GridSnapMover(gridCell, originalPoints)
+    }
 }

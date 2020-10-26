@@ -69,7 +69,8 @@ namespace splitTime.editor.collage {
             @mousedown="selectFrame(frame, $event)"
         >
             <montage-frame
-                :collage-editor-shared="collageEditorShared"
+                :collage-edit-helper="collageEditorShared"
+                :collage-view-helper="collageEditorShared"
                 :montage="montage"
                 :montage-frame="frame"
                 :edit-affects-all-frames="false"

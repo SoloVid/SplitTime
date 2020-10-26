@@ -17,11 +17,14 @@ namespace splitTime.editor.level {
         if (this.level.groups.length > 0) {
             defaultHeight = this.level.groups[this.level.groups.length - 1].obj.defaultHeight
         }
-        this.level.groups.push(client.withMetadata("group", {
+        const group = {
             id: "Group " + this.level.groups.length,
             defaultZ: 0,
             defaultHeight: defaultHeight
-        }))
+        }
+        this.level.groups.push(client.withMetadata("group", group))
+        const wrapper = new GroupWrapper(group, this.level)
+        this.levelEditorShared.propertiesPaneStuff = getGroupPropertiesStuff(wrapper)
     }
 
     Vue.component("level-tree", {

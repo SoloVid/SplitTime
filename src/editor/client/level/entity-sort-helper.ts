@@ -7,13 +7,23 @@ namespace splitTime.editor.level {
 
         constructor(private readonly level: Level) {}
 
-        getSortedEntities(): (Position | Prop)[] {
-            let entities: (Position | Prop)[] = []
+        getSortedEntities(): (Position | Prop | Trace)[] {
+            let entities: (Position | Prop | Trace)[] = []
             entities = entities.concat(this.level.positions)
             entities = entities.concat(this.level.props)
+            entities = entities.concat(this.level.traces)
             entities.sort((a, b) => {
                 if (a.obj.z !== b.obj.z) {
                     return a.obj.z - b.obj.z
+                }
+                if (a.type === "trace" && b.type === "trace") {
+                    return a.obj.height - b.obj.height
+                } else if (a.type === "trace") {
+                    // FTODO: Can we do better here?
+                    return a.obj.height - DEFAULT_HEIGHT
+                } else if (b.type === "trace") {
+                    // FTODO: Can we do better here?
+                    return b.obj.height - DEFAULT_HEIGHT
                 }
                 return a.obj.y - b.obj.y
             })

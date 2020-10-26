@@ -21,6 +21,7 @@ namespace splitTime.editor.level {
         selectedCollage: string
         selectedMontage: string
         selectedMontageDirection: string
+        selectedMontageObject: file.collage.Montage | null
         readonly server: client.ServerLiaison
         readonly time: game_seconds
         follow(follower: client.Followable): void

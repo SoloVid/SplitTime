@@ -5,6 +5,7 @@ namespace splitTime.editor.level {
         selectedCollage: string = ""
         selectedMontage: string = ""
         selectedMontageDirection: string = ""
+        selectedMontageObject: file.collage.Montage | null = null
         selectedTraceType: string = trace.Type.SOLID
         pathInProgress: splitTime.level.file_data.Trace | null = null
         readonly info = {}
