@@ -88,6 +88,7 @@ namespace splitTime.file {
                     }),
                     traces: type.array(type.object({
                         id: type.string,
+                        group: type.string,
                         type: type.string,
                         vertices: type.string,
                         z: type.number,

@@ -1,18 +1,17 @@
 namespace splitTime.editor.level {
-    interface VueMenuLayer {
+    interface VueMenuGroup {
         // props
         levelEditorShared: LevelEditorShared
         level: Level
-        layer: Layer
+        group: Group | undefined
         index: number
         // data
         collapsed: boolean
         // computed
-        layerAboveZ: number
-        layerHeight: number
         traces: Trace[]
         props: Prop[]
         positions: Position[]
+        allDisplayed: boolean
         allTracesDisplayed: boolean
         allPropsDisplayed: boolean
         allPositionsDisplayed: boolean
@@ -26,95 +25,101 @@ namespace splitTime.editor.level {
         toggleAllPositionsDisplayed(): void
     }
 
-    function data(this: VueMenuLayer): Partial<VueMenuLayer> {
+    function data(this: VueMenuGroup): Partial<VueMenuGroup> {
         return {
             collapsed: true
         }
     }
 
-    function layerAboveZ(this: VueMenuLayer): number {
-        var layerAbove = this.level.layers[this.index + 1]
-        return layerAbove ? layerAbove.obj.z : Number.MAX_VALUE
+    function traces(this: VueMenuGroup): Trace[] {
+        return this.level.traces.filter(trace => inGroup(this.level, this.index, trace.obj))
     }
-    function layerHeight(this: VueMenuLayer): number {
-        return this.layerAboveZ - this.layer.obj.z
+    function props(this: VueMenuGroup): Prop[] {
+        return this.level.props.filter(prop => inGroup(this.level, this.index, prop.obj))
     }
-    function traces(this: VueMenuLayer): Trace[] {
-        return this.level.traces.filter(trace => {
-            return trace.obj.z >= this.layer.obj.z && trace.obj.z < this.layerAboveZ
-        })
+    function positions(this: VueMenuGroup): Position[] {
+        return this.level.positions.filter(pos => inGroup(this.level, this.index, pos.obj))
     }
-    function props(this: VueMenuLayer): Prop[] {
-        return this.level.props.filter(prop => {
-            return prop.obj.z >= this.layer.obj.z && prop.obj.z < this.layerAboveZ
-        })
+    function allDisplayed(this: VueMenuGroup): boolean {
+        return this.allTracesDisplayed && this.allPropsDisplayed && this.allPositionsDisplayed
     }
-    function positions(this: VueMenuLayer): Position[] {
-        return this.level.positions.filter(pos => {
-            return pos.obj.z >= this.layer.obj.z && pos.obj.z < this.layerAboveZ
-        })
-    }
-    function allTracesDisplayed(this: VueMenuLayer): boolean {
+    function allTracesDisplayed(this: VueMenuGroup): boolean {
         return this.traces.every(trace => {
             return trace.metadata.displayed
         })
     }
-    function allPropsDisplayed(this: VueMenuLayer): boolean {
+    function allPropsDisplayed(this: VueMenuGroup): boolean {
         return this.props.every(prop => {
             return prop.metadata.displayed
         })
     }
-    function allPositionsDisplayed(this: VueMenuLayer): boolean {
+    function allPositionsDisplayed(this: VueMenuGroup): boolean {
         return this.positions.every(pos => {
             return pos.metadata.displayed
         })
     }
 
-    function edit(this: VueMenuLayer): void {
-        this.levelEditorShared.propertiesPaneStuff = getLayerPropertiesStuff(this.layer)
+    function edit(this: VueMenuGroup): void {
+        if (!this.group) {
+            log.debug("Group can't be edited because it is default")
+            return
+        }
+        const wrapper = new GroupWrapper(this.group.obj, this.level)
+        this.levelEditorShared.propertiesPaneStuff = getGroupPropertiesStuff(wrapper)
     }
-    function editTrace(this: VueMenuLayer, trace: Trace): void {
+    function editTrace(this: VueMenuGroup, trace: Trace): void {
         this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace.obj)
     }
-    function editProp(this: VueMenuLayer, prop: Prop): void {
+    function editProp(this: VueMenuGroup, prop: Prop): void {
         this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(prop.obj)
     }
-    function editPosition(this: VueMenuLayer, position: Position): void {
+    function editPosition(this: VueMenuGroup, position: Position): void {
         this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(position.obj)
     }
-    function toggleAllTracesDisplayed(this: VueMenuLayer): void {
+    function toggleAllDisplayed(this: VueMenuGroup): void {
+        const displayed = this.allDisplayed
+        this.traces.forEach(trace => {
+            trace.metadata.displayed = !displayed
+        })
+        this.props.forEach(prop => {
+            prop.metadata.displayed = !displayed
+        })
+        this.positions.forEach(pos => {
+            pos.metadata.displayed = !displayed
+        })
+    }
+    function toggleAllTracesDisplayed(this: VueMenuGroup): void {
         var displayed = this.allTracesDisplayed
         this.traces.forEach(trace => {
             trace.metadata.displayed = !displayed
         })
     }
-    function toggleAllPropsDisplayed(this: VueMenuLayer): void {
+    function toggleAllPropsDisplayed(this: VueMenuGroup): void {
         var displayed = this.allPropsDisplayed
         this.props.forEach(prop => {
             prop.metadata.displayed = !displayed
         })
     }
-    function toggleAllPositionsDisplayed(this: VueMenuLayer): void {
+    function toggleAllPositionsDisplayed(this: VueMenuGroup): void {
         var displayed = this.allPositionsDisplayed
         this.positions.forEach(pos => {
             pos.metadata.displayed = !displayed
         })
     }
 
-    Vue.component("menu-layer", {
+    Vue.component("menu-group", {
         props: {
             levelEditorShared: Object,
             level: Object,
-            layer: Object,
+            group: Object,
             index: Number
         },
         data,
         computed: {
-            layerAboveZ,
-            layerHeight,
             traces,
             props,
             positions,
+            allDisplayed,
             allTracesDisplayed,
             allPropsDisplayed,
             allPositionsDisplayed
@@ -124,6 +129,7 @@ namespace splitTime.editor.level {
             editTrace,
             editProp,
             editPosition,
+            toggleAllDisplayed,
             toggleAllTracesDisplayed,
             toggleAllPropsDisplayed,
             toggleAllPositionsDisplayed
@@ -134,11 +140,19 @@ namespace splitTime.editor.level {
         <i v-if="collapsed" class="fas fa-chevron-right"></i>
         <i v-if="!collapsed" class="fas fa-chevron-down"></i>
     </span>
-    <input type="checkbox" v-model="layer.metadata.displayed"/>
-    <strong @click="edit" class="pointer">
-        <span v-show="!layer.obj.id">Layer {{ index }}</span>
-        <span v-show="layer.obj.id">{{layer.obj.id}}</span>
-    </strong>
+    <input type="checkbox"
+        :checked="allDisplayed"
+        @click.left="toggleAllDisplayed"
+    />
+    <template v-if="!!group">
+        <strong @click="edit" class="pointer">
+            <span v-show="!group.obj.id">Group {{ index }}</span>
+            <span v-show="group.obj.id">{{group.obj.id}}</span>
+        </strong>
+    </template>
+    <template v-if="!group">
+        <strong><em>Homeless</em></strong>
+    </template>
     <div v-show="!collapsed" class="indent">
         <div v-show="traces.length > 0">
             <div>

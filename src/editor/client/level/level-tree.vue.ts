@@ -5,27 +5,22 @@ namespace splitTime.editor.level {
         // computed
         level: Level
         // methods
-        createLayer(): void
+        createGroup(): void
     }
 
     function level(this: VueLevelTree): Level {
         return this.levelEditorShared.level
     }
 
-    function createLayer(this: VueLevelTree): void {
-        const level = this.level
-        var assumedRelativeZ = DEFAULT_HEIGHT
-        if(level.layers.length > 1) {
-            assumedRelativeZ = Math.abs(level.layers[1].obj.z - level.layers[0].obj.z)
+    function createGroup(this: VueLevelTree): void {
+        let defaultHeight = DEFAULT_HEIGHT
+        if (this.level.groups.length > 0) {
+            defaultHeight = this.level.groups[this.level.groups.length - 1].obj.defaultHeight
         }
-        var z = 0
-        if(level.layers.length > 0) {
-            var previousLayer = level.layers[level.layers.length - 1]
-            z = previousLayer.obj.z + assumedRelativeZ
-        }
-        level.layers.push(client.withMetadata("layer", {
-            id: "",
-            z: z
+        this.level.groups.push(client.withMetadata("group", {
+            id: "Group " + this.level.groups.length,
+            defaultZ: 0,
+            defaultHeight: defaultHeight
         }))
     }
 
@@ -41,21 +36,36 @@ namespace splitTime.editor.level {
             level
         },
         methods: {
-            createLayer
+            createGroup
         },
         template: `
-<div>
-    <div>
-        <menu-layer
-                v-for="(layer, index) in levelEditorShared.level.layers"
-                :key="index"
-                :level-editor-shared="levelEditorShared"
-                :level="level"
-                :layer="layer"
-                :index="index"
-        ></menu-layer>
-    </div>
-    <div class="option" v-on:click.left="createLayer">Add Layer</div>
+<div class="level-tree">
+    <label>
+        Active Group:
+        <select class="active-group block" v-model="levelEditorShared.activeGroup">
+            <option
+                v-for="(group, index) in levelEditorShared.level.groups"
+                :value="index"
+            >{{ group.id || ("Group " + index) }}</option>
+            <option value="-1">Homeless</option>
+        </select>
+    </label>
+    <hr/>
+    <menu-group
+            v-for="(group, index) in levelEditorShared.level.groups"
+            :key="index"
+            :level-editor-shared="levelEditorShared"
+            :level="level"
+            :group="group"
+            :index="index"
+    ></menu-group>
+    <menu-group
+            :level-editor-shared="levelEditorShared"
+            :level="level"
+            :index="-1"
+            class="catch-all-group"
+    ></menu-group>
+    <div class="option" v-on:click.left="createGroup">Add Group</div>
 </div>
         `
     })

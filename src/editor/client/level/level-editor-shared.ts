@@ -1,6 +1,6 @@
 namespace splitTime.editor.level {
     export class SharedStuff implements LevelEditorShared {
-        activeLayer: int = 0
+        activeGroup: int = 0
         mode: Mode = "trace"
         selectedCollage: string = ""
         selectedMontage: string = ""

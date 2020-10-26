@@ -6,13 +6,17 @@ namespace splitTime.editor.level {
         // data
         cancelNextContextMenu: boolean
         editorPadding: number
+        sorter: EntitySortHelper
         // computed
+        allEntitiesSorted: (Position | Prop)[]
+        backgroundStyleObject: object
         level: Level
         inputs: client.UserInputs
         containerWidth: number
         containerHeight: number
-        leftPadding: number
-        topPadding: number
+        levelOffsetStyleObject: object
+        tracesSorted: Trace[]
+        traceTransform: string
         // asyncComputed
         backgroundSrc: string
         // methods
@@ -26,7 +30,22 @@ namespace splitTime.editor.level {
     function data(this: VueLevelGraphicalEditor): Partial<VueLevelGraphicalEditor> {
         return {
             cancelNextContextMenu: false,
-            editorPadding: EDITOR_PADDING
+            editorPadding: EDITOR_PADDING,
+            sorter: new EntitySortHelper(this.levelEditorShared.level)
+        }
+    }
+
+    function allEntitiesSorted(this: VueLevelGraphicalEditor): (Position | Prop)[] {
+        return this.sorter.getSortedEntities()
+    }
+
+    function backgroundStyleObject(this: VueLevelGraphicalEditor): object {
+        const leftPadding = EDITOR_PADDING + this.level.backgroundOffsetX
+        const topPadding = EDITOR_PADDING + this.level.backgroundOffsetY
+        return {
+            position: 'absolute',
+            left: leftPadding + 'px',
+            top: topPadding + 'px'
         }
     }
 
@@ -62,14 +81,24 @@ namespace splitTime.editor.level {
         return this.level.width + 2*EDITOR_PADDING
     }
     function containerHeight(this: VueLevelGraphicalEditor): number {
-        var addedHeight = this.level.layers.length > 0 ? this.level.layers[this.level.layers.length - 1].obj.z : 0
+        var addedHeight = this.level.groups.length > 0 ? this.level.groups[this.level.groups.length - 1].obj.defaultZ : 0
         return this.level.height + 2*EDITOR_PADDING + addedHeight
     }
-    function leftPadding(this: VueLevelGraphicalEditor): number {
-        return EDITOR_PADDING + this.level.backgroundOffsetX
+
+    function levelOffsetStyleObject(this: VueLevelGraphicalEditor): object {
+        return {
+            position: 'absolute',
+            left: EDITOR_PADDING + 'px',
+            top: EDITOR_PADDING + 'px'
+        }
     }
-    function topPadding(this: VueLevelGraphicalEditor): number {
-        return EDITOR_PADDING + this.level.backgroundOffsetY
+
+    function tracesSorted(this: VueLevelGraphicalEditor): Trace[] {
+        return this.level.traces.sort((a, b) => a.obj.z - b.obj.z)
+    }
+
+    function traceTransform(this: VueLevelGraphicalEditor): string {
+        return "translate(" + EDITOR_PADDING + "," + EDITOR_PADDING + ")"
     }
 
     function backgroundSrc(this: VueLevelGraphicalEditor): PromiseLike<string> {
@@ -77,13 +106,14 @@ namespace splitTime.editor.level {
     }
 
     function createPosition(this: VueLevelGraphicalEditor) {
-        var layerIndex = this.levelEditorShared.activeLayer
-        var z = this.level.layers[layerIndex].obj.z
+        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        var z = group.defaultZ
         var x = this.inputs.mouse.x
         var y = this.inputs.mouse.y + z
 
         var object = {
             id: "",
+            group: group.id,
             collage: this.levelEditorShared.selectedCollage,
             montage: this.levelEditorShared.selectedMontage,
             x: x,
@@ -97,13 +127,14 @@ namespace splitTime.editor.level {
     }
     
     function createProp(this: VueLevelGraphicalEditor) {
-        var layerIndex = this.levelEditorShared.activeLayer
-        var z = this.level.layers[layerIndex].obj.z
+        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        var z = group.defaultZ
         var x = this.inputs.mouse.x
         var y = this.inputs.mouse.y + z
         
         var object = {
             id: "",
+            group: group.id,
             collage: this.levelEditorShared.selectedCollage,
             montage: this.levelEditorShared.selectedMontage,
             x: x,
@@ -126,16 +157,17 @@ namespace splitTime.editor.level {
     }
 
     function handleMouseUp(this: VueLevelGraphicalEditor, event: MouseEvent): void {
-        const z = this.level.layers[this.levelEditorShared.activeLayer].obj.z
-        const yOnLayer = this.inputs.mouse.y + z
+        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        const z = group.defaultZ
+        const yInGroup = this.inputs.mouse.y + z
         const x = this.inputs.mouse.x
         const isLeftClick = event.which === 1
         const isRightClick = event.which === 3
         if(this.levelEditorShared.mode === "trace") {
             var literalPoint = "(" +
                 Math.floor(x) + ", " +
-                Math.floor(yOnLayer) + ")"
-            var closestPosition = findClosestPosition(this.level, this.inputs.mouse.x, yOnLayer)
+                Math.floor(yInGroup) + ")"
+            var closestPosition = findClosestPosition(this.level, this.inputs.mouse.x, yInGroup)
             var positionPoint = closestPosition ? "(pos:" + closestPosition.obj.id + ")" : ""
             const pathInProgress = this.levelEditorShared.pathInProgress
             if(isLeftClick) {
@@ -148,7 +180,7 @@ namespace splitTime.editor.level {
                 }
             } else if(isRightClick) {
                 if(!pathInProgress) {
-                    var trace = addNewTrace(this.level, this.levelEditorShared.activeLayer, this.levelEditorShared.selectedTraceType)
+                    var trace = addNewTrace(this.level, this.levelEditorShared.activeGroup, this.levelEditorShared.selectedTraceType)
                     
                     if(this.levelEditorShared.selectedTraceType == splitTime.trace.Type.PATH && !this.inputs.ctrlDown) {
                         trace.obj.vertices = positionPoint
@@ -187,12 +219,11 @@ namespace splitTime.editor.level {
     }
 
     function handleMouseMove(this: VueLevelGraphicalEditor, event: MouseEvent): void {
-        const layerIndex = this.levelEditorShared.activeLayer
-        const layer = this.level.layers[layerIndex]
-        const layerZ = layer ? layer.obj.z : 0
+        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        const groupZ = group ? group.defaultZ : 0
         Vue.set(this.levelEditorShared.info, "x", this.inputs.mouse.x)
-        Vue.set(this.levelEditorShared.info, "y", this.inputs.mouse.y + layerZ)
-        Vue.set(this.levelEditorShared.info, "z", layerZ)
+        Vue.set(this.levelEditorShared.info, "y", this.inputs.mouse.y + groupZ)
+        Vue.set(this.levelEditorShared.info, "z", groupZ)
     }
 
     Vue.component("level-graphical-editor", {
@@ -202,12 +233,15 @@ namespace splitTime.editor.level {
         },
         data,
         computed: {
+            allEntitiesSorted,
+            backgroundStyleObject,
             level,
             inputs,
             containerWidth,
             containerHeight,
-            leftPadding,
-            topPadding
+            levelOffsetStyleObject,
+            tracesSorted,
+            traceTransform
         },
         asyncComputed: {
             backgroundSrc
@@ -229,18 +263,33 @@ namespace splitTime.editor.level {
     @dblclick.prevent
     @dragstart.prevent
 >
-    <img v-if="!!backgroundSrc" class="background" :src="backgroundSrc" :style="{ position: 'absolute', left: leftPadding + 'px', top: topPadding + 'px' }"/>
-    <rendered-layer
-            v-for="(layer, layerIndex) in level.layers"
-            :key="layer.metadata.editorId"
+    <img v-if="!!backgroundSrc" class="background" :src="backgroundSrc" :style="backgroundStyleObject"/>
+    
+    <div
+        v-for="entity in allEntitiesSorted"
+        :key="entity.metadata.editorId"
+        class="proposition-container"
+        :style="levelOffsetStyleObject"
+    >
+        <rendered-proposition
+            class="entity.type"
             :level-editor-shared="levelEditorShared"
-            :level="level"
-            :layer="layer"
-            :index="layerIndex"
-            :width="level.width"
-            :height="level.height"
-            :is-active="layerIndex === levelEditorShared.activeLayer"
-    ></rendered-layer>
+            :p="entity"
+        ></rendered-proposition>
+    </div>
+    <svg
+        :style="{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', 'pointer-events': 'none' }"
+        class="trace-svg"
+    >
+        <rendered-trace v-for="trace in tracesSorted"
+            :key="trace.metadata.editorId"
+            :transform="traceTransform"
+            :level-editor-shared="levelEditorShared"
+            :metadata="trace.metadata"
+            :trace="trace.obj"
+        ></rendered-trace>
+    </svg>
+
     <grid-lines
         v-if="levelEditorShared.gridEnabled"
         :grid-cell="levelEditorShared.gridCell"

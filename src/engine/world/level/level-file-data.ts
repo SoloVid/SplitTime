@@ -7,7 +7,7 @@ namespace splitTime.level {
         background: string
         backgroundOffsetX: int
         backgroundOffsetY: int
-        layers: file_data.Layer[]
+        groups: file_data.Group[]
         traces: file_data.Trace[]
         props: file_data.Prop[]
         positions: file_data.Position[]
@@ -17,13 +17,15 @@ namespace splitTime.level {
     let testFileDataJsonable: file.IsJsonable<FileData, false> = {} as FileData
 
     export namespace file_data {
-        export interface Layer {
+        export interface Group {
             id: string
-            z: number
+            defaultZ: number
+            defaultHeight: number
         }
 
         export interface Trace {
             id: string
+            group: string
             type: string
             vertices: string
             z: number
@@ -38,6 +40,7 @@ namespace splitTime.level {
 
         export interface Prop {
             id: string
+            group: string
             collage: string
             montage: string
             x: number
@@ -50,6 +53,7 @@ namespace splitTime.level {
 
         export interface Position {
             id: string
+            group: string
             collage: string
             montage: string
             x: number
@@ -69,12 +73,14 @@ namespace splitTime.level {
                 background: type.string,
                 backgroundOffsetX: type.int,
                 backgroundOffsetY: type.int,
-                layers: type.array(type.object({
+                groups: type.array(type.object({
                     id: type.string,
-                    z: type.number
+                    defaultZ: type.number,
+                    defaultHeight: type.number
                 })),
                 traces: type.array(type.object({
                     id: type.string,
+                    group: type.string,
                     type: type.string,
                     vertices: type.string,
                     z: type.number,
@@ -88,6 +94,7 @@ namespace splitTime.level {
                 })),
                 props: type.array(type.object({
                     id: type.string,
+                    group: type.string,
                     collage: type.string,
                     montage: type.string,
                     x: type.number,
@@ -98,6 +105,7 @@ namespace splitTime.level {
                 })),
                 positions: type.array(type.object({
                     id: type.string,
+                    group: type.string,
                     collage: type.string,
                     montage: type.string,
                     x: type.number,

@@ -3,13 +3,16 @@ namespace splitTime.editor.level {
         // props
         levelEditorShared: LevelEditorShared
         metadata: client.EditorMetadata
+        offset: Coordinates2D
         trace: splitTime.level.file_data.Trace
         // data
         uid: string
         // computed
+        acceptMouse: boolean
         hasClose: boolean
         height: number
         vertices: Coordinates3D[]
+        mousableStyle: object
         pointsArray: (Readonly<Coordinates2D> | null)[]
         points: string
         pointsShadow: string
@@ -26,6 +29,10 @@ namespace splitTime.editor.level {
         // methods
         track(point: Coordinates2D): void
         toggleHighlight(highlight: boolean): void
+    }
+
+    function acceptMouse(this: VueRenderedTrace): boolean {
+        return inGroup(this.levelEditorShared.level, this.levelEditorShared.activeGroup, this.trace)
     }
 
     function hasClose(this: VueRenderedTrace): boolean {
@@ -47,6 +54,12 @@ namespace splitTime.editor.level {
                 z: this.trace.z
             }
         })
+    }
+
+    function mousableStyle(this: VueRenderedTrace): object {
+        return {
+            "pointer-events": this.acceptMouse ? "initial" : "none"
+        }
     }
 
     function pointsArray(this: VueRenderedTrace): (Readonly<Coordinates2D> | null)[] {
@@ -216,9 +229,11 @@ namespace splitTime.editor.level {
             }
         },
         computed: {
+            acceptMouse,
             hasClose,
             height,
             vertices,
+            mousableStyle,
             pointsArray,
             points,
             pointsShadow,
@@ -274,48 +289,51 @@ namespace splitTime.editor.level {
     </defs>
     <!-- Base outline and fill -->
     <polyline
-            v-show="metadata.displayed"
-            v-on:dblclick.prevent
-            v-on:mousedown.left="track(null)"
-            v-on:mouseenter="toggleHighlight(true)"
-            v-on:mouseleave="toggleHighlight(false)"
-            :points="points"
-            :stroke="traceStroke"
-            :fill="traceFill"
+        :style="mousableStyle"
+        v-show="metadata.displayed"
+        v-on:dblclick.prevent
+        v-on:mousedown.left="track(null)"
+        v-on:mouseenter="toggleHighlight(true)"
+        v-on:mouseleave="toggleHighlight(false)"
+        :points="points"
+        :stroke="traceStroke"
+        :fill="traceFill"
     ></polyline>
     <!-- Points/vertices -->
     <circle
-            class="hoverable"
-            v-for="(vertex) in vertices"
-            :cx="vertex.x"
-            :cy="vertex.y - vertex.z"
-            r="3"
-            v-on:mousedown.left="track(vertex)"
+        :style="mousableStyle"
+        v-show="metadata.displayed"
+        class="hoverable"
+        v-for="(vertex) in vertices"
+        :cx="vertex.x"
+        :cy="vertex.y - vertex.z"
+        r="3"
+        v-on:mousedown.left="track(vertex)"
     />
     <!-- Outline for ramp/slope part of stairs; adds more of a 3D look -->
     <polyline
-            v-show="metadata.displayed"
-            :points="pointsStairsSlope"
-            stroke="red" stroke-width="5" fill="none"
-            v-if="pointsStairsSlope"
-            style="pointer-events: none;"
+        v-show="metadata.displayed"
+        :points="pointsStairsSlope"
+        stroke="red" stroke-width="5" fill="none"
+        v-if="pointsStairsSlope"
+        style="pointer-events: none;"
     ></polyline>
     <!-- Up-arrows fill pattern on ramp/slope plus additional dashed outline on top of the previous -->
     <polyline
-            v-show="metadata.displayed"
-            :points="pointsStairsSlope"
-            stroke="black" stroke-width="2" stroke-dasharray="10,5" :fill="'url(#up-arrows-pattern)'"
-            v-if="pointsStairsSlope"
-            style="pointer-events: none;"
+        v-show="metadata.displayed"
+        :points="pointsStairsSlope"
+        stroke="black" stroke-width="2" stroke-dasharray="10,5" :fill="'url(#up-arrows-pattern)'"
+        v-if="pointsStairsSlope"
+        style="pointer-events: none;"
     ></polyline>
     <!-- Outline and fill for the top (z-axis/height) face area of the trace's volume -->
     <polyline
-            v-show="metadata.displayed"
-            :points="pointsShadow"
-            :fill="traceShadowFill"
-            :stroke="traceShadowStroke"
-            v-if="traceShadowDisplayed"
-            style="pointer-events: none;"
+        v-show="metadata.displayed"
+        :points="pointsShadow"
+        :fill="traceShadowFill"
+        :stroke="traceShadowStroke"
+        v-if="traceShadowDisplayed"
+        style="pointer-events: none;"
     ></polyline>
 </g>
         `

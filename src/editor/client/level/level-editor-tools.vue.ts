@@ -105,42 +105,22 @@ namespace splitTime.editor.level {
             },
             template: `
 <div>
-    <label>
-        Active Layer:
-        <select class="active-layer block" v-model="levelEditorShared.activeLayer">
-            <option
-                v-for="(layer, index) in levelEditorShared.level.layers"
-                :value="index"
-            >{{ layer.id || ("Layer " + index) }}</option>
-        </select>
-    </label>
-    <hr/>
     <div style="display: flex; flex-flow: row; justify-content: center;">
         <div :class="{ option: true, active: mode === 'trace' }"
             @click="selectModeOption('trace')"
-            title="Traces define areas of interaction within the level.
-            &#013;&#013;
-            Right-click to create new.&#013;Left-click to add points to started trace.&#013;
-            Right-click to close trace (and fill in), or shift+right-click to end trace without filling in.&#013;
-            Left-click to drag.&#013;Shift+left-click to clone."
+            title="Trace"
         >
             <i class="fas fa-${TRACE_ICON}"></i>
         </div>
         <div :class="{ option: true, active: mode === 'prop' }"
             @click="selectModeOption('prop')"
-            title="Props are loaded on level entrance and are destroyed on level exit.
-            &#013;
-            Props are generally static (or animated) graphical elements bodies can walk behind or in front of.
-            &#013;
-            Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone."
+            title="Prop"
         >
             <i class="fas fa-${PROP_ICON}"></i>
         </div>
         <div :class="{ option: true, active: mode === 'position' }"
             @click="selectModeOption('position')"
-            title="Positions are handles for locations that bodies may occupy or paths may lead to and from.
-            &#013;&#013;
-            Right-click to create new.&#013;Left-click to drag.&#013;Shift+left-click to clone."
+            title="Position"
         >
             <i class="fas fa-${POSITION_ICON}"></i>
         </div>

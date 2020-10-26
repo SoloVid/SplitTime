@@ -11,7 +11,7 @@ namespace splitTime.editor.client {
         {
             type: splitTime.trace.Type.STAIRS,
             color: "rgba(0, 200, 0, .7)",
-            help: "Solid trace slope up to the next layer"
+            help: "Wedge-shaped solid trace (direction determines from bottom to top)"
         },
         {
             type: splitTime.trace.Type.GROUND,

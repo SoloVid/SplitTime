@@ -16,15 +16,16 @@ namespace splitTime.editor.level {
         }
     }
 
-    export function getLayerPropertiesStuff(layer: Layer): client.ObjectProperties {
+    export function getGroupPropertiesStuff(group: splitTime.level.file_data.Group): client.ObjectProperties {
         const fields = {
             id: {},
-            z: {}
+            defaultZ: {},
+            defaultHeight: {}
         }
-        type SimplifiedLayer = { [K in keyof Required<typeof fields>]: string | number }
+        type SimplifiedGroup = { [K in keyof Required<typeof fields>]: string | number }
         return {
-            title: "Layer Properties",
-            thing: layer.obj as SimplifiedLayer,
+            title: "Group Properties",
+            thing: group as SimplifiedGroup,
             fields
         }
     }
@@ -32,6 +33,7 @@ namespace splitTime.editor.level {
     export function getPropPropertiesStuff(prop: splitTime.level.file_data.Prop): client.ObjectProperties {
         const fields = {
             id: {},
+            group: {},
             collage: {},
             montage: {},
             x: {},
@@ -51,6 +53,7 @@ namespace splitTime.editor.level {
     export function getPositionPropertiesStuff(position: splitTime.level.file_data.Position): client.ObjectProperties {
         const fields = {
             id: {},
+            group: {},
             collage: {},
             montage: {},
             x: {},
@@ -69,6 +72,7 @@ namespace splitTime.editor.level {
     export function getTracePropertiesStuff(trace: splitTime.level.file_data.Trace): client.ObjectProperties {
         interface TraceFieldOptions {
             id: client.FieldOptions
+            group: client.FieldOptions
             type: client.FieldOptions
             vertices: client.FieldOptions
             z: client.FieldOptions
@@ -82,6 +86,7 @@ namespace splitTime.editor.level {
         }
         let fields: TraceFieldOptions = {
             id: {},
+            group: {},
             type: {
                 readonly: true
             },

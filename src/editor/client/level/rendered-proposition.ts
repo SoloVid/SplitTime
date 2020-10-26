@@ -68,6 +68,7 @@ namespace splitTime.editor.level {
     }
 
     function styleObject(this: VueRenderedProposition): object {
+        const level = this.levelEditorShared.level
         return {
             outline: this.p.metadata.highlighted ? "2px solid yellow" : "",
             backgroundColor: this.p.metadata.highlighted ? "yellow" : "initial",
@@ -76,7 +77,8 @@ namespace splitTime.editor.level {
             left: this.positionLeft + 'px',
             top: this.positionTop + 'px',
             width: this.frame.box.width + 'px',
-            height: this.frame.box.height + 'px'
+            height: this.frame.box.height + 'px',
+            "pointer-events": inGroup(level, this.levelEditorShared.activeGroup, this.p.obj) ? "initial" : "none"
         }
     }
 

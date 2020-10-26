@@ -60,7 +60,7 @@ namespace splitTime.editor.level {
             background: levelObject.background,
             backgroundOffsetX: levelObject.backgroundOffsetX,
             backgroundOffsetY: levelObject.backgroundOffsetY,
-            layers: levelObject.layers.map(l => l.obj),
+            groups: levelObject.groups.map(g => g.obj),
             traces: levelObject.traces.map(t => t.obj),
             props: levelObject.props.map(p => p.obj),
             positions: levelObject.positions.map(p => p.obj)
@@ -80,24 +80,44 @@ namespace splitTime.editor.level {
         levelObject.background = levelFile.background
         levelObject.backgroundOffsetX = levelFile.backgroundOffsetX
         levelObject.backgroundOffsetY = levelFile.backgroundOffsetY
-        levelObject.layers = levelFile.layers.map(l => client.withMetadata("layer", l))
+        levelObject.groups = levelFile.groups.map(g => client.withMetadata("group", g))
         levelObject.traces = levelFile.traces.map(t => client.withMetadata("trace", t))
         levelObject.props = levelFile.props.map(p => client.withMetadata("prop", p))
         levelObject.positions = levelFile.positions.map(p => client.withMetadata("position", p))
         return levelObject
     }
-    
-    export function addNewTrace(levelObject: Level, layerIndex: int, type: string): Trace {
-        var z = levelObject.layers[layerIndex].obj.z
-        var height = levelObject.layers.length > layerIndex + 1 ?
-        levelObject.layers[layerIndex + 1].obj.z - z :
-        DEFAULT_HEIGHT
+
+    export function getGroupByIndex(level: Level, groupIndex: int): splitTime.level.file_data.Group {
+        if (groupIndex < 0 || groupIndex >= level.groups.length) {
+            return {
+                id: "",
+                defaultZ: 0,
+                defaultHeight: DEFAULT_HEIGHT
+            }
+        }
+        return level.groups[groupIndex].obj
+    }
+
+    type FileThing = splitTime.level.file_data.Trace | splitTime.level.file_data.Prop | splitTime.level.file_data.Position
+    export function inGroup(level: Level, groupIndex: int, obj: FileThing): boolean {
+        if (groupIndex < 0) {
+            return level.groups.every(g => g.obj.id !== obj.group)
+        }
+        const group = level.groups[groupIndex]
+        return obj.group === group.obj.id
+    }
+
+    export function addNewTrace(levelObject: Level, groupIndex: int, type: string): Trace {
+        const group = getGroupByIndex(levelObject, groupIndex)
+        var z = group.defaultZ
+        var height = group.defaultHeight
         if(type === splitTime.trace.Type.GROUND) {
             type = splitTime.trace.Type.SOLID
             height = 0
         }
         const traceObj = {
             id: "",
+            group: group.id,
             type: type,
             vertices: "",
             z: z,

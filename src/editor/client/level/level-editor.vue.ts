@@ -105,7 +105,7 @@ namespace splitTime.editor.level {
             style="flex-shrink: 0; right: 0;"
         ></div>
 
-        <div class="layers-container" ref="layersContainer" style="flex-grow: 1; overflow: auto;">
+        <div class="graphical-editor-container" ref="graphicalEditorContainer" style="flex-grow: 1; overflow: auto;">
             <level-graphical-editor
                 :editor-inputs="editorInputs"
                 :level-editor-shared="sharedStuff"

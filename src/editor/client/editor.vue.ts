@@ -128,16 +128,17 @@ namespace splitTime.editor {
 
     function createLevel(this: VueEditor) {
         this.showNewDialog = false
-        if(this.level && this.level.layers.length > 0) {
+        if(this.level && this.level.groups.length > 0) {
             if(!confirm("Are you sure you want to clear the current level and create a new one?")) {
                 return
             }
         }
 
         this.level = new level.Level()
-        this.level.layers.push(client.withMetadata("layer", {
+        this.level.groups.push(client.withMetadata("group", {
             id: "",
-            z: 0
+            defaultZ: 0,
+            defaultHeight: level.DEFAULT_HEIGHT
         }))
         updatePageTitle("level untitled")
     }
