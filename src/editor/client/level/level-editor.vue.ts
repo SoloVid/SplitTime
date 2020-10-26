@@ -1,55 +1,5 @@
 namespace splitTime.editor.level {
-    class SharedStuff implements LevelEditorShared {
-        activeLayer: int = 0
-        mode: Mode = "position"
-        typeSelected: string = trace.Type.SOLID
-        pathInProgress: splitTime.level.file_data.Trace | null = null
-        readonly info = {}
-        propertiesPaneStuff: client.ObjectProperties
-
-        constructor(
-            private editor: VueLevelEditor
-        ) {
-            this.propertiesPaneStuff = getLevelPropertiesStuff(this.editor.level)
-        }
-
-        get gridCell(): Vector2D {
-            return this.editor.editorGlobalStuff.gridCell
-        }
-
-        get gridEnabled(): boolean {
-            return this.editor.editorGlobalStuff.gridEnabled
-        }
-
-        get level(): Level {
-            return this.editor.level
-        }
-
-        get server(): client.ServerLiaison {
-            return this.editor.editorGlobalStuff.server
-        }
-
-        get time(): game_seconds {
-            return this.editor.editorGlobalStuff.time
-        }
-
-        setMode(mode: Mode, subType?: string): void {
-            this.mode = mode
-            if (subType) {
-                this.typeSelected = subType
-            }
-        }
-
-        shouldDragBePrevented(): boolean {
-            return this.editor.editorInputs.mouse.isDown || this.pathInProgress !== null
-        }
-
-        follow(follower: client.Followable): void {
-            this.editor.editorGlobalStuff.setFollowers([follower])
-        }
-    }
-
-    interface VueLevelEditor extends client.VueComponent {
+    export interface VueLevelEditor extends client.VueComponent {
         // props
         editorInputs: client.UserInputs
         editorGlobalStuff: client.GlobalEditorShared
@@ -138,8 +88,10 @@ namespace splitTime.editor.level {
     <div class="content" style="flex-grow: 1; overflow: hidden; display: flex;">
         <div ref="leftMenu" class="menu" style="flex-shrink: 0; width: 128px;">
             <level-editor-tools
+                :editor-global-stuff="editorGlobalStuff"
                 :level-editor-shared="sharedStuff"
             ></level-editor-tools>
+            <hr/>
             <object-properties
                 :editor-global-stuff="editorGlobalStuff"
                 :title="sharedStuff.propertiesPaneStuff.title"

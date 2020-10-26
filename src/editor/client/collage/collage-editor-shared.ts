@@ -40,7 +40,7 @@ namespace splitTime.editor.collage {
             this.editor.editorGlobalStuff.setFollowers([follower])
         }
 
-        selectMontage(montage: file.collage.Montage, andProperties: boolean): void {
+        selectMontage(montage: file.collage.Montage, andProperties: boolean = true): void {
             this.selectedMontage = montage
             this.editor.editorGlobalStuff.setOnDelete(() => {
                 const index = this.collage.montages.indexOf(montage)

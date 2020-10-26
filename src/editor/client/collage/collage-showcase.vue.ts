@@ -1,7 +1,8 @@
 namespace splitTime.editor.collage {
     interface VueCollageShowcase extends client.VueComponent {
         // props
-        collageEditorShared: CollageEditorShared
+        collageEditHelper: IVueCollageEditHelper | undefined
+        collageViewHelper: IVueCollageViewHelper
         // computed
         collage: file.Collage
         gridStyle: object
@@ -11,7 +12,7 @@ namespace splitTime.editor.collage {
     }
 
     function collage(this: VueCollageShowcase): file.Collage {
-        return this.collageEditorShared.collage
+        return this.collageViewHelper.collage
     }
 
     function gridStyle(this: VueCollageShowcase): object {
@@ -19,12 +20,13 @@ namespace splitTime.editor.collage {
             display: "grid",
             "grid-template-columns": "repeat(auto-fill, minmax(" + this.widestMontageWidth + "px, 1fr))",
             "grid-gap": "0.5rem",
-            "align-items": "center"
+            "align-items": "center",
+            "justify-items": "center"
         }
     }
 
     function widestMontageWidth(this: VueCollageShowcase): number {
-        const width = this.collageEditorShared.realCollage.montages.reduce((maxWidth, m) => {
+        const width = this.collageViewHelper.realCollage.montages.reduce((maxWidth, m) => {
             const mWidth = m.getOverallArea().width
             return Math.max(maxWidth, mWidth)
         }, 0)
@@ -35,12 +37,14 @@ namespace splitTime.editor.collage {
         const collageHelper = new CollageHelper(this.collage)
         const newMontage = collageHelper.newMontage()
         this.collage.montages.push(newMontage)
-        this.collageEditorShared.selectMontage(newMontage, true)
+        assert(!!this.collageEditHelper, "Collage editor should be defined for montage editing")
+        this.collageEditHelper.selectMontage(newMontage, true)
     }
 
     Vue.component("collage-showcase", {
         props: {
-            collageEditorShared: Object
+            collageEditHelper: Object,
+            collageViewHelper: Object
         },
         data: function() {
             return {
@@ -58,11 +62,13 @@ namespace splitTime.editor.collage {
 <div :style="gridStyle">
     <template v-for="m in collage.montages">
         <montage
-            :collage-editor-shared="collageEditorShared"
+            :collage-edit-helper="collageEditHelper"
+            :collage-view-helper="collageViewHelper"
             :montage="m"
         ></montage>
     </template>
     <div
+        v-if="collageEditHelper"
         @mousedown.left="createNewMontage"
         title="Add montage"
         style="text-align: center; cursor: pointer;"

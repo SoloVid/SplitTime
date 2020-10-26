@@ -107,7 +107,8 @@ namespace splitTime.editor.collage {
         <div style="flex-grow: 1;" class="standard-padding">
             <collage-showcase
                 style="flex-grow: 1;"
-                :collage-editor-shared="sharedStuff"
+                :collage-edit-helper="sharedStuff"
+                :collage-view-helper="sharedStuff"
             ></collage-showcase>
         </div>
     </div>

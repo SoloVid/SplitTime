@@ -1,7 +1,8 @@
 namespace splitTime.editor.collage {
     interface VueMontage {
         // props
-        collageEditorShared: CollageEditorShared
+        collageEditHelper: IVueCollageEditHelper | undefined
+        collageViewHelper: IVueCollageViewHelper
         montage: file.collage.Montage
         // data
         placeholderImgSrc: string
@@ -30,7 +31,7 @@ namespace splitTime.editor.collage {
     }
 
     function frame(this: VueMontage): splitTime.collage.Frame {
-        return this.realMontage.getFrameAt(this.collageEditorShared.time)
+        return this.realMontage.getFrameAt(this.collageViewHelper.time)
     }
 
     function frameTargetBox(this: VueMontage): math.Rect {
@@ -47,7 +48,7 @@ namespace splitTime.editor.collage {
 
     function realMontage(this: VueMontage): splitTime.collage.Montage {
         const dir = this.montage.direction === "" ? undefined : this.montage.direction
-        return this.collageEditorShared.realCollage.getMontage(this.montage.id, dir)
+        return this.collageViewHelper.realCollage.getMontage(this.montage.id, dir)
     }
 
     function containerStyle(this: VueMontage): object {
@@ -55,7 +56,7 @@ namespace splitTime.editor.collage {
             position: 'relative',
             width: this.overallArea.width + 'px',
             height: this.overallArea.height + 'px',
-            outline: this.montage === this.collageEditorShared.selectedMontage ? "4px solid red" : "none"
+            outline: this.montage === this.collageViewHelper.selectedMontage ? "4px solid red" : "none"
         }
     }
 
@@ -69,12 +70,17 @@ namespace splitTime.editor.collage {
 
     function setActiveMontage(this: VueMontage, event: MouseEvent): void {
         const alsoSetProperties = !(event as PropertiesEvent).propertiesPanelSet
-        this.collageEditorShared.selectMontage(this.montage, alsoSetProperties)
+        if (!!this.collageEditHelper) {
+            this.collageEditHelper.selectMontage(this.montage, alsoSetProperties)
+        } else {
+            this.collageViewHelper.selectMontage(this.montage)
+        }
     }
 
     Vue.component("montage", {
         props: {
-            collageEditorShared: Object,
+            collageEditHelper: Object,
+            collageViewHelper: Object,
             montage: Object
         },
         data,
@@ -111,7 +117,8 @@ namespace splitTime.editor.collage {
             :style="frameDivStyle"
         >
             <montage-frame
-                :collage-editor-shared="collageEditorShared"
+                :collage-edit-helper="collageEditHelper"
+                :collage-view-helper="collageViewHelper"
                 :montage="montage"
                 :montage-frame="fileMontageFrame"
                 :edit-affects-all-frames="true"

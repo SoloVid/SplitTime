@@ -36,24 +36,28 @@ namespace splitTime.editor.level {
     }
 
     function montage(this: VueRenderedProposition): splitTime.collage.Montage {
+        const tempFrame = new splitTime.collage.Frame(
+            math.Rect.make(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH),
+            new Coordinates2D(),
+            1
+        )
+        const tempBodySpec: file.collage.BodySpec = {
+            width: 32,
+            depth: 32,
+            height: 32
+        }
+        const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [])
         if (this.collage === null) {
-            const tempFrame = new splitTime.collage.Frame(
-                math.Rect.make(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH),
-                new Coordinates2D(),
-                1
-            )
-            const tempBodySpec: file.collage.BodySpec = {
-                width: 32,
-                depth: 32,
-                height: 32
-            }
-            const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [])
             return tempMontage
         }
-        if (this.p.obj.montage === "") {
-            return this.collage.getDefaultMontage(this.p.obj.dir)
+        try {
+            if (this.p.obj.montage === "") {
+                return this.collage.getDefaultMontage(this.p.obj.dir)
+            }
+            return this.collage.getMontage(this.p.obj.montage, this.p.obj.dir)
+        } catch (e: unknown) {
+            return tempMontage
         }
-        return this.collage.getMontage(this.p.obj.montage, this.p.obj.dir)
     }
 
     function positionLeft(this: VueRenderedProposition): number {

@@ -5,6 +5,8 @@ namespace splitTime.editor.level {
         level: Level
         layer: Layer
         index: number
+        // data
+        collapsed: boolean
         // computed
         layerAboveZ: number
         layerHeight: number
@@ -22,6 +24,12 @@ namespace splitTime.editor.level {
         toggleAllTracesDisplayed(): void
         toggleAllPropsDisplayed(): void
         toggleAllPositionsDisplayed(): void
+    }
+
+    function data(this: VueMenuLayer): Partial<VueMenuLayer> {
+        return {
+            collapsed: true
+        }
     }
 
     function layerAboveZ(this: VueMenuLayer): number {
@@ -100,6 +108,7 @@ namespace splitTime.editor.level {
             layer: Object,
             index: Number
         },
+        data,
         computed: {
             layerAboveZ,
             layerHeight,
@@ -121,27 +130,31 @@ namespace splitTime.editor.level {
         },
         template: `
 <div>
+    <span @click="collapsed = !collapsed" @mousedown.prevent class="pointer">
+        <i v-if="collapsed" class="fas fa-chevron-right"></i>
+        <i v-if="!collapsed" class="fas fa-chevron-down"></i>
+    </span>
     <input type="checkbox" v-model="layer.metadata.displayed"/>
-    <strong v-on:click="edit" class="pointer">
+    <strong @click="edit" class="pointer">
         <span v-show="!layer.obj.id">Layer {{ index }}</span>
         <span v-show="layer.obj.id">{{layer.obj.id}}</span>
     </strong>
-    <div class="indent">
+    <div v-show="!collapsed" class="indent">
         <div v-show="traces.length > 0">
             <div>
                 <input type="checkbox"
                     :checked="allTracesDisplayed"
-                    v-on:click.left="toggleAllTracesDisplayed"
+                    @click.left="toggleAllTracesDisplayed"
                 />
                 Traces
             </div>
             <div class="indent">
                 <div v-for="(trace, traceIndex) in traces"
-                    v-on:mouseenter="trace.metadata.highlighted = true"
-                    v-on:mouseleave="trace.metadata.highlighted = false"
+                    @mouseenter="trace.metadata.highlighted = true"
+                    @mouseleave="trace.metadata.highlighted = false"
                 >
                     <input type="checkbox" v-model="trace.metadata.displayed"/>
-                    <span v-on:click.left="editTrace(trace)" class="pointer">
+                    <span @click.left="editTrace(trace)" class="pointer">
                         <span v-show="!trace.obj.id">Trace {{ traceIndex }}</span>
                         <span v-show="trace.obj.id">{{trace.obj.id}}</span>
                     </span>
@@ -152,17 +165,17 @@ namespace splitTime.editor.level {
             <div>
                 <input type="checkbox"
                     :checked="allPropsDisplayed"
-                    v-on:click.left="toggleAllPropsDisplayed"
+                    @click.left="toggleAllPropsDisplayed"
                 />
                 Props
             </div>
             <div class="indent">
                 <div v-for="(prop, index) in props"
-                    v-on:mouseenter="prop.metadata.highlighted = true"
-                    v-on:mouseleave="prop.metadata.highlighted = false"
+                    @mouseenter="prop.metadata.highlighted = true"
+                    @mouseleave="prop.metadata.highlighted = false"
                 >
                     <input type="checkbox" v-model="prop.metadata.displayed"/>
-                    <span v-on:click.left="editProp(prop)" class="pointer">
+                    <span @click.left="editProp(prop)" class="pointer">
                         <span v-show="!prop.obj.id">Prop {{ index }}</span>
                         <span v-show="prop.obj.id">{{prop.obj.id}}</span>
                     </span>
@@ -173,18 +186,18 @@ namespace splitTime.editor.level {
             <div>
                 <input type="checkbox"
                     :checked="allPositionsDisplayed"
-                    v-on:click.left="toggleAllPositionsDisplayed"
+                    @click.left="toggleAllPositionsDisplayed"
                 />
                 Positions
             </div>
             <div class="indent">
                 <div v-for="(position, index) in positions"
-                    v-on:mouseenter="position.metadata.highlighted = true"
-                    v-on:mouseleave="position.metadata.highlighted = false"
+                    @mouseenter="position.metadata.highlighted = true"
+                    @mouseleave="position.metadata.highlighted = false"
                     style="list-style-type: disc"
                 >
                     <input type="checkbox" v-model="position.metadata.displayed"/>
-                    <span v-on:click.left="editPosition(position)" class="pointer">
+                    <span @click.left="editPosition(position)" class="pointer">
                         <span v-show="!position.obj.id">Position {{ index }}</span>
                         <span v-show="position.obj.id">{{position.obj.id}}</span>
                     </span>

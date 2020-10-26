@@ -134,8 +134,8 @@ namespace splitTime.editor.client {
         methods: {
         },
         template: `
-<div>
-    <h4>{{ title }}</h4>
+<div class="object-properties">
+    <div><strong>{{ title }}</strong></div>
     <object-property
         v-for="(fieldOptions, key) in fields"
         :key="title + key"
@@ -174,7 +174,7 @@ namespace splitTime.editor.client {
             launchFileBrowser
         },
         template: `
-<label>
+<label :class="['object-property', 'field-key-' + fieldKey]">
     {{ title }}
     <input
         v-if="inputType === 'string'"

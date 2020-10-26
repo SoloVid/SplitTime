@@ -81,15 +81,15 @@ namespace splitTime.editor.level {
         var z = this.level.layers[layerIndex].obj.z
         var x = this.inputs.mouse.x
         var y = this.inputs.mouse.y + z
-        
+
         var object = {
             id: "",
-            collage: "",
-            montage: "",
+            collage: this.levelEditorShared.selectedCollage,
+            montage: this.levelEditorShared.selectedMontage,
             x: x,
             y: y,
             z: z,
-            dir: "S"
+            dir: this.levelEditorShared.selectedMontageDirection
         }
         const newThing = client.withMetadata<"position", splitTime.level.file_data.Position>("position", object)
         this.level.positions.push(newThing)
@@ -104,12 +104,12 @@ namespace splitTime.editor.level {
         
         var object = {
             id: "",
-            collage: "",
-            montage: "",
+            collage: this.levelEditorShared.selectedCollage,
+            montage: this.levelEditorShared.selectedMontage,
             x: x,
             y: y,
             z: z,
-            dir: "S",
+            dir: this.levelEditorShared.selectedMontageDirection,
             playerOcclusionFadeFactor: 0
         }
 
@@ -140,7 +140,7 @@ namespace splitTime.editor.level {
             const pathInProgress = this.levelEditorShared.pathInProgress
             if(isLeftClick) {
                 if(pathInProgress) {
-                    if(this.levelEditorShared.typeSelected == "path" && this.inputs.ctrlDown) {
+                    if(this.levelEditorShared.selectedTraceType == "path" && this.inputs.ctrlDown) {
                         pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint
                     } else {
                         pathInProgress.vertices = pathInProgress.vertices + " " + literalPoint
@@ -148,9 +148,9 @@ namespace splitTime.editor.level {
                 }
             } else if(isRightClick) {
                 if(!pathInProgress) {
-                    var trace = addNewTrace(this.level, this.levelEditorShared.activeLayer, this.levelEditorShared.typeSelected)
+                    var trace = addNewTrace(this.level, this.levelEditorShared.activeLayer, this.levelEditorShared.selectedTraceType)
                     
-                    if(this.levelEditorShared.typeSelected == splitTime.trace.Type.PATH && !this.inputs.ctrlDown) {
+                    if(this.levelEditorShared.selectedTraceType == splitTime.trace.Type.PATH && !this.inputs.ctrlDown) {
                         trace.obj.vertices = positionPoint
                     } else {
                         trace.obj.vertices = literalPoint
@@ -222,10 +222,12 @@ namespace splitTime.editor.level {
         template: `
 <div
     class="level-area"
-    v-on:dragstart.prevent
-    v-on:dblclick.prevent
-    v-on:mousemove="handleMouseMove"
     :style="{ position: 'relative', width: containerWidth + 'px', height: containerHeight + 'px', overflow: 'hidden' }"
+    @mousemove="handleMouseMove"
+    @mouseup="handleMouseUp"
+    @contextmenu.prevent
+    @dblclick.prevent
+    @dragstart.prevent
 >
     <img v-if="!!backgroundSrc" class="background" :src="backgroundSrc" :style="{ position: 'absolute', left: leftPadding + 'px', top: topPadding + 'px' }"/>
     <rendered-layer

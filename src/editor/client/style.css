@@ -77,6 +77,11 @@ img {
     cursor: pointer;
 }
 
+.menu .option.active {
+    color: white;
+    background-color: orange;
+}
+
 .pointer {
     cursor: pointer;
 }
@@ -179,7 +184,7 @@ textarea {
     cursor: e-resize
 }
 
-input.block, textarea.block {
+input.block, textarea.block, select.block {
     box-sizing: border-box;
     width: 100%;
     display: block;
