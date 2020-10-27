@@ -9,6 +9,7 @@ namespace splitTime.editor.level {
         sorter: EntitySortHelper
         // computed
         allEntitiesSorted: (Position | Prop | Trace)[]
+        backgroundSrc: string
         backgroundStyleObject: object
         level: Level
         inputs: client.UserInputs
@@ -17,7 +18,6 @@ namespace splitTime.editor.level {
         levelOffsetStyleObject: object
         traceTransform: string
         // asyncComputed
-        backgroundSrc: string
         // methods
         createPosition(): void
         createProp(): void
@@ -102,7 +102,7 @@ namespace splitTime.editor.level {
         return "translate(" + EDITOR_PADDING + "," + EDITOR_PADDING + ")"
     }
 
-    function backgroundSrc(this: VueLevelGraphicalEditor): PromiseLike<string> {
+    function backgroundSrc(this: VueLevelGraphicalEditor): string {
         return this.levelEditorShared.server.imgSrc(this.level.background)
     }
 
@@ -255,6 +255,7 @@ namespace splitTime.editor.level {
         data,
         computed: {
             allEntitiesSorted,
+            backgroundSrc,
             backgroundStyleObject,
             level,
             inputs,
@@ -264,7 +265,6 @@ namespace splitTime.editor.level {
             traceTransform
         },
         asyncComputed: {
-            backgroundSrc
         },
         methods: {
             createPosition,

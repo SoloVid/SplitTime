@@ -9,6 +9,7 @@ namespace splitTime.editor.level {
 
     export interface LevelEditorShared {
         activeGroup: int
+        readonly collageManager: CollageManager
         gridCell: Vector2D
         gridEnabled: boolean
         /** Stuff to display to the user */

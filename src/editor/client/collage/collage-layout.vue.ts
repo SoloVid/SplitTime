@@ -6,13 +6,13 @@ namespace splitTime.editor.collage {
         // data
         editorPadding: number
         // computed
+        backgroundSrc: string
         collage: file.Collage
         containerWidth: number
         containerHeight: number
         framesSorted: file.collage.Frame[]
         viewBox: string
         // asyncComputed
-        backgroundSrc: string
         // methods
         // handleKeyDown(event: KeyboardEvent): void
         startNewFrame(): void
@@ -57,7 +57,7 @@ namespace splitTime.editor.collage {
         return "" + -EDITOR_PADDING + " " + -EDITOR_PADDING + " " + this.containerWidth + " " + this.containerHeight
     }
 
-    function backgroundSrc(this: VueCollageLayout): PromiseLike<string> {
+    function backgroundSrc(this: VueCollageLayout): string {
         return this.collageEditorShared.server.imgSrc(this.collage.image)
     }
 
@@ -88,6 +88,7 @@ namespace splitTime.editor.collage {
         },
         data,
         computed: {
+            backgroundSrc,
             collage,
             containerWidth,
             containerHeight,
@@ -95,7 +96,6 @@ namespace splitTime.editor.collage {
             viewBox
         },
         asyncComputed: {
-            backgroundSrc
         },
         methods: {
             // handleKeyDown,

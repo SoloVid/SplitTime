@@ -1,4 +1,8 @@
 namespace splitTime.editor.level {
+
+    const NOT_READY = "NOT_READY"
+    const NOT_AVAILABLE = "NOT_AVAILABLE"
+
     /** Shared component for either prop or position */
     interface VueRenderedProposition {
         // props
@@ -6,15 +10,14 @@ namespace splitTime.editor.level {
         p: Prop | Position
         // computed
         body: file.collage.BodySpec
+        collage: Collage | typeof NOT_READY | typeof NOT_AVAILABLE
         frame: splitTime.collage.Frame
         framePosition: Coordinates2D
+        imgSrc: string
         montage: splitTime.collage.Montage
         positionLeft: int
         positionTop: int
         styleObject: object
-        // asyncComputed
-        collage: Collage | null
-        imgSrc: string
         // methods
         toggleHighlight(highlight: boolean): void
         track(): void
@@ -47,7 +50,7 @@ namespace splitTime.editor.level {
             height: 32
         }
         const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [])
-        if (this.collage === null) {
+        if (this.collage === NOT_READY || this.collage == NOT_AVAILABLE) {
             return tempMontage
         }
         try {
@@ -82,20 +85,27 @@ namespace splitTime.editor.level {
         }
     }
 
-    async function collage(this: VueRenderedProposition): Promise<Collage | null> {
+    function collage(this: VueRenderedProposition): Collage | typeof NOT_READY | typeof NOT_AVAILABLE {
         if (this.p.obj.collage === "") {
-            return null
+            return NOT_AVAILABLE
         }
-        const s = this.levelEditorShared.server
-        const collageJson = await s.api.collageJson.fetch(s.withProject({ collageId: this.p.obj.collage }))
-        return splitTime.collage.makeCollageFromFile(collageJson, true)
+        try {
+            const c = this.levelEditorShared.collageManager.getRealCollage(this.p.obj.collage)
+            return c || NOT_READY
+        } catch (e: unknown) {
+            return NOT_AVAILABLE
+        }
     }
 
-    async function imgSrc(this: VueRenderedProposition): Promise<string> {
-        if (this.p.obj.collage === "" || this.collage === null) {
+    function imgSrc(this: VueRenderedProposition): string {
+        const c = this.collage
+        if (c === NOT_READY) {
+            return ""
+        }
+        if (c === NOT_AVAILABLE) {
             return getPlaceholderImage()
         }
-        return await this.levelEditorShared.server.imgSrc(this.collage.image)
+        return this.levelEditorShared.server.imgSrc(c.image)
     }
 
     function toggleHighlight(this: VueRenderedProposition, highlight: boolean): void {
@@ -136,22 +146,16 @@ namespace splitTime.editor.level {
         },
         computed: {
             body,
+            collage,
             frame,
             framePosition,
+            imgSrc,
             montage,
             positionLeft,
             positionTop,
             styleObject
         },
         asyncComputed: {
-            collage: {
-                get: collage,
-                default: null
-            },
-            imgSrc: {
-                get: imgSrc,
-                default: ""
-            }
         },
         methods: {
             toggleHighlight,

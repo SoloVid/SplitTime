@@ -6,6 +6,7 @@ namespace splitTime.editor.collage {
         offset: Coordinates2D
         // data
         // computed
+        backgroundSrc: string
         collage: file.Collage
         grabBox: math.Rect
         isSelected: boolean
@@ -13,7 +14,6 @@ namespace splitTime.editor.collage {
         traceStroke: string
         vertices: Coordinates2D[]
         // asyncComputed
-        backgroundSrc: string
         // methods
         track(point?: Coordinates2D): void
         addToMontage(): void
@@ -69,7 +69,7 @@ namespace splitTime.editor.collage {
         ]
     }
 
-    function backgroundSrc(this: VueFrameRectangle): PromiseLike<string> {
+    function backgroundSrc(this: VueFrameRectangle): string {
         return this.collageEditorShared.server.imgSrc(this.collage.image)
     }
 
@@ -95,6 +95,7 @@ namespace splitTime.editor.collage {
         },
         data,
         computed: {
+            backgroundSrc,
             collage,
             grabBox,
             isSelected,
@@ -103,7 +104,6 @@ namespace splitTime.editor.collage {
             vertices
         },
         asyncComputed: {
-            backgroundSrc
         },
         methods: {
             track,

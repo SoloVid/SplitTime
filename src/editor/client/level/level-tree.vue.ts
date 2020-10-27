@@ -49,7 +49,7 @@ namespace splitTime.editor.level {
             <option
                 v-for="(group, index) in levelEditorShared.level.groups"
                 :value="index"
-            >{{ group.id || ("Group " + index) }}</option>
+            >{{ group.obj.id || ("Group " + index) }}</option>
             <option value="-1">Homeless</option>
         </select>
     </label>

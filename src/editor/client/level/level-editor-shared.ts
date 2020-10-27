@@ -1,6 +1,7 @@
 namespace splitTime.editor.level {
     export class SharedStuff implements LevelEditorShared {
         activeGroup: int = 0
+        readonly collageManager: CollageManager
         mode: Mode = "trace"
         selectedCollage: string = ""
         selectedMontage: string = ""
@@ -15,6 +16,7 @@ namespace splitTime.editor.level {
             private editor: VueLevelEditor
         ) {
             this.propertiesPaneStuff = getLevelPropertiesStuff(this.editor.level)
+            this.collageManager = new CollageManager(this.server)
         }
 
         get gridCell(): Vector2D {

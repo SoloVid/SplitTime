@@ -23,9 +23,9 @@ namespace splitTime.editor.level {
         traceShadowStroke: string
         traceShadowDisplayed: boolean
         otherLevelDisplayed: boolean
+        otherLevelImgSrc: string
         // asyncComputed
         otherLevel: splitTime.level.FileData
-        otherLevelImgSrc: string
         // methods
         track(point: Coordinates2D): void
         toggleHighlight(highlight: boolean): void
@@ -176,7 +176,7 @@ namespace splitTime.editor.level {
         const s = this.levelEditorShared.server
         return s.api.levelJson.fetch(s.withProject({ levelId: this.trace.level }))
     }
-    function otherLevelImgSrc(this: VueRenderedTrace): PromiseLike<string> {
+    function otherLevelImgSrc(this: VueRenderedTrace): string {
         return this.levelEditorShared.server.imgSrc(this.otherLevel.background)
     }
 
@@ -243,16 +243,13 @@ namespace splitTime.editor.level {
             traceShadowFill,
             traceShadowStroke,
             traceShadowDisplayed,
-            otherLevelDisplayed
+            otherLevelDisplayed,
+            otherLevelImgSrc
         },
         asyncComputed: {
             otherLevel: {
                 get: otherLevel,
                 default: exportLevel(new Level())
-            },
-            otherLevelImgSrc: {
-                get: otherLevelImgSrc,
-                default: ""
             }
         },
         methods: {
