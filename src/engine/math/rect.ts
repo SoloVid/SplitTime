@@ -57,6 +57,10 @@ namespace splitTime.math {
         set y2(val: number) {
             this._height = val - this._y
         }
+
+        copy(): Rect {
+            return Rect.make(this.x, this.y, this.width, this.height)
+        }
     }
 
     export function calculateTotalRectArea(rects: Rect[]): Rect {

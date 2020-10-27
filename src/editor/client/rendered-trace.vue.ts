@@ -288,10 +288,10 @@ namespace splitTime.editor.level {
     <polyline
         :style="mousableStyle"
         v-show="metadata.displayed"
-        v-on:dblclick.prevent
-        v-on:mousedown.left="track(null)"
-        v-on:mouseenter="toggleHighlight(true)"
-        v-on:mouseleave="toggleHighlight(false)"
+        @dblclick.prevent
+        @mousedown.left="track(null)"
+        @mousemove="toggleHighlight(true)"
+        @mouseleave="toggleHighlight(false)"
         :points="points"
         :stroke="traceStroke"
         :fill="traceFill"
@@ -305,7 +305,7 @@ namespace splitTime.editor.level {
         :cx="vertex.x"
         :cy="vertex.y - vertex.z"
         r="3"
-        v-on:mousedown.left="track(vertex)"
+        @mousedown.left="track(vertex)"
     />
     <!-- Outline for ramp/slope part of stairs; adds more of a 3D look -->
     <polyline

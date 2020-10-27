@@ -68,7 +68,7 @@ namespace splitTime.editor.level {
             :index="-1"
             class="catch-all-group"
     ></menu-group>
-    <div class="option" v-on:click.left="createGroup">Add Group</div>
+    <div class="option" @click.left="createGroup">Add Group</div>
 </div>
         `
     })

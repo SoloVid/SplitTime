@@ -33,6 +33,8 @@ namespace splitTime.body {
                 drawArea.y2 = Math.max(drawArea.y2, singleDrawArea.y2)
             }
             var node = this._getBodyNode(body)
+            // FTODO: cache stuff we care about and check here if anything actually changed
+            // then if nothing changed, we can skip over this node in updating graph
             node.drawArea = drawArea
             node.shouldBeDrawnThisFrame = true
             return node

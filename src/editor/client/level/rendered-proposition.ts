@@ -165,10 +165,10 @@ namespace splitTime.editor.level {
 <div
     v-show="p.metadata.displayed"
     class="draggable"
-    v-on:dblclick.prevent
-    v-on:mousedown.left="track"
-    v-on:mouseenter="toggleHighlight(true)"
-    v-on:mouseleave="toggleHighlight(false)"
+    @dblclick.prevent
+    @mousedown.left="track"
+    @mousemove="toggleHighlight(true)"
+    @mouseleave="toggleHighlight(false)"
     :style="styleObject"
 >
     <img :src="imgSrc" :style="{ position: 'absolute', left: -frame.box.x + 'px', top: -frame.box.y + 'px' }"/>

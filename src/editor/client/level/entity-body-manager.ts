@@ -15,7 +15,7 @@ namespace splitTime.editor.level {
             const drawArea = math.Rect.make(topLeft.x, topLeft.y, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH)
             this.placeholderDrawable = {
                 getCanvasRequirements(): splitTime.body.CanvasRequirements {
-                    return new splitTime.body.CanvasRequirements(drawArea)
+                    return new splitTime.body.CanvasRequirements(drawArea.copy())
                 }
             }
         }
