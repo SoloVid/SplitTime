@@ -41,7 +41,7 @@ namespace splitTime.editor {
 }
 
 namespace splitTime.editor.level {
-    export const DEFAULT_HEIGHT = 64
+    export const DEFAULT_GROUP_HEIGHT = 64
 
     export function getLevelPageTitle(filePath: string, level: editor.level.Level): string {
         let title = filePath ? filePath : "untitled"
@@ -92,7 +92,7 @@ namespace splitTime.editor.level {
             return {
                 id: "",
                 defaultZ: 0,
-                defaultHeight: DEFAULT_HEIGHT
+                defaultHeight: DEFAULT_GROUP_HEIGHT
             }
         }
         return level.groups[groupIndex].obj

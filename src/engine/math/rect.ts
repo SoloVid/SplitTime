@@ -58,4 +58,32 @@ namespace splitTime.math {
             this._height = val - this._y
         }
     }
+
+    export function calculateTotalRectArea(rects: Rect[]): Rect {
+        let lowX = Number.POSITIVE_INFINITY
+        let highX = Number.NEGATIVE_INFINITY
+        let lowY = Number.POSITIVE_INFINITY
+        let highY = Number.NEGATIVE_INFINITY
+        for (const rect of rects) {
+            lowX = Math.min(lowX, rect.x)
+            highX = Math.max(highX, rect.x2)
+            lowY = Math.min(lowY, rect.y)
+            highY = Math.max(highY, rect.y2)
+        }
+        return math.Rect.make(lowX, lowY, highX - lowX, highY - lowY)
+    }
+
+    export function calculateTotalArea(points: Coordinates2D[]): Rect {
+        let lowX = Number.POSITIVE_INFINITY
+        let highX = Number.NEGATIVE_INFINITY
+        let lowY = Number.POSITIVE_INFINITY
+        let highY = Number.NEGATIVE_INFINITY
+        for (const p of points) {
+            lowX = Math.min(lowX, p.x)
+            highX = Math.max(highX, p.x)
+            lowY = Math.min(lowY, p.y)
+            highY = Math.max(highY, p.y)
+        }
+        return math.Rect.make(lowX, lowY, highX - lowX, highY - lowY)
+    }
 }

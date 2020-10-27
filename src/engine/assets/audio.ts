@@ -1,13 +1,3 @@
-/**
- * Audio loading considerations
- *
- * The current setup is that each audio file is loaded only once, when the play function
- * is called on it for the first time. Then the Howl object associated with that audio
- * file gets added to loadedSounds[handle] to be used later.
- *
- * Note: depending on the total number of audio files used in a project, it may be better to
- * load all the files at the start of the program.
- */
 namespace splitTime.assets {
     const MUSIC_DIR = "music/"
     const SOUND_EFFECT_DIR = "fx/"
@@ -29,6 +19,16 @@ namespace splitTime.assets {
         }
     }
 
+    /**
+     * Audio loading considerations
+     *
+     * The current setup is that each audio file is loaded only once, when the play function
+     * is called on it for the first time. Then the Howl object associated with that audio
+     * file gets added to loadedSounds[handle] to be used later.
+     *
+     * Note: depending on the total number of audio files used in a project, it may be better to
+     * load all the files at the start of the program.
+     */
     export class Audio {
         constructor(private readonly root: string) {}
 

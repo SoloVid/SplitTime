@@ -1,5 +1,5 @@
 namespace splitTime {
-    const DEFAULT_PARCEL_DIR = 9999
+    const DEFAULT_MONTAGE_DIR = 9999
     /**
      * Image (e.g. sprite sheet or tile map) with a bunch of associated metadata.
      * 
@@ -23,15 +23,15 @@ namespace splitTime {
                 if (!(id in this.montageMap)) {
                     this.montageMap[id] = {}
                 }
-                const dir = montage.direction === null ? DEFAULT_PARCEL_DIR : montage.direction
+                const dir = montage.direction === null ? DEFAULT_MONTAGE_DIR : montage.direction
                 this.montageMap[id][dir] = montage
             }
             // Make sure there is a default for each montage
             for (const id in this.montageMap) {
                 const bucket = this.montageMap[id]
-                if (!(DEFAULT_PARCEL_DIR in bucket)) {
+                if (!(DEFAULT_MONTAGE_DIR in bucket)) {
                     for (const dir in bucket) {
-                        bucket[DEFAULT_PARCEL_DIR] = bucket[dir]
+                        bucket[DEFAULT_MONTAGE_DIR] = bucket[dir]
                         break
                     }
                 }
@@ -54,12 +54,12 @@ namespace splitTime {
                 throw new Error("Montage " + id + " not found in collage")
             }
             const bucket = this.montageMap[id]
-            const dirKey = direction === undefined ? DEFAULT_PARCEL_DIR :
+            const dirKey = direction === undefined ? DEFAULT_MONTAGE_DIR :
                 splitTime.direction.interpret(direction)
             if (dirKey in bucket) {
                 return bucket[dirKey]
             }
-            return bucket[DEFAULT_PARCEL_DIR]
+            return bucket[DEFAULT_MONTAGE_DIR]
         }
 
         getDefaultMontage(direction?: direction_t | string): collage.Montage {

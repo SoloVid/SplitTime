@@ -13,7 +13,7 @@ namespace splitTime.editor.level {
     }
 
     function createGroup(this: VueLevelTree): void {
-        let defaultHeight = DEFAULT_HEIGHT
+        let defaultHeight = DEFAULT_GROUP_HEIGHT
         if (this.level.groups.length > 0) {
             defaultHeight = this.level.groups[this.level.groups.length - 1].obj.defaultHeight
         }

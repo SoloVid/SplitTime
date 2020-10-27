@@ -138,7 +138,7 @@ namespace splitTime.editor {
         this.level.groups.push(client.withMetadata("group", {
             id: "",
             defaultZ: 0,
-            defaultHeight: level.DEFAULT_HEIGHT
+            defaultHeight: level.DEFAULT_GROUP_HEIGHT
         }))
         updatePageTitle("level untitled")
     }

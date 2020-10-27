@@ -73,7 +73,7 @@ namespace splitTime.editor.collage {
         }
     }
 
-    const defaultBodySpec = {
+    export const defaultBodySpec = {
         width: 16,
         depth: 16,
         height: 48

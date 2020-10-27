@@ -26,11 +26,17 @@ namespace splitTime.editor.level {
         handleMouseMove(event: MouseEvent): void
     }
 
+    function makeEntitySortHelper(levelEditorShared: LevelEditorShared): EntitySortHelper {
+        const collageManager = new CollageManager(levelEditorShared.server)
+        const bodyManager = new EntityBodyManager(levelEditorShared.level, collageManager)
+        return new EntitySortHelper(levelEditorShared.level, bodyManager)
+    }
+
     function data(this: VueLevelGraphicalEditor): Partial<VueLevelGraphicalEditor> {
         return {
             cancelNextContextMenu: false,
             editorPadding: EDITOR_PADDING,
-            sorter: new EntitySortHelper(this.levelEditorShared.level)
+            sorter: makeEntitySortHelper(this.levelEditorShared)
         }
     }
 

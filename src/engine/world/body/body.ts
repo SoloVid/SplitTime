@@ -143,17 +143,6 @@ namespace splitTime {
             return this.childrenBolted.concat(this.childrenLoose)
         }
 
-        staticTrace: { traceStr: string; type: string }[] = []
-        /**
-         * @deprecated should be moved to Prop class or something
-         */
-        addStaticTrace(traceStr: string, type: string) {
-            if (this.staticTrace.length === 0) {
-                this.staticTrace = []
-            }
-            this.staticTrace.push({ traceStr: traceStr, type: type })
-        }
-
         _resortInBodyOrganizer() {
             if (this._level) {
                 this._level.notifyBodyMoved(this)

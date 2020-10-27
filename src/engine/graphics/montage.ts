@@ -42,19 +42,7 @@ namespace splitTime.collage {
          * Returned box is relative to body positioned at (0, 0, 0).
          */
         getOverallArea(): math.Rect {
-            let lowX = Number.POSITIVE_INFINITY
-            let highX = Number.NEGATIVE_INFINITY
-            let lowY = Number.POSITIVE_INFINITY
-            let highY = Number.NEGATIVE_INFINITY
-            for (const frame of this.frames) {
-                const singleDrawArea = frame.getTargetBox(this.bodySpec)
-                
-                lowX = Math.min(lowX, singleDrawArea.x)
-                highX = Math.max(highX, singleDrawArea.x2)
-                lowY = Math.min(lowY, singleDrawArea.y)
-                highY = Math.max(highY, singleDrawArea.y2)
-            }
-            return math.Rect.make(lowX, lowY, highX - lowX, highY - lowY)
+            return math.calculateTotalRectArea(this.frames.map(f => f.getTargetBox(this.bodySpec)))
         }
     }
 }

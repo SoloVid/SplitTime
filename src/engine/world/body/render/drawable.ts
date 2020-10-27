@@ -12,6 +12,11 @@ namespace splitTime.body {
          * @param whereDefaultWouldBe suggestion on where to translate (e.g. the Body)
          */
         getDesiredOrigin(whereDefaultWouldBe: Coordinates3D): Coordinates3D
+        /**
+         * Indicates what the drawable needs for a canvas.
+         * The position of the rectangle will be assumed relative
+         * to whatever the whereDefaultWouldBe parameter will be.
+         */
         getCanvasRequirements(): splitTime.body.CanvasRequirements
 
         draw(ctx: GenericCanvasRenderingContext2D): void
@@ -24,14 +29,9 @@ namespace splitTime.body {
         // clone(): Drawable
     }
 
-    /**
-     * Indicates what the drawable needs for a canvas.
-     * The position of the rectangle will be assumed relative
-     * to whatever the whereDefaultWouldBe parameter will be.
-     */
     export class CanvasRequirements {
-        rect: math.Rect
-        isCleared: boolean = false
+        readonly rect: math.Rect
+        readonly isCleared: boolean = false
         constructor(rect: math.Rect) {
             this.rect = rect
         }
