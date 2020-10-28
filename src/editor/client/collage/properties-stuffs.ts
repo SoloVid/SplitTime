@@ -11,11 +11,12 @@ namespace splitTime.editor.collage {
         return {
             title: "Collage Properties",
             thing: collage as SimplifiedCollage,
-            fields: fieldObject
+            fields: fieldObject,
+            doDelete: null
         }
     }
 
-    export function getFramePropertiesStuff(frame: file.collage.Frame): client.ObjectProperties {
+    export function getFramePropertiesStuff(frame: file.collage.Frame, doDelete: () => void): client.ObjectProperties {
         const fieldObject = {
             id: {},
             x: {},
@@ -27,11 +28,12 @@ namespace splitTime.editor.collage {
         return {
             title: "Frame Properties",
             thing: frame as SimplifiedFrame,
-            fields: fieldObject
+            fields: fieldObject,
+            doDelete
         }
     }
 
-    export function getMontagePropertiesStuff(montage: file.collage.Montage): client.ObjectProperties {
+    export function getMontagePropertiesStuff(montage: file.collage.Montage, doDelete: () => void): client.ObjectProperties {
         const fieldObject = {
             id: {},
             direction: {}
@@ -40,11 +42,12 @@ namespace splitTime.editor.collage {
         return {
             title: "Montage Properties",
             thing: montage as SimplifiedMontage,
-            fields: fieldObject
+            fields: fieldObject,
+            doDelete
         }
     }
 
-    export function getMontageFramePropertiesStuff(montageFrame: file.collage.MontageFrame): client.ObjectProperties {
+    export function getMontageFramePropertiesStuff(montageFrame: file.collage.MontageFrame, doDelete: () => void): client.ObjectProperties {
         const fieldObject = {
             frameId: {},
             offsetX: {},
@@ -55,7 +58,8 @@ namespace splitTime.editor.collage {
         return {
             title: "Montage Frame Properties",
             thing: montageFrame as SimplifiedMontageFrame,
-            fields: fieldObject
+            fields: fieldObject,
+            doDelete
         }
     }
 
@@ -69,7 +73,8 @@ namespace splitTime.editor.collage {
         return {
             title: "Body Spec Properties",
             thing: body as SimplifiedBodySpec,
-            fields: fieldObject
+            fields: fieldObject,
+            doDelete: () => null
         }
     }
 }

@@ -65,16 +65,16 @@ namespace splitTime.editor.level {
             return
         }
         const wrapper = new GroupWrapper(this.group.obj, this.level)
-        this.levelEditorShared.propertiesPaneStuff = getGroupPropertiesStuff(wrapper)
+        this.levelEditorShared.editProperties(getGroupPropertiesStuff(this.level, wrapper))
     }
     function editTrace(this: VueMenuGroup, trace: Trace): void {
-        this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace.obj)
+        this.levelEditorShared.editProperties(getTracePropertiesStuff(this.level, trace.obj))
     }
     function editProp(this: VueMenuGroup, prop: Prop): void {
-        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(prop.obj)
+        this.levelEditorShared.editProperties(getPropPropertiesStuff(this.level, prop.obj))
     }
     function editPosition(this: VueMenuGroup, position: Position): void {
-        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(position.obj)
+        this.levelEditorShared.editProperties(getPositionPropertiesStuff(this.level, position.obj))
     }
     function toggleAllDisplayed(this: VueMenuGroup): void {
         const displayed = this.allDisplayed

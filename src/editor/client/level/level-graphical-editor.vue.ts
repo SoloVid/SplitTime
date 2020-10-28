@@ -6,7 +6,6 @@ namespace splitTime.editor.level {
         // data
         cancelNextContextMenu: boolean
         editorPadding: number
-        sorter: EntitySortHelper
         // computed
         allEntitiesSorted: (Position | Prop | Trace)[]
         backgroundSrc: string
@@ -16,6 +15,7 @@ namespace splitTime.editor.level {
         containerWidth: number
         containerHeight: number
         levelOffsetStyleObject: object
+        sorter: EntitySortHelper
         traceTransform: string
         // asyncComputed
         // methods
@@ -26,17 +26,10 @@ namespace splitTime.editor.level {
         handleMouseMove(event: MouseEvent): void
     }
 
-    function makeEntitySortHelper(levelEditorShared: LevelEditorShared): EntitySortHelper {
-        const collageManager = new CollageManager(levelEditorShared.server)
-        const bodyManager = new EntityBodyManager(levelEditorShared.level, collageManager)
-        return new EntitySortHelper(levelEditorShared.level, bodyManager)
-    }
-
     function data(this: VueLevelGraphicalEditor): Partial<VueLevelGraphicalEditor> {
         return {
             cancelNextContextMenu: false,
-            editorPadding: EDITOR_PADDING,
-            sorter: makeEntitySortHelper(this.levelEditorShared)
+            editorPadding: EDITOR_PADDING
         }
     }
 
@@ -98,6 +91,11 @@ namespace splitTime.editor.level {
         }
     }
 
+    function sorter(this: VueLevelGraphicalEditor): EntitySortHelper {
+        const bodyManager = new EntityBodyManager(this.levelEditorShared.level, this.levelEditorShared.collageManager)
+        return new EntitySortHelper(this.levelEditorShared.level, bodyManager)
+    }
+
     function traceTransform(this: VueLevelGraphicalEditor): string {
         return "translate(" + EDITOR_PADDING + "," + EDITOR_PADDING + ")"
     }
@@ -144,7 +142,7 @@ namespace splitTime.editor.level {
         }
         const newThing = client.withMetadata<"position", splitTime.level.file_data.Position>("position", object)
         this.level.positions.push(newThing)
-        this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(newThing.obj)
+        this.levelEditorShared.editProperties(getPositionPropertiesStuff(this.level, newThing.obj))
     }
     
     function createProp(this: VueLevelGraphicalEditor) {
@@ -165,7 +163,7 @@ namespace splitTime.editor.level {
 
         const newThing = client.withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)
         this.level.props.push(newThing)
-        this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(newThing.obj)
+        this.levelEditorShared.editProperties(getPropPropertiesStuff(this.level, newThing.obj))
     }
 
     function handleContextMenu(this: VueLevelGraphicalEditor, event: Event): void {
@@ -210,7 +208,7 @@ namespace splitTime.editor.level {
                     }
                     
                     this.levelEditorShared.pathInProgress = trace.obj
-                    this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(trace.obj)
+                    this.levelEditorShared.editProperties(getTracePropertiesStuff(this.level, trace.obj))
                 } else {
                     if(!this.inputs.ctrlDown) {
                         if(pathInProgress.type == splitTime.trace.Type.PATH) {
@@ -262,6 +260,7 @@ namespace splitTime.editor.level {
             containerWidth,
             containerHeight,
             levelOffsetStyleObject,
+            sorter,
             traceTransform
         },
         asyncComputed: {

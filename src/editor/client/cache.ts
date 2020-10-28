@@ -1,8 +1,6 @@
 namespace splitTime.editor.client {
     export class Cache<T> {
 
-        // This field is designed to help get around Vue missing changes to cache
-        private cacheChangeTrigger = 1
         private readonly cache: { [id: string]: CacheEntry<T> } = {}
         // Setting this to a higher number can help ensure that cache misses don't all happen at exactly the same time
         cacheLifeRandomFactor = 0
@@ -13,15 +11,13 @@ namespace splitTime.editor.client {
         ) {}
 
         private getCacheEntry(id: string): CacheEntry<T> {
-            nop(this.cacheChangeTrigger)
             if (!(id in this.cache)) {
-                this.cache[id] = {
+                MaybeVue.set(this.cache, id, {
                     refetchAt: 0,
                     isLoading: false,
                     failed: false,
                     data: null
-                }
-                this.cacheChangeTrigger++
+                })
             }
             const collageInfo = this.cache[id]
             if (!collageInfo.isLoading && collageInfo.refetchAt <= Date.now()) {
@@ -55,7 +51,6 @@ namespace splitTime.editor.client {
             } finally {
                 cacheEntry.refetchAt = Date.now() + this.cacheLife + splitTime.randomRangedInt(-this.cacheLifeRandomFactor, this.cacheLifeRandomFactor)
                 cacheEntry.isLoading = false
-                this.cacheChangeTrigger++
             }
         }
     }

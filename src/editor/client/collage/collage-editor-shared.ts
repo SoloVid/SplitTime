@@ -1,7 +1,7 @@
 namespace splitTime.editor.collage {
     export class SharedStuff implements CollageEditorShared {
         readonly info = {}
-        propertiesPaneStuff: client.ObjectProperties
+        propertiesPaneStuff: client.ObjectProperties | null
 
         constructor(
             private editor: VueCollageEditor
@@ -36,33 +36,45 @@ namespace splitTime.editor.collage {
             return this.editor.editorGlobalStuff.time
         }
 
+        editProperties(propertiesSpec: client.ObjectProperties): void {
+            this.propertiesPaneStuff = propertiesSpec
+            const doDelete = propertiesSpec.doDelete
+            if (!doDelete) {
+                this.editor.editorGlobalStuff.setOnDelete(() => {})
+                return
+            }
+            const fullDoDelete = () => {
+                this.propertiesPaneStuff = null
+                doDelete()
+                this.editor.editorGlobalStuff.setOnDelete(() => {})
+            }
+            propertiesSpec.doDelete = fullDoDelete
+            this.editor.editorGlobalStuff.setOnDelete(fullDoDelete)
+        }
+
         follow(follower: client.Followable): void {
             this.editor.editorGlobalStuff.setFollowers([follower])
         }
 
         selectMontage(montage: file.collage.Montage, andProperties: boolean = true): void {
             this.selectedMontage = montage
-            this.editor.editorGlobalStuff.setOnDelete(() => {
-                const index = this.collage.montages.indexOf(montage)
-                this.collage.montages.splice(index, 1)
-                this.selectedMontage = null
-                this.editor.editorGlobalStuff.setOnDelete(() => {})
-            })
             if (andProperties) {
-                this.propertiesPaneStuff = getMontagePropertiesStuff(montage)
+                this.editProperties(getMontagePropertiesStuff(montage, () => {
+                    const index = this.collage.montages.indexOf(montage)
+                    this.collage.montages.splice(index, 1)
+                    this.selectedMontage = null
+                }))
             }
         }
 
         selectFrame(frame: file.collage.Frame, andProperties: boolean): void {
             this.selectedFrame = frame
-            const frameWrapper = new FrameWrapper(frame, this.collage)
-            this.editor.editorGlobalStuff.setOnDelete(() => {
-                frameWrapper.delete()
-                this.selectedFrame = null
-                this.editor.editorGlobalStuff.setOnDelete(() => {})
-            })
             if (andProperties) {
-                this.propertiesPaneStuff = getFramePropertiesStuff(frameWrapper)
+                const frameWrapper = new FrameWrapper(frame, this.collage)
+                this.editProperties(getFramePropertiesStuff(frameWrapper, () => {
+                    frameWrapper.delete()
+                    this.selectedFrame = null
+                }))
             }
         }
 
@@ -74,14 +86,12 @@ namespace splitTime.editor.collage {
             }
             const frame = frames[0]
             this.selectFrame(frame, false)
-            this.editor.editorGlobalStuff.setOnDelete(() => {
-                for (const m of this.collage.montages) {
-                    m.frames = m.frames.filter(f => f !== montageFrame)
-                }
-                this.editor.editorGlobalStuff.setOnDelete(() => {})
-            })
             if (andProperties) {
-                this.propertiesPaneStuff = getMontageFramePropertiesStuff(montageFrame)
+                this.editProperties(getMontageFramePropertiesStuff(montageFrame, () => {
+                    for (const m of this.collage.montages) {
+                        m.frames = m.frames.filter(f => f !== montageFrame)
+                    }
+                }))
             }
         }
 

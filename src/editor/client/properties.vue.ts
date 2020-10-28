@@ -10,14 +10,25 @@ namespace splitTime.editor.client {
         title: string,
         thing: { [key: string]: string | number }
         fields: { [key: string]: FieldOptions }
+        doDelete: (() => void) | null
     }
 
     interface VueObjectProperties {
         // props
         editorGlobalStuff: client.GlobalEditorShared
-        title: string,
-        thing: { [key: string]: string | number }
-        fields: { [key: string]: FieldOptions }
+        spec: ObjectProperties
+        // methods
+        doDelete(): void
+    }
+
+    function doDelete(this: VueObjectProperties): void {
+        if (this.spec.doDelete === null) {
+            return
+        }
+        if (!window.confirm("Are you sure you want to delete this?")) {
+            return
+        }
+        this.spec.doDelete()
     }
 
     type InputType = "string" | "textarea" | "number" | "file"
@@ -38,6 +49,7 @@ namespace splitTime.editor.client {
         isReadonly: boolean
         // methods
         launchFileBrowser(): void
+        onChange(): void
     }
 
     function data(this: VueObjectProperty) {
@@ -118,6 +130,10 @@ namespace splitTime.editor.client {
         this.value = filePath.replace(prefixRegex, "")
     }
 
+    function onChange(this: VueObjectProperty): void {
+        this.editorGlobalStuff.createUndoPoint()
+    }
+
     function isReadonly(this: VueObjectProperty): boolean {
         return !!this.fieldOptions.readonly
     }
@@ -125,25 +141,25 @@ namespace splitTime.editor.client {
     Vue.component("object-properties", {
         props: {
             editorGlobalStuff: Object,
-            title: String,
-            thing: Object,
-            fields: Object
+            spec: Object
         },
         computed: {
         },
         methods: {
+            doDelete
         },
         template: `
 <div class="object-properties">
-    <div><strong>{{ title }}</strong></div>
+    <div><strong>{{ spec.title }}</strong></div>
     <object-property
-        v-for="(fieldOptions, key) in fields"
-        :key="title + key"
+        v-for="(fieldOptions, key) in spec.fields"
+        :key="spec.title + key"
         :editor-global-stuff="editorGlobalStuff"
-        :thing="thing"
+        :thing="spec.thing"
         :fieldKey="key"
         :fieldOptions="fieldOptions"
     ></object-property>
+    <a v-if="!!spec.doDelete" class="btn" @click="doDelete">Delete</a>
 </div>
         `
     })
@@ -171,7 +187,8 @@ namespace splitTime.editor.client {
             isReadonly
         },
         methods: {
-            launchFileBrowser
+            launchFileBrowser,
+            onChange
         },
         template: `
 <label :class="['object-property', 'field-key-' + fieldKey]">
@@ -179,12 +196,14 @@ namespace splitTime.editor.client {
     <input
         v-if="inputType === 'string'"
         v-model="value"
+        @change="onChange"
         :readonly="isReadonly"
         class="block"
     />
     <textarea
         v-if="inputType === 'textarea'"
         v-model="value"
+        @change="onChange"
         :readonly="isReadonly"
         class="block"
     />
@@ -192,6 +211,7 @@ namespace splitTime.editor.client {
         v-if="inputType === 'number'"
         type="number"
         v-model.number="value"
+        @change="onChange"
         :readonly="isReadonly"
         class="block"
     />
@@ -199,6 +219,7 @@ namespace splitTime.editor.client {
         v-if="inputType === 'file'"
         :value="value"
         @dblclick.left="launchFileBrowser"
+        @change="onChange"
         :readonly="true"
         class="block pointer"
     />

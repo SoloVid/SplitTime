@@ -74,7 +74,7 @@ namespace splitTime.editor.collage {
 
     function trackBody(this: VueMontageFrame, event: MouseEvent): void {
         assert(!!this.collageEditHelper, "trackBody() must be called with edit helper")
-        this.collageEditHelper.propertiesPaneStuff = getBodySpecPropertiesStuff(this.body)
+        this.collageEditHelper.editProperties(getBodySpecPropertiesStuff(this.body))
         const affectedMontageFrames = this.editAffectsAllFrames ? this.montage.frames : [this.montageFrame]
         this.collageEditHelper.follow({
             shift(dx: number, dy: number) {

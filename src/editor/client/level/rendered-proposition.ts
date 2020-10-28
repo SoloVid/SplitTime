@@ -133,9 +133,9 @@ namespace splitTime.editor.level {
         })
         const obj = this.p.obj
         if ("playerOcclusionFadeFactor" in obj) {
-            this.levelEditorShared.propertiesPaneStuff = getPropPropertiesStuff(obj)
+            this.levelEditorShared.editProperties(getPropPropertiesStuff(this.levelEditorShared.level, obj))
         } else {
-            this.levelEditorShared.propertiesPaneStuff = getPositionPropertiesStuff(obj)
+            this.levelEditorShared.editProperties(getPositionPropertiesStuff(this.levelEditorShared.level, obj))
         }
     }
 

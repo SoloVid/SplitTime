@@ -12,11 +12,12 @@ namespace splitTime.editor.level {
         return {
             title: "Level Properties",
             thing: level as SimplifiedLevel,
-            fields: fieldObject
+            fields: fieldObject,
+            doDelete: null
         }
     }
 
-    export function getGroupPropertiesStuff(group: splitTime.level.file_data.Group): client.ObjectProperties {
+    export function getGroupPropertiesStuff(level: Level, group: splitTime.level.file_data.Group): client.ObjectProperties {
         const fields = {
             id: {},
             defaultZ: {},
@@ -26,11 +27,14 @@ namespace splitTime.editor.level {
         return {
             title: "Group Properties",
             thing: group as SimplifiedGroup,
-            fields
+            fields,
+            doDelete: () => {
+                level.groups = level.groups.filter(g => g.obj !== group)
+            }
         }
     }
     
-    export function getPropPropertiesStuff(prop: splitTime.level.file_data.Prop): client.ObjectProperties {
+    export function getPropPropertiesStuff(level: Level, prop: splitTime.level.file_data.Prop): client.ObjectProperties {
         const fields = {
             id: {},
             group: {},
@@ -46,11 +50,14 @@ namespace splitTime.editor.level {
         return {
             title: "Prop Properties",
             thing: prop as SimplifiedProp,
-            fields
+            fields,
+            doDelete: () => {
+                level.props = level.props.filter(p => p.obj !== prop)
+            }
         }
     }
     
-    export function getPositionPropertiesStuff(position: splitTime.level.file_data.Position): client.ObjectProperties {
+    export function getPositionPropertiesStuff(level: Level, position: splitTime.level.file_data.Position): client.ObjectProperties {
         const fields = {
             id: {},
             group: {},
@@ -65,11 +72,14 @@ namespace splitTime.editor.level {
         return {
             title: "Position Properties",
             thing: position as SimplifiedPosition,
-            fields
+            fields,
+            doDelete: () => {
+                level.positions = level.positions.filter(p => p.obj !== position)
+            }
         }
     }
     
-    export function getTracePropertiesStuff(trace: splitTime.level.file_data.Trace): client.ObjectProperties {
+    export function getTracePropertiesStuff(level: Level, trace: splitTime.level.file_data.Trace): client.ObjectProperties {
         interface TraceFieldOptions {
             id: client.FieldOptions
             group: client.FieldOptions
@@ -116,7 +126,10 @@ namespace splitTime.editor.level {
         return {
             title: "Trace Properties",
             thing: trace as SimplifiedTrace,
-            fields: fields as unknown as { [key: string]: client.FieldOptions }
+            fields: fields as unknown as { [key: string]: client.FieldOptions },
+            doDelete: () => {
+                level.traces = level.traces.filter(t => t.obj !== trace)
+            }
         }
     }
 }

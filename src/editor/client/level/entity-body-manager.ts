@@ -3,7 +3,6 @@ namespace splitTime.editor.level {
     export class EntityBodyManager {
 
         // This field is designed to help get around Vue missing changes to editorIdToBody
-        private mapChangeTrigger = 1
         private readonly editorIdToBody: { [editorId: string]: body.GraphBody } = {}
         private readonly placeholderDrawable: body.GraphDrawable
 
@@ -21,12 +20,10 @@ namespace splitTime.editor.level {
         }
 
         getUpdatedBody(editorEntity: EditorEntity): body.GraphBody | null {
-            nop(this.mapChangeTrigger)
             const editorId = editorEntity.metadata.editorId
             if (!(editorId in this.editorIdToBody)) {
                 // FTODO: don't make full Body
-                this.editorIdToBody[editorId] = new Body()
-                this.mapChangeTrigger++
+                MaybeVue.set(this.editorIdToBody, editorId, new Body())
             }
             const body = this.editorIdToBody[editorId]
             if (editorEntity.type === "trace") {

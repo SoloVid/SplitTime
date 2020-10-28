@@ -1,10 +1,13 @@
 namespace splitTime.editor {
+    const UNDO_STACK_SIZE = 1000
     class GlobalEditorStuff implements client.GlobalEditorShared {
         gridEnabled = false
         cachedGridCell = new Vector2D(32, 32)
         followers: client.Followable[] | null = null
         previousFollowers: client.Followable[] | null = null
         onDeleteCallback = () => {}
+        undoStack: string[] = []
+        redoStack: string[] = []
 
         constructor(
             private readonly editor: VueEditor
@@ -23,6 +26,53 @@ namespace splitTime.editor {
 
         get time(): game_seconds {
             return this.editor.time
+        }
+
+        createUndoPoint(): void {
+            if (!this.editor.level && !this.editor.collage) {
+                return
+            }
+            const currentState = this.editor.exportString()
+            // Don't push if this is a duplicate state
+            if (this.undoStack[this.undoStack.length - 1] === currentState) {
+                return
+            }
+            this.undoStack.push(currentState)
+            if (this.undoStack.length > UNDO_STACK_SIZE) {
+                this.undoStack.shift()
+            }
+            this.redoStack = []
+            log.debug("undo point created: ", this.undoStack)
+        }
+
+        undo(): void {
+            log.debug("undo requested")
+            const currentState = this.editor.exportString()
+            let state: string = currentState
+            while (state === currentState) {
+                if (this.undoStack.length === 0) {
+                    log.debug("Can't undo; already at earliest")
+                    return
+                }
+                state = this.undoStack.pop() as string
+            }
+            this.redoStack.push(currentState)
+            this.editor.importString(state)
+        }
+
+        redo(): void {
+            log.debug("redo requested")
+            const currentState = this.editor.exportString()
+            let state: string = currentState
+            while (state === currentState) {
+                if (this.redoStack.length === 0) {
+                    log.debug("Can't redo; already at latest")
+                    return
+                }
+                state = this.redoStack.pop() as string
+            }
+            this.undoStack.push(currentState)
+            this.editor.importString(state)
         }
 
         openFileSelect(rootDirectory: string): PromiseLike<string> {
@@ -66,6 +116,8 @@ namespace splitTime.editor {
         createCollage(): void
         createLevel(): void
         editSettings(): void
+        exportString(): file.json
+        importString(file: file.json): void
         moveFollowers(dx: number, dy: number, fallbackToPrevious?: boolean): void
         handleMouseMove(event: MouseEvent): void
         handleMouseDown(event: MouseEvent): void
@@ -151,6 +203,31 @@ namespace splitTime.editor {
         this.supervisorControl.triggerSettings()
     }
 
+    function exportString(this: VueEditor): file.json {
+        if (this.level) {
+            return level.exportLevelJson(this.level)
+        } else if (this.collage) {
+            return toJson(this.collage)
+        } else {
+            throw new Error("What are you trying to export?")
+        }
+    }
+
+    function importString(this: VueEditor, file: file.json): void {
+        this.level = null
+        this.collage = null
+        // Promise.resolve().then(() => {
+            const fileObject = JSON.parse(file)
+            if (splitTime.level.instanceOf.FileData(fileObject)) {
+                this.level = level.importLevel(file)
+            } else if (splitTime.file.instanceOf.Collage(fileObject)) {
+                this.collage = fileObject
+            } else {
+                throw new Error("Unrecognized file type")
+            }
+        // })
+    }
+
     function moveFollowers(this: VueEditor, dx: number, dy: number, fallbackToPrevious: boolean = true): void {
         let toMove = this.globalEditorStuff.followers
         if (fallbackToPrevious && toMove === null) {
@@ -177,6 +254,7 @@ namespace splitTime.editor {
 
     function handleMouseDown(this: VueEditor, event: MouseEvent): void {
         this.inputs.mouse.isDown = true
+        this.globalEditorStuff.createUndoPoint()
     }
 
     function handleMouseUp(this: VueEditor, event: MouseEvent): void {
@@ -185,6 +263,7 @@ namespace splitTime.editor {
             this.globalEditorStuff.previousFollowers = this.globalEditorStuff.followers
             this.globalEditorStuff.followers = null
         }
+        this.globalEditorStuff.createUndoPoint()
     }
 
     function handleKeyDown(this: VueEditor, event: KeyboardEvent): void {
@@ -195,13 +274,27 @@ namespace splitTime.editor {
             case "textarea":
             return
         }
-        
+        const ctrlKey = event.ctrlKey || event.metaKey
+
         const keycode = splitTime.controls.keyboard.keycode
         var specialKey = true
         switch(event.which) {
             case keycode.DEL:
+                this.globalEditorStuff.createUndoPoint()
                 this.globalEditorStuff.onDeleteCallback()
+                this.globalEditorStuff.createUndoPoint()
                 break;
+            case keycode.Z:
+                if (ctrlKey) {
+                    this.globalEditorStuff.undo()
+                }
+                break;
+            case keycode.Y:
+                if (ctrlKey) {
+                    this.globalEditorStuff.redo()
+                }
+                break;
+            case keycode.CTRL:
             case keycode.SHIFT:
                 this.inputs.ctrlDown = true
                 break
@@ -228,9 +321,9 @@ namespace splitTime.editor {
 
     function handleKeyUp(this: VueEditor, event: KeyboardEvent): void {
         const keycode = splitTime.controls.keyboard.keycode
-        if(event.which == keycode.SHIFT) { // shift
+        if(event.which == keycode.SHIFT || event.which === keycode.CTRL) {
             this.inputs.ctrlDown = false
-        } else if(event.which == keycode.ESC) { // esc
+        } else if(event.which == keycode.ESC) {
             if (this.level === null) {
                 log.debug("No level to export")
             } else {
@@ -256,14 +349,10 @@ namespace splitTime.editor {
             const response = await this.server.api.projectFiles.readFile.fetch(
                 this.server.withProject({ filePath }))
             const contents = atob(response.base64Contents)
-            const fileObject = JSON.parse(contents)
-            if (splitTime.level.instanceOf.FileData(fileObject)) {
-                this.level = level.importLevel(contents)
-                updatePageTitle(level.getLevelPageTitle(filePath, this.level))
-            } else if (splitTime.file.instanceOf.Collage(fileObject)) {
-                this.collage = fileObject
+            try {
+                this.importString(contents)
                 updatePageTitle(filePath)
-            } else {
+            } catch (e: unknown) {
                 alert("Editing this file type is not supported. Is it possible your data is corrupted?")
             }
         }
@@ -285,14 +374,7 @@ namespace splitTime.editor {
         }
         this.fileBrowserReturnListener = async filePath => {
             this.lastServerFile = filePath
-            let fileContents: file.json
-            if (this.level) {
-                fileContents = level.exportLevelJson(this.level)
-            } else if (this.collage) {
-                fileContents = toJson(this.collage)
-            } else {
-                throw new Error("What are you trying to save?")
-            }
+            const fileContents = this.exportString()
             await this.server.api.projectFiles.writeFile.fetch(
                 this.server.withProject({ filePath, base64Contents: btoa(fileContents) })
             )
@@ -336,6 +418,8 @@ namespace splitTime.editor {
             createLevel,
             clickFileChooser,
             editSettings,
+            exportString,
+            importString,
             moveFollowers,
             handleMouseMove,
             handleMouseDown,

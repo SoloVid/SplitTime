@@ -58,7 +58,7 @@ namespace splitTime.editor.collage {
 
     function onSupervisorControlChange(this: VueCollageEditor): void {
         this.supervisorControl.triggerSettings = () => {
-            this.sharedStuff.propertiesPaneStuff = getCollagePropertiesStuff(this.collage)
+            this.sharedStuff.editProperties(getCollagePropertiesStuff(this.collage))
         }
     }
 
@@ -92,10 +92,9 @@ namespace splitTime.editor.collage {
     <div style="display: flex; flex-flow: row wrap;" class="vertical-bar-separators">
         <div class="menu">
             <object-properties
+                v-if="!!sharedStuff.propertiesPaneStuff"
                 :editor-global-stuff="editorGlobalStuff"
-                :title="sharedStuff.propertiesPaneStuff.title"
-                :thing="sharedStuff.propertiesPaneStuff.thing"
-                :fields="sharedStuff.propertiesPaneStuff.fields"
+                :spec="sharedStuff.propertiesPaneStuff"
             ></object-properties>
         </div>
         <div class="standard-padding">

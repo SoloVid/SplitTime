@@ -10,7 +10,7 @@ namespace splitTime.editor.level {
         selectedTraceType: string = trace.Type.SOLID
         pathInProgress: splitTime.level.file_data.Trace | null = null
         readonly info = {}
-        propertiesPaneStuff: client.ObjectProperties
+        propertiesPaneStuff: client.ObjectProperties | null
 
         constructor(
             private editor: VueLevelEditor
@@ -45,6 +45,22 @@ namespace splitTime.editor.level {
 
         follow(follower: client.Followable): void {
             this.editor.editorGlobalStuff.setFollowers([follower])
+        }
+
+        editProperties(propertiesSpec: client.ObjectProperties): void {
+            this.propertiesPaneStuff = propertiesSpec
+            const doDelete = propertiesSpec.doDelete
+            if (!doDelete) {
+                this.editor.editorGlobalStuff.setOnDelete(() => {})
+                return
+            }
+            const fullDoDelete = () => {
+                this.propertiesPaneStuff = null
+                doDelete()
+                this.editor.editorGlobalStuff.setOnDelete(() => {})
+            }
+            propertiesSpec.doDelete = fullDoDelete
+            this.editor.editorGlobalStuff.setOnDelete(fullDoDelete)
         }
     }
 }

@@ -17,7 +17,6 @@ namespace splitTime.editor.level {
         readonly level: Level
         mode: Mode
         pathInProgress: splitTime.level.file_data.Trace | null
-        propertiesPaneStuff: client.ObjectProperties
         selectedTraceType: string
         selectedCollage: string
         selectedMontage: string
@@ -27,5 +26,6 @@ namespace splitTime.editor.level {
         readonly time: game_seconds
         follow(follower: client.Followable): void
         shouldDragBePrevented(): boolean
+        editProperties(propertiesSpec: client.ObjectProperties): void
     }
 }

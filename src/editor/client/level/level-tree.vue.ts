@@ -24,7 +24,7 @@ namespace splitTime.editor.level {
         }
         this.level.groups.push(client.withMetadata("group", group))
         const wrapper = new GroupWrapper(group, this.level)
-        this.levelEditorShared.propertiesPaneStuff = getGroupPropertiesStuff(wrapper)
+        this.levelEditorShared.editProperties(getGroupPropertiesStuff(this.level, wrapper))
     }
 
     Vue.component("level-tree", {

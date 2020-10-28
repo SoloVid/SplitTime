@@ -6,11 +6,12 @@ namespace splitTime.editor.level {
         supervisorControl: client.EditorSupervisorControl
         level: Level
         // data
-        sharedStuff: LevelEditorShared
+        sharedStuff: SharedStuff
         // computed
         editorWidth: number
         editorHeight: number
         // methods
+        onLevelChange(): void
         onSupervisorControlChange(): void
         trackLeftMenuResize(): void
         trackRightMenuResize(): void
@@ -29,9 +30,13 @@ namespace splitTime.editor.level {
         return this.$el.clientHeight
     }
 
+    function onLevelChange(this: VueLevelEditor): void {
+        this.sharedStuff.propertiesPaneStuff = null
+    }
+
     function onSupervisorControlChange(this: VueLevelEditor): void {
         this.supervisorControl.triggerSettings = () => {
-            this.sharedStuff.propertiesPaneStuff = getLevelPropertiesStuff(this.level)
+            this.sharedStuff.editProperties(getLevelPropertiesStuff(this.level))
         }
     }
 
@@ -81,6 +86,7 @@ namespace splitTime.editor.level {
             trackRightMenuResize
         },
         watch: {
+            level: onLevelChange,
             supervisorControl: onSupervisorControlChange
         },
         template: `
@@ -93,10 +99,9 @@ namespace splitTime.editor.level {
             ></level-editor-tools>
             <hr/>
             <object-properties
+                v-if="!!sharedStuff.propertiesPaneStuff"
                 :editor-global-stuff="editorGlobalStuff"
-                :title="sharedStuff.propertiesPaneStuff.title"
-                :thing="sharedStuff.propertiesPaneStuff.thing"
-                :fields="sharedStuff.propertiesPaneStuff.fields"
+                :spec="sharedStuff.propertiesPaneStuff"
             ></object-properties>
         </div>
         <div

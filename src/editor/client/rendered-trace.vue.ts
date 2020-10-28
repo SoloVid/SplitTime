@@ -206,7 +206,7 @@ namespace splitTime.editor.level {
             }
         }
         this.levelEditorShared.follow(follower)
-        this.levelEditorShared.propertiesPaneStuff = getTracePropertiesStuff(this.trace)
+        this.levelEditorShared.editProperties(getTracePropertiesStuff(this.levelEditorShared.level, this.trace))
     }
     function toggleHighlight(this: VueRenderedTrace, highlight: boolean): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {

@@ -17,9 +17,9 @@ namespace splitTime.editor.collage {
         gridEnabled: boolean
         selectedFrame: file.collage.Frame | null
         selectedMontage: file.collage.Montage | null
-        propertiesPaneStuff: client.ObjectProperties
         /** Stuff to display to the user */
         readonly info: { [name: string]: string | number }
+        editProperties(propertiesSpec: client.ObjectProperties): void
         follow(follower: client.Followable): void
         selectFrame(frame: file.collage.Frame, andProperties: boolean): void
         selectMontage(montage: file.collage.Montage, andProperties: boolean): void
