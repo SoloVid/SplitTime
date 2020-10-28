@@ -129,9 +129,9 @@ namespace splitTime {
                 var prop = this.fileData.props[iProp]
                 const collageMontage = G.ASSETS.collages.get(prop.collage).getMontage(prop.montage)
                 // const sprite = new Sprite(prop.collage, prop.montage)
-                const sprite = new Sprite(prop.collage)
-                sprite.playerOcclusionFadeFactor = prop.playerOcclusionFadeFactor
                 const body = new Body()
+                const sprite = new Sprite(body, prop.collage)
+                sprite.playerOcclusionFadeFactor = prop.playerOcclusionFadeFactor
                 body.width = collageMontage.bodySpec.width
                 body.depth = collageMontage.bodySpec.depth
                 body.height = collageMontage.bodySpec.height

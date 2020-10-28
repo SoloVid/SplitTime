@@ -34,7 +34,7 @@ namespace splitTime.conversation {
             this.isTornDown = true
         }
 
-        private makeDetectionListener(detective: Body, interruptibles: readonly InterruptibleSpec[]): (delta: number) => "SC" | undefined {
+        private makeDetectionListener(detective: Body, interruptibles: readonly InterruptibleSpec[]): (delta: number) => STOP_CALLBACKS_TYPE | undefined {
             return (delta: number) => {
                 if (this.isTornDown) {
                     return splitTime.STOP_CALLBACKS

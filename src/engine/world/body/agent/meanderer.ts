@@ -3,17 +3,16 @@ namespace splitTime.agent {
         pixels: number = 0
         counter: Signaler | null = null
 
-        constructor(private readonly body: splitTime.Body) {
+        constructor(private readonly spriteBody: SpriteBody) {
+        }
+
+        private get body(): Body {
+            return this.spriteBody.body
         }
 
         regularMotion(delta: game_seconds, newSteps: number, newDir: direction_t) {
             if(this.pixels > 0) {
-                // TODO: re-evaluate
-                for (const drawable of this.body.drawables) {
-                    if (drawable instanceof Sprite) {
-                        drawable.requestStance("walk", newDir)
-                    }
-                }
+                this.spriteBody.sprite.requestStance("walk", newDir)
                 var pixelsThisFrame = delta * this.body.spd
                 this.body.mover.zeldaBump(this.body.dir, pixelsThisFrame)
                 this.pixels -= pixelsThisFrame;
@@ -39,10 +38,10 @@ namespace splitTime.agent {
     export class RandomMeandering implements TimeNotified, npc.Behavior {
         private base: BaseMeanderer
         constructor(
-            private readonly body: Body,
+            private readonly spriteBody: SpriteBody,
             private readonly levelManager: LevelManager
         ) {
-            this.base = new BaseMeanderer(body)
+            this.base = new BaseMeanderer(spriteBody)
         }
 
         isComplete(): boolean {
@@ -54,7 +53,7 @@ namespace splitTime.agent {
         }
 
         notifyTimeAdvance(delta: game_seconds): void {
-            if (this.levelManager.getCurrent() !== this.body.level) {
+            if (this.levelManager.getCurrent() !== this.spriteBody.body.level) {
                 return
             }
             this.base.regularMotion(delta, randomInt(16) + 16, direction.getRandom())
@@ -62,8 +61,8 @@ namespace splitTime.agent {
     }
     export class LineMeandering implements TimeNotified, npc.Behavior {
         private base: BaseMeanderer
-        constructor(private readonly body: Body) {
-            this.base = new BaseMeanderer(body)
+        constructor(private readonly spriteBody: SpriteBody) {
+            this.base = new BaseMeanderer(spriteBody)
         }
         
         isComplete(): boolean {
@@ -75,13 +74,13 @@ namespace splitTime.agent {
         }
 
         notifyTimeAdvance(delta: game_seconds): void {
-            this.base.regularMotion(delta, 64, Math.round((this.body.dir + 2)%4))
+            this.base.regularMotion(delta, 64, Math.round((this.spriteBody.body.dir + 2)%4))
         }
     }
     export class SquareMeandering implements TimeNotified, npc.Behavior {
         private base: BaseMeanderer
-        constructor(private readonly body: Body) {
-            this.base = new BaseMeanderer(body)
+        constructor(private readonly spriteBody: SpriteBody) {
+            this.base = new BaseMeanderer(spriteBody)
         }
         
         isComplete(): boolean {
@@ -93,7 +92,7 @@ namespace splitTime.agent {
         }
 
         notifyTimeAdvance(delta: game_seconds): void {
-            this.base.regularMotion(delta, 64, Math.round((this.body.dir + 1)%4))
+            this.base.regularMotion(delta, 64, Math.round((this.spriteBody.body.dir + 1)%4))
         }
     }
 }

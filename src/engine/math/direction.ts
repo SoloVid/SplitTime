@@ -122,15 +122,7 @@ namespace splitTime.direction {
         throw new Error("Types of from and to should be matched")
     }
 
-    export function simplifyToCardinal(realDir: string | number | null) {
-        if (realDir === null) {
-            return null
-        }
-
-        if (typeof realDir === "string") {
-            return realDir.charAt(0)
-        }
-
+    export function simplifyToCardinal(realDir: direction_t): direction_t {
         return splitTime.mod(Math.round(realDir), 4)
     }
 

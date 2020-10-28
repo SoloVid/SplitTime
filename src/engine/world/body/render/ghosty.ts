@@ -20,16 +20,16 @@ namespace splitTime.body {
     }
 
     export function createGhost(
-        sourceBody: Body,
+        sourceSpriteBody: SpriteBody,
         location: ILevelLocation2
-    ): Body {
-        const tempDrawable = extractSprite(sourceBody).clone()
+    ): SpriteBody {
+        const tempSprite = sourceSpriteBody.sprite.clone()
         const tempBody = new Body()
         tempBody.width = 0
         tempBody.depth = 0
         tempBody.putInLocation(location)
-        tempBody.drawables.push(tempDrawable)
-        return tempBody
+        tempBody.drawables.push(tempSprite)
+        return new SpriteBody(tempSprite, tempBody)
     }
 
     export function fadeInBody(
@@ -107,15 +107,16 @@ namespace splitTime.body {
         body: Body,
         location: ILevelLocation2
     ): PromiseLike<void> {
-        const ghost = createGhost(body, body)
+        const spriteBody = new SpriteBody(extractSprite(body), body)
+        const ghost = createGhost(spriteBody, body)
 
         // If either finishes, we don't want the other to continue
         function clearBoth() {
-            ghost.clearLevel()
+            ghost.body.clearLevel()
             body.fadeEnteringLevelPromise = null
         }
 
-        fadeOutBody(ghost).then(clearBoth)
+        fadeOutBody(ghost.body).then(clearBoth)
         body.putInLocation(location)
         body.fadeEnteringLevelPromise = new Pledge()
         return body.fadeEnteringLevelPromise.then(clearBoth)

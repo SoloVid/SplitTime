@@ -5,11 +5,18 @@ namespace splitTime {
         public readonly movementAgent: agent.BestEffortMovementAgent
 
         constructor(
-            public readonly body: Body,
-            public readonly sprite: Sprite,
+            public readonly spriteBody: SpriteBody,
             public behavior: npc.BehaviorChoice = new npc.BehaviorChoice()
         ) {
-            this.movementAgent = new agent.BestEffortMovementAgent(body)
+            this.movementAgent = new agent.BestEffortMovementAgent(spriteBody)
+        }
+
+        get body(): Body {
+            return this.spriteBody.body
+        }
+
+        get sprite(): Sprite {
+            return this.spriteBody.sprite
         }
     }
 }

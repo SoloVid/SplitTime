@@ -68,12 +68,12 @@ namespace splitTime {
 
             for (var iBody = 0; iBody < bodies.length; iBody++) {
                 var body = bodies[iBody]
-                this.bodyRenderer.feedBody(body, body === playerBody)
                 for (const drawable of body.drawables) {
                     if (typeof drawable.prepareForRender === "function") {
                         drawable.prepareForRender()
                     }
                 }
+                this.bodyRenderer.feedBody(body, body === playerBody)
                 if (body.shadow) {
                     var shadow = new splitTime.body.Shadow(body)
                     shadow.prepareForRender()

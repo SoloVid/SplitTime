@@ -2,10 +2,11 @@ namespace splitTime {
     let nextRef = 10
 
     export class Sprite implements splitTime.body.Drawable {
-        private _time: game_seconds = Number.NEGATIVE_INFINITY
-        private _timeFrameStarted: game_seconds = Number.NEGATIVE_INFINITY
+        private _time: game_seconds = 0
+        private _timeFrameStarted: game_seconds = 0
         readonly ref: int
         constructor(
+            private readonly body: file.collage.BodySpec,
             private readonly collageId: string,
             private readonly defaultMontageId?: string
         ) {
@@ -41,7 +42,7 @@ namespace splitTime {
         private getCurrentMontage(): collage.Montage {
             if (this.stance === Sprite.DEFAULT_STANCE) {
                 if (this.defaultMontageId) {
-                    return this.collage.getMontage(this.defaultMontageId)
+                    return this.collage.getMontage(this.defaultMontageId, this.dir)
                 }
                 return this.collage.getDefaultMontage(this.dir)
             }
@@ -57,14 +58,8 @@ namespace splitTime {
         }
 
         getCanvasRequirements(): splitTime.body.CanvasRequirements {
-            const frame = this.getCurrentFrame()
             return new splitTime.body.CanvasRequirements(
-                math.Rect.make(
-                    0 - frame.box.width / 2 + frame.offset.x,
-                    0 - frame.box.height + frame.offset.y,
-                    frame.box.width,
-                    frame.box.height
-                )
+                this.getCurrentFrame().getTargetBox(this.body)
             )
         }
 
@@ -82,21 +77,20 @@ namespace splitTime {
             var tImg = this.getImage()
 
             const frame = this.getCurrentFrame()
-            var x = -Math.round(frame.box.width / 2) - frame.offset.x
-            var y = -frame.box.height - frame.offset.y
+            const targetBox = frame.getTargetBox(this.body)
 
             ctx.globalAlpha = ctx.globalAlpha * this.opacityModifier
 
             ctx.drawImage(
-                tImg,
+                this.getImage(),
                 frame.box.x,
                 frame.box.y,
                 frame.box.width,
                 frame.box.height,
-                x,
-                y,
-                frame.box.width,
-                frame.box.height
+                targetBox.x,
+                targetBox.y,
+                targetBox.width,
+                targetBox.height
             )
         }
 
@@ -145,8 +139,30 @@ namespace splitTime {
         }
 
         prepareForRender() {
-            this.finalizeStance()
-            this.finalizeFrame()
+            const oldStance = this.stance
+            let currentFrame = this.getCurrentFrame()
+
+            if (!this.requestedStance || !this.collage.hasMontage(this.requestedStance)) {
+                this.requestedStance = Sprite.DEFAULT_STANCE
+            }
+            this.stance = this.requestedStance
+            this.dir = this.requestedDir
+            const montage = this.getCurrentMontage()
+
+            if (
+                oldStance !== this.stance ||
+                this.requestedFrameReset
+            ) {
+                this.frame = 0
+                this._timeFrameStarted = this._time
+            } else {
+                //Only update on frame tick
+                while (this._time > this._timeFrameStarted + currentFrame.duration) {
+                    this._timeFrameStarted = this._timeFrameStarted + currentFrame.duration
+                    this.frame = (this.frame + 1) % montage.frames.length
+                    currentFrame = this.getCurrentFrame()
+                }
+            }
         }
         cleanupAfterRender() {
             if (this.autoReset) {
@@ -159,7 +175,12 @@ namespace splitTime {
         }
 
         clone(): splitTime.Sprite {
-            var clone = new splitTime.Sprite(this.collageId)
+            const newBody = {
+                width: this.body.width,
+                depth: this.body.depth,
+                height: this.body.height
+            }
+            var clone = new splitTime.Sprite(newBody, this.collageId)
             clone.omniDir = this.omniDir
             clone.rotate = this.rotate
             clone.opacityModifier = this.opacityModifier

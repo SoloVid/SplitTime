@@ -60,13 +60,15 @@ namespace splitTime.menu {
 
         handleMenu() {
             // TODO: improve implementation
-            /*This menu system navigates on a grid even though points are listed linearly.
-			Basically, the code finds the closest point (in the direction of the key press)
-			to the current point that is within a 90 degree viewing angle from the point in that direction.*/
+            // This menu system navigates on a grid even though points are listed linearly.
+            // Basically, the code finds the closest point (in the direction of the key press)
+            // to the current point that is within a 90 degree viewing angle from the point in that direction.
 
-            var controlDirection = splitTime.direction.simplifyToCardinal(
-                this.controls.joyStick.getDirection()
-            )
+            const rawDirection = this.controls.joyStick.getDirection()
+            let controlDirection = null
+            if (rawDirection !== null) {
+                controlDirection = splitTime.direction.simplifyToCardinal(rawDirection)
+            }
 
             var prevPoint = this.currentPoint
             var iPoint = prevPoint

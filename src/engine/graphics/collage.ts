@@ -39,7 +39,7 @@ namespace splitTime {
 
             if (!this.hasMontage(defaultMontageId)) {
                 if (!allowErrors) {
-                    throw new Error("Default montage " + defaultMontageId + " not found in collage")
+                    throw new Error("Default montage \"" + defaultMontageId + "\" not found in collage")
                 }
                 // log.warn("Default montage " + defaultMontageId + " not found in collage")
             }
@@ -51,13 +51,19 @@ namespace splitTime {
 
         getMontage(id: string, direction?: direction_t | string): collage.Montage {
             if (!this.hasMontage(id)) {
-                throw new Error("Montage " + id + " not found in collage")
+                throw new Error("Montage \"" + id + "\" not found in collage")
             }
             const bucket = this.montageMap[id]
-            const dirKey = direction === undefined ? DEFAULT_MONTAGE_DIR :
-                splitTime.direction.interpret(direction)
+            if (direction === undefined) {
+                return bucket[DEFAULT_MONTAGE_DIR]
+            }
+            const dirKey = splitTime.direction.interpret(direction)
             if (dirKey in bucket) {
                 return bucket[dirKey]
+            }
+            const simplerDirKey = splitTime.direction.simplifyToCardinal(dirKey)
+            if (simplerDirKey in bucket) {
+                return bucket[simplerDirKey]
             }
             return bucket[DEFAULT_MONTAGE_DIR]
         }

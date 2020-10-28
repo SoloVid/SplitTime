@@ -91,6 +91,10 @@ namespace splitTime.body {
 
             for (const drawable of body.drawables) {
                 const drawArea = drawable.getCanvasRequirements().rect
+                drawArea.x += body.x
+                //Combine y and z axes to get the "screen y" position,
+                // which is the y location on the 2D screen
+                drawArea.y += body.y - body.z
                 //If the body is in bounds
                 if (
                     drawArea.y2 >= screen.y &&
