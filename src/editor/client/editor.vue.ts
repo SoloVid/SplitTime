@@ -42,11 +42,9 @@ namespace splitTime.editor {
                 this.undoStack.shift()
             }
             this.redoStack = []
-            log.debug("undo point created: ", this.undoStack)
         }
 
         undo(): void {
-            log.debug("undo requested")
             const currentState = this.editor.exportString()
             let state: string = currentState
             while (state === currentState) {
@@ -61,7 +59,6 @@ namespace splitTime.editor {
         }
 
         redo(): void {
-            log.debug("redo requested")
             const currentState = this.editor.exportString()
             let state: string = currentState
             while (state === currentState) {

@@ -50,7 +50,6 @@ namespace splitTime.body.collisions {
             if (z + dz < level.lowestLayerZ) {
                 dz = -(z - level.lowestLayerZ)
             }
-            // log.debug("new actual: " + actualNewZ)
 
             const dzRoundedUp = dz > 0 ? Math.ceil(dz) : Math.floor(dz)
             const adz = Math.abs(dzRoundedUp)

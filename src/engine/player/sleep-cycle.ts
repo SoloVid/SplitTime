@@ -10,7 +10,6 @@ namespace splitTime.player {
             private readonly onWake: () => void
         ) {
             this.stamina.registerKOListener(() => {
-                splitTime.log.debug("KO!")
                 this.worldRenderer.fadeTo(new splitTime.light.Color(0,0,0)).then(() => {
                     this.onKO()
                     this.worldRenderer.fadeIn()
