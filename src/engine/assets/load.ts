@@ -43,8 +43,14 @@ namespace splitTime {
             G.ASSETS.audio.registerSoundEffect(soundFxFile)
         }
 
+        for (const collageFilePath in masterData.collages) {
+            const collageData = masterData.collages[collageFilePath]
+            assert(splitTime.file.instanceOf.Collage(collageData), "\"" + collageFilePath + "\" is an invalid collage")
+        }
+
         for (const levelFilePath in masterData.levels) {
             const levelData = masterData.levels[levelFilePath]
+            assert(splitTime.level.instanceOf.FileData(levelData), "\"" + levelFilePath + "\" is an invalid level")
             var levelName = levelFilePath.replace(/\.json$/, "")
             var level = perspective.world.getLevel(levelName)
             promiseCollection.push(
