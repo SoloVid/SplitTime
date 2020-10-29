@@ -17,14 +17,6 @@ namespace splitTime.utils {
         }
         t.assert(!!errString1, "Passing an invalid color name should throw an error.")
 
-        var errString2
-        try{
-            const invalidColor = new light.Color(-1,0,0)
-        } catch (error) {
-            errString2 = error
-        }
-        t.assert(false, "Passing an invalid color name should throw an error. " + errString2)
-
         const whiteColor = new light.Color("white")
         t.assertEqual(255, whiteColor.r, "The color name 'white' should have an R value of 255.")
         t.assertEqual(255, whiteColor.g, "The color name 'white' should have an G value of 255.")
