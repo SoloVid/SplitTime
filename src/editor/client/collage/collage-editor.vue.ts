@@ -6,13 +6,14 @@ namespace splitTime.editor.collage {
         supervisorControl: client.EditorSupervisorControl
         collage: file.Collage
         // data
-        sharedStuff: CollageEditorShared
+        sharedStuff: SharedStuff
         // computed
         inputs: client.UserInputs
         position: Coordinates2D
         editorWidth: number
         editorHeight: number
         // methods
+        onCollageChange(): void
         onSupervisorControlChange(): void
     }
 
@@ -56,6 +57,11 @@ namespace splitTime.editor.collage {
         return this.$el.clientHeight
     }
 
+    function onCollageChange(this: VueCollageEditor): void {
+        this.sharedStuff.selectedFrame = null
+        this.sharedStuff.selectedMontage = null
+    }
+
     function onSupervisorControlChange(this: VueCollageEditor): void {
         this.supervisorControl.triggerSettings = () => {
             this.sharedStuff.editProperties(getCollagePropertiesStuff(this.collage))
@@ -85,6 +91,7 @@ namespace splitTime.editor.collage {
             onSupervisorControlChange
         },
         watch: {
+            collage: onCollageChange,
             supervisorControl: onSupervisorControlChange
         },
         template: `
