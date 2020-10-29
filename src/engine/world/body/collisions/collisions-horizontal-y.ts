@@ -69,13 +69,13 @@ namespace splitTime.body.collisions {
         } {
             var edgeY =
                 dy > 0
-                    ? y + dy + this.mover.body.halfBaseLength
-                    : y + dy - this.mover.body.halfBaseLength
-            var left = x - this.mover.body.halfBaseLength
+                    ? y + dy + this.mover.body.depth / 2
+                    : y + dy - this.mover.body.depth / 2
+            var left = x - this.mover.body.width / 2
             return splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
                 level,
                 left,
-                this.mover.body.baseLength,
+                this.mover.body.width,
                 edgeY,
                 Math.abs(dy),
                 z,

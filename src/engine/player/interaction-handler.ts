@@ -56,8 +56,9 @@ namespace splitTime.player {
             otherBody.getX(),
             otherBody.getY()
         )
+        // TODO: account for depth and height in addition to width
         var distBetweenBases =
-            dist - playerBody.baseLength / 2 - otherBody.baseLength / 2
+            dist - playerBody.width / 2 - otherBody.width / 2
         if (distBetweenBases > INTERACT_FUDGE) {
             return 0
         }

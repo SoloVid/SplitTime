@@ -63,6 +63,7 @@ namespace splitTime {
         }
 
         const secondsForFrame = 1 / splitTime.FPS
+        const budget = new FrameBudget(1000 * secondsForFrame)
 
         if (isCurrentLevelSet) {
             const level = perspective.levelManager.getCurrent()
@@ -70,10 +71,10 @@ namespace splitTime {
             const timeline = region.getTimeline()
 
             timeline.notifyFrameUpdate(secondsForFrame)
-            g.performanceCheckpoint("timeline frame update")
+            g.performanceCheckpoint("timeline frame update", budget.takePart(0.4))
 
             g.notifyListenersFrameUpdate(secondsForFrame)
-            g.performanceCheckpoint("notify listeners of update")
+            g.performanceCheckpoint("notify listeners of update", budget.takePart(0.01))
 
             splitTime.debug.setDebugValue(
                 "Board Bodies",
@@ -90,12 +91,12 @@ namespace splitTime {
 
             perspective.camera.notifyFrameUpdate(secondsForFrame)
             perspective.worldRenderer.renderBoardState(true)
-            g.performanceCheckpoint("world state render")
+            g.performanceCheckpoint("world state render", budget.takePart(0.4))
         }
 
         if (perspective.hud) {
             perspective.hud.render(perspective.view)
-            g.performanceCheckpoint("render HUD")
+            g.performanceCheckpoint("render HUD", budget.takePart(0.01))
         }
     }
 
@@ -135,26 +136,51 @@ namespace splitTime {
 
         private lastPerformanceCheck: Date | null = null
 
-        performanceCheckpoint(debugName: string, allow = 5) {
+        performanceCheckpoint(debugName: string, allowMs = 5) {
+            const allowMsRounded = Math.ceil(allowMs)
             if (splitTime.debug.ENABLED) {
                 var now = new Date()
                 if (this.lastPerformanceCheck) {
                     var timePassed =
                         now.getMilliseconds() -
                         this.lastPerformanceCheck.getMilliseconds()
-                    if (timePassed > allow) {
+                    if (timePassed > allowMsRounded) {
                         splitTime.log.warn(
                             debugName +
                                 ": " +
                                 timePassed +
                                 "ms taken when " +
-                                allow +
+                                allowMsRounded +
                                 "ms allotted"
                         )
                     }
                 }
                 this.lastPerformanceCheck = now
             }
+        }
+    }
+
+    class FrameBudget {
+        private msLeft: number
+        constructor(
+            private readonly totalMs: number
+        ) {
+            this.msLeft = totalMs
+        }
+
+        takeMs(ms: number): number {
+            this.msLeft -= ms
+            if (this.msLeft < 0) {
+                log.error("FrameBudget time overspent")
+            } else if (this.msLeft < 0.1) {
+                log.warn("FrameBudget time cutting it close")
+            }
+            return ms
+        }
+
+        takePart(fraction: number): number {
+            const ms = fraction * this.totalMs
+            return this.takeMs(ms)
         }
     }
 }

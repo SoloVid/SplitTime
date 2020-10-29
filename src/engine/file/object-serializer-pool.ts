@@ -13,10 +13,10 @@ namespace splitTime.file {
 
         serializerExists<T extends object>(thing: T): boolean {
             try {
-                this.getSerializer(thing);
-                return true;
+                this.getSerializer(thing)
+                return true
             } catch (e) {
-                return false;
+                return false
             }
         }
 

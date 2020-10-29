@@ -160,7 +160,7 @@ namespace splitTime.particles {
         generateIntervalMs: number = 100
         /** 1 means the max amount come out right at the beginning */
         explosiveness: number = 0
-        location: ReadonlyCoordinates3D
+        location: Readonly<Coordinates3D>
         generateParticle: (emitter: ParticleEmitter) => Particle
         _particlesGoneHandlers: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         xres: number = 100
@@ -173,7 +173,7 @@ namespace splitTime.particles {
         colorShiftMagnitude: number = 0
         lightIntensity: number = 0
         constructor(
-            location: ReadonlyCoordinates3D,
+            location: Readonly<Coordinates3D>,
             particleGenerator: (emitter: ParticleEmitter) => Particle
         ) {
             this.location = location
@@ -244,16 +244,14 @@ namespace splitTime.particles {
             }
         }
 
-        getCanvasRequirements(x: number, y: number, z: number) {
-            var canvReq = new splitTime.body.CanvasRequirements(
-                Math.round(x),
-                Math.round(y),
-                Math.round(z),
-                this.xres,
-                this.yres
+        getDesiredOrigin(whereDefaultWouldBe: Coordinates3D): Coordinates3D {
+            return new Coordinates3D(0, 0, 0)
+        }
+
+        getCanvasRequirements(): splitTime.body.CanvasRequirements {
+            return new splitTime.body.CanvasRequirements(
+                math.Rect.make(-this.xres / 2, -this.yres / 2, this.xres, this.yres)
             )
-            canvReq.translateOrigin = false
-            return canvReq
         }
 
         /**
@@ -316,14 +314,16 @@ namespace splitTime.particles {
          */
         put(level: splitTime.Level) {
             var tempBody = new splitTime.Body()
-            tempBody.baseLength = 0
+            tempBody.width = 0
+            tempBody.depth = 0
+            tempBody.height = 0
             tempBody.put(
                 level,
                 this.location.x,
                 this.location.y,
                 this.location.z
             )
-            tempBody.drawable = this
+            tempBody.drawables.push(this)
             this.registerParticlesGoneHandler(function() {
                 tempBody.clearLevel()
             })

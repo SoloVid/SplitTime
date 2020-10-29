@@ -2,7 +2,7 @@ namespace splitTime.testRunner {
     declare function postMessage(message: unknown): void
 
     defer(() => {
-        const tests = splitTime.test.getScenarios();
+        const tests = splitTime.test.getScenarios()
         const testHelper = new ExceptionTestHelper()
         function runTest(index: int): TestResult {
             try {

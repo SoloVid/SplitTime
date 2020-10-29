@@ -1,7 +1,7 @@
 namespace splitTime.trace {
-    export type TracePointSpec = ReadonlyCoordinates2D | string | null
+    export type TracePointSpec = Readonly<Coordinates2D> | string | null
 
-    export function ensureNoPositions(vertices: TracePointSpec[]): (ReadonlyCoordinates2D | null)[] {
+    export function ensureNoPositions(vertices: TracePointSpec[]): (Readonly<Coordinates2D> | null)[] {
         const nonPosVertices: (Coordinates2D | null)[] = []
         for (const v of vertices) {
             if (typeof v === "string") {
@@ -14,15 +14,28 @@ namespace splitTime.trace {
 
     export function extractCoordinates(
         points: TracePointSpec[],
-        positions: { [id: string]: ReadonlyCoordinates2D } = {}
-    ): ReadonlyCoordinates2D[] {
-        function getPoint(spec: TracePointSpec): ReadonlyCoordinates2D {
-            if (spec === null) {
-                const firstPoint = points[0]
+        positions: { [id: string]: Readonly<Coordinates2D> } = {}
+    ): Readonly<Coordinates2D>[] {
+        const pointsAndNulls = convertPositions(points, positions)
+        return pointsAndNulls.map(p => {
+            if (p === null) {
+                const firstPoint = pointsAndNulls[0]
                 if (firstPoint === null) {
                     throw new Error("First point needs to be specified")
                 }
-                return getPoint(firstPoint)
+                return firstPoint
+            }
+            return p
+        })
+    }
+
+    export function convertPositions(
+        points: TracePointSpec[],
+        positions: { [id: string]: Readonly<Coordinates2D> } = {}
+    ): (Readonly<Coordinates2D> | null)[] {
+        function getPoint(spec: TracePointSpec): Readonly<Coordinates2D> | null {
+            if (spec === null) {
+                return null
             }
             if (typeof spec === "string") {
                 const pos = positions[spec]

@@ -42,13 +42,13 @@ namespace splitTime {
 
     // Implementation from https://stackoverflow.com/a/1349426/4639640
     export function generateUID(length: int = 16) {
-        var result           = '';
-        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
+        var result           = ''
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        var charactersLength = characters.length
         for ( var i = 0; i < length; i++ ) {
-           result += characters.charAt(Math.floor(Math.random() * charactersLength));
+           result += characters.charAt(Math.floor(Math.random() * charactersLength))
         }
-        return result;
+        return result
      }
 
     export function randomSeed() {
@@ -80,9 +80,22 @@ namespace splitTime {
 
     // From https://stackoverflow.com/a/10073788/4639640
     export function pad(n: number, width: int, padChar: string = "0") {
-        let nStr = n + '';
-        return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join(padChar) + nStr;
-      }
+        let nStr = n + ''
+        return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join(padChar) + nStr
+    }
+
+    // From https://stackoverflow.com/a/18650828/4639640
+    export function formatBytes(bytes: number, decimals = 2): string {
+        if (bytes === 0) return '0 Bytes';
+
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
 
     export function isOverlap(x1: number, length1: number, x2: number, length2: number) {
         var noOverlap =

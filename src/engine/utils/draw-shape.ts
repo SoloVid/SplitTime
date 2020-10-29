@@ -1,6 +1,6 @@
 namespace splitTime.utils {
     export function drawShapeOpaque(
-        points: (ReadonlyCoordinates2D | null)[],
+        points: (Readonly<Coordinates2D> | null)[],
         target: GenericCanvasRenderingContext2D | null,
         extraBuffer: splitTime.Canvas,
         color: string | CanvasGradient | ((x: int, y: int) => light.Color)

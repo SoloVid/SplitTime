@@ -50,7 +50,6 @@ namespace splitTime.body.collisions {
             if (z + dz < level.lowestLayerZ) {
                 dz = -(z - level.lowestLayerZ)
             }
-            // log.debug("new actual: " + actualNewZ)
 
             const dzRoundedUp = dz > 0 ? Math.ceil(dz) : Math.floor(dz)
             const adz = Math.abs(dzRoundedUp)
@@ -59,9 +58,8 @@ namespace splitTime.body.collisions {
             //-1 for negative movement on the axis, 1 for positive
             var kHat = (dz === 0 ? 0 : dzRoundedUp / adz) as unitOrZero
 
-            const left = x - this.mover.body.baseLength / 2
-            const top = y - this.mover.body.baseLength / 2
-            const baseLength = this.mover.body.baseLength
+            const left = x - this.mover.body.width / 2
+            const top = y - this.mover.body.depth / 2
             const height = this.mover.body.height
 
             // The lower bound of the collision area we'll check each iteration
@@ -83,8 +81,8 @@ namespace splitTime.body.collisions {
             for (var i = 0; i < steps; i++) {
                 const originCollisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
                     level,
-                    left, baseLength,
-                    top, baseLength,
+                    left, this.mover.body.width,
+                    top, this.mover.body.depth,
                     lowerBoundZ, 1,
                     ignoreBodies.concat(this.mover.body)
                 )

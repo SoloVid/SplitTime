@@ -53,7 +53,8 @@ namespace splitTime {
                     +posObj.y,
                     +posObj.z,
                     splitTime.direction.interpret(posObj.dir),
-                    posObj.stance
+                    // TODO: resolve confusion of "montage" and "stance"
+                    posObj.montage
                 )
 
                 if (posObj.id) {
@@ -126,38 +127,21 @@ namespace splitTime {
             //Pull board objects from file
             for (var iProp = 0; iProp < this.fileData.props.length; iProp++) {
                 var prop = this.fileData.props[iProp]
-                var template = prop.template
-
-                var obj = G.BODY_TEMPLATES.getInstance(template)
-                if (obj) {
-                    obj.id = prop.id
-                    obj.put(this.level, +prop.x, +prop.y, +prop.z, true)
-                    obj.dir =
-                        typeof prop.dir === "string"
-                            ? splitTime.direction.fromString(prop.dir)
-                            : +prop.dir
-                    if (obj.drawable instanceof Sprite) {
-                        obj.drawable.requestStance(
-                            prop.stance,
-                            obj.dir,
-                            true,
-                            true
-                        )
-                    }
-                    if (
-                        obj.drawable &&
-                        (prop.playerOcclusionFadeFactor ||
-                            prop.playerOcclusionFadeFactor === "0")
-                    ) {
-                        obj.drawable.playerOcclusionFadeFactor = +prop.playerOcclusionFadeFactor
-                    }
-                } else {
-                    splitTime.log.error(
-                        'Template "' +
-                            template +
-                            '" not found for instantiating prop'
-                    )
+                const collageMontage = G.ASSETS.collages.get(prop.collage).getMontage(prop.montage)
+                // const sprite = new Sprite(prop.collage, prop.montage)
+                const body = new Body()
+                const sprite = new Sprite(body, prop.collage)
+                sprite.playerOcclusionFadeFactor = prop.playerOcclusionFadeFactor
+                body.width = collageMontage.bodySpec.width
+                body.depth = collageMontage.bodySpec.depth
+                body.height = collageMontage.bodySpec.height
+                body.drawables.push(sprite)
+                body.id = prop.id
+                body.put(this.level, +prop.x, +prop.y, +prop.z, true)
+                if (prop.dir !== "") {
+                    body.dir = splitTime.direction.interpret(prop.dir)
                 }
+                sprite.requestStance(prop.montage, body.dir, true, true)
             }
             this._addingProps = false
         }

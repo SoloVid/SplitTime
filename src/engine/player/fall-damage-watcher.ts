@@ -15,7 +15,6 @@ namespace splitTime.player {
                 const dZVelocity = this.body.zVelocity - this.prevZVelocity
                 const staminaHit = Math.pow((dZVelocity - this.minZVelocityForDamage), 1.5) / this.minZVelocityForDamage
                 if (staminaHit > 0) {
-                    splitTime.log.debug("velocity: " + this.prevZVelocity + " -> " + this.body.zVelocity)
                     this.stamina.hit(staminaHit)
                 }
             }

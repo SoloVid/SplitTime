@@ -60,13 +60,12 @@ namespace splitTime.body {
         ): { level: splitTime.Level; x: number; y: number; z: number } | null {
             let levelIdTo: string | null = null
             var levelTraces = levelFrom.getLevelTraces()
-            var left = Math.round(x - this.body.baseLength / 2)
-            var topY = Math.round(y - this.body.baseLength / 2)
-            var roundBase = Math.round(this.body.baseLength)
+            var left = Math.round(x - this.body.width / 2)
+            var topY = Math.round(y - this.body.depth / 2)
             var roundZ = Math.round(z)
             var topZ = roundZ + Math.round(this.body.height)
-            const xChecks = [left, left + roundBase]
-            const yChecks = [topY, topY + roundBase]
+            const xChecks = [left, left + this.body.width]
+            const yChecks = [topY, topY + this.body.depth]
             const zChecks = [roundZ, topZ - 1]
             let pointerTrace: Trace | null = null
             for (const xCheck of xChecks) {

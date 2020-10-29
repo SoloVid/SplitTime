@@ -1,22 +1,16 @@
 namespace splitTime.agent {
     export class BestEffortMovementAgent implements splitTime.TimeNotified {
-        private body: splitTime.Body
-        private targetLevelLocation: ReadonlyCoordinates3D | null = null
-        private targetScreenLocation: ReadonlyCoordinates2D | null = null
+        private targetLevelLocation: Readonly<Coordinates3D> | null = null
+        private targetScreenLocation: Readonly<Coordinates2D> | null = null
         private targetDirection: number | null = null
 
-        public constructor(body: splitTime.Body) {
-            this.body = body
-        }
-        setBody(body: Body) {
-            this.body = body
-            this.resetTarget()
+        public constructor(private readonly spriteBody: SpriteBody) {
         }
 
-        setWalkingTowardBoardLocation(coords: ReadonlyCoordinates3D) {
+        setWalkingTowardBoardLocation(coords: Readonly<Coordinates3D>) {
             this.targetLevelLocation = coords
         }
-        setWalkingTowardScreenLocation(coords: ReadonlyCoordinates2D) {
+        setWalkingTowardScreenLocation(coords: Readonly<Coordinates2D>) {
             this.targetScreenLocation = coords
         }
         setWalkingDirection(dir: number) {
@@ -66,11 +60,12 @@ namespace splitTime.agent {
             return null
         }
 
-        private get sprite(): splitTime.Sprite | null {
-            if (this.body.drawable instanceof splitTime.Sprite) {
-                return this.body.drawable
-            }
-            return null
+        private get body(): Body {
+            return this.spriteBody.body
+        }
+
+        private get sprite(): Sprite {
+            return this.spriteBody.sprite
         }
     }
 }

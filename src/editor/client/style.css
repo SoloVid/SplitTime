@@ -1,0 +1,191 @@
+* {
+    font-family: Sans-Serif;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    user-select: none;
+}
+
+.left { float: left; }
+.right { float: right; }
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn, input[type='submit'] {
+    font-size: medium;
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+    color: white;
+    padding: 10px;
+    background-color: black;
+    margin: 2px;
+    border: none;
+    border-radius: 5px;
+    transition: background-color .5s, color .5s, box-shadow .5s;
+}
+
+.menu-bar {
+    border-top: thin solid black;
+    border-bottom: thin solid black;
+    padding: 5px 0px 5px 0px;
+    background-color: white;
+}
+.menu-bar a {
+    cursor: pointer;
+    text-decoration:none;
+    margin: 0px;
+    padding: 5px 10px 5px 10px;
+    color: black;
+    font-size: 12px;
+    font-weight: bold;
+}
+.menu .option:hover, .menu-bar a:hover {
+    color: white;
+    background-color: lightgreen;
+}
+.menu-bar * {
+    font-size: 12px;
+}
+.level-area {
+    cursor: crosshair;
+    background-color: black;
+}
+
+.menu {
+    width: 128px;
+    overflow: auto;
+    /* border-left: 2px solid black; */
+    /* border-right: 2px solid black; */
+    padding: 4px;
+    /* background-color: white; */
+    /* resize: horizontal; */
+}
+
+.menu .option
+{
+    border: 1px solid black;
+    margin: 4px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+.menu .option.active {
+    color: white;
+    background-color: orange;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+table.row-simple {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.row-simple th, table.row-simple td {
+    border-bottom: 1px solid #ddd;
+    padding-left: 5px;
+    padding-right: 5px;
+    text-align: left;
+}
+
+tr:hover {background-color: #f5f5f5;}
+tr.active {background-color: #dadada;}
+
+.modal-backdrop {
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(50, 50, 50, .5)
+}
+
+.modal-body {
+    display: block;
+    overflow: auto;
+    position: relative;
+    top: 5%;
+    left: 10%;
+    width: 80%;
+    height: 90%;
+    margin: 0;
+    background-color: white;
+    padding: 15px;
+}
+
+.draggable.position img {
+    opacity: .5;
+    background-color: #cd96cd94;
+}
+
+textarea {
+    width: 100%;
+}
+
+.highlighted, .hoverable:hover {
+    outline: 4px solid yellow;
+}
+
+.indent {
+    margin-left: 10px;
+}
+
+.standard-margin {
+    margin: 1rem;
+}
+
+.standard-padding {
+    padding: 1rem;
+}
+
+/* From https://gist.github.com/dfrankland/f6fed3e3ccc42e3de482b324126f9542 */
+.transparency-checkerboard-background {
+    background-image:
+      linear-gradient(45deg, #ccc 25%, transparent 25%), 
+      linear-gradient(135deg, #ccc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #ccc 75%),
+      linear-gradient(135deg, transparent 75%, #ccc 75%);
+    background-size:12px 12px; /* Must be a square */
+    background-position:0 0, 6px 0, 6px -6px, 0px 6px; /* Must be half of one side of the square */
+}
+
+/* From https://stackoverflow.com/a/47824568/4639640 */
+.vertical-bar-separators > *:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 25%;
+    width: 2px;
+    height: 50%;
+    background-color:rgb(0, 0, 0);
+}
+.vertical-bar-separators > *:not(:last-child) {
+    /** Parent positioning required for bar positioning */
+    position: relative;
+}
+
+.vertical-resize-bar {
+    /* position: absolute; */
+    /* top: 0; */
+    width: 4px;
+    height: 100%;
+    background-color:rgb(0, 0, 0);
+    cursor: e-resize
+}
+
+input.block, textarea.block, select.block {
+    box-sizing: border-box;
+    width: 100%;
+    display: block;
+}

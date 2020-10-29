@@ -228,7 +228,6 @@ namespace splitTime.level {
     }
 
     const dummyFileData: splitTime.level.FileData = {
-        fileName: "file",
         type: "action",
         region: "region",
         width: width,
@@ -236,6 +235,7 @@ namespace splitTime.level {
         background: "background",
         backgroundOffsetX: 0,
         backgroundOffsetY: 0,
+        groups: [],
         traces: [],
         props: [],
         positions: []

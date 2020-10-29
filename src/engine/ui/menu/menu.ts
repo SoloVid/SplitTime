@@ -38,7 +38,7 @@ namespace splitTime.menu {
 
         // TODO: potentially split up into logic and rendering
         render() {
-            // this.handleMenu();
+            // this.handleMenu()
 
             //Draw splitTime.Menu background
             if (this.spec.background) {
@@ -60,13 +60,15 @@ namespace splitTime.menu {
 
         handleMenu() {
             // TODO: improve implementation
-            /*This menu system navigates on a grid even though points are listed linearly.
-			Basically, the code finds the closest point (in the direction of the key press)
-			to the current point that is within a 90 degree viewing angle from the point in that direction.*/
+            // This menu system navigates on a grid even though points are listed linearly.
+            // Basically, the code finds the closest point (in the direction of the key press)
+            // to the current point that is within a 90 degree viewing angle from the point in that direction.
 
-            var controlDirection = splitTime.direction.simplifyToCardinal(
-                this.controls.joyStick.getDirection()
-            )
+            const rawDirection = this.controls.joyStick.getDirection()
+            let controlDirection = null
+            if (rawDirection !== null) {
+                controlDirection = splitTime.direction.simplifyToCardinal(rawDirection)
+            }
 
             var prevPoint = this.currentPoint
             var iPoint = prevPoint
@@ -185,7 +187,7 @@ namespace splitTime.menu {
                         this.spec.point.length
                 } while (iPoint != prevPoint)
                 this.currentPoint = bestPoint
-                //		this.currentPoint = (this.spec.point.length + this.currentPoint - 1)%this.spec.point.length;
+                //		this.currentPoint = (this.spec.point.length + this.currentPoint - 1)%this.spec.point.length
             } else if (controlDirection === splitTime.direction.E) {
                 //Right
                 do //While index point does not equal original point
@@ -239,7 +241,7 @@ namespace splitTime.menu {
                     iPoint = (iPoint + 1) % this.spec.point.length
                 } while (iPoint != prevPoint)
                 this.currentPoint = bestPoint
-                //this.currentPoint = (this.currentPoint + 1)%this.spec.point.length;
+                //this.currentPoint = (this.currentPoint + 1)%this.spec.point.length
             } else if (controlDirection === splitTime.direction.S) {
                 //Down
                 do //While index point does not equal original point
@@ -293,7 +295,7 @@ namespace splitTime.menu {
                     iPoint = (iPoint + 1) % this.spec.point.length
                 } while (iPoint != prevPoint)
                 this.currentPoint = bestPoint
-                //		this.currentPoint = (this.currentPoint + 1)%this.spec.point.length;
+                //		this.currentPoint = (this.currentPoint + 1)%this.spec.point.length
             }
         }
     }

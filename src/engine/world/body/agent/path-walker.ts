@@ -142,7 +142,7 @@ namespace splitTime.agent {
                 y: coords2D.y,
                 z: this.npc.body.z
             }
-            const coordsAs3D = coords2D as ReadonlyCoordinates3D
+            const coordsAs3D = coords2D as Readonly<Coordinates3D>
             if (!!coordsAs3D.z || coordsAs3D.z === 0) {
                 newCoords.z = coordsAs3D.z
             }

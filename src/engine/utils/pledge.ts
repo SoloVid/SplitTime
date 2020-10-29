@@ -81,14 +81,6 @@ namespace splitTime {
             return prom
         }
         static when(arr: splitTime.Pledge[]): PromiseLike<unknown> {
-            if (!Array.isArray(arr)) {
-                var newArr = new Array(arguments.length)
-                for (var i = 0; i < arguments.length; i++) {
-                    newArr[i] = arguments[i]
-                }
-                return splitTime.Pledge.when(newArr)
-            }
-
             var prom = new splitTime.Pledge()
             var results: unknown[] = []
 
@@ -116,17 +108,10 @@ namespace splitTime {
             for (var iPromise = 0; iPromise < arr.length; iPromise++) {
                 arr[iPromise].then(makeSingleResolveHandler(iPromise))
             }
+            checkResolve()
             return prom
         }
         static whenAny(arr: splitTime.Pledge[]): splitTime.Pledge {
-            if (!Array.isArray(arr)) {
-                var newArr = new Array(arguments.length)
-                for (var i = 0; i < arguments.length; i++) {
-                    newArr[i] = arguments[i]
-                }
-                return splitTime.Pledge.whenAny(newArr)
-            }
-
             var prom = new splitTime.Pledge()
             var isResolved = false
 
@@ -152,16 +137,8 @@ namespace splitTime {
         add(prom: splitTime.Pledge) {
             this.promises.push(prom)
         }
-        then(callBack: { (): void; (): void; (): void; (): void }) {
+        then(callBack: () => void) {
             return splitTime.Pledge.when(this.promises).then(callBack)
-        }
-
-        static wait(ms: number | undefined) {
-            var promise = new splitTime.Pledge()
-            setTimeout(function() {
-                promise.resolve()
-            }, ms)
-            return promise
         }
     }
 

@@ -1,6 +1,5 @@
 namespace splitTime.level {
     export interface FileData {
-        fileName: string
         type: "action"
         region: string
         width: int
@@ -8,45 +7,113 @@ namespace splitTime.level {
         background: string
         backgroundOffsetX: int
         backgroundOffsetY: int
+        groups: file_data.Group[]
         traces: file_data.Trace[]
         props: file_data.Prop[]
         positions: file_data.Position[]
     }
 
+    // Expect compiler error if FileData is not jsonable
+    let testFileDataJsonable: file.IsJsonable<FileData, false> = {} as FileData
+
     export namespace file_data {
+        export interface Group {
+            id: string
+            defaultZ: number
+            defaultHeight: number
+        }
+
         export interface Trace {
             id: string
+            group: string
             type: string
             vertices: string
-            z: number | string
-            height: number | string
+            z: number
+            height: number
             direction: string // for stairs
             event: string // for events
             level: string // for pointers
-            offsetX: string // for pointers
-            offsetY: string // for pointers
-            offsetZ: string // for pointers
+            offsetX: number // for pointers
+            offsetY: number // for pointers
+            offsetZ: number // for pointers
         }
 
         export interface Prop {
             id: string
-            template: string
-            x: number | string
-            y: number | string
-            z: number | string
+            group: string
+            collage: string
+            montage: string
+            x: number
+            y: number
+            z: number
             dir: string
-            stance: string
             // FTODO: clean up
-            playerOcclusionFadeFactor: undefined | string
+            playerOcclusionFadeFactor: number
         }
 
         export interface Position {
             id: string
-            x: number | string
-            y: number | string
-            z: number | string
+            group: string
+            collage: string
+            montage: string
+            x: number
+            y: number
+            z: number
             dir: string
-            stance: string
+        }
+    }
+
+    export namespace instanceOf {
+        export function FileData(thing: unknown): thing is FileData {
+            return type.isA(thing, type.object<level.FileData>({
+                type: type.other<"action">(t => t === "action"),
+                region: type.string,
+                width: type.int,
+                height: type.int,
+                background: type.string,
+                backgroundOffsetX: type.int,
+                backgroundOffsetY: type.int,
+                groups: type.array(type.object({
+                    id: type.string,
+                    defaultZ: type.number,
+                    defaultHeight: type.number
+                })),
+                traces: type.array(type.object({
+                    id: type.string,
+                    group: type.string,
+                    type: type.string,
+                    vertices: type.string,
+                    z: type.number,
+                    height: type.number,
+                    direction: type.string,
+                    event: type.string,
+                    level: type.string,
+                    offsetX: type.number,
+                    offsetY: type.number,
+                    offsetZ: type.number
+                })),
+                props: type.array(type.object({
+                    id: type.string,
+                    group: type.string,
+                    collage: type.string,
+                    montage: type.string,
+                    x: type.number,
+                    y: type.number,
+                    z: type.number,
+                    dir: type.string,
+                    playerOcclusionFadeFactor: type.number
+                })),
+                positions: type.array(type.object({
+                    id: type.string,
+                    group: type.string,
+                    collage: type.string,
+                    montage: type.string,
+                    x: type.number,
+                    y: type.number,
+                    z: type.number,
+                    dir: type.string
+                }))
+            }))
         }
     }
 }

@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script>
+            window.__EDITOR_CONSTANT__ = true;
+        </script>
+        <script src="node_modules/vue/dist/vue.js"></script>
+        <script src="node_modules/vue-async-computed/dist/vue-async-computed.js"></script>
+        <script src="node_modules/jquery/dist/jquery.min.js"></script>
+        <link href="node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
+        <link rel="stylesheet" href="src/editor/client/style.css">
+        <script src="build/editor-client.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <st-editor
+                :server="serverLiaison"
+                :time="time"
+            ></st-editor>
+        </div>
+
+        <svg
+            id="common-svg-patterns"
+            style="position: absolute; pointer-events: none;"
+            width="0" height="0"
+        >
+            <defs>
+                <pattern id="up-arrows-pattern" x="0" y="0" width="20" height="25" patternUnits="userSpaceOnUse">
+                    <polyline
+                        points="5,8 10,0 10,20 10,0 15,8"
+                        stroke="rgba(0, 0, 0, 0.7)" stroke-width="1.5" fill="none"
+                    ></polyline>
+                </pattern>
+                <!-- From https://stackoverflow.com/a/14500054/4639640 -->
+                <pattern id="diagonal-hatch" patternUnits="userSpaceOnUse" width="4" height="4">
+                    <path d="M-1,1 l2,-2
+                             M0,4 l4,-4
+                             M3,5 l2,-2" 
+                          style="stroke:rgba(255, 0, 0, 0.7); stroke-width:1" />
+                </pattern>
+            </defs>
+        </svg>
+
+        <script>
+            var projectName = window.location.hash.substring(1);
+            while(!projectName) {
+                projectName = prompt("Project folder name:") || "";
+            }
+            window.location.hash = "#" + projectName;
+            var serverLiaison = new splitTime.editor.client.ServerLiaison(projectName);
+
+            var vueApp = new Vue({
+                el: "#app",
+                data: {
+                    serverLiaison: serverLiaison,
+                    time: 0
+                }
+            });
+
+            window.onbeforeunload = function() {
+                return true;
+            };
+
+            var TIME_INTERVAL = 50;
+            window.setInterval(function() {
+                vueApp.time += TIME_INTERVAL / 1000;
+            }, TIME_INTERVAL);
+        </script>
+    </body>
+</html>

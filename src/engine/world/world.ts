@@ -1,9 +1,10 @@
 namespace splitTime {
     export class World {
-
-        constructor(levels: level.FileData[] = G._GAME_DATA.levels) {
-            for (const levelData of levels) {
-                const levelId = levelData.fileName.replace(/\.json$/, "")
+        constructor(gameData: CompiledGameData = G._GAME_DATA) {
+            const levelMap = gameData.levels
+            for (const levelFilePath in levelMap) {
+                const levelData = levelMap[levelFilePath]
+                const levelId = levelFilePath.replace(/\.json$/, "")
                 const level = new Level(levelId, levelData)
                 this.levelMap[levelId] = level
             }

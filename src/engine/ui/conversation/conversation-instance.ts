@@ -18,7 +18,7 @@ namespace splitTime.conversation {
         }
 
         private isCurrentNode(nodeId: BreadCrumbs): boolean {
-            return this.current !== null && this.current.breadCrumbs.equals(nodeId);
+            return this.current !== null && this.current.breadCrumbs.equals(nodeId)
         }
 
         notifyNodeCompletion(nodeId: BreadCrumbs): void {

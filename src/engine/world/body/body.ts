@@ -13,14 +13,15 @@ namespace splitTime {
 
         fadeEnteringLevelPromise: Pledge | null
 
-        drawable: splitTime.body.Drawable | null = null
+        drawables: splitTime.body.Drawable[] = []
         shadow = false
 
         private _level: splitTime.Level | null = null
-        _x = 0
-        _y = 0
-        _z = 0
-        _time: game_ms = Number.NEGATIVE_INFINITY
+        // Coordinates represent center of base: x is midpoint, y is midpoint, z is bottom
+        private _x = 0
+        private _y = 0
+        private _z = 0
+        private _time: game_ms = Number.NEGATIVE_INFINITY
 
         childrenBolted: Body[] = []
         childrenLoose: Body[] = []
@@ -30,13 +31,14 @@ namespace splitTime {
         GRAVITY = -1280
         // For gravity etc., auto-applied z-axis motion in pixels per second
         zVelocity = 0
-        height = 32
 
-        //The splitTime.Body's base is the collision area of the splitTime.Body
-        baseLength = 16
-        //Standard offset of the base is 0--that is, x=0 is centered and y=0 is at bottom
-        baseOffX = 0
-        baseOffY = 0
+        // Collision volume dimensions
+        /** x-axis base length */
+        private _width = 16
+        /** y-axis base length */
+        private _depth = 16
+        /** z-axis length */
+        private _height = 32
 
         // TODO: remove parameter when moving templates elsewhere
         constructor() {
@@ -53,6 +55,39 @@ namespace splitTime {
 
             //Initialize variables used for region transitions
             this.fadeEnteringLevelPromise = null
+        }
+        get width(): int {
+            return this._width
+        }
+        set width(val: int) {
+            if (!Number.isInteger(val)) {
+                throw new Error("Width must be an integer")
+            }
+            if (val % 2 !== 0) {
+                throw new Error("Width must be a multiple of 2")
+            }
+            this._width = val
+        }
+        get depth(): int {
+            return this._depth
+        }
+        set depth(val: int) {
+            if (!Number.isInteger(val)) {
+                throw new Error("Depth must be an integer")
+            }
+            if (val % 2 !== 0) {
+                throw new Error("Depth must be a multiple of 2")
+            }
+            this._depth = val
+        }
+        get height(): int {
+            return this._height
+        }
+        set height(val: int) {
+            if (!Number.isInteger(val)) {
+                throw new Error("Height must be an integer")
+            }
+            this._height = val
         }
         get x() {
             return this.getX()
@@ -74,9 +109,6 @@ namespace splitTime {
         }
         get level() {
             return this.getLevel()
-        }
-        get halfBaseLength() {
-            return Math.round(this.baseLength / 2)
         }
 
         addChild(child: Body, isBolted: boolean) {
@@ -109,17 +141,6 @@ namespace splitTime {
         }
         getChildren(): Body[] {
             return this.childrenBolted.concat(this.childrenLoose)
-        }
-
-        staticTrace: { traceStr: string; type: string }[] = []
-        /**
-         * @deprecated should be moved to Prop class or something
-         */
-        addStaticTrace(traceStr: string, type: string) {
-            if (this.staticTrace.length === 0) {
-                this.staticTrace = []
-            }
-            this.staticTrace.push({ traceStr: traceStr, type: type })
         }
 
         _resortInBodyOrganizer() {
@@ -181,11 +202,11 @@ namespace splitTime {
         }
 
         getLeft(): number {
-            return this.getX() - this.baseLength / 2
+            return this.x - this.width / 2
         }
 
         getTopY(): number {
-            return this.getY() - this.baseLength / 2
+            return this.y - this.depth / 2
         }
 
         /**
@@ -223,6 +244,9 @@ namespace splitTime {
             )
         }
 
+        /**
+         * @deprecated This may be moving
+         */
         putInPosition(position: Position, includeChildren = false): void {
             this.put(
                 position.getLevel(),
@@ -232,13 +256,16 @@ namespace splitTime {
                 includeChildren
             )
             this.dir = position.dir
-            if (this.drawable instanceof Sprite) {
-                this.drawable.requestStance(
-                    position.stance,
-                    this.dir,
-                    true,
-                    true
-                )
+            for (const drawable of this.drawables) {
+                // TODO: Don't do this here
+                if (drawable instanceof Sprite) {
+                    drawable.requestStance(
+                        position.stance,
+                        this.dir,
+                        true,
+                        true
+                    )
+                }
             }
         }
 
@@ -301,7 +328,7 @@ namespace splitTime {
 
             var level = this._level
             if (level && level.isLoaded()) {
-                if (this.baseLength > ZILCH) {
+                if (this.width > ZILCH && this.depth > ZILCH && this.height > ZILCH) {
                     if (Math.abs(this.zVelocity) > ZILCH) {
                         var expectedDZ = this.zVelocity * delta
                         var actualDZ = this.mover.zeldaVerticalBump(expectedDZ)
@@ -314,15 +341,11 @@ namespace splitTime {
                 }
             }
 
-            try {
-                if (
-                    this.drawable &&
-                    splitTime.instanceOf.TimeNotified(this.drawable)
-                ) {
-                    this.drawable.notifyTimeAdvance(delta)
+            for (const drawable of this.drawables) {
+                // TODO: either remove check or remove Drawable "extends TimeNotified"
+                if (splitTime.instanceOf.TimeNotified(drawable)) {
+                    drawable.notifyTimeAdvance(delta)
                 }
-            } catch (e) {
-                splitTime.log.error(e)
             }
         }
 

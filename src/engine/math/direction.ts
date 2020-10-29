@@ -46,8 +46,7 @@ namespace splitTime.direction {
         if (typeof lookup[stringDir] !== "undefined") {
             return lookup[stringDir]
         } else {
-            log.warn("Invalid direction: " + stringDir)
-            return -1
+            throw new Error("Invalid direction: " + stringDir)
         }
     }
     export function toString(numDir: direction_t): string {
@@ -97,12 +96,12 @@ namespace splitTime.direction {
         toThing: ILevelLocation
     ): direction_t
     export function fromToThing(
-        fromThing: ReadonlyCoordinates2D,
-        toThing: ReadonlyCoordinates2D
+        fromThing: Readonly<Coordinates2D>,
+        toThing: Readonly<Coordinates2D>
     ): direction_t
     export function fromToThing(
-        fromThing: ReadonlyCoordinates2D | ILevelLocation,
-        toThing: ReadonlyCoordinates2D | ILevelLocation
+        fromThing: Readonly<Coordinates2D> | ILevelLocation,
+        toThing: Readonly<Coordinates2D> | ILevelLocation
     ): direction_t {
         if (instanceOf.ILevelLocation(fromThing) && instanceOf.ILevelLocation(toThing)) {
             return splitTime.direction.fromTo(
@@ -123,15 +122,7 @@ namespace splitTime.direction {
         throw new Error("Types of from and to should be matched")
     }
 
-    export function simplifyToCardinal(realDir: string | number | null) {
-        if (realDir === null) {
-            return null
-        }
-
-        if (typeof realDir === "string") {
-            return realDir.charAt(0)
-        }
-
+    export function simplifyToCardinal(realDir: direction_t): direction_t {
         return splitTime.mod(Math.round(realDir), 4)
     }
 

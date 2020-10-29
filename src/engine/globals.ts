@@ -6,3 +6,7 @@ function assert(condition: boolean, message: string): asserts condition {
         throw new Error(message)
     }
 }
+
+function nop(arg: unknown): void {
+    // Do nothing
+}

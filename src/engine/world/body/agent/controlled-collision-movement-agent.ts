@@ -9,8 +9,8 @@ namespace splitTime.agent {
 
     export class ControlledCollisionMovement implements splitTime.TimeNotified {
         private body: splitTime.Body
-        private targetLevelLocation: ReadonlyCoordinates3D | null = null
-        private targetScreenLocation: ReadonlyCoordinates2D | null = null
+        private targetLevelLocation: Readonly<Coordinates3D> | null = null
+        private targetScreenLocation: Readonly<Coordinates2D> | null = null
         private targetDirection: number | null = null
         private ladder: EngagedLadder | null = null
 
@@ -22,10 +22,10 @@ namespace splitTime.agent {
             this.resetTarget()
         }
 
-        setWalkingTowardBoardLocation(coords: ReadonlyCoordinates3D) {
+        setWalkingTowardBoardLocation(coords: Readonly<Coordinates3D>) {
             this.targetLevelLocation = coords
         }
-        setWalkingTowardScreenLocation(coords: ReadonlyCoordinates2D) {
+        setWalkingTowardScreenLocation(coords: Readonly<Coordinates2D>) {
             this.targetScreenLocation = coords
         }
         setWalkingDirection(dir: number) {
@@ -50,8 +50,8 @@ namespace splitTime.agent {
                     // FTODO: should this check more/different part of Body than base?
                     const baseCollisionCheck = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
                         this.body.level,
-                        this.body.x - this.body.halfBaseLength, this.body.baseLength,
-                        this.body.y - this.body.halfBaseLength, this.body.baseLength,
+                        this.body.getLeft(), this.body.width,
+                        this.body.getTopY(), this.body.depth,
                         this.body.z, 1,
                         [this.body]
                     )
@@ -114,8 +114,11 @@ namespace splitTime.agent {
         }
 
         private get sprite(): splitTime.Sprite | null {
-            if (this.body.drawable instanceof splitTime.Sprite) {
-                return this.body.drawable
+            // TODO: re-evaluate extracting sprite
+            for (const drawable of this.body.drawables) {
+                if (drawable instanceof splitTime.Sprite) {
+                    return drawable
+                }
             }
             return null
         }

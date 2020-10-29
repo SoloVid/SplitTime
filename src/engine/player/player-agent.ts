@@ -42,7 +42,7 @@ namespace splitTime.player {
         doJump() {
             if (!this.isFrozen() && this.jumpAbility) {
                 this.jumpAbility.use()
-                // this.freezeUntil = this.body.getLevel().getRegion().getTime() + this.jumpCooldown;
+                // this.freezeUntil = this.body.getLevel().getRegion().getTime() + this.jumpCooldown
             }
         }
         doSpecial() {

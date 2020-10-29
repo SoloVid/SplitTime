@@ -1,4 +1,5 @@
 namespace splitTime.body {
+    /** @deprecated maybe because this is painful to use and is less important because of collage montages */
     export class TemplateManager {
         private templates: { [templateName: string]: () => Body } = {}
 

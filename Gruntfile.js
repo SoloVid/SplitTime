@@ -7,7 +7,9 @@ var convertSourceMap = require("convert-source-map");
 module.exports = function(grunt) {
 
     var LEVEL_DIRECTORY = "levels/";
-    var PRELOADED_IMAGE_DIRECTORY = "images/preloaded/";
+    var COLLAGE_DIRECTORY = "collage/";
+    var IMAGE_DIRECTORY = "images/";
+    var PRELOADED_IMAGE_DIRECTORY = IMAGE_DIRECTORY + "preloaded/";
     var AUDIO_DIRECTORY = "audio/";
     var MUSIC_DIRECTORY = AUDIO_DIRECTORY + "music/";
     var SOUND_EFFECT_DIRECTORY = AUDIO_DIRECTORY + "fx/";
@@ -156,6 +158,32 @@ module.exports = function(grunt) {
                 'build/tsjs/defer.run.js'
             ];
             concatFilesWithSourceMaps(files, 'build/engine-test.js');
+
+            files = [
+                'build/tsjs/editor/server/**/*.js',
+                '!build/tsjs/editor/server/main.js'
+            ];
+            concatFilesWithSourceMaps(files, 'build/editor-server-lib.js');
+
+            grunt.file.write('build/generated/environment-ext.js',
+                'var __ROOT__ = "' + __dirname.replace(/\\/g, "\\\\") + '";\n')
+            files = [
+                'build/generated/environment-ext.js',
+                'build/engine.js',
+                'build/editor-server-lib.js',
+                'build/tsjs/editor/server/main.js',
+                'build/tsjs/defer.run.js'
+            ];
+            concatFilesWithSourceMaps(files, 'build/editor-server.js');
+
+            files = [
+                'build/engine.js',
+                'build/editor-server-lib.js',
+                'build/tsjs/editor/client/**/*.js',
+                // 'build/tsjs/editor/client/test.js',
+                'build/tsjs/defer.run.js'
+            ];
+            concatFilesWithSourceMaps(files, 'build/editor-client.js');
         }
     });
 
@@ -163,7 +191,9 @@ module.exports = function(grunt) {
         grunt.log.writeln("Generating JSON for " + projectName);
         var projectRoot = "projects/" + projectName + "/";
         var gameData = {
-            levels: [],
+            levels: {},
+            collages: {},
+            imageFiles: [],
             preloadedImageFiles: [],
             musicFiles: [],
             soundEffectFiles: []
@@ -172,11 +202,24 @@ module.exports = function(grunt) {
             if(/\.json$/.test(fileName)) {
                 grunt.verbose.writeln("Reading " + fileName);
                 var fileData = grunt.file.readJSON(absPath);
-                fileData.fileName = join(subDir, fileName);
-                gameData.levels.push(fileData);
+                var levelFileRelativePath = join(subDir, fileName);
+                gameData.levels[levelFileRelativePath] = fileData;
             } else {
-                grunt.warn("Non-JSON file found in levels directory: " + fileName);
+                grunt.warn("Non-JSON file found in level directory: " + fileName);
             }
+        });
+        grunt.file.recurse(join(projectRoot, COLLAGE_DIRECTORY), function(absPath, rootDir, subDir, fileName) {
+            if(/\.json$/.test(fileName)) {
+                grunt.verbose.writeln("Reading " + fileName);
+                var fileData = grunt.file.readJSON(absPath);
+                var collageFileRelativePath = join(subDir, fileName);
+                gameData.collages[collageFileRelativePath] = fileData;
+            } else {
+                grunt.warn("Non-JSON file found in collage directory: " + fileName);
+            }
+        });
+        grunt.file.recurse(path.join(projectRoot, IMAGE_DIRECTORY), function(absPath, rootDir, subDir, fileName) {
+            gameData.imageFiles.push(join(subDir, fileName));
         });
         grunt.file.recurse(path.join(projectRoot, PRELOADED_IMAGE_DIRECTORY), function(absPath, rootDir, subDir, fileName) {
             gameData.preloadedImageFiles.push(join(subDir, fileName));
@@ -188,7 +231,7 @@ module.exports = function(grunt) {
             gameData.soundEffectFiles.push(join(subDir, fileName));
         });
 
-        var dataFileContents = "G._GAME_DATA = " + JSON.stringify(gameData) + ";";
+        var dataFileContents = "var G = G || {};\nG._GAME_DATA = " + JSON.stringify(gameData) + ";";
         grunt.verbose.writeln("Writing data JS file");
         grunt.file.write(path.join(projectRoot, "build/generated/data.js"), dataFileContents);
     });

@@ -1,12 +1,44 @@
 This file is here as a mixture of TODOs and implementation thought experiments. Since opportunities to work on the engine are sparse, my thoughts here help me to keep track of what I've been thinking.
 
+Identified engine enhancements
+- Do sprite-splitting in rendering
+
+
+
+I want a box/sprite/frame/image/prop editor.
+- Shortcut for all same size in strict grid?
+- Can stick any number of traces on each frame/box
+    - Either all same time or per frame
+- Different sized bodies on different frames presents issue for using as template for body (TODO: resolve)
+
+
+Level editor enhancements
+- Instead of layers in editor, allow arbitrary groupings with default z
+- Allow locking groups so they can't be interacted with
+    - This actually might not be necessary because of active layer (will be active group) concept in editor
+    - More generally, add additional flag; instead of single checkbox for show/hide, two toggle options for show/hide and locked/unlocked
+- Actually sort objects by engine rendering logic
+- Create concept of "level linkages"
+    - Rather than specifying all params for level relationships in pointer/transport traces, use some shared level linkage structure
+    - For create/edit user should be able to drag levels graphically one over the other to align
+    - This idea may be scrapped as too much work, but I did add a thing for rendering the other image
+- Allow reload assets (maybe)
+- Auto-complete drop-downs instead of blank text fields
+- Graphically present something like tileset (could be set of props) to user in level editor
+- Undo functionality, probably whole-sale saving state of editor
+
+
+Server considerations
+- Cache busting
+    - Include modified time in query string for assets
+    - Set Cache-Control no-store for game.js
+
+
+
 Let's call "Bodys" NPCs in this doc.
 
 - Events, particularly paths, ought to be easy to set up.
 - API should allow developer to easily specify an event where NPC moves through a series of positions.
-- Since we already have traces in the level editor, it would be cool to be able to make path traces.
-    - Path traces ought to be able to bind to positions (one-way or two-way?) so that the engine knows how to handle a call to move from one position to another.
-    - Positions ought to be able to bind to multiple paths, but there probably would never be a case to allow two different paths between the same two positions.
 - Traces could be more exposed to the developer.
     - Allow developer to access traces anytime?
     - Let developer define different traces and the behavior of loading them in?

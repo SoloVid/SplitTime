@@ -1,15 +1,6 @@
 namespace splitTime.body {
     export class Warper {
-        level: splitTime.Level
-        baseLength: number
-        halfBaseLength: number
-        height: number
-        constructor(public readonly body: splitTime.Body) {
-            this.level = body.getLevel()
-
-            this.baseLength = this.body.baseLength
-            this.halfBaseLength = Math.round(this.baseLength / 2)
-            this.height = this.body.height
+        constructor(private readonly body: splitTime.Body) {
         }
 
         /**
@@ -31,6 +22,10 @@ namespace splitTime.body {
          */
         warp(dir: number, maxDistance: number): number {
             this.ensureInRegion()
+
+            const level = this.body.level
+            const width = this.body.width
+            const depth = this.body.depth
 
             var startX = Math.round(this.body.x)
             var startY = Math.round(this.body.y)
@@ -57,14 +52,14 @@ namespace splitTime.body {
                 startY,
                 (x, y) => {
                     if (
-                        x + me.halfBaseLength >= me.level.width ||
-                        x - me.halfBaseLength < 0
+                        x + width / 2 >= level.width ||
+                        x - width / 2 < 0
                     ) {
                         return
                     }
                     if (
-                        y + me.halfBaseLength >= me.level.yWidth ||
-                        y - me.halfBaseLength < 0
+                        y + depth / 2 >= level.yWidth ||
+                        y - depth / 2 < 0
                     ) {
                         return
                     }
@@ -74,7 +69,7 @@ namespace splitTime.body {
                             toX = x
                             toY = y
                             events = collisionInfo.events
-                            if (collisionInfo.targetLevel !== this.level) {
+                            if (collisionInfo.targetLevel !== level) {
                                 mightMoveLevels = true
                             }
                         }
@@ -87,11 +82,11 @@ namespace splitTime.body {
             if (
                 toX !== null &&
                 toY !== null &&
-                (Math.abs(toX - startX) > this.baseLength ||
-                    Math.abs(toY - startY) > this.baseLength)
+                (Math.abs(toX - startX) > width ||
+                    Math.abs(toY - startY) > depth)
             ) {
-                this.body.put(this.level, toX, toY, z)
-                this.level.runEvents(events, this.body)
+                this.body.put(level, toX, toY, z)
+                level.runEvents(events, this.body)
                 if (mightMoveLevels) {
                     var transporter = new splitTime.body.Transporter(this.body)
                     transporter.transportLevelIfApplicable()
@@ -112,16 +107,16 @@ namespace splitTime.body {
             y: int,
             z: int
         ): { blocked: boolean; events: string[]; targetLevel: Level } {
-            var left = x - this.halfBaseLength
-            var top = y - this.halfBaseLength
+            var left = x - this.body.width / 2
+            var top = y - this.body.depth / 2
 
             const originCollisionInfo =
                 splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
-                    this.level,
+                    this.body.level,
                     left,
-                    this.baseLength,
+                    this.body.width,
                     top,
-                    this.baseLength,
+                    this.body.depth,
                     z,
                     this.body.height,
                     [this.body]
