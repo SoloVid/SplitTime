@@ -31,7 +31,7 @@ namespace splitTime.ui {
             try {
                 view.see.save()
                 view.see.clip()
-                view.see.fillStyle = this.colorGetter().toRgbaString()
+                view.see.fillStyle = this.colorGetter().cssString
                 view.see.fillRect(left, top, this.width * this.fractionGetter(), this.height)
             } finally {
                 view.see.restore()

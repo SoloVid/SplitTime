@@ -4,11 +4,25 @@ namespace splitTime.light {
     var dummyContext: GenericCanvasRenderingContext2D | null = null
 
     export class Color {
-        private cssColorString: string
+        private _cssString: string
         private _r: number
         private _g: number
         private _b: number
         private _a: number
+
+        /**
+         * Get the CSS String that we've already determined is a valid CSS color style
+         */
+        public get cssString(): string {
+            return this._cssString
+        }
+
+        /**
+         * Set the CSS string and assert that it is a valid CSS color style
+         */
+        public set cssString(value: string) {
+            this.setValuesFromString(value)
+        }
 
         //Wrap RGBA values with get/set methods & update the color string whenever they change
         public get r(): number {
@@ -16,27 +30,28 @@ namespace splitTime.light {
         }
         public set r(value: number) {
             this._r = value
-            this.setColorString()
+            this.generateCssString()
         }
         public get g(): number {
             return this._g
         }
         public set g(value: number) {
             this._g = value
-            this.setColorString()
+            this.generateCssString()
         }
         public get b(): number {
             return this._b
         }
         public set b(value: number) {
             this._b = value
-            this.setColorString()
+            this.generateCssString()
         }
         public get a(): number {
             return this._a
         }
         public set a(value: number) {
             this._a = value
+            this.generateCssString()
         }
 
         /**
@@ -58,21 +73,18 @@ namespace splitTime.light {
             blue: number,
             alpha?: number,
         ] | [colorString: string]) {
-            this.cssColorString = ""
+            //Initialize variables
+            this._cssString = ""
+            this._r = -1
+            this._g = -1
+            this._b = -1
             
             // Default setting is "not transparent" (alpha value of 1)
             this._a = 1
 
             //If the argument is a string, it should evaluate as a CSS color, such as "white" or "Chartreuse"
             if (typeof args[0] === "string") {
-                this.cssColorString = args[0]
-                
-                const rgbaData = Color.stringToRgbaData(this.cssColorString)
-                assert(!!rgbaData, "Error: unable to convert string to RGBA values")
-                this._r = rgbaData[0]
-                this._g = rgbaData[1]
-                this._b = rgbaData[2]
-                this._a = rgbaData[3]
+                this.setValuesFromString(args[0])
             }
             //If the user passed in the RGB(A) numerical values
             else if (
@@ -88,7 +100,7 @@ namespace splitTime.light {
                 }
 
                 //Build the CSS string from RGBA values
-                this.setColorString()
+                this.generateCssString()
             }
             else {
                 //Sanity check to make sure we are handling arguments properly                
@@ -97,22 +109,36 @@ namespace splitTime.light {
         }
 
         /**
-         * Rebuild the CSS color string after RGBA values have changed.
+         * Rebuild the CSS color string after RGBA values have been set or updated.
          */
-        private setColorString(): boolean {
-            var rgba = this.toRgbaString()
+        private generateCssString() {
+            let rgba = Color.evaluateColorStyle(this.toRgbaString())
             
             //Make sure this will evaluate to a valid CSS color
-            assert(Color.isValidColor(rgba), "Error: invalid RGBA values: " + rgba)
+            assert(!!rgba, "Invalid RGBA values: " + rgba)
 
-            this.cssColorString = rgba
-            return true
+            this._cssString = rgba
         }
 
         /**
-         * Returns a string with CSS style for this color using the RGBA values
+         * Sets cssString and RGBA values based on string input (and asserts that the string is a valid CSS color)
+         * @param cssColorString - the color string to input
          */
-        toRgbaString(): string {
+        private setValuesFromString(cssColorString: string) {
+            this._cssString = cssColorString
+            
+            const rgbaData = Color.stringToRgbaData(this._cssString)
+            assert(!!rgbaData, "Unable to convert string to RGBA values: " + this._cssString)
+            this._r = rgbaData[0]
+            this._g = rgbaData[1]
+            this._b = rgbaData[2]
+            this._a = 1
+        }
+
+        /**
+         * Returns the RGBA values as a string (WARNING: may contain out-of-bounds values)
+         */
+        private toRgbaString(): string {
             return "rgba(" + this._r + ", " + this._g + ", " + this._b + ", " + this._a + ")"
         }
 
@@ -120,16 +146,37 @@ namespace splitTime.light {
          * Returns true if the color can be evaluated as a valid color in CSS
          */
         static isValidColor(colorString: string): boolean {
-            return Color.stringToRgbaData(colorString) !== null
+            return Color.evaluateColorStyle(colorString) !== null
         }
 
         /**
          * Evaluates a string as a color in CSS syntax and returns {r, g, b, a} or null for invalid colors
+         * 
+         * TODO: either document or change how this handles alpha (currently alpha gets set as a number from 0 - 255)
+         * 
          * @param colorString the string to evaluate in CSS
          */
         static stringToRgbaData(colorString: string): Uint8ClampedArray | null {
             assert(!__NODE__, "Converting a string to RGBA data isn't available in Node.js")
-            
+            if (!dummyContext) {
+                //Initialize the dummy context the first time we validate a color
+                dummyContext = new splitTime.Canvas(1,1).context;
+            }
+
+            const evaluatedStr = Color.evaluateColorStyle(colorString)
+            if(!evaluatedStr){
+                return null
+            }
+
+            dummyContext.fillRect(0,0,1,1)
+            return dummyContext.getImageData(0,0,1,1).data
+        }
+
+        /**
+         * Evaluates a string as a color in CSS syntax and returns the evaluated string (or null for invalid colors)
+         * @param colorString the string to evaluate in CSS
+         */
+        static evaluateColorStyle(colorString: string): string | null {
             if (!dummyContext) {
                 //Initialize the dummy context the first time we validate a color
                 dummyContext = new splitTime.Canvas(1,1).context;
@@ -138,18 +185,20 @@ namespace splitTime.light {
             //(fillStyle will not change if the color is invalid)
             dummyContext.fillStyle = "#123456"
             dummyContext.fillStyle = colorString
+
+            //If the fillStyle is still the same, it's probably invalid.
             if (dummyContext.fillStyle === "#123456") {
                 //Double-check to make sure it isn't actually #123456
                 dummyContext.fillStyle = "#000000"
                 dummyContext.fillStyle = colorString
+
+                //This time, if the fillStyle didn't change, we know for sure that colorString is invalid.
                 if(dummyContext.fillStyle === "#000000") {
                     //It's an invalid color
                     return null
                 }
             }
-
-            dummyContext.fillRect(0,0,1,1)
-            return dummyContext.getImageData(0,0,1,1).data
+            return dummyContext.fillStyle
         }
     }
 }

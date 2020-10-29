@@ -170,7 +170,7 @@ namespace splitTime {
             }
 
             //Draw the (semi-)transparent rectangle for fading in/out
-            this.buffer.context.fillStyle = this.fadeToColor.toRgbaString()
+            this.buffer.context.fillStyle = this.fadeToColor.cssString
             this.buffer.context.globalAlpha = this.fadeOutAmount + this.fadeInAmount
             this.buffer.context.fillRect(
                 0,

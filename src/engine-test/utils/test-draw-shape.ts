@@ -4,19 +4,23 @@ namespace splitTime.utils {
 
     splitTime.test.scenario(drawShapeTests, "Validate colors", t => {
         const color = new light.Color(255, 100, 1)
-        const colorString = color.toRgbaString()
+        const colorString = color.cssString
         t.assert(light.Color.isValidColor(colorString), "Should be a valid color: 255, 100, 1")
         
         t.assert(!light.Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
 
-        var errString1
+        var errString
         try{
             const invalidColor = new light.Color("invalidBlue")
         } catch (error) {
-            errString1 = error
+            errString = error
         }
-        t.assert(!!errString1, "Passing an invalid color name should throw an error.")
+        t.assert(!!errString, "Passing an invalid color name should throw an error.")
 
+        const outOfBoundsColor = new light.Color(-1, 256, 3.5)
+        const roundedColor = new light.Color(0, 255, 4)
+        t.assertEqual(outOfBoundsColor.cssString, roundedColor.cssString, "Out-of-bounds or non-integer RGB values should be rounded to nearest valid RGB value.")
+        
         const whiteColor = new light.Color("white")
         t.assertEqual(255, whiteColor.r, "The color name 'white' should have an R value of 255.")
         t.assertEqual(255, whiteColor.g, "The color name 'white' should have an G value of 255.")
@@ -41,7 +45,7 @@ namespace splitTime.utils {
         const buffer = new splitTime.Canvas(target.width, target.height)
         const color = new light.Color(255, 100, 1)
 
-        drawShapeOpaque(points, target.context, buffer, color.toRgbaString())
+        drawShapeOpaque(points, target.context, buffer, color.cssString)
 
         const outputData = target.context.getImageData(0, 0, target.width, target.height)
 
@@ -84,7 +88,7 @@ namespace splitTime.utils {
         const buffer = new splitTime.Canvas(target.width, target.height)
         const color = new light.Color(255, 100, 1)
 
-        drawShapeOpaque(points, target.context, buffer, color.toRgbaString())
+        drawShapeOpaque(points, target.context, buffer, color.cssString)
 
         const outputData = target.context.getImageData(0, 0, target.width, target.height)
 
@@ -121,7 +125,7 @@ namespace splitTime.utils {
         const buffer = new splitTime.Canvas(target.width, target.height)
         const color = new light.Color(255, 100, 1)
 
-        drawShapeOpaque(points, target.context, buffer, color.toRgbaString())
+        drawShapeOpaque(points, target.context, buffer, color.cssString)
 
         const outputData = target.context.getImageData(0, 0, target.width, target.height)
 
