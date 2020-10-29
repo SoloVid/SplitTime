@@ -9,11 +9,31 @@ namespace splitTime.utils {
         
         t.assert(!light.Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
 
+        var errString1
+        try{
+            const invalidColor = new light.Color("invalidBlue")
+        } catch (error) {
+            errString1 = error
+        }
+        t.assert(!!errString1, "Passing an invalid color name should throw an error.")
+
+        var errString2
+        try{
+            const invalidColor = new light.Color(-1,0,0)
+        } catch (error) {
+            errString2 = error
+        }
+        t.assert(false, "Passing an invalid color name should throw an error. " + errString2)
+
         const whiteColor = new light.Color("white")
-        t.assert(whiteColor.r == 255 && whiteColor.g == 255 && whiteColor.b == 255, "The color name 'white' should resolve to 255, 255, 255")
-        
+        t.assertEqual(255, whiteColor.r, "The color name 'white' should have an R value of 255.")
+        t.assertEqual(255, whiteColor.g, "The color name 'white' should have an G value of 255.")
+        t.assertEqual(255, whiteColor.b, "The color name 'white' should have an B value of 255.")
+                
         const fuchsia = new light.Color("fuchsia")
-        t.assert(fuchsia.r == 255 && fuchsia.g == 0 && fuchsia.b == 255, "The color name 'fuchsia' should resolve to 255, 0, 255")
+        t.assertEqual(255, fuchsia.r, "The color name 'fuchsia' should have an R value of 255.")
+        t.assertEqual(0, fuchsia.g, "The color name 'fuchsia' should have an G value of 0.")
+        t.assertEqual(255, fuchsia.b, "The color name 'fuchsia' should have an B value of 255.")
     })
 
     splitTime.test.scenario(drawShapeTests, "Draw a square", t => {
