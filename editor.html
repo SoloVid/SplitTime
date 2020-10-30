@@ -44,7 +44,7 @@
         <script>
             var projectName = window.location.hash.substring(1);
             while(!projectName) {
-                projectName = prompt("Project folder name:") || "";
+                projectName = window.prompt("Project directory name:") || "";
             }
             window.location.hash = "#" + projectName;
             var serverLiaison = new splitTime.editor.client.ServerLiaison(projectName);

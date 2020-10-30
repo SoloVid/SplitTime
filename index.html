@@ -61,6 +61,15 @@
             <hr />
             <br />
             <div>
+                <a class="btn" onclick="openGamePage()">Play-Test</a>
+                <script>
+                    function openGamePage() {
+                        var projectName = window.prompt("Project directory name:");
+                        if (projectName) {
+                            window.location = "/" + projectName + "/";
+                        }
+                    }
+                </script>
                 <a class="btn" href="/editor.html">Editor</a>
                 <a class="btn" href="/test-runner.html">Tests</a>
             </div>
