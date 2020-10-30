@@ -1,57 +1,16 @@
 This file is here as a mixture of TODOs and implementation thought experiments. Since opportunities to work on the engine are sparse, my thoughts here help me to keep track of what I've been thinking.
 
-Identified engine enhancements
-- Do sprite-splitting in rendering
-
-
-
-I want a box/sprite/frame/image/prop editor.
-- Shortcut for all same size in strict grid?
-- Can stick any number of traces on each frame/box
-    - Either all same time or per frame
-- Different sized bodies on different frames presents issue for using as template for body (TODO: resolve)
-
-
-Level editor enhancements
-- Instead of layers in editor, allow arbitrary groupings with default z
-- Allow locking groups so they can't be interacted with
-    - This actually might not be necessary because of active layer (will be active group) concept in editor
-    - More generally, add additional flag; instead of single checkbox for show/hide, two toggle options for show/hide and locked/unlocked
-- Actually sort objects by engine rendering logic
-- Create concept of "level linkages"
-    - Rather than specifying all params for level relationships in pointer/transport traces, use some shared level linkage structure
-    - For create/edit user should be able to drag levels graphically one over the other to align
-    - This idea may be scrapped as too much work, but I did add a thing for rendering the other image
-- Allow reload assets (maybe)
-- Auto-complete drop-downs instead of blank text fields
-- Graphically present something like tileset (could be set of props) to user in level editor
-- Undo functionality, probably whole-sale saving state of editor
-
-
-Server considerations
+- Sprite-splitting in rendering to allow for water, tall grass, etc.
+- Level editor enhancements
+    - Allow reload assets (maybe)
+    - Auto-complete drop-downs instead of blank text fields
 - Cache busting
     - Include modified time in query string for assets
     - Set Cache-Control no-store for game.js
-
-
-
-Let's call "Bodys" NPCs in this doc.
-
-- Events, particularly paths, ought to be easy to set up.
-- API should allow developer to easily specify an event where NPC moves through a series of positions.
 - Traces could be more exposed to the developer.
     - Allow developer to access traces anytime?
     - Let developer define different traces and the behavior of loading them in?
         - Maybe better to abstract out of editor but still leave in engine code.
-- Events could be easily set up as a series of waypoint positions
-    - Some positions would be linked by paths (e.g. Bob's front door to town entrance) and some not (e.g. Bob's front door to inside)
-    - Potentially there could be a third option of runtime straight path between two positions. This would be useful for moving NPCs into a crowd.
-    - Arbitrary wait times could be allowed at each position.
-    - Arbitrary function execution should be allowed at each position.
-    - If player is on the board, NPC walks path.
-    - If player is off board, some kind of wait time is calculated and substituted for actually walking the path. How does this work exactly? What should happen if player walks in during the middle of what should be a path event?
-    - If play walks off board during walk path, NPC should stop and something like the above point should happen.
-    - Maybe calculate remaining time, wait that long, but if player interrupts that time we fast forward to where we should have been walking? The catch-up will probably be expensive, but we are still saving by not walking everyone on every board. Also, load time between boards is probably acceptable.
 - Event structure
     - Pieces should only know about the next event to happen.
     - Event chains should not all be queued at initialization.
@@ -61,8 +20,4 @@ Let's call "Bodys" NPCs in this doc.
     - If current event is the only thing that is in dynamic memory, we only need to store it on save. This means each piece of chain needs to have an ID so we can later match up the current event to its reconstructed static-memory equivalent.
     - Perhaps have user specify an ID for a chain and then automatically tack on a counter to each piece?
     - What about dynamic events (i.e. events not hard-defined in code, perhaps parameterized based on template and player decisions)? Do they exist? How do we handle them? Maybe still reference a static event but perhaps allow developer to attach a simple parameter object to the event chain which will be saved.
-
-### Conversation
-
 - Add ellipses for unseen characters in dialog (i.e. before user is able to see dialog)
-- Add line sequence between everything else
