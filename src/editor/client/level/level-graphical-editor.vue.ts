@@ -295,7 +295,7 @@ namespace splitTime.editor.level {
             :style="levelOffsetStyleObject"
         >
             <rendered-proposition
-                class="entity.type"
+                :class="entity.type"
                 :level-editor-shared="levelEditorShared"
                 :p="entity"
             ></rendered-proposition>
