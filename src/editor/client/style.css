@@ -19,7 +19,9 @@ img {
 }
 
 .btn, input[type='submit'] {
+    text-decoration: none;
     font-size: medium;
+    font-weight: bold;
     display: inline-block;
     cursor: pointer;
     text-align: center;
@@ -30,6 +32,12 @@ img {
     border: none;
     border-radius: 5px;
     transition: background-color .5s, color .5s, box-shadow .5s;
+}
+.btn:hover {
+    color: black;
+    background-color: white;
+    text-decoration: none;
+    box-shadow: 0px 10px 30px rgba(100, 100, 100, .5);
 }
 
 .menu-bar {

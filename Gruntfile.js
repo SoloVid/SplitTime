@@ -111,6 +111,21 @@ module.exports = function(grunt) {
         });
     });
 
+    grunt.registerTask('serve', function() {
+        var done = this.async();
+        var serverPath = path.join(getRoot(), "build", "editor-server.js");
+        grunt.verbose.writeln("Using server: " + serverPath);
+        var process = childProcess.fork(serverPath, [], {});
+        process.on('error', function(err) {
+            done(false);
+        });
+        process.on('exit', function(code) {
+            if(code === 0) {
+                done();
+            }
+        });
+    });
+
     function countSlashesInPath(path) {
         return (path.replace(/\\\\?/g, "/").match(/\//g) || []).length;
     }
@@ -256,15 +271,13 @@ module.exports = function(grunt) {
         grunt.file.write("build/@types/splitTime/index.d.ts", indexFileContents);
     });
 
+    function getRoot() {
+        return path.resolve(path.dirname((module).filename), '.');
+    }
+
     function getPathInNodeModules(pathPart) {
-        var ownRoot = path.resolve(path.dirname((module).filename), '.');
-        var userRoot = path.resolve(ownRoot, '..', '..');
+        var ownRoot = getRoot();
         var binSub = path.join('node_modules', pathPart);
-    
-        if (fs.existsSync(path.join(userRoot, binSub))) {
-            // Using project override
-            return path.join(userRoot, binSub);
-        }
         return path.join(ownRoot, binSub);
     }
 
