@@ -1,9 +1,9 @@
 namespace splitTime.npc {
     export interface Behavior extends TimeNotified {
         /**
-         * Only expect this to be checked *after* a call to notifyTimeAdvance()
+         * Notify the behavior that, starting this frame,
+         * it will indefinitely not receive frame updates.
          */
-        isComplete(): boolean
         notifySuspension(): void
     }
 }

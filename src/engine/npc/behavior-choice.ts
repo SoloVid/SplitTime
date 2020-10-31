@@ -1,5 +1,5 @@
 namespace splitTime.npc {
-    export class BehaviorChoice implements TimeNotified, npc.Behavior {
+    export class BehaviorChoice implements TimeNotified, Behavior, TemporaryBehavior, ConditionalBehavior {
 
         private readonly behaviorMap: { [priority: number]: splitTime.npc.Behavior | null } = {}
         private levelUsed: int | null = null
@@ -7,6 +7,7 @@ namespace splitTime.npc {
         constructor(
             private readonly priorityLevels: readonly int[] = [npc.PRIORITY, npc.DIRECTED, npc.IDLE]
         ) {
+            assert(this.priorityLevels.length !== 0, "At least one priority level should be specified")
             for (const level of this.priorityLevels) {
                 this.behaviorMap[level] = null
             }
@@ -19,6 +20,22 @@ namespace splitTime.npc {
                 }
             }
             return true
+        }
+
+        isConditionMet(): boolean {
+            for (const level of this.priorityLevels) {
+                const behavior = this.behaviorMap[level]
+                if (behavior !== null) {
+                    // Unconditional behaviors count as condition always met
+                    if (!instanceOf.ConditionalBehavior(behavior)) {
+                        return true
+                    }
+                    if (behavior.isConditionMet()) {
+                        return true
+                    }
+                }
+            }
+            return false
         }
 
         notifySuspension(): void {
@@ -38,22 +55,26 @@ namespace splitTime.npc {
             this.levelUsed = null
             for (const level of this.priorityLevels) {
                 const behavior = this.behaviorMap[level]
-                if (behavior !== null) {
-                    this.levelUsed = lastLevelUsed
-                    if (this.levelUsed !== lastLevelUsed && lastLevelUsed !== null) {
-                        this.behaviorMap[lastLevelUsed]?.notifySuspension()
-                    }
-
-                    behavior.notifyTimeAdvance(delta)
-                    if (behavior.isComplete()) {
-                        this.behaviorMap[level] = null
-                    }
-                    return
+                if (behavior === null) {
+                    continue
                 }
+                if (instanceOf.ConditionalBehavior(behavior) && !behavior.isConditionMet()) {
+                    continue
+                }
+                this.levelUsed = level
+                if (this.levelUsed !== lastLevelUsed && lastLevelUsed !== null) {
+                    this.behaviorMap[lastLevelUsed]?.notifySuspension()
+                }
+
+                behavior.notifyTimeAdvance(delta)
+                if (instanceOf.TemporaryBehavior(behavior) && behavior.isComplete()) {
+                    this.behaviorMap[level] = null
+                }
+                return
             }
         }
 
-        stop(behavior: splitTime.npc.Behavior): void {
+        stop(behavior: Behavior): void {
             for (const level of this.priorityLevels) {
                 if (this.behaviorMap[level] === behavior) {
                     this.behaviorMap[level] = null
@@ -61,7 +82,7 @@ namespace splitTime.npc {
             }
         }
 
-        set(behavior: splitTime.npc.Behavior, level?: int): void {
+        set(behavior: Behavior | TemporaryBehavior | ConditionalBehavior, level?: int): void {
             if (level === undefined) {
                 level = this.priorityLevels[0]
             }

@@ -122,6 +122,10 @@ namespace splitTime.direction {
         throw new Error("Types of from and to should be matched")
     }
 
+    export function getOpposite(dir: direction_t): direction_t {
+        return (dir + 2) % 4
+    }
+
     export function simplifyToCardinal(realDir: direction_t): direction_t {
         return splitTime.mod(Math.round(realDir), 4)
     }

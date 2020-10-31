@@ -1,10 +1,10 @@
 namespace splitTime.npc {
-    export class BehaviorSequence implements Behavior {
+    export class BehaviorSequence implements TemporaryBehavior {
 
         private currentBehaviorIndex: int = 0
 
         constructor(
-            private readonly behaviors: readonly Behavior[]
+            private readonly behaviors: readonly TemporaryBehavior[]
         ) {}
 
         isComplete(): boolean {
@@ -12,16 +12,22 @@ namespace splitTime.npc {
         }
 
         notifySuspension(): void {
+            if (this.isComplete()) {
+                return
+            }
             this.currentBehavior.notifySuspension()
             this.checkAdvance()
         }
 
         notifyTimeAdvance(delta: game_seconds): void {
+            if (this.isComplete()) {
+                return
+            }
             this.currentBehavior.notifyTimeAdvance(delta)
             this.checkAdvance()
         }
 
-        private get currentBehavior(): Behavior {
+        private get currentBehavior(): TemporaryBehavior {
             if (this.isComplete()) {
                 throw new Error("BehaviorSequence invoked after completion")
             }

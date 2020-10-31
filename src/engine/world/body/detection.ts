@@ -2,7 +2,12 @@ namespace splitTime.body {
     const ARBITRARY_MAX_DETECTION_RADIUS = 256
     const ARBITRARY_DETECTION_RADIUS = 48
 
-    export function canDetect(detective: Body, target: Body): boolean {
+    export function canDetect(
+        detective: Body,
+        target: Body,
+        sightDistance: number = ARBITRARY_MAX_DETECTION_RADIUS,
+        senseDistance: number = ARBITRARY_DETECTION_RADIUS
+    ): boolean {
         if (detective.getLevel() !== target.getLevel()) {
             return false
         }
