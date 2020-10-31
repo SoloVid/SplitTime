@@ -27,6 +27,8 @@ namespace splitTime.npc {
             this.spriteBody.sprite.requestStance(this.moveStance, dir)
             if (this.isCloseEnough()) {
                 this.spriteBody.body.putInPosition(this.position)
+            } else {
+                this.spriteBody.body.dir = dir
             }
         }
 
