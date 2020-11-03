@@ -51,6 +51,9 @@ namespace splitTime.trace {
         return points.map(getPoint)
     }
 
+    export function makePositionPoint(positionId: string): string {
+        return "(pos:" + positionId + ")"
+    }
     export function interpretPointString(
         traceStr: string
     ): TracePointSpec[] {

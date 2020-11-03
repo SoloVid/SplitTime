@@ -130,8 +130,14 @@ namespace splitTime.editor.level {
         const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
         const loc = getBestEntityLocation(this)
 
+        let pIndex = this.level.positions.length
+        let pId = "Position " + pIndex
+        while (this.level.positions.some(m => m.obj.id === pId)) {
+            pIndex++
+            pId = "Position " + pIndex
+        }
         var object = {
-            id: "",
+            id: pId,
             group: group.id,
             collage: this.levelEditorShared.selectedCollage,
             montage: this.levelEditorShared.selectedMontage,
@@ -187,7 +193,7 @@ namespace splitTime.editor.level {
                 Math.floor(snappedX) + ", " +
                 Math.floor(snappedY) + ")"
             var closestPosition = findClosestPosition(this.level, this.inputs.mouse.x, yInGroup)
-            var positionPoint = closestPosition ? "(pos:" + closestPosition.obj.id + ")" : ""
+            var positionPoint = closestPosition ? splitTime.trace.makePositionPoint(closestPosition.obj.id) : ""
             const pathInProgress = this.levelEditorShared.pathInProgress
             if(isLeftClick) {
                 if(pathInProgress) {

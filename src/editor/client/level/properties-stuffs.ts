@@ -68,14 +68,13 @@ namespace splitTime.editor.level {
             z: {},
             dir: {}
         }
+        const wrappedPosition = new PositionWrapper(position, level)
         type SimplifiedPosition = { [K in keyof Required<typeof fields>]: string | number }
         return {
             title: "Position Properties",
-            thing: position as SimplifiedPosition,
+            thing: wrappedPosition as SimplifiedPosition,
             fields,
-            doDelete: () => {
-                level.positions = level.positions.filter(p => p.obj !== position)
-            }
+            doDelete: () => wrappedPosition.delete()
         }
     }
     
