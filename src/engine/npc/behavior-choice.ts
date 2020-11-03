@@ -40,7 +40,7 @@ namespace splitTime.npc {
 
         notifySuspension(): void {
             if (this.levelUsed !== null) {
-                this.behaviorMap[this.levelUsed]?.notifySuspension()
+                this.behaviorMap[this.levelUsed]?.notifySuspension?.()
             }
             this.levelUsed = null
         }
@@ -63,7 +63,7 @@ namespace splitTime.npc {
                 }
                 this.levelUsed = level
                 if (this.levelUsed !== lastLevelUsed && lastLevelUsed !== null) {
-                    this.behaviorMap[lastLevelUsed]?.notifySuspension()
+                    this.behaviorMap[lastLevelUsed]?.notifySuspension?.()
                 }
 
                 behavior.notifyTimeAdvance(delta)

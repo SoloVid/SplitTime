@@ -384,6 +384,6 @@ namespace splitTime {
         }
 
         // Generally equates to pixels per second (game time)
-        spd = 16
+        spd = 32
     }
 }

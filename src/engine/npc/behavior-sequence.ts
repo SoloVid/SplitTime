@@ -15,7 +15,7 @@ namespace splitTime.npc {
             if (this.isComplete()) {
                 return
             }
-            this.currentBehavior.notifySuspension()
+            this.currentBehavior.notifySuspension?.()
             this.checkAdvance()
         }
 

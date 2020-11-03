@@ -15,10 +15,6 @@ namespace splitTime.npc {
             return !this.isCloseEnough()
         }
 
-        notifySuspension(): void {
-            // Do nothing
-        }
-
         notifyTimeAdvance(delta: game_seconds): void {
             const dir = direction.fromToThing(this.spriteBody.body, this.position)
             const dist = this.getDistance()

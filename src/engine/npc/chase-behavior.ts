@@ -32,10 +32,6 @@ namespace splitTime.npc {
             return this.canDetect()
         }
 
-        notifySuspension(): void {
-            // FTODO: Anything here?
-        }
-
         notifyTimeAdvance(delta: splitTime.game_seconds): void {
             if (!this.inLevel()) {
                 return

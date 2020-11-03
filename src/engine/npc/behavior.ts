@@ -4,6 +4,6 @@ namespace splitTime.npc {
          * Notify the behavior that, starting this frame,
          * it will indefinitely not receive frame updates.
          */
-        notifySuspension(): void
+        notifySuspension?(): void
     }
 }

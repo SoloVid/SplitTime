@@ -25,7 +25,7 @@ namespace splitTime.npc {
 
         notifySuspension(): void {
             for (const b of this.behaviors) {
-                b.notifySuspension()
+                b.notifySuspension?.()
             }
         }
 

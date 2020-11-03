@@ -8,7 +8,7 @@ namespace splitTime.npc {
         }
 
         notifySuspension(): void {
-            this.baseBehavior.notifySuspension()
+            this.baseBehavior.notifySuspension?.()
         }
 
         notifyTimeAdvance(delta: game_seconds): void {
