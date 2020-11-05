@@ -7,7 +7,18 @@ namespace splitTime.conversation {
         constructor(name: string, body: splitTime.Body) {
             this.name = name
             this.body = body
-            this.speechBox = this.body.speechBox
+            // TODO: re-evaluate this speech box
+            this.speechBox = new splitTime.body.SpeechBox(body, 42)
+        }
+
+        behavior(): npc.ConditionalBehavior {
+            return {
+                isConditionMet() {
+                    // TODO: check conversation manager
+                    return false
+                },
+                notifyTimeAdvance(delta: game_seconds) {}
+            }
         }
     }
 }

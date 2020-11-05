@@ -1,4 +1,6 @@
 namespace splitTime.conversation {
+    // FTODO: Get rid of singleton
+    export const interactEvent = new splitTime.body.CustomEventHandler<void>()
     export class ConversationHandlers {
         private readonly onInteractLambda = () => this.onInteract()
         onInteract = () => this.onInteractDefault()
@@ -6,19 +8,19 @@ namespace splitTime.conversation {
 
         constructor(
             private readonly conversation: ConversationInstance,
-            private readonly nodeId: BreadCrumbs,
+            private readonly node: ConversationLeafNode,
             private readonly section: SectionSpec,
             private readonly helper: RunnerHelper
         ) {}
 
         private onInteractDefault(): void {
-            this.conversation.tryInterrupt(this.nodeId)
+            this.conversation.tryInterrupt("TODO: type", this.node)
         }
 
         setUp(): void {
             // FTODO: Try to push this up the chain so that we don't attach and detach so often
             for (const speaker of this.section.getSpeakers()) {
-                speaker.body.registerPlayerInteractHandler(this.onInteractLambda)
+                interactEvent.registerListener(speaker.body, this.onInteractLambda)
                 if(this.section.detectionInterruptibles.length > 0) {
                     speaker.body.registerTimeAdvanceListener(
                         this.makeDetectionListener(speaker.body, this.section.detectionInterruptibles)
@@ -29,7 +31,7 @@ namespace splitTime.conversation {
 
         tearDown(): void {
             for (const speaker of this.section.getSpeakers()) {
-                speaker.body.deregisterPlayerInteractHandler(this.onInteractLambda)
+                interactEvent.removeListener(speaker.body, this.onInteractLambda)
             }
             this.isTornDown = true
         }
@@ -41,7 +43,7 @@ namespace splitTime.conversation {
                 }
                 for(const interruptible of interruptibles) {
                     if(this.isDetectionInterruptibleTriggered(detective, interruptible)) {
-                        this.conversation.interrupt(this.nodeId, interruptible)
+                        this.conversation.interrupt(this.node, interruptible)
                         return
                     }
                 }

@@ -12,9 +12,9 @@ namespace splitTime.conversation {
             this.parent = parent
         }
 
-        getParent(): SectionSpec {
+        getParent(): LineSequence {
             assert(this.parent !== null, "Line parent should have been set")
-            return this.parent!.getParent()
+            return this.parent
         }
     }
 }

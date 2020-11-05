@@ -26,8 +26,9 @@ namespace splitTime.conversation {
         }
 
         build(): SectionSpec {
+            const builtStuff = this.parts.map(p => p instanceof SectionBuilder ? p.build() : p)
             return new SectionSpec(
-                this.parts.map(p => p instanceof SectionBuilder ? p.build() : p),
+                groupLineSequences(builtStuff),
                 this.interruptibles.map(i => i.build()),
                 this.detectionInterruptibles.map(i => i.build()),
                 this.cancelSection?.build()

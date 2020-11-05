@@ -1,12 +1,6 @@
 namespace splitTime.conversation {
     export class ConversationDslBuilder implements DSL {
-        private sectionBuilder: SectionBuilder
-
-        constructor(
-            topLevelSectionBuilder: SectionBuilder
-        ) {
-            this.sectionBuilder = topLevelSectionBuilder
-        }
+        private sectionBuilder: SectionBuilder = new SectionBuilder()
 
         say(speaker: Speaker, line: string): void {
             const lineObj = new Line(speaker, line)
@@ -36,6 +30,10 @@ namespace splitTime.conversation {
             } finally {
                 this.sectionBuilder = prevSection
             }
+        }
+
+        build(): ConversationSpec {
+            return new ConversationSpec("TODO: ID", this.sectionBuilder.build())
         }
     }
 }

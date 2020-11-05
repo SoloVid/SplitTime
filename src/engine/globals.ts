@@ -7,6 +7,10 @@ function assert(condition: boolean, message: string): asserts condition {
     }
 }
 
+function assertNever(impossible: never, message: string): never {
+    throw new Error(message)
+}
+
 function nop(arg: unknown): void {
     // Do nothing
 }

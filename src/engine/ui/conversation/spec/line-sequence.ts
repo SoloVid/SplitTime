@@ -6,16 +6,23 @@ namespace splitTime.conversation {
      * on save/load.
      */
     export class LineSequence {
+        private parent: SectionSpec | null = null
+
         constructor(
-            public readonly lines: readonly Line[],
-            private readonly parent: SectionSpec
+            public readonly lines: readonly Line[]
         ) {
             for(const line of this.lines) {
                 line.setParent(this)
             }
         }
 
+        setParent(parent: SectionSpec): void {
+            assert(this.parent === null, "LineSequence parent can only be set once")
+            this.parent = parent
+        }
+
         getParent(): SectionSpec {
+            assert(this.parent !== null, "LineSequence parent should have been set")
             return this.parent
         }
     }

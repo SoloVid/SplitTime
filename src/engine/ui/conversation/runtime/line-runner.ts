@@ -5,7 +5,7 @@ namespace splitTime.conversation {
         private started: boolean = false
         constructor(
             private readonly conversation: ConversationInstance,
-            private readonly nodeId: BreadCrumbs,
+            private readonly node: ConversationLeafNode,
             private readonly line: Line,
             private readonly helper: RunnerHelper
         ) {
@@ -19,12 +19,12 @@ namespace splitTime.conversation {
         }
 
         onInteract(): void {
-            this.conversation.tryInterrupt(this.nodeId) || this.dialog.advance()
+            this.conversation.tryInterrupt("TODO type", this.node) || this.dialog.advance()
         }
 
         private registerHandlers() {
             this.dialog.registerPlayerInteractHandler(() => this.onInteract())
-            this.dialog.registerDismissHandler(() => this.conversation.tryCancel(this.nodeId) && this.stop())
+            this.dialog.registerDismissHandler(() => this.conversation.tryCancel(this.node) && this.stop())
             this.dialog.registerDialogEndHandler(() => this.stop())
         }
 
@@ -41,7 +41,7 @@ namespace splitTime.conversation {
 
         stop(): void {
             this.helper.secretary.remove(this.dialog)
-            this.conversation.notifyNodeCompletion(this.nodeId)
+            this.conversation.notifyNodeCompletion(this.node)
         }
 
         interrupt(): void {
