@@ -22,7 +22,7 @@ namespace splitTime.conversation {
         }
 
         start(spec: ConversationSpec): void {
-            const inst = new ConversationInstance(spec.topLevelSection, this.helper)
+            const inst = new ConversationInstance(spec, this.helper)
             inst.start()
         }
 

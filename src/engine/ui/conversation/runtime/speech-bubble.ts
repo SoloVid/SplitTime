@@ -19,7 +19,7 @@ namespace splitTime.conversation {
             | null = null
 
         constructor(
-            public readonly clique: Clique,
+            public readonly conversation: ConversationInstance,
             public readonly speaker: string,
             private _line: string,
             location: ILevelLocation

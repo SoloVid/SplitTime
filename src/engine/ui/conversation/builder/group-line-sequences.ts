@@ -1,4 +1,5 @@
 namespace splitTime.conversation {
+    type SectionSpecRawPart = SectionSpec | Line | MidConversationAction
     export function groupLineSequences(basicParts: readonly SectionSpecRawPart[]): SectionSpecPart[] {
         const formalizedParts: SectionSpecPart[] = []
         let groupOfLines: Line[] = []

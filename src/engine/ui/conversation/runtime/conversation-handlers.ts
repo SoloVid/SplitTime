@@ -1,66 +1,62 @@
 namespace splitTime.conversation {
-    // FTODO: Get rid of singleton
-    export const interactEvent = new splitTime.body.CustomEventHandler<void>()
     export class ConversationHandlers {
-        private readonly onInteractLambda = () => this.onInteract()
-        onInteract = () => this.onInteractDefault()
         private isTornDown = false
+
+        private readonly specs: EventListenerSpec[] = []
 
         constructor(
             private readonly conversation: ConversationInstance,
             private readonly node: ConversationLeafNode,
             private readonly section: SectionSpec,
-            private readonly helper: RunnerHelper
-        ) {}
-
-        private onInteractDefault(): void {
-            this.conversation.tryInterrupt("TODO: type", this.node)
+            private readonly interactEvent: body.CustomEventHandler<unknown>
+        ) {
+            for (const speaker of this.section.getSpeakers()) {
+                for (const interruptible of this.section.interruptibles) {
+                    for (const event of interruptible.events) {
+                        this.specs.push({
+                            event,
+                            body: speaker.body,
+                            callback: this.makeCallback(() =>
+                                this.conversation.tryInterrupt(event, this.node))
+                        })
+                    }
+                }
+                this.specs.push({
+                    event: interactEvent,
+                    body: speaker.body,
+                    callback: this.makeCallback(() => this.conversation.advanceAt(node))
+                })
+            }
         }
 
         setUp(): void {
             // FTODO: Try to push this up the chain so that we don't attach and detach so often
-            for (const speaker of this.section.getSpeakers()) {
-                interactEvent.registerListener(speaker.body, this.onInteractLambda)
-                if(this.section.detectionInterruptibles.length > 0) {
-                    speaker.body.registerTimeAdvanceListener(
-                        this.makeDetectionListener(speaker.body, this.section.detectionInterruptibles)
-                    )
-                }
+            for (const spec of this.specs) {
+                spec.event.registerListener(spec.body, spec.callback)
             }
         }
 
         tearDown(): void {
-            for (const speaker of this.section.getSpeakers()) {
-                interactEvent.removeListener(speaker.body, this.onInteractLambda)
-            }
             this.isTornDown = true
+            for (const spec of this.specs) {
+                spec.event.removeListener(spec.body, spec.callback)
+            }
         }
 
-        private makeDetectionListener(detective: Body, interruptibles: readonly InterruptibleSpec[]): (delta: number) => STOP_CALLBACKS_TYPE | undefined {
-            return (delta: number) => {
+        private makeCallback(callbackMeat: () => void): () => CallbackResult {
+            return () => {
                 if (this.isTornDown) {
-                    return splitTime.STOP_CALLBACKS
+                    return STOP_CALLBACKS
                 }
-                for(const interruptible of interruptibles) {
-                    if(this.isDetectionInterruptibleTriggered(detective, interruptible)) {
-                        this.conversation.interrupt(this.node, interruptible)
-                        return
-                    }
-                }
+                callbackMeat()
                 return
             }
         }
+    }
 
-        private isDetectionInterruptibleTriggered(detective: Body, interruptible: InterruptibleSpec): boolean {
-            const actualTarget =
-            interruptible.body ||
-            this.helper.playerBodyGetter()
-            return !!actualTarget &&
-                splitTime.body.canDetect(
-                    detective,
-                    actualTarget
-                ) &&
-                interruptible.conditionMet
-        }
+    interface EventListenerSpec {
+        event: body.CustomEventHandler<unknown>
+        body: Body
+        callback: () => CallbackResult
     }
 }

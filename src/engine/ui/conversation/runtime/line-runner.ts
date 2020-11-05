@@ -10,20 +10,20 @@ namespace splitTime.conversation {
             private readonly helper: RunnerHelper
         ) {
             this.dialog = new SpeechBubble(
-                conversation.clique,
+                conversation,
                 this.line.speaker.name,
                 this.line.text,
                 this.line.speaker.speechBox
             )
-            this.speakers = line.getParent().getSpeakers()
+            this.speakers = line.getParent().getParent().getSpeakers()
         }
 
-        onInteract(): void {
-            this.conversation.tryInterrupt("TODO type", this.node) || this.dialog.advance()
+        advance(): void {
+            this.dialog.advance()
         }
 
         private registerHandlers() {
-            this.dialog.registerPlayerInteractHandler(() => this.onInteract())
+            this.dialog.registerPlayerInteractHandler(() => this.advance())
             this.dialog.registerDismissHandler(() => this.conversation.tryCancel(this.node) && this.stop())
             this.dialog.registerDialogEndHandler(() => this.stop())
         }
@@ -35,7 +35,6 @@ namespace splitTime.conversation {
             this.started = true
             // FTODO: make this a bit more object oriented
             this.registerHandlers()
-            this.dialog.clique.speakers = this.speakers
             this.helper.secretary.submit(this.dialog)
         }
 

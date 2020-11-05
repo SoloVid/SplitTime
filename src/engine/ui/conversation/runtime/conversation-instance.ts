@@ -1,12 +1,13 @@
 namespace splitTime.conversation {
-    export type ConversationLeafNode = Line | MidConversationAction
-    export type ConversationInnerNode = SectionSpec | LineSequence | ConversationSpec
-    type Part = ConversationLeafNode | SectionSpec | LineSequence | InterruptibleSpec
-
-    type Current = { action: ConversationLeafNode, interruptibleEvent: Interruptible | null, handlers: ConversationHandlers }
+    interface Current {
+        action: ConversationLeafNode
+        section: SectionSpec
+        interruptibleEvent: Interruptible | null
+        handlers: ConversationHandlers
+        advanceCallback: (() => void) | null
+    }
 
     export class ConversationInstance {
-        public readonly clique: Clique = new Clique()
         private current: Current | null = null
         private readonly treeTraveler: TreeTraveler = new TreeTraveler()
 
@@ -20,20 +21,29 @@ namespace splitTime.conversation {
             this.goToNode(first)
         }
 
+        getCurrentSpeakers(): readonly Speaker[] {
+            if (this.current === null) {
+                return []
+            }
+            return this.current.section.getSpeakers()
+        }
+
         private isCurrentNode(node: ConversationLeafNode): boolean {
             return this.current !== null && this.current.action === node
         }
 
         notifyNodeCompletion(node: ConversationLeafNode): void {
             if(this.isCurrentNode(node)) {
-                this.advance()
+                assert(this.current !== null, "Conversation current should not be null when advancing")
+                const nextAction = this.treeTraveler.getNextAfter(this.current.action)
+                this.goToNode(nextAction)
             }
         }
 
-        advance(): void {
-            assert(this.current !== null, "Conversation bread crumbs should not be null when advancing")
-            const nextAction = this.treeTraveler.getNextAfter(this.current.action)
-            this.goToNode(nextAction)
+        advanceAt(node: ConversationLeafNode): void {
+            if(this.isCurrentNode(node)) {
+                this.current?.advanceCallback?.()
+            }
         }
 
         private goToNode(action: ConversationLeafNode | null): void {
@@ -45,18 +55,20 @@ namespace splitTime.conversation {
                 this.current = null
                 return
             }
-            const section = action.getParent()
+            const section = this.treeTraveler.getNearestParentSection(action)
             const newCurrent: Current = {
                 action,
+                section,
                 interruptibleEvent: null,
-                handlers: new ConversationHandlers(this, action, section, this.helper)
+                handlers: new ConversationHandlers(this, action, section, this.helper.advanceEvent),
+                advanceCallback: null
             }
             this.current = newCurrent
             newCurrent.handlers.setUp()
             if(action instanceof Line) {
                 const lineRunner = this.launchLine(action)
                 newCurrent.interruptibleEvent = lineRunner
-                newCurrent.handlers.onInteract = () => lineRunner.onInteract()
+                newCurrent.advanceCallback = () => lineRunner.advance()
             } else if(action instanceof MidConversationAction) {
                 newCurrent.interruptibleEvent = this.launchEvent(action)
             } else {
@@ -74,11 +86,11 @@ namespace splitTime.conversation {
             return true
         }
 
-        tryInterrupt(type: string, node: ConversationLeafNode): boolean {
+        tryInterrupt<T>(event: body.CustomEventHandler<T>, node: ConversationLeafNode): boolean {
             if(this.current === null || !this.isCurrentNode(node)) {
                 return false
             }
-            const nextPerInterrupt = this.treeTraveler.getInterruptedFrom(type, node)
+            const nextPerInterrupt = this.treeTraveler.getInterruptedFrom(event, node)
             if (nextPerInterrupt === null) {
                 return false
             }

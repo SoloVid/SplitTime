@@ -14,25 +14,13 @@ namespace splitTime.conversation {
 
         interruptible(
             condition: Condition = true,
-            setup: () => void = () => {}
+            setup: () => void = () => {},
+            ...events: body.CustomEventHandler<unknown>[]
         ): SectionBuilderFluentReturn {
             const newSectionBuilder = new SectionBuilder()
             this.helper.withSectionBuilder(newSectionBuilder, setup)
             this.sectionBuilder.addInterruptible(
-                new InterruptibleSpecBuilder(condition, newSectionBuilder)
-            )
-            return this
-        }
-
-        interruptibleByDetection(
-            condition: Condition = true,
-            setup: () => void = () => {},
-            body?: Body
-        ): SectionBuilderFluentReturn {
-            const newSectionBuilder = new SectionBuilder()
-            this.helper.withSectionBuilder(newSectionBuilder, setup)
-            this.sectionBuilder.addDetectionInterruptible(
-                new InterruptibleSpecBuilder(condition, newSectionBuilder, body)
+                new InterruptibleSpecBuilder(events, condition, newSectionBuilder)
             )
             return this
         }

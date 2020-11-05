@@ -2,7 +2,12 @@ namespace splitTime.conversation {
     export class ConversationDslBuilder implements DSL {
         private sectionBuilder: SectionBuilder = new SectionBuilder()
 
+        listen(speaker: Speaker): void {
+            this.sectionBuilder.addSpeaker(speaker)
+        }
+
         say(speaker: Speaker, line: string): void {
+            this.sectionBuilder.addSpeaker(speaker)
             const lineObj = new Line(speaker, line)
             this.sectionBuilder.append(lineObj)
         }

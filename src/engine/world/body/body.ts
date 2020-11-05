@@ -52,12 +52,7 @@ namespace splitTime {
             this.timeAdvanceListeners = new splitTime.RegisterCallbacks({
                 notifyTimeAdvance: null
             })
-            this.playerInteractHandlers = new splitTime.RegisterCallbacks({
-                onPlayerInteract: null
-            })
             this.mover = new splitTime.body.Mover(this)
-            // TODO: sort out (throw out) inheritance to make this work right
-            this.speechBox = new splitTime.body.SpeechBox(this, 42)
 
             //Initialize variables used for region transitions
             this.fadeEnteringLevelPromise = null
@@ -356,22 +351,10 @@ namespace splitTime {
             }
         }
 
-        notifyPlayerInteract() {
-            this.playerInteractHandlers.run()
-        }
-
         registerTimeAdvanceListener(
             handler: ((delta: game_seconds) => splitTime.CallbackResult) | splitTime.TimeNotified
         ) {
             this.timeAdvanceListeners.register(handler)
-        }
-
-        //Function run on ENTER or SPACE
-        registerPlayerInteractHandler(handler: () => void) {
-            this.playerInteractHandlers.register(handler)
-        }
-        deregisterPlayerInteractHandler(handler: () => void) {
-            this.playerInteractHandlers.remove(handler)
         }
 
         registerEventListener(id: string, handler: (data: unknown) => CallbackResult) {

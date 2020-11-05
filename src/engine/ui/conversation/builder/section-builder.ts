@@ -2,12 +2,18 @@ namespace splitTime.conversation {
     type BuilderPart = SectionBuilder | Line | MidConversationAction
     export class SectionBuilder {
         private readonly parts: BuilderPart[] = []
+        private readonly speakers: Speaker[] = []
         private cancelSection: SectionBuilder | null = null
         private interruptibles: InterruptibleSpecBuilder[] = []
-        private detectionInterruptibles: InterruptibleSpecBuilder[] = []
 
         append(part: BuilderPart): void {
             this.parts.push(part)
+        }
+
+        addSpeaker(speaker: Speaker): void {
+            if (this.speakers.indexOf(speaker) < 0) {
+                this.speakers.push(speaker)
+            }
         }
 
         setCancelSection(section: SectionBuilder): void {
@@ -21,16 +27,12 @@ namespace splitTime.conversation {
             this.interruptibles.push(interruptible)
         }
 
-        addDetectionInterruptible(interruptible: InterruptibleSpecBuilder): void {
-            this.detectionInterruptibles.push(interruptible)
-        }
-
         build(): SectionSpec {
             const builtStuff = this.parts.map(p => p instanceof SectionBuilder ? p.build() : p)
             return new SectionSpec(
+                this.speakers,
                 groupLineSequences(builtStuff),
                 this.interruptibles.map(i => i.build()),
-                this.detectionInterruptibles.map(i => i.build()),
                 this.cancelSection?.build()
             )
         }

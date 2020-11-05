@@ -11,9 +11,9 @@ namespace splitTime.conversation {
      * Serves as a point of contact for all dialog-related decisions
      *
      * For example:
-     * - Give Dialog objects a chance to update themselves.
-     * - Choose which Dialog object(s) should display on the screen (and push to DialogRenderer).
-     * - Delegate screen interactions from the player to appropriate Dialog objects.
+     * - Give speech bubbles a chance to update themselves.
+     * - Choose which speech bubbles should display on the screen (and push to renderer).
+     * - Delegate screen interactions from the player to appropriate speech bubbles.
      */
     export class Secretary {
         private dialogs: SpeechBubble[] = []
@@ -23,7 +23,7 @@ namespace splitTime.conversation {
          */
         private engagedDialog: SpeechBubble | null = null
 
-        private recentlyEngagedClique: Clique | null = null
+        private recentlyEngagedConversation: ConversationInstance | null = null
 
         constructor(
             private readonly renderer: Renderer,
@@ -60,7 +60,7 @@ namespace splitTime.conversation {
          */
         disengageAllDialogs() {
             this.engagedDialog = null
-            this.recentlyEngagedClique = null
+            this.recentlyEngagedConversation = null
         }
 
         notifyFrameUpdate() {
@@ -96,12 +96,12 @@ namespace splitTime.conversation {
             if (this.engagedDialog && winningScore > engagedScore) {
                 this.renderer.hide(this.engagedDialog)
                 this.engagedDialog = null
-                this.recentlyEngagedClique = null
+                this.recentlyEngagedConversation = null
             }
 
             if (usurper !== null) {
                 this.engagedDialog = usurper
-                this.recentlyEngagedClique = this.engagedDialog.clique
+                this.recentlyEngagedConversation = this.engagedDialog.conversation
                 this.renderer.show(this.engagedDialog)
             }
 
@@ -126,8 +126,8 @@ namespace splitTime.conversation {
                 location.getY()
             )
             // If we've engaged in a dialog, we don't want to accidentally stop tracking the conversation just because the speaker changed.
-            if (dialog.clique === this.recentlyEngagedClique) {
-                const speakersExcludingPlayer = dialog.clique.speakers.filter(
+            if (dialog.conversation === this.recentlyEngagedConversation) {
+                const speakersExcludingPlayer = dialog.conversation.getCurrentSpeakers().filter(
                     s => s.body !== this.perspective.playerBody
                 )
                 if (speakersExcludingPlayer.length > 0) {
@@ -151,7 +151,7 @@ namespace splitTime.conversation {
                 3 /
                 Math.max(distance, 0.0001)
 
-            if (dialog.clique === this.recentlyEngagedClique) {
+            if (dialog.conversation === this.recentlyEngagedConversation) {
                 return distanceScore * 1.5
             }
             return distanceScore

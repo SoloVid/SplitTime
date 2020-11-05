@@ -15,7 +15,7 @@ namespace splitTime.conversation {
         }
 
         getCanceledFrom(node: ConversationLeafNode): ConversationLeafNode | null {
-            let current = this.getNearestParentSection(node)
+            let current: SectionSpec | null = this.getNearestParentSection(node)
             // Quit when we get to the root of the tree
             while (current !== null) {
                 if (current.cancelSection !== null) {
@@ -31,12 +31,12 @@ namespace splitTime.conversation {
             return null
         }
 
-        getInterruptedFrom(type: string, node: ConversationLeafNode): ConversationLeafNode | null {
-            let current = this.getNearestParentSection(node)
+        getInterruptedFrom<T>(event: body.CustomEventHandler<T>, node: ConversationLeafNode): ConversationLeafNode | null {
+            let current: SectionSpec | null = this.getNearestParentSection(node)
             // Quit when we get to the root of the tree
             while (current !== null) {
                 for (const interruptible of current.interruptibles) {
-                    if (interruptible.type !== type || !interruptible.conditionMet) {
+                    if (interruptible.events.indexOf(event) < 0 || !interruptible.conditionMet) {
                         continue
                     }
                     if (interruptible.section) {
@@ -97,7 +97,9 @@ namespace splitTime.conversation {
             assertNever(node, "Unexpected section part type")
         }
 
-        private getNearestParentSection(node: SectionSpecPart | Line): SectionSpec | null {
+        getNearestParentSection(node: ConversationLeafNode): SectionSpec
+        getNearestParentSection(node: LineSequence | SectionSpec): SectionSpec | null
+        getNearestParentSection(node: SectionSpecPart | Line): SectionSpec | null {
             const parent = node.getParent()
             if (parent instanceof SectionSpec) {
                 return parent

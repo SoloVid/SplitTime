@@ -2,34 +2,29 @@ namespace splitTime.conversation {
     export type Condition = true | (() => boolean)
 
     export interface DSL {
+        /** Explicitly register a speaker as part of this conversation (section) */
+        listen(speaker: Speaker): void
         say(speaker: Speaker, line: string): void
         section(sectionSetup: () => void): SectionChain
         do(action: time.MidEventCallback): void
         // waitUntil(condition: Condition): void
     }
 
-    export interface SectionChain extends SectionChainInterruptible {
+    export interface SectionChain {
         /**
-         * The modified section can be canceled when the player walks away
+         * The modified section can be canceled when a speaker leaves.
+         * Only one cancelable can be specified per section.
          */
-        cancelable(sectionSetup?: () => void): void
-    }
+        cancelable(sectionSetup?: () => void): SectionChain
 
-    export interface SectionChainInterruptible {
         /**
-         * The modified section can be interrupted when the player interacts
+         * The modified section can be interrupted when one of the events
+         * is triggered on a body associated with a speaker in the section
          */
         interruptible(
             condition?: Condition,
-            sectionSetup?: () => void
-        ): SectionChainInterruptible
-        /**
-         * The modified section can be interrupted when the body is detected by some speaker
-         */
-        interruptibleByDetection(
-            condition?: Condition,
             sectionSetup?: () => void,
-            body?: Body
-        ): SectionChainInterruptible
+            ...events: body.CustomEventHandler<unknown>[]
+        ): SectionChain
     }
 }
