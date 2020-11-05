@@ -36,7 +36,8 @@ namespace splitTime.editor.collage {
     export function getMontagePropertiesStuff(montage: file.collage.Montage, doDelete: () => void): client.ObjectProperties {
         const fieldObject = {
             id: {},
-            direction: {}
+            direction: {},
+            propPostProcessor: {}
         }
         type SimplifiedMontage = { [K in keyof typeof fieldObject]: string | number }
         return {

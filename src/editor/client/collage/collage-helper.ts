@@ -27,7 +27,8 @@ namespace splitTime.editor.collage {
                 direction: "",
                 frames: [],
                 body: bodySpec,
-                traces: []
+                traces: [],
+                propPostProcessor: ""
             }
         }
 

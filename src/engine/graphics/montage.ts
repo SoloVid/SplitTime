@@ -8,7 +8,8 @@ namespace splitTime.collage {
             readonly direction: direction_t | null,
             readonly frames: readonly Readonly<Frame>[],
             readonly bodySpec: Readonly<file.collage.BodySpec>,
-            readonly traces: readonly Readonly<level.file_data.Trace>[]
+            readonly traces: readonly Readonly<level.file_data.Trace>[],
+            readonly propPostProcessorId: string
         ) {}
 
         getFrame(index: int): Frame {

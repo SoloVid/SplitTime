@@ -16,6 +16,7 @@ namespace splitTime.file {
     export namespace collage {
         /**
          * Component of {@link Collage}, specifically used in JSON file format.
+         * Specific rectangle within the collage image.
          * 
          * Unlike {@link splitTime.collage.Frame}, a single Frame may be used by multiple {@link Montage}s.
          */
@@ -29,6 +30,7 @@ namespace splitTime.file {
 
         /**
          * Component of {@link Collage}, specifically used in JSON file format.
+         * Sequence of {@link Frame}s, with associated geometry.
          */
         export interface Montage {
             id: string
@@ -36,6 +38,11 @@ namespace splitTime.file {
             frames: MontageFrame[]
             body: BodySpec
             traces: level.file_data.Trace[]
+            /**
+             * Identifier for a post-processor that will have a chance
+             * to touch any props created from this montage.
+             */
+            propPostProcessor: string
         }
 
         /**
@@ -99,7 +106,8 @@ namespace splitTime.file {
                         offsetX: type.number,
                         offsetY: type.number,
                         offsetZ: type.number
-                    }))
+                    })),
+                    propPostProcessor: type.string
                 })),
                 defaultMontageId: type.string
             }))

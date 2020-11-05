@@ -97,7 +97,8 @@ namespace splitTime {
                         )
                     }),
                     fileMontage.body,
-                    fileMontage.traces
+                    fileMontage.traces,
+                    fileMontage.propPostProcessor
                 )
             }), file.defaultMontageId, allowErrors)
         }

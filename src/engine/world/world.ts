@@ -1,5 +1,8 @@
 namespace splitTime {
     export class World {
+
+        public readonly propPostProcessor = new world.PropPostProcessor()
+
         constructor(gameData: CompiledGameData = G._GAME_DATA) {
             const levelMap = gameData.levels
             for (const levelFilePath in levelMap) {

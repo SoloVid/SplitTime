@@ -113,20 +113,17 @@ namespace splitTime {
             }
         }
 
-        refetchBodies() {
+        private refetchBodies(world: World) {
             assert(this.fileData !== null, "Level must have file data")
 
-            // this._bodyOrganizer = new splitTime.level.BodyOrganizer(this);
             this.level._cellGrid = new splitTime.level.CellGrid(this.level)
 
-            for (var iBody = 0; iBody < this.level.bodies.length; iBody++) {
-                this.level._cellGrid.addBody(this.level.bodies[iBody])
+            for (const body of this.level.bodies) {
+                this.level._cellGrid.addBody(body)
             }
 
             this._addingProps = true
-            //Pull board objects from file
-            for (var iProp = 0; iProp < this.fileData.props.length; iProp++) {
-                var prop = this.fileData.props[iProp]
+            for (const prop of this.fileData.props) {
                 const collageMontage = G.ASSETS.collages.get(prop.collage).getMontage(prop.montage)
                 // const sprite = new Sprite(prop.collage, prop.montage)
                 const body = new Body()
@@ -142,6 +139,10 @@ namespace splitTime {
                     body.dir = splitTime.direction.interpret(prop.dir)
                 }
                 sprite.requestStance(prop.montage, body.dir, true, true)
+                const spriteBody = new SpriteBody(sprite, body)
+                if (!!collageMontage.propPostProcessorId) {
+                    world.propPostProcessor.process(collageMontage.propPostProcessorId, spriteBody)
+                }
             }
             this._addingProps = false
         }
@@ -153,7 +154,7 @@ namespace splitTime {
         async loadForPlay(world: World): Promise<void> {
             await this.loadAssets(world)
 
-            this.refetchBodies()
+            this.refetchBodies(world)
             assert(this.fileData !== null, "Level must have file data to be loaded")
             const traceSpecs = this.fileData.traces.map(t => trace.TraceSpec.fromRaw(t))
             const traces = traceSpecs.map(spec => {

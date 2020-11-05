@@ -49,7 +49,7 @@ namespace splitTime.editor.level {
             depth: 32,
             height: 32
         }
-        const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [])
+        const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [], "")
         if (this.collage === NOT_READY || this.collage == NOT_AVAILABLE) {
             return tempMontage
         }
