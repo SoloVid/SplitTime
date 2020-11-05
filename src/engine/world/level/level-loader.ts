@@ -2,14 +2,12 @@ namespace splitTime {
     export class LevelLoader {
         private fileData: level.FileData | null = null
         _addingProps: boolean
-        private loadPromise: splitTime.Pledge
 
         constructor(
             private readonly level: Level,
             private readonly levelData: splitTime.level.FileData
         ) {
             this._addingProps = false
-            this.loadPromise = new splitTime.Pledge()
         }
 
         hasData(): boolean {
@@ -76,6 +74,9 @@ namespace splitTime {
                             transportTraceId,
                             ((trace, level) => {
                                 return (body: splitTime.Body) => {
+                                    if (body.levelLocked) {
+                                        return
+                                    }
                                     splitTime.body.smoothPut(body, {
                                         level: pointerOffset.level,
                                         x: body.x + pointerOffset.offsetX,
@@ -138,6 +139,7 @@ namespace splitTime {
                 if (prop.dir !== "") {
                     body.dir = splitTime.direction.interpret(prop.dir)
                 }
+                body.levelLocked = true
                 sprite.requestStance(prop.montage, body.dir, true, true)
                 const spriteBody = new SpriteBody(sprite, body)
                 if (!!collageMontage.propPostProcessorId) {

@@ -17,6 +17,7 @@ namespace splitTime {
         shadow = false
 
         private _level: splitTime.Level | null = null
+        levelLocked: boolean = false
         // Coordinates represent center of base: x is midpoint, y is midpoint, z is bottom
         private _x = 0
         private _y = 0
@@ -276,7 +277,8 @@ namespace splitTime {
         private setLevel(
             level: splitTime.Level | null,
             includeChildren: boolean = false
-        ) {
+        ): void {
+            assert(!this.levelLocked, "Cannot set level when levelLocked === true")
             if (level === this._level) {
                 return
             }

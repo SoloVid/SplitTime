@@ -2,7 +2,7 @@ namespace splitTime.body {
     export class Transporter {
         constructor(public readonly body: Body) {}
 
-        detectApplicableOtherLevel(fromLevel: Level, fromX: number, fromY: number, fromZ: number): ILevelLocation2 | null {
+        private detectApplicableOtherLevel(fromLevel: Level, fromX: number, fromY: number, fromZ: number): ILevelLocation2 | null {
             var whereToNext = this._theNextTransport(
                 fromLevel,
                 fromX,
@@ -40,7 +40,10 @@ namespace splitTime.body {
             return null
         }
 
-        transportLevelIfApplicable(hintLevelId?: string) {
+        transportLevelIfApplicable(hintLevelId?: string): void {
+            if (this.body.levelLocked) {
+                return
+            }
             const whereTo = this.detectApplicableOtherLevel(
                 this.body.getLevel(),
                 this.body.getX(),
