@@ -8,7 +8,7 @@ namespace splitTime.file {
         | number
         | string
 
-    type DefinitelyNotJsonable = (() => any) | undefined
+    type DefinitelyNotJsonable = ((...args: any[]) => any) | undefined
 
     /**
      * Returns an unsatisfiable type (will have never components) if the type T
@@ -34,13 +34,18 @@ namespace splitTime.file {
                     ? IsJsonable<U, AllowUnknown>[]
                     // Otherwise check if object
                     : T extends object
-                        // It's an object
-                        ? {
-                            // Iterate over keys in object case
-                            [P in keyof T]:
-                                // Recursive call for children
-                                IsJsonable<T[P], AllowUnknown>
-                        }
+                        // Check if object type can be used as interface
+                        // i.e. check if object has any private properties
+                        ? { [K in keyof T]: T[K] } extends T
+                            // It's a simple object
+                            ? {
+                                // Iterate over keys in object case
+                                [P in keyof T]:
+                                    // Recursive call for children
+                                    IsJsonable<T[P], AllowUnknown>
+                            }
+                            // Object has some private members
+                            : never
                         // Gate the subsequent checks behind whether we're allowing unknown or not
                         : AllowUnknown extends false
                             ? never
