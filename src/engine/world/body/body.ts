@@ -6,10 +6,8 @@ namespace splitTime {
         id: string = "NOT SET"
         ref: int
         private timeAdvanceListeners: splitTime.RegisterCallbacks
-        private playerInteractHandlers: splitTime.RegisterCallbacks
         private readonly customEvents: { [id: string]: splitTime.RegisterCallbacks } = {}
         mover: splitTime.body.Mover
-        speechBox: splitTime.body.SpeechBox
 
         fadeEnteringLevelPromise: Pledge | null
 
@@ -359,6 +357,9 @@ namespace splitTime {
 
         registerEventListener(id: string, handler: (data: unknown) => CallbackResult) {
             this.getCustomEventCallbacks(id).register(handler)
+        }
+        removeEventListener(id: string, handler: (data: unknown) => CallbackResult) {
+            this.getCustomEventCallbacks(id).remove(handler)
         }
         triggerEvent(id: string, data: unknown) {
             if (id in this.customEvents) {
