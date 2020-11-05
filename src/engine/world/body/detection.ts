@@ -41,6 +41,12 @@ namespace splitTime.body {
             return false
         }
 
+        const centerOfDetective = new level.Location(
+            detective.x,
+            detective.y,
+            detective.z + detective.height / 2,
+            detective.level
+        )
         const centerOfTarget = new level.Location(
             target.x,
             target.y,
@@ -48,7 +54,7 @@ namespace splitTime.body {
             target.level
         )
         if (
-            doesRayReach(detective.speechBox, centerOfTarget, detective, target)
+            doesRayReach(centerOfDetective, centerOfTarget, detective, target)
         ) {
             return true
         }

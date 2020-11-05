@@ -1,38 +1,21 @@
 namespace splitTime.npc {
-    const CLOSE_ENOUGH = 2
     export class StickToPositionBehavior implements Behavior, ConditionalBehavior {
+        private readonly helperBehavior: DirectedWalkBehavior
+
         constructor(
-            private readonly spriteBody: SpriteBody,
+            private readonly npc: Npc,
             private readonly position: Position,
             private readonly moveStance: string
-        ) {}
-
-        isCloseEnough(): boolean {
-            return this.getDistance() <= CLOSE_ENOUGH
+        ) {
+            this.helperBehavior = new DirectedWalkBehavior(npc, position)
         }
 
         isConditionMet(): boolean {
-            return !this.isCloseEnough()
+            return !this.helperBehavior.isCloseEnough()
         }
 
         notifyTimeAdvance(delta: game_seconds): void {
-            const dir = direction.fromToThing(this.spriteBody.body, this.position)
-            const dist = this.getDistance()
-            const stepDist = Math.min(this.spriteBody.body.spd * delta, dist)
-            this.spriteBody.body.mover.zeldaBump(stepDist, dir)
-            this.spriteBody.sprite.requestStance(this.moveStance, dir)
-            if (this.isCloseEnough()) {
-                this.spriteBody.body.putInPosition(this.position)
-            } else {
-                this.spriteBody.body.dir = dir
-            }
-        }
-
-        private getDistance(): number {
-            // FTODO: 3D?
-            return measurement.distanceTrue(
-                this.spriteBody.body.x, this.spriteBody.body.y,
-                this.position.x, this.position.y)
+            this.helperBehavior.notifyTimeAdvance(delta)
         }
     }
 }

@@ -2,6 +2,7 @@ namespace splitTime {
     var nextRef = 10 //reserve first 10
 
     export class Body {
+        // FTODO: figure out if should remove this
         template: string | null = null
         id: string = "NOT SET"
         ref: int
@@ -9,7 +10,9 @@ namespace splitTime {
         private readonly customEvents: { [id: string]: splitTime.RegisterCallbacks } = {}
         mover: splitTime.body.Mover
 
-        fadeEnteringLevelPromise: Pledge | null
+        // FTODO: I don't think this belongs here
+        /** @deprecated doesn't belong here */
+        fadeEnteringLevelPromise: Pledge | null = null
 
         drawables: splitTime.body.Drawable[] = []
         shadow = false
@@ -25,6 +28,10 @@ namespace splitTime {
         childrenBolted: Body[] = []
         childrenLoose: Body[] = []
 
+        // FTODO: get rid of this from here
+        /**
+         * @deprecated direction doesn't mean anything to Body at this point
+         */
         dir: direction_t = 3
 
         GRAVITY = -1280
@@ -39,6 +46,8 @@ namespace splitTime {
         /** z-axis length */
         private _height = 32
 
+        // TODO: should this be some kind of sliding scale, like friction or mass?
+        pushable: boolean = false
         readonly collisionMask: CollisionMask = {
             membership: 1,
             search: 1
@@ -51,9 +60,6 @@ namespace splitTime {
                 notifyTimeAdvance: null
             })
             this.mover = new splitTime.body.Mover(this)
-
-            //Initialize variables used for region transitions
-            this.fadeEnteringLevelPromise = null
         }
         get width(): int {
             return this._width
@@ -66,6 +72,7 @@ namespace splitTime {
                 throw new Error("Width must be a multiple of 2")
             }
             this._width = val
+            this._resortInBodyOrganizer()
         }
         get depth(): int {
             return this._depth
@@ -78,6 +85,7 @@ namespace splitTime {
                 throw new Error("Depth must be a multiple of 2")
             }
             this._depth = val
+            this._resortInBodyOrganizer()
         }
         get height(): int {
             return this._height
@@ -87,6 +95,7 @@ namespace splitTime {
                 throw new Error("Height must be an integer")
             }
             this._height = val
+            this._resortInBodyOrganizer()
         }
         get x() {
             return this.getX()
@@ -142,7 +151,7 @@ namespace splitTime {
             return this.childrenBolted.concat(this.childrenLoose)
         }
 
-        _resortInBodyOrganizer() {
+        private _resortInBodyOrganizer() {
             if (this._level) {
                 this._level.notifyBodyMoved(this)
             }
@@ -209,9 +218,7 @@ namespace splitTime {
         }
 
         /**
-         * Put this body in the specified level at the specified coordinates. Returns a promise that will 
-         * be resolved when any applicable transition animations have finished and the body has been put
-         * into the requested level.
+         * Put this body in the specified level at the specified coordinates.
          *
          * @param level - the level to put the body into
          * @param x - the x coordinate of the target location
@@ -241,31 +248,6 @@ namespace splitTime {
                 location.z,
                 includeChildren
             )
-        }
-
-        /**
-         * @deprecated This may be moving
-         */
-        putInPosition(position: Position, includeChildren = false): void {
-            this.put(
-                position.getLevel(),
-                position.getX(),
-                position.getY(),
-                position.getZ(),
-                includeChildren
-            )
-            this.dir = position.dir
-            for (const drawable of this.drawables) {
-                // TODO: Don't do this here
-                if (drawable instanceof Sprite) {
-                    drawable.requestStance(
-                        position.stance,
-                        this.dir,
-                        true,
-                        true
-                    )
-                }
-            }
         }
 
         clearLevel(): void {
@@ -306,12 +288,6 @@ namespace splitTime {
                 throw new Error("Body is not in a Level")
             }
             return this._level
-        }
-        /**
-         * @deprecated perhaps too much clog
-         */
-        getRegion(): splitTime.Region {
-            return this.getLevel().getRegion()
         }
 
         notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {

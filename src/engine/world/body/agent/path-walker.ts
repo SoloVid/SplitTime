@@ -74,7 +74,7 @@ namespace splitTime.agent {
             if (closeEnough(this.npc.body, coords)) {
                 // FTODO: This forced putting could be problematic for collisions
                 if (targetLocation instanceof Position) {
-                    this.npc.body.putInPosition(targetLocation)
+                    this.npc.spriteBody.putInPosition(targetLocation)
                 } else {
                     this.npc.body.x = coords.x
                     this.npc.body.y = coords.y
@@ -120,7 +120,7 @@ namespace splitTime.agent {
                     this.nextStep()
                 }
             } else if (stage instanceof Position) {
-                this.npc.body.putInPosition(stage)
+                this.npc.spriteBody.putInPosition(stage)
                 this.lastKnownLocation = stage
                 this.nextStep()
             } else if (instanceOf.ILevelLocation2(stage)) {

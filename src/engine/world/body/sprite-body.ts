@@ -16,5 +16,23 @@ namespace splitTime {
             body.drawables.push(sprite)
             return new SpriteBody(sprite, body)
         }
+
+        // FTODO: move again?
+        putInPosition(position: Position, includeChildren = false): void {
+            this.body.put(
+                position.getLevel(),
+                position.getX(),
+                position.getY(),
+                position.getZ(),
+                includeChildren
+            )
+            this.body.dir = position.dir
+            this.sprite.requestStance(
+                position.stance,
+                position.dir,
+                true,
+                true
+            )
+        }
     }
 }

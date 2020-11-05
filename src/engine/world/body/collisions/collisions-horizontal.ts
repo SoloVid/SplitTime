@@ -199,8 +199,11 @@ namespace splitTime.body.collisions {
 
         tryPushOtherBodies(bodies: Body[], dir: number) {
             this.mover.bodyExt.pushing = true
-            for (var i = 0; i < bodies.length; i++) {
-                bodies[i].mover.zeldaBump(1, dir)
+            for (const body of bodies) {
+                // TODO: should this be different speeds depending on some parameters?
+                if (body.pushable) {
+                    body.mover.zeldaBump(1, dir)
+                }
             }
             this.mover.bodyExt.pushing = false
         }

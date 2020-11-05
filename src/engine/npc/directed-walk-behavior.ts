@@ -6,7 +6,7 @@ namespace splitTime.npc {
         ) {}
 
         isComplete(): boolean {
-            if (closeEnough(this.npc.body, this.targetLocation)) {
+            if (this.isCloseEnough()) {
                 return true
             }
             if (this.npc.body.level !== this.targetLocation.level) {
@@ -19,19 +19,26 @@ namespace splitTime.npc {
         }
 
         notifyTimeAdvance(delta: splitTime.game_seconds): void {
+            const dirBefore = direction.fromToThing(this.npc.body, this.targetLocation)
             this.npc.movementAgent.setWalkingTowardBoardLocation(this.targetLocation)
             this.npc.movementAgent.notifyTimeAdvance(delta)
+            const dirAfter = direction.fromToThing(this.npc.body, this.targetLocation)
+            const overshot = !direction.areWithin90Degrees(dirBefore, dirAfter)
 
-            if (closeEnough(this.npc.body, this.targetLocation)) {
+            if (overshot || this.isCloseEnough()) {
                 // FTODO: This forced putting could be problematic for collisions
                 if (this.targetLocation instanceof Position) {
-                    this.npc.body.putInPosition(this.targetLocation)
+                    this.npc.spriteBody.putInPosition(this.targetLocation)
                 } else {
                     this.npc.body.x = this.targetLocation.x
                     this.npc.body.y = this.targetLocation.y
                     this.npc.body.z = this.targetLocation.z
                 }
             }
+        }
+
+        isCloseEnough(): boolean {
+            return closeEnough(this.npc.body, this.targetLocation)
         }
     }
 
