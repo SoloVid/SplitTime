@@ -112,6 +112,7 @@ namespace splitTime.body {
 
             const originCollisionInfo =
                 splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+                    this.body.collisionMask,
                     this.body.level,
                     left,
                     this.body.width,

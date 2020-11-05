@@ -340,6 +340,7 @@ namespace splitTime.level {
         }
 
         forEachBody(
+            collisionMask: CollisionMask,
             minX: number,
             minY: number,
             minZ: number,
@@ -367,10 +368,13 @@ namespace splitTime.level {
                         var cell = this._grids[iCellZ][
                             iCellY * this._xCells + iCellX
                         ]
-                        for (var iBody = 0; iBody < cell.length; iBody++) {
-                            var body = cell[iBody]
+                        for (const body of cell) {
                             if (!bodiesHit[body.ref]) {
+                                const isTargetCollisionLayer = 
+                                    !!(body.collisionMask.membership & collisionMask.search) ||
+                                    !!(collisionMask.membership & body.collisionMask.search)
                                 if (
+                                    isTargetCollisionLayer &&
                                     isXOverlap(minX, exMaxX, body) &&
                                     isYOverlap(minY, exMaxY, body) &&
                                     isZOverlap(minZ, exMaxZ, body)

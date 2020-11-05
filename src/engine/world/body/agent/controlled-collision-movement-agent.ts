@@ -49,6 +49,7 @@ namespace splitTime.agent {
                 if (!level.areLocationsEquivalent(this.ladder.location, this.body)) {
                     // FTODO: should this check more/different part of Body than base?
                     const baseCollisionCheck = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+                        this.body.collisionMask,
                         this.body.level,
                         this.body.getLeft(), this.body.width,
                         this.body.getTopY(), this.body.depth,

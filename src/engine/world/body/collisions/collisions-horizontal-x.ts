@@ -73,6 +73,7 @@ namespace splitTime.body.collisions {
                     : x + dx - this.mover.body.width / 2
             var top = y - this.mover.body.depth / 2
             return splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+                this.mover.body.collisionMask,
                 level,
                 edgeX,
                 Math.abs(dx),

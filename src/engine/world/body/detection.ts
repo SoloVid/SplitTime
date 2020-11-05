@@ -81,6 +81,7 @@ namespace splitTime.body {
             end.getY(),
             (x, y) => {
                 const collisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
+                    detective.collisionMask,
                     start.getLevel(),
                     x,
                     1,

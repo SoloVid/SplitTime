@@ -80,6 +80,7 @@ namespace splitTime.body.collisions {
             var eventIdSet = {}
             for (var i = 0; i < steps; i++) {
                 const originCollisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
+                    this.mover.body.collisionMask,
                     level,
                     left, this.mover.body.width,
                     top, this.mover.body.depth,

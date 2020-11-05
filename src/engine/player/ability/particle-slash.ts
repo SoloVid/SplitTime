@@ -21,6 +21,10 @@ namespace splitTime.player.ability {
         radiansWide: number = Math.PI * 0.5
         radius: number = 24
         hitBoxWidth: number = 16
+        collisionMask: CollisionMask = {
+            membership: 1,
+            search: 1
+        }
         duration: game_seconds = 0.08
         extraParticleTime: number = 0.03
 
@@ -34,7 +38,6 @@ namespace splitTime.player.ability {
             slashBody.width = 0
             slashBody.depth = 0
 
-            const that = this
             const particles = new splitTime.particles.ParticleEmitter(
                 slashBody,
                 function(emitter) {
@@ -73,6 +76,7 @@ namespace splitTime.player.ability {
                     // TODO: stop (functionally) slash
                 } else {
                     const collisionInfo = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+                        this.collisionMask,
                         slashBody.level,
                         slashBody.x - this.hitBoxWidth / 2, this.hitBoxWidth,
                         slashBody.y - this.hitBoxWidth / 2, this.hitBoxWidth,

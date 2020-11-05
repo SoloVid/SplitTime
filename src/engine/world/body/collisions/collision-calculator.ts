@@ -1,4 +1,14 @@
 namespace splitTime {
+    /**
+     * A pair of bit masks that allow bodies to selectively detect collisions with each other.
+     */
+    export interface CollisionMask {
+        // a la Godot collision layers, bit mask of collision groups this body belongs to
+        membership: int
+        // a la Godot collision mask, bit mask of collision groups to cross-check
+        search: int
+    }
+
     interface ApiCollisionInfo {
         blocked: boolean
         bodies: Body[]
@@ -32,6 +42,7 @@ namespace splitTime {
          * Calculate collisions in volume. This function is primarily useful for gauging a slice of volume (i.e. one-pixel step).
          */
         calculateVolumeCollision(
+            collisionMask: CollisionMask,
             level: splitTime.Level,
             startX: number,
             xPixels: number,
@@ -58,6 +69,7 @@ namespace splitTime {
                     otherBody.getZ() + otherBody.height - startZ
             }
             level.getCellGrid().forEachBody(
+                collisionMask,
                 startX,
                 startY,
                 startZ,
@@ -96,6 +108,7 @@ namespace splitTime {
                         this._levelIdStack.push(level.id)
                         try {
                             var otherLevelCollisionInfo = this.calculateVolumeCollision(
+                                collisionMask,
                                 pointerOffset.level,
                                 startX + pointerOffset.offsetX,
                                 xPixels,

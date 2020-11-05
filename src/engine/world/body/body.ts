@@ -41,6 +41,11 @@ namespace splitTime {
         /** z-axis length */
         private _height = 32
 
+        readonly collisionMask: CollisionMask = {
+            membership: 1,
+            search: 1
+        }
+
         // TODO: remove parameter when moving templates elsewhere
         constructor() {
             this.ref = nextRef++

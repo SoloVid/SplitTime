@@ -65,6 +65,7 @@ namespace splitTime.body {
             const maxFallDist = 1000
             const minBottom = this.realBody.z - maxFallDist
             const shadowFallInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
+                this.realBody.collisionMask,
                 this.realBody.level,
                 this.realBody.getLeft(), this.realBody.width,
                 this.realBody.getTopY(), this.realBody.depth,
