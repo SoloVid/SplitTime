@@ -57,10 +57,9 @@ namespace splitTime.editor.level {
             y: 0
         }
         if (this.$el) {
-            const $pos = $(this.$el).position()
             position = {
-                x: $pos.left,
-                y: $pos.top
+                x: this.$el.offsetLeft,
+                y: this.$el.offsetTop
             }
         }
         const mouse = {

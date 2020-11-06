@@ -37,10 +37,9 @@ namespace splitTime.editor.collage {
                 y: 0
             }
         }
-        const $pos = $(this.$el).position()
         return {
-            x: $pos.left,
-            y: $pos.top
+            x: this.$el.offsetLeft,
+            y: this.$el.offsetTop
         }
     }
 
