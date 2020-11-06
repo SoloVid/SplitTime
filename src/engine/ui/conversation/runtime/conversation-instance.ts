@@ -86,7 +86,7 @@ namespace splitTime.conversation {
             return true
         }
 
-        tryInterrupt<T>(event: body.CustomEventHandler<T>, node: ConversationLeafNode): boolean {
+        tryInterrupt(event: body.CustomEventHandler<void>, node: ConversationLeafNode): boolean {
             if(this.current === null || !this.isCurrentNode(node)) {
                 return false
             }

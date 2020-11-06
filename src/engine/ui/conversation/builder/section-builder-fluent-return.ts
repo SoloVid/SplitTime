@@ -15,7 +15,7 @@ namespace splitTime.conversation {
         interruptible(
             condition: Condition = true,
             setup: () => void = () => {},
-            ...events: body.CustomEventHandler<unknown>[]
+            ...events: body.CustomEventHandler<void>[]
         ): SectionBuilderFluentReturn {
             const newSectionBuilder = new SectionBuilder()
             this.helper.withSectionBuilder(newSectionBuilder, setup)

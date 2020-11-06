@@ -3,7 +3,7 @@ namespace splitTime.conversation {
         gameLoop: GameLoop,
         perspective: Perspective,
         hud: ui.HUD,
-        advanceEvent: body.CustomEventHandler<unknown>
+        advanceEvent: body.CustomEventHandler<void>
     ): ConversationSpecManager {
         const renderer = new Renderer(perspective.camera)
         hud.pushRenderer(renderer)

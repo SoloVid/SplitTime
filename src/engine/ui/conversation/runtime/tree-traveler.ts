@@ -31,7 +31,7 @@ namespace splitTime.conversation {
             return null
         }
 
-        getInterruptedFrom<T>(event: body.CustomEventHandler<T>, node: ConversationLeafNode): ConversationLeafNode | null {
+        getInterruptedFrom(event: body.CustomEventHandler<void>, node: ConversationLeafNode): ConversationLeafNode | null {
             let current: SectionSpec | null = this.getNearestParentSection(node)
             // Quit when we get to the root of the tree
             while (current !== null) {

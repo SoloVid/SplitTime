@@ -8,7 +8,7 @@ namespace splitTime.conversation {
             private readonly conversation: ConversationInstance,
             private readonly node: ConversationLeafNode,
             private readonly section: SectionSpec,
-            private readonly interactEvent: body.CustomEventHandler<unknown>
+            private readonly interactEvent: body.CustomEventHandler<void>
         ) {
             for (const speaker of this.section.getSpeakers()) {
                 for (const interruptible of this.section.interruptibles) {
@@ -55,7 +55,7 @@ namespace splitTime.conversation {
     }
 
     interface EventListenerSpec {
-        event: body.CustomEventHandler<unknown>
+        event: body.CustomEventHandler<void>
         body: Body
         callback: () => CallbackResult
     }

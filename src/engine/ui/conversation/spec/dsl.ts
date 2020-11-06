@@ -24,7 +24,7 @@ namespace splitTime.conversation {
         interruptible(
             condition?: Condition,
             sectionSetup?: () => void,
-            ...events: body.CustomEventHandler<unknown>[]
+            ...events: body.CustomEventHandler<void>[]
         ): SectionChain
     }
 }

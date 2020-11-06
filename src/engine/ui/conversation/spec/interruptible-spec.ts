@@ -3,7 +3,7 @@ namespace splitTime.conversation {
         private parent: SectionSpec | null = null
 
         constructor(
-            public readonly events: body.CustomEventHandler<unknown>[],
+            public readonly events: body.CustomEventHandler<void>[],
             public readonly condition: Condition,
             public readonly section: SectionSpec | null = null,
             public readonly body?: Body
