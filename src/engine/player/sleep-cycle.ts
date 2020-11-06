@@ -6,8 +6,8 @@ namespace splitTime.player {
             private readonly body: splitTime.Body,
             private readonly stamina: Stamina,
             private readonly worldRenderer: WorldRenderer,
-            private readonly onKO: () => void,
-            private readonly onWake: () => void
+            public onKO: () => void = () => {},
+            public onWake: () => void = () => {}
         ) {
             this.stamina.registerKOListener(() => {
                 this.worldRenderer.fadeTo(new splitTime.light.Color(0,0,0)).then(() => {
