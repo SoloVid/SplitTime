@@ -7,12 +7,13 @@ namespace splitTime.conversation {
         ) {
         }
 
-        register(id: string, setup: SetupFunc): ConversationSpec {
+        register(id: string, setup: SetupFunc): time.EventSpec<void> {
             const builder = new ConversationDslBuilder()
             setup(builder)
             const spec = builder.build()
             this.specs[id] = spec
-            return spec
+
+            return new time.EventSpec(id, () => this.start(spec))
         }
 
         getSpecById(id: string): ConversationSpec {
@@ -21,7 +22,7 @@ namespace splitTime.conversation {
             return spec
         }
 
-        start(spec: ConversationSpec): void {
+        private start(spec: ConversationSpec): void {
             const inst = new ConversationInstance(spec, this.helper)
             inst.start()
         }

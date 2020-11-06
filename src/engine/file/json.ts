@@ -63,8 +63,7 @@ namespace splitTime.file {
 
     export type json = string
 
-    type a = unknown extends string ? "yes" : "no"
-    type a1 = unknown extends (string | unknown) ? "yes" : "no"
+    export type IsJsonableOrVoid<T> = T extends void ? void : IsJsonable<T>
 
     type JustNonNeverKeys<T> = { [K in keyof T]: T[K] extends never ? never : K }[keyof T]
     type MadeJsonableInner<T> = T extends object ? { [K in JustNonNeverKeys<T>]: MadeJsonableInner<T[K]> } : T
