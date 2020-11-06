@@ -103,7 +103,7 @@ namespace splitTime {
             }
         }
 
-        length() {
+        get length(): int {
             return this._handlers.length
         }
 

@@ -19,5 +19,9 @@ namespace splitTime.body {
         trigger(body: Body, data: T): void {
             body.triggerEvent(this.uid, data)
         }
+
+        hasListener(body: Body): boolean {
+            return body.hasEventListener(this.uid)
+        }
     }
 }

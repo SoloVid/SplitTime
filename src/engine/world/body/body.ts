@@ -331,16 +331,19 @@ namespace splitTime {
             this.timeAdvanceListeners.register(handler)
         }
 
-        registerEventListener(id: string, handler: (data: unknown) => CallbackResult) {
+        registerEventListener(id: string, handler: (data: unknown) => CallbackResult): void {
             this.getCustomEventCallbacks(id).register(handler)
         }
-        removeEventListener(id: string, handler: (data: unknown) => CallbackResult) {
+        removeEventListener(id: string, handler: (data: unknown) => CallbackResult): void {
             this.getCustomEventCallbacks(id).remove(handler)
         }
-        triggerEvent(id: string, data: unknown) {
+        triggerEvent(id: string, data: unknown): void {
             if (id in this.customEvents) {
                 this.getCustomEventCallbacks(id).run(data)
             }
+        }
+        hasEventListener(id: string): boolean {
+            return this.getCustomEventCallbacks(id).length > 0
         }
 
         private getCustomEventCallbacks(id: string): RegisterCallbacks {
