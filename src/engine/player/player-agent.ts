@@ -1,13 +1,11 @@
 namespace splitTime.player {
+    const ATTACK_ABILITY = "ATTACK_ABILITY"
+    const JUMP_ABILITY = "JUMP_ABILITY"
+    const SPECIAL_ABILITY = "SPECIAL_ABILITY"
+
     export class PlayerAgent implements splitTime.TimeNotified {
+        readonly abilities: ability.AbilityPool
         movementAgent: splitTime.agent.ControlledCollisionMovement
-        private freezeUntil: splitTime.game_seconds
-        jumpAbility: ability.IAbility | null
-        jumpCooldown: splitTime.game_seconds
-        specialAbility: ability.IAbility | null
-        specialCooldown: splitTime.game_seconds
-        attackAbility: ability.IAbility | null
-        attackCooldown: splitTime.game_seconds
 
         constructor(
             private readonly playerManager: PlayerManager,
@@ -15,55 +13,32 @@ namespace splitTime.player {
             readonly body: splitTime.Body,
             readonly stamina: Stamina | null = null
         ) {
+            this.abilities = new ability.AbilityPool(body)
             this.movementAgent = new splitTime.agent.ControlledCollisionMovement(
                 body
             )
-            this.freezeUntil = Number.NEGATIVE_INFINITY
-            this.jumpAbility = null
-            this.jumpCooldown = 0.1
-            this.specialAbility = null
-            this.specialCooldown = 0.1
-            this.attackAbility = null
-            this.attackCooldown = 0.1
         }
 
         setJumpAbility(ability: ability.IAbility) {
-            this.jumpAbility = ability
+            this.abilities.set(JUMP_ABILITY, ability, 0.1)
         }
 
         setSpecialAbility(ability: ability.IAbility) {
-            this.specialAbility = ability
+            this.abilities.set(SPECIAL_ABILITY, ability, 0.1)
         }
 
         setAttackAbility(ability: ability.IAbility) {
-            this.attackAbility = ability
+            this.abilities.set(ATTACK_ABILITY, ability, 0.1)
         }
 
         doJump() {
-            if (!this.isFrozen() && this.jumpAbility) {
-                this.jumpAbility.use()
-                // this.freezeUntil = this.body.getLevel().getRegion().getTime() + this.jumpCooldown
-            }
+            this.abilities.use(JUMP_ABILITY)
         }
         doSpecial() {
-            if (!this.isFrozen() && this.specialAbility) {
-                var used = this.specialAbility.use()
-                if (used) {
-                    this.freezeUntil =
-                        this.body
-                            .getLevel()
-                            .getRegion()
-                            .getTime() + this.specialCooldown
-                }
-            }
+            this.abilities.use(SPECIAL_ABILITY)
         }
         doAttack() {
-            if (!this.isFrozen() && this.attackAbility) {
-                const used = this.attackAbility.use()
-                if (used) {
-                    this.freezeUntil = this.body.getLevel().getRegion().getTime() + this.attackCooldown
-                }
-            }
+            this.abilities.use(ATTACK_ABILITY)
         }
 
         setLadder(eventId: string, direction: splitTime.direction_t) {
@@ -71,9 +46,7 @@ namespace splitTime.player {
         }
 
         isFrozen(): boolean {
-            const level = this.body.getLevel()
-            const now = level.getRegion().getTime()
-            return now <= this.freezeUntil || (this.stamina !== null && !this.stamina.isConscious())
+            return this.abilities.isFrozen() || (this.stamina !== null && !this.stamina.isConscious())
         }
 
         notifyTimeAdvance(delta: splitTime.game_seconds) {

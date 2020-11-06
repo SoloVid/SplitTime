@@ -3,6 +3,7 @@ namespace splitTime.agent {
         private targetLevelLocation: Readonly<Coordinates3D> | null = null
         private targetScreenLocation: Readonly<Coordinates2D> | null = null
         private targetDirection: number | null = null
+        speed: number = 32
 
         public constructor(private readonly spriteBody: SpriteBody) {
         }
@@ -32,12 +33,12 @@ namespace splitTime.agent {
                 if (this.body.level.isLoaded()) {
                     this.body.mover.horizontal.zeldaStep(
                         this.body.dir,
-                        this.body.spd * delta,
+                        this.speed * delta,
                         true
                     )
                 } else {
-                    this.body.x += this.body.spd * delta * direction.getXMagnitude(this.body.dir)
-                    this.body.y += this.body.spd * delta * direction.getYMagnitude(this.body.dir)
+                    this.body.x += this.speed * delta * direction.getXMagnitude(this.body.dir)
+                    this.body.y += this.speed * delta * direction.getYMagnitude(this.body.dir)
                 }
             }
         }

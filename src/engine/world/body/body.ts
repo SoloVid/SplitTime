@@ -349,8 +349,5 @@ namespace splitTime {
             }
             return this.customEvents[id]
         }
-
-        // Generally equates to pixels per second (game time)
-        spd = 32
     }
 }

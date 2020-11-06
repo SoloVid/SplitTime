@@ -19,11 +19,11 @@ namespace splitTime.body {
             target.y
         )
         if (
-            proximity < ARBITRARY_MAX_DETECTION_RADIUS &&
+            proximity < sightDistance &&
             isZOverlap(detective, target)
         ) {
             return (
-                isJustNearEnough(detective, target) || canSee(detective, target)
+                isJustNearEnough(detective, target, senseDistance) || canSee(detective, target)
             )
         }
 
@@ -62,14 +62,14 @@ namespace splitTime.body {
         return false
     }
 
-    function isJustNearEnough(detective: Body, target: Body): boolean {
+    function isJustNearEnough(detective: Body, target: Body, senseDistance: number): boolean {
         var proximity = splitTime.measurement.distanceTrue(
             detective.x,
             detective.y,
             target.x,
             target.y
         )
-        return proximity < ARBITRARY_DETECTION_RADIUS
+        return proximity < senseDistance
     }
 
     function doesRayReach(

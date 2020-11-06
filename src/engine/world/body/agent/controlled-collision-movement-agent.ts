@@ -13,6 +13,7 @@ namespace splitTime.agent {
         private targetScreenLocation: Readonly<Coordinates2D> | null = null
         private targetDirection: number | null = null
         private ladder: EngagedLadder | null = null
+        speed: number = 32
 
         public constructor(body: splitTime.Body) {
             this.body = body
@@ -80,16 +81,16 @@ namespace splitTime.agent {
                 let dz = 0
                 if (this.ladder !== null) {
                     if (direction.areWithin90Degrees(this.body.dir, this.ladder.direction)) {
-                        dz = this.body.mover.vertical.zeldaVerticalMove(this.body.spd * delta / 2)
+                        dz = this.body.mover.vertical.zeldaVerticalMove(this.speed * delta / 2)
                     } else if (!direction.areWithin90Degrees(this.body.dir, this.ladder.direction, 2)) {
-                        dz = this.body.mover.vertical.zeldaVerticalMove(-this.body.spd * delta / 2)
+                        dz = this.body.mover.vertical.zeldaVerticalMove(-this.speed * delta / 2)
                     }
                 }
 
                 if (dz === 0) {
                     this.body.mover.horizontal.zeldaStep(
                         this.body.dir,
-                        this.body.spd * delta,
+                        this.speed * delta,
                         true
                     )
                 }

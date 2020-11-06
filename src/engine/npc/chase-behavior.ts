@@ -7,7 +7,7 @@ namespace splitTime.npc {
         sightDistance: pixels_t = 256
         senseDistance: pixels_t
         moveStance: string = "run"
-        chaseSpeed: pixels_t
+        chaseSpeed: pixels_t = 32
 
         constructor(
             private readonly npc: splitTime.Npc,
@@ -15,7 +15,6 @@ namespace splitTime.npc {
             private readonly howCloseToGet: number
         ) {
             this.senseDistance = 2 * this.npc.body.width
-            this.chaseSpeed = this.npc.body.spd
         }
 
         private inLevel(): boolean {

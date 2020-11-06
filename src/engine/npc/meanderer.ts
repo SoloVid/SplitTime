@@ -22,6 +22,7 @@ namespace splitTime.agent {
     class BaseMeanderer {
         pixels: number = 0
         counter: Signaler | null = null
+        speed: number = 32
 
         constructor(private readonly spriteBody: SpriteBody) {
         }
@@ -33,7 +34,7 @@ namespace splitTime.agent {
         regularMotion(delta: game_seconds, newSteps: number, newDir: direction_t) {
             if(this.pixels > 0) {
                 this.spriteBody.sprite.requestStance("walk", this.body.dir)
-                var pixelsThisFrame = delta * this.body.spd
+                var pixelsThisFrame = delta * this.speed
                 this.body.mover.zeldaBump(this.body.dir, pixelsThisFrame)
                 this.pixels -= pixelsThisFrame;
                 if(this.pixels <= 0) {
