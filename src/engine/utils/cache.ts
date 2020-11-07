@@ -1,4 +1,4 @@
-namespace splitTime.editor.client {
+namespace splitTime {
     export class Cache<T> {
 
         private readonly cache: { [id: string]: CacheEntry<T> } = {}

@@ -1,11 +1,11 @@
 namespace splitTime.editor.level {
     export class CollageManager {
-        private readonly cache: client.Cache<CollageInfo>
+        private readonly cache: Cache<CollageInfo>
 
         constructor(
             private readonly server: client.ServerLiaison
         ) {
-            this.cache = new client.Cache(async collageId => {
+            this.cache = new Cache(async collageId => {
                 const c = await this.server.api.collageJson.fetch(this.server.withProject({ collageId }))
                 return {
                     collageFile: c,
