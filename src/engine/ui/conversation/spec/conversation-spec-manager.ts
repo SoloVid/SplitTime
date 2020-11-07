@@ -1,6 +1,7 @@
 namespace splitTime.conversation {
     export class ConversationSpecManager {
-        private specs: { [id: string]: ConversationSpec } = {}
+        private readonly builders: { [id: string]: ConversationSpecBuilder | undefined } = {}
+        private readonly specs: { [id: string]: ConversationSpec | undefined } = {}
 
         constructor(
             private readonly helper: RunnerHelper
@@ -8,21 +9,22 @@ namespace splitTime.conversation {
         }
 
         register(id: string, setup: SetupFunc): time.EventSpec<void> {
-            const builder = new ConversationDslBuilder()
-            setup(builder)
-            const spec = builder.build()
-            this.specs[id] = spec
-
-            return new time.EventSpec(id, () => this.start(spec))
+            this.builders[id] = new ConversationSpecBuilder(setup)
+            return new time.EventSpec(id, () => this.start(id))
         }
 
         getSpecById(id: string): ConversationSpec {
-            const spec = this.specs[id]
-            assert(!!spec, "Conversation spec \"" + id + "\" not found")
+            let spec = this.specs[id]
+            if (!spec) {
+                const builder = this.builders[id]
+                assert(!!builder, "Conversation spec \"" + id + "\" not found")
+                spec = this.specs[id] = builder.build()
+            }
             return spec
         }
 
-        private start(spec: ConversationSpec): void {
+        private start(id: string): void {
+            const spec = this.getSpecById(id)
             const inst = new ConversationInstance(spec, this.helper)
             inst.start()
         }
