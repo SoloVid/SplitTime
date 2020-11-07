@@ -1,31 +1,27 @@
 namespace splitTime {
     export const FPS = 60
 
-    function mainGameLoop(gameLoop: GameLoop) {
+    function mainGameLoop(gameLoop: GameLoop, timeStamp: number) {
+        const timeStampDelta = timeStamp - gameLoop.lastTimeStamp
+        gameLoop.lastTimeStamp = timeStamp
         const isRunning = gameLoop.isRunning()
         const perspective = gameLoop.perspective
-        const startTime = new Date().getTime()
+        const startTime = performance.now()
 
         if (isRunning) {
             try {
-                mainGameLoopBody(gameLoop)
+                mainGameLoopBody(gameLoop, timeStampDelta)
             } catch (ex) {
                 console.error(ex)
             }
         }
 
-        const endTime = new Date().getTime()
+        const endTime = performance.now()
         const msElapsed = endTime - startTime
 
-        var displayFPS = FPS
-        const msPerFrame = (1 / FPS) * 1000
-        if (msElapsed < msPerFrame) {
-            scheduleNextLoop(msPerFrame - msElapsed, gameLoop)
-        } else {
-            scheduleNextLoop(2, gameLoop) //give browser a quick breath
-            var secondsElapsed = msElapsed / 1000
-            displayFPS = Math.round(1 / secondsElapsed)
-        }
+        const msPerFrame = timeStampDelta
+        const displayFPS = Math.round(1000 / msPerFrame)
+        scheduleNextLoop(gameLoop)
 
         if (isRunning) {
             splitTime.debug.setDebugValue("FPS", displayFPS)
@@ -36,11 +32,11 @@ namespace splitTime {
         }
     }
 
-    function scheduleNextLoop(ms: number, gameLoop: GameLoop) {
-        setTimeout(mainGameLoop, ms, gameLoop)
+    function scheduleNextLoop(gameLoop: GameLoop) {
+        requestAnimationFrame(timeStamp => mainGameLoop(gameLoop, timeStamp))
     }
 
-    function mainGameLoopBody(g: GameLoop) {
+    function mainGameLoopBody(g: GameLoop, msElapsed: number) {
         const perspective = g.perspective
         g.performanceCheckpoint("start loop", 999999)
 
@@ -62,7 +58,7 @@ namespace splitTime {
             return
         }
 
-        const secondsForFrame = 1 / splitTime.FPS
+        const secondsForFrame = Math.min(msElapsed / 1000, 1 / splitTime.FPS)
         const budget = new FrameBudget(1000 * secondsForFrame)
 
         if (isCurrentLevelSet) {
@@ -101,11 +97,12 @@ namespace splitTime {
     }
 
     export class GameLoop {
+        lastTimeStamp: number = 0
         private running: boolean = false
         private listeners: (FrameNotified | ((seconds: number) => void))[] = []
 
         constructor(public readonly perspective: Perspective) {
-            Promise.resolve().then(() => mainGameLoop(this))
+            Promise.resolve().then(() => mainGameLoop(this, 0))
         }
 
         start() {
@@ -134,16 +131,15 @@ namespace splitTime {
             return this.running
         }
 
-        private lastPerformanceCheck: Date | null = null
+        private lastPerformanceCheck: number | null = null
 
         performanceCheckpoint(debugName: string, allowMs = 5) {
             const allowMsRounded = Math.ceil(allowMs)
             if (splitTime.debug.ENABLED) {
-                var now = new Date()
+                const now = performance.now()
                 if (this.lastPerformanceCheck) {
                     var timePassed =
-                        now.getMilliseconds() -
-                        this.lastPerformanceCheck.getMilliseconds()
+                        now - this.lastPerformanceCheck
                     if (timePassed > allowMsRounded) {
                         splitTime.log.warn(
                             debugName +

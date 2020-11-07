@@ -51,13 +51,6 @@ namespace splitTime {
         return result
      }
 
-    export function randomSeed() {
-        var limit = new Date().getTime() % 1000000
-        for (var i = 0; i < limit; i++) {
-            Math.random()
-        }
-    }
-
     export function approachValue(
         oldValue: number,
         targetValue: number,

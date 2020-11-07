@@ -202,7 +202,7 @@ namespace splitTime.conversation {
                     .getRegion()
                     .getTimeMs()
             } else {
-                return +new Date()
+                return +performance.now()
             }
         }
     }

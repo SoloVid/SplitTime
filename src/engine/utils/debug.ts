@@ -24,7 +24,7 @@ namespace splitTime.debug {
             debugInfo[key] = new DebugValue(key)
         }
         debugInfo[key].value = value
-        debugInfo[key].timeUpdated = new Date().getTime()
+        debugInfo[key].timeUpdated = performance.now()
     }
 
     export function update() {
@@ -35,7 +35,7 @@ namespace splitTime.debug {
         for (var i = 0; i < keys.length; i++) {
             let key = keys[i]
             var debugValue = debugInfo[key]
-            if (new Date().getTime() - debugValue.timeUpdated > LIFE) {
+            if (performance.now() - debugValue.timeUpdated > LIFE) {
                 delete debugInfo[key]
             }
         }

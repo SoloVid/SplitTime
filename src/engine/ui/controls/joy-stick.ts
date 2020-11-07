@@ -34,7 +34,7 @@ namespace splitTime.controls {
             return null
         }
         onTilt(callback: () => splitTime.CallbackResult) {
-            var lastTrigger = new Date().getTime()
+            var lastTrigger = performance.now()
             var isDone = false
 
             var innerCallback = function(): splitTime.CallbackResult {
@@ -42,7 +42,7 @@ namespace splitTime.controls {
                     return splitTime.STOP_CALLBACKS
                 }
 
-                var newTime = new Date().getTime()
+                var newTime = performance.now()
                 if (newTime - lastTrigger < MIN_TIME_BETWEEN_STROKES) {
                     return
                 }

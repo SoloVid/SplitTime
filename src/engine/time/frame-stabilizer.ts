@@ -7,7 +7,7 @@ namespace splitTime {
                 msPerFrame,
                 maxCounter,
                 function() {
-                    return new Date().getTime()
+                    return performance.now()
                 }
             )
         }

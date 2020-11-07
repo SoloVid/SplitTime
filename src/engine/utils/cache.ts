@@ -20,7 +20,7 @@ namespace splitTime {
                 })
             }
             const collageInfo = this.cache[id]
-            if (!collageInfo.isLoading && collageInfo.refetchAt <= Date.now()) {
+            if (!collageInfo.isLoading && collageInfo.refetchAt <= performance.now()) {
                 collageInfo.isLoading = true
                 this.load(id)
             }
@@ -49,7 +49,7 @@ namespace splitTime {
                 log.warn("Failed to load item \"" + cacheEntry + "\" for cache", e)
                 cacheEntry.failed = true
             } finally {
-                cacheEntry.refetchAt = Date.now() + this.cacheLife + splitTime.randomRangedInt(-this.cacheLifeRandomFactor, this.cacheLifeRandomFactor)
+                cacheEntry.refetchAt = performance.now() + this.cacheLife + splitTime.randomRangedInt(-this.cacheLifeRandomFactor, this.cacheLifeRandomFactor)
                 cacheEntry.isLoading = false
             }
         }
