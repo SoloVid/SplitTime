@@ -12,12 +12,11 @@ namespace splitTime {
         return ms / 1000
     }
 
-    class ScheduledEvent {
+    class ScheduledEvent<T> {
         public readonly timeMs: game_ms
         constructor(
             public readonly time: game_seconds,
-            // FTODO: Can we get rid of "any" here?
-            public readonly instance: time.EventInstance<any>
+            public readonly instance: time.EventInstance<T> | (() => void)
         ) {
             this.timeMs = toMs(this.time)
         }
@@ -35,7 +34,7 @@ namespace splitTime {
         private timeAdvanceListeners: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         private regions: splitTime.Region[] = []
 
-        private upcomingEvents: ScheduledEvent[] = []
+        private upcomingEvents: ScheduledEvent<unknown>[] = []
 
         readonly beginning: time.Moment = new time.Moment(0)
         kSecondsPerRealSecond: game_seconds = 1
@@ -46,6 +45,8 @@ namespace splitTime {
         private readonly timelineRelations: TimelineRelation[] = []
         // This is our variable for preventing infinite recursion on navigating two-way relations
         private isAlreadyVisited: boolean = false
+
+        private isStarted: boolean = false
 
         constructor(public readonly id: string) {}
 
@@ -125,10 +126,14 @@ namespace splitTime {
                 this.upcomingEvents.length > 0 &&
                 this.upcomingEvents[0].time <= newTime
             ) {
-                const event = this.upcomingEvents.shift() as ScheduledEvent
+                const event = this.upcomingEvents.shift() as ScheduledEvent<unknown>
                 // Update time along the way in case someone cares
                 this.time = event.time
-                event.instance.run()
+                if (typeof event.instance === "function") {
+                    event.instance()
+                } else {
+                    event.instance.run()
+                }
             }
 
             // Move time fully ahead
@@ -153,6 +158,7 @@ namespace splitTime {
         }
 
         notifyFrameUpdate(delta: real_seconds) {
+            this.isStarted = true
             this.advance(delta * this.kSecondsPerRealSecond)
         }
 
@@ -172,16 +178,29 @@ namespace splitTime {
             return days * this.hour(this.kHoursPerDay)
         }
 
-        schedule<T extends file.jsonable | void>(
+        /**
+         * Schedule simple event specified by callback.
+         * This kind of scheduled event cannot be saved.
+         * Scheduling events in this manner must occur before timeline starts.
+         */
+        schedule(moment: time.Moment, eventCallback: (() => void)): void
+        /**
+         * Schedule event that can be saved/serialized.
+         */
+        schedule<T>(moment: time.Moment, eventInstance: time.EventInstance<T>): void
+        schedule<T>(
             moment: time.Moment,
-            eventInstance: time.EventInstance<T>
+            event: time.EventInstance<T> | (() => void)
         ): void {
+            if (typeof event === "function") {
+                assert(!this.isStarted, "Simple callback event cannot be specified after timeline starts")
+            }
             this.scheduleAbsolute(
-                new ScheduledEvent(moment.getTime(), eventInstance)
+                new ScheduledEvent(moment.getTime(), event)
             )
         }
 
-        scheduleFromNow<T extends file.jsonable | void>(
+        scheduleFromNow<T>(
             timeFromNow: game_seconds,
             eventInstance: time.EventInstance<T>
         ): void {
@@ -190,11 +209,12 @@ namespace splitTime {
             )
         }
 
-        private scheduleAbsolute(event: ScheduledEvent) {
+        private scheduleAbsolute<T>(event: ScheduledEvent<T>) {
             if (event.time < this.getTime()) {
+                const id = (typeof event.instance === "function") ? "callback" : event.instance.spec.id
                 throw new Error(
                     "Cannot schedule event in the past: " +
-                        event.instance.spec.id +
+                        id +
                         " at " +
                         event.time +
                         " (current time " +
@@ -204,11 +224,11 @@ namespace splitTime {
             }
             for (let i = 0; i < this.upcomingEvents.length; i++) {
                 if (event.time < this.upcomingEvents[i].time) {
-                    this.upcomingEvents.splice(i, 0, event)
+                    this.upcomingEvents.splice(i, 0, event as ScheduledEvent<unknown>)
                     return
                 }
             }
-            this.upcomingEvents.push(event)
+            this.upcomingEvents.push(event as ScheduledEvent<unknown>)
         }
     }
 
