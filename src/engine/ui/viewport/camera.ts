@@ -148,28 +148,63 @@ namespace splitTime {
             if (this.currentLevel !== existingLevel) {
                 this.actualFocusPoint = targetFocus
             } else {
-                this.actualFocusPoint.x = splitTime.approachValue(
+                const idealNew = new Coordinates3D()
+                idealNew.x = splitTime.approachValue(
                     this.actualFocusPoint.x,
                     targetFocus.x,
                     this.getScreenMoveSpeed(
                         targetFocus.x - this.actualFocusPoint.x
                     )
                 )
-                this.actualFocusPoint.y = splitTime.approachValue(
+                idealNew.y = splitTime.approachValue(
                     this.actualFocusPoint.y,
                     targetFocus.y,
                     this.getScreenMoveSpeed(
                         targetFocus.y - this.actualFocusPoint.y
                     )
                 )
-                this.actualFocusPoint.z = splitTime.approachValue(
+                idealNew.z = splitTime.approachValue(
                     this.actualFocusPoint.z,
                     targetFocus.z,
                     this.getScreenMoveSpeed(
                         targetFocus.z - this.actualFocusPoint.z
                     )
                 )
+
+                // Although the above logic looks smooth for the camera against the environment,
+                // it (by itself) causes a jitter effect with the player image.
+                // The camera coordinates and the sprite coordinates may be at a set offset
+                // from each other when moving, but the rounded coordinates (used in rendering)
+                // may still (and do) alternate between pixels because the switch from
+                // round down to round up is slightly off.
+                // Or in other words, as I move, the point at which the camera coordinates
+                // snap over one for the next pixel and the point at which the player sprite
+                // coordinates snap over one for the next pixel happen at different times,
+                // such that the player sprite will appear to fall behind a pixel and then
+                // catch up a pixel in rapid succession.
+                // The result is that the player sprite looks like it jerks back and forth
+                // (by 1 pixel) at a rapid rate.
+                // This hack attempts to align the rounding of the two coordinates
+                // by making sure that their fractional values (after the decimal point)
+                // are always the same.
+                const alignedNew = new Coordinates3D()
+                alignedNew.x = this.imputeDecimal(idealNew.x, targetFocus.x)
+                alignedNew.y = this.imputeDecimal(idealNew.y, targetFocus.y)
+                alignedNew.z = this.imputeDecimal(idealNew.z, targetFocus.z)
+
+                // Diagonal looks worse with the alignment adjustment, so don't use it in that case.
+                if (this.actualFocusPoint.x !== alignedNew.x && this.actualFocusPoint.y !== alignedNew.y) {
+                    this.actualFocusPoint = idealNew
+                } else {
+                    this.actualFocusPoint = alignedNew
+                }
             }
+        }
+
+        private imputeDecimal(me: number, informer: number): number {
+            const fraction = informer % 1
+            // Add the integer part of me to the decimal part of informer
+            return Math.round(me - fraction) + fraction
         }
     }
 }

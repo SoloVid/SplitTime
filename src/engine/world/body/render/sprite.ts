@@ -74,8 +74,6 @@ namespace splitTime {
         }
 
         private _drawSimple(ctx: GenericCanvasRenderingContext2D) {
-            var tImg = this.getImage()
-
             const frame = this.getCurrentFrame()
             const targetBox = frame.getTargetBox(this.body)
 

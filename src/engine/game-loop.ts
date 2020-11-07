@@ -70,7 +70,7 @@ namespace splitTime {
             g.performanceCheckpoint("timeline frame update", budget.takePart(0.4))
 
             g.notifyListenersFrameUpdate(secondsForFrame)
-            g.performanceCheckpoint("notify listeners of update", budget.takePart(0.01))
+            g.performanceCheckpoint("notify listeners of update", budget.takePart(0.05))
 
             splitTime.debug.setDebugValue(
                 "Board Bodies",
@@ -92,7 +92,7 @@ namespace splitTime {
 
         if (perspective.hud) {
             perspective.hud.render(perspective.view)
-            g.performanceCheckpoint("render HUD", budget.takePart(0.01))
+            g.performanceCheckpoint("render HUD", budget.takePart(0.05))
         }
     }
 
@@ -134,19 +134,18 @@ namespace splitTime {
         private lastPerformanceCheck: number | null = null
 
         performanceCheckpoint(debugName: string, allowMs = 5) {
-            const allowMsRounded = Math.ceil(allowMs)
             if (splitTime.debug.ENABLED) {
                 const now = performance.now()
                 if (this.lastPerformanceCheck) {
                     var timePassed =
                         now - this.lastPerformanceCheck
-                    if (timePassed > allowMsRounded) {
+                    if (timePassed > allowMs) {
                         splitTime.log.warn(
                             debugName +
                                 ": " +
-                                timePassed +
+                                timePassed.toFixed(2) +
                                 "ms taken when " +
-                                allowMsRounded +
+                                allowMs.toFixed(2) +
                                 "ms allotted"
                         )
                     }
