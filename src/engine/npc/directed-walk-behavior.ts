@@ -2,7 +2,9 @@ namespace splitTime.npc {
     export class DirectedWalkBehavior implements Behavior, TemporaryBehavior {
         constructor(
             private readonly npc: Npc,
-            private readonly targetLocation: ILevelLocation2
+            private readonly targetLocation: ILevelLocation2,
+            private readonly speed: Indirect<number>,
+            private readonly stance: string
         ) {}
 
         isComplete(): boolean {
@@ -21,6 +23,8 @@ namespace splitTime.npc {
         notifyTimeAdvance(delta: splitTime.game_seconds): void {
             const dirBefore = direction.fromToThing(this.npc.body, this.targetLocation)
             this.npc.movementAgent.setWalkingTowardBoardLocation(this.targetLocation)
+            this.npc.movementAgent.speed = this.speed
+            this.npc.movementAgent.stance = this.stance
             this.npc.movementAgent.notifyTimeAdvance(delta)
             const dirAfter = direction.fromToThing(this.npc.body, this.targetLocation)
             const overshot = !direction.areWithin90Degrees(dirBefore, dirAfter)

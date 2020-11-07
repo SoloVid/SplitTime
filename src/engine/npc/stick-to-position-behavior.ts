@@ -5,9 +5,10 @@ namespace splitTime.npc {
         constructor(
             private readonly npc: Npc,
             private readonly position: Position,
+            private readonly speed: Indirect<number>,
             private readonly moveStance: string
         ) {
-            this.helperBehavior = new DirectedWalkBehavior(npc, position)
+            this.helperBehavior = new DirectedWalkBehavior(npc, position, speed, moveStance)
         }
 
         isConditionMet(): boolean {

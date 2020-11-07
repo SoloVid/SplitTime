@@ -27,6 +27,7 @@ namespace splitTime.agent {
         }
     }
 
+    // TODO: make use of DirectedWalkBehavior
     export class PathWalker implements npc.Behavior {
         private lastKnownLocation: Coordinates2D | Position | null = null
         private nextStageIndex: int = 0
@@ -38,6 +39,8 @@ namespace splitTime.agent {
         constructor(
             private readonly pathSpec: PathSpec,
             private readonly npc: Npc,
+            private readonly speed: Indirect<number>,
+            private readonly stance: string
         ) {
             const builder = new PathDslBuilder()
             pathSpec.setup(builder)
@@ -69,6 +72,8 @@ namespace splitTime.agent {
 
             const coords = this.coordsAs3D(targetLocation)
             this.npc.movementAgent.setWalkingTowardBoardLocation(coords)
+            this.npc.movementAgent.speed = this.speed
+            this.npc.movementAgent.stance = this.stance
             this.npc.movementAgent.notifyTimeAdvance(delta)
 
             if (closeEnough(this.npc.body, coords)) {

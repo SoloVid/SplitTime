@@ -6,6 +6,8 @@ namespace splitTime.player {
     export class PlayerAgent implements splitTime.TimeNotified {
         readonly abilities: ability.AbilityPool
         movementAgent: splitTime.agent.ControlledCollisionMovement
+        speed: Indirect<number> = 32
+        walkStance: string = "walk"
 
         constructor(
             private readonly playerManager: PlayerManager,
@@ -64,6 +66,8 @@ namespace splitTime.player {
                 this.movementAgent.setStopped()
             } else {
                 this.movementAgent.setWalkingDirection(dir)
+                this.movementAgent.speed = this.speed
+                this.movementAgent.stance = this.walkStance
             }
 
             if (!this.isFrozen() && this.spriteBody.body.getLevel().isLoaded()) {

@@ -6,7 +6,9 @@ namespace splitTime.npc {
         constructor(
             private readonly npc: Npc,
             private readonly positions: readonly Position[],
-            private readonly waitAtEach: game_seconds
+            private readonly waitAtEach: game_seconds,
+            private readonly speed: Indirect<number>,
+            private readonly walkStance: string
         ) {
             assert(positions.length >= 2, "Patrol must have at least two positions")
         }
@@ -17,7 +19,7 @@ namespace splitTime.npc {
                 this.underlyingBehavior = new BehaviorLoop(() => {
                     const behaviors = []
                     for (const pos of flightPath) {
-                        behaviors.push(new DirectedWalkBehavior(this.npc, pos))
+                        behaviors.push(new DirectedWalkBehavior(this.npc, pos, this.speed, this.walkStance))
                         behaviors.push(new WaitBehavior(this.waitAtEach))
                     }
                     return new BehaviorSequence(behaviors)
