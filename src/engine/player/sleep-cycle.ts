@@ -4,12 +4,12 @@ namespace splitTime.player {
 
         constructor(
             private readonly body: splitTime.Body,
-            private readonly stamina: Stamina,
+            private readonly stamina: MeteredStat,
             private readonly worldRenderer: WorldRenderer,
             public onKO: () => void = () => {},
             public onWake: () => void = () => {}
         ) {
-            this.stamina.registerKOListener(() => {
+            this.stamina.registerEmptyListener(() => {
                 this.worldRenderer.fadeTo(new splitTime.light.Color(0,0,0)).then(() => {
                     this.onKO()
                     this.worldRenderer.fadeIn()
@@ -20,7 +20,7 @@ namespace splitTime.player {
         notifyTimeAdvance(delta: splitTime.game_seconds) {
             const timeline = this.body.getLevel().getRegion().getTimeline()
             const hoursPassed = delta / timeline.kSecondsPerMinute / timeline.kMinutesPerHour
-            if (this.stamina.isConscious()) {
+            if (this.stamina.isFull()) {
                 this.stamina.hit(hoursPassed)
             } else {
                 // TODO: change up restfulness in bed
@@ -30,7 +30,7 @@ namespace splitTime.player {
                 this.stamina.add(hoursPassed * (this.stamina.max / hoursFullRest))
 
                 // TODO: add oversleep?
-                if (this.stamina.isConscious()) {
+                if (this.stamina.isFull()) {
                     this.worldRenderer.fadeTo(new splitTime.light.Color(0,0,0)).then(() => {
                         this.onWake()
                         this.worldRenderer.fadeIn()

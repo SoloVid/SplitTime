@@ -4,7 +4,7 @@ namespace splitTime.player {
 
         constructor(
             private readonly body: splitTime.Body,
-            private readonly stamina: Stamina,
+            private readonly stamina: MeteredStat,
             private readonly minZVelocityForDamage: number = 640
         ) {
             this.prevZVelocity = this.body.zVelocity

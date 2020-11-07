@@ -9,8 +9,8 @@ namespace splitTime.player {
             private readonly joyStick: controls.JoyStick
         ) {}
 
-        makeAgent(body: Body, stamina?: Stamina): PlayerAgent {
-            return new PlayerAgent(this, this.joyStick, body, stamina)
+        makeAgent(spriteBody: SpriteBody, stamina?: MeteredStat): PlayerAgent {
+            return new PlayerAgent(this, this.joyStick, spriteBody, stamina)
         }
 
         add(playerAgent: PlayerAgent) {

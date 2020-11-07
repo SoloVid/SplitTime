@@ -10,13 +10,17 @@ namespace splitTime.player {
         constructor(
             private readonly playerManager: PlayerManager,
             private readonly joyStick: controls.JoyStick,
-            readonly body: splitTime.Body,
-            readonly stamina: Stamina | null = null
+            readonly spriteBody: splitTime.SpriteBody,
+            readonly stamina: MeteredStat | null = null
         ) {
-            this.abilities = new ability.AbilityPool(body)
+            this.abilities = new ability.AbilityPool(spriteBody.body)
             this.movementAgent = new splitTime.agent.ControlledCollisionMovement(
-                body
+                spriteBody
             )
+        }
+
+        get body(): Body {
+            return this.spriteBody.body
         }
 
         setJumpAbility(ability: ability.IAbility) {
@@ -46,7 +50,7 @@ namespace splitTime.player {
         }
 
         isFrozen(): boolean {
-            return this.abilities.isFrozen() || (this.stamina !== null && !this.stamina.isConscious())
+            return this.abilities.isFrozen() || (this.stamina !== null && this.stamina.isEmpty())
         }
 
         notifyTimeAdvance(delta: splitTime.game_seconds) {
@@ -62,7 +66,7 @@ namespace splitTime.player {
                 this.movementAgent.setWalkingDirection(dir)
             }
 
-            if (!this.isFrozen() && this.body.getLevel().isLoaded()) {
+            if (!this.isFrozen() && this.spriteBody.body.getLevel().isLoaded()) {
                 this.movementAgent.notifyTimeAdvance(delta)
             }
         }
