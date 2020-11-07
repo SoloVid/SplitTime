@@ -27,10 +27,7 @@ namespace splitTime.npc {
                 const behavior = this.behaviorMap[level]
                 if (behavior !== null) {
                     // Unconditional behaviors count as condition always met
-                    if (!instanceOf.ConditionalBehavior(behavior)) {
-                        return true
-                    }
-                    if (behavior.isConditionMet()) {
+                    if (isBehaviorConditionMet(behavior)) {
                         return true
                     }
                 }
@@ -58,7 +55,7 @@ namespace splitTime.npc {
                 if (behavior === null) {
                     continue
                 }
-                if (instanceOf.ConditionalBehavior(behavior) && !behavior.isConditionMet()) {
+                if (!isBehaviorConditionMet(behavior)) {
                     continue
                 }
                 this.levelUsed = level
@@ -67,7 +64,7 @@ namespace splitTime.npc {
                 }
 
                 behavior.notifyTimeAdvance(delta)
-                if (instanceOf.TemporaryBehavior(behavior) && behavior.isComplete()) {
+                if (isBehaviorComplete(behavior)) {
                     this.behaviorMap[level] = null
                 }
                 return
