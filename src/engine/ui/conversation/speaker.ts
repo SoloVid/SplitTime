@@ -8,7 +8,7 @@ namespace splitTime.conversation {
             public readonly body: splitTime.Body
         ) {
             // TODO: re-evaluate this speech box
-            this.speechBox = new splitTime.body.SpeechBox(body, 42)
+            this.speechBox = new splitTime.body.SpeechBox(body, body.height)
         }
 
         getBehavior(): npc.ConditionalBehavior {

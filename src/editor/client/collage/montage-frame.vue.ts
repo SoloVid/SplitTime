@@ -147,6 +147,8 @@ namespace splitTime.editor.collage {
             stroke-dasharray="2,1"
         />
         <rect
+            style="pointer-events: initial; cursor: grab;"
+            @mousedown="trackBody"
             :x="bodyFrontRectRelative.x"
             :y="bodyFrontRectRelative.y - body.depth"
             :width="body.width"

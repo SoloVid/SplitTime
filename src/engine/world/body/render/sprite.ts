@@ -13,7 +13,7 @@ namespace splitTime {
             this.ref = nextRef++
         }
 
-        static DEFAULT_STANCE = "$DEFAULT_STANCE$"
+        static DEFAULT_STANCE = "__DEFAULT_STANCE__"
 
         private autoReset: boolean = true
 
@@ -22,7 +22,7 @@ namespace splitTime {
 
         opacityModifier = 1
         playerOcclusionFadeFactor = 0
-        private stance = splitTime.Sprite.DEFAULT_STANCE
+        private stance: string | null = null
         private requestedStance = splitTime.Sprite.DEFAULT_STANCE
         private requestedFrameReset = false
         private frame = 0
@@ -46,6 +46,7 @@ namespace splitTime {
                 }
                 return this.collage.getDefaultMontage(this.dir)
             }
+            assert(this.stance !== null, "Stance shouldn't be null at this point")
             return this.collage.getMontage(this.stance, this.dir)
         }
 
@@ -92,30 +93,6 @@ namespace splitTime {
             )
         }
 
-        private finalizeFrame() {
-            if (
-                this.stance !== this.requestedStance ||
-                this.requestedFrameReset
-            ) {
-                this.frame = 0
-                this._timeFrameStarted = this._time
-            } else {
-                //Only update on frame tick
-                while (this._time > this._timeFrameStarted + this.getCurrentFrame().duration) {
-                    this._timeFrameStarted = this._timeFrameStarted + this.getCurrentFrame().duration
-                    this.frame = (this.frame + 1) % this.getCurrentMontage().frames.length
-                }
-            }
-        }
-
-        private finalizeStance() {
-            if (!this.requestedStance || !this.collage.hasMontage(this.requestedStance)) {
-                this.requestedStance = Sprite.DEFAULT_STANCE
-            }
-            this.stance = this.requestedStance
-            this.dir = this.requestedDir
-        }
-
         requestStance(
             stance: string,
             dir: number,
@@ -138,7 +115,7 @@ namespace splitTime {
 
         prepareForRender() {
             const oldStance = this.stance
-            let currentFrame = this.getCurrentFrame()
+            let currentFrameDuration: number = oldStance === null ? 0 : this.getCurrentFrame().duration
 
             if (!this.requestedStance || !this.collage.hasMontage(this.requestedStance)) {
                 this.requestedStance = Sprite.DEFAULT_STANCE
@@ -155,10 +132,10 @@ namespace splitTime {
                 this._timeFrameStarted = this._time
             } else {
                 //Only update on frame tick
-                while (this._time > this._timeFrameStarted + currentFrame.duration) {
-                    this._timeFrameStarted = this._timeFrameStarted + currentFrame.duration
+                while (this._time >= this._timeFrameStarted + currentFrameDuration) {
+                    this._timeFrameStarted = this._timeFrameStarted + currentFrameDuration
                     this.frame = (this.frame + 1) % montage.frames.length
-                    currentFrame = this.getCurrentFrame()
+                    currentFrameDuration = this.getCurrentFrame().duration
                 }
             }
         }

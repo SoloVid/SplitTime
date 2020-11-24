@@ -37,7 +37,7 @@ namespace splitTime {
                 }
             }
 
-            if (!this.hasMontage(defaultMontageId)) {
+            if (!this.hasMontage(defaultMontageId) && defaultMontageId !== "") {
                 if (!allowErrors) {
                     throw new Error("Default montage \"" + defaultMontageId + "\" not found in collage")
                 }

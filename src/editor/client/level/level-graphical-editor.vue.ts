@@ -58,8 +58,8 @@ namespace splitTime.editor.level {
         }
         if (this.$el) {
             position = {
-                x: this.$el.offsetLeft,
-                y: this.$el.offsetTop
+                x: this.$el.offsetLeft - this.$el.parentElement!.scrollLeft,
+                y: this.$el.offsetTop - this.$el.parentElement!.scrollTop
             }
         }
         const mouse = {
