@@ -1,57 +1,17 @@
 namespace splitTime.particles {
     export class Particle {
-        seed: number
-        age: number
-        x: number
-        y: number
-        vx: number
-        vy: number
-        accX: number
-        accY: number
-        radius: number
-        r: number
-        g: number
-        b: number
-        colorShiftR: number
-        colorShiftG: number
-        colorShiftB: number
-        opacity: number
-        opacityShift: number
-
-        constructor(
-            posVec: splitTime.Vector2D,
-            vVec: splitTime.Vector2D,
-            accVec: splitTime.Vector2D
-        ) {
-            this.seed = Math.random()
-            this.age = 0 // milliseconds
-            this.x = posVec ? posVec.x : 0
-            this.y = posVec ? posVec.y : 0
-            this.vx = vVec ? vVec.x : 0 // pixels per second
-            this.vy = vVec ? vVec.y : 0 // pixels per second
-            this.accX = accVec ? accVec.x : 0 // pixels per second per second
-            this.accY = accVec ? accVec.y : 0 // pixels per second per second
-            this.radius = 4
-            this.r = 255
-            this.g = 255
-            this.b = 255
-            this.colorShiftR = 0
-            this.colorShiftG = 0
-            this.colorShiftB = 0
-            this.opacity = 0.8
-            this.opacityShift = 0
-            // this.updateHandler = splitTime.Particle.applyBasicPhysics;
-            // this.updateHandler = function(emitter, particle, msPassed) {
-            //     splitTime.Particle.applyBasicPhysics(emitter, particle, msPassed);
-            //     splitTime.Particle.applyLazyEffect(emitter, particle, msPassed);
-            //     splitTime.Particle.applyColorShift(emitter, particle, msPassed);
-            //     splitTime.Particle.applyOpacityShift(emitter, particle, msPassed);
-            // };
-        }
-
-        getFillStyle(): string {
-            return "rgb(" + this.r + "," + this.g + "," + this.b + ")"
-        }
+        seed: number = Math.random()
+        /** Milliseconds since spawned */
+        age: number = 0
+        maxParticleAgeMs: number = 5000
+        position: Vector2D = new Vector2D(0, 0)
+        velocity: Vector2D = new Vector2D(0, 0)
+        acceleration: Vector2D = new Vector2D(0, 0)
+        radius: number = 4
+        color: light.Color = new light.Color(255, 255, 255, 0.8)
+        colorShift: light.Color = new light.Color(0, 0, 0, 0)
+        lightRadius: number = this.radius
+        lightIntensity: number = 0
 
         advanceTime(emitter: ParticleEmitter, msPassed: number): void {
             splitTime.particles.applyBasicPhysics(emitter, this, msPassed)
@@ -76,10 +36,10 @@ namespace splitTime.particles {
         msPassed: number
     ): void {
         var seconds = msPassed / 1000
-        particle.x += particle.vx * seconds
-        particle.y += particle.vy * seconds
-        particle.vx += particle.accX * seconds
-        particle.vy += particle.accY * seconds
+        particle.position.x += particle.velocity.x * seconds
+        particle.position.y += particle.velocity.y * seconds
+        particle.velocity.x += particle.acceleration.x * seconds
+        particle.velocity.y += particle.acceleration.y * seconds
         particle.age += msPassed
     }
 
@@ -91,8 +51,8 @@ namespace splitTime.particles {
         var HOW_OFTEN = emitter.lazyIntervalMs
         var HOW_DRASTIC = emitter.lazyMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
-            particle.accX = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
-            particle.accY = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.acceleration.x = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.acceleration.y = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
         }
     }
 
@@ -104,13 +64,13 @@ namespace splitTime.particles {
         var HOW_OFTEN = emitter.colorShiftIntervalMs
         var HOW_DRASTIC = emitter.colorShiftMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
-            particle.colorShiftR = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
-            particle.colorShiftG = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
-            particle.colorShiftB = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.colorShift.r = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.colorShift.g = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.colorShift.b = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
         }
-        particle.r = splitTime.constrain(particle.r + particle.colorShiftR, 0, 255)
-        particle.g = splitTime.constrain(particle.g + particle.colorShiftG, 0, 255)
-        particle.b = splitTime.constrain(particle.b + particle.colorShiftB, 0, 255)
+        particle.color.r = splitTime.constrain(particle.color.r + particle.colorShift.r, 0, 255)
+        particle.color.g = splitTime.constrain(particle.color.g + particle.colorShift.g, 0, 255)
+        particle.color.b = splitTime.constrain(particle.color.b + particle.colorShift.b, 0, 255)
     }
 
     export function applyOpacityShift(
@@ -121,10 +81,10 @@ namespace splitTime.particles {
         var HOW_OFTEN = emitter.opacityShiftIntervalMs
         var HOW_DRASTIC = emitter.opacityShiftMagnitude
         if (particle.isOccasion(HOW_OFTEN, msPassed)) {
-            particle.opacityShift = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
+            particle.colorShift.a = splitTime.randomRanged(-HOW_DRASTIC, HOW_DRASTIC)
         }
-        particle.opacity = splitTime.constrain(
-            particle.opacity + particle.opacityShift,
+        particle.color.a = splitTime.constrain(
+            particle.color.a + particle.colorShift.a,
             0,
             1
         )
@@ -133,28 +93,27 @@ namespace splitTime.particles {
     export function generateDefaultParticle(
         emitter: ParticleEmitter
     ): Particle {
-        return new splitTime.particles.Particle(
-            new splitTime.Vector2D(
-                emitter.location.x + Math.random() * 32 - 16,
-                emitter.location.y -
-                    emitter.location.z +
-                    Math.random() * 32 -
-                    16
-            ),
-            splitTime.Vector2D.angular(
-                splitTime.randomRanged(0, 2 * Math.PI),
-                Math.random() * 16
-            ),
-            new splitTime.Vector2D(0, 10)
+        const p = new splitTime.particles.Particle()
+        p.position = new splitTime.Vector2D(
+            emitter.location.x + Math.random() * 32 - 16,
+            emitter.location.y -
+                emitter.location.z +
+                Math.random() * 32 -
+                16
         )
+        p.velocity = splitTime.Vector2D.angular(
+            splitTime.randomRanged(0, 2 * Math.PI),
+            Math.random() * 16
+        )
+        p.acceleration = new splitTime.Vector2D(0, 10)
+        return p
     }
 
     export class ParticleEmitter implements splitTime.body.Drawable {
         _particles: Particle[] = []
         _lastParticleGenerated: number = 0
         _currentTime: number = 0
-        maxParticleAgeMs: number = 5000
-        /** How long to generate particles */
+        /** How long to generate particles or 0 for infinite stream */
         stopEmissionsAfter: number = 0
         /** Milliseconds between particle generations */
         generateIntervalMs: number = 100
@@ -171,7 +130,6 @@ namespace splitTime.particles {
         opacityShiftMagnitude: number = 0
         colorShiftIntervalMs: number = 2000
         colorShiftMagnitude: number = 0
-        lightIntensity: number = 0
         constructor(
             location: Readonly<Coordinates3D>,
             particleGenerator: (emitter: ParticleEmitter) => Particle
@@ -210,7 +168,7 @@ namespace splitTime.particles {
                 var particle = this._particles[iParticle]
                 particle.advanceTime(this, msPassed)
 
-                if (particle.age > this.maxParticleAgeMs) {
+                if (particle.age > particle.maxParticleAgeMs) {
                     this._particles.splice(iParticle, 1)
                     iParticle--
                     // regenerateCount++;
@@ -223,7 +181,8 @@ namespace splitTime.particles {
                 let timePassedSinceLastGeneration =
                     this._currentTime - this._lastParticleGenerated
                 if (this._lastParticleGenerated === 0) {
-                    timePassedSinceLastGeneration += this.explosiveness * this.maxParticleAgeMs
+                    // TODO: re-figure this since maxParticleAgeMs is now part of Particle
+                    // timePassedSinceLastGeneration += this.explosiveness * this.maxParticleAgeMs
                 }
                 var randomFactor = Math.random() / 2 + 0.75
                 var howManyToSpawn = Math.round(
@@ -254,23 +213,15 @@ namespace splitTime.particles {
             )
         }
 
-        /**
-         * @param {GenericCanvasRenderingContext2D} ctx
-         */
         draw(ctx: GenericCanvasRenderingContext2D) {
-            var initialOpacity = ctx.globalAlpha
-            for (
-                var iParticle = 0;
-                iParticle < this._particles.length;
-                iParticle++
-            ) {
-                var particle = this._particles[iParticle]
+            const initialOpacity = ctx.globalAlpha
+            for (const particle of this._particles) {
                 ctx.beginPath()
-                ctx.fillStyle = particle.getFillStyle()
-                ctx.globalAlpha = initialOpacity * particle.opacity
+                ctx.fillStyle = particle.color.cssString
+                // ctx.globalAlpha = initialOpacity * particle.color.a
                 ctx.arc(
-                    particle.x,
-                    particle.y,
+                    particle.position.x,
+                    particle.position.y,
                     particle.radius,
                     0,
                     Math.PI * 2,
@@ -282,15 +233,20 @@ namespace splitTime.particles {
         }
 
         applyLighting(ctx: GenericCanvasRenderingContext2D, intensity: number): void {
-            if (this.lightIntensity <= 0 || intensity <= 0) {
-                return
-            }
-            const initialAlpha = ctx.globalAlpha
-            try {
-                ctx.globalAlpha = intensity * this.lightIntensity
-                this.draw(ctx)
-            } finally {
-                ctx.globalAlpha = initialAlpha
+            for (const particle of this._particles) {
+                ctx.beginPath()
+                const lightColor = new light.Color(particle.color.r, particle.color.g, particle.color.b, intensity * particle.lightIntensity)
+                ctx.fillStyle = lightColor.cssString
+                ctx.arc(
+                    particle.position.x,
+                    particle.position.y,
+                    particle.lightRadius,
+                    0,
+                    Math.PI * 2,
+                    true
+                )
+                ctx.closePath()
+                ctx.fill()
             }
         }
 

@@ -20,6 +20,20 @@ namespace splitTime {
     }
 
     /**
+     * Math.random() is uniform distribution. This is normal.
+     */
+    export function randomNormal(): number {
+        // Implementation from https://stackoverflow.com/a/49434653/4639640
+        let u = 0, v = 0;
+        while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+        while(v === 0) v = Math.random();
+        let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+        num = num / 10.0 + 0.5; // Translate to 0 -> 1
+        if (num > 1 || num < 0) return randomNormal(); // resample between 0 and 1
+        return num;
+    }
+
+    /**
      * random integer between 1 and num
      */
     export function randomInt(num: number) {
@@ -27,17 +41,17 @@ namespace splitTime {
     }
 
     /**
-     * random integer between 1 and num
+     * random integer between min and max
      */
-    export function randomRangedInt(min: number, max: number) {
+    export function randomRangedInt(min: int, max: int): int {
         return Math.round(Math.random() * (max - min)) + min
     }
 
     /**
-     * random integer between 1 and num
+     * random number between min and max
      */
-    export function randomRanged(min: number, max: number) {
-        return Math.random() * (max - min) + min
+    export function randomRanged(min: number, max: number, random: () => number = Math.random): number {
+        return random() * (max - min) + min
     }
 
     // Implementation from https://stackoverflow.com/a/1349426/4639640

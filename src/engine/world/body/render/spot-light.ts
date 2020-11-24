@@ -2,9 +2,11 @@ namespace splitTime.body {
     export class SpotLight implements Light {
 
         constructor(
-            private readonly intensity: number = 0,
-            private readonly radius: number = 150
+            public intensity: number = 0,
+            public radius: number = 150
         ) {}
+
+        color: light.Color = new light.Color(255, 255, 255)
 
         applyLighting(
             ctx: GenericCanvasRenderingContext2D,
@@ -20,11 +22,10 @@ namespace splitTime.body {
                     this.radius
                 )
                 const combinedIntensity = intensityModifier * this.intensity
-                grd.addColorStop(
-                    0,
-                    "rgba(255, 255, 255, " + combinedIntensity + ")"
-                )
-                grd.addColorStop(1, "rgba(255, 255, 255, 0)")
+                const colorInner = new light.Color(this.color.r, this.color.g, this.color.b, this.color.a * combinedIntensity)
+                const colorOuter = new light.Color(this.color.r, this.color.g, this.color.b, 0)
+                grd.addColorStop(0, colorInner.cssString)
+                grd.addColorStop(1, colorOuter.cssString)
                 ctx.fillStyle = grd
                 ctx.beginPath()
                 ctx.arc(

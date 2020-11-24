@@ -41,26 +41,21 @@ namespace splitTime.player.ability {
             const particles = new splitTime.particles.ParticleEmitter(
                 slashBody,
                 function(emitter) {
-                    var p = new splitTime.particles.Particle(
-                        new splitTime.Vector2D(
-                            emitter.location.x + splitTime.randomRanged(-5, 5),
-                            emitter.location.y - emitter.location.z + splitTime.randomRanged(-5, 5)
-                        ),
-                        new splitTime.Vector2D(0, 0),
-                        new splitTime.Vector2D(0, 0)
+                    var p = new splitTime.particles.Particle()
+                    p.position = new splitTime.Vector2D(
+                        emitter.location.x + splitTime.randomRanged(-5, 5),
+                        emitter.location.y - emitter.location.z + splitTime.randomRanged(-5, 5)
                     )
                     p.radius = 6
-                    p.r = 200
-                    p.g = 220
-                    p.b = 255
-                    p.opacity = 0.5
+                    p.color = new light.Color(100, 220, 255, 0.5)
+                    p.lightRadius = p.radius
+                    p.lightIntensity = 0.05
+                    p.maxParticleAgeMs = 50
                     return p
                 }
             )
             particles.generateIntervalMs = 5
-            particles.maxParticleAgeMs = 50
             particles.stopEmissionsAfter = (this.duration + this.extraParticleTime) * 1000
-            particles.lightIntensity = .05
 
             slashBody.drawables.push(particles)
 

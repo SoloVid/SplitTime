@@ -95,7 +95,7 @@ namespace splitTime.light {
                 this._r = args[0]
                 this._g = args[1]
                 this._b = args[2]
-                if (args[3]) {
+                if (args[3] !== undefined) {
                     this._a = args[3]
                 }
 
