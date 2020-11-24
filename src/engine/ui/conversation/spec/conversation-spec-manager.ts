@@ -29,8 +29,8 @@ namespace splitTime.conversation {
             inst.start()
         }
 
-        makeSpeaker(name: string, body: Body): Speaker {
-            return new Speaker(name, body)
+        makeSpeaker(body: Body): Speaker {
+            return new Speaker(this.helper.secretary, body)
         }
     }
 }

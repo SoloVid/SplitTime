@@ -1,23 +1,24 @@
 namespace splitTime.conversation {
     export class Speaker {
-        name: string
-        body: splitTime.Body
+        name: string = ""
         speechBox: splitTime.body.SpeechBox
 
-        constructor(name: string, body: splitTime.Body) {
-            this.name = name
-            this.body = body
+        constructor(
+            private readonly secretary: Secretary,
+            public readonly body: splitTime.Body
+        ) {
             // TODO: re-evaluate this speech box
             this.speechBox = new splitTime.body.SpeechBox(body, 42)
         }
 
-        behavior(): npc.ConditionalBehavior {
+        getBehavior(): npc.ConditionalBehavior {
             return {
-                isConditionMet() {
-                    // TODO: check conversation manager
-                    return false
+                isConditionMet: () => {
+                    return this.secretary.isSpeakerConversing(this)
                 },
-                notifyTimeAdvance(delta: game_seconds) {}
+                notifyTimeAdvance(delta: game_seconds) {
+                    // Do nothing. The conversation manager system is handling the behavior.
+                }
             }
         }
     }

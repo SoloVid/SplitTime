@@ -54,6 +54,17 @@ namespace splitTime.conversation {
             }
         }
 
+        isSpeakerConversing(speaker: Speaker): boolean {
+            for (const dialog of this.dialogs) {
+                for (const s of dialog.conversation.getCurrentSpeakers()) {
+                    if (s === speaker) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+
         /**
          * This method should be used sparingly, essentially only for major plot points.
          * This method allows a new dialog to take precedence over one which is actively engaged.
