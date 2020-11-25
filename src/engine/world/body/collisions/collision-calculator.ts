@@ -92,10 +92,10 @@ namespace splitTime {
                 )
                 collisionInfo.events = traceCollision.events
                 collisionInfo.targetLevel = traceCollision.targetLevel
+                collisionInfo.blocked = traceCollision.blocked
+                collisionInfo.zBlockedTopEx =
+                    traceCollision.zBlockedTopEx
                 if (traceCollision.blocked) {
-                    collisionInfo.blocked = traceCollision.blocked
-                    collisionInfo.zBlockedTopEx =
-                        traceCollision.zBlockedTopEx
                     collisionInfo.vStepUpEstimate =
                         traceCollision.vStepUpEstimate
                 } else {
@@ -118,16 +118,18 @@ namespace splitTime {
                                 zPixels
                             )
                             // TODO: maybe add events?
+                            // Note that the sign on the offset is flipped here
+                            // because we are coming back from the other level's
+                            // coordinates to our own.
+                            const backTranslatedZBlockedTopEx =
+                                otherLevelCollisionInfo.zBlockedTopEx -
+                                pointerOffset.offsetZ
+                            collisionInfo.zBlockedTopEx = Math.max(collisionInfo.zBlockedTopEx,
+                                backTranslatedZBlockedTopEx)
                             if (otherLevelCollisionInfo.blocked) {
                                 collisionInfo.blocked = true
                                 collisionInfo.bodies =
                                     otherLevelCollisionInfo.bodies
-                                // Note that the sign on the offset is flipped here
-                                // because we are coming back from the other level's
-                                // coordinates to our own.
-                                collisionInfo.zBlockedTopEx =
-                                    otherLevelCollisionInfo.zBlockedTopEx -
-                                    pointerOffset.offsetZ
                                 collisionInfo.vStepUpEstimate =
                                     otherLevelCollisionInfo.vStepUpEstimate
                                 break
@@ -180,7 +182,7 @@ namespace splitTime {
             collisionInfo.vStepUpEstimate =
                 originCollisionInfo.zBlockedTopEx - startZ
             collisionInfo.blocked =
-                originCollisionInfo.containsSolid
+                originCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0
             for (var levelId in originCollisionInfo.pointerTraces) {
                 collisionInfo.pointerTraces.push(
                     originCollisionInfo.pointerTraces[levelId]

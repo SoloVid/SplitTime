@@ -87,7 +87,9 @@ namespace splitTime.body.collisions {
                     lowerBoundZ, 1,
                     ignoreBodies.concat(this.mover.body)
                 )
-                if (originCollisionInfo.blocked) {
+                // Ground traces don't cause the blocked flag to be set,
+                // but we can detect the blockage through zBlockedTopEx
+                if (originCollisionInfo.blocked || originCollisionInfo.zBlockedTopEx === lowerBoundZ) {
                     bodies = originCollisionInfo.bodies
                     if (dz < 0) {
                         // Since we started targetZ above our initial point, make sure we don't go up
