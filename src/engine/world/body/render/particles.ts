@@ -2,8 +2,10 @@ namespace splitTime.particles {
     export class Particle {
         seed: number = Math.random()
         /** Milliseconds since spawned */
-        age: number = 0
-        maxParticleAgeMs: number = 5000
+        ageMs: number = 0
+        fadeInMs: number = 0
+        fadeOutMs: number = 0
+        maxAgeMs: number = 5000
         position: Vector2D = new Vector2D(0, 0)
         velocity: Vector2D = new Vector2D(0, 0)
         acceleration: Vector2D = new Vector2D(0, 0)
@@ -24,9 +26,16 @@ namespace splitTime.particles {
         isOccasion(howOften: number, msPassed: number): boolean {
             var ageOffset = howOften * this.seed
             return (
-                Math.floor((this.age + ageOffset) / howOften) !==
-                Math.floor(this.age + ageOffset - msPassed / howOften)
+                Math.floor((this.ageMs + ageOffset) / howOften) !==
+                Math.floor(this.ageMs + ageOffset - msPassed / howOften)
             )
+        }
+
+        get fadeOpacity(): number {
+            const fadeInOpacity = this.ageMs >= this.fadeInMs ? 1 : this.ageMs / this.fadeInMs
+            const msLeft = this.maxAgeMs - this.ageMs
+            const fadeOutOpacity = msLeft >= this.fadeOutMs ? 1 : msLeft / this.fadeOutMs
+            return fadeInOpacity * fadeOutOpacity
         }
     }
 
@@ -40,7 +49,7 @@ namespace splitTime.particles {
         particle.position.y += particle.velocity.y * seconds
         particle.velocity.x += particle.acceleration.x * seconds
         particle.velocity.y += particle.acceleration.y * seconds
-        particle.age += msPassed
+        particle.ageMs += msPassed
     }
 
     export function applyLazyEffect(
@@ -90,38 +99,17 @@ namespace splitTime.particles {
         )
     }
 
-    export function generateDefaultParticle(
-        emitter: ParticleEmitter
-    ): Particle {
-        const p = new splitTime.particles.Particle()
-        p.position = new splitTime.Vector2D(
-            emitter.location.x + Math.random() * 32 - 16,
-            emitter.location.y -
-                emitter.location.z +
-                Math.random() * 32 -
-                16
-        )
-        p.velocity = splitTime.Vector2D.angular(
-            splitTime.randomRanged(0, 2 * Math.PI),
-            Math.random() * 16
-        )
-        p.acceleration = new splitTime.Vector2D(0, 10)
-        return p
-    }
-
+    type InitializeParticleFunction = (softParticle: Particle) => Particle
     export class ParticleEmitter implements splitTime.body.Drawable {
-        _particles: Particle[] = []
-        _lastParticleGenerated: number = 0
-        _currentTime: number = 0
+        private _particles: Particle[] = []
+        private _lastParticleGenerated: number = 0
+        private _currentTime: number = 0
         /** How long to generate particles or 0 for infinite stream */
         stopEmissionsAfter: number = 0
         /** Milliseconds between particle generations */
         generateIntervalMs: number = 100
-        /** 1 means the max amount come out right at the beginning */
-        explosiveness: number = 0
-        location: Readonly<Coordinates3D>
-        generateParticle: (emitter: ParticleEmitter) => Particle
-        _particlesGoneHandlers: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
+        preGenerateMs: number = 0
+        private _particlesGoneHandlers: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         xres: number = 100
         yres: number = 100
         lazyIntervalMs: number = 2000
@@ -131,11 +119,9 @@ namespace splitTime.particles {
         colorShiftIntervalMs: number = 2000
         colorShiftMagnitude: number = 0
         constructor(
-            location: Readonly<Coordinates3D>,
-            particleGenerator: (emitter: ParticleEmitter) => Particle
+            public location: ILevelLocation2,
+            public generateParticle: InitializeParticleFunction
         ) {
-            this.location = location
-            this.generateParticle = particleGenerator || generateDefaultParticle
         }
 
         playerOcclusionFadeFactor = 0.3
@@ -144,13 +130,18 @@ namespace splitTime.particles {
         spawn(n: number) {
             n = n || 1
             for (var i = 0; i < n; i++) {
-                this._particles.push(this.generateParticle(this))
+                const p = new Particle()
+                p.position = new Vector2D(this.location.x, this.location.y - this.location.z)
+                this._particles.push(this.generateParticle(p))
                 this._lastParticleGenerated = this._currentTime
             }
         }
 
         advanceTime(msPassed: number) {
-            var STEP = 40
+            const STEP = 40
+            while (this._currentTime < this.preGenerateMs) {
+                this._advanceTimeStep(Math.min(STEP, this.preGenerateMs - this._currentTime))
+            }
             for (var i = 0; i < msPassed - STEP; i += STEP) {
                 this._advanceTimeStep(STEP)
             }
@@ -168,7 +159,7 @@ namespace splitTime.particles {
                 var particle = this._particles[iParticle]
                 particle.advanceTime(this, msPassed)
 
-                if (particle.age > particle.maxParticleAgeMs) {
+                if (particle.ageMs > particle.maxAgeMs) {
                     this._particles.splice(iParticle, 1)
                     iParticle--
                     // regenerateCount++;
@@ -180,10 +171,6 @@ namespace splitTime.particles {
             ) {
                 let timePassedSinceLastGeneration =
                     this._currentTime - this._lastParticleGenerated
-                if (this._lastParticleGenerated === 0) {
-                    // TODO: re-figure this since maxParticleAgeMs is now part of Particle
-                    // timePassedSinceLastGeneration += this.explosiveness * this.maxParticleAgeMs
-                }
                 var randomFactor = Math.random() / 2 + 0.75
                 var howManyToSpawn = Math.round(
                     (randomFactor * timePassedSinceLastGeneration) /
@@ -197,7 +184,7 @@ namespace splitTime.particles {
 
             if (
                 this._particles.length === 0 &&
-                this._currentTime > this.stopEmissionsAfter
+                (this.stopEmissionsAfter > 0 && this._currentTime > this.stopEmissionsAfter)
             ) {
                 this._particlesGoneHandlers.run()
             }
@@ -217,7 +204,8 @@ namespace splitTime.particles {
             const initialOpacity = ctx.globalAlpha
             for (const particle of this._particles) {
                 ctx.beginPath()
-                ctx.fillStyle = particle.color.cssString
+                const modColor = new light.Color(particle.color.r, particle.color.g, particle.color.b, particle.color.a * particle.fadeOpacity)
+                ctx.fillStyle = modColor.cssString
                 // ctx.globalAlpha = initialOpacity * particle.color.a
                 ctx.arc(
                     particle.position.x,
@@ -235,7 +223,8 @@ namespace splitTime.particles {
         applyLighting(ctx: GenericCanvasRenderingContext2D, intensity: number): void {
             for (const particle of this._particles) {
                 ctx.beginPath()
-                const lightColor = new light.Color(particle.color.r, particle.color.g, particle.color.b, intensity * particle.lightIntensity)
+                const lightColor = new light.Color(particle.color.r, particle.color.g, particle.color.b,
+                    intensity * particle.lightIntensity * particle.fadeOpacity)
                 ctx.fillStyle = lightColor.cssString
                 ctx.arc(
                     particle.position.x,
@@ -265,26 +254,6 @@ namespace splitTime.particles {
             this._particlesGoneHandlers.register(handler)
         }
 
-        /**
-         * @param {splitTime.Level} level
-         */
-        put(level: splitTime.Level) {
-            var tempBody = new splitTime.Body()
-            tempBody.width = 0
-            tempBody.depth = 0
-            tempBody.height = 0
-            tempBody.put(
-                level,
-                this.location.x,
-                this.location.y,
-                this.location.z
-            )
-            tempBody.drawables.push(this)
-            this.registerParticlesGoneHandler(function() {
-                tempBody.clearLevel()
-            })
-        }
-
         getLight(): ParticleEmitter {
             return this
         }
@@ -292,5 +261,19 @@ namespace splitTime.particles {
         clone(): ParticleEmitter {
             throw new Error("not yet implemented")
         }
+    }
+
+    export function putNew(location: ILevelLocation2, generateParticle: InitializeParticleFunction): ParticleEmitter {
+        var tempBody = new splitTime.Body()
+        tempBody.width = 0
+        tempBody.depth = 0
+        tempBody.height = 0
+        tempBody.putInLocation(location)
+        const particles = new ParticleEmitter(tempBody, generateParticle)
+        tempBody.drawables.push(particles)
+        particles.registerParticlesGoneHandler(function() {
+            tempBody.clearLevel()
+        })
+        return particles
     }
 }

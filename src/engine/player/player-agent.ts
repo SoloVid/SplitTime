@@ -26,7 +26,7 @@ namespace splitTime.player {
         }
 
         setJumpAbility(ability: ability.IAbility) {
-            this.abilities.set(JUMP_ABILITY, ability, 0.1)
+            this.abilities.set(JUMP_ABILITY, ability, 0.0)
         }
 
         setSpecialAbility(ability: ability.IAbility) {

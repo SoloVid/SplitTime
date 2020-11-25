@@ -40,17 +40,14 @@ namespace splitTime.player.ability {
 
             const particles = new splitTime.particles.ParticleEmitter(
                 slashBody,
-                function(emitter) {
-                    var p = new splitTime.particles.Particle()
-                    p.position = new splitTime.Vector2D(
-                        emitter.location.x + splitTime.randomRanged(-5, 5),
-                        emitter.location.y - emitter.location.z + splitTime.randomRanged(-5, 5)
-                    )
+                p => {
+                    p.position.x += splitTime.randomRanged(-5, 5)
+                    p.position.y += splitTime.randomRanged(-5, 5)
                     p.radius = 6
                     p.color = new light.Color(100, 220, 255, 0.5)
                     p.lightRadius = p.radius
                     p.lightIntensity = 0.05
-                    p.maxParticleAgeMs = 50
+                    p.maxAgeMs = 50
                     return p
                 }
             )
@@ -64,7 +61,7 @@ namespace splitTime.player.ability {
             let secondsPassed = 0
             slashBody.registerTimeAdvanceListener(delta => {
                 const angle = -((secondsPassed / this.duration) - 0.5) * this.radiansWide
-                slashBody.putInLocation(new splitTime.InFrontOfBody(this.body, this.radius, angle, this.body.height * 0.7))
+                slashBody.putInLocation(new splitTime.InFrontOfBody(this.body, this.radius, angle, this.body.height * 0.5))
                 secondsPassed += delta
                 if (secondsPassed > this.duration) {
                     secondsPassed = this.duration
