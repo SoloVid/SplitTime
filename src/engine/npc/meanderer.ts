@@ -55,6 +55,53 @@ namespace splitTime.agent {
             }
         }
     }
+
+    enum MeanderState {
+        WAITING = "WAITING",
+        WALKING = "WALKING"
+    }
+
+    export function makeMeanderingBehavior(npc: Npc, home: ILevelLocation2): npc.Behavior {
+        let state = MeanderState.WAITING
+        let waitUntil: game_seconds = 0
+        let dir = direction.S
+        const stateMachine = new splitTime.npc.BehaviorStateMachine(() => state)
+        npc.body.registerTimeAdvanceListener(delta => {
+            const time = npc.body.level.getRegion().getTime()
+            if (time >= waitUntil) {
+                if (state === MeanderState.WAITING) {
+                    walk()
+                } else {
+                    wait()
+                }
+            }
+        })
+        function wait() {
+            state = MeanderState.WAITING
+            waitUntil = npc.body.level.getRegion().getTime() + splitTime.randomRanged(1, 2)
+        }
+        function walk() {
+            state = MeanderState.WALKING
+            dir = direction.getRandom()
+            // 33% chance of just going back to home location
+            if (Math.random() < 0.33) {
+                dir = direction.fromToThing(npc.body, home)
+            }
+            waitUntil = npc.body.level.getRegion().getTime() + splitTime.randomRanged(1, 3)
+        }
+        stateMachine.set(MeanderState.WAITING, {
+            notifyTimeAdvance() {
+                npc.movementAgent.setStopped()
+            }
+        })
+        stateMachine.set(MeanderState.WALKING, {
+            notifyTimeAdvance() {
+                npc.movementAgent.setWalkingDirection(dir)
+            },
+            notifySuspension: wait
+        })
+        return stateMachine
+    }
     
     export class RandomMeandering implements TimeNotified, npc.Behavior {
         private base: BaseMeanderer
@@ -63,14 +110,6 @@ namespace splitTime.agent {
             private readonly levelManager: LevelManager
         ) {
             this.base = new BaseMeanderer(spriteBody)
-        }
-
-        isComplete(): boolean {
-            return false
-        }
-
-        notifySuspension(): void {
-            // Do nothing
         }
 
         notifyTimeAdvance(delta: game_seconds): void {
@@ -86,14 +125,6 @@ namespace splitTime.agent {
             this.base = new BaseMeanderer(spriteBody)
         }
         
-        isComplete(): boolean {
-            return false
-        }
-
-        notifySuspension(): void {
-            // Do nothing
-        }
-
         notifyTimeAdvance(delta: game_seconds): void {
             this.base.regularMotion(delta, 64, Math.round((this.spriteBody.body.dir + 2)%4))
         }
@@ -104,14 +135,6 @@ namespace splitTime.agent {
             this.base = new BaseMeanderer(spriteBody)
         }
         
-        isComplete(): boolean {
-            return false
-        }
-
-        notifySuspension(): void {
-            // Do nothing
-        }
-
         notifyTimeAdvance(delta: game_seconds): void {
             this.base.regularMotion(delta, 64, Math.round((this.spriteBody.body.dir + 1)%4))
         }

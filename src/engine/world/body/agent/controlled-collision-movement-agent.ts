@@ -86,6 +86,7 @@ namespace splitTime.agent {
                     this.body.y += speed * delta * direction.getYMagnitude(this.body.dir)
                 }
             }
+            this.resetTarget()
         }
 
         resetTarget() {

@@ -9,6 +9,9 @@ namespace splitTime {
             public behavior: npc.BehaviorChoice = new npc.BehaviorChoice()
         ) {
             this.movementAgent = new agent.ControlledCollisionMovement(spriteBody)
+            spriteBody.body.registerTimeAdvanceListener(delta => {
+                this.movementAgent.notifyTimeAdvance(delta)
+            })
         }
 
         get body(): Body {

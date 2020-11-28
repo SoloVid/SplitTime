@@ -131,7 +131,7 @@ namespace splitTime.direction {
     }
 
     export function getRandom(): direction_t {
-        return (splitTime.randomInt(16) - 1) / 4
+        return splitTime.randomRanged(0, 4)
     }
     export function getRandomCardinal(): direction_t {
         return splitTime.randomInt(4) - 1

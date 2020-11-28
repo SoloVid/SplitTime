@@ -34,21 +34,23 @@ namespace splitTime {
     }
 
     /**
-     * random integer between 1 and num
+     * random integer between 1 and num (inclusive)
      */
     export function randomInt(num: number) {
         return Math.floor(Math.random() * num + 1)
     }
 
     /**
-     * random integer between min and max
+     * random integer between min and max (inclusive)
      */
     export function randomRangedInt(min: int, max: int): int {
-        return Math.round(Math.random() * (max - min)) + min
+        const howManyIntegers = max - min + 1
+        const whichOnePicked = randomInt(howManyIntegers)
+        return whichOnePicked + min - 1
     }
 
     /**
-     * random number between min and max
+     * random number between min and max (exclusive)
      */
     export function randomRanged(min: number, max: number, random: () => number = Math.random): number {
         return random() * (max - min) + min
