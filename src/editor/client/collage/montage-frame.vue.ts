@@ -19,6 +19,7 @@ namespace splitTime.editor.collage {
         // asyncComputed
         imgSrc: string
         // methods
+        editBody(event: MouseEvent): void
         trackBody(event: MouseEvent): void
     }
 
@@ -72,9 +73,17 @@ namespace splitTime.editor.collage {
         return await s.imgSrc(this.collageViewHelper.collage.image)
     }
 
+    function editBody(this: VueMontageFrame, event: MouseEvent): void {
+        assert(!!this.collageEditHelper, "editBody() must be called with edit helper")
+        this.collageEditHelper.editProperties(getBodySpecPropertiesStuff(this.body))
+        // Somewhat type-unsafe way of letting upper events know they should try to set properties
+        const anyEvent = event as PropertiesEvent
+        anyEvent.propertiesPanelSet = true
+        event.preventDefault()
+    }
+
     function trackBody(this: VueMontageFrame, event: MouseEvent): void {
         assert(!!this.collageEditHelper, "trackBody() must be called with edit helper")
-        this.collageEditHelper.editProperties(getBodySpecPropertiesStuff(this.body))
         const affectedMontageFrames = this.editAffectsAllFrames ? this.montage.frames : [this.montageFrame]
         this.collageEditHelper.follow({
             shift(dx: number, dy: number) {
@@ -84,9 +93,6 @@ namespace splitTime.editor.collage {
                 }
             }
         })
-        // Somewhat type-unsafe way of letting upper events know they should try to set properties
-        const anyEvent = event as PropertiesEvent
-        anyEvent.propertiesPanelSet = true
         event.preventDefault()
     }
 
@@ -114,6 +120,7 @@ namespace splitTime.editor.collage {
             }
         },
         methods: {
+            editBody,
             trackBody
         },
         template: `
@@ -124,6 +131,7 @@ namespace splitTime.editor.collage {
         <img :src="imgSrc" :style="{ position: 'absolute', left: -frame.box.x + 'px', top: -frame.box.y + 'px' }"/>
     </div>
     <svg v-if="collageEditHelper" :style="svgStyle">
+        <!-- Base -->
         <rect
             :x="bodyFrontRectRelative.x"
             :y="bodyFrontRectRelative.y + body.height - body.depth"
@@ -134,9 +142,11 @@ namespace splitTime.editor.collage {
             stroke-dasharray="2,1"
             fill="none"
         />
+        <!-- Front -->
         <rect
             style="pointer-events: initial; cursor: grab;"
             @mousedown="trackBody"
+            @dblclick="editBody"
             :x="bodyFrontRectRelative.x"
             :y="bodyFrontRectRelative.y"
             :width="bodyFrontRectRelative.width"
@@ -146,17 +156,19 @@ namespace splitTime.editor.collage {
             stroke-width="2"
             stroke-dasharray="2,1"
         />
+        <!-- Top -->
         <rect
             style="pointer-events: initial; cursor: grab;"
             @mousedown="trackBody"
+            @dblclick="editBody"
             :x="bodyFrontRectRelative.x"
             :y="bodyFrontRectRelative.y - body.depth"
             :width="body.width"
             :height="body.depth"
+            fill="url(#diagonal-hatch)"
             stroke="red"
             stroke-width="2"
             stroke-dasharray="2,1"
-            fill="none"
         />
     </svg>
 </div>

@@ -154,8 +154,11 @@ namespace splitTime.editor.level {
         <strong><em>Homeless</em></strong>
     </template>
     <div v-show="!collapsed" class="indent">
+        <div v-show="traces.length === 0 && props.length === 0 && positions.length === 0" class="indent">
+            <em>Empty</em>
+        </div>
         <div v-show="traces.length > 0">
-            <div>
+            <div v-show="props.length > 0 || positions.length > 0">
                 <input type="checkbox"
                     :checked="allTracesDisplayed"
                     @click.left="toggleAllTracesDisplayed"
@@ -176,7 +179,7 @@ namespace splitTime.editor.level {
             </div>
         </div>
         <div v-show="props.length > 0">
-            <div>
+            <div v-show="traces.length > 0 || positions.length > 0">
                 <input type="checkbox"
                     :checked="allPropsDisplayed"
                     @click.left="toggleAllPropsDisplayed"
@@ -197,7 +200,7 @@ namespace splitTime.editor.level {
             </div>
         </div>
         <div v-show="positions.length > 0">
-            <div>
+            <div v-show="traces.length > 0 || props.length > 0">
                 <input type="checkbox"
                     :checked="allPositionsDisplayed"
                     @click.left="toggleAllPositionsDisplayed"

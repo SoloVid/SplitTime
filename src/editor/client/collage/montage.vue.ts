@@ -105,6 +105,7 @@ namespace splitTime.editor.collage {
     <div
         :style="containerStyle"
         class="transparency-checkerboard-background"
+        :title="montage.id + ' (' + montage.direction + ')'"
     >
         <div
             v-if="montage.frames.length === 0"
