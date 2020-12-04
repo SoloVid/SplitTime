@@ -159,9 +159,13 @@ namespace splitTime.body {
             node2: GraphBodyNode
         ) {
             //determine which node corresponds to the body in front
-            var nodeInFront = node1
-            var nodeBehind = node2
-            if (shouldRenderInFront(node2.body, node1.body)) {
+            let nodeInFront = node1
+            let nodeBehind = node2
+            const isThisOrderCorrect = shouldRenderInFront(node2.body, node1.body)
+            if (isThisOrderCorrect === undefined) {
+                return
+            }
+            if (isThisOrderCorrect) {
                 nodeInFront = node2
                 nodeBehind = node1
             }
@@ -174,7 +178,7 @@ namespace splitTime.body {
     /**
      * returns true if the body in question should render in front of the other body.
      */
-    export function shouldRenderInFront(body1: GraphBody, body2: GraphBody) {
+    function shouldRenderInFront(body1: GraphBody, body2: GraphBody): boolean | undefined {
         if (isAbove(body1, body2) || isInFront(body1, body2)) {
             //if body1 is completely above or in front
             return true
@@ -183,9 +187,14 @@ namespace splitTime.body {
             return false
         }
 
+        // If neither body is clearly above or in front,
+        // don't make a determination because this pair's
+        // rendering order could mess with other well-defined
+        // rendering orders for other pairs.
+        return undefined
         //If neither body is clearly above or in front,
         //go with the one whose base front is farther forward on the y axis
-        return isFurtherForward(body1, body2)
+        // return isFurtherForward(body1, body2)
     }
 
     /**
