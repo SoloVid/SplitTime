@@ -26,6 +26,7 @@ namespace splitTime.editor.level {
         otherLevelImgSrc: string
         // asyncComputed
         otherLevel: splitTime.level.FileData
+        otherLevelImgDim: Coordinates2D
         // methods
         track(point: Coordinates2D): void
         toggleHighlight(highlight: boolean): void
@@ -179,6 +180,18 @@ namespace splitTime.editor.level {
     function otherLevelImgSrc(this: VueRenderedTrace): string {
         return this.levelEditorShared.server.imgSrc(this.otherLevel.background)
     }
+    async function otherLevelImgDim(this: VueRenderedTrace): Promise<Coordinates2D> {
+        return new Promise<Coordinates2D>(resolve => {
+            const img = new Image()
+            img.src = this.otherLevelImgSrc
+            img.onload = () => {
+                resolve({
+                    x: img.width,
+                    y: img.height
+                })
+            }
+        })
+    }
 
     function track(this: VueRenderedTrace, point?: Coordinates2D): void {
         if(this.levelEditorShared.shouldDragBePrevented()) {
@@ -250,6 +263,10 @@ namespace splitTime.editor.level {
             otherLevel: {
                 get: otherLevel,
                 default: exportLevel(new Level())
+            },
+            otherLevelImgDim: {
+                get: otherLevelImgDim,
+                default: { x: PLACEHOLDER_WIDTH, y: PLACEHOLDER_WIDTH }
             }
         },
         methods: {
@@ -277,8 +294,10 @@ namespace splitTime.editor.level {
                 fill="black"
             />
             <image
-                :width="otherLevel.width"
-                :height="otherLevel.height"
+                :x="otherLevel.backgroundOffsetX"
+                :y="otherLevel.backgroundOffsetY"
+                :width="otherLevelImgDim.x"
+                :height="otherLevelImgDim.y"
                 preserveAspectRatio="none"
                 :href="otherLevelImgSrc"
             />
