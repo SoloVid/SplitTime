@@ -8,7 +8,7 @@ namespace splitTime.editor.level {
     export type Mode = "position" | "prop" | "trace"
 
     export interface LevelEditorShared {
-        activeGroup: int
+        activeGroup: string
         readonly collageManager: CollageManager
         gridCell: Vector2D
         gridEnabled: boolean

@@ -104,7 +104,7 @@ namespace splitTime.editor.level {
     }
 
     function getBestEntityLocation(editor: VueLevelGraphicalEditor): Coordinates3D {
-        const group = getGroupByIndex(editor.level, editor.levelEditorShared.activeGroup)
+        const group = getGroupById(editor.level, editor.levelEditorShared.activeGroup)
         var z = group.defaultZ
         var x = editor.inputs.mouse.x
         var y = editor.inputs.mouse.y + z
@@ -126,7 +126,7 @@ namespace splitTime.editor.level {
     }
 
     function createPosition(this: VueLevelGraphicalEditor) {
-        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        const group = getGroupById(this.level, this.levelEditorShared.activeGroup)
         const loc = getBestEntityLocation(this)
 
         let pIndex = this.level.positions.length
@@ -151,7 +151,7 @@ namespace splitTime.editor.level {
     }
     
     function createProp(this: VueLevelGraphicalEditor) {
-        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        const group = getGroupById(this.level, this.levelEditorShared.activeGroup)
         const loc = getBestEntityLocation(this)
         
         var object = {
@@ -178,7 +178,7 @@ namespace splitTime.editor.level {
     }
 
     function handleMouseUp(this: VueLevelGraphicalEditor, event: MouseEvent): void {
-        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        const group = getGroupById(this.level, this.levelEditorShared.activeGroup)
         const z = group.defaultZ
         const yInGroup = this.inputs.mouse.y + z
         const x = this.inputs.mouse.x
@@ -242,7 +242,7 @@ namespace splitTime.editor.level {
     }
 
     function handleMouseMove(this: VueLevelGraphicalEditor, event: MouseEvent): void {
-        const group = getGroupByIndex(this.level, this.levelEditorShared.activeGroup)
+        const group = getGroupById(this.level, this.levelEditorShared.activeGroup)
         const groupZ = group ? group.defaultZ : 0
         Vue.set(this.levelEditorShared.info, "x", this.inputs.mouse.x)
         Vue.set(this.levelEditorShared.info, "y", this.inputs.mouse.y + groupZ)

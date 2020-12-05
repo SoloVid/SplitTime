@@ -20,6 +20,7 @@ namespace splitTime.editor.level {
     export function getGroupPropertiesStuff(level: Level, group: splitTime.level.file_data.Group): client.ObjectProperties {
         const fields = {
             id: {},
+            parent: {},
             defaultZ: {},
             defaultHeight: {}
         }
@@ -29,7 +30,7 @@ namespace splitTime.editor.level {
             thing: group as SimplifiedGroup,
             fields,
             doDelete: () => {
-                level.groups = level.groups.filter(g => g.obj !== group)
+                level.groups = level.groups.filter(g => g.obj.id !== group.id)
             }
         }
     }

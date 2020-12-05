@@ -4,12 +4,17 @@ namespace splitTime.editor.level {
         levelEditorShared: LevelEditorShared
         // computed
         level: Level
+        topLevelGroups: Group[]
         // methods
         createGroup(): void
     }
 
     function level(this: VueLevelTree): Level {
         return this.levelEditorShared.level
+    }
+
+    function topLevelGroups(this: VueLevelTree): Group[] {
+        return this.level.groups.filter(g => checkGroupMatch(this.level, "", g.obj.parent))
     }
 
     function createGroup(this: VueLevelTree): void {
@@ -19,6 +24,7 @@ namespace splitTime.editor.level {
         }
         const group = {
             id: "Group " + this.level.groups.length,
+            parent: "",
             defaultZ: 0,
             defaultHeight: defaultHeight
         }
@@ -36,7 +42,8 @@ namespace splitTime.editor.level {
             }
         },
         computed: {
-            level
+            level,
+            topLevelGroups
         },
         methods: {
             createGroup
@@ -46,28 +53,33 @@ namespace splitTime.editor.level {
     <label>
         Active Group:
         <select class="active-group block" v-model="levelEditorShared.activeGroup">
+            <option :value="''">&lt;DEFAULT&gt;</option>
             <option
-                v-for="(group, index) in levelEditorShared.level.groups"
-                :value="index"
-            >{{ group.obj.id || ("Group " + index) }}</option>
-            <option value="-1">Homeless</option>
+                v-for="group in levelEditorShared.level.groups"
+                :value="group.obj.id"
+            >{{ group.obj.id || "Untitled Group" }}</option>
         </select>
     </label>
     <hr/>
     <menu-group
-            v-for="(group, index) in levelEditorShared.level.groups"
-            :key="index"
+            :level-editor-shared="levelEditorShared"
+            :level="level"
+            class="catch-all-group"
+    ></menu-group>
+    <!--
+    <menu-group
+            v-for="group in topLevelGroups"
+            :key="group.id"
             :level-editor-shared="levelEditorShared"
             :level="level"
             :group="group"
-            :index="index"
     ></menu-group>
     <menu-group
             :level-editor-shared="levelEditorShared"
             :level="level"
-            :index="-1"
             class="catch-all-group"
     ></menu-group>
+    -->
     <div class="option" @click.left="createGroup">Add Group</div>
 </div>
         `

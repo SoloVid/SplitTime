@@ -4,14 +4,17 @@ namespace splitTime.editor.level {
         levelEditorShared: LevelEditorShared
         level: Level
         group: Group | undefined
-        index: number
         // data
         collapsed: boolean
+        displayHelper: GroupDisplayHelper
         // computed
+        groupId: string
+        subGroups: Group[]
         traces: Trace[]
         props: Prop[]
         positions: Position[]
         allDisplayed: boolean
+        allSubGroupsDisplayed: boolean
         allTracesDisplayed: boolean
         allPropsDisplayed: boolean
         allPositionsDisplayed: boolean
@@ -20,6 +23,8 @@ namespace splitTime.editor.level {
         editTrace(trace: Trace): void
         editProp(prop: Prop): void
         editPosition(position: Position): void
+        toggleAllDisplayed(): void
+        toggleAllSubGroupsDisplayed(): void
         toggleAllTracesDisplayed(): void
         toggleAllPropsDisplayed(): void
         toggleAllPositionsDisplayed(): void
@@ -27,39 +32,48 @@ namespace splitTime.editor.level {
 
     function data(this: VueMenuGroup): Partial<VueMenuGroup> {
         return {
-            collapsed: true
+            collapsed: true,
+            displayHelper: new GroupDisplayHelper(
+                () => this.level,
+                () => this.group
+            )
         }
     }
 
+    function groupId(this: VueMenuGroup): string {
+        return this.group?.obj.id || ""
+    }
+
+    function subGroups(this: VueMenuGroup): Group[] {
+        return this.displayHelper.subGroups
+    }
     function traces(this: VueMenuGroup): Trace[] {
-        return this.level.traces.filter(trace => inGroup(this.level, this.index, trace.obj))
+        return this.displayHelper.traces
     }
     function props(this: VueMenuGroup): Prop[] {
-        return this.level.props.filter(prop => inGroup(this.level, this.index, prop.obj))
+        return this.displayHelper.props
     }
     function positions(this: VueMenuGroup): Position[] {
-        return this.level.positions.filter(pos => inGroup(this.level, this.index, pos.obj))
+        return this.displayHelper.positions
     }
     function allDisplayed(this: VueMenuGroup): boolean {
-        return this.allTracesDisplayed && this.allPropsDisplayed && this.allPositionsDisplayed
+        return this.displayHelper.allDisplayed
+    }
+    function allSubGroupsDisplayed(this: VueMenuGroup): boolean {
+        return this.displayHelper.allSubGroupsDisplayed
     }
     function allTracesDisplayed(this: VueMenuGroup): boolean {
-        return this.traces.every(trace => {
-            return trace.metadata.displayed
-        })
+        return this.displayHelper.allTracesDisplayed
     }
     function allPropsDisplayed(this: VueMenuGroup): boolean {
-        return this.props.every(prop => {
-            return prop.metadata.displayed
-        })
+        return this.displayHelper.allPropsDisplayed
     }
     function allPositionsDisplayed(this: VueMenuGroup): boolean {
-        return this.positions.every(pos => {
-            return pos.metadata.displayed
-        })
+        return this.displayHelper.allPositionsDisplayed
     }
 
     function edit(this: VueMenuGroup): void {
+        this.levelEditorShared.activeGroup = this.groupId
         if (!this.group) {
             log.debug("Group can't be edited because it is default")
             return
@@ -77,99 +91,116 @@ namespace splitTime.editor.level {
         this.levelEditorShared.editProperties(getPositionPropertiesStuff(this.level, position.obj))
     }
     function toggleAllDisplayed(this: VueMenuGroup): void {
-        const displayed = this.allDisplayed
-        this.traces.forEach(trace => {
-            trace.metadata.displayed = !displayed
-        })
-        this.props.forEach(prop => {
-            prop.metadata.displayed = !displayed
-        })
-        this.positions.forEach(pos => {
-            pos.metadata.displayed = !displayed
-        })
+        this.displayHelper.toggleAllDisplayed()
+    }
+    function toggleAllSubGroupsDisplayed(this: VueMenuGroup): void {
+        this.displayHelper.toggleAllSubGroupsDisplayed()
     }
     function toggleAllTracesDisplayed(this: VueMenuGroup): void {
-        var displayed = this.allTracesDisplayed
-        this.traces.forEach(trace => {
-            trace.metadata.displayed = !displayed
-        })
+        this.displayHelper.toggleAllTracesDisplayed()
     }
     function toggleAllPropsDisplayed(this: VueMenuGroup): void {
-        var displayed = this.allPropsDisplayed
-        this.props.forEach(prop => {
-            prop.metadata.displayed = !displayed
-        })
+        this.displayHelper.toggleAllPropsDisplayed()
     }
     function toggleAllPositionsDisplayed(this: VueMenuGroup): void {
-        var displayed = this.allPositionsDisplayed
-        this.positions.forEach(pos => {
-            pos.metadata.displayed = !displayed
-        })
+        this.displayHelper.toggleAllPositionsDisplayed()
     }
 
-    Vue.component("menu-group", {
-        props: {
-            levelEditorShared: Object,
-            level: Object,
-            group: Object,
-            index: Number
-        },
-        data,
-        computed: {
-            traces,
-            props,
-            positions,
-            allDisplayed,
-            allTracesDisplayed,
-            allPropsDisplayed,
-            allPositionsDisplayed
-        },
-        methods: {
-            edit,
-            editTrace,
-            editProp,
-            editPosition,
-            toggleAllDisplayed,
-            toggleAllTracesDisplayed,
-            toggleAllPropsDisplayed,
-            toggleAllPositionsDisplayed
-        },
-        template: `
-<div>
-    <span @click="collapsed = !collapsed" @mousedown.prevent class="pointer">
-        <i v-if="collapsed" class="fas fa-chevron-right"></i>
-        <i v-if="!collapsed" class="fas fa-chevron-down"></i>
-    </span>
-    <input type="checkbox"
-        :checked="allDisplayed"
-        @click.left="toggleAllDisplayed"
-    />
+    // defer necessary for icons
+    defer(() => {
+        Vue.component("menu-group", {
+            props: {
+                levelEditorShared: Object,
+                level: Object,
+                group: Object
+            },
+            data,
+            computed: {
+                groupId,
+                subGroups,
+                traces,
+                props,
+                positions,
+                allDisplayed,
+                allSubGroupsDisplayed,
+                allTracesDisplayed,
+                allPropsDisplayed,
+                allPositionsDisplayed
+            },
+            methods: {
+                edit,
+                editTrace,
+                editProp,
+                editPosition,
+                toggleAllDisplayed,
+                toggleAllSubGroupsDisplayed,
+                toggleAllTracesDisplayed,
+                toggleAllPropsDisplayed,
+                toggleAllPositionsDisplayed
+            },
+            template: `
+<div class="menu-group">
     <template v-if="!!group">
-        <strong @click="edit" class="pointer">
-            <span v-show="!group.obj.id">Group {{ index }}</span>
-            <span v-show="group.obj.id">{{group.obj.id}}</span>
-        </strong>
+        <span @click="collapsed = !collapsed" @mousedown.prevent class="pointer">
+            <i v-if="collapsed" class="fas fa-caret-right"></i>
+            <i v-if="!collapsed" class="fas fa-caret-down"></i>
+        </span>
+        <input type="checkbox"
+            :checked="allDisplayed"
+            @click.left="toggleAllDisplayed"
+        />
+        <span :class="{ highlighted: levelEditorShared.activeGroup === groupId }">
+            <template v-if="!!group">
+                <strong @click="edit" class="pointer">
+                    <span v-show="!group.obj.id">Untitled Group</span>
+                    <span v-show="group.obj.id">{{group.obj.id}}</span>
+                </strong>
+            </template>
+            <template v-if="!group">
+                <strong><em>Homeless</em></strong>
+            </template>
+        </span>
     </template>
-    <template v-if="!group">
-        <strong><em>Homeless</em></strong>
-    </template>
-    <div v-show="!collapsed" class="indent">
-        <div v-show="traces.length === 0 && props.length === 0 && positions.length === 0" class="indent">
+    <div v-show="!collapsed || !group" :class="{ 'menu-group-body': true, indent: !!group }">
+        <div v-show="subGroups.length === 0 && traces.length === 0 && props.length === 0 && positions.length === 0" class="indent">
             <em>Empty</em>
         </div>
-        <div v-show="traces.length > 0">
-            <div v-show="props.length > 0 || positions.length > 0">
+        <div class="sub-groups" v-show="subGroups.length > 0">
+            <!--
+            <div v-show="traces.length > 0 || props.length > 0 || positions.length > 0">
+                <input type="checkbox"
+                    :checked="allSubGroupsDisplayed"
+                    @click.left="toggleAllSubGroupsDisplayed"
+                />
+                Sub-Groups
+            </div>
+            -->
+            <div class="indent">
+                <div v-for="subGroup in subGroups">
+                    <menu-group
+                        :levelEditorShared="levelEditorShared"
+                        :level="level"
+                        :group="subGroup"
+                    ></menu-group>
+                </div>
+            </div>
+        </div>
+        <div class="traces" v-show="traces.length > 0">
+            <!--
+            <div v-show="subGroups.length > 0 || props.length > 0 || positions.length > 0">
                 <input type="checkbox"
                     :checked="allTracesDisplayed"
                     @click.left="toggleAllTracesDisplayed"
                 />
                 Traces
             </div>
+            -->
             <div class="indent">
                 <div v-for="(trace, traceIndex) in traces"
                     @mouseenter="trace.metadata.highlighted = true"
                     @mouseleave="trace.metadata.highlighted = false"
                 >
+                    <i class="fas fa-${TRACE_ICON}"></i>
                     <input type="checkbox" v-model="trace.metadata.displayed"/>
                     <span @click.left="editTrace(trace)" class="pointer">
                         <span v-show="!trace.obj.id">Trace {{ traceIndex }}</span>
@@ -178,19 +209,22 @@ namespace splitTime.editor.level {
                 </div>
             </div>
         </div>
-        <div v-show="props.length > 0">
-            <div v-show="traces.length > 0 || positions.length > 0">
+        <div class="props" v-show="props.length > 0">
+            <!--
+            <div v-show="subGroups.length > 0 || traces.length > 0 || positions.length > 0">
                 <input type="checkbox"
                     :checked="allPropsDisplayed"
                     @click.left="toggleAllPropsDisplayed"
                 />
                 Props
             </div>
+            -->
             <div class="indent">
                 <div v-for="(prop, index) in props"
                     @mouseenter="prop.metadata.highlighted = true"
                     @mouseleave="prop.metadata.highlighted = false"
                 >
+                    <i class="fas fa-${PROP_ICON}"></i>
                     <input type="checkbox" v-model="prop.metadata.displayed"/>
                     <span @click.left="editProp(prop)" class="pointer">
                         <span v-show="!prop.obj.id">Prop {{ index }}</span>
@@ -199,20 +233,23 @@ namespace splitTime.editor.level {
                 </div>
             </div>
         </div>
-        <div v-show="positions.length > 0">
-            <div v-show="traces.length > 0 || props.length > 0">
+        <div class="positions" v-show="positions.length > 0">
+            <!--
+            <div v-show="subGroups.length > 0 || traces.length > 0 || props.length > 0">
                 <input type="checkbox"
                     :checked="allPositionsDisplayed"
                     @click.left="toggleAllPositionsDisplayed"
                 />
                 Positions
             </div>
+            -->
             <div class="indent">
                 <div v-for="(position, index) in positions"
                     @mouseenter="position.metadata.highlighted = true"
                     @mouseleave="position.metadata.highlighted = false"
                     style="list-style-type: disc"
                 >
+                    <i class="fas fa-${POSITION_ICON}"></i>
                     <input type="checkbox" v-model="position.metadata.displayed"/>
                     <span @click.left="editPosition(position)" class="pointer">
                         <span v-show="!position.obj.id">Position {{ index }}</span>
@@ -224,5 +261,6 @@ namespace splitTime.editor.level {
     </div>
 </div>
         `
+        })
     })
 }

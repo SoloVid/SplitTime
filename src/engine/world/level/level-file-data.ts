@@ -19,6 +19,7 @@ namespace splitTime.level {
     export namespace file_data {
         export interface Group {
             id: string
+            parent: string
             defaultZ: number
             defaultHeight: number
         }
@@ -65,6 +66,7 @@ namespace splitTime.level {
                 backgroundOffsetY: type.int,
                 groups: type.array(type.object({
                     id: type.string,
+                    parent: type.string,
                     defaultZ: type.number,
                     defaultHeight: type.number
                 })),

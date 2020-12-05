@@ -43,6 +43,13 @@ namespace splitTime.editor.level {
             this.groupBacking.id = newId
         }
 
+        get parent(): string {
+            return this.groupBacking.parent
+        }
+        set parent(p: string) {
+            this.groupBacking.parent = p
+        }
+
         get defaultZ(): int {
             return this.groupBacking.defaultZ
         }

@@ -87,28 +87,33 @@ namespace splitTime.editor.level {
         return levelObject
     }
 
-    export function getGroupByIndex(level: Level, groupIndex: int): splitTime.level.file_data.Group {
-        if (groupIndex < 0 || groupIndex >= level.groups.length) {
-            return {
-                id: "",
-                defaultZ: 0,
-                defaultHeight: DEFAULT_GROUP_HEIGHT
+    export function getGroupById(level: Level, groupId: string): splitTime.level.file_data.Group {
+        for (const group of level.groups) {
+            if (group.obj.id === groupId) {
+                return group.obj
             }
         }
-        return level.groups[groupIndex].obj
+        return {
+            id: "",
+            parent: "",
+            defaultZ: 0,
+            defaultHeight: DEFAULT_GROUP_HEIGHT
+        }
     }
 
     type FileThing = splitTime.level.file_data.Trace | splitTime.level.file_data.Prop | splitTime.level.file_data.Position
-    export function inGroup(level: Level, groupIndex: int, obj: FileThing): boolean {
-        if (groupIndex < 0) {
-            return level.groups.every(g => g.obj.id !== obj.group)
+    export function inGroup(level: Level, group: string, obj: FileThing): boolean {
+        return checkGroupMatch(level, group, obj.group)
+    }
+    export function checkGroupMatch(level: Level, realGroup: string, testGroup: string): boolean {
+        if (realGroup === "") {
+            return level.groups.every(g => g.obj.id !== testGroup)
         }
-        const group = level.groups[groupIndex]
-        return obj.group === group.obj.id
+        return realGroup === testGroup
     }
 
-    export function addNewTrace(levelObject: Level, groupIndex: int, type: string): Trace {
-        const group = getGroupByIndex(levelObject, groupIndex)
+    export function addNewTrace(levelObject: Level, groupId: string, type: string): Trace {
+        const group = getGroupById(levelObject, groupId)
         var z = group.defaultZ
         var height = group.defaultHeight
         if(type === splitTime.trace.Type.GROUND) {

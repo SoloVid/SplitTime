@@ -1,6 +1,6 @@
 namespace splitTime.editor.level {
     export class SharedStuff implements LevelEditorShared {
-        activeGroup: int = -1
+        activeGroup: string = ""
         readonly collageManager: CollageManager
         mode: Mode = "trace"
         selectedCollage: string = ""
@@ -18,7 +18,7 @@ namespace splitTime.editor.level {
             this.propertiesPaneStuff = getLevelPropertiesStuff(this.editor.level)
             this.collageManager = new CollageManager(this.server)
             if (this.editor.level && this.editor.level.groups.length > 0) {
-                this.activeGroup = 0
+                this.activeGroup = this.editor.level.groups[0].obj.id
             }
         }
 

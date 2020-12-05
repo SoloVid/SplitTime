@@ -186,6 +186,7 @@ namespace splitTime.editor {
         this.level = new level.Level()
         this.level.groups.push(client.withMetadata("group", {
             id: "",
+            parent: "",
             defaultZ: 0,
             defaultHeight: level.DEFAULT_GROUP_HEIGHT
         }))
