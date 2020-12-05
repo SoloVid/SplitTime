@@ -4,17 +4,12 @@ namespace splitTime.editor.level {
         levelEditorShared: LevelEditorShared
         // computed
         level: Level
-        topLevelGroups: Group[]
         // methods
         createGroup(): void
     }
 
     function level(this: VueLevelTree): Level {
         return this.levelEditorShared.level
-    }
-
-    function topLevelGroups(this: VueLevelTree): Group[] {
-        return this.level.groups.filter(g => checkGroupMatch(this.level, "", g.obj.parent))
     }
 
     function createGroup(this: VueLevelTree): void {
@@ -42,8 +37,7 @@ namespace splitTime.editor.level {
             }
         },
         computed: {
-            level,
-            topLevelGroups
+            level
         },
         methods: {
             createGroup
@@ -64,22 +58,7 @@ namespace splitTime.editor.level {
     <menu-group
             :level-editor-shared="levelEditorShared"
             :level="level"
-            class="catch-all-group"
     ></menu-group>
-    <!--
-    <menu-group
-            v-for="group in topLevelGroups"
-            :key="group.id"
-            :level-editor-shared="levelEditorShared"
-            :level="level"
-            :group="group"
-    ></menu-group>
-    <menu-group
-            :level-editor-shared="levelEditorShared"
-            :level="level"
-            class="catch-all-group"
-    ></menu-group>
-    -->
     <div class="option" @click.left="createGroup">Add Group</div>
 </div>
         `

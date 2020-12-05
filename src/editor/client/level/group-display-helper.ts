@@ -77,29 +77,5 @@ namespace splitTime.editor.level {
             const displayed = this.allDisplayed
             this.setAllDisplayed(displayed)
         }
-        toggleAllSubGroupsDisplayed(): void {
-            var displayed = this.allSubGroupsDisplayed
-            this.subGroups.forEach(group => {
-                group.metadata.displayed = !displayed
-            })
-        }
-        toggleAllTracesDisplayed(): void {
-            var displayed = this.allTracesDisplayed
-            this.traces.forEach(trace => {
-                trace.metadata.displayed = !displayed
-            })
-        }
-        toggleAllPropsDisplayed(): void {
-            var displayed = this.allPropsDisplayed
-            this.props.forEach(prop => {
-                prop.metadata.displayed = !displayed
-            })
-        }
-        toggleAllPositionsDisplayed(): void {
-            var displayed = this.allPositionsDisplayed
-            this.positions.forEach(pos => {
-                pos.metadata.displayed = !displayed
-            })
-        }
     }
 }
