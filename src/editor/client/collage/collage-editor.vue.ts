@@ -94,8 +94,8 @@ namespace splitTime.editor.collage {
             supervisorControl: onSupervisorControlChange
         },
         template: `
-<div>
-    <div style="display: flex; flex-flow: row wrap;" class="vertical-bar-separators">
+<div class="collage-editor">
+    <div class="top-row" style="display: flex; flex-flow: row; height: 50%;">
         <div class="menu">
             <object-properties
                 v-if="!!sharedStuff.propertiesPaneStuff"
@@ -103,13 +103,13 @@ namespace splitTime.editor.collage {
                 :spec="sharedStuff.propertiesPaneStuff"
             ></object-properties>
         </div>
-        <div class="standard-padding">
+        <div class="collage-layout-container" style="flex-grow: 1; height: 100%; overflow: auto">
             <collage-layout
                 :editor-inputs="editorInputs"
                 :collage-editor-shared="sharedStuff"
             ></collage-layout>
         </div>
-        <div style="flex-grow: 1;" class="standard-padding">
+        <div class="collage-showcase-container" style="flex-grow: 1; overflow: auto;">
             <collage-showcase
                 style="flex-grow: 1;"
                 :collage-edit-helper="sharedStuff"
