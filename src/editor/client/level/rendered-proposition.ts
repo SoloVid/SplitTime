@@ -49,7 +49,7 @@ namespace splitTime.editor.level {
             depth: 32,
             height: 32
         }
-        const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [], "")
+        const tempMontage = new splitTime.collage.Montage("", null, [tempFrame], tempBodySpec, [], "", 0)
         if (this.collage === NOT_READY || this.collage == NOT_AVAILABLE) {
             return tempMontage
         }
@@ -132,6 +132,7 @@ namespace splitTime.editor.level {
             }
         })
         const obj = this.p.obj
+        // TODO: How to distinguish?
         if ("playerOcclusionFadeFactor" in obj) {
             this.levelEditorShared.editProperties(getPropPropertiesStuff(this.levelEditorShared.level, obj))
         } else {

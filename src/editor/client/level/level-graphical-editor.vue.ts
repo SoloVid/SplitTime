@@ -162,8 +162,7 @@ namespace splitTime.editor.level {
             x: loc.x,
             y: loc.y,
             z: loc.z,
-            dir: this.levelEditorShared.selectedMontageDirection,
-            playerOcclusionFadeFactor: 0
+            dir: this.levelEditorShared.selectedMontageDirection
         }
 
         const newThing = client.withMetadata<"prop", splitTime.level.file_data.Prop>("prop", object)

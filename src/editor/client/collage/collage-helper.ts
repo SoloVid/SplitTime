@@ -16,11 +16,15 @@ namespace splitTime.editor.collage {
                 depth: defaultBodySpec.depth,
                 height: defaultBodySpec.height
             }
+            let propPostProcessor = ""
+            let playerOcclusionFadeFactor = 0
             if (this.collage.montages.length > 0) {
                 const recentMontage = this.collage.montages[this.collage.montages.length - 1]
                 bodySpec.width = recentMontage.body.width
                 bodySpec.depth = recentMontage.body.depth
                 bodySpec.height = recentMontage.body.height
+                propPostProcessor = recentMontage.propPostProcessor
+                playerOcclusionFadeFactor = recentMontage.playerOcclusionFadeFactor
             }
             return {
                 id: montageId,
@@ -28,7 +32,8 @@ namespace splitTime.editor.collage {
                 frames: [],
                 body: bodySpec,
                 traces: [],
-                propPostProcessor: ""
+                propPostProcessor: propPostProcessor,
+                playerOcclusionFadeFactor: playerOcclusionFadeFactor
             }
         }
 

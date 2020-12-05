@@ -43,8 +43,7 @@ namespace splitTime.editor.level {
             x: {},
             y: {},
             z: {},
-            dir: {},
-            playerOcclusionFadeFactor: {}
+            dir: {}
         }
         type SimplifiedProp = { [K in keyof Required<typeof fields>]: string | number }
         return {

@@ -98,7 +98,8 @@ namespace splitTime {
                     }),
                     fileMontage.body,
                     fileMontage.traces,
-                    fileMontage.propPostProcessor
+                    fileMontage.propPostProcessor,
+                    fileMontage.playerOcclusionFadeFactor
                 )
             }), file.defaultMontageId, allowErrors)
         }

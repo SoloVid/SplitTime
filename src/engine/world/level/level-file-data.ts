@@ -47,20 +47,10 @@ namespace splitTime.level {
             y: number
             z: number
             dir: string
-            // FTODO: clean up
-            playerOcclusionFadeFactor: number
         }
 
-        export interface Position {
-            id: string
-            group: string
-            collage: string
-            montage: string
-            x: number
-            y: number
-            z: number
-            dir: string
-        }
+        /** Alias */
+        export type Position = Prop
     }
 
     export namespace instanceOf {
@@ -100,8 +90,7 @@ namespace splitTime.level {
                     x: type.number,
                     y: type.number,
                     z: type.number,
-                    dir: type.string,
-                    playerOcclusionFadeFactor: type.number
+                    dir: type.string
                 })),
                 positions: type.array(type.object({
                     id: type.string,

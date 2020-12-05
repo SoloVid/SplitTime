@@ -129,7 +129,7 @@ namespace splitTime {
                 // const sprite = new Sprite(prop.collage, prop.montage)
                 const body = new Body()
                 const sprite = new Sprite(body, prop.collage)
-                sprite.playerOcclusionFadeFactor = prop.playerOcclusionFadeFactor
+                sprite.playerOcclusionFadeFactor = collageMontage.playerOcclusionFadeFactor
                 body.width = collageMontage.bodySpec.width
                 body.depth = collageMontage.bodySpec.depth
                 body.height = collageMontage.bodySpec.height

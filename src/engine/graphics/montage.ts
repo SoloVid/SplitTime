@@ -9,7 +9,8 @@ namespace splitTime.collage {
             readonly frames: readonly Readonly<Frame>[],
             readonly bodySpec: Readonly<file.collage.BodySpec>,
             readonly traces: readonly Readonly<level.file_data.Trace>[],
-            readonly propPostProcessorId: string
+            readonly propPostProcessorId: string,
+            readonly playerOcclusionFadeFactor: number
         ) {}
 
         getFrame(index: int): Frame {

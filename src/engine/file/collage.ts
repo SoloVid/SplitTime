@@ -43,6 +43,10 @@ namespace splitTime.file {
              * to touch any props created from this montage.
              */
             propPostProcessor: string
+            /**
+             * Value in [0,1] how much to fade when occluding player.
+             */
+            playerOcclusionFadeFactor: number
         }
 
         /**
@@ -107,7 +111,8 @@ namespace splitTime.file {
                         offsetY: type.number,
                         offsetZ: type.number
                     })),
-                    propPostProcessor: type.string
+                    propPostProcessor: type.string,
+                    playerOcclusionFadeFactor: type.number
                 })),
                 defaultMontageId: type.string
             }))

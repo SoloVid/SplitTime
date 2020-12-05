@@ -37,7 +37,8 @@ namespace splitTime.editor.collage {
         const fieldObject = {
             id: {},
             direction: {},
-            propPostProcessor: {}
+            propPostProcessor: {},
+            playerOcclusionFadeFactor: {}
         }
         type SimplifiedMontage = { [K in keyof typeof fieldObject]: string | number }
         return {
