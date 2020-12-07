@@ -103,9 +103,12 @@ namespace splitTime.body.collisions {
                                 )
                             }
                         } else {
+                            const dz = xCollisionInfo.adjustedZ - currentZ
                             currentX = newX
                             currentZ = xCollisionInfo.adjustedZ
                             xPixelsRemaining--
+                            // Slow down when changing elevation
+                            xPixelsRemaining -= Math.ceil(Math.abs(dz))
                             pixelsMovedX++
                             addArrayToSet(xCollisionInfo.events, eventIdSet)
                             if (xCollisionInfo.targetLevel !== level) {
@@ -144,9 +147,12 @@ namespace splitTime.body.collisions {
                                 )
                             }
                         } else {
+                            const dz = yCollisionInfo.adjustedZ - currentZ
                             currentY = newY
                             currentZ = yCollisionInfo.adjustedZ
                             yPixelsRemaining--
+                            // Slow down when changing elevation
+                            yPixelsRemaining -= Math.ceil(Math.abs(dz))
                             pixelsMovedY++
                             addArrayToSet(yCollisionInfo.events, eventIdSet)
                             if (yCollisionInfo.targetLevel !== level) {
