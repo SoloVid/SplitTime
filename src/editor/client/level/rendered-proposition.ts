@@ -131,12 +131,11 @@ namespace splitTime.editor.level {
                 this.p.obj.y = y + snappedDelta.y
             }
         })
-        const obj = this.p.obj
-        // TODO: How to distinguish?
-        if ("playerOcclusionFadeFactor" in obj) {
-            this.levelEditorShared.editProperties(getPropPropertiesStuff(this.levelEditorShared.level, obj))
+        const p = this.p
+        if (p.type === "prop") {
+            this.levelEditorShared.editProperties(getPropPropertiesStuff(this.levelEditorShared.level, p.obj))
         } else {
-            this.levelEditorShared.editProperties(getPositionPropertiesStuff(this.levelEditorShared.level, obj))
+            this.levelEditorShared.editProperties(getPositionPropertiesStuff(this.levelEditorShared.level, p.obj))
         }
     }
 

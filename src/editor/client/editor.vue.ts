@@ -184,12 +184,6 @@ namespace splitTime.editor {
         }
 
         this.level = new level.Level()
-        this.level.groups.push(client.withMetadata("group", {
-            id: "",
-            parent: "",
-            defaultZ: 0,
-            defaultHeight: level.DEFAULT_GROUP_HEIGHT
-        }))
         updatePageTitle("level untitled")
     }
 
@@ -376,6 +370,7 @@ namespace splitTime.editor {
             await this.server.api.projectFiles.writeFile.fetch(
                 this.server.withProject({ filePath, base64Contents: btoa(fileContents) })
             )
+            updatePageTitle(filePath)
         }
         this.fileBrowserTitle = "Save File As"
         this.fileBrowserConfirmActionText = "Save"

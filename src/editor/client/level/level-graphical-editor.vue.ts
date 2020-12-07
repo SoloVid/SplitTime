@@ -155,6 +155,7 @@ namespace splitTime.editor.level {
         const loc = getBestEntityLocation(this)
         
         var object = {
+            // FTODO: Generate ID from montage name
             id: "",
             group: group.id,
             collage: this.levelEditorShared.selectedCollage,

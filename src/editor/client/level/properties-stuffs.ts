@@ -4,7 +4,10 @@ namespace splitTime.editor.level {
             region: {},
             width: {},
             height: {},
-            background: {},
+            background: {
+                isFile: true,
+                fileBrowserRoot: splitTime.IMAGE_DIR
+            },
             backgroundOffsetX: {},
             backgroundOffsetY: {}
         }
