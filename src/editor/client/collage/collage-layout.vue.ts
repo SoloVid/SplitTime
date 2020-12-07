@@ -103,7 +103,7 @@ namespace splitTime.editor.collage {
         },
         template: `
 <div
-    style="position: relative; cursor: crosshair;"
+    style="position: relative; cursor: crosshair; display: inline-block;"
     class="transparency-checkerboard-background"
     @mousedown.right.prevent="startNewFrame"
     @contextmenu.prevent

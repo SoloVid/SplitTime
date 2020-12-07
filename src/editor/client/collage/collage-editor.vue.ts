@@ -94,7 +94,7 @@ namespace splitTime.editor.collage {
             supervisorControl: onSupervisorControlChange
         },
         template: `
-<div class="collage-editor">
+<div class="collage-editor" style="overflow-y: auto;">
     <div class="top-row" style="display: flex; flex-flow: row; height: 50%;">
         <div class="menu">
             <object-properties
