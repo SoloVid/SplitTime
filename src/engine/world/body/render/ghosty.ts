@@ -118,6 +118,9 @@ namespace splitTime.body {
 
         fadeOutBody(ghost.body).then(clearBoth)
         body.putInLocation(location)
+        if (body.level.isLoaded()) {
+            body.mover.transportLevelIfApplicable()
+        }
         body.fadeEnteringLevelPromise = new Pledge()
         return body.fadeEnteringLevelPromise.then(clearBoth)
     }
