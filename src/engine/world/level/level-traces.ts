@@ -157,44 +157,74 @@ namespace splitTime.level {
             const minZRelativeToTrace = minZ - spec.z
             const traceHeightFromMinZ = spec.z + spec.height - minZ
             const pixelHeight = constrain(traceHeightFromMinZ, 0, maxHeight)
-            const groundColor = "rgba(" + 1 + ", 0, 0, 1)"
-            const topColor = "rgba(" + Math.min(255, pixelHeight + 1) + ", 0, 0, 1)"
-            const noColor = "rgba(0, 0, 0, 0)"
+            const groundR = 1
+            const topR = Math.min(255, pixelHeight + 1)
             switch (spec.type) {
                 case splitTime.trace.Type.SOLID:
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
                         const i = (y * this.width + x) * BYTES_PER_PIXEL
-                        a[i] = Math.max(pixelHeight + 1, a[i])
+                        a[i] = Math.max(topR, a[i])
                     })
                     break
                 case splitTime.trace.Type.GROUND:
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
                         const i = (y * this.width + x) * BYTES_PER_PIXEL
-                        a[i] = Math.max(1, a[i])
+                        a[i] = Math.max(groundR, a[i])
                     })
                     break
                 case splitTime.trace.Type.STAIRS:
                     const stairsExtremes = spec.calculateStairsExtremes()
+                    const bottom = stairsExtremes.bottom
+                    const dx = stairsExtremes.top.x - stairsExtremes.bottom.x
+                    const dy = stairsExtremes.top.y - stairsExtremes.bottom.y
+                    const m = dy / dx
+                    const b = stairsExtremes.top.y - m * stairsExtremes.top.x
+                    const mInverse = -1/m
+                    const a1 = -m
+                    const b1 = 1
+                    const c1 = b
+                    const a2 = -mInverse
+                    const b2 = 1
+                    const determinant = a1 * b2 - a2 * b1
+
+                    const startFraction = minZRelativeToTrace / spec.height
+                    const stairsTopThisLayer = Math.min(spec.z + spec.height, exMaxZ)
+                    const stairsTopRelativeToTrace = stairsTopThisLayer - spec.z
+                    const endFraction = stairsTopRelativeToTrace / spec.height
+
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
-                        // TODO: fill in
+                        const i = (y * this.width + x) * BYTES_PER_PIXEL
+
+                        const c2 = y - mInverse * x
+                        let xIntersect: int
+                        let yIntersect: int
+                        if (dx === 0) {
+                            xIntersect = bottom.x
+                            yIntersect = y
+                        } else if (dy === 0) {
+                            xIntersect = x
+                            yIntersect = bottom.y
+                        } else {
+                            xIntersect = Math.round((b2 * c1 - b1 * c2) / determinant)
+                            yIntersect = Math.round((a1 * c2 - a2 * c1) / determinant)
+                        }
+
+                        const xDist = xIntersect - bottom.x
+                        const xFraction = xDist / dx
+                        const yDist = yIntersect - bottom.y
+                        const yFraction = yDist / dy
+                        const fraction = dx === 0 ? yFraction : xFraction
+                        if (fraction < startFraction) {
+                            // Don't draw anything
+                        } else if (fraction > endFraction) {
+                            a[i] = Math.max(topR, a[i])
+                        } else {
+                            const fractionThisLayer = (fraction - startFraction) /
+                                (endFraction - startFraction)
+                            const r = fractionThisLayer * (topR - groundR) + groundR
+                            a[i] = Math.max(r, a[i])
+                        }
                     })
-                    // const gradient = trace.createStairsGradient(holderCtx)
-                    // const startFraction = minZRelativeToTrace / spec.height
-                    // if (startFraction >= 0 && startFraction <= 1) {
-                    //     gradient.addColorStop(startFraction, noColor)
-                    //     gradient.addColorStop(startFraction, groundColor)
-
-                    //     const stairsTopThisLayer = Math.min(spec.z + spec.height, exMaxZ)
-                    //     const stairsTopRelativeToTrace = stairsTopThisLayer - spec.z
-                    //     const endFraction = stairsTopRelativeToTrace / spec.height
-                    //     gradient.addColorStop(endFraction, topColor)
-
-                    //     trace.drawColor(
-                    //         holderCtx,
-                    //         extraBuffer,
-                    //         gradient
-                    //     )
-                    // }
                     break
             }
         }

@@ -40,7 +40,7 @@ namespace splitTime.math {
             new Vector2D(3, 1)
         ])
 
-        testFillPolygon(diamond, 6, (x, y, isDrawn) => {
+        testFillPolygon(diamond, 7, (x, y, isDrawn) => {
             const bottomLeft = y < -x + 4
             const bottomRight = y < x - 2
             const topLeft = y > x + 2
