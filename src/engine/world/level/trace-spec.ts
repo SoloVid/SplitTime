@@ -55,34 +55,6 @@ namespace splitTime.trace {
             )
         }
 
-        drawColor(
-            target: GenericCanvasRenderingContext2D | null,
-            extraBuffer: splitTime.Canvas,
-            color: string | CanvasGradient | ((x: int, y: int) => light.Color),
-            offsetPos = { x: 0, y: 0 }
-        ) {
-            const nonPosVertices: (Coordinates2D | null)[] = []
-            for (const v of this.vertices) {
-                if (typeof v === "string") {
-                    throw new Error("Refusing to draw trace that has positions in it")
-                }
-                nonPosVertices.push(v)
-            }
-            const pointsArray = nonPosVertices
-                .map(t => t === null ? null : new Coordinates2D(t.x + offsetPos.x, t.y + offsetPos.y))
-            utils.drawShapeOpaque(pointsArray, target, extraBuffer, color)
-        }
-
-        createStairsGradient(
-            ctx: GenericCanvasRenderingContext2D
-        ): CanvasGradient {
-            const stairsExtremes = this.calculateStairsExtremes()
-            return ctx.createLinearGradient(
-                stairsExtremes.bottom.x, stairsExtremes.bottom.y,
-                stairsExtremes.top.x, stairsExtremes.top.y
-            )
-        }
-
         calculateStairsExtremes(): { top: Vector2D, bottom: Vector2D } {
             const polygon = this.getPolygon()
             assert(this.direction !== null, "Stairs must have a direction")

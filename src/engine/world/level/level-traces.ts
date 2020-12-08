@@ -46,22 +46,19 @@ namespace splitTime.level {
             this.layerZs = []
             this.layerFuncData = []
 
-            // let debugTraceCtx = null
-            // if (splitTime.debug.ENABLED) {
-            //     this.debugTraceCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
-            //     debugTraceCtx = this.debugTraceCanvas.context
-            //     debugTraceCtx.clearRect(
-            //         0,
-            //         0,
-            //         this.debugTraceCanvas.width,
-            //         this.debugTraceCanvas.height
-            //     )
-            // }
-
-            const tracesSortedFromBottomToTop = this.traces.slice()
-                .sort((a, b) => (a.spec.z + a.spec.height) - (b.spec.z + b.spec.height))
-            const topZ = tracesSortedFromBottomToTop.length > 0 ?
-                tracesSortedFromBottomToTop[tracesSortedFromBottomToTop.length - 1] : 0
+            let debugTraceCtx: GenericCanvasRenderingContext2D | null = null
+            let debugImageData: ImageData | null = null
+            if (__DOM__ && splitTime.debug.ENABLED) {
+                this.debugTraceCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
+                debugTraceCtx = this.debugTraceCanvas.context
+                debugTraceCtx.clearRect(
+                    0,
+                    0,
+                    this.debugTraceCanvas.width,
+                    this.debugTraceCanvas.height
+                )
+                debugImageData = debugTraceCtx.getImageData(0, 0, this.debugTraceCanvas.width, this.debugTraceCanvas.height)
+            }
 
             this.layerZs = this.calculateLayerZs(this.traces)
             this.layerCount = this.layerZs.length
@@ -85,29 +82,32 @@ namespace splitTime.level {
                 const nextLayerZ = this.layerZs[iLayer + 1]
                 const specialTraceBins = this.layerSpecialTraceBins[iLayer]
 
-                for (const trace of tracesSortedFromBottomToTop) {
-                    this.drawPartialSolidTrace(trace, a, layerZ, nextLayerZ)
-                }
                 for (const trace of this.traces) {
+                    this.drawPartialSolidTrace(trace, a, layerZ, nextLayerZ)
                     this.drawPartialSpecialTrace(trace, a, layerZ, nextLayerZ, specialTraceBins)
                 }
 
                 // TODO: traces related to props
 
                 // TODO: Debug image
-                // if (splitTime.debug.ENABLED && debugTraceCtx !== null) {
-                //     debugTraceCtx.drawImage(holderCanvas.element, 0, -layerZ)
-                // }
+                if (debugTraceCtx !== null && debugImageData !== null) {
+                    for (let i = 0; i < a.length / BYTES_PER_PIXEL; i++) {
+                        const aIndex = i * BYTES_PER_PIXEL
+                        const debugIndex = (i - layerZ * this.width) * 4
+                        if (debugIndex < 0 || debugIndex >= debugImageData.data.length) {
+                            continue
+                        }
+                        // Since this canvas is for debugging, brighten up the colors a bit
+                        debugImageData.data[debugIndex + 0] = a[aIndex + 0] * 200
+                        debugImageData.data[debugIndex + 1] = a[aIndex + 1] * 200
+                        debugImageData.data[debugIndex + 2] = a[aIndex + 2] * 200
+                        debugImageData.data[debugIndex + 3] = 255
+                    }
+                }
             }
-            // if (splitTime.debug.ENABLED && this.debugTraceCanvas !== null) {
-            //     const ctx = this.debugTraceCanvas.context
-            //     // Since this canvas is for debugging, brighten up the colors a bit
-            //     const imageData = ctx.getImageData(0, 0, this.debugTraceCanvas.width, this.debugTraceCanvas.height)
-            //     for (let i = 0; i < imageData.data.length; i++) {
-            //         imageData.data[i] *= 200
-            //     }
-            //     ctx.putImageData(imageData, 0, 0)
-            // }
+            if (debugTraceCtx !== null && debugImageData !== null) {
+                debugTraceCtx.putImageData(debugImageData, 0, 0)
+            }
         }
 
         private calculateLayerZs(traces: readonly Trace[]): int[] {
@@ -162,12 +162,18 @@ namespace splitTime.level {
             switch (spec.type) {
                 case splitTime.trace.Type.SOLID:
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
+                        if (x < 0 || y < 0 || x >= this.width || y >= this.yWidth) {
+                            return
+                        }
                         const i = (y * this.width + x) * BYTES_PER_PIXEL
                         a[i] = Math.max(topR, a[i])
                     })
                     break
                 case splitTime.trace.Type.GROUND:
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
+                        if (x < 0 || y < 0 || x >= this.width || y >= this.yWidth) {
+                            return
+                        }
                         const i = (y * this.width + x) * BYTES_PER_PIXEL
                         a[i] = Math.max(groundR, a[i])
                     })
@@ -178,8 +184,12 @@ namespace splitTime.level {
                     const dx = stairsExtremes.top.x - stairsExtremes.bottom.x
                     const dy = stairsExtremes.top.y - stairsExtremes.bottom.y
                     const m = dy / dx
-                    const b = stairsExtremes.top.y - m * stairsExtremes.top.x
+                    // y intercept
+                    const b = bottom.y - m * bottom.x
                     const mInverse = -1/m
+                    // Pre-calculate reusable parts for Cramer's rule
+                    // We're creating Ax + By = C forms as directly as possible
+                    // from y = mx + b form
                     const a1 = -m
                     const b1 = 1
                     const c1 = b
@@ -187,15 +197,24 @@ namespace splitTime.level {
                     const b2 = 1
                     const determinant = a1 * b2 - a2 * b1
 
+                    // In each layer, we aren't necessarily drawing the full [0,1]
+                    // range of the stairs gradient.
+                    // 0 <= startFraction < endFraction <= 1
                     const startFraction = minZRelativeToTrace / spec.height
                     const stairsTopThisLayer = Math.min(spec.z + spec.height, exMaxZ)
                     const stairsTopRelativeToTrace = stairsTopThisLayer - spec.z
                     const endFraction = stairsTopRelativeToTrace / spec.height
 
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
+                        if (x < 0 || y < 0 || x >= this.width || y >= this.yWidth) {
+                            return
+                        }
                         const i = (y * this.width + x) * BYTES_PER_PIXEL
 
+                        // y intercept of perpendicular line
                         const c2 = y - mInverse * x
+
+                        // Vertical lines are an exception
                         let xIntersect: int
                         let yIntersect: int
                         if (dx === 0) {
@@ -205,14 +224,18 @@ namespace splitTime.level {
                             xIntersect = x
                             yIntersect = bottom.y
                         } else {
+                            // This math is Cramer's rule, compliments of https://stackoverflow.com/q/4543506
                             xIntersect = Math.round((b2 * c1 - b1 * c2) / determinant)
                             yIntersect = Math.round((a1 * c2 - a2 * c1) / determinant)
                         }
 
+                        // How far is this point along the gradient with respect to x?
                         const xDist = xIntersect - bottom.x
                         const xFraction = xDist / dx
+                        // How far is this point along the gradient with respect to y?
                         const yDist = yIntersect - bottom.y
                         const yFraction = yDist / dy
+                        // How far is this point along the gradient?
                         const fraction = dx === 0 ? yFraction : xFraction
                         if (fraction < startFraction) {
                             // Don't draw anything
@@ -267,8 +290,11 @@ namespace splitTime.level {
             }
 
             math.fillPolygon(spec.getPolygon(), (x, y) => {
-                const color = getColor(x, y)
+                if (x < 0 || y < 0 || x >= this.width || y >= this.yWidth) {
+                    return
+                }
                 const i = (y * this.width + x) * BYTES_PER_PIXEL
+                const color = getColor(x, y)
                 a[i + 1] = a[i + 1] | color.g
                 a[i + 2] = a[i + 2] | color.b
             })

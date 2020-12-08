@@ -43,21 +43,6 @@ namespace splitTime {
             return this.spec.getLocationId()
         }
 
-        drawColor(
-            target: GenericCanvasRenderingContext2D | null,
-            extraBuffer: splitTime.Canvas,
-            color: string | CanvasGradient | ((x: int, y: int) => light.Color),
-            offsetPos = { x: 0, y: 0 }
-        ) {
-            return this.spec.drawColor(target, extraBuffer, color, offsetPos)
-        }
-
-        createStairsGradient(
-            ctx: GenericCanvasRenderingContext2D
-        ): CanvasGradient {
-            return this.spec.createStairsGradient(ctx)
-        }
-
         calculateStairsExtremes(): { top: Vector2D, bottom: Vector2D } {
             return this.spec.calculateStairsExtremes()
         }
