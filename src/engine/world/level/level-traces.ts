@@ -215,8 +215,8 @@ namespace splitTime.level {
                         const c2 = y - mInverse * x
 
                         // Vertical lines are an exception
-                        let xIntersect: int
-                        let yIntersect: int
+                        let xIntersect: number
+                        let yIntersect: number
                         if (dx === 0) {
                             xIntersect = bottom.x
                             yIntersect = y
@@ -225,8 +225,8 @@ namespace splitTime.level {
                             yIntersect = bottom.y
                         } else {
                             // This math is Cramer's rule, compliments of https://stackoverflow.com/q/4543506
-                            xIntersect = Math.round((b2 * c1 - b1 * c2) / determinant)
-                            yIntersect = Math.round((a1 * c2 - a2 * c1) / determinant)
+                            xIntersect = (b2 * c1 - b1 * c2) / determinant
+                            yIntersect = (a1 * c2 - a2 * c1) / determinant
                         }
 
                         // How far is this point along the gradient with respect to x?

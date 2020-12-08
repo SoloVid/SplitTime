@@ -47,7 +47,7 @@ namespace splitTime.math {
             edgesActive = edgesActive.filter(e => e.yMax >= y)
 
             // Soft from left to right
-            const xStops = edgesActive.map(e => e.x).sort()
+            const xStops = edgesActive.map(e => e.x).sort((a, b) => a - b)
             const maxX = xStops[xStops.length - 1]
             let drawing = false
             for (let x = xStops[0]; x <= maxX; x++) {

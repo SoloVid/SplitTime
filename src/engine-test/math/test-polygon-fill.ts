@@ -82,15 +82,16 @@ namespace splitTime.math {
 
         fillPolygon(polygon, (x, y) => hits[y * dim + x] = true)
 
-        let debugString = ""
-        for (let y = 0; y < dim; y++) {
-            for (let x = 0; x < dim; x++) {
-                const drawn = hits[y * dim + x]
-                debugString += drawn ? "X" : "-"
-            }
-            debugString += "\n"
-        }
-        console.log(debugString)
+        // Uncomment this for some useful debugging graphics
+        // let debugString = ""
+        // for (let y = 0; y < dim; y++) {
+        //     for (let x = 0; x < dim; x++) {
+        //         const drawn = hits[y * dim + x]
+        //         debugString += drawn ? "X" : "-"
+        //     }
+        //     debugString += "\n"
+        // }
+        // console.log(debugString)
 
         for (let i = 0; i < dim * dim; i++) {
             const x = i % dim
