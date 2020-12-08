@@ -1,4 +1,6 @@
 namespace splitTime.level {
+    const BYTES_PER_PIXEL = 3
+
     export namespace traces {
         export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
 
@@ -23,7 +25,7 @@ namespace splitTime.level {
         private yWidth: int
         private layerZs: int[]
         private layerCount: int
-        private layerFuncData: ImageData[]
+        private layerFuncData: Uint8ClampedArray[]
         // This value could potentially be exposed or calculated dynamically.
         // There is a hard limit of 16 traces per pixel in the current paradigm,
         // so this value determines the largest area affected by this
@@ -44,21 +46,17 @@ namespace splitTime.level {
             this.layerZs = []
             this.layerFuncData = []
 
-            const holderCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
-            const holderCtx = holderCanvas.context
-            const extraBuffer = new splitTime.Canvas(levelWidth, levelYWidth)
-
-            let debugTraceCtx = null
-            if (splitTime.debug.ENABLED) {
-                this.debugTraceCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
-                debugTraceCtx = this.debugTraceCanvas.context
-                debugTraceCtx.clearRect(
-                    0,
-                    0,
-                    this.debugTraceCanvas.width,
-                    this.debugTraceCanvas.height
-                )
-            }
+            // let debugTraceCtx = null
+            // if (splitTime.debug.ENABLED) {
+            //     this.debugTraceCanvas = new splitTime.Canvas(levelWidth, levelYWidth)
+            //     debugTraceCtx = this.debugTraceCanvas.context
+            //     debugTraceCtx.clearRect(
+            //         0,
+            //         0,
+            //         this.debugTraceCanvas.width,
+            //         this.debugTraceCanvas.height
+            //     )
+            // }
 
             const tracesSortedFromBottomToTop = this.traces.slice()
                 .sort((a, b) => (a.spec.z + a.spec.height) - (b.spec.z + b.spec.height))
@@ -78,59 +76,38 @@ namespace splitTime.level {
             ) {
                 this.layerSpecialTraceBins.push(Array(Math.ceil(levelWidth / this.traceBinWidth) * Math.ceil(levelYWidth / this.traceBinWidth)).fill(null))
 
-                holderCtx.clearRect(
-                    0,
-                    0,
-                    holderCanvas.width,
-                    holderCanvas.height
-                )
+                const buffer = new ArrayBuffer(this.width * this.yWidth * BYTES_PER_PIXEL)
+                const a = new Uint8ClampedArray(buffer)
+                this.layerFuncData[iLayer] = a
 
                 const layerZ = this.layerZs[iLayer]
                 // This operation is safe because there should be a sentinel
                 const nextLayerZ = this.layerZs[iLayer + 1]
                 const specialTraceBins = this.layerSpecialTraceBins[iLayer]
 
-                const existingGCO = holderCtx.globalCompositeOperation
-
-                // The operation we want here is to take the brighter of the pixels.
-                // According to MDN, that should be "lighten."
-                // However, "lighten" seems to be an alias for "lighter" (additive)
-                // in all three major browsers I tried.
-                // So instead, we just sorted all of the solid traces first.
-                holderCtx.globalCompositeOperation = "source-over"
                 for (const trace of tracesSortedFromBottomToTop) {
-                    this.drawPartialSolidTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ)
+                    this.drawPartialSolidTrace(trace, a, layerZ, nextLayerZ)
                 }
-
-                holderCtx.globalCompositeOperation = "lighter"
                 for (const trace of this.traces) {
-                    this.drawPartialSpecialTrace(trace, holderCtx, extraBuffer, layerZ, nextLayerZ, specialTraceBins)
+                    this.drawPartialSpecialTrace(trace, a, layerZ, nextLayerZ, specialTraceBins)
                 }
-
-                holderCtx.globalCompositeOperation = existingGCO
 
                 // TODO: traces related to props
 
-                this.layerFuncData[iLayer] = holderCtx.getImageData(
-                    0,
-                    0,
-                    holderCanvas.width,
-                    holderCanvas.height
-                )
-
-                if (splitTime.debug.ENABLED && debugTraceCtx !== null) {
-                    debugTraceCtx.drawImage(holderCanvas.element, 0, -layerZ)
-                }
+                // TODO: Debug image
+                // if (splitTime.debug.ENABLED && debugTraceCtx !== null) {
+                //     debugTraceCtx.drawImage(holderCanvas.element, 0, -layerZ)
+                // }
             }
-            if (splitTime.debug.ENABLED && this.debugTraceCanvas !== null) {
-                const ctx = this.debugTraceCanvas.context
-                // Since this canvas is for debugging, brighten up the colors a bit
-                const imageData = ctx.getImageData(0, 0, this.debugTraceCanvas.width, this.debugTraceCanvas.height)
-                for (let i = 0; i < imageData.data.length; i++) {
-                    imageData.data[i] *= 200
-                }
-                ctx.putImageData(imageData, 0, 0)
-            }
+            // if (splitTime.debug.ENABLED && this.debugTraceCanvas !== null) {
+            //     const ctx = this.debugTraceCanvas.context
+            //     // Since this canvas is for debugging, brighten up the colors a bit
+            //     const imageData = ctx.getImageData(0, 0, this.debugTraceCanvas.width, this.debugTraceCanvas.height)
+            //     for (let i = 0; i < imageData.data.length; i++) {
+            //         imageData.data[i] *= 200
+            //     }
+            //     ctx.putImageData(imageData, 0, 0)
+            // }
         }
 
         private calculateLayerZs(traces: readonly Trace[]): int[] {
@@ -168,7 +145,7 @@ namespace splitTime.level {
             return newZArray.sort((a, b) => a - b)
         }
 
-        private drawPartialSolidTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, extraBuffer: splitTime.Canvas, minZ: int, exMaxZ: int): void {
+        private drawPartialSolidTrace(trace: Trace, a: Uint8ClampedArray, minZ: int, exMaxZ: int): void {
             const spec = trace.spec
             const maxHeight = exMaxZ - minZ
             if (spec.height > 0 && !isOverlap(spec.z, spec.height, minZ, maxHeight)) {
@@ -185,42 +162,44 @@ namespace splitTime.level {
             const noColor = "rgba(0, 0, 0, 0)"
             switch (spec.type) {
                 case splitTime.trace.Type.SOLID:
-                    trace.drawColor(
-                        holderCtx,
-                        extraBuffer,
-                        topColor
-                    )
+                    math.fillPolygon(spec.getPolygon(), (x, y) => {
+                        const i = (y * this.width + x) * BYTES_PER_PIXEL
+                        a[i] = Math.max(pixelHeight + 1, a[i])
+                    })
                     break
                 case splitTime.trace.Type.GROUND:
-                    trace.drawColor(
-                        holderCtx,
-                        extraBuffer,
-                        groundColor
-                    )
+                    math.fillPolygon(spec.getPolygon(), (x, y) => {
+                        const i = (y * this.width + x) * BYTES_PER_PIXEL
+                        a[i] = Math.max(1, a[i])
+                    })
                     break
                 case splitTime.trace.Type.STAIRS:
-                    const gradient = trace.createStairsGradient(holderCtx)
-                    const startFraction = minZRelativeToTrace / spec.height
-                    if (startFraction >= 0 && startFraction <= 1) {
-                        gradient.addColorStop(startFraction, noColor)
-                        gradient.addColorStop(startFraction, groundColor)
+                    const stairsExtremes = spec.calculateStairsExtremes()
+                    math.fillPolygon(spec.getPolygon(), (x, y) => {
+                        // TODO: fill in
+                    })
+                    // const gradient = trace.createStairsGradient(holderCtx)
+                    // const startFraction = minZRelativeToTrace / spec.height
+                    // if (startFraction >= 0 && startFraction <= 1) {
+                    //     gradient.addColorStop(startFraction, noColor)
+                    //     gradient.addColorStop(startFraction, groundColor)
 
-                        const stairsTopThisLayer = Math.min(spec.z + spec.height, exMaxZ)
-                        const stairsTopRelativeToTrace = stairsTopThisLayer - spec.z
-                        const endFraction = stairsTopRelativeToTrace / spec.height
-                        gradient.addColorStop(endFraction, topColor)
+                    //     const stairsTopThisLayer = Math.min(spec.z + spec.height, exMaxZ)
+                    //     const stairsTopRelativeToTrace = stairsTopThisLayer - spec.z
+                    //     const endFraction = stairsTopRelativeToTrace / spec.height
+                    //     gradient.addColorStop(endFraction, topColor)
 
-                        trace.drawColor(
-                            holderCtx,
-                            extraBuffer,
-                            gradient
-                        )
-                    }
+                    //     trace.drawColor(
+                    //         holderCtx,
+                    //         extraBuffer,
+                    //         gradient
+                    //     )
+                    // }
                     break
             }
         }
 
-        private drawPartialSpecialTrace(trace: Trace, holderCtx: GenericCanvasRenderingContext2D, extraBuffer: splitTime.Canvas, minZ: int, exMaxZ: int, specialTraceBins: (Trace[] | null)[]): void {
+        private drawPartialSpecialTrace(trace: Trace, a: Uint8ClampedArray, minZ: int, exMaxZ: int, specialTraceBins: (Trace[] | null)[]): void {
             const spec = trace.spec
             if (!isOverlap(spec.z, spec.height, minZ, exMaxZ - minZ)) {
                 return
@@ -257,11 +236,12 @@ namespace splitTime.level {
                 return color
             }
 
-            trace.drawColor(
-                holderCtx,
-                extraBuffer,
-                getColor
-            )
+            math.fillPolygon(spec.getPolygon(), (x, y) => {
+                const color = getColor(x, y)
+                const i = (y * this.width + x) * BYTES_PER_PIXEL
+                a[i + 1] = a[i + 1] | color.g
+                a[i + 2] = a[i + 2] | color.b
+            })
         }
 
         /**
@@ -339,13 +319,12 @@ namespace splitTime.level {
             exMaxZ: int,
             ignoreEvents: boolean
         ) {
-            var imageData = this.layerFuncData[layer]
+            var pixelArray = this.layerFuncData[layer]
             // This operation needed to be inline to be performant
-            var dataIndex = (y * this.width + x) * 4
-            var r = imageData.data[dataIndex++]
-            var g = imageData.data[dataIndex++]
-            var b = imageData.data[dataIndex++]
-            var a = imageData.data[dataIndex++]
+            var dataIndex = (y * this.width + x) * BYTES_PER_PIXEL
+            var r = pixelArray[dataIndex++]
+            var g = pixelArray[dataIndex++]
+            var b = pixelArray[dataIndex++]
 
             if (r > 0) {
                 var height = layerZ + (r - 1)

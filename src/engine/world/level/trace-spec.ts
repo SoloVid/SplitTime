@@ -84,10 +84,7 @@ namespace splitTime.trace {
         }
 
         calculateStairsExtremes(): { top: Vector2D, bottom: Vector2D } {
-            const points = ensureNoPositions(this.vertices)
-                .filter(v => v !== null)
-                .map(v => new Vector2D(v!.x, v!.y))
-            const polygon = new math.Polygon(points)
+            const polygon = this.getPolygon()
             assert(this.direction !== null, "Stairs must have a direction")
             const top = polygon.findPointToward(direction.toRadians(this.direction))
             const bottom = polygon.findPointToward(direction.toRadians(this.direction) + Math.PI)
@@ -95,6 +92,13 @@ namespace splitTime.trace {
                 top: top,
                 bottom: bottom
             }
+        }
+
+        getPolygon(): math.Polygon {
+            const points = ensureNoPositions(this.vertices)
+                .filter(v => v !== null)
+                .map(v => new Vector2D(v!.x, v!.y))
+            return new math.Polygon(points)
         }
     }
 }
