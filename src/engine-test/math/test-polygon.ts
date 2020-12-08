@@ -1,6 +1,4 @@
 namespace splitTime.math {
-    splitTime.test.group(math, "Math", splitTime)
-
     splitTime.test.scenario(math, "Polygon#findPointToward() with square", t => {
         const square = new Polygon([
             new Vector2D(1, 1),
