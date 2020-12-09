@@ -23,7 +23,7 @@ namespace splitTime {
         private _x = 0
         private _y = 0
         private _z = 0
-        private _time: game_ms = Number.NEGATIVE_INFINITY
+        private _time: game_seconds = Number.NEGATIVE_INFINITY
 
         childrenBolted: Body[] = []
         childrenLoose: Body[] = []

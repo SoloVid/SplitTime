@@ -200,7 +200,7 @@ namespace splitTime.conversation {
                 return this._location
                     .getLevel()
                     .getRegion()
-                    .getTimeMs()
+                    .getTime() * 1000
             } else {
                 return +performance.now()
             }

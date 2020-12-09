@@ -13,9 +13,6 @@ namespace splitTime {
             }
             return this._timeline
         }
-        getTimeMs(): game_ms {
-            return this.getTimeline().getTimeMs()
-        }
         getTime(): game_seconds {
             return this.getTimeline().getTime()
         }
@@ -26,17 +23,6 @@ namespace splitTime {
             }
             this._timeline = timeline
             this._timeline.addRegion(this)
-        }
-
-        getTimeStabilizer(msPerStep?: game_ms, maxCounter?: number): Signaler {
-            var that = this
-            return new splitTime.IntervalStabilizer(
-                msPerStep,
-                maxCounter,
-                function() {
-                    return that.getTimeMs()
-                }
-            )
         }
 
         addLevel(level: Level) {

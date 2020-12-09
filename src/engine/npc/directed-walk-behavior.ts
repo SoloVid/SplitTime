@@ -31,13 +31,13 @@ namespace splitTime.npc {
 
             if (overshot || this.isCloseEnough()) {
                 // FTODO: This forced putting could be problematic for collisions
-                if (this.targetLocation instanceof Position) {
-                    this.npc.spriteBody.putInPosition(this.targetLocation)
-                } else {
+                // if (this.targetLocation instanceof Position) {
+                //     this.npc.spriteBody.putInPosition(this.targetLocation)
+                // } else {
                     this.npc.body.x = this.targetLocation.x
                     this.npc.body.y = this.targetLocation.y
                     this.npc.body.z = this.targetLocation.z
-                }
+                // }
             }
         }
 
