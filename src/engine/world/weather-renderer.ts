@@ -144,7 +144,7 @@ namespace splitTime {
                 this.SCREEN_HEIGHT
             )
             //Fill with light
-            this.buffer.context.fillStyle = level.weather.getAmbientLight()
+            this.buffer.context.fillStyle = level.weather.getAmbientLight().cssString
             this.buffer.context.fillRect(
                 0,
                 0,
