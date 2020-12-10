@@ -9,15 +9,15 @@ namespace splitTime {
     }
 
     class ScheduledEvent<T> {
-        constructor(
-            time: game_seconds,
-            instance: (() => void),
-            recurs: game_seconds
-        )
-        constructor(
-            time: game_seconds,
-            instance: time.EventInstance<T>,
-        )
+        // constructor(
+        //     time: game_seconds,
+        //     instance: (() => void),
+        //     recurs: game_seconds
+        // )
+        // constructor(
+        //     time: game_seconds,
+        //     instance: time.EventInstance<T>,
+        // )
         constructor(
             public readonly time: game_seconds,
             public readonly instance: time.EventInstance<T> | (() => void),
@@ -231,7 +231,7 @@ namespace splitTime {
 
         scheduleFromNow<T>(
             timeFromNow: game_seconds,
-            eventInstance: time.EventInstance<T>
+            eventInstance: time.EventInstance<T> | (() => void)
         ): void {
             this.scheduleAbsolute(
                 new ScheduledEvent(this.getTime() + timeFromNow, eventInstance)
