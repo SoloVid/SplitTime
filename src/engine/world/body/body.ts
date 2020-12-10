@@ -289,6 +289,9 @@ namespace splitTime {
             }
             return this._level
         }
+        hasLevel(): boolean {
+            return this._level !== null
+        }
 
         notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
             const ZILCH = 0.00001

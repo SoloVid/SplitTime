@@ -6,7 +6,21 @@ namespace splitTime.body.collisions {
         dzAllowed: number
     }
 
+    interface CachedFallStopBody {
+        body: Body
+        location: ILevelLocation2
+    }
+
+    interface CachedFallStop {
+        location: ILevelLocation2
+        bodies: CachedFallStopBody[]
+        events: string[]
+        targetLevel: Level
+        ignoreBodies: Body[]
+    }
+
     export class Vertical {
+        private lastFallStopped: CachedFallStop | null = null
         constructor(private readonly mover: splitTime.body.Mover) {}
 
         /**
@@ -46,6 +60,17 @@ namespace splitTime.body.collisions {
             dz: number,
             ignoreBodies: Body[] = []
         ): VerticalCollisionInfo {
+            if (this.canApplyCachedFall(level, x, y, z, dz, ignoreBodies)) {
+                return {
+                    bodies: this.lastFallStopped!.bodies.map(a => a.body),
+                    events: this.lastFallStopped!.events,
+                    targetLevel: this.lastFallStopped!.targetLevel,
+                    dzAllowed: 0
+                }
+            }
+
+            this.lastFallStopped = null
+
             //If the body is out of bounds on the Z axis
             if (z + dz < level.lowestLayerZ) {
                 dz = -(z - level.lowestLayerZ)
@@ -78,6 +103,7 @@ namespace splitTime.body.collisions {
             let bodies: Body[] = []
             const targetLevels: { [levelId: string]: Level } = {}
             var eventIdSet = {}
+            let blocked = false
             for (var i = 0; i < steps; i++) {
                 const originCollisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
                     this.mover.body.collisionMask,
@@ -90,6 +116,7 @@ namespace splitTime.body.collisions {
                 // Ground traces don't cause the blocked flag to be set,
                 // but we can detect the blockage through zBlockedTopEx
                 if (originCollisionInfo.blocked || originCollisionInfo.zBlockedTopEx === lowerBoundZ) {
+                    blocked = true
                     bodies = originCollisionInfo.bodies
                     if (dz < 0) {
                         // Since we started targetZ above our initial point, make sure we don't go up
@@ -113,12 +140,55 @@ namespace splitTime.body.collisions {
                 dzAllowed = dz
             }
 
-            return {
+            const r = {
                 bodies: bodies,
                 events: Object.keys(eventIdSet),
                 targetLevel: chooseTheOneOrDefault(targetLevels, level),
                 dzAllowed: dzAllowed
             }
+            if (dz < 0 && blocked) {
+                this.lastFallStopped = {
+                    location: { x, y, z: targetZ, level },
+                    bodies: r.bodies.map(b => ({body: b, location: splitTime.level.copyLocation(b)})),
+                    events: r.events,
+                    targetLevel: r.targetLevel,
+                    ignoreBodies: ignoreBodies
+                }
+            }
+            return r
+        }
+
+        private canApplyCachedFall(
+            level: Level,
+            x: number,
+            y: number,
+            z: number,
+            dz: number,
+            ignoreBodies: Body[] = []
+        ): boolean {
+            if (dz >= 0) {
+                return false
+            }
+            if (this.lastFallStopped === null) {
+                return false
+            }
+            if (!splitTime.level.areLocationsEquivalent({x, y, z, level}, this.lastFallStopped.location)) {
+                return false
+            }
+            if (ignoreBodies.length !== this.lastFallStopped.ignoreBodies.length) {
+                return false
+            }
+            for (let i = 0; i < ignoreBodies.length; i++) {
+                if (ignoreBodies[i] !== this.lastFallStopped.ignoreBodies[i]) {
+                    return false
+                }
+            }
+            for (const body of this.lastFallStopped.bodies) {
+                if (!body.body.hasLevel() || !splitTime.level.areLocationsEquivalent(body.body, body.location)) {
+                    return false
+                }
+            }
+            return true
         }
     }
 }
