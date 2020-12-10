@@ -106,7 +106,8 @@ namespace splitTime.conversation {
                 var dialog = this.dialogs[i]
                 var location = dialog.getLocation()
                 var level = location.getLevel()
-                if (level.getRegion() === currentRegion) {
+                // Related timelines make this check faulty
+                // if (level.getRegion() === currentRegion) {
                     dialog.notifyFrameUpdate()
                     if (level === currentLevel && !dialog.isFinished()) {
                         var score = this.calculateDialogImportanceScore(dialog)
@@ -115,7 +116,7 @@ namespace splitTime.conversation {
                             winningScore = score
                         }
                     }
-                }
+                // }
             }
 
             if (this.engagedDialog && winningScore > engagedScore) {

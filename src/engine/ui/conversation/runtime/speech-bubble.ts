@@ -2,12 +2,12 @@ namespace splitTime.conversation {
     export class SpeechBubble implements Interruptible {
         // can be cut short
         private _effectiveLine: string
-        private _charactersDisplayed: number
-        private _startDelay: number | null = null
-        private _isFinished: boolean
-        private _location: ILevelLocation
-        private _timeline: splitTime.Timeline | null = null
-        private _lastStepMs: number = 0
+        // start with 1 so there is never an empty box
+        private _charactersDisplayed: number = 1
+        private _timeLastCharacterOut: game_seconds | null = null
+        private _isFinished: boolean = false
+        private readonly _timeStarted: game_seconds
+        private _timePlayedTo: game_seconds
         private _playerInteractHandler:
             | PlayerInteractHandler
             | Function
@@ -22,17 +22,14 @@ namespace splitTime.conversation {
             public readonly conversation: ConversationInstance,
             public readonly speaker: string,
             private _line: string,
-            location: ILevelLocation
+            private readonly location: ILevelLocation
         ) {
             for (const conversion of CONVERSIONS) {
                 this._line = conversion.apply(this._line)
             }
-            this._location = location
-            this._lastStepMs = 0
+            this._timeStarted = this._getTime()
+            this._timePlayedTo = this._timeStarted
             this._effectiveLine = this._line
-            this._charactersDisplayed = 0
-            this._startDelay = null
-            this._isFinished = false
         }
 
         get line(): string {
@@ -42,25 +39,21 @@ namespace splitTime.conversation {
             )
         }
 
-        _advanceMethod: string | null = null
-        _delay: number = DEFAULT_DELAY_MS
-        _msPerChar = DEFAULT_MS_PER_CHAR
+        advanceMethod: AdvanceMethod | null = null
+        delay: number = DEFAULT_DELAY_MS
+        msPerChar = DEFAULT_MS_PER_CHAR
 
         getLocation(): ILevelLocation {
-            return this._location
-        }
-        setLocation(location: ILevelLocation) {
-            this._location = location
-            this._lastStepMs = 0
+            return this.location
         }
 
-        getAdvanceMethod() {
-            return this._advanceMethod || AdvanceMethod.DEFAULT
+        getAdvanceMethod(): AdvanceMethod {
+            return this.advanceMethod || AdvanceMethod.DEFAULT
         }
 
-        setAdvanceMethod(advanceMethod: string | null, delay?: number) {
-            this._advanceMethod = advanceMethod
-            this._delay = delay || this._delay
+        setAdvanceMethod(advanceMethod: AdvanceMethod | null, delay?: number): void {
+            this.advanceMethod = advanceMethod
+            this.delay = delay || this.delay
         }
 
         getDisplayedCurrentLine() {
@@ -68,26 +61,39 @@ namespace splitTime.conversation {
         }
 
         notifyFrameUpdate() {
-            const msSinceLastStep = this._getTimeMs() - this._lastStepMs
-            if (this._charactersDisplayed === 0) {
-                this.step()
-            } else if (
-                msSinceLastStep >
-                this._howLongForChar(this.line[this._charactersDisplayed - 1])
-            ) {
-                this.step()
+            let keepGoing = true
+            const now = this._getTime()
+            while (keepGoing) {
+                keepGoing = false
+                if (this._charactersDisplayed > this._effectiveLine.length) {
+                    if (this.getAdvanceMethod() !== AdvanceMethod.AUTO &&
+                        this.getAdvanceMethod() !== AdvanceMethod.HYBRID) {
+                        // Do nothing
+                    } else if (!this._timeLastCharacterOut) {
+                        this._timeLastCharacterOut = this._getTime()
+                    } else if (this._getTime() > this._timeLastCharacterOut + this.delay / 1000) {
+                        this.advance()
+                    }
+                } else {
+                    const charTime = this._howLongForChar(this.line[this._charactersDisplayed - 1]) / 1000
+                    if (this._timePlayedTo + charTime <= now) {
+                        this._charactersDisplayed++
+                        this._timePlayedTo += charTime
+                        keepGoing = true
+                    }
+                }
             }
         }
 
         private _howLongForChar(char: string): number {
             if (char === SPACE) {
-                return this._msPerChar + EXTRA_MS_PER_SPACE
+                return this.msPerChar + EXTRA_MS_PER_SPACE
             } else if (SHORT_BREAK_PUNCTUATION.indexOf(char) >= 0) {
-                return this._msPerChar + EXTRA_MS_PER_SHORT_BREAK_PUNCTUATION
+                return this.msPerChar + EXTRA_MS_PER_SHORT_BREAK_PUNCTUATION
             } else if (LONG_BREAK_PUNCTUATION.indexOf(char) >= 0) {
-                return this._msPerChar + EXTRA_MS_PER_LONG_BREAK_PUNCTUATION
+                return this.msPerChar + EXTRA_MS_PER_LONG_BREAK_PUNCTUATION
             }
-            return this._msPerChar
+            return this.msPerChar
         }
 
         /**
@@ -131,31 +137,12 @@ namespace splitTime.conversation {
         }
 
         advance() {
-            this._startDelay = null
+            this._timeLastCharacterOut = null
             if (this._charactersDisplayed < this._effectiveLine.length) {
                 this._charactersDisplayed = this._effectiveLine.length
             } else {
                 this._isFinished = true
                 this.onClose()
-            }
-        }
-
-        /**
-         * Move forward one frame relative to the dialog speed
-         */
-        step() {
-            this._lastStepMs = this._getTimeMs()
-            if (this._charactersDisplayed < this._effectiveLine.length) {
-                this._charactersDisplayed++
-            } else if (
-                this.getAdvanceMethod() === AdvanceMethod.AUTO ||
-                this.getAdvanceMethod() === AdvanceMethod.HYBRID
-            ) {
-                if (!this._startDelay) {
-                    this._startDelay = this._getTimeMs()
-                } else if (this._getTimeMs() > this._startDelay + this._delay) {
-                    this.advance()
-                }
             }
         }
 
@@ -195,14 +182,14 @@ namespace splitTime.conversation {
             }
         }
 
-        _getTimeMs() {
-            if (this._location) {
-                return this._location
+        _getTime(): game_seconds {
+            if (this.location) {
+                return this.location
                     .getLevel()
                     .getRegion()
-                    .getTime() * 1000
+                    .getTime()
             } else {
-                return +performance.now()
+                return +performance.now() / 1000
             }
         }
     }

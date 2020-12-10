@@ -1,9 +1,9 @@
 namespace splitTime.conversation {
-    export const AdvanceMethod = {
-        DEFAULT: "HYBRID",
-        AUTO: "AUTO",
-        INTERACTION: "INTERACTION",
-        HYBRID: "HYBRID"
+    export enum AdvanceMethod {
+        DEFAULT = "HYBRID",
+        AUTO = "AUTO",
+        INTERACTION = "INTERACTION",
+        HYBRID = "HYBRID"
     }
 
     export const DASH = "\u2014"
