@@ -9,10 +9,12 @@ namespace splitTime.body.collisions {
     interface CachedFallStopBody {
         body: Body
         location: ILevelLocation2
+        dimensions: file.collage.BodySpec
     }
 
     interface CachedFallStop {
         location: ILevelLocation2
+        dimensions: file.collage.BodySpec
         bodies: CachedFallStopBody[]
         events: string[]
         targetLevel: Level
@@ -149,7 +151,20 @@ namespace splitTime.body.collisions {
             if (dz < 0 && blocked) {
                 this.lastFallStopped = {
                     location: { x, y, z: targetZ, level },
-                    bodies: r.bodies.map(b => ({body: b, location: splitTime.level.copyLocation(b)})),
+                    dimensions: {
+                        width: this.mover.body.width,
+                        depth: this.mover.body.depth,
+                        height: this.mover.body.height,
+                    },
+                    bodies: r.bodies.map(b => ({
+                        body: b,
+                        location: splitTime.level.copyLocation(b),
+                        dimensions: {
+                            width: b.width,
+                            depth: b.depth,
+                            height: b.height
+                        }
+                    })),
                     events: r.events,
                     targetLevel: r.targetLevel,
                     ignoreBodies: ignoreBodies
@@ -175,6 +190,11 @@ namespace splitTime.body.collisions {
             if (!splitTime.level.areLocationsEquivalent({x, y, z, level}, this.lastFallStopped.location)) {
                 return false
             }
+            if (this.lastFallStopped.dimensions.width !== this.mover.body.width ||
+                this.lastFallStopped.dimensions.depth !== this.mover.body.depth ||
+                this.lastFallStopped.dimensions.height !== this.mover.body.height) {
+                return false
+            }
             if (ignoreBodies.length !== this.lastFallStopped.ignoreBodies.length) {
                 return false
             }
@@ -184,7 +204,15 @@ namespace splitTime.body.collisions {
                 }
             }
             for (const body of this.lastFallStopped.bodies) {
-                if (!body.body.hasLevel() || !splitTime.level.areLocationsEquivalent(body.body, body.location)) {
+                if (!body.body.hasLevel()) {
+                    return false
+                }
+                if (body.dimensions.width !== body.body.width ||
+                    body.dimensions.depth !== body.body.depth ||
+                    body.dimensions.height !== body.body.height) {
+                    return false
+                }
+                if (!splitTime.level.areLocationsEquivalent(body.body, body.location)) {
                     return false
                 }
             }
