@@ -176,10 +176,11 @@ namespace splitTime {
             this.level._levelTraces = null
             this.level._cellGrid = null
 
-            for (var i = 0; i < this.level._props.length; i++) {
+            for (const prop of this.level._props) {
                 // We don't just remove from this level because we don't want props to leak out into other levels.
-                var l = this.level._props[i].getLevel()
-                l.removeBody(this.level._props[i])
+                if (prop.hasLevel()) {
+                    prop.level.removeBody(prop)
+                }
             }
             this.level._props = []
         }

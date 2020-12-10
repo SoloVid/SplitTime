@@ -9,7 +9,7 @@ namespace splitTime {
             const collage = G.ASSETS.collages.get(collageId)
             const montage = montageId ? collage.getMontage(montageId, direction) : collage.getDefaultMontage(direction)
             const body = new Body()
-            const sprite = new Sprite(body, collageId)
+            const sprite = new Sprite(body, collageId, montageId)
             body.width = montage.bodySpec.width
             body.depth = montage.bodySpec.depth
             body.height = montage.bodySpec.height
