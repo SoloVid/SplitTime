@@ -11,7 +11,7 @@ namespace splitTime.player {
         var highestScore = 0
         for (var i = 0; i < possibleInteractions.length; i++) {
             var interaction = possibleInteractions[i]
-            if (interaction.score > highestScore) {
+            if (event.hasListener(interaction.body) && interaction.score > highestScore) {
                 chosenInteraction = interaction
                 highestScore = interaction.score
             }
