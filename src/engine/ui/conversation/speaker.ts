@@ -21,5 +21,9 @@ namespace splitTime.conversation {
                 }
             }
         }
+
+        isConversing(): boolean {
+            return this.secretary.isSpeakerConversing(this)
+        }
     }
 }

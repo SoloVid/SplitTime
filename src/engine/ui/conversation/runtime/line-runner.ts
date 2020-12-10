@@ -24,7 +24,14 @@ namespace splitTime.conversation {
 
         private registerHandlers() {
             this.dialog.registerPlayerInteractHandler(() => this.advance())
-            this.dialog.registerDismissHandler(() => this.conversation.tryCancel(this.node) && this.stop())
+            this.dialog.registerDismissHandler(() => {
+                const playerBody = this.conversation.helper.secretary.perspective.playerBody
+                // Only cancel the conversation if the player is involved.
+                // FTODO: Improve conversation cancellation system
+                if (this.speakers.some(s => s.body === playerBody)) {
+                    this.conversation.tryCancel(this.node) && this.stop()
+                }
+            })
             this.dialog.registerDialogEndHandler(() => this.stop())
         }
 

@@ -13,7 +13,8 @@ namespace splitTime.conversation {
 
         constructor(
             private readonly spec: ConversationSpec,
-            private readonly helper: RunnerHelper
+            // FTODO: make private again
+            public readonly helper: RunnerHelper
         ) {}
 
         start(): void {
@@ -30,6 +31,10 @@ namespace splitTime.conversation {
 
         private isCurrentNode(node: ConversationLeafNode): boolean {
             return this.current !== null && this.current.action === node
+        }
+
+        checkForCancellations(): void {
+            // TODO: put something in here to cancel conversations as necessary
         }
 
         notifyNodeCompletion(node: ConversationLeafNode): void {

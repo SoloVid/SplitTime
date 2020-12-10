@@ -16,6 +16,7 @@ namespace splitTime.conversation {
      * - Delegate screen interactions from the player to appropriate speech bubbles.
      */
     export class Secretary {
+        private conversations: ConversationInstance[] = []
         private dialogs: SpeechBubble[] = []
 
         /**
@@ -27,8 +28,17 @@ namespace splitTime.conversation {
 
         constructor(
             private readonly renderer: Renderer,
-            private readonly perspective: LimitedPerspective
+            // FTODO: Make private again
+            public readonly perspective: LimitedPerspective
         ) {}
+
+        subscribeConversation(conversation: ConversationInstance): void {
+            this.conversations.push(conversation)
+        }
+
+        unsubscribeConversation(conversation: ConversationInstance): void {
+            this.conversations = this.conversations.filter(c => c !== conversation)
+        }
 
         /**
          * Allow dialog manager to start managing the dialog.
@@ -75,6 +85,10 @@ namespace splitTime.conversation {
         }
 
         notifyFrameUpdate() {
+            for (const c of this.conversations) {
+                c.checkForCancellations()
+            }
+
             if (this.engagedDialog && this.engagedDialog.isFinished()) {
                 this.remove(this.engagedDialog)
             }
