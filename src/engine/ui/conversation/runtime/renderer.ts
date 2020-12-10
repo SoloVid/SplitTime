@@ -1,10 +1,17 @@
 namespace splitTime.conversation {
     class DialogDrawing {
+        public readonly firstCharacterSeen: number
+
         constructor(
             public dialog: SpeechBubble,
             public incoming: boolean = true,
             public visibility: number = 0
-        ) {}
+        ) {
+            const ELISION_PATTERN_LENGTH = 4
+            const charsSeen = dialog.getDisplayedCurrentLine().length
+            const roundedCharsSeen = charsSeen - (charsSeen % ELISION_PATTERN_LENGTH)
+            this.firstCharacterSeen = Math.max(0, roundedCharsSeen - 1)
+        }
     }
 
     const CONFIG = {
@@ -74,6 +81,10 @@ namespace splitTime.conversation {
             for (var i = 0; i < this.dialogDrawings.length; i++) {
                 // TODO: visibility
                 var drawing = this.dialogDrawings[i]
+                const ELISION_CHAR = "."
+                let elision = new Array(drawing.firstCharacterSeen + 1).join(ELISION_CHAR)
+                elision = elision.replace(/..../g, "... ")
+                const elisionRegex = new RegExp("^.{" + drawing.firstCharacterSeen + "}")
                 var dialog = drawing.dialog
                 var location = dialog.getLocation()
                 this.sayFromBoardFocalPoint(
@@ -83,8 +94,8 @@ namespace splitTime.conversation {
                         y: location.getY(),
                         z: location.getZ()
                     },
-                    dialog.line,
-                    dialog.getDisplayedCurrentLine(),
+                    dialog.line.replace(elisionRegex, elision),
+                    dialog.getDisplayedCurrentLine().replace(elisionRegex, elision),
                     dialog.speaker
                 )
             }
