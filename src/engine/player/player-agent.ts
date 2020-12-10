@@ -38,13 +38,19 @@ namespace splitTime.player {
         }
 
         doJump() {
-            this.abilities.use(JUMP_ABILITY)
+            this.useAbility(JUMP_ABILITY)
         }
         doSpecial() {
-            this.abilities.use(SPECIAL_ABILITY)
+            this.useAbility(SPECIAL_ABILITY)
         }
         doAttack() {
-            this.abilities.use(ATTACK_ABILITY)
+            this.useAbility(ATTACK_ABILITY)
+        }
+
+        useAbility(ability: string): void {
+            if (!this.isFrozen()) {
+                this.abilities.use(ability)
+            }
         }
 
         setLadder(eventId: string, direction: splitTime.direction_t) {
@@ -52,7 +58,7 @@ namespace splitTime.player {
         }
 
         isFrozen(): boolean {
-            return this.abilities.isFrozen() || (this.stamina !== null && this.stamina.isEmpty())
+            return this.playerManager.controlsLocked || this.abilities.isFrozen() || (this.stamina !== null && this.stamina.isEmpty())
         }
 
         notifyTimeAdvance(delta: splitTime.game_seconds) {

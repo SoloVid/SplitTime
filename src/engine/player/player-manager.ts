@@ -3,6 +3,7 @@ namespace splitTime.player {
     export class PlayerManager {
         activePlayerAgent: PlayerAgent | null = null
         available: PlayerAgent[] = []
+        private _controlsLocked: boolean = false
 
         constructor(
             public readonly perspective: Perspective,
@@ -53,6 +54,13 @@ namespace splitTime.player {
                     this.getActive()!.setLadder(eventId, direction)
                 }
             }
+        }
+
+        get controlsLocked(): boolean {
+            return this._controlsLocked
+        }
+        set controlsLocked(locked: boolean) {
+            this._controlsLocked = locked
         }
     }
 }
