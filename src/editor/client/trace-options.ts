@@ -31,12 +31,17 @@ namespace splitTime.editor.client {
         {
             type: splitTime.trace.Type.POINTER,
             color: "rgba(100, 50, 100, .8)",
-            help: "Link to another level. Traces from that level will affect this area, and a body fully moved into the pointer trace will be transported to that level."
+            help: "Link to another level *in the same region*. Traces from that level will affect this area, and a body fully moved into the pointer trace will be transported to that level."
         },
         {
             type: splitTime.trace.Type.TRANSPORT,
             color: "rgba(200, 100, 10, .8)",
             help: "Link to another level regardless of what's on the other side. Note: You'll want to use opposite values for pairs of these traces, but be careful not to overlap the traces and leave enough room for the maximum expected base between."
+        },
+        {
+            type: splitTime.trace.Type.SEND,
+            color: "rgba(200, 100, 200, .8)",
+            help: "Similar to transport trace, transport body to another location. Unlike transport trace, send trace will always send to a single absolute location."
         }
     ]
 }

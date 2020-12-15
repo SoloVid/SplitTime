@@ -109,7 +109,8 @@ namespace splitTime.file {
                         level: type.string,
                         offsetX: type.number,
                         offsetY: type.number,
-                        offsetZ: type.number
+                        offsetZ: type.number,
+                        targetPosition: type.string
                     })),
                     propPostProcessor: type.string,
                     playerOcclusionFadeFactor: type.number

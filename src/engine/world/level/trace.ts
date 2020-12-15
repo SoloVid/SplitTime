@@ -39,6 +39,13 @@ namespace splitTime {
             return this.level
         }
 
+        getTargetPosition(): Position {
+            if (!this.spec.targetPosition) {
+                throw new Error("Trace does not have a target Position")
+            }
+            return this.getLevel().getPosition(this.spec.targetPosition)
+        }
+
         getLocationId() {
             return this.spec.getLocationId()
         }

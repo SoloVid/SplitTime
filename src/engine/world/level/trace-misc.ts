@@ -6,7 +6,8 @@ namespace splitTime.trace {
         EVENT: "event",
         PATH: "path",
         POINTER: "pointer",
-        TRANSPORT: "transport"
+        TRANSPORT: "transport",
+        SEND: "send",
     }
 
     export const RColor = {

@@ -8,6 +8,7 @@ namespace splitTime.trace {
         offsetX: number = 0
         offsetY: number = 0
         offsetZ: number = 0
+        targetPosition: string = ""
         direction: direction_t | null = null
         eventId: string = ""
 
@@ -39,20 +40,22 @@ namespace splitTime.trace {
                     trace.offsetY = rawTrace.offsetY
                     trace.offsetZ = rawTrace.offsetZ
                     break
+                case Type.SEND:
+                    trace.level = rawTrace.level
+                    trace.targetPosition = rawTrace.targetPosition
+                    break
             }
             return trace
         }
 
         getLocationId() {
-            return (
-                this.level +
-                ":" +
-                this.offsetX +
-                "," +
-                this.offsetY +
-                "," +
-                this.offsetZ
-            )
+            return [
+                this.level,
+                this.offsetX,
+                this.offsetY,
+                this.offsetZ,
+                this.targetPosition
+            ].join(",")
         }
 
         calculateStairsExtremes(): { top: Vector2D, bottom: Vector2D } {

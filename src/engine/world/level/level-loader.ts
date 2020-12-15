@@ -69,9 +69,9 @@ namespace splitTime {
                 switch (traceSpec.type) {
                     case trace.Type.TRANSPORT:
                         const pointerOffset = t.getPointerOffset()
-                        var transportTraceId = traceSpec.getLocationId()
+                        var sendTraceId = traceSpec.getLocationId()
                         this.level.registerEvent(
-                            transportTraceId,
+                            sendTraceId,
                             ((trace, level) => {
                                 return (body: splitTime.Body) => {
                                     if (body.levelLocked) {
@@ -86,10 +86,25 @@ namespace splitTime {
                                 }
                             })(t, level)
                         )
-                        break;
+                        break
+                    case trace.Type.SEND:
+                        var sendTraceId = traceSpec.getLocationId()
+                        this.level.registerEvent(
+                            sendTraceId,
+                            ((trace, level) => {
+                                return (body: splitTime.Body) => {
+                                    if (body.levelLocked) {
+                                        return
+                                    }
+                                    const targetPosition = trace.getTargetPosition()
+                                    splitTime.body.smoothPut(body, targetPosition)
+                                }
+                            })(t, level)
+                        )
+                        break
                     case trace.Type.PATH:
                         this.connectPositionsFromPath(t.spec)
-                        break;
+                        break
                 }
             }
         }

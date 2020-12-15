@@ -132,7 +132,8 @@ namespace splitTime.editor.level {
             level: "",
             offsetX: 0,
             offsetY: 0,
-            offsetZ: 0
+            offsetZ: 0,
+            targetPosition: ""
         }
         const trace = client.withMetadata<"trace", splitTime.level.file_data.Trace>("trace", traceObj)
         levelObject.traces.push(trace)

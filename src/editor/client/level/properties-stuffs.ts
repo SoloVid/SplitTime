@@ -95,6 +95,7 @@ namespace splitTime.editor.level {
             offsetX?: client.FieldOptions
             offsetY?: client.FieldOptions
             offsetZ?: client.FieldOptions
+            targetPosition?: client.FieldOptions
         }
         let fields: TraceFieldOptions = {
             id: {},
@@ -121,7 +122,11 @@ namespace splitTime.editor.level {
                 fields.offsetY = {}
                 fields.offsetZ = {}
                 break
-        }
+            case splitTime.trace.Type.SEND:
+                fields.level = {}
+                fields.targetPosition = {}
+                break
+            }
 
         type SimplifiedTrace = { [K in keyof Required<typeof fields>]: string | number }
 

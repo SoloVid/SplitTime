@@ -261,6 +261,7 @@ namespace splitTime.level {
                 case splitTime.trace.Type.EVENT:
                 case splitTime.trace.Type.POINTER:
                 case splitTime.trace.Type.TRANSPORT:
+                case splitTime.trace.Type.SEND:
                     // Do nothing. We're just trying to weed out the other types.
                     break
                 default:
@@ -412,10 +413,11 @@ namespace splitTime.level {
                         const spec = trace.spec
                         switch (spec.type) {
                             case splitTime.trace.Type.EVENT:
-                                assert(spec.eventId !== null, "Event trace has no ID")
+                                assert(spec.eventId !== null, "Event trace has no event ID")
                                 collisionInfo.events[spec.eventId] = true
                                 break
                             case splitTime.trace.Type.TRANSPORT:
+                            case splitTime.trace.Type.SEND:
                                 collisionInfo.events[spec.getLocationId()] = true
                                 break
                             case splitTime.trace.Type.POINTER:
