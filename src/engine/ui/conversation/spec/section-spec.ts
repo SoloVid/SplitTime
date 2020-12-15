@@ -11,6 +11,12 @@ namespace splitTime.conversation {
             for (const part of parts) {
                 part.setParent(this)
             }
+            for (const i of interruptibles) {
+                i.setParent(this)
+            }
+            if (cancelSection !== null) {
+                cancelSection.setParent(this)
+            }
         }
 
         setParent(parent: SectionSpec | ConversationSpec): void {
