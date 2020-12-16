@@ -4,13 +4,16 @@ namespace splitTime.trace {
         vertices: TracePointSpec[]
         z: number = 0
         height: number = 0
-        level: string = ""
-        offsetX: number = 0
-        offsetY: number = 0
-        offsetZ: number = 0
-        targetPosition: string = ""
+        linkLevel: string = ""
+        linkOffsetX: number = 0
+        linkOffsetY: number = 0
+        linkOffsetZ: number = 0
+        linkPosition: string = ""
         direction: direction_t | null = null
         eventId: string = ""
+
+        /** variable offset to apply to all coordinates, e.g. position of body if spec is relative */
+        offset: Coordinates3D = new Coordinates3D()
 
         constructor(type: string, vertices: string) {
             this.type = type
@@ -35,14 +38,14 @@ namespace splitTime.trace {
                     break
                 case Type.POINTER:
                 case Type.TRANSPORT:
-                    trace.level = rawTrace.level
-                    trace.offsetX = rawTrace.offsetX
-                    trace.offsetY = rawTrace.offsetY
-                    trace.offsetZ = rawTrace.offsetZ
+                    trace.linkLevel = rawTrace.level
+                    trace.linkOffsetX = rawTrace.offsetX
+                    trace.linkOffsetY = rawTrace.offsetY
+                    trace.linkOffsetZ = rawTrace.offsetZ
                     break
                 case Type.SEND:
-                    trace.level = rawTrace.level
-                    trace.targetPosition = rawTrace.targetPosition
+                    trace.linkLevel = rawTrace.level
+                    trace.linkPosition = rawTrace.targetPosition
                     break
             }
             return trace
@@ -50,11 +53,11 @@ namespace splitTime.trace {
 
         getLocationId() {
             return [
-                this.level,
-                this.offsetX,
-                this.offsetY,
-                this.offsetZ,
-                this.targetPosition
+                this.linkLevel,
+                this.linkOffsetX,
+                this.linkOffsetY,
+                this.linkOffsetZ,
+                this.linkPosition
             ].join(",")
         }
 
@@ -69,8 +72,23 @@ namespace splitTime.trace {
             }
         }
 
+        /** z value of trace spec with offset applied */
+        get offsetZ(): number {
+            return this.z + this.offset.z
+        }
+
+        /** vertices of trace spec with offset applied */
+        getOffsetVertices(): TracePointSpec[] {
+            return this.vertices.map(v => {
+                if (instanceOf.Coordinates2D(v)) {
+                    return new Coordinates2D(v.x + this.offset.x, v.y + this.offset.y)
+                }
+                return v
+            })
+        }
+
         getPolygon(): math.Polygon {
-            const points = ensureNoPositions(this.vertices)
+            const points = ensureNoPositions(this.getOffsetVertices())
                 .filter(v => v !== null)
                 .map(v => new Vector2D(v!.x, v!.y))
             return new math.Polygon(points)

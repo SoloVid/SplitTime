@@ -22,10 +22,10 @@ namespace splitTime.trace {
         }
 
         isPointAboveStairs(point: Coordinates3D): boolean {
-            if (point.z < this.spec.z) {
+            if (point.z < this.spec.offsetZ) {
                 return false
             }
-            if (point.z > this.spec.z + this.spec.height) {
+            if (point.z >= this.spec.offsetZ + this.spec.height) {
                 return true
             }
             const pointVector = new Vector3D(point.x, point.y, point.z)
@@ -59,7 +59,7 @@ namespace splitTime.trace {
             const point3D = {
                 x: point.x,
                 y: point.y,
-                z: spec.z + height
+                z: spec.offsetZ + height
             }
             return point3D
         })
@@ -71,5 +71,43 @@ namespace splitTime.trace {
             }
             return p
         })
+    }
+
+    /**
+     * Add a custom rendering order for the body to order based on
+     * whether or not the other body is fully above the stairs slope plane.
+     *
+     * The intention is that a prop post processor can call this method.
+     * Such a prop post processor should be set on a montage which has
+     * a graphic of the stairs/ramp and a single stairs trace.
+     * In order to bypass the default rendering order, you'll need to
+     * make the prop's body completely cover the cuboid space of the stairs
+     * and then also have the prop post processor turn off collisions for the body.
+     *
+     * Note that using this rendering scheme fails for cases where bodies will be
+     * positioned in front (higher y) of the stairs but not on top.
+     * For this reason, this method currently only really works for stairs on the back-side
+     * of some other larger solid.
+     * @param spriteBody 
+     */
+    export function applyStairsSlopePlaneRenderingOrder(spriteBody: SpriteBody): void {
+        const stairsTrace = findStairsTrace(spriteBody)
+        stairsTrace.offset = new Coordinates3D(spriteBody.body.x, spriteBody.body.y, spriteBody.body.z)
+        const strippedPoints = stairsTrace.getOffsetVertices().filter((v): v is (Coordinates2D | null) => typeof v !== "string")
+        const stairsPlane = new StairsPlane(stairsTrace, strippedPoints)
+        spriteBody.body.shouldRenderInFrontCustom = otherBody => {
+            return !stairsPlane.isPointAboveStairs(otherBody)
+        }
+    }
+
+    function findStairsTrace(spriteBody: SpriteBody): TraceSpec {
+        const collage = G.ASSETS.collages.get(spriteBody.sprite.collageId)
+        const montage = spriteBody.sprite.defaultMontageId ? collage.getMontage(spriteBody.sprite.defaultMontageId) : collage.getDefaultMontage()
+        for (const trace of montage.traces) {
+            if (trace.type === Type.STAIRS) {
+                return TraceSpec.fromRaw(trace)
+            }
+        }
+        throw new Error("No stairs trace found in montage")
     }
 }

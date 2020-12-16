@@ -7,8 +7,8 @@ namespace splitTime {
         readonly ref: int
         constructor(
             private readonly body: file.collage.BodySpec,
-            private readonly collageId: string,
-            private readonly defaultMontageId?: string
+            public readonly collageId: string,
+            public readonly defaultMontageId?: string
         ) {
             this.ref = nextRef++
         }

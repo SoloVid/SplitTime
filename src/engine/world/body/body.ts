@@ -16,6 +16,9 @@ namespace splitTime {
 
         drawables: splitTime.body.Drawable[] = []
         shadow = false
+        /**
+         * If implemented, returns true if this Body should render in front of otherBody
+         */
         shouldRenderInFrontCustom?: (otherBody: body.GraphBody) => (boolean | undefined)
 
         private _level: splitTime.Level | null = null

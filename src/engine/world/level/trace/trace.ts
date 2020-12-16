@@ -18,10 +18,10 @@ namespace splitTime {
 
         load(level: Level, world: World) {
             // this.vertices = trace.extractCoordinates(this.spec.vertices, level.getPositionMap())
-            this.level = this.spec.level ? world.getLevel(this.spec.level) : null
-            this.offsetX = this.spec.offsetX
-            this.offsetY = this.spec.offsetY
-            this.offsetZ = this.spec.offsetZ
+            this.level = this.spec.linkLevel ? world.getLevel(this.spec.linkLevel) : null
+            this.offsetX = this.spec.linkOffsetX
+            this.offsetY = this.spec.linkOffsetY
+            this.offsetZ = this.spec.linkOffsetZ
         }
 
         getPointerOffset(): PointerOffset {
@@ -40,10 +40,10 @@ namespace splitTime {
         }
 
         getTargetPosition(): Position {
-            if (!this.spec.targetPosition) {
+            if (!this.spec.linkPosition) {
                 throw new Error("Trace does not have a target Position")
             }
-            return this.getLevel().getPosition(this.spec.targetPosition)
+            return this.getLevel().getPosition(this.spec.linkPosition)
         }
 
         getLocationId() {

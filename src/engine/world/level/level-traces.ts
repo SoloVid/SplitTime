@@ -111,7 +111,7 @@ namespace splitTime.level {
         }
 
         private calculateLayerZs(traces: readonly Trace[]): int[] {
-            let layerZs = this.fillLayerZGaps(traces, traces.map(t => Math.floor(t.spec.z)))
+            let layerZs = this.fillLayerZGaps(traces, traces.map(t => Math.floor(t.spec.offsetZ)))
             return layerZs.sort((a, b) => a - b)
         }
 
@@ -128,8 +128,8 @@ namespace splitTime.level {
             const MAX_LAYER_Z = 240
             for (const trace of traces) {
                 const spec = trace.spec
-                let startZ = spec.z
-                for (let currentZ = startZ; currentZ < spec.z + spec.height; currentZ++) {
+                let startZ = spec.offsetZ
+                for (let currentZ = startZ; currentZ < spec.offsetZ + spec.height; currentZ++) {
                     if (zSet[currentZ]) {
                         startZ = currentZ
                     } else if (currentZ - startZ > MAX_LAYER_Z) {
@@ -148,14 +148,14 @@ namespace splitTime.level {
         private drawPartialSolidTrace(trace: Trace, a: Uint8ClampedArray, minZ: int, exMaxZ: int): void {
             const spec = trace.spec
             const maxHeight = exMaxZ - minZ
-            if (spec.height > 0 && !isOverlap(spec.z, spec.height, minZ, maxHeight)) {
+            if (spec.height > 0 && !isOverlap(spec.offsetZ, spec.height, minZ, maxHeight)) {
                 return
             }
-            if (spec.height === 0 && (spec.z < minZ || spec.z >= exMaxZ)) {
+            if (spec.height === 0 && (spec.offsetZ < minZ || spec.offsetZ >= exMaxZ)) {
                 return
             }
-            const minZRelativeToTrace = minZ - spec.z
-            const traceHeightFromMinZ = spec.z + spec.height - minZ
+            const minZRelativeToTrace = minZ - spec.offsetZ
+            const traceHeightFromMinZ = spec.offsetZ + spec.height - minZ
             const pixelHeight = constrain(traceHeightFromMinZ, 0, maxHeight)
             const groundR = 1
             const topR = Math.min(255, pixelHeight + 1)
@@ -201,8 +201,8 @@ namespace splitTime.level {
                     // range of the stairs gradient.
                     // 0 <= startFraction < endFraction <= 1
                     const startFraction = minZRelativeToTrace / spec.height
-                    const stairsTopThisLayer = Math.min(spec.z + spec.height, exMaxZ)
-                    const stairsTopRelativeToTrace = stairsTopThisLayer - spec.z
+                    const stairsTopThisLayer = Math.min(spec.offsetZ + spec.height, exMaxZ)
+                    const stairsTopRelativeToTrace = stairsTopThisLayer - spec.offsetZ
                     const endFraction = stairsTopRelativeToTrace / spec.height
 
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
@@ -254,7 +254,7 @@ namespace splitTime.level {
 
         private drawPartialSpecialTrace(trace: Trace, a: Uint8ClampedArray, minZ: int, exMaxZ: int, specialTraceBins: (Trace[] | null)[]): void {
             const spec = trace.spec
-            if (!isOverlap(spec.z, spec.height, minZ, exMaxZ - minZ)) {
+            if (!isOverlap(spec.offsetZ, spec.height, minZ, exMaxZ - minZ)) {
                 return
             }
             switch (spec.type) {
@@ -407,7 +407,7 @@ namespace splitTime.level {
                             continue
                         }
                         const trace = bin[i]
-                        if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.z, trace.spec.height)) {
+                        if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
                             continue
                         }
                         const spec = trace.spec

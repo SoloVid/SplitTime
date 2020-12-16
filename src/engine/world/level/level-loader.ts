@@ -110,7 +110,7 @@ namespace splitTime {
         }
 
         connectPositionsFromPath(traceSpec: trace.TraceSpec) {
-            const points = traceSpec.vertices
+            const points = traceSpec.getOffsetVertices()
             for (let i = 0; i < points.length; i++) {
                 const point1 = points[i]
                 if (typeof point1 === "string") {
@@ -143,7 +143,7 @@ namespace splitTime {
                 const collageMontage = G.ASSETS.collages.get(prop.collage).getMontage(prop.montage)
                 // const sprite = new Sprite(prop.collage, prop.montage)
                 const body = new Body()
-                const sprite = new Sprite(body, prop.collage)
+                const sprite = new Sprite(body, prop.collage, prop.montage)
                 sprite.playerOcclusionFadeFactor = collageMontage.playerOcclusionFadeFactor
                 body.width = collageMontage.bodySpec.width
                 body.depth = collageMontage.bodySpec.depth
@@ -174,6 +174,16 @@ namespace splitTime {
             this.refetchBodies(world)
             assert(this.fileData !== null, "Level must have file data to be loaded")
             const traceSpecs = this.fileData.traces.map(t => trace.TraceSpec.fromRaw(t))
+            for (const prop of this.fileData.props) {
+                const collageMontage = G.ASSETS.collages.get(prop.collage).getMontage(prop.montage, prop.dir)
+                for (const t of collageMontage.traces) {
+                    const spec = trace.TraceSpec.fromRaw(t)
+                    spec.offset.x = prop.x
+                    spec.offset.y = prop.y
+                    spec.offset.z = prop.z
+                    traceSpecs.push(spec)
+                }
+            }
             const traces = traceSpecs.map(spec => {
                 const trace = new Trace(spec)
                 trace.load(this.level, world)
