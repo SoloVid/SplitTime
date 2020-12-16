@@ -16,6 +16,7 @@ namespace splitTime {
 
         drawables: splitTime.body.Drawable[] = []
         shadow = false
+        shouldRenderInFrontCustom?: (otherBody: body.GraphBody) => (boolean | undefined)
 
         private _level: splitTime.Level | null = null
         levelLocked: boolean = false
