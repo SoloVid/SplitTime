@@ -65,6 +65,7 @@ namespace splitTime.trace {
     class StairsFixture {
         private readonly spec: TraceSpec
         private readonly points: (Coordinates2D | null)[]
+        private readonly stairsPlane: StairsPlane
         constructor(
             direction: string,
             z: int,
@@ -74,11 +75,12 @@ namespace splitTime.trace {
             this.spec = makeSpec(coords, direction, z, height)
             this.points = this.coords.map(c => new Coordinates3D(c[0], c[1]))
             this.points.push(null)
+            this.stairsPlane = new StairsPlane(this.spec, this.points)
         }
 
         isPointAbove(x: int, y: int, z: int): boolean {
             const pointCoord = new Coordinates3D(x, y, z)
-            return isPointAboveStairs(pointCoord, this.spec, this.points)
+            return this.stairsPlane.isPointAboveStairs(pointCoord)
         }
     }
 

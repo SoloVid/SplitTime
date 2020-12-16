@@ -1,34 +1,40 @@
 namespace splitTime.trace {
 
-    export function isPointAboveStairs(
-        point: Coordinates3D,
-        spec: TraceSpec,
-        pointsArray2D: (Coordinates2D | null)[]
-    ): boolean {
-        if (point.z < spec.z) {
-            return false
-        }
-        if (point.z > spec.z + spec.height) {
-            return true
+    export class StairsPlane {
+        private readonly v1: Vector3D
+        private readonly normal: Vector3D
+        private readonly upSign: number
+
+        constructor(
+            private readonly spec: TraceSpec,
+            pointsArray2D: (Coordinates2D | null)[]
+        ) {
+            const stairsPlane = calculateStairsPlane(spec, pointsArray2D)
+            assert(stairsPlane.length >= 3, "Stairs must have at least three points")
+            this.v1 = new Vector3D(stairsPlane[0].x, stairsPlane[0].y, stairsPlane[0].z)
+            const v2 = new Vector3D(stairsPlane[1].x, stairsPlane[1].y, stairsPlane[1].z)
+            const v3 = new Vector3D(stairsPlane[2].x, stairsPlane[2].y, stairsPlane[2].z)
+            // Two vectors along plane
+            const s1 = this.v1.plus(v2.times(-1))
+            const s2 = v3.plus(v2.times(-1))
+            this.normal = s1.cross(s2)
+            this.upSign = this.normal.dot(new Vector3D(0, 0, 1))
         }
 
-        const stairsPlane = calculateStairsPlane(spec, pointsArray2D)
-        assert(stairsPlane.length >= 3, "Stairs must have at least three points")
-        const v1 = new Vector3D(stairsPlane[0].x, stairsPlane[0].y, stairsPlane[0].z)
-        const v2 = new Vector3D(stairsPlane[1].x, stairsPlane[1].y, stairsPlane[1].z)
-        const v3 = new Vector3D(stairsPlane[2].x, stairsPlane[2].y, stairsPlane[2].z)
-        // Two vectors along plane
-        const s1 = v1.plus(v2.times(-1))
-        const s2 = v3.plus(v2.times(-1))
-        const normal = s1.cross(s2)
-        const upSign = normal.dot(new Vector3D(0, 0, 1))
-
-        const pointVector = new Vector3D(point.x, point.y, point.z)
-        const pointRelativeToPlane = pointVector.plus(v1.times(-1))
-        const pointProjectedOntoNormal = normal.dot(pointRelativeToPlane)
-        const positiveIfSignsSame = upSign * pointProjectedOntoNormal
-        // The equal to zero part is trying to be a little more inclusive
-        return positiveIfSignsSame >= 0
+        isPointAboveStairs(point: Coordinates3D): boolean {
+            if (point.z < this.spec.z) {
+                return false
+            }
+            if (point.z > this.spec.z + this.spec.height) {
+                return true
+            }
+            const pointVector = new Vector3D(point.x, point.y, point.z)
+            const pointRelativeToPlane = pointVector.plus(this.v1.times(-1))
+            const pointProjectedOntoNormal = this.normal.dot(pointRelativeToPlane)
+            const positiveIfSignsSame = this.upSign * pointProjectedOntoNormal
+            // The equal to zero part is trying to be a little more inclusive
+            return positiveIfSignsSame >= 0
+        }
     }
 
     /**
