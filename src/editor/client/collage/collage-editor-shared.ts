@@ -2,6 +2,8 @@ namespace splitTime.editor.collage {
     export class SharedStuff implements CollageEditorShared {
         readonly info = {}
         propertiesPaneStuff: client.ObjectProperties | null
+        traceInProgress: splitTime.level.file_data.Trace | null = null
+        traceTypeSelected = ""
 
         constructor(
             private editor: VueCollageEditor
@@ -57,6 +59,7 @@ namespace splitTime.editor.collage {
         }
 
         selectMontage(montage: file.collage.Montage, andProperties: boolean = true): void {
+            this.traceInProgress = null
             this.selectedMontage = montage
             if (andProperties) {
                 this.editProperties(getMontagePropertiesStuff(montage, () => {
@@ -96,6 +99,7 @@ namespace splitTime.editor.collage {
         }
 
         trackFrame(frame: file.collage.Frame, point?: Coordinates2D): void {
+            this.traceInProgress = null
             this.selectFrame(frame, true)
             const left = frame.x
             const top = frame.y

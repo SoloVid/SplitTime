@@ -38,6 +38,22 @@ namespace splitTime.editor {
     export function toJson<T>(data: file.IsJsonable<T>): file.json {
         return JSON.stringify(data, null, 4)
     }
+
+    export function safeGetColor(trace: splitTime.level.file_data.Trace, metadata: client.EditorMetadata) {
+        if(metadata.highlighted) {
+            return "rgba(255, 255, 0, 0.8)"
+        }
+        let type = trace.type
+        if(type === splitTime.trace.Type.SOLID && +trace.height === 0) {
+            type = splitTime.trace.Type.GROUND
+        }
+        for(const traceOption of client.traceOptions) {
+            if(traceOption.type === type) {
+                return traceOption.color
+            }
+        }
+        return "rgba(255, 255, 255, 1)"
+    }
 }
 
 namespace splitTime.editor.level {
@@ -139,22 +155,7 @@ namespace splitTime.editor.level {
         levelObject.traces.push(trace)
         return trace
     }
-    
-    export function safeGetColor(trace: splitTime.level.file_data.Trace, metadata: client.EditorMetadata) {
-        if(metadata.highlighted) {
-            return "rgba(255, 255, 0, 0.8)"
-        }
-        let type = trace.type
-        if(type === splitTime.trace.Type.SOLID && +trace.height === 0) {
-            type = splitTime.trace.Type.GROUND
-        }
-        for(const traceOption of client.traceOptions) {
-            if(traceOption.type === type) {
-                return traceOption.color
-            }
-        }
-        return "rgba(255, 255, 255, 1)"
-    }
+
     export function safeExtractTraceArray(levelObject: Level, traceStr: string): (Readonly<Coordinates2D> | null)[] {
         const pointSpecs = splitTime.trace.interpretPointString(traceStr)
         return splitTime.trace.convertPositions(pointSpecs, getPositionMap(levelObject))

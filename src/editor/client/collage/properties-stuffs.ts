@@ -79,4 +79,10 @@ namespace splitTime.editor.collage {
             doDelete: () => null
         }
     }
+
+    export function getTracePropertiesStuff(montage: file.collage.Montage, trace: splitTime.level.file_data.Trace): client.ObjectProperties {
+        return client.getTracePropertiesStuff(trace, () => {
+            montage.traces = montage.traces.filter(t => t !== trace)
+        })
+    }
 }
