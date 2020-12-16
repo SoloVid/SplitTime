@@ -104,40 +104,15 @@ namespace splitTime.editor.client {
         }, "")
     }
     function pointsStairsSlope(this: VueRenderedTrace): string {
-        var that = this
         const pointsArray2D = this.pointsArray
-        let pointsArray3D: (Coordinates3D | null)[] = []
+        let pointsArray3D: (Coordinates3D)[] = []
         if(this.trace.type === splitTime.trace.Type.STAIRS && !!this.trace.direction && pointsArray2D.length >= 3) {
-            var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace)
-            var extremes = officialTrace.calculateStairsExtremes()
-            var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y)
-            var stairsLength = stairsVector.magnitude
-            var totalDZ = that.trace.height
-            pointsArray3D = pointsArray2D.map(point => {
-                if(!point) {
-                    return point
-                }
-                var partUpVector = new splitTime.Vector2D(point.x - extremes.bottom.x, point.y - extremes.bottom.y) 
-                var distanceUp = stairsVector.times(partUpVector.dot(stairsVector) / (stairsLength * stairsLength)).magnitude
-                var height = Math.min(Math.round(totalDZ * (distanceUp / stairsLength)), totalDZ)
-                const point3D = {
-                    x: point.x,
-                    y: point.y,
-                    z: that.trace.z + height
-                }
-                return point3D
-            })
+            const officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace)
+            pointsArray3D = splitTime.trace.calculateStairsPlane(officialTrace, pointsArray2D)
         }
         return pointsArray3D.reduce(function(pointsStr, point) {
-            var y
-            if(point !== null) {
-                y = point.y - point.z
-                return pointsStr + " " + point.x + "," + y
-            } else if(pointsArray3D.length > 0 && pointsArray3D[0] !== null) {
-                y = pointsArray3D[0].y - pointsArray3D[0].z
-                return pointsStr + " " + pointsArray3D[0].x + "," + y
-            }
-            return pointsStr
+            const y = point.y - point.z
+            return pointsStr + " " + point.x + "," + y
         }, "")
     }
     function traceFill(this: VueRenderedTrace): string {
