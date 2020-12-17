@@ -19,43 +19,6 @@ namespace splitTime {
         return SCRIPT_DIRECTORY
     }
 
-    /**
-     * Math.random() is uniform distribution. This is normal.
-     */
-    export function randomNormal(): number {
-        // Implementation from https://stackoverflow.com/a/49434653/4639640
-        let u = 0, v = 0;
-        while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-        while(v === 0) v = Math.random();
-        let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-        num = num / 10.0 + 0.5; // Translate to 0 -> 1
-        if (num > 1 || num < 0) return randomNormal(); // resample between 0 and 1
-        return num;
-    }
-
-    /**
-     * random integer between 1 and num (inclusive)
-     */
-    export function randomInt(num: number) {
-        return Math.floor(Math.random() * num + 1)
-    }
-
-    /**
-     * random integer between min and max (inclusive)
-     */
-    export function randomRangedInt(min: int, max: int): int {
-        const howManyIntegers = max - min + 1
-        const whichOnePicked = randomInt(howManyIntegers)
-        return whichOnePicked + min - 1
-    }
-
-    /**
-     * random number between min and max (exclusive)
-     */
-    export function randomRanged(min: number, max: number, random: () => number = Math.random): number {
-        return random() * (max - min) + min
-    }
-
     // Implementation from https://stackoverflow.com/a/1349426/4639640
     export function generateUID(length: int = 16) {
         var result           = ''
