@@ -155,7 +155,7 @@ namespace splitTime {
                 sprite.requestStance(prop.montage, body.dir, true, true)
                 const spriteBody = new SpriteBody(sprite, body)
                 if (!!collageMontage.propPostProcessorId) {
-                    world.propPostProcessor.process(collageMontage.propPostProcessorId, spriteBody)
+                    world.propPostProcessor.process(collageMontage.propPostProcessorId, spriteBody, prop)
                 }
             }
         }
