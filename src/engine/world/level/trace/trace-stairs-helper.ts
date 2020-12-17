@@ -1,5 +1,5 @@
 namespace splitTime.trace {
-
+    const upward = new Vector3D(0, 0, 1)
     export class StairsPlane {
         private readonly v1: Vector3D
         private readonly normal: Vector3D
@@ -18,7 +18,7 @@ namespace splitTime.trace {
             const s1 = this.v1.plus(v2.times(-1))
             const s2 = v3.plus(v2.times(-1))
             this.normal = s1.cross(s2)
-            this.upSign = this.normal.dot(new Vector3D(0, 0, 1))
+            this.upSign = this.normal.dot(upward)
         }
 
         isPointAboveStairs(point: Coordinates3D): boolean {
@@ -75,7 +75,9 @@ namespace splitTime.trace {
 
     /**
      * Add a custom rendering order for the body to order based on
-     * whether or not the other body is fully above the stairs slope plane.
+     * whether or not the other body is fully above the stairs slope plane
+     * and subsequently whether or not the other body is behind the best
+     * guess vertical plane.
      *
      * The intention is that a prop post processor can call this method.
      * Such a prop post processor should be set on a montage which has
@@ -84,19 +86,19 @@ namespace splitTime.trace {
      * make the prop's body completely cover the cuboid space of the stairs
      * and then also have the prop post processor turn off collisions for the body.
      *
-     * Note that using this rendering scheme fails for cases where bodies will be
-     * positioned in front (higher y) of the stairs but not on top.
-     * For this reason, this method currently only really works for stairs on the back-side
-     * of some other larger solid.
-     * @param spriteBody 
+     * For best results, the stairs trace should be a convex polygon.
      */
-    export function applyStairsSlopePlaneRenderingOrder(spriteBody: SpriteBody): void {
+    export function applyStairsRenderingOrder(spriteBody: SpriteBody): void {
         const stairsTrace = findStairsTrace(spriteBody)
         stairsTrace.offset = new Coordinates3D(spriteBody.body.x, spriteBody.body.y, spriteBody.body.z)
-        const strippedPoints = stairsTrace.getOffsetVertices().filter((v): v is (Coordinates2D | null) => typeof v !== "string")
+        const strippedPoints = splitTime.trace.ensureNoPositions(stairsTrace.getOffsetVertices())
         const stairsPlane = new StairsPlane(stairsTrace, strippedPoints)
+        const verticalPlane = new TraceVerticalPlaneDivide(stairsTrace)
         spriteBody.body.shouldRenderInFrontCustom = otherBody => {
-            return !stairsPlane.isPointAboveStairs(otherBody)
+            if (stairsPlane.isPointAboveStairs(otherBody)) {
+                return false
+            }
+            return verticalPlane.isPointBehindPlane(otherBody)
         }
     }
 
