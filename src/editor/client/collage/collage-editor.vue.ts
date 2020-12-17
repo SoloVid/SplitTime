@@ -138,12 +138,14 @@ namespace splitTime.editor.collage {
             ></collage-showcase>
         </div>
     </div>
-    <montage-editor
-        v-if="!!sharedStuff.selectedMontage"
-        :collage-editor-shared="sharedStuff"
-        :editor-inputs="editorInputs"
-        :montage="sharedStuff.selectedMontage"
-    ></montage-editor>
+    <div style="overflow: auto; height: 50%;">
+        <montage-editor
+            v-if="!!sharedStuff.selectedMontage"
+            :collage-editor-shared="sharedStuff"
+            :editor-inputs="editorInputs"
+            :montage="sharedStuff.selectedMontage"
+        ></montage-editor>
+    </div>
 </div>
         `
     })
