@@ -22,7 +22,10 @@ namespace splitTime {
         shouldRenderInFrontCustom?: (otherBody: body.GraphBody) => (boolean | undefined)
 
         private _level: splitTime.Level | null = null
+        /** If true, linking traces won't attempt to change level, and direct setting will throw exception. */
         levelLocked: boolean = false
+        /** If true, Body will be destroyed when parent level is unloaded. */
+        ethereal: boolean = false
         // Coordinates represent center of base: x is midpoint, y is midpoint, z is bottom
         private _x = 0
         private _y = 0

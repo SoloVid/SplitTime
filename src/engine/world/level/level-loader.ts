@@ -1,14 +1,11 @@
 namespace splitTime {
     export class LevelLoader {
         private fileData: level.FileData | null = null
-        _addingProps: boolean
 
         constructor(
             private readonly level: Level,
             private readonly levelData: splitTime.level.FileData
-        ) {
-            this._addingProps = false
-        }
+        ) {}
 
         hasData(): boolean {
             return this.fileData !== null
@@ -138,11 +135,11 @@ namespace splitTime {
                 this.level._cellGrid.addBody(body)
             }
 
-            this._addingProps = true
             for (const prop of this.fileData.props) {
                 const collageMontage = G.ASSETS.collages.get(prop.collage).getMontage(prop.montage)
                 // const sprite = new Sprite(prop.collage, prop.montage)
                 const body = new Body()
+                body.ethereal = true
                 const sprite = new Sprite(body, prop.collage, prop.montage)
                 sprite.playerOcclusionFadeFactor = collageMontage.playerOcclusionFadeFactor
                 body.width = collageMontage.bodySpec.width
@@ -161,7 +158,6 @@ namespace splitTime {
                     world.propPostProcessor.process(collageMontage.propPostProcessorId, spriteBody)
                 }
             }
-            this._addingProps = false
         }
 
         async loadAssets(world: World): Promise<void> {
@@ -201,13 +197,11 @@ namespace splitTime {
             this.level._levelTraces = null
             this.level._cellGrid = null
 
-            for (const prop of this.level._props) {
-                // We don't just remove from this level because we don't want props to leak out into other levels.
-                if (prop.hasLevel()) {
-                    prop.level.removeBody(prop)
+            for (const body of this.level.bodies) {
+                if (body.ethereal) {
+                    body.clearLevel()
                 }
             }
-            this.level._props = []
         }
     }
 }
