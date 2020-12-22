@@ -199,7 +199,10 @@ namespace splitTime {
 
             for (const body of this.level.bodies) {
                 if (body.ethereal) {
+                    const llBefore = body.levelLocked
+                    body.levelLocked = false
                     body.clearLevel()
+                    body.levelLocked = llBefore
                 }
             }
         }
