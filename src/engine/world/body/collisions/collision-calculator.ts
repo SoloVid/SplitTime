@@ -15,7 +15,7 @@ namespace splitTime {
         vStepUpEstimate: number
         zBlockedTopEx: number
         events: string[]
-        targetOffset: trace.PointerOffset
+        targetOffset: trace.PointerOffset | null
     }
 
     class InternalCollisionInfo implements ApiCollisionInfo {
@@ -24,10 +24,10 @@ namespace splitTime {
         vStepUpEstimate: number = 0
         zBlockedTopEx: number = 0
         events: string[] = []
-        pointerOffsets: trace.PointerOffset[] = []
+        pointerOffsets: (trace.PointerOffset)[] = []
 
         constructor(
-            public targetOffset: trace.PointerOffset
+            public targetOffset: trace.PointerOffset | null
         ) {}
     }
 
@@ -49,7 +49,7 @@ namespace splitTime {
             ignoreBodies: splitTime.Body[] = [],
             ignoreEvents: boolean = false
         ): ApiCollisionInfo {
-            var collisionInfo = new InternalCollisionInfo(new SimplePointerOffset(level))
+            var collisionInfo = new InternalCollisionInfo(null)
             function handleFoundBody(otherBody: Body) {
                 for (const ignoreBody of ignoreBodies) {
                     if (otherBody === ignoreBody) {
@@ -96,7 +96,7 @@ namespace splitTime {
                     collisionInfo.vStepUpEstimate =
                         traceCollision.vStepUpEstimate
                 } else {
-                    const pointerOffsets: { [id: string]: trace.PointerOffset} = {}
+                    const pointerOffsets: { [id: string]: trace.PointerOffset } = {}
                     for (const pointerOffset of traceCollision.pointerOffsets) {
                         const offsetId = pointerOffset.getOffsetHash()
                         if (this.pointerStack.indexOf(offsetId) >= 0) {
@@ -132,14 +132,16 @@ namespace splitTime {
                                 break
                             }
                             // If we had decided this other level was our target, see if it wants to pawn us off
-                            if (pointerOffset.getOffsetHash() === collisionInfo.targetOffset.getOffsetHash()) {
-                                pointerOffsets[otherLevelCollisionInfo.targetOffset.getOffsetHash()] = otherLevelCollisionInfo.targetOffset
+                            const thisTargetOffset = collisionInfo.targetOffset
+                            const nextTargetOffset = otherLevelCollisionInfo.targetOffset
+                            if (thisTargetOffset !== null && nextTargetOffset !== null && pointerOffset.getOffsetHash() === thisTargetOffset.getOffsetHash()) {
+                                pointerOffsets[nextTargetOffset.getOffsetHash()] = nextTargetOffset
                             }
                         } finally {
                             this.pointerStack.pop()
                         }
                     }
-                    collisionInfo.targetOffset = choosePointerOffset(pointerOffsets, level)
+                    collisionInfo.targetOffset = chooseTheOneOrDefault(pointerOffsets, collisionInfo.targetOffset)
                 }
             }
             return collisionInfo
@@ -172,7 +174,7 @@ namespace splitTime {
                     ignoreEvents
                 )
 
-            const offset = choosePointerOffset(originCollisionInfo.pointerOffsets, level)
+            const offset = chooseTheOneOrDefault(originCollisionInfo.pointerOffsets, null)
             const collisionInfo = new InternalCollisionInfo(offset)
 
             collisionInfo.zBlockedTopEx = originCollisionInfo.zBlockedTopEx
@@ -181,9 +183,10 @@ namespace splitTime {
             collisionInfo.blocked =
                 originCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0
             for (let id in originCollisionInfo.pointerOffsets) {
-                collisionInfo.pointerOffsets.push(
-                    originCollisionInfo.pointerOffsets[id] || new SimplePointerOffset(level)
-                )
+                const offset = originCollisionInfo.pointerOffsets[id]
+                if (offset !== null) {
+                    collisionInfo.pointerOffsets.push(offset)
+                }
             }
             for (var eventId in originCollisionInfo.events) {
                 collisionInfo.events.push(eventId)
@@ -193,30 +196,12 @@ namespace splitTime {
         }
     }
 
-    export function choosePointerOffset(map: { [id: string]: trace.PointerOffset | null }, level: Level): trace.PointerOffset {
+    export function chooseTheOneOrDefault<T>(map: { [id: string]: T}, defaultOption: T): T {
         const ids = Object.keys(map)
         if (ids.length == 1) {
-            return map[ids[0]] || new SimplePointerOffset(level)
+            return map[ids[0]]
         }
-        return new SimplePointerOffset(level)
-    }
-
-    class SimplePointerOffset implements trace.PointerOffset {
-        constructor(
-            public level: Level,
-            public offsetX: number = 0,
-            public offsetY: number = 0,
-            public offsetZ: number = 0
-        ) {}
-
-        getOffsetHash(): string {
-            return [
-                this.level,
-                this.offsetX,
-                this.offsetY,
-                this.offsetZ
-            ].join(",")
-        }
+        return defaultOption
     }
 
     export const COLLISION_CALCULATOR = new CollisionCalculator()

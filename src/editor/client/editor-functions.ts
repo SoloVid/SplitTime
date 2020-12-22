@@ -136,21 +136,12 @@ namespace splitTime.editor.level {
             type = splitTime.trace.Type.SOLID
             height = 0
         }
-        const traceObj = {
-            id: "",
+        const traceObj = splitTime.level.file_data.makeTrace({
             group: group.id,
             type: type,
-            vertices: "",
             z: z,
             height: height,
-            direction: "",
-            event: "",
-            level: "",
-            offsetX: 0,
-            offsetY: 0,
-            offsetZ: 0,
-            targetPosition: ""
-        }
+        })
         const trace = client.withMetadata<"trace", splitTime.level.file_data.Trace>("trace", traceObj)
         levelObject.traces.push(trace)
         return trace

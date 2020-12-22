@@ -86,10 +86,14 @@ namespace splitTime.trace {
 
     function makeSpec(coords: CoordinateList, direction: string, z: int, height: int): TraceSpec {
         const verticesStr = coords.map(c => "(" + c[0] + ", " + c[1] + ")").join(" ") + " (close)"
-        const spec = new TraceSpec(Type.STAIRS, verticesStr)
-        spec.direction = splitTime.direction.interpret(direction)
-        spec.z = z
-        spec.height = height
-        return spec
+        const specFile = splitTime.level.file_data.makeTrace({
+            type: Type.STAIRS,
+            vertices: verticesStr,
+            direction,
+            z,
+            height
+        })
+        return TraceSpec.fromRaw(specFile)
+
     }
 }

@@ -2,7 +2,7 @@ namespace splitTime.body.collisions {
     interface VerticalCollisionInfo {
         bodies: Body[]
         events: string[]
-        targetOffset: trace.PointerOffset
+        targetOffset: trace.PointerOffset | null
         dzAllowed: number
     }
 
@@ -17,7 +17,7 @@ namespace splitTime.body.collisions {
         dimensions: file.collage.BodySpec
         bodies: CachedFallStopBody[]
         events: string[]
-        targetOffset: trace.PointerOffset
+        targetOffset: trace.PointerOffset | null
         ignoreBodies: Body[]
     }
 
@@ -103,7 +103,7 @@ namespace splitTime.body.collisions {
             }
 
             let bodies: Body[] = []
-            const targetOffsets: { [offsetHash: string]: trace.PointerOffset } = {}
+            const targetOffsets: { [offsetHash: string]: trace.PointerOffset | null } = {}
             var eventIdSet = {}
             let blocked = false
             for (var i = 0; i < steps; i++) {
@@ -132,7 +132,12 @@ namespace splitTime.body.collisions {
                 lowerBoundZ += kHat
                 targetZ += kHat
                 addArrayToSet(originCollisionInfo.events, eventIdSet)
-                targetOffsets[originCollisionInfo.targetOffset.getOffsetHash()] = originCollisionInfo.targetOffset
+                const targetOffset = originCollisionInfo.targetOffset
+                if (targetOffset === null) {
+                    targetOffsets[splitTime.level.traces.SELF_LEVEL_ID] = null
+                } else {
+                    targetOffsets[targetOffset.getOffsetHash()] = targetOffset
+                }
             }
 
             let dzAllowed = targetZ - z
@@ -145,7 +150,7 @@ namespace splitTime.body.collisions {
             const r = {
                 bodies: bodies,
                 events: Object.keys(eventIdSet),
-                targetOffset: choosePointerOffset(targetOffsets, level),
+                targetOffset: chooseTheOneOrDefault(targetOffsets, null),
                 dzAllowed: dzAllowed
             }
             if (dz < 0 && blocked) {

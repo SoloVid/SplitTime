@@ -1,10 +1,10 @@
 namespace splitTime {
     export namespace trace {
         export interface PointerOffset {
-            level: splitTime.Level
-            offsetX: number
-            offsetY: number
-            offsetZ: number
+            readonly level: splitTime.Level
+            readonly offsetX: number
+            readonly offsetY: number
+            readonly offsetZ: number
             getOffsetHash(): string
         }
 
@@ -21,28 +21,30 @@ namespace splitTime {
 
     export class Trace {
         // vertices: Coordinates2D[] = []
-        level: splitTime.Level | null = null
-        offsetX: number | null = null
-        offsetY: number | null = null
-        offsetZ: number | null = null
+        private _level: splitTime.Level | null = null
+        readonly offsetX: number
+        readonly offsetY: number
+        readonly offsetZ: number
 
         constructor(readonly spec: trace.TraceSpec) {
-        }
-
-        load(level: Level, world: World) {
-            // this.vertices = trace.extractCoordinates(this.spec.vertices, level.getPositionMap())
-            this.level = this.spec.linkLevel ? world.getLevel(this.spec.linkLevel) : null
             this.offsetX = this.spec.linkOffsetX
             this.offsetY = this.spec.linkOffsetY
             this.offsetZ = this.spec.linkOffsetZ
         }
 
+        load(level: Level, world: World) {
+            this._level = this.spec.linkLevel ? world.getLevel(this.spec.linkLevel) : null
+        }
+
         getPointerOffset(): trace.PointerOffset {
-            assert(!!this.level, "Pointer trace must have a level")
-            assert(!!this.offsetX || this.offsetX === 0, "Pointer trace must have offsetX")
-            assert(!!this.offsetY || this.offsetY === 0, "Pointer trace must have offsetY")
-            assert(!!this.offsetZ || this.offsetZ === 0, "Pointer trace must have offsetZ")
             return this as trace.PointerOffset
+        }
+
+        get level(): Level {
+            if (this._level === null) {
+                throw new Error("Trace isn't loaded; so the level can't be accessed")
+            }
+            return this._level
         }
 
         getLevel(): Level {

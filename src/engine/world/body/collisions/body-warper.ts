@@ -106,7 +106,7 @@ namespace splitTime.body {
             x: int,
             y: int,
             z: int
-        ): { blocked: boolean; events: string[]; targetOffset: trace.PointerOffset } {
+        ): { blocked: boolean; events: string[]; targetOffset: trace.PointerOffset | null } {
             var left = x - this.body.width / 2
             var top = y - this.body.depth / 2
 

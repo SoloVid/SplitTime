@@ -10,9 +10,9 @@ namespace splitTime.trace {
         ) {
             const basePoly = spec.getPolygon()
             const xExtremes = splitTime.math.polygon.getXExtremes(basePoly)
-            this.v1 = new Vector3D(xExtremes.left.x, xExtremes.left.y, spec.z)
-            const v2 = new Vector3D(xExtremes.right.x, xExtremes.right.y, spec.z)
-            const v3 = new Vector3D(this.v1.x, this.v1.y, spec.z + spec.height)
+            this.v1 = new Vector3D(xExtremes.left.x, xExtremes.left.y, spec.offsetZ)
+            const v2 = new Vector3D(xExtremes.right.x, xExtremes.right.y, spec.offsetZ)
+            const v3 = new Vector3D(this.v1.x, this.v1.y, spec.offsetZ + spec.height)
             // Two vectors along plane
             const s1 = this.v1.plus(v2.times(-1))
             const s2 = v3.plus(v2.times(-1))

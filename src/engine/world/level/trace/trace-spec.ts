@@ -1,24 +1,47 @@
 namespace splitTime.trace {
     export class TraceSpec {
-        type: string
-        vertices: TracePointSpec[]
-        z: number = 0
-        height: number = 0
-        linkLevel: string = ""
-        linkOffsetX: number = 0
-        linkOffsetY: number = 0
-        linkOffsetZ: number = 0
-        linkPosition: string = ""
+        readonly type: string
+        readonly vertices: TracePointSpec[]
+        readonly z: number = 0
+        readonly height: number = 0
+        readonly linkLevel: string = ""
+        readonly linkOffsetX: number = 0
+        readonly linkOffsetY: number = 0
+        readonly linkOffsetZ: number = 0
+        readonly linkPosition: string = ""
         private offsetHash: string = ""
-        direction: direction_t | null = null
-        eventId: string = ""
+        readonly direction: direction_t | null = null
+        readonly eventId: string = ""
 
         /** variable offset to apply to all coordinates, e.g. position of body if spec is relative */
         offset: Coordinates3D = new Coordinates3D()
 
-        constructor(type: string, vertices: string) {
-            this.type = type
-            this.vertices = interpretPointString(vertices)
+        private constructor(rawTrace: splitTime.level.file_data.Trace) {
+            this.type = rawTrace.type
+            this.vertices = interpretPointString(rawTrace.vertices)
+            this.z = +rawTrace.z
+            this.height = +rawTrace.height
+            switch (this.type) {
+                case Type.STAIRS:
+                    this.direction = direction.interpret(rawTrace.direction)
+                    break
+                case Type.EVENT:
+                    this.eventId = rawTrace.event
+                    break
+                case Type.POINTER:
+                case Type.TRANSPORT:
+                    this.linkLevel = rawTrace.level
+                    this.linkOffsetX = rawTrace.offsetX
+                    this.linkOffsetY = rawTrace.offsetY
+                    this.linkOffsetZ = rawTrace.offsetZ
+                    this.generateOffsetHash()
+                    break
+                case Type.SEND:
+                    this.linkLevel = rawTrace.level
+                    this.linkPosition = rawTrace.targetPosition
+                    this.generateOffsetHash()
+                    break
+            }
         }
 
         /**
@@ -27,31 +50,7 @@ namespace splitTime.trace {
         static fromRaw(
             rawTrace: splitTime.level.file_data.Trace
         ): TraceSpec {
-            var trace = new TraceSpec(rawTrace.type, rawTrace.vertices)
-            trace.z = +rawTrace.z
-            trace.height = +rawTrace.height
-            switch (trace.type) {
-                case Type.STAIRS:
-                    trace.direction = direction.interpret(rawTrace.direction)
-                    break
-                case Type.EVENT:
-                    trace.eventId = rawTrace.event
-                    break
-                case Type.POINTER:
-                case Type.TRANSPORT:
-                    trace.linkLevel = rawTrace.level
-                    trace.linkOffsetX = rawTrace.offsetX
-                    trace.linkOffsetY = rawTrace.offsetY
-                    trace.linkOffsetZ = rawTrace.offsetZ
-                    trace.generateOffsetHash()
-                    break
-                case Type.SEND:
-                    trace.linkLevel = rawTrace.level
-                    trace.linkPosition = rawTrace.targetPosition
-                    trace.generateOffsetHash()
-                    break
-            }
-            return trace
+            return new TraceSpec(rawTrace)
         }
 
         getOffsetHash() {

@@ -334,15 +334,21 @@ namespace splitTime.level {
             minZ: int,
             exMaxZ: int,
             ignoreEvents: boolean = false
-        ) {
+        ): void {
+            if (this.layerCount === 0) {
+                return
+            }
+            if (minZ < this.layerZs[0]) {
+                collisionInfo.pointerOffsets[traces.SELF_LEVEL_ID] = null
+            }
             for (
-                var iLayer = 0;
+                let iLayer = 0;
                 iLayer < this.layerCount;
                 iLayer++
             ) {
-                var layerZ = this.layerZs[iLayer]
+                const layerZ = this.layerZs[iLayer]
                 // This operation should be safe because there is a sentinel
-                var nextLayerZ = this.layerZs[iLayer + 1]
+                const nextLayerZ = this.layerZs[iLayer + 1]
                 if (exMaxZ > layerZ && minZ < nextLayerZ) {
                     this._calculatePixelCollision(
                         collisionInfo,
@@ -414,9 +420,7 @@ namespace splitTime.level {
                                 break
                             case splitTime.trace.Type.POINTER:
                                 isOtherLevel = true
-                                assert(!!trace.level, "Pointer trace has no level")
-                                const locationId = trace.getOffsetHash()
-                                collisionInfo.pointerOffsets[locationId] = trace.getPointerOffset()
+                                collisionInfo.pointerOffsets[trace.getOffsetHash()] = trace.getPointerOffset()
                                 break
                             default:
                                 throw new Error("Unexpected trace type " + spec.type)

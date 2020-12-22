@@ -65,7 +65,7 @@ namespace splitTime.body.collisions {
             bodies: splitTime.Body[]
             vStepUpEstimate: number
             events: string[]
-            targetOffset: trace.PointerOffset
+            targetOffset: trace.PointerOffset | null
         } {
             var edgeX =
                 dx > 0

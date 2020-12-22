@@ -66,9 +66,9 @@ namespace splitTime {
                 switch (traceSpec.type) {
                     case trace.Type.TRANSPORT:
                         const pointerOffset = t.getPointerOffset()
-                        var sendTraceId = traceSpec.getOffsetHash()
+                        const transportTraceId = traceSpec.getOffsetHash()
                         this.level.registerEvent(
-                            sendTraceId,
+                            transportTraceId,
                             ((trace, level) => {
                                 return (body: splitTime.Body) => {
                                     if (body.levelLocked) {
@@ -85,7 +85,7 @@ namespace splitTime {
                         )
                         break
                     case trace.Type.SEND:
-                        var sendTraceId = traceSpec.getOffsetHash()
+                        const sendTraceId = traceSpec.getOffsetHash()
                         this.level.registerEvent(
                             sendTraceId,
                             ((trace, level) => {
