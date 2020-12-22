@@ -106,17 +106,16 @@ namespace splitTime.level {
     splitTime.test.scenario(levelTracesTests, "Pointer trace", t => {
         testTraces([pointer1.trace], (coords, collisionInfo) => {
             t.assert(!collisionInfo.containsSolid, "Pointer trace should not be solid at " + coordsStr(coords))
-            const levels = collisionInfo.levels
-            const pointerTraces = collisionInfo.pointerTraces
+            const pointerTraces = collisionInfo.pointerOffsets
             // There should be no more than one here because we're checking
             // one pixel and there is one pointer trace.
             // FTODO: Is this a problem that it could be 0 or 1?
             // The zero case seems to come from referencing coordinates that are
             // undefined according to the traces specified.
-            t.assert(Object.keys(levels).length <= 1, "Should be no more than one level at " + coordsStr(coords))
+            // t.assert(Object.keys(levels).length <= 1, "Should be no more than one level at " + coordsStr(coords))
             if (pointer1.overlaps(coords)) {
                 t.assert(Object.keys(pointerTraces).length === 1, "Should be one pointer at " + coordsStr(coords))
-                t.assert(pointer1Level === levels[pointer1Level.id], "Expecting pointer1 level at " + coordsStr(coords))
+                // t.assert(pointer1Level === levels[pointer1Level.id], "Expecting pointer1 level at " + coordsStr(coords))
                 const actualTrace = pointerTraces[pointer1Level.id]
                 t.assert(pointer1.trace === actualTrace, "Expecting pointer1 level trace at " + coordsStr(coords))
             } else {
@@ -148,9 +147,9 @@ namespace splitTime.level {
             (coords, collisionInfo) => {
                 t.assert(smallCube.overlaps(coords) === collisionInfo.containsSolid,
                     "smallCube at " + coordsStr(coords))
-                t.assert(pointer1.overlaps(coords) === !!collisionInfo.pointerTraces[pointer1Level.id],
+                t.assert(pointer1.overlaps(coords) === !!collisionInfo.pointerOffsets[pointer1Level.id],
                     "pointer1 at " + coordsStr(coords))
-                t.assert(pointer2.overlaps(coords) === !!collisionInfo.pointerTraces[pointer2Level.id],
+                t.assert(pointer2.overlaps(coords) === !!collisionInfo.pointerOffsets[pointer2Level.id],
                     "pointer2 at " + coordsStr(coords))
                 t.assert(eventBox.overlaps(coords) === !!collisionInfo.events[eventId],
                     "eventBox at " + coordsStr(coords))

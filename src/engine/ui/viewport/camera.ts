@@ -8,13 +8,15 @@ namespace splitTime {
         public readonly SCREEN_WIDTH: int
         public readonly SCREEN_HEIGHT: int
 
+        private previousFocus: {
+            target: ILevelLocation2,
+            actual: Coordinates3D
+        } | null = null
         private actualFocusPoint: Coordinates3D = {
             x: 0,
             y: 0,
             z: 0
         }
-
-        private currentLevel: splitTime.Level | null = null
 
         private focusPoints: ILevelLocation2[] = []
 
@@ -116,10 +118,10 @@ namespace splitTime {
         }
 
         notifyFrameUpdate(delta: number) {
-            var existingLevel = this.currentLevel
-            this.currentLevel = this.currentLevelGetter()
+            const currentLevel = this.currentLevelGetter()
 
             var targetFocus = {
+                level: currentLevel,
                 x: 0,
                 y: 0,
                 z: 0
@@ -127,7 +129,7 @@ namespace splitTime {
 
             let pointsChosen = 0
             for (var i = 0; i < this.focusPoints.length; i++) {
-                if (this.focusPoints[i].level === this.currentLevel) {
+                if (this.focusPoints[i].level === currentLevel) {
                     pointsChosen++
                     targetFocus.x += this.focusPoints[i].x
                     targetFocus.y += this.focusPoints[i].y
@@ -145,8 +147,19 @@ namespace splitTime {
             targetFocus.y /= pointsChosen
             targetFocus.z /= pointsChosen
 
-            if (this.currentLevel !== existingLevel) {
+            if (this.previousFocus === null) {
                 this.actualFocusPoint = targetFocus
+            }
+            else if (currentLevel !== this.previousFocus.target.level) {
+                const dx = targetFocus.x - this.previousFocus.target.x
+                const dy = targetFocus.y - this.previousFocus.target.y
+                const dz = targetFocus.z - this.previousFocus.target.z
+                const newFocus = new Coordinates3D(
+                    this.previousFocus.actual.x + dx,
+                    this.previousFocus.actual.y + dy,
+                    this.previousFocus.actual.z + dz
+                )
+                this.actualFocusPoint = newFocus
             } else {
                 const idealNew = new Coordinates3D()
                 idealNew.x = splitTime.approachValue(
@@ -198,6 +211,10 @@ namespace splitTime {
                 } else {
                     this.actualFocusPoint = alignedNew
                 }
+            }
+            this.previousFocus = {
+                target: targetFocus,
+                actual: this.actualFocusPoint
             }
         }
 

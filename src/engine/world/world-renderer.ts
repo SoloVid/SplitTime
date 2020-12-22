@@ -229,6 +229,9 @@ namespace splitTime {
             this.fadeInAmount = this.fadeToTransparency
             this.fadeOutAmount = 0
             this.fadeInPromise = new splitTime.Pledge()
+            if (this.fadeInAmount <= 0) {
+                this.fadeInPromise.resolve()
+            }
             return this.fadeInPromise
         }
     }

@@ -1,9 +1,22 @@
 namespace splitTime {
-    interface PointerOffset {
-        level: splitTime.Level
-        offsetX: number
-        offsetY: number
-        offsetZ: number
+    export namespace trace {
+        export interface PointerOffset {
+            level: splitTime.Level
+            offsetX: number
+            offsetY: number
+            offsetZ: number
+            getOffsetHash(): string
+        }
+
+        export function isPointerOffsetSignificant(pointerOffset: PointerOffset | null, startLevel: Level): boolean {
+            if (pointerOffset === null) {
+                return false
+            }
+            if (pointerOffset.level !== startLevel) {
+                return true
+            }
+            return pointerOffset.offsetX !== 0 || pointerOffset.offsetY !== 0 || pointerOffset.offsetZ !== 0
+        }
     }
 
     export class Trace {
@@ -24,12 +37,12 @@ namespace splitTime {
             this.offsetZ = this.spec.linkOffsetZ
         }
 
-        getPointerOffset(): PointerOffset {
+        getPointerOffset(): trace.PointerOffset {
             assert(!!this.level, "Pointer trace must have a level")
             assert(!!this.offsetX || this.offsetX === 0, "Pointer trace must have offsetX")
             assert(!!this.offsetY || this.offsetY === 0, "Pointer trace must have offsetY")
             assert(!!this.offsetZ || this.offsetZ === 0, "Pointer trace must have offsetZ")
-            return this as PointerOffset
+            return this as trace.PointerOffset
         }
 
         getLevel(): Level {
@@ -46,8 +59,8 @@ namespace splitTime {
             return this.getLevel().getPosition(this.spec.linkPosition)
         }
 
-        getLocationId() {
-            return this.spec.getLocationId()
+        getOffsetHash() {
+            return this.spec.getOffsetHash()
         }
 
         calculateStairsExtremes(): { top: Vector2D, bottom: Vector2D } {

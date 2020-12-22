@@ -9,6 +9,7 @@ namespace splitTime.trace {
         linkOffsetY: number = 0
         linkOffsetZ: number = 0
         linkPosition: string = ""
+        private offsetHash: string = ""
         direction: direction_t | null = null
         eventId: string = ""
 
@@ -42,17 +43,23 @@ namespace splitTime.trace {
                     trace.linkOffsetX = rawTrace.offsetX
                     trace.linkOffsetY = rawTrace.offsetY
                     trace.linkOffsetZ = rawTrace.offsetZ
+                    trace.generateOffsetHash()
                     break
                 case Type.SEND:
                     trace.linkLevel = rawTrace.level
                     trace.linkPosition = rawTrace.targetPosition
+                    trace.generateOffsetHash()
                     break
             }
             return trace
         }
 
-        getLocationId() {
-            return [
+        getOffsetHash() {
+            return this.offsetHash
+        }
+
+        private generateOffsetHash() {
+            this.offsetHash = [
                 this.linkLevel,
                 this.linkOffsetX,
                 this.linkOffsetY,

@@ -2,40 +2,36 @@ namespace splitTime.body {
     export class Transporter {
         constructor(public readonly body: Body) {}
 
-        private detectApplicableOtherLevel(fromLevel: Level, fromX: number, fromY: number, fromZ: number): ILevelLocation2 | null {
-            var whereToNext = this._theNextTransport(
-                fromLevel,
-                fromX,
-                fromY,
-                fromZ
-            )
-            var whereTo = null
-            while (whereToNext !== null && whereToNext.level !== fromLevel) {
-                whereTo = whereToNext
-                whereToNext = this._theNextTransport(
-                    whereToNext.level,
-                    whereToNext.x,
-                    whereToNext.y,
-                    whereToNext.z
+        private detectApplicableOtherLevel(from: ILevelLocation2): ILevelLocation2 | null {
+            const maxDepth = 20
+            let whereLast = from
+            for (let i = 0; i < maxDepth; i++) {
+                const whereToNext = this._theNextTransport(
+                    whereLast.level,
+                    whereLast.x,
+                    whereLast.y,
+                    whereLast.z
                 )
-            }
-            var cyclicEnd = whereToNext !== null
-            if (cyclicEnd) {
-                if (splitTime.debug.ENABLED) {
-                    console.warn(
-                        "Cyclic pointer traces detected on level " +
-                            fromLevel.id +
-                            " near (" +
-                            fromX +
-                            ", " +
-                            fromY +
-                            ", " +
-                            fromZ +
-                            ")"
-                    )
+                if (whereToNext === null) {
+                    if (whereLast === from) {
+                        return null
+                    }
+                    return whereLast
                 }
-            } else if (whereTo !== null) {
-                return whereTo
+                whereLast = whereToNext
+            }
+            if (splitTime.debug.ENABLED) {
+                console.warn(
+                    "Cyclic pointer traces detected on level " +
+                        from.level.id +
+                        " near (" +
+                        from.x +
+                        ", " +
+                        from.y +
+                        ", " +
+                        from.z +
+                        ")"
+                )
             }
             return null
         }
@@ -44,12 +40,7 @@ namespace splitTime.body {
             if (this.body.levelLocked) {
                 return
             }
-            const whereTo = this.detectApplicableOtherLevel(
-                this.body.getLevel(),
-                this.body.getX(),
-                this.body.getY(),
-                this.body.getZ()
-            )
+            const whereTo = this.detectApplicableOtherLevel(this.body)
             if (whereTo !== null) {
                 smoothPut(this.body, whereTo)
             }
@@ -60,8 +51,8 @@ namespace splitTime.body {
             x: number,
             y: number,
             z: number
-        ): { level: splitTime.Level; x: number; y: number; z: number } | null {
-            let levelIdTo: string | null = null
+        ): ILevelLocation2 | null {
+            let offsetHash: string | null = null
             var levelTraces = levelFrom.getLevelTraces()
             var left = Math.round(x - this.body.width / 2)
             var topY = Math.round(y - this.body.depth / 2)
@@ -70,7 +61,7 @@ namespace splitTime.body {
             const xChecks = [left, left + this.body.width]
             const yChecks = [topY, topY + this.body.depth]
             const zChecks = [roundZ, topZ - 1]
-            let pointerTrace: Trace | null = null
+            let pointerOffset: trace.PointerOffset | null = null
             for (const xCheck of xChecks) {
                 for (const yCheck of yChecks) {
                     for (const zCheck of zChecks) {
@@ -84,27 +75,26 @@ namespace splitTime.body {
                             true
                         )
 
-                        const pointerTraces = cornerCollisionInfo.pointerTraces
+                        const pointerOffsets = cornerCollisionInfo.pointerOffsets
                         // Make sure no pointer trace is something different
-                        for (var key in pointerTraces) {
-                            if (levelIdTo === null) {
-                                levelIdTo = key
-                            } else if (key !== levelIdTo) {
+                        for (var key in pointerOffsets) {
+                            if (offsetHash === null) {
+                                offsetHash = key
+                            } else if (key !== offsetHash) {
                                 return null
                             }
                         }
                         // Make sure the pointer trace actually showed up in the list
-                        if (!levelIdTo || !pointerTraces[levelIdTo]) {
+                        if (!offsetHash || !pointerOffsets[offsetHash]) {
                             return null
                         }
-                        pointerTrace = pointerTraces[levelIdTo]
+                        pointerOffset = pointerOffsets[offsetHash]
                     }
                 }
             }
-            if (!pointerTrace) {
+            if (!pointerOffset || !trace.isPointerOffsetSignificant(pointerOffset, levelFrom)) {
                 return null
             }
-            const pointerOffset = pointerTrace.getPointerOffset()
             return {
                 level: pointerOffset.level,
                 x: x + pointerOffset.offsetX,

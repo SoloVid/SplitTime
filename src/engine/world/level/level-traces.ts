@@ -5,18 +5,10 @@ namespace splitTime.level {
         export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
 
         export class CollisionInfo {
-            containsSolid: boolean
-            levels: { [levelId: string]: Level | null }
-            pointerTraces: { [levelId: string]: splitTime.Trace }
-            zBlockedTopEx: int
-            events: { [eventId: string]: true }
-            constructor() {
-                this.containsSolid = false
-                this.levels = {}
-                this.pointerTraces = {}
-                this.zBlockedTopEx = -4096 // arbitrary
-                this.events = {}
-            }
+            containsSolid: boolean = false
+            pointerOffsets: { [offsetHash: string]: splitTime.trace.PointerOffset | null } = {}
+            zBlockedTopEx: int = -4096 // arbitrary
+            events: { [eventId: string]: true } = {}
         }
     }
 
@@ -418,13 +410,13 @@ namespace splitTime.level {
                                 break
                             case splitTime.trace.Type.TRANSPORT:
                             case splitTime.trace.Type.SEND:
-                                collisionInfo.events[spec.getLocationId()] = true
+                                collisionInfo.events[spec.getOffsetHash()] = true
                                 break
                             case splitTime.trace.Type.POINTER:
                                 isOtherLevel = true
                                 assert(!!trace.level, "Pointer trace has no level")
-                                collisionInfo.pointerTraces[trace.level.id] = trace
-                                collisionInfo.levels[trace.level.id] = trace.level
+                                const locationId = trace.getOffsetHash()
+                                collisionInfo.pointerOffsets[locationId] = trace.getPointerOffset()
                                 break
                             default:
                                 throw new Error("Unexpected trace type " + spec.type)
@@ -434,7 +426,7 @@ namespace splitTime.level {
             }
 
             if (!isOtherLevel) {
-                collisionInfo.levels[traces.SELF_LEVEL_ID] = null
+                collisionInfo.pointerOffsets[traces.SELF_LEVEL_ID] = null
             }
         }
 

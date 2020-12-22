@@ -3,7 +3,7 @@ namespace splitTime.conversation {
 
     interface LimitedPerspective {
         camera: Camera
-        levelManager: { getCurrent: () => Level }
+        levelManager: { isCurrentSet(): boolean, getCurrent: () => Level }
         playerBody: Body | null
     }
 
@@ -85,6 +85,10 @@ namespace splitTime.conversation {
         }
 
         notifyFrameUpdate() {
+            if (!this.perspective.levelManager.isCurrentSet()) {
+                return
+            }
+
             for (const c of this.conversations) {
                 c.checkForCancellations()
             }

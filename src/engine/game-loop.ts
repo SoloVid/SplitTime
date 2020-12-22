@@ -38,39 +38,22 @@ namespace splitTime {
 
     function mainGameLoopBody(g: GameLoop, msElapsed: number) {
         const perspective = g.perspective
-        g.performanceCheckpoint("start loop", 999999)
-
-        //Initiate level transition if applicable
         const isCurrentLevelSet = perspective.levelManager.isCurrentSet()
-        if (
-            !perspective.levelManager.isTransitioning() &&
-            perspective.playerBody &&
-            (!isCurrentLevelSet ||
-                perspective.playerBody.getLevel() !==
-                    perspective.levelManager.getCurrent())
-        ) {
-            perspective.levelManager.transition(
-                perspective.playerBody.getLevel()
-            )
-            g.performanceCheckpoint("level transition", 10)
-            
-            // FTODO: don't skip rest of frame
-            return
-        }
+        g.performanceCheckpoint("start loop", 999999)
 
         const secondsForFrame = Math.min(msElapsed / 1000, 1 / splitTime.FPS)
         const budget = new FrameBudget(1000 * secondsForFrame)
 
-        if (isCurrentLevelSet) {
+        g.notifyListenersFrameUpdate(secondsForFrame)
+        g.performanceCheckpoint("notify listeners of update", budget.takePart(0.05))
+
+        if (isCurrentLevelSet && !perspective.levelManager.isTransitioning()) {
             const level = perspective.levelManager.getCurrent()
             const region = level.getRegion()
             const timeline = region.getTimeline()
 
             timeline.notifyFrameUpdate(secondsForFrame)
             g.performanceCheckpoint("timeline frame update", budget.takePart(0.4))
-
-            g.notifyListenersFrameUpdate(secondsForFrame)
-            g.performanceCheckpoint("notify listeners of update", budget.takePart(0.05))
 
             splitTime.debug.setDebugValue(
                 "Board Bodies",
@@ -84,7 +67,23 @@ namespace splitTime {
                     "," +
                     Math.round(perspective.camera.getFocusPoint().z)
             )
+        }
 
+        //Initiate level transition if applicable
+        if (
+            !perspective.levelManager.isTransitioning() &&
+            perspective.playerBody &&
+            (!isCurrentLevelSet ||
+                perspective.playerBody.getLevel() !==
+                    perspective.levelManager.getCurrent())
+        ) {
+            perspective.levelManager.transition(
+                perspective.playerBody.getLevel()
+            )
+            g.performanceCheckpoint("level transition", 10)
+        }
+
+        if (isCurrentLevelSet) {
             perspective.camera.notifyFrameUpdate(secondsForFrame)
             perspective.worldRenderer.renderBoardState(true)
             g.performanceCheckpoint("world state render", budget.takePart(0.4))

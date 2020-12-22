@@ -2,7 +2,7 @@ namespace splitTime.body.collisions {
     interface VerticalCollisionInfo {
         bodies: Body[]
         events: string[]
-        targetLevel: Level
+        targetOffset: trace.PointerOffset
         dzAllowed: number
     }
 
@@ -17,7 +17,7 @@ namespace splitTime.body.collisions {
         dimensions: file.collage.BodySpec
         bodies: CachedFallStopBody[]
         events: string[]
-        targetLevel: Level
+        targetOffset: trace.PointerOffset
         ignoreBodies: Body[]
     }
 
@@ -43,7 +43,7 @@ namespace splitTime.body.collisions {
             if (collisionInfo.dzAllowed !== 0) {
                 this.mover.body.setZ(this.mover.body.z + collisionInfo.dzAllowed)
                 this.mover.body.level.runEvents(collisionInfo.events, this.mover.body)
-                if (collisionInfo.targetLevel !== this.mover.body.level) {
+                if (trace.isPointerOffsetSignificant(collisionInfo.targetOffset, this.mover.body.level)) {
                     this.mover.transportLevelIfApplicable()
                 }
             }
@@ -66,7 +66,7 @@ namespace splitTime.body.collisions {
                 return {
                     bodies: this.lastFallStopped!.bodies.map(a => a.body),
                     events: this.lastFallStopped!.events,
-                    targetLevel: this.lastFallStopped!.targetLevel,
+                    targetOffset: this.lastFallStopped!.targetOffset,
                     dzAllowed: 0
                 }
             }
@@ -103,7 +103,7 @@ namespace splitTime.body.collisions {
             }
 
             let bodies: Body[] = []
-            const targetLevels: { [levelId: string]: Level } = {}
+            const targetOffsets: { [offsetHash: string]: trace.PointerOffset } = {}
             var eventIdSet = {}
             let blocked = false
             for (var i = 0; i < steps; i++) {
@@ -132,7 +132,7 @@ namespace splitTime.body.collisions {
                 lowerBoundZ += kHat
                 targetZ += kHat
                 addArrayToSet(originCollisionInfo.events, eventIdSet)
-                targetLevels[originCollisionInfo.targetLevel.id] = originCollisionInfo.targetLevel
+                targetOffsets[originCollisionInfo.targetOffset.getOffsetHash()] = originCollisionInfo.targetOffset
             }
 
             let dzAllowed = targetZ - z
@@ -145,7 +145,7 @@ namespace splitTime.body.collisions {
             const r = {
                 bodies: bodies,
                 events: Object.keys(eventIdSet),
-                targetLevel: chooseTheOneOrDefault(targetLevels, level),
+                targetOffset: choosePointerOffset(targetOffsets, level),
                 dzAllowed: dzAllowed
             }
             if (dz < 0 && blocked) {
@@ -166,7 +166,7 @@ namespace splitTime.body.collisions {
                         }
                     })),
                     events: r.events,
-                    targetLevel: r.targetLevel,
+                    targetOffset: r.targetOffset,
                     ignoreBodies: ignoreBodies
                 }
             }

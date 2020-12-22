@@ -46,7 +46,7 @@ namespace splitTime.body.collisions {
             collisionInfo.blocked = simpleCollisionInfo.blocked
             collisionInfo.bodies = simpleCollisionInfo.bodies
             collisionInfo.events = simpleCollisionInfo.events
-            collisionInfo.targetLevel = simpleCollisionInfo.targetLevel
+            collisionInfo.targetOffset = simpleCollisionInfo.targetOffset
 
             return collisionInfo
         }
@@ -65,7 +65,7 @@ namespace splitTime.body.collisions {
             bodies: splitTime.Body[]
             vStepUpEstimate: number
             events: string[]
-            targetLevel: Level
+            targetOffset: trace.PointerOffset
         } {
             var edgeY =
                 dy > 0
