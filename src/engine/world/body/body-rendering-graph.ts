@@ -179,8 +179,8 @@ namespace splitTime.body {
      * returns true if the body in question should render in front of the other body.
      */
     function shouldRenderInFront(body1: GraphBody, body2: GraphBody): boolean | undefined {
-        if (isAbove(body1, body2) || isInFront(body1, body2)) {
-            //if body1 is completely above or in front
+        if (isAbove(body1, body2) && isInFront(body1, body2)) {
+            //if body1 is completely above and in front, it should clearly render in front
             return true
         } else if (isAbove(body2, body1) || isInFront(body2, body1)) {
             //if body2 is completely above or in front
@@ -198,7 +198,7 @@ namespace splitTime.body {
     }
 
     /**
-     * returns true if body1's top is lower than body2's bottom
+     * returns true if body2's top is lower than (or at the same z level as) body1's bottom
      */
     function isAbove(body1: GraphBody, body2: GraphBody) {
         return body1.z >= body2.z + body2.height
