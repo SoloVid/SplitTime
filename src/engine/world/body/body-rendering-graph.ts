@@ -180,7 +180,7 @@ namespace splitTime.body {
      */
     function shouldRenderInFront(body1: GraphBody, body2: GraphBody): boolean | undefined {
         if (isAbove(body1, body2) || isInFront(body1, body2)) {
-            //if body1 is completely above and in front, it should clearly render in front
+            //if body1 is completely above or in front
             return true
         } else if (isAbove(body2, body1) || isInFront(body2, body1)) {
             //if body2 is completely above or in front
