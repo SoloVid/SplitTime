@@ -1,10 +1,8 @@
 {
   "extends": "../../tsconfig-base.json",
-  "include": [
-    "./**/*.ts"
-  ],
   "references": [
-    { "path": ".." },
-    { "path": "../engine" }
+    { "path": "./client" },
+    { "path": "./server" }
   ],
+  "files": []
 }

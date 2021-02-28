@@ -47,6 +47,9 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    // sync-glob might be a good non-Grunt alternative
+    // https://github.com/AndyOGo/node-sync-glob/blob/HEAD/API.md
+    // https://www.npmjs.com/package/sync-glob
     grunt.loadNpmTasks('grunt-sync');
 
     grunt.registerTask('build', 'Build game project or just engine', function(projectName) {
@@ -153,10 +156,8 @@ module.exports = function(grunt) {
         } else {
             files = [
                 'node_modules/es6-promise/dist/es6-promise.auto.min.js',
-                'build/tsjs/compiler-defines.js',
-                'build/tsjs/defer.def.js',
-                'build/tsjs/environment.js',
-                'build/tsjs/globals.js',
+                'build/tsjs/*.js',
+                '!build/tsjs/defer.run.js',
                 'build/tsjs/engine/**/*.js'
             ];
             concatFilesWithSourceMaps(files, 'build/engine-without-dom-libraries.js');
