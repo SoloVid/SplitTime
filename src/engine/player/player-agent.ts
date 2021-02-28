@@ -8,6 +8,7 @@ namespace splitTime.player {
         movementAgent: splitTime.agent.ControlledCollisionMovement
         speed: Indirect<number> = 32
         walkStance: string = "walk"
+        readonly locationHistory = new LocationHistory(128)
 
         constructor(
             private readonly playerManager: PlayerManager,
@@ -79,6 +80,8 @@ namespace splitTime.player {
             if (!this.isFrozen() && this.spriteBody.body.getLevel().isLoaded()) {
                 this.movementAgent.notifyTimeAdvance(delta)
             }
+
+            this.locationHistory.push(this.body)
         }
     }
 }

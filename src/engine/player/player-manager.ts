@@ -27,8 +27,9 @@ namespace splitTime.player {
 
         getLadderEvent(direction: splitTime.direction_t): (body: Body, eventId: string) => void {
             return (body: splitTime.Body, eventId: string) => {
-                if (body === this.getActiveBody()) {
-                    this.getActive()!.setLadder(eventId, direction)
+                const agent = this.getActive()
+                if (agent !== null && body === agent.body) {
+                    agent.setLadder(eventId, direction)
                 }
             }
         }

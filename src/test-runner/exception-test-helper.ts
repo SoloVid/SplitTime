@@ -11,5 +11,15 @@ namespace splitTime.testRunner {
                 throw new Error(message + "\n\tExpected: |" + JSON.stringify(expected) + "|\n\tActual:   |" + JSON.stringify(actual) + "|\n")
             }
         }
+
+        assertThrow(callback: () => void, message: string): void {
+            let exceptionThrown = false
+            try {
+                callback()
+            } catch (e: unknown) {
+                exceptionThrown = true
+            }
+            this.assert(exceptionThrown, message)
+        }
     }
 }
