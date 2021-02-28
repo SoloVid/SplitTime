@@ -35,6 +35,7 @@ namespace splitTime {
         targetValue: number,
         step: number
     ) {
+        assert(step > 0, "step should be positive")
         if (oldValue < targetValue) {
             return Math.min(oldValue + step, targetValue)
         } else {
