@@ -11,14 +11,14 @@ namespace splitTime {
         private readonly bodyRenderer: body.Renderer
         private readonly weatherRenderer: WeatherRenderer
         
-        private fadingOut: boolean
-        private fadeOutAmount: number
-        private fadeInAmount: number
-        private readonly FADE_INCREMENT: number
-        private fadeToColor: splitTime.light.Color
-        private fadeToTransparency: number
-        private fadeOutPromise: splitTime.Pledge
-        private fadeInPromise: splitTime.Pledge
+        private fadingOut: boolean = false
+        private fadeOutAmount: number = 0
+        private fadeInAmount: number = 0
+        private readonly FADE_INCREMENT: number = 0.05
+        private fadeToColor: splitTime.light.Color = new splitTime.light.Color(0,0,0)
+        private fadeToTransparency: number = 1
+        private fadeOutPromise: splitTime.Pledge = new splitTime.Pledge()
+        private fadeInPromise: splitTime.Pledge = new splitTime.Pledge()
 
         constructor(
             private readonly camera: Camera,
@@ -28,15 +28,6 @@ namespace splitTime {
         ) {
             this.SCREEN_WIDTH = camera.SCREEN_WIDTH
             this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT
-
-            this.fadingOut = false
-            this.fadeOutAmount = 0
-            this.fadeInAmount = 0
-            this.FADE_INCREMENT = 0.05
-            this.fadeToColor = new splitTime.light.Color(0,0,0)
-            this.fadeToTransparency = 0
-            this.fadeInPromise = new splitTime.Pledge()
-            this.fadeOutPromise = new splitTime.Pledge()
 
             this.buffer = new splitTime.Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
             this.snapshot = new splitTime.Canvas(
