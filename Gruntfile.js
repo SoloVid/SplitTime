@@ -98,7 +98,7 @@ module.exports = function(grunt) {
             grunt.file.write(path.join(tsconfigRoot, "tsconfig.json"), grunt.file.read("tsconfig.project.json"));
         }
         grunt.verbose.writeln("Running in " + tsconfigRoot);
-        var process = childProcess.fork(tscPath, [], {
+        var process = childProcess.fork(tscPath, ["-b"], {
             cwd: tsconfigRoot
         });
         process.on('error', function(err) {
@@ -153,9 +153,10 @@ module.exports = function(grunt) {
         } else {
             files = [
                 'node_modules/es6-promise/dist/es6-promise.auto.min.js',
-                'build/tsjs/compiler-defines.debug.js',
-                'build/tsjs/environment.js',
+                'build/tsjs/compiler-defines.js',
                 'build/tsjs/defer.def.js',
+                'build/tsjs/environment.js',
+                'build/tsjs/globals.js',
                 'build/tsjs/engine/**/*.js'
             ];
             concatFilesWithSourceMaps(files, 'build/engine-without-dom-libraries.js');

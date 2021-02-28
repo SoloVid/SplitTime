@@ -6,7 +6,7 @@ namespace splitTime.editor.level {
         // data
         editorPadding: number
         // computed
-        allEntitiesSorted: (Position | Prop | Trace)[]
+        allEntitiesSorted: EditorEntity[]
         backgroundSrc: string
         backgroundStyleObject: object
         level: Level
