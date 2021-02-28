@@ -1,4 +1,7 @@
 namespace splitTime.conversation {
+    /**
+     * Helper class for navigating forward through the conversation tree.
+     */
     export class TreeTraveler {
         getFirst(section: SectionSpec): ConversationLeafNode | null {
             for (const part of section.parts) {
@@ -113,4 +116,6 @@ namespace splitTime.conversation {
             return parent.getParent()
         }
     }
+
+    export const treeTraveler = new TreeTraveler()
 }

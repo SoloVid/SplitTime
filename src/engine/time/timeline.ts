@@ -85,6 +85,9 @@ namespace splitTime {
             otherTimeline.timelineRelations.push(new TimelineRelation(this, 1 / otherSecondsPerMySecond))
         }
 
+        /**
+         * Get the current time in seconds.
+         */
         getTime(): game_seconds {
             return this.time
         }

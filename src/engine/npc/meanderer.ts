@@ -10,7 +10,7 @@ namespace splitTime.agent {
         let dir = direction.S
         const stateMachine = new splitTime.npc.BehaviorStateMachine(() => state)
         npc.body.registerTimeAdvanceListener(delta => {
-            const time = npc.body.level.getRegion().getTime()
+            const time = splitTime.time.getFromBody(npc.body)
             if (time >= waitUntil) {
                 if (state === MeanderState.WAITING) {
                     walk()
@@ -21,7 +21,7 @@ namespace splitTime.agent {
         })
         function wait() {
             state = MeanderState.WAITING
-            waitUntil = npc.body.level.getRegion().getTime() + splitTime.randomRanged(1, 2)
+            waitUntil = splitTime.time.getFromBody(npc.body) + splitTime.randomRanged(1, 2)
         }
         function walk() {
             state = MeanderState.WALKING
@@ -31,7 +31,7 @@ namespace splitTime.agent {
             if (Math.random() < 0.33) {
                 dir = direction.fromToThing(npc.body, home)
             }
-            waitUntil = npc.body.level.getRegion().getTime() + splitTime.randomRanged(1, 3)
+            waitUntil = splitTime.time.getFromBody(npc.body) + splitTime.randomRanged(1, 3)
         }
         stateMachine.set(MeanderState.WAITING, {
             notifyTimeAdvance() {

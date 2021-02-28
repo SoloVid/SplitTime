@@ -13,9 +13,6 @@ namespace splitTime {
             }
             return this._timeline
         }
-        getTime(): game_seconds {
-            return this.getTimeline().getTime()
-        }
 
         setTimeline(timeline: Timeline) {
             if (this._timeline) {

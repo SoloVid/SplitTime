@@ -3,7 +3,7 @@ namespace splitTime.conversation {
         public readonly firstCharacterSeen: number
 
         constructor(
-            public dialog: SpeechBubble,
+            public dialog: SpeechBubbleState,
             public incoming: boolean = true,
             public visibility: number = 0
         ) {
@@ -42,21 +42,20 @@ namespace splitTime.conversation {
 
         constructor(private readonly camera: Camera) {}
 
-        show(dialog: SpeechBubble) {
+        show(dialog: SpeechBubbleState) {
             this.dialogDrawings.push(new DialogDrawing(dialog))
         }
 
-        hide(dialog: SpeechBubble) {
-            for (var i = 0; i < this.dialogDrawings.length; i++) {
-                if (this.dialogDrawings[i].dialog === dialog) {
-                    this.dialogDrawings[i].incoming = false
+        hide(dialog: SpeechBubbleState) {
+            for (const drawing of this.dialogDrawings) {
+                if (drawing.dialog === dialog) {
+                    drawing.incoming = false
                 }
             }
         }
 
         notifyFrameUpdate() {
-            for (var i = this.dialogDrawings.length - 1; i >= 0; i--) {
-                var drawing = this.dialogDrawings[i]
+            for (const drawing of this.dialogDrawings) {
                 if (drawing.incoming) {
                     drawing.visibility = splitTime.approachValue(
                         drawing.visibility,
@@ -65,22 +64,24 @@ namespace splitTime.conversation {
                     )
                     // TODO: remove temporary hackaround bad UX
                     drawing.visibility = 1
+                    // TODO: Maybe add event here for dialog fully visible
                 } else {
-                    drawing.visibility -= 0.1
+                    drawing.visibility = splitTime.approachValue(
+                        drawing.visibility,
+                        0,
+                        0.1 
+                    )
                     // TODO: remove temporary hackaround bad UX
                     drawing.visibility = 0
-                    if (drawing.visibility <= 0) {
-                        const spliced = this.dialogDrawings.splice(i, 1)
-                        spliced[0].dialog.onDismiss()
-                    }
+                    // TODO: Maybe add event here for dialog gone
                 }
             }
+            this.dialogDrawings = this.dialogDrawings.filter(d => d.visibility > 0);
         }
 
         render(view: ui.View) {
-            for (var i = 0; i < this.dialogDrawings.length; i++) {
+            for (const drawing of this.dialogDrawings) {
                 // TODO: visibility
-                var drawing = this.dialogDrawings[i]
                 const ELISION_CHAR = "."
                 let elision = new Array(drawing.firstCharacterSeen + 1).join(ELISION_CHAR)
                 elision = elision.replace(/..../g, "... ")
@@ -90,11 +91,11 @@ namespace splitTime.conversation {
                 this.sayFromBoardFocalPoint(
                     view.see,
                     {
-                        x: location.getX(),
-                        y: location.getY(),
-                        z: location.getZ()
+                        x: location.x,
+                        y: location.y,
+                        z: location.z
                     },
-                    dialog.line.replace(elisionRegex, elision),
+                    dialog.getLineForMeasurement().replace(elisionRegex, elision),
                     dialog.getDisplayedCurrentLine().replace(elisionRegex, elision),
                     dialog.speaker
                 )

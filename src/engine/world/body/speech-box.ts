@@ -1,5 +1,5 @@
 namespace splitTime.body {
-    export class SpeechBox implements ILevelLocation {
+    export class SpeechBox implements ILevelLocation2 {
         body: Body
         offsetX: number
         offsetY: number
@@ -16,28 +16,16 @@ namespace splitTime.body {
             this.offsetZ = offsetZ
         }
 
-        /**
-         * @return number
-         */
-        getX() {
+        get x(): number {
             return this.body.getX() + this.offsetX
         }
-        /**
-         * @return number
-         */
-        getY() {
+        get y(): number {
             return this.body.getY() + this.offsetY
         }
-        /**
-         * @return number
-         */
-        getZ() {
+        get z(): number {
             return this.body.getZ() + this.offsetZ
         }
-        /**
-         * @return splitTime.Level
-         */
-        getLevel() {
+        get level(): Level {
             return this.body.getLevel()
         }
     }
