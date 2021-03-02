@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /// <reference path="deps.d.ts" />
 
 const PORT = 8080 // default port to listen

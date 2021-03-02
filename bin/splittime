@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+require('../build/tsjs/build-tools/cli.js')
