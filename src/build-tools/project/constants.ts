@@ -5,5 +5,3 @@ export const PRELOADED_IMAGE_DIRECTORY = IMAGE_DIRECTORY + "/preloaded"
 export const AUDIO_DIRECTORY = "audio"
 export const MUSIC_DIRECTORY = AUDIO_DIRECTORY + "/music"
 export const SOUND_EFFECT_DIRECTORY = AUDIO_DIRECTORY + "/fx"
-export const TASK_DATA_GEN = 'generate-data-js'
-export const TASK_DECL_GEN = 'generate-index-d-ts'

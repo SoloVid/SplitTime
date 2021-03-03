@@ -1,8 +1,15 @@
-import * as fsOrig from "fs";
-import * as pathOrig from "path";
-import * as rrdir from 'rrdir';
-import { join, slash } from '../common/path-helper';
-import { COLLAGE_DIRECTORY, IMAGE_DIRECTORY, LEVEL_DIRECTORY, MUSIC_DIRECTORY, PRELOADED_IMAGE_DIRECTORY, SOUND_EFFECT_DIRECTORY } from './constants';
+import * as fsOrig from "fs"
+import * as pathOrig from "path"
+import * as rrdir from "rrdir"
+import { join, slash } from "../common/path-helper"
+import {
+    COLLAGE_DIRECTORY,
+    IMAGE_DIRECTORY,
+    LEVEL_DIRECTORY,
+    MUSIC_DIRECTORY,
+    PRELOADED_IMAGE_DIRECTORY,
+    SOUND_EFFECT_DIRECTORY,
+} from "./constants"
 const fs = fsOrig.promises
 const path = pathOrig.posix
 
@@ -25,8 +32,8 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
         imageFiles: [],
         preloadedImageFiles: [],
         musicFiles: [],
-        soundEffectFiles: []
-    };
+        soundEffectFiles: [],
+    }
     const promises: PromiseLike<void>[] = []
     promises.push(getJsonFileDataMap(join(projectRoot, LEVEL_DIRECTORY))
         .then(map => { gameData.levels = map }))
@@ -45,7 +52,8 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
         await promise
     }
 
-    var dataFileContents = "var G = G || {};\nG._GAME_DATA = " + JSON.stringify(gameData) + ";"
+    var dataFileContents =
+        "var G = G || {};\nG._GAME_DATA = " + JSON.stringify(gameData) + ";"
     const generatedFile = "build/generated/data.js"
     await fs.mkdir(path.dirname(generatedFile), { recursive: true })
     await fs.writeFile(join(projectRoot, generatedFile), dataFileContents)
@@ -70,12 +78,12 @@ async function getJsonFileDataMap(dir: string): Promise<FileDataMap> {
             continue
         }
         const relPath = path.relative(dir, slash(entry.path))
-        if(/\.json$/.test(entry.path)) {
+        if (/\.json$/.test(entry.path)) {
             const contents = await fs.readFile(entry.path)
             const fileData = JSON.parse(contents.toString())
-            map[relPath] = fileData;
+            map[relPath] = fileData
         } else {
-            console.warn("Non-JSON file found in level directory: " + relPath);
+            console.warn("Non-JSON file found in level directory: " + relPath)
         }
     }
     return map

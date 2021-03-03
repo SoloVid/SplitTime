@@ -1,4 +1,3 @@
-
 declare module "sync-directory" {
     interface Options {
         watch?: boolean
@@ -6,7 +5,11 @@ declare module "sync-directory" {
         deleteOrphaned?: boolean
     }
 
-    function syncDirectory(srcDir: string, targetDir: string, config?: Options): void
-    
+    function syncDirectory(
+        srcDir: string,
+        targetDir: string,
+        config?: Options
+    ): void
+
     export = syncDirectory
 }

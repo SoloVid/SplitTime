@@ -8,7 +8,7 @@ export async function syncAssets(projectPath: string): Promise<void> {
         path.resolve(path.join(projectPath, "dist", "images")),
         {
             type: "copy",
-            deleteOrphaned: true
+            deleteOrphaned: true,
         }
     )
     syncDirectory(
@@ -16,7 +16,7 @@ export async function syncAssets(projectPath: string): Promise<void> {
         path.resolve(path.join(projectPath, "dist", "audio")),
         {
             type: "copy",
-            deleteOrphaned: true
+            deleteOrphaned: true,
         }
     )
 }
