@@ -2,6 +2,7 @@ import * as fsOrig from "fs"
 import { concatFilesWithSourceMaps, runAfter } from "../common/concat-mapped"
 import * as path from "path"
 import { glob } from "glob"
+import { getEngineRoot } from "../common/path-helper"
 const fs = fsOrig.promises
 
 export async function concatEngineSource(): Promise<void> {
@@ -60,7 +61,7 @@ async function concatEditorServer() {
     const generatedFile = 'build/generated/environment-ext.js'
     await fs.mkdir(path.dirname(generatedFile), { recursive: true })
     await fs.writeFile(generatedFile,
-        'var __ROOT__ = "' + __dirname.replace(/\\/g, "\\\\") + '";\n')
+        'var __ROOT__ = "' + getEngineRoot().replace(/\\/g, "\\\\") + '";\n')
     const files = [
         'build/generated/environment-ext.js',
         'build/engine-without-dom-libraries.js',

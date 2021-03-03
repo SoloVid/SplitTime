@@ -7,3 +7,7 @@ export function join(...args: string[]): string {
 export function slash(filePath: string): string {
     return filePath.replace(/\\/g, "/")
 }
+
+export function getEngineRoot(): string {
+    return path.resolve(require("find-root")(__dirname))
+}

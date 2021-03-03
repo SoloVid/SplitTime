@@ -47,13 +47,16 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
 
     var dataFileContents = "var G = G || {};\nG._GAME_DATA = " + JSON.stringify(gameData) + ";"
     const generatedFile = "build/generated/data.js"
-    await fs.mkdir(path.dirname(generatedFile))
+    await fs.mkdir(path.dirname(generatedFile), { recursive: true })
     await fs.writeFile(join(projectRoot, generatedFile), dataFileContents)
 }
 
 async function getAllRelativePaths(dir: string): Promise<string[]> {
     const relPaths: string[] = []
     for await (const entry of rrdir(dir)) {
+        if (entry.directory) {
+            continue
+        }
         const relPath = path.relative(dir, slash(entry.path))
         relPaths.push(relPath)
     }
