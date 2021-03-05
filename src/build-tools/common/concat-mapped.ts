@@ -3,6 +3,7 @@ import * as convertSourceMap from "convert-source-map"
 import * as fsOrig from "fs"
 import * as glob from "glob"
 import * as path from "path"
+import { writeFile } from "./file-helper"
 const fs = fsOrig.promises
 
 export async function runAfter(
@@ -49,8 +50,8 @@ export async function concatFilesWithSourceMaps(
     concat.add(null, "//# sourceMappingURL=" + sourceMapFileName)
     var sourceMapPath = path.join(outputFileDir, sourceMapFileName)
     await Promise.all([
-        fs.writeFile(outputFilePath, concat.content),
-        fs.writeFile(sourceMapPath, concat.sourceMap),
+        writeFile(outputFilePath, concat.content),
+        writeFile(sourceMapPath, concat.sourceMap),
     ])
 }
 

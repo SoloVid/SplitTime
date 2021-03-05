@@ -12,8 +12,10 @@ const express: typeof _dependencies.express = require( "express" )
 const path: typeof _dependencies.path = require("path")
 const app = express()
 
-app.use(express.static(__ROOT__ + '/projects'))
-app.use(express.static(__ROOT__))
+const root = require("find-root")(__dirname)
+app.use(express.static(root + '/projects'))
+app.use(express.static(root + "/static"))
+app.use(express.static(root))
 
 const apiServer = new splitTime.editor.server.ApiServer()
 app.post('*', express.json(), async (req, res) => {

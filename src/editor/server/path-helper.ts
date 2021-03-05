@@ -8,7 +8,7 @@ namespace splitTime.editor.server {
         }
 
         toWebPath(filePath: string): string {
-            const relPath = this.nodeLibs.path.relative(__ROOT__, filePath)
+            const relPath = this.nodeLibs.path.relative(this.getEngineDirectory(), filePath)
             return "/" + this.ensurePosixPath(relPath)
         }
 
@@ -16,8 +16,12 @@ namespace splitTime.editor.server {
             return filePath.split(this.nodeLibs.path.sep).join(this.nodeLibs.path.posix.sep)
         }
 
+        getEngineDirectory(): string {
+            return path.resolve(require("find-root")(__dirname))
+        }
+        
         getProjectDirectory(projectId: string): string {
-            return this.nodeLibs.path.join(__ROOT__, "projects", projectId)
+            return this.nodeLibs.path.join(this.getEngineDirectory(), "projects", projectId)
         }
 
         getFilePath(projectId: string, directory: string, file?: string): string {

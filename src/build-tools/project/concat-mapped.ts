@@ -4,7 +4,7 @@ import {
     concatFilesWithSourceMaps,
     countSlashesInPath,
 } from "../common/concat-mapped"
-import { getEngineRoot, join } from "../common/path-helper"
+import { getEngineRoot, join } from "../common/file-helper"
 const fs = fsOrig.promises
 
 export async function concatProjectSource(projectRoot: string): Promise<void> {

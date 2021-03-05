@@ -1,7 +1,7 @@
 import * as fsOrig from "fs"
 import * as pathOrig from "path"
 import * as rrdir from "rrdir"
-import { slash } from "../common/path-helper"
+import { slash, writeFile } from "../common/file-helper"
 const fs = fsOrig.promises
 const path = pathOrig.posix
 
@@ -19,5 +19,5 @@ export async function generateDeclarations() {
         }
     }
     const indexFileContents = declRefs.join("\n")
-    await fs.writeFile("build/@types/splitTime/index.d.ts", indexFileContents)
+    await writeFile("build/@types/splitTime/index.d.ts", indexFileContents)
 }

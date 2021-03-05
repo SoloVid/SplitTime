@@ -7,10 +7,10 @@ async function run() {
         const projectName = process.argv[2]
         if (projectName) {
             const projectPath = "projects/" + projectName
-            console.log(`Building ${projectName}...`)
+            // console.log(`Building ${projectName}...`)
             await buildProject(projectPath)
         } else {
-            console.log("Building project in current directory")
+            // console.log("Building project in current directory")
             await buildProject(".")
         }
     } catch (e: unknown) {

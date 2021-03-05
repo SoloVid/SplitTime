@@ -7,7 +7,7 @@ async function run() {
         const command = process.argv[2]
         switch (command) {
             case "build":
-                console.log("Building project in current directory")
+                // console.log("Building project in current directory")
                 await buildProject(".")
                 break
             default:
