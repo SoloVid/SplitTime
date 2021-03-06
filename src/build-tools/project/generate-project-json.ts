@@ -26,7 +26,7 @@ interface CompiledGameData {
 }
 
 export async function generateProjectJson(projectRoot: string): Promise<void> {
-    var gameData: CompiledGameData = {
+    const gameData: CompiledGameData = {
         levels: {},
         collages: {},
         imageFiles: [],
@@ -52,7 +52,7 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
         await promise
     }
 
-    var dataFileContents =
+    const dataFileContents =
         "var G = G || {};\nG._GAME_DATA = " + JSON.stringify(gameData) + ";"
     const generatedFile = "build/generated/data.js"
     await writeFile(join(projectRoot, generatedFile), dataFileContents)

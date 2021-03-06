@@ -18,37 +18,41 @@ export async function concatFilesWithSourceMaps(
     filePatterns: string[],
     outputFilePath: string
 ): Promise<void> {
-    var outputFileDir = path.dirname(outputFilePath)
-    var outputFileName = path.basename(outputFilePath)
+    const outputFileDir = path.dirname(outputFilePath)
+    const outputFileName = path.basename(outputFilePath)
     let files: string[] = []
     for (const pattern of filePatterns) {
         files = files.concat(glob.sync(pattern))
     }
     const concat = new Concat(true, outputFileName, "\n\n;\n\n")
-    const calls = await Promise.all(
-        files.map(async (file) => {
-            const fileInfo = await readFileWithSourceMap(file)
-            let sourceMap: undefined | string = undefined
-            if (fileInfo.sourceMap) {
-                const jsonSourceMap = convertSourceMap
-                    .fromJSON(fileInfo.sourceMap)
-                    .toObject()
-                for (let i = 0; i < jsonSourceMap.sources.length; i++) {
-                    jsonSourceMap.sources[i] = transposeRelativePath(
-                        jsonSourceMap.sources[i],
-                        file,
-                        outputFilePath
-                    )
-                }
-                sourceMap = convertSourceMap.fromObject(jsonSourceMap).toJSON()
+    const callTodos = files.map(async (file) => {
+        const fileInfo = await readFileWithSourceMap(file)
+        let sourceMap: undefined | string = undefined
+        if (fileInfo.sourceMap) {
+            const jsonSourceMap = convertSourceMap
+                .fromJSON(fileInfo.sourceMap)
+                .toObject()
+            for (let i = 0; i < jsonSourceMap.sources.length; i++) {
+                jsonSourceMap.sources[i] = transposeRelativePath(
+                    jsonSourceMap.sources[i],
+                    file,
+                    outputFilePath
+                )
             }
-            return () => concat.add(file, fileInfo.content, sourceMap)
-        })
-    )
-    calls.forEach((c) => c())
-    var sourceMapFileName = outputFileName + ".map"
+            sourceMap = convertSourceMap.fromObject(jsonSourceMap).toJSON()
+        }
+        return () => concat.add(file, fileInfo.content, sourceMap)
+    })
+    const dummy = Promise.resolve(() => {})
+    for (let i = 0; i < callTodos.length; i++) {
+        const toCall = await callTodos[i]
+        toCall()
+        // Allow garbage to be taken out.
+        callTodos[i] = dummy
+    }
+    const sourceMapFileName = outputFileName + ".map"
     concat.add(null, "//# sourceMappingURL=" + sourceMapFileName)
-    var sourceMapPath = path.join(outputFileDir, sourceMapFileName)
+    const sourceMapPath = path.join(outputFileDir, sourceMapFileName)
     await Promise.all([
         writeFile(outputFilePath, concat.content),
         writeFile(sourceMapPath, concat.sourceMap),
@@ -58,19 +62,23 @@ export async function concatFilesWithSourceMaps(
 async function readFileWithSourceMap(filePath: string) {
     const fileContents = await fs.readFile(filePath)
     const fileContentsString = fileContents.toString()
-    var fileLines = fileContentsString.split("\n")
-    var sourceMap = ""
+    const fileLines = fileContentsString.split("\n")
+    let iSourceMap = -1
+    let sourceMap = ""
     const fileLinesWithoutSourceMaps = await Promise.all(
-        fileLines.map(async (line) => {
-            var matches = line.match(/\/\/# sourceMappingURL=(.+\.js\.map)/)
+        fileLines.map(async (line, i) => {
+            const matches = line.match(/\/\/# sourceMappingURL=(.+\.js\.map)/)
             if (matches) {
-                var relSourceMapPath = matches[1]
-                var absSourceMapPath = path.join(
+                const relSourceMapPath = matches[1]
+                const absSourceMapPath = path.join(
                     path.resolve(path.dirname(filePath)),
                     relSourceMapPath
                 )
                 const sourceMapFile = await fs.readFile(absSourceMapPath)
-                sourceMap = sourceMapFile.toString()
+                if (iSourceMap < i) {
+                    sourceMap = sourceMapFile.toString()
+                    iSourceMap = i
+                }
                 return line.replace(/./g, "/")
             } else {
                 return line
@@ -92,10 +100,10 @@ function transposeRelativePath(
     originalReferenceFile: string,
     targetReferenceFile: string
 ): string {
-    var absoluteFilePath = path.resolve(
+    const absoluteFilePath = path.resolve(
         path.dirname(originalReferenceFile),
         originalRelativePath
     )
-    var targetDir = path.resolve(path.dirname(targetReferenceFile))
+    const targetDir = path.resolve(path.dirname(targetReferenceFile))
     return path.relative(targetDir, absoluteFilePath).replace(/\\\\?/g, "/")
 }
