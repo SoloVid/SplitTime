@@ -1,2 +1,24 @@
 #!/usr/bin/env node
-require('../build/tsjs/build-tools/cli.js')
+
+const child_process = require("child_process")
+
+const command = process.argv[2]
+const childArgs = process.argv.slice(3)
+switch (command) {
+    case "build":
+        runScript("../build/tsjs/build-tools/cli.js", childArgs)
+        break
+    case "serve":
+        runScript("../build/editor-server.js", childArgs)
+        break
+    default:
+        console.error("Unrecognized command")
+        process.exit(1)
+}
+
+function runScript(scriptPath, args) {
+    const actualPath = require.resolve(scriptPath)
+    child_process.fork(actualPath, args, {
+        stdio: "inherit"
+    })
+}

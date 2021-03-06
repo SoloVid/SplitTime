@@ -2,26 +2,27 @@ namespace splitTime.editor.server {
     export class PathHelper {
         private readonly nodeLibs = new NodeLibs()
 
+        constructor(private readonly config: Config) {}
+
         toProjectPath(projectId: string, filePath: string): string {
             const relPath = this.nodeLibs.path.relative(this.getProjectDirectory(projectId), filePath)
             return "/" + this.ensurePosixPath(relPath)
         }
 
-        toWebPath(filePath: string): string {
-            const relPath = this.nodeLibs.path.relative(this.getEngineDirectory(), filePath)
-            return "/" + this.ensurePosixPath(relPath)
+        toProjectWebPath(filePath: string): string {
+            const relPath = this.nodeLibs.path.relative(this.config.sourceDirectory, filePath)
+            return "/" + prefixRun + "/" + this.ensurePosixPath(relPath)
         }
 
         ensurePosixPath(filePath: string): string {
             return filePath.split(this.nodeLibs.path.sep).join(this.nodeLibs.path.posix.sep)
         }
 
-        getEngineDirectory(): string {
-            return path.resolve(require("find-root")(__dirname))
-        }
-        
         getProjectDirectory(projectId: string): string {
-            return this.nodeLibs.path.join(this.getEngineDirectory(), "projects", projectId)
+            // if (this.config.isSingleProject) {
+            //     return this.config.sourceDirectory
+            // }
+            return this.nodeLibs.path.join(this.config.sourceDirectory, projectId)
         }
 
         getFilePath(projectId: string, directory: string, file?: string): string {

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="src/editor/client/style.css">
+    <link rel="stylesheet" href="/static/editor-style.css">
     <!-- Adapted from https://www.w3schools.com/howto/howto_css_coming_soon.asp -->
     <style>
         body,
@@ -61,17 +61,17 @@
             <hr />
             <br />
             <div>
-                <a class="btn" onclick="openGamePage()">Play-Test</a>
                 <script>
-                    function openGamePage() {
+                    function openProjectPage(prefix) {
                         var projectName = window.prompt("Project directory name:");
-                        if (projectName) {
-                            window.location = "/" + projectName + "/";
+                        if (projectName !== undefined) {
+                            window.location = "/" + prefix + "/" + projectName;
                         }
                     }
                 </script>
-                <a class="btn" href="/editor.html">Editor</a>
-                <a class="btn" href="/test-runner.html">Tests</a>
+                <a class="btn" onclick="openProjectPage('run')">Run</a>
+                <a class="btn" onclick="openProjectPage('edit')">Edit</a>
+                <a class="btn" href="/static/test-runner.html">Test Engine</a>
             </div>
         </div>
         <div class="bottomleft">

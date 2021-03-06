@@ -1,9 +1,13 @@
 namespace splitTime.editor.server {
     export class ProjectFileTsApiBacking {
         private readonly nodeLibs = new NodeLibs()
-        private readonly pathHelper = new PathHelper()
+        private readonly pathHelper: PathHelper
 
-        constructor(private readonly api: ProjectFileTsApi) {
+        constructor(
+            private readonly api: ProjectFileTsApi,
+            private readonly config: Config
+        ) {
+            this.pathHelper = new PathHelper(config)
             this.api.directoryListing.serve(async request => {
                 const requestDir = this.pathHelper.getFilePath(request.projectId, request.data.directory)
                 const files = await this.nodeLibs.fsPromises.readdir(requestDir)

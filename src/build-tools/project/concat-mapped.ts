@@ -4,7 +4,7 @@ import {
     concatFilesWithSourceMaps,
     countSlashesInPath,
 } from "../common/concat-mapped"
-import { getEngineRoot, join } from "../common/file-helper"
+import { getEngineModuleRoot, join } from "../common/file-helper"
 const fs = fsOrig.promises
 
 export async function concatProjectSource(projectRoot: string): Promise<void> {
@@ -23,7 +23,7 @@ export async function concatProjectSource(projectRoot: string): Promise<void> {
 }
 
 export async function concatEntireGameJs(projectRoot: string): Promise<void> {
-    const engineRoot = getEngineRoot()
+    const engineRoot = await getEngineModuleRoot()
     const files = [
         join(engineRoot, "build/engine.js"),
         join(engineRoot, "build/tsjs/defer.def.js"),
