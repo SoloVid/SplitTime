@@ -19,4 +19,5 @@ export async function syncAssets(projectPath: string): Promise<void> {
             deleteOrphaned: true,
         }
     )
+    // FTODO: It would be nice for this to be more async.
 }

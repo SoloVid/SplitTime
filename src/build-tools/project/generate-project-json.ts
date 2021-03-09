@@ -34,23 +34,20 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
         musicFiles: [],
         soundEffectFiles: [],
     }
-    const promises: PromiseLike<void>[] = []
-    promises.push(getJsonFileDataMap(join(projectRoot, LEVEL_DIRECTORY))
-        .then(map => { gameData.levels = map }))
-    promises.push(getJsonFileDataMap(join(projectRoot, COLLAGE_DIRECTORY))
-        .then(map => { gameData.collages = map }))
-    promises.push(getAllRelativePaths(join(projectRoot, IMAGE_DIRECTORY))
-        .then(list => { gameData.imageFiles = list }))
-    promises.push(getAllRelativePaths(join(projectRoot, PRELOADED_IMAGE_DIRECTORY))
-        .then(list => { gameData.preloadedImageFiles = list }))
-    promises.push(getAllRelativePaths(join(projectRoot, MUSIC_DIRECTORY))
-        .then(list => { gameData.musicFiles = list }))
-    promises.push(getAllRelativePaths(join(projectRoot, SOUND_EFFECT_DIRECTORY))
-        .then(list => { gameData.soundEffectFiles = list }))
-
-    for (const promise of promises) {
-        await promise
-    }
+    await Promise.all([
+        getJsonFileDataMap(join(projectRoot, LEVEL_DIRECTORY))
+            .then(map => { gameData.levels = map }),
+        getJsonFileDataMap(join(projectRoot, COLLAGE_DIRECTORY))
+            .then(map => { gameData.collages = map }),
+        getAllRelativePaths(join(projectRoot, IMAGE_DIRECTORY))
+            .then(list => { gameData.imageFiles = list }),
+        getAllRelativePaths(join(projectRoot, PRELOADED_IMAGE_DIRECTORY))
+            .then(list => { gameData.preloadedImageFiles = list }),
+        getAllRelativePaths(join(projectRoot, MUSIC_DIRECTORY))
+            .then(list => { gameData.musicFiles = list }),
+        getAllRelativePaths(join(projectRoot, SOUND_EFFECT_DIRECTORY))
+            .then(list => { gameData.soundEffectFiles = list }),
+    ])
 
     const dataFileContents =
         "var G = G || {};\nG._GAME_DATA = " + JSON.stringify(gameData) + ";"

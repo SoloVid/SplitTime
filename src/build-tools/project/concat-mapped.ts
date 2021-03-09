@@ -7,7 +7,7 @@ import {
 import { getEngineModuleRoot, join } from "../common/file-helper"
 const fs = fsOrig.promises
 
-export async function concatProjectSource(projectRoot: string): Promise<void> {
+export function concatProjectSource(projectRoot: string): Promise<void> {
     const compiledSourceFiles = glob.sync(projectRoot + "/build/tsjs/**/*.js")
     // We're sorting by the number of slashes in the path ascending
     // so as to put the top-level directory files before the innermost directory files.
@@ -16,7 +16,7 @@ export async function concatProjectSource(projectRoot: string): Promise<void> {
         const slashesInB = countSlashesInPath(b)
         return slashesInA - slashesInB
     })
-    concatFilesWithSourceMaps(
+    return concatFilesWithSourceMaps(
         compiledSourceFilesSorted,
         join(projectRoot, "build/project-source.js")
     )
@@ -31,5 +31,5 @@ export async function concatEntireGameJs(projectRoot: string): Promise<void> {
         join(projectRoot, "build/project-source.js"),
         join(engineRoot, "build/tsjs/defer.run.js"),
     ]
-    concatFilesWithSourceMaps(files, projectRoot + "/dist/game.js")
+    return concatFilesWithSourceMaps(files, projectRoot + "/dist/game.js")
 }
