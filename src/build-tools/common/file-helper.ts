@@ -15,7 +15,7 @@ export function slash(filePath: string): string {
 //     return path.resolve(require("find-root")(__dirname))
 // }
 
-export async function getEngineModuleRoot(): Promise<string> {
+export async function getEngineModuleRoot(projectRoot: string): Promise<string> {
     // We're using this hackaround method instead of something involving __dirname
     // because __filename and __dirname have symlinks resolved.
     // Resolved symlinks are problematic for local development of engine
@@ -24,7 +24,9 @@ export async function getEngineModuleRoot(): Promise<string> {
         const child = child_process.spawn("node", [
             "--preserve-symlinks",
             "--eval", "process.stdout.write(require.resolve('splittime/package.json'))"
-        ])
+        ], {
+            cwd: projectRoot
+        })
         let output = ""
         child.stdout.on("data", data => {
             output += data
