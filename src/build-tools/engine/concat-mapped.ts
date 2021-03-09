@@ -38,7 +38,7 @@ export async function concatEngineSource(): Promise<void> {
 }
 
 async function concatEngineWithoutDom() {
-    const files = ["node_modules/es6-promise/dist/es6-promise.auto.min.js"]
+    const files = ["node_modules/es6-promise/dist/es6-promise.auto.js"]
         .concat(
             glob
                 .sync("build/tsjs/*.js")

@@ -2,6 +2,7 @@ import { task } from "../common/task"
 import { compileTypescript } from "./compile-typescript"
 import { concatEntireGameJs, concatProjectSource } from "./concat-mapped"
 import { generateProjectJson } from "./generate-project-json"
+// import { minifyGame } from "./minify"
 import { syncAssets } from "./sync-assets"
 
 export async function buildProject(projectPath: string): Promise<void> {
@@ -21,12 +22,18 @@ async function buildProjectBody(projectPath: string): Promise<void> {
         projectSource
     )
     // FTODO: Add minification step for project
+    // const minified = task(
+    //     "minify",
+    //     () => minifyGame(projectPath),
+    //     gameJs
+    // )
     const sync = task("syncAssets", () => syncAssets(projectPath))
     await Promise.all([
         compile,
         projectJson,
         projectSource,
         gameJs,
+        // minified,
         sync,
     ])
 }
