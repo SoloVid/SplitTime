@@ -124,16 +124,36 @@ namespace splitTime.conversation {
             }
 
             // Update what speech bubble is rendered.
-            if (engaged !== null && !engagedDialogStillActive) {
-                this.renderer.hide(engaged.speechBubble)
-                const isConversationDismissed = usurper === null || usurper.conversation !== engaged.conversation
-                if (this.perspective.playerBody !== null && isConversationDismissed) {
-                    // FTODO: This might be problematic for nested conversations.
-                    this.getRuntime(engaged.conversation).pullOut(this.perspective.playerBody)
+            const fromLastFrame = engaged ? [engaged] : []
+            let toShowThisFrame = usurper ? [usurper] : []
+            const toHideThisFrame: typeof fromLastFrame = []
+
+            for (const stale of fromLastFrame) {
+                if (toShowThisFrame.some(toShow => stale.speechBubble === toShow.speechBubble)) {
+                    // It's already showing, so we don't need to show again.
+                    toShowThisFrame = toShowThisFrame.filter(
+                        toShow => stale.speechBubble !== toShow.speechBubble
+                    )
+                } else {
+                    toHideThisFrame.push(stale)
                 }
             }
-            if (usurper !== null && usurper.speechBubble !== engaged?.speechBubble) {
-                this.renderer.show(usurper.speechBubble)
+
+            for (const toShow of toShowThisFrame) {
+                this.renderer.show(toShow.speechBubble)
+            }
+            for (const toHide of toHideThisFrame) {
+                this.renderer.hide(toHide.speechBubble)
+
+                const conversationContinues = toShowThisFrame.some(
+                    toHide => toHide.conversation === toHide.conversation
+                )
+                if (!conversationContinues) {
+                    if (this.perspective.playerBody !== null) {
+                        // FTODO: This might be problematic for nested conversations.
+                        this.getRuntime(toHide.conversation).pullOut(this.perspective.playerBody)
+                    }
+                }
             }
 
             // Mark which one we picked for scoring next round.

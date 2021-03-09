@@ -65,6 +65,9 @@ namespace splitTime.conversation {
                 return false
             }
             const node = this.current.action
+            if (!this.shouldBeCanceled(node, body)) {
+                return false
+            }
             let cancelNext = this.treeTraveler.getCanceledFrom(node)
             while (cancelNext !== null && this.shouldBeCanceled(node, body)) {
                 cancelNext = this.treeTraveler.getCanceledFrom(cancelNext)
