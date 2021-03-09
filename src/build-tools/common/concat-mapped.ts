@@ -6,14 +6,6 @@ import * as path from "path"
 import { writeFile } from "./file-helper"
 const fs = fsOrig.promises
 
-export async function runAfter(
-    callback: () => PromiseLike<void>,
-    ...promises: PromiseLike<void>[]
-): Promise<void> {
-    await Promise.all(promises)
-    await callback()
-}
-
 export async function concatFilesWithSourceMaps(
     filePatterns: string[],
     outputFilePath: string

@@ -1,22 +1,28 @@
 import * as fsOrig from "fs"
-import { concatFilesWithSourceMaps, runAfter } from "../common/concat-mapped"
+import { concatFilesWithSourceMaps } from "../common/concat-mapped"
 import { glob } from "glob"
+import { task } from "../common/task"
 const fs = fsOrig.promises
 
 export async function concatEngineSource(): Promise<void> {
-    const engineWithoutDomPromise = runAfter(() => concatEngineWithoutDom())
-    const enginePromise = runAfter(
+    const engineWithoutDomPromise = task("concatEngineWithoutDom", () => concatEngineWithoutDom())
+    const enginePromise = task(
+        "concatEngine",
         () => concatEngine(),
         engineWithoutDomPromise
     )
-    const engineTestPromise = runAfter(() => concatEngineTest(), enginePromise)
-    const editorServerLibPromise = runAfter(() => concatEditorServerLib())
-    const editorServerPromise = runAfter(
+    const engineTestPromise = task("concatEngineTest", () => concatEngineTest(),
+        enginePromise
+    )
+    const editorServerLibPromise = task("concatEditorServerLib", () => concatEditorServerLib())
+    const editorServerPromise = task(
+        "concatEditorServer",
         () => concatEditorServer(),
         engineWithoutDomPromise,
         editorServerLibPromise
     )
-    const editorClientPromise = runAfter(
+    const editorClientPromise = task(
+        "concatEditorClient",
         () => concatEditorClient(),
         enginePromise,
         editorServerLibPromise
