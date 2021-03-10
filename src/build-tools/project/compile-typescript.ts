@@ -13,12 +13,11 @@ export async function compileTypescript(projectPath: string): Promise<void> {
         cwd: projectPath
     })
     return new Promise((resolve, reject) => {
-        process.on('error', function(err) {
-            reject(err)
-        })
-        process.on('exit', function(code) {
+        process.on("exit", code => {
             if(code === 0) {
                 resolve()
+            } else {
+                reject("Project TypeScript compilation failed")
             }
         })
     })

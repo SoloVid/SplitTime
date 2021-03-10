@@ -6,11 +6,15 @@ import { generateProjectJson } from "./generate-project-json"
 import { syncAssets } from "./sync-assets"
 
 export async function buildProject(projectPath: string): Promise<void> {
-    await task("buildProject", () => buildProjectBody(projectPath))
+    await task("buildProject", () => buildProjectDependent(projectPath))
 }
 
-async function buildProjectBody(projectPath: string): Promise<void> {
-        const compile = task("compileTypescript", () => compileTypescript(projectPath))
+export async function buildProjectDependent(
+    projectPath: string,
+    typesAvailable: PromiseLike<void> = Promise.resolve(),
+    engineJsAvailable: PromiseLike<void> = Promise.resolve()
+): Promise<void> {
+    const compile = task("compileTypescript", () => compileTypescript(projectPath), typesAvailable)
     const projectJson = task("generateProjectJson", () => generateProjectJson(projectPath))
     const projectSource = task("concatProjectSource", () => concatProjectSource(projectPath),
         compile
@@ -18,6 +22,7 @@ async function buildProjectBody(projectPath: string): Promise<void> {
     const gameJs = task(
         "concatEntireGameJs",
         () => concatEntireGameJs(projectPath),
+        engineJsAvailable,
         projectJson,
         projectSource
     )
