@@ -4,7 +4,8 @@ namespace splitTime.conversation {
 
         constructor(
             public readonly speaker: Speaker,
-            public readonly text: string
+            public readonly text: string,
+            public readonly options?: Partial<Options>
         ) {}
 
         setParent(parent: LineSequence): void {

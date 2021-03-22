@@ -10,13 +10,14 @@ namespace splitTime.conversation {
         private _isFinished: boolean = false
         private readonly _timeStarted: game_seconds
         private _timePlayedTo: game_seconds
+        private readonly _level: Level
 
         constructor(
             public readonly speaker: string,
             private _line: string,
-            private readonly location: ILevelLocation2,
-            public readonly allSpeakers: readonly Speaker[]
+            private readonly location: ILevelLocation2
         ) {
+            this._level = location.level
             for (const conversion of CONVERSIONS) {
                 this._line = conversion.apply(this._line)
             }
@@ -116,11 +117,7 @@ namespace splitTime.conversation {
         }
 
         private getTime(): game_seconds {
-            if (this.location) {
-                return time.getFromBody(this.location)
-            } else {
-                return +performance.now() / 1000
-            }
+            return time.getFromLevel(this._level)
         }
     }
 }

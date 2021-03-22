@@ -9,8 +9,8 @@ namespace splitTime.conversation {
         ) {
         }
 
-        register(id: string, setup: SetupFunc): time.EventSpec<void> {
-            this.builders[id] = new ConversationSpecBuilder(setup)
+        register(id: string, setup: SetupFunc, options?: Partial<Options>): time.EventSpec<void> {
+            this.builders[id] = new ConversationSpecBuilder(setup, options)
             return new time.EventSpec(id, () => this.start(id))
         }
 

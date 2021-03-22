@@ -9,7 +9,7 @@ namespace splitTime.conversation {
 
     interface LastPicked {
         conversation: ConversationInstance
-        speechBubble: SpeechBubbleState
+        lineSpeechBubble: LineSpeechBubble | null
     }
 
     /**
@@ -23,29 +23,65 @@ namespace splitTime.conversation {
             private readonly perspective: LimitedPerspective
         ) {}
 
-        updatePick(conversation: null, speechBubble: null): void
-        updatePick(conversation: ConversationInstance, speechBubble: SpeechBubbleState): void
-        updatePick(conversation: ConversationInstance | null, speechBubble: SpeechBubbleState | null): void {
-            if (conversation === null || speechBubble === null) {
+        updatePick(conversation: null, lineSpeechBubble: null): void
+        updatePick(conversation: ConversationInstance, lineSpeechBubble: LineSpeechBubble | null): void
+        updatePick(conversation: ConversationInstance | null, lineSpeechBubble: LineSpeechBubble | null): void {
+            if (conversation === null) {
                 this.lastPicked = null
             } else {
                 this.lastPicked = {
                     conversation,
-                    speechBubble
+                    lineSpeechBubble
                 }
             }
         }
 
-        calculateConversationImportanceScore(conversation: ConversationInstance, speechBubble: SpeechBubbleState): number {
+        calculateContinuingConversationScore(conversation: ConversationInstance): number {
+            const leaf = conversation.getCurrentLeaf()
+            if (leaf === null) {
+                return 0
+            }
+            const focusPoint = this.perspective.camera.getFocusPoint()
+
+            // TODO: Current speakers doesn't always accurately reflect speech bubble speakers.
+            const allSpeakers = conversation.getCurrentSpeakers()
+            const speakersExcludingPlayer = allSpeakers.filter(
+                s => s.body !== this.perspective.playerBody
+            )
+            const speakersToConsider = speakersExcludingPlayer.length > 0 ? speakersExcludingPlayer : allSpeakers
+            if (speakersToConsider.length === 0) {
+                return 0
+            }
+
+            const distance = speakersToConsider
+                .map(s =>
+                    splitTime.measurement.distanceEasy(
+                        focusPoint.x,
+                        focusPoint.y,
+                        s.body.x,
+                        s.body.y
+                    )
+                )
+                .reduce(
+                    (tempMin, tempDist) => Math.min(tempMin, tempDist),
+                    splitTime.MAX_SAFE_INTEGER
+                )
+
+            const continuingBias = 1.5
+            const conversationOptions = optionsSniffer.getEffectiveOptions(leaf)
+            return this.calculateScoreFromDistance(distance) * continuingBias * conversationOptions.importance
+        }
+
+        calculateLineImportanceScore(lineSpeechBubble: LineSpeechBubble): number {
+            const location = lineSpeechBubble.speechBubble.getLocation()
             if (
-                speechBubble.getLocation().level !==
+                location.level !==
                 this.perspective.levelManager.getCurrent()
             ) {
                 return MIN_SCORE - 1
             }
 
             var focusPoint = this.perspective.camera.getFocusPoint()
-            var location = speechBubble.getLocation()
 
             var distance = splitTime.measurement.distanceEasy(
                 focusPoint.x,
@@ -53,38 +89,18 @@ namespace splitTime.conversation {
                 location.x,
                 location.y
             )
-            const conversationContinues = this.lastPicked !== null && conversation === this.lastPicked.conversation
-            // If we've engaged in a dialog, we don't want to accidentally stop tracking the conversation just because the speaker changed.
-            if (conversationContinues) {
-                // TODO: Current speakers doesn't always accurately reflect speech bubble speakers.
-                const speakersExcludingPlayer = speechBubble.allSpeakers.filter(
-                    s => s.body !== this.perspective.playerBody
-                )
-                if (speakersExcludingPlayer.length > 0) {
-                    distance = speakersExcludingPlayer
-                        .map(s =>
-                            splitTime.measurement.distanceEasy(
-                                focusPoint.x,
-                                focusPoint.y,
-                                s.body.getX(),
-                                s.body.getY()
-                            )
-                        )
-                        .reduce(
-                            (tempMin, tempDist) => Math.min(tempMin, tempDist),
-                            splitTime.MAX_SAFE_INTEGER
-                        )
-                }
-            }
-            var distanceScore =
+            const distanceScore =
                 this.perspective.camera.SCREEN_WIDTH /
                 3 /
                 Math.max(distance, 0.0001)
+            const lineOptions = optionsSniffer.getEffectiveOptions(lineSpeechBubble.line)
+            return distanceScore * lineOptions.importance
+        }
 
-            if (conversationContinues) {
-                return distanceScore * 1.5
-            }
-            return distanceScore
+        private calculateScoreFromDistance(distance: number): number {
+            return this.perspective.camera.SCREEN_WIDTH /
+                3 /
+                Math.max(distance, 0.0001)
         }
 
         // getCurrentScore(): number {
@@ -104,11 +120,11 @@ namespace splitTime.conversation {
             }
             return this.lastPicked.conversation
         }
-        getPickedSpeechBubble(): SpeechBubbleState | null {
+        getPickedLineSpeechBubble(): LineSpeechBubble | null {
             if (this.lastPicked === null) {
                 return null
             }
-            return this.lastPicked.speechBubble
+            return this.lastPicked.lineSpeechBubble
         }
     }
 }

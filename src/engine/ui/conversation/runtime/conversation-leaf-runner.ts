@@ -4,7 +4,7 @@ namespace splitTime.conversation {
      */
     export class ConversationLeafRunner implements Interruptible {
         private readonly handlers: ConversationHandlers
-        private speechBubble: SpeechBubbleState | null = null
+        private lineSpeechBubble: LineSpeechBubble | null = null
         private interruptibleEvent: Interruptible | null = null
         private advanceCallback: (() => void) | null = null
 
@@ -24,10 +24,10 @@ namespace splitTime.conversation {
         // run(): void {
             this.handlers.setUp()
             if(this.node instanceof Line) {
-                const speechBubble = this.makeSpeechBubble(this.node)
-                this.speechBubble = speechBubble
-                this.interruptibleEvent = speechBubble
-                this.advanceCallback = () => speechBubble.advance()
+                const lineSpeechBubble = this.makeLineSpeechBubble(this.node)
+                this.lineSpeechBubble = lineSpeechBubble
+                this.interruptibleEvent = lineSpeechBubble.speechBubble
+                this.advanceCallback = () => lineSpeechBubble.speechBubble.advance()
             } else if(this.node instanceof MidConversationAction) {
                 this.interruptibleEvent = this.launchEvent(this.node)
             } else {
@@ -35,8 +35,8 @@ namespace splitTime.conversation {
             }
         }
 
-        getSpeechBubble(): SpeechBubbleState | null {
-            return this.speechBubble
+        getLineSpeechBubble(): LineSpeechBubble | null {
+            return this.lineSpeechBubble
         }
 
         interrupt(): void {
@@ -51,13 +51,13 @@ namespace splitTime.conversation {
             }
         }
 
-        private makeSpeechBubble(line: Line): SpeechBubbleState {
-            return new SpeechBubbleState(
+        private makeLineSpeechBubble(line: Line): LineSpeechBubble {
+            const speechBubble = new SpeechBubbleState(
                 line.speaker.name,
                 line.text,
-                line.speaker.speechBox,
-                treeTraveler.getNearestParentSection(this.node).getSpeakers()
+                line.speaker.speechBox
             )
+            return new LineSpeechBubble(line, speechBubble)
         }
 
         private launchEvent(event: MidConversationAction): Interruptible | null {

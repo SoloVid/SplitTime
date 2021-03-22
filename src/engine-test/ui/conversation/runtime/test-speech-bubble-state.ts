@@ -6,7 +6,7 @@ namespace splitTime.conversation {
 
     splitTime.test.scenario(group, "SpeechBubbleState#notifyFrameUpdate() moves dialog forward", t => {
         const location = new TimeLocation()
-        const bubble = new SpeechBubbleState("", line, location, [])
+        const bubble = new SpeechBubbleState("", line, location)
 
         // Beginning
         t.assert(!bubble.isFinished(), "Bubble should start unfinished")
@@ -57,7 +57,7 @@ namespace splitTime.conversation {
 
     splitTime.test.scenario(group, "SpeechBubbleState#advance() jumps to end", t => {
         const location = new TimeLocation()
-        const bubble = new SpeechBubbleState("", line, location, [])
+        const bubble = new SpeechBubbleState("", line, location)
 
         bubble.advance()
         t.assertEqual(line, bubble.getDisplayedCurrentLine(), "Full line should be displayed")
@@ -75,7 +75,7 @@ namespace splitTime.conversation {
 
     splitTime.test.scenario(group, "SpeechBubbleState#advance() x2 forces finish", t => {
         const location = new TimeLocation()
-        const bubble = new SpeechBubbleState("", line, location, [])
+        const bubble = new SpeechBubbleState("", line, location)
 
         // Advance to end
         bubble.advance()
@@ -92,7 +92,7 @@ namespace splitTime.conversation {
 
     splitTime.test.scenario(group, "SpeechBubbleState#advance() is required to finish INTERACTION", t => {
         const location = new TimeLocation()
-        const bubble = new SpeechBubbleState("", line, location, [])
+        const bubble = new SpeechBubbleState("", line, location)
         bubble.setAdvanceMethod(AdvanceMethod.INTERACTION)
 
         bubble.notifyFrameUpdate()
@@ -106,7 +106,7 @@ namespace splitTime.conversation {
 
     splitTime.test.scenario(group, "SpeechBubbleState#interrupt() adds dash and jumps to end", t => {
         const location = new TimeLocation()
-        const bubble = new SpeechBubbleState("", line, location, [])
+        const bubble = new SpeechBubbleState("", line, location)
 
         bubble.interrupt()
         t.assertEqual(line.charAt(0) + DASH, bubble.getDisplayedCurrentLine(), "Cut line should be displayed")
@@ -124,7 +124,7 @@ namespace splitTime.conversation {
 
     splitTime.test.scenario(group, "SpeechBubbleState#interrupt() just jumps to end if close enough", t => {
         const location = new TimeLocation()
-        const bubble = new SpeechBubbleState("", line, location, [])
+        const bubble = new SpeechBubbleState("", line, location)
 
         // FTODO: Don't duplicate stanza with other test.
         const totalTimeForLine = line.split("").reduce(

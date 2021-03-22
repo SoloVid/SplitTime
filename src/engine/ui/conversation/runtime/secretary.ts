@@ -94,32 +94,33 @@ namespace splitTime.conversation {
 
             const currentLevel = this.perspective.levelManager.getCurrent()
             const engaged = this.connoisseur.getPicked()
-            let engagedDialogStillActive = false
             let winningScore = MIN_SCORE
-            let usurper: {conversation: ConversationInstance, speechBubble: SpeechBubbleState} | null = null
+            let usurper: {conversation: ConversationInstance, lineSpeechBubble: LineSpeechBubble | null} | null = null
 
             for (const t of this.conversations) {
                 t.runtime.notifyFrameUpdate()
 
-                const speechBubble = t.runtime.getSpeechBubble()
-                if (speechBubble === null || t.runtime.isFinished()) {
+                if (t.runtime.isFinished()) {
                     continue
                 }
-                if (engaged !== null && speechBubble === engaged.speechBubble) {
-                    engagedDialogStillActive = true
-                }
+                const lineSpeechBubble = t.runtime.getLineSpeechBubble()
 
-                const location = speechBubble.getLocation()
-                // Related timelines make region check (not present) faulty
-                if (location.level === currentLevel) {
-                    const score = this.connoisseur.calculateConversationImportanceScore(t.conversation, speechBubble)
-                    if (score > winningScore) {
-                        usurper = {
-                            conversation: t.conversation,
-                            speechBubble
-                        }
-                        winningScore = score
+                let score: number = 0
+                if (t.conversation === engaged?.conversation) {
+                    score = this.connoisseur.calculateContinuingConversationScore(engaged.conversation)
+                } else if (lineSpeechBubble !== null) {
+                    const location = lineSpeechBubble.speechBubble.getLocation()
+                                // Related timelines make region check (not present) faulty
+                    if (location.level === currentLevel) {
+                        score = this.connoisseur.calculateLineImportanceScore(lineSpeechBubble)
                     }
+                }
+                if (score > winningScore) {
+                    usurper = {
+                        conversation: t.conversation,
+                        lineSpeechBubble
+                    }
+                    winningScore = score
                 }
             }
 
@@ -129,10 +130,10 @@ namespace splitTime.conversation {
             const toHideThisFrame: typeof fromLastFrame = []
 
             for (const stale of fromLastFrame) {
-                if (toShowThisFrame.some(toShow => stale.speechBubble === toShow.speechBubble)) {
+                if (toShowThisFrame.some(toShow => stale.lineSpeechBubble === toShow.lineSpeechBubble)) {
                     // It's already showing, so we don't need to show again.
                     toShowThisFrame = toShowThisFrame.filter(
-                        toShow => stale.speechBubble !== toShow.speechBubble
+                        toShow => stale.lineSpeechBubble !== toShow.lineSpeechBubble
                     )
                 } else {
                     toHideThisFrame.push(stale)
@@ -140,10 +141,14 @@ namespace splitTime.conversation {
             }
 
             for (const toShow of toShowThisFrame) {
-                this.renderer.show(toShow.speechBubble)
+                if (toShow.lineSpeechBubble) {
+                    this.renderer.show(toShow.lineSpeechBubble.speechBubble)
+                }
             }
             for (const toHide of toHideThisFrame) {
-                this.renderer.hide(toHide.speechBubble)
+                if (toHide.lineSpeechBubble) {
+                    this.renderer.hide(toHide.lineSpeechBubble.speechBubble)
+                }
 
                 const conversationContinues = toShowThisFrame.some(
                     toHide => toHide.conversation === toHide.conversation
@@ -160,7 +165,7 @@ namespace splitTime.conversation {
             if (usurper === null) {
                 this.connoisseur.updatePick(null, null)
             } else {
-                this.connoisseur.updatePick(usurper.conversation, usurper.speechBubble)
+                this.connoisseur.updatePick(usurper.conversation, usurper.lineSpeechBubble)
             }
 
             // Remove conversations that are done.

@@ -29,7 +29,7 @@ namespace splitTime.conversation {
         /** Stuff for our current conversation point. */
         private current: Current | null = null
         /** Speech bubble displaying. May be a line behind our conversation pointer. */
-        private activeSpeechBubble: SpeechBubbleState | null = null
+        private activeLineSpeechBubble: LineSpeechBubble | null = null
 
         constructor(
             public readonly conversation: ConversationInstance,
@@ -50,8 +50,8 @@ namespace splitTime.conversation {
             return this.conversation.getCurrentLeaf() === null
         }
 
-        getSpeechBubble(): SpeechBubbleState | null {
-            return this.activeSpeechBubble
+        getLineSpeechBubble(): LineSpeechBubble | null {
+            return this.activeLineSpeechBubble
             // if (this.current === null) {
             //     return null
             // }
@@ -63,27 +63,41 @@ namespace splitTime.conversation {
         }
 
         interrupt(event: body.CustomEventHandler<void>): void {
-            if (this.activeSpeechBubble !== null) {
-                this.activeSpeechBubble.interrupt()
+            if (this.activeLineSpeechBubble !== null) {
+                this.activeLineSpeechBubble.speechBubble.interrupt()
             }
             const interrupted = this.conversation.tryInterrupt(event)
             this.maybeUpdateCurrent(interrupted)
         }
 
         pullOut(body: Body): void {
-            if (this.activeSpeechBubble !== null) {
-                this.activeSpeechBubble.interrupt()
+            if (this.activeLineSpeechBubble !== null) {
+                this.activeLineSpeechBubble.speechBubble.interrupt()
             }
             const canceled = this.conversation.tryCancel(body)
             this.maybeUpdateCurrent(canceled)
         }
 
+        private advanceInProgress = false
+        private advanceQueue = 0
         advance(): void {
-            if (this.activeSpeechBubble !== null) {
-                this.activeSpeechBubble.advance()
+            this.advanceQueue++
+            if (this.advanceInProgress) {
+                return
             }
-            this.conversation.advanceToNext()
-            this.updateCurrent()
+            try {
+                this.advanceInProgress = true
+                while (this.advanceQueue > 0) {
+                    this.advanceQueue--
+                    if (this.activeLineSpeechBubble !== null) {
+                        this.activeLineSpeechBubble.speechBubble.advance()
+                    }
+                    this.conversation.advanceToNext()
+                    this.updateCurrent()
+                }
+            } finally {
+                this.advanceInProgress = false
+            }
         }
 
         private maybeUpdateCurrent(indication: boolean): void {
@@ -103,17 +117,19 @@ namespace splitTime.conversation {
                     // action: leaf,
                     runner: new ConversationLeafRunner(this, leaf, this.helper)
                 }
-                if (this.activeSpeechBubble === null) {
-                    this.activeSpeechBubble = this.current.runner.getSpeechBubble()
+                // TODO: This can get called in wrong order if new ConversationLeafRunner()
+                // triggers another round through here.
+                if (this.activeLineSpeechBubble === null) {
+                    this.activeLineSpeechBubble = this.current.runner.getLineSpeechBubble()
                 }
             }
         }
 
         notifyFrameUpdate(): void {
             this.checkForCancellations()
-            if (this.activeSpeechBubble !== null) {
-                this.activeSpeechBubble.notifyFrameUpdate()
-                if (this.activeSpeechBubble.isFinished()) {
+            if (this.activeLineSpeechBubble !== null) {
+                this.activeLineSpeechBubble.speechBubble.notifyFrameUpdate()
+                if (this.activeLineSpeechBubble.speechBubble.isFinished()) {
                     this.handleSpeechBubbleFinished()
                 }
             }
@@ -121,15 +137,17 @@ namespace splitTime.conversation {
 
         private handleSpeechBubbleFinished(): void {
             if (this.current === null) {
-                this.activeSpeechBubble = null
+                this.activeLineSpeechBubble = null
                 return
             }
-            let currentSpeechBubble = this.current.runner.getSpeechBubble()
-            if (currentSpeechBubble === this.activeSpeechBubble) {
+            let currentSpeechBubble = this.current.runner.getLineSpeechBubble()
+            if (currentSpeechBubble === this.activeLineSpeechBubble) {
+                this.activeLineSpeechBubble = null
                 this.advance()
-                currentSpeechBubble = this.current?.runner.getSpeechBubble() || null
+            } else {
+                // Catch up displayed to actual pointer.
+                this.activeLineSpeechBubble = currentSpeechBubble
             }
-            this.activeSpeechBubble = currentSpeechBubble
         }
 
     }
