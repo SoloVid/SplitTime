@@ -54,7 +54,7 @@ namespace splitTime {
 
         constructor(public readonly id: string) {}
 
-        registerTimeAdvanceListener(listener: (delta: game_seconds) => void): void {
+        registerTimeAdvanceListener(listener: (delta: game_seconds) => CallbackResult): void {
             this.timeAdvanceListeners.register(listener)
         }
 

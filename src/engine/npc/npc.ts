@@ -6,7 +6,7 @@ namespace splitTime {
 
         constructor(
             public readonly spriteBody: SpriteBody,
-            public behavior: npc.BehaviorChoice = new npc.BehaviorChoice()
+            public readonly behavior: npc.BehaviorChoice = new npc.BehaviorChoice()
         ) {
             this.movementAgent = new agent.ControlledCollisionMovement(spriteBody)
             spriteBody.body.registerTimeAdvanceListener(delta => {
