@@ -126,6 +126,10 @@ namespace splitTime.direction {
         return (dir + 2) % 4
     }
 
+    export function getRotated(dir: direction_t, howMany90Degrees: number = 1): direction_t {
+        return (dir + howMany90Degrees) % 4
+    }
+
     export function simplifyToCardinal(realDir: direction_t): direction_t {
         return splitTime.mod(Math.round(realDir), 4)
     }

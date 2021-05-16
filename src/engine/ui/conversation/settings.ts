@@ -1,9 +1,9 @@
 namespace splitTime.conversation {
-    export const AdvanceMethod = {
-        DEFAULT: "HYBRID",
-        AUTO: "AUTO",
-        INTERACTION: "INTERACTION",
-        HYBRID: "HYBRID"
+    export enum AdvanceMethod {
+        DEFAULT = "HYBRID",
+        AUTO = "AUTO",
+        INTERACTION = "INTERACTION",
+        HYBRID = "HYBRID"
     }
 
     export const DASH = "\u2014"
@@ -25,9 +25,20 @@ namespace splitTime.conversation {
     export let CONVERSIONS: Conversion[] = [new Conversion(/--/g, DASH)]
 
     export let DEFAULT_MS_PER_CHAR = 40
-    export let EXTRA_MS_PER_SPACE = -DEFAULT_MS_PER_CHAR
-    export let EXTRA_MS_PER_SHORT_BREAK_PUNCTUATION = 8 * DEFAULT_MS_PER_CHAR
-    export let EXTRA_MS_PER_LONG_BREAK_PUNCTUATION = 16 * DEFAULT_MS_PER_CHAR
+    export let FACTOR_PER_SPACE = 0
+    export let FACTOR_PER_SHORT_BREAK_PUNCTUATION = 8
+    export let FACTOR_PER_LONG_BREAK_PUNCTUATION = 16
 
     export let DEFAULT_DELAY_MS = 200
+
+    export function howLongForChar(char: string, msPerChar: int): number {
+        if (char === SPACE) {
+            return msPerChar * FACTOR_PER_SPACE
+        } else if (SHORT_BREAK_PUNCTUATION.indexOf(char) >= 0) {
+            return msPerChar * FACTOR_PER_SHORT_BREAK_PUNCTUATION
+        } else if (LONG_BREAK_PUNCTUATION.indexOf(char) >= 0) {
+            return msPerChar * FACTOR_PER_LONG_BREAK_PUNCTUATION
+        }
+        return msPerChar
+    }
 }

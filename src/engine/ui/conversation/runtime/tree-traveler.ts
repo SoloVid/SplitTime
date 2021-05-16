@@ -1,10 +1,16 @@
 namespace splitTime.conversation {
+    /**
+     * Helper class for navigating forward through the conversation tree.
+     */
     export class TreeTraveler {
         getFirst(section: SectionSpec): ConversationLeafNode | null {
-            if (section.parts.length === 0) {
-                return null
+            for (const part of section.parts) {
+                const first = this.getFirstOfSectionPart(part)
+                if (first !== null) {
+                    return first
+                }
             }
-            return this.getFirstOfSectionPart(section.parts[0])
+            return null
         }
 
         getNextAfter(node: ConversationLeafNode): ConversationLeafNode | null {
@@ -110,4 +116,6 @@ namespace splitTime.conversation {
             return parent.getParent()
         }
     }
+
+    export const treeTraveler = new TreeTraveler()
 }

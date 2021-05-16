@@ -25,7 +25,7 @@ namespace splitTime {
 
             this.applyLighting(level, screen, ctx)
 
-            const counter = Math.round(level.getRegion().getTimeMs() / 10) % COUNTER_BASE
+            const counter = Math.round(time.getFromLevel(level) * 100) % COUNTER_BASE
 
             //Weather
             if (level.weather.isRaining) {
@@ -144,7 +144,7 @@ namespace splitTime {
                 this.SCREEN_HEIGHT
             )
             //Fill with light
-            this.buffer.context.fillStyle = level.weather.getAmbientLight()
+            this.buffer.context.fillStyle = level.weather.getAmbientLight().cssString
             this.buffer.context.fillRect(
                 0,
                 0,

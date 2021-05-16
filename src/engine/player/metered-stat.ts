@@ -9,7 +9,6 @@ namespace splitTime.player {
      * you could go before passing out
      */
     export class MeteredStat {
-        conscious: boolean = true
         private readonly emptyListeners = new splitTime.RegisterCallbacks()
         private readonly maxedListeners = new splitTime.RegisterCallbacks()
 
@@ -38,7 +37,6 @@ namespace splitTime.player {
             const prevAmount = this.current
             this.current -= howMuch
             if (prevAmount > 0 && this.current <= 0) {
-                this.conscious = false
                 this.emptyListeners.run()
             }
         }
@@ -46,7 +44,6 @@ namespace splitTime.player {
         add(howMuch: number): void {
             this.current = Math.min(this.current + howMuch, this.max)
             if (this.current >= this.max) {
-                this.conscious = true
                 this.maxedListeners.run()
             }
         }

@@ -4,10 +4,9 @@ namespace splitTime.editor.level {
         editorInputs: client.UserInputs
         levelEditorShared: LevelEditorShared
         // data
-        cancelNextContextMenu: boolean
         editorPadding: number
         // computed
-        allEntitiesSorted: (Position | Prop | Trace)[]
+        allEntitiesSorted: EditorEntity[]
         backgroundSrc: string
         backgroundStyleObject: object
         level: Level
@@ -21,14 +20,12 @@ namespace splitTime.editor.level {
         // methods
         createPosition(): void
         createProp(): void
-        handleContextMenu(event: Event): void
         handleMouseUp(event: MouseEvent): void
         handleMouseMove(event: MouseEvent): void
     }
 
     function data(this: VueLevelGraphicalEditor): Partial<VueLevelGraphicalEditor> {
         return {
-            cancelNextContextMenu: false,
             editorPadding: EDITOR_PADDING
         }
     }
@@ -171,13 +168,6 @@ namespace splitTime.editor.level {
         this.levelEditorShared.editProperties(getPropPropertiesStuff(this.level, newThing.obj))
     }
 
-    function handleContextMenu(this: VueLevelGraphicalEditor, event: Event): void {
-        if(this.cancelNextContextMenu) {
-            event.preventDefault()
-        }
-        this.cancelNextContextMenu = false
-    }
-
     function handleMouseUp(this: VueLevelGraphicalEditor, event: MouseEvent): void {
         const group = getGroupById(this.level, this.levelEditorShared.activeGroup)
         const z = group.defaultZ
@@ -227,17 +217,14 @@ namespace splitTime.editor.level {
                     }
                     this.levelEditorShared.pathInProgress = null
                 }
-                this.cancelNextContextMenu = true
             }
         } else if(this.levelEditorShared.mode === "position") {
             if(isRightClick) {
                 this.createPosition()
-                this.cancelNextContextMenu = true
             }
         } else if(this.levelEditorShared.mode === "prop") {
             if(isRightClick) {
                 this.createProp()
-                this.cancelNextContextMenu = true
             }
         }
     }
@@ -273,7 +260,6 @@ namespace splitTime.editor.level {
         methods: {
             createPosition,
             createProp,
-            handleContextMenu,
             handleMouseUp,
             handleMouseMove
         },
@@ -310,12 +296,12 @@ namespace splitTime.editor.level {
             :style="{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', 'pointer-events': 'none' }"
             class="trace-svg"
         >
-            <rendered-trace
+            <rendered-level-trace
                 :transform="traceTransform"
                 :level-editor-shared="levelEditorShared"
                 :metadata="entity.metadata"
                 :trace="entity.obj"
-            ></rendered-trace>
+            ></rendered-level-trace>
         </svg>
     </div>
 

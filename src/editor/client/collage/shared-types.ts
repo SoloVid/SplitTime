@@ -17,6 +17,8 @@ namespace splitTime.editor.collage {
         gridEnabled: boolean
         selectedFrame: file.collage.Frame | null
         selectedMontage: file.collage.Montage | null
+        traceInProgress: splitTime.level.file_data.Trace | null
+        traceTypeSelected: string
         /** Stuff to display to the user */
         readonly info: { [name: string]: string | number }
         editProperties(propertiesSpec: client.ObjectProperties): void
@@ -27,7 +29,11 @@ namespace splitTime.editor.collage {
         trackFrame(frame: file.collage.Frame, point?: Coordinates2D): void
     }
 
-    export type CollageEditorShared = IVueCollageViewHelper & IVueCollageEditHelper
+    // TypeScript docs suggest using inheritance with interfaces instead of intersection types
+    export interface CollageEditorShared extends IVueCollageViewHelper, IVueCollageEditHelper {
+        selectedMontage: file.collage.Montage | null
+        selectMontage(montage: file.collage.Montage, andProperties?: boolean): void
+    }
 
     export interface PropertiesEvent {
         propertiesPanelSet?: boolean

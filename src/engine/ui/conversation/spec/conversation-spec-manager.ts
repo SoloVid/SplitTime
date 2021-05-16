@@ -4,12 +4,13 @@ namespace splitTime.conversation {
         private readonly specs: { [id: string]: ConversationSpec | undefined } = {}
 
         constructor(
-            private readonly helper: RunnerHelper
+            private readonly helper: HelperInfo,
+            private readonly secretary: Secretary
         ) {
         }
 
-        register(id: string, setup: SetupFunc): time.EventSpec<void> {
-            this.builders[id] = new ConversationSpecBuilder(setup)
+        register(id: string, setup: SetupFunc, options?: Partial<Options>): time.EventSpec<void> {
+            this.builders[id] = new ConversationSpecBuilder(setup, options)
             return new time.EventSpec(id, () => this.start(id))
         }
 
@@ -25,12 +26,12 @@ namespace splitTime.conversation {
 
         private start(id: string): void {
             const spec = this.getSpecById(id)
-            const inst = new ConversationInstance(spec, this.helper)
-            inst.start()
+            const inst = new ConversationInstance(spec)
+            this.secretary.submitConversation(inst)
         }
 
         makeSpeaker(body: Body): Speaker {
-            return new Speaker(this.helper.secretary, body)
+            return new Speaker(this.secretary, body)
         }
     }
 }

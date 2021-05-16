@@ -8,6 +8,7 @@ namespace splitTime.player {
         movementAgent: splitTime.agent.ControlledCollisionMovement
         speed: Indirect<number> = 32
         walkStance: string = "walk"
+        readonly locationHistory = new LocationHistory(128)
 
         constructor(
             private readonly playerManager: PlayerManager,
@@ -38,13 +39,19 @@ namespace splitTime.player {
         }
 
         doJump() {
-            this.abilities.use(JUMP_ABILITY)
+            this.useAbility(JUMP_ABILITY)
         }
         doSpecial() {
-            this.abilities.use(SPECIAL_ABILITY)
+            this.useAbility(SPECIAL_ABILITY)
         }
         doAttack() {
-            this.abilities.use(ATTACK_ABILITY)
+            this.useAbility(ATTACK_ABILITY)
+        }
+
+        useAbility(ability: string): void {
+            if (!this.isFrozen()) {
+                this.abilities.use(ability)
+            }
         }
 
         setLadder(eventId: string, direction: splitTime.direction_t) {
@@ -52,7 +59,7 @@ namespace splitTime.player {
         }
 
         isFrozen(): boolean {
-            return this.abilities.isFrozen() || (this.stamina !== null && this.stamina.isEmpty())
+            return this.playerManager.controlsLocked || this.abilities.isFrozen() || (this.stamina !== null && this.stamina.isEmpty())
         }
 
         notifyTimeAdvance(delta: splitTime.game_seconds) {
@@ -73,6 +80,8 @@ namespace splitTime.player {
             if (!this.isFrozen() && this.spriteBody.body.getLevel().isLoaded()) {
                 this.movementAgent.notifyTimeAdvance(delta)
             }
+
+            this.locationHistory.push(this.body)
         }
     }
 }

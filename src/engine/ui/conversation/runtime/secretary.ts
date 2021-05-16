@@ -3,8 +3,13 @@ namespace splitTime.conversation {
 
     interface LimitedPerspective {
         camera: Camera
-        levelManager: { getCurrent: () => Level }
+        levelManager: { isCurrentSet(): boolean, getCurrent: () => Level }
         playerBody: Body | null
+    }
+
+    interface TrackedConversation {
+        conversation: ConversationInstance
+        runtime: ConversationRuntimeManager
     }
 
     /**
@@ -16,156 +21,158 @@ namespace splitTime.conversation {
      * - Delegate screen interactions from the player to appropriate speech bubbles.
      */
     export class Secretary {
-        private dialogs: SpeechBubble[] = []
+        private conversations: TrackedConversation[] = []
 
         /**
          * If a dialog has been engaged, it will be stored here.
          */
-        private engagedDialog: SpeechBubble | null = null
+        private engaged: TrackedConversation | null = null
 
-        private recentlyEngagedConversation: ConversationInstance | null = null
+        private readonly connoisseur: ConversationConnoisseur
 
         constructor(
             private readonly renderer: Renderer,
-            private readonly perspective: LimitedPerspective
-        ) {}
-
-        /**
-         * Allow dialog manager to start managing the dialog.
-         */
-        submit(dialog: SpeechBubble) {
-            if (this.dialogs.indexOf(dialog) < 0) {
-                this.dialogs.push(dialog)
-            }
+            // FTODO: Make private again
+            private readonly perspective: LimitedPerspective,
+            private readonly helper: HelperInfo
+        ) {
+            this.connoisseur = new ConversationConnoisseur(perspective)
         }
 
-        /**
-         * Stop dialog manager from managing the dialog.
-         */
-        remove(dialog: SpeechBubble) {
-            for (var i = this.dialogs.length - 1; i >= 0; i--) {
-                if (this.dialogs[i] === dialog) {
-                    this.dialogs.splice(i, 1)
-                    this.renderer.hide(dialog)
+        submitConversation(conversation: ConversationInstance): void {
+            assert(!this.conversations.some(t => t.conversation === conversation), "Conversation already submitted")
+            const runtime = new ConversationRuntimeManager(conversation, this.helper)
+            this.conversations.push({
+                conversation,
+                runtime
+            })
+        }
+
+        private getRuntime(conversation: ConversationInstance): ConversationRuntimeManager {
+            for (const t of this.conversations) {
+                if (t.conversation === conversation) {
+                    return t.runtime
                 }
             }
-            if (dialog === this.engagedDialog) {
-                this.engagedDialog = null
+            throw new Error("Failed to find conversation runtime")
+        }
+
+        interrupt(conversation: ConversationInstance, event: body.CustomEventHandler<void>): void {
+            this.getRuntime(conversation).interrupt(event)
+        }
+
+        pullOut(conversation: ConversationInstance, speaker: Speaker): void {
+            this.getRuntime(conversation).pullOut(speaker.body)
+        }
+
+        advance(conversation: ConversationInstance): void {
+            this.getRuntime(conversation).advance()
+        }
+
+        getConversationForSpeaker(speaker: Speaker): ConversationInstance | null {
+            for (const t of this.conversations) {
+                for (const s of t.conversation.getCurrentSpeakers()) {
+                    if (s === speaker) {
+                        return t.conversation
+                    }
+                }
             }
+            return null
         }
 
         isSpeakerConversing(speaker: Speaker): boolean {
-            for (const dialog of this.dialogs) {
-                for (const s of dialog.conversation.getCurrentSpeakers()) {
-                    if (s === speaker) {
-                        return true
-                    }
-                }
+            if (this.getConversationForSpeaker(speaker) !== null) {
+                return true
             }
             return false
         }
 
-        /**
-         * This method should be used sparingly, essentially only for major plot points.
-         * This method allows a new dialog to take precedence over one which is actively engaged.
-         */
-        disengageAllDialogs() {
-            this.engagedDialog = null
-            this.recentlyEngagedConversation = null
-        }
-
         notifyFrameUpdate() {
-            if (this.engagedDialog && this.engagedDialog.isFinished()) {
-                this.remove(this.engagedDialog)
+            if (!this.perspective.levelManager.isCurrentSet()) {
+                return
             }
 
-            var currentLevel = this.perspective.levelManager.getCurrent()
-            var currentRegion = currentLevel.getRegion()
+            const currentLevel = this.perspective.levelManager.getCurrent()
+            const engaged = this.connoisseur.getPicked()
+            let winningScore = MIN_SCORE
+            let usurper: {conversation: ConversationInstance, lineSpeechBubble: LineSpeechBubble | null} | null = null
 
-            var engagedScore = this.engagedDialog
-                ? this.calculateDialogImportanceScore(this.engagedDialog)
-                : 0
-            var winningScore = Math.max(engagedScore, MIN_SCORE)
-            var usurper = null
+            for (const t of this.conversations) {
+                t.runtime.notifyFrameUpdate()
 
-            for (var i = 0; i < this.dialogs.length; i++) {
-                var dialog = this.dialogs[i]
-                var location = dialog.getLocation()
-                var level = location.getLevel()
-                if (level.getRegion() === currentRegion) {
-                    dialog.notifyFrameUpdate()
-                    if (level === currentLevel && !dialog.isFinished()) {
-                        var score = this.calculateDialogImportanceScore(dialog)
-                        if (score > winningScore) {
-                            usurper = dialog
-                            winningScore = score
-                        }
+                if (t.runtime.isFinished()) {
+                    continue
+                }
+                const lineSpeechBubble = t.runtime.getLineSpeechBubble()
+
+                let score: number = 0
+                if (t.conversation === engaged?.conversation) {
+                    score = this.connoisseur.calculateContinuingConversationScore(engaged.conversation)
+                } else if (lineSpeechBubble !== null) {
+                    const location = lineSpeechBubble.speechBubble.getLocation()
+                                // Related timelines make region check (not present) faulty
+                    if (location.level === currentLevel) {
+                        score = this.connoisseur.calculateLineImportanceScore(lineSpeechBubble)
+                    }
+                }
+                if (score > winningScore) {
+                    usurper = {
+                        conversation: t.conversation,
+                        lineSpeechBubble
+                    }
+                    winningScore = score
+                }
+            }
+
+            // Update what speech bubble is rendered.
+            const fromLastFrame = engaged ? [engaged] : []
+            let toShowThisFrame = usurper ? [usurper] : []
+            const toHideThisFrame: typeof fromLastFrame = []
+
+            for (const stale of fromLastFrame) {
+                if (toShowThisFrame.some(toShow => stale.lineSpeechBubble === toShow.lineSpeechBubble)) {
+                    // It's already showing, so we don't need to show again.
+                    toShowThisFrame = toShowThisFrame.filter(
+                        toShow => stale.lineSpeechBubble !== toShow.lineSpeechBubble
+                    )
+                } else {
+                    toHideThisFrame.push(stale)
+                }
+            }
+
+            for (const toShow of toShowThisFrame) {
+                if (toShow.lineSpeechBubble) {
+                    this.renderer.show(toShow.lineSpeechBubble.speechBubble)
+                }
+            }
+            for (const toHide of toHideThisFrame) {
+                if (toHide.lineSpeechBubble) {
+                    this.renderer.hide(toHide.lineSpeechBubble.speechBubble)
+                }
+
+                const conversationContinues = toShowThisFrame.some(
+                    toHide => toHide.conversation === toHide.conversation
+                )
+                if (!conversationContinues) {
+                    if (this.perspective.playerBody !== null) {
+                        // FTODO: This might be problematic for nested conversations.
+                        this.getRuntime(toHide.conversation).pullOut(this.perspective.playerBody)
                     }
                 }
             }
 
-            if (this.engagedDialog && winningScore > engagedScore) {
-                this.renderer.hide(this.engagedDialog)
-                this.engagedDialog = null
-                this.recentlyEngagedConversation = null
+            // Mark which one we picked for scoring next round.
+            if (usurper === null) {
+                this.connoisseur.updatePick(null, null)
+            } else {
+                this.connoisseur.updatePick(usurper.conversation, usurper.lineSpeechBubble)
             }
 
-            if (usurper !== null) {
-                this.engagedDialog = usurper
-                this.recentlyEngagedConversation = this.engagedDialog.conversation
-                this.renderer.show(this.engagedDialog)
-            }
+            // Remove conversations that are done.
+            this.conversations = this.conversations.filter(c => !c.runtime.isFinished())
 
+            // Allow renderer to go.
             this.renderer.notifyFrameUpdate()
-        }
-
-        private calculateDialogImportanceScore(dialog: SpeechBubble) {
-            if (
-                dialog.getLocation().getLevel() !==
-                this.perspective.levelManager.getCurrent()
-            ) {
-                return MIN_SCORE - 1
-            }
-
-            var focusPoint = this.perspective.camera.getFocusPoint()
-            var location = dialog.getLocation()
-
-            var distance = splitTime.measurement.distanceEasy(
-                focusPoint.x,
-                focusPoint.y,
-                location.getX(),
-                location.getY()
-            )
-            // If we've engaged in a dialog, we don't want to accidentally stop tracking the conversation just because the speaker changed.
-            if (dialog.conversation === this.recentlyEngagedConversation) {
-                const speakersExcludingPlayer = dialog.conversation.getCurrentSpeakers().filter(
-                    s => s.body !== this.perspective.playerBody
-                )
-                if (speakersExcludingPlayer.length > 0) {
-                    distance = speakersExcludingPlayer
-                        .map(s =>
-                            splitTime.measurement.distanceEasy(
-                                focusPoint.x,
-                                focusPoint.y,
-                                s.body.getX(),
-                                s.body.getY()
-                            )
-                        )
-                        .reduce(
-                            (tempMin, tempDist) => Math.min(tempMin, tempDist),
-                            splitTime.MAX_SAFE_INTEGER
-                        )
-                }
-            }
-            var distanceScore =
-                this.perspective.camera.SCREEN_WIDTH /
-                3 /
-                Math.max(distance, 0.0001)
-
-            if (dialog.conversation === this.recentlyEngagedConversation) {
-                return distanceScore * 1.5
-            }
-            return distanceScore
         }
     }
 }

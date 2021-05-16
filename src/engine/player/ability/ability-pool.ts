@@ -17,7 +17,7 @@ namespace splitTime.player.ability {
             if (spec && !this.isFrozen()) {
                 const used = spec.ability.use()
                 if (used) {
-                    this.freezeUntil = this.body.getLevel().getRegion().getTime() + spec.coolDown
+                    this.freezeUntil = splitTime.time.getFromBody(this.body) + spec.coolDown
                 }
             }
         }
@@ -38,8 +38,7 @@ namespace splitTime.player.ability {
         }
 
         isFrozen(): boolean {
-            const level = this.body.getLevel()
-            const now = level.getRegion().getTime()
+            const now = splitTime.time.getFromBody(this.body)
             return now <= this.freezeUntil
         }
     }

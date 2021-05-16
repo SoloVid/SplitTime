@@ -63,19 +63,25 @@ namespace splitTime.body {
 
         prepareForRender() {
             const maxFallDist = 1000
-            const minBottom = this.realBody.z - maxFallDist
+            const maxMinBottom = this.realBody.z - maxFallDist
+            const minBottom = Math.max(maxMinBottom, this.realBody.level.lowestLayerZ)
+            const scanDist = Math.max(this.realBody.z - minBottom, 0)
             const shadowFallInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
                 this.realBody.collisionMask,
                 this.realBody.level,
                 this.realBody.getLeft(), this.realBody.width,
                 this.realBody.getTopY(), this.realBody.depth,
-                minBottom, maxFallDist + 1,
+                minBottom, scanDist + 1,
                 [this.realBody],
                 true
             )
             this.shadowBody.x = this.realBody.x
             this.shadowBody.y = this.realBody.y
-            this.shadowBody.z = Math.min(shadowFallInfo.zBlockedTopEx, this.realBody.z)
+            if (shadowFallInfo.blocked) {
+                this.shadowBody.z = Math.min(shadowFallInfo.zBlockedTopEx, this.realBody.z)
+            } else {
+                this.shadowBody.z = minBottom
+            }
             this.radius =
                 (this.maxRadius - this.minRadius) /
                     (0.05 * Math.abs(this.realBody.z - this.shadowBody.z) + 1) +

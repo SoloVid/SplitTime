@@ -2,14 +2,16 @@ namespace splitTime.editor.server {
     export class PathHelper {
         private readonly nodeLibs = new NodeLibs()
 
+        constructor(private readonly config: Config) {}
+
         toProjectPath(projectId: string, filePath: string): string {
             const relPath = this.nodeLibs.path.relative(this.getProjectDirectory(projectId), filePath)
             return "/" + this.ensurePosixPath(relPath)
         }
 
-        toWebPath(filePath: string): string {
-            const relPath = this.nodeLibs.path.relative(__ROOT__, filePath)
-            return "/" + this.ensurePosixPath(relPath)
+        toProjectWebPath(filePath: string): string {
+            const relPath = this.nodeLibs.path.relative(this.config.sourceDirectory, filePath)
+            return "/" + prefixRun + "/" + this.ensurePosixPath(relPath)
         }
 
         ensurePosixPath(filePath: string): string {
@@ -17,7 +19,10 @@ namespace splitTime.editor.server {
         }
 
         getProjectDirectory(projectId: string): string {
-            return this.nodeLibs.path.join(__ROOT__, "projects", projectId)
+            // if (this.config.isSingleProject) {
+            //     return this.config.sourceDirectory
+            // }
+            return this.nodeLibs.path.join(this.config.sourceDirectory, projectId)
         }
 
         getFilePath(projectId: string, directory: string, file?: string): string {

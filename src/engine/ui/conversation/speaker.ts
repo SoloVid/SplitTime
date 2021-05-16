@@ -21,5 +21,16 @@ namespace splitTime.conversation {
                 }
             }
         }
+
+        isConversing(): boolean {
+            return this.secretary.isSpeakerConversing(this)
+        }
+
+        shutUp(): void {
+            const conversation = this.secretary.getConversationForSpeaker(this)
+            if (conversation !== null) {
+                this.secretary.pullOut(conversation, this)
+            }
+        }
     }
 }

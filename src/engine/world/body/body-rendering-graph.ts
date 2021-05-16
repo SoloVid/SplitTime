@@ -178,13 +178,21 @@ namespace splitTime.body {
     /**
      * returns true if the body in question should render in front of the other body.
      */
-    function shouldRenderInFront(body1: GraphBody, body2: GraphBody): boolean | undefined {
-        if (isAbove(body1, body2) || isInFront(body1, body2)) {
+    function shouldRenderInFront(body: GraphBody, otherBody: GraphBody): boolean | undefined {
+        if (isAbove(body, otherBody) || isInFront(body, otherBody)) {
             //if body1 is completely above or in front
             return true
-        } else if (isAbove(body2, body1) || isInFront(body2, body1)) {
+        }
+        if (isAbove(otherBody, body) || isInFront(otherBody, body)) {
             //if body2 is completely above or in front
             return false
+        }
+        if (body.shouldRenderInFrontCustom) {
+            return body.shouldRenderInFrontCustom(otherBody)
+        }
+        if (otherBody.shouldRenderInFrontCustom) {
+            const r = otherBody.shouldRenderInFrontCustom(body)
+            return r === undefined ? undefined : !r
         }
 
         // If neither body is clearly above or in front,
@@ -242,6 +250,7 @@ namespace splitTime.body {
         width: int
         depth: int
         height: int
+        shouldRenderInFrontCustom?: (otherBody: GraphBody) => (boolean | undefined)
     }
 
     export interface GraphDrawable {

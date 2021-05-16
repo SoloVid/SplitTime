@@ -5,18 +5,10 @@ namespace splitTime.level {
         export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
 
         export class CollisionInfo {
-            containsSolid: boolean
-            levels: { [levelId: string]: Level | null }
-            pointerTraces: { [levelId: string]: splitTime.Trace }
-            zBlockedTopEx: int
-            events: { [eventId: string]: true }
-            constructor() {
-                this.containsSolid = false
-                this.levels = {}
-                this.pointerTraces = {}
-                this.zBlockedTopEx = -4096 // arbitrary
-                this.events = {}
-            }
+            containsSolid: boolean = false
+            pointerOffsets: { [offsetHash: string]: splitTime.trace.PointerOffset | null } = {}
+            zBlockedTopEx: int = -4096 // arbitrary
+            events: { [eventId: string]: true } = {}
         }
     }
 
@@ -111,7 +103,7 @@ namespace splitTime.level {
         }
 
         private calculateLayerZs(traces: readonly Trace[]): int[] {
-            let layerZs = this.fillLayerZGaps(traces, traces.map(t => Math.floor(t.spec.z)))
+            let layerZs = this.fillLayerZGaps(traces, traces.map(t => Math.floor(t.spec.offsetZ)))
             return layerZs.sort((a, b) => a - b)
         }
 
@@ -128,8 +120,8 @@ namespace splitTime.level {
             const MAX_LAYER_Z = 240
             for (const trace of traces) {
                 const spec = trace.spec
-                let startZ = spec.z
-                for (let currentZ = startZ; currentZ < spec.z + spec.height; currentZ++) {
+                let startZ = spec.offsetZ
+                for (let currentZ = startZ; currentZ < spec.offsetZ + spec.height; currentZ++) {
                     if (zSet[currentZ]) {
                         startZ = currentZ
                     } else if (currentZ - startZ > MAX_LAYER_Z) {
@@ -148,14 +140,14 @@ namespace splitTime.level {
         private drawPartialSolidTrace(trace: Trace, a: Uint8ClampedArray, minZ: int, exMaxZ: int): void {
             const spec = trace.spec
             const maxHeight = exMaxZ - minZ
-            if (spec.height > 0 && !isOverlap(spec.z, spec.height, minZ, maxHeight)) {
+            if (spec.height > 0 && !isOverlap(spec.offsetZ, spec.height, minZ, maxHeight)) {
                 return
             }
-            if (spec.height === 0 && (spec.z < minZ || spec.z >= exMaxZ)) {
+            if (spec.height === 0 && (spec.offsetZ < minZ || spec.offsetZ >= exMaxZ)) {
                 return
             }
-            const minZRelativeToTrace = minZ - spec.z
-            const traceHeightFromMinZ = spec.z + spec.height - minZ
+            const minZRelativeToTrace = minZ - spec.offsetZ
+            const traceHeightFromMinZ = spec.offsetZ + spec.height - minZ
             const pixelHeight = constrain(traceHeightFromMinZ, 0, maxHeight)
             const groundR = 1
             const topR = Math.min(255, pixelHeight + 1)
@@ -201,8 +193,8 @@ namespace splitTime.level {
                     // range of the stairs gradient.
                     // 0 <= startFraction < endFraction <= 1
                     const startFraction = minZRelativeToTrace / spec.height
-                    const stairsTopThisLayer = Math.min(spec.z + spec.height, exMaxZ)
-                    const stairsTopRelativeToTrace = stairsTopThisLayer - spec.z
+                    const stairsTopThisLayer = Math.min(spec.offsetZ + spec.height, exMaxZ)
+                    const stairsTopRelativeToTrace = stairsTopThisLayer - spec.offsetZ
                     const endFraction = stairsTopRelativeToTrace / spec.height
 
                     math.fillPolygon(spec.getPolygon(), (x, y) => {
@@ -254,13 +246,14 @@ namespace splitTime.level {
 
         private drawPartialSpecialTrace(trace: Trace, a: Uint8ClampedArray, minZ: int, exMaxZ: int, specialTraceBins: (Trace[] | null)[]): void {
             const spec = trace.spec
-            if (!isOverlap(spec.z, spec.height, minZ, exMaxZ - minZ)) {
+            if (!isOverlap(spec.offsetZ, spec.height, minZ, exMaxZ - minZ)) {
                 return
             }
             switch (spec.type) {
                 case splitTime.trace.Type.EVENT:
                 case splitTime.trace.Type.POINTER:
                 case splitTime.trace.Type.TRANSPORT:
+                case splitTime.trace.Type.SEND:
                     // Do nothing. We're just trying to weed out the other types.
                     break
                 default:
@@ -341,15 +334,21 @@ namespace splitTime.level {
             minZ: int,
             exMaxZ: int,
             ignoreEvents: boolean = false
-        ) {
+        ): void {
+            if (this.layerCount === 0) {
+                return
+            }
+            if (minZ < this.layerZs[0]) {
+                collisionInfo.pointerOffsets[traces.SELF_LEVEL_ID] = null
+            }
             for (
-                var iLayer = 0;
+                let iLayer = 0;
                 iLayer < this.layerCount;
                 iLayer++
             ) {
-                var layerZ = this.layerZs[iLayer]
+                const layerZ = this.layerZs[iLayer]
                 // This operation should be safe because there is a sentinel
-                var nextLayerZ = this.layerZs[iLayer + 1]
+                const nextLayerZ = this.layerZs[iLayer + 1]
                 if (exMaxZ > layerZ && minZ < nextLayerZ) {
                     this._calculatePixelCollision(
                         collisionInfo,
@@ -406,23 +405,22 @@ namespace splitTime.level {
                             continue
                         }
                         const trace = bin[i]
-                        if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.z, trace.spec.height)) {
+                        if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
                             continue
                         }
                         const spec = trace.spec
                         switch (spec.type) {
                             case splitTime.trace.Type.EVENT:
-                                assert(spec.eventId !== null, "Event trace has no ID")
+                                assert(spec.eventId !== null, "Event trace has no event ID")
                                 collisionInfo.events[spec.eventId] = true
                                 break
                             case splitTime.trace.Type.TRANSPORT:
-                                collisionInfo.events[spec.getLocationId()] = true
+                            case splitTime.trace.Type.SEND:
+                                collisionInfo.events[spec.getOffsetHash()] = true
                                 break
                             case splitTime.trace.Type.POINTER:
                                 isOtherLevel = true
-                                assert(!!trace.level, "Pointer trace has no level")
-                                collisionInfo.pointerTraces[trace.level.id] = trace
-                                collisionInfo.levels[trace.level.id] = trace.level
+                                collisionInfo.pointerOffsets[trace.getOffsetHash()] = trace.getPointerOffset()
                                 break
                             default:
                                 throw new Error("Unexpected trace type " + spec.type)
@@ -432,7 +430,7 @@ namespace splitTime.level {
             }
 
             if (!isOtherLevel) {
-                collisionInfo.levels[traces.SELF_LEVEL_ID] = null
+                collisionInfo.pointerOffsets[traces.SELF_LEVEL_ID] = null
             }
         }
 

@@ -16,14 +16,21 @@ namespace splitTime {
 
         drawables: splitTime.body.Drawable[] = []
         shadow = false
+        /**
+         * If implemented, returns true if this Body should render in front of otherBody
+         */
+        shouldRenderInFrontCustom?: (otherBody: body.GraphBody) => (boolean | undefined)
 
         private _level: splitTime.Level | null = null
+        /** If true, linking traces won't attempt to change level, and direct setting will throw exception. */
         levelLocked: boolean = false
+        /** If true, Body will be destroyed when parent level is unloaded. */
+        ethereal: boolean = false
         // Coordinates represent center of base: x is midpoint, y is midpoint, z is bottom
         private _x = 0
         private _y = 0
         private _z = 0
-        private _time: game_ms = Number.NEGATIVE_INFINITY
+        private _time: game_seconds = Number.NEGATIVE_INFINITY
 
         childrenBolted: Body[] = []
         childrenLoose: Body[] = []
@@ -288,6 +295,9 @@ namespace splitTime {
                 throw new Error("Body is not in a Level")
             }
             return this._level
+        }
+        hasLevel(): boolean {
+            return this._level !== null
         }
 
         notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {

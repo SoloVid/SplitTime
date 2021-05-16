@@ -7,13 +7,10 @@ namespace splitTime {
         // 0-1 invisible to fully visible
         cloudAlpha: number = 1
         // Color of light (e.g. black for darkness)
-        ambientLight: string | (() => string) = "rgba(255, 255, 255, 1)"
+        ambientLight: Indirect<light.Color> = new light.Color(255, 255, 255)
 
-        getAmbientLight(): string {
-            if (typeof this.ambientLight === "string") {
-                return this.ambientLight
-            }
-            return this.ambientLight()
+        getAmbientLight(): light.Color {
+            return redirect(this.ambientLight)
         }
     }
 }

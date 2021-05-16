@@ -6,6 +6,10 @@ namespace splitTime.conversation {
         private cancelSection: SectionBuilder | null = null
         private interruptibles: InterruptibleSpecBuilder[] = []
 
+        constructor(
+            private readonly options?: Partial<Options>
+        ) {}
+
         append(part: BuilderPart): void {
             this.parts.push(part)
         }
@@ -33,7 +37,8 @@ namespace splitTime.conversation {
                 this.speakers,
                 groupLineSequences(builtStuff),
                 this.interruptibles.map(i => i.build()),
-                this.cancelSection?.build()
+                this.cancelSection?.build(),
+                this.options
             )
         }
     }

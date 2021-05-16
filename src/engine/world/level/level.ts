@@ -16,7 +16,6 @@ namespace splitTime {
         backgroundOffsetY: int = 0
         _cellGrid: level.CellGrid | null = null
         weather: WeatherSettings = new WeatherSettings()
-        _props: Body[] = []
         type: "action" | null = null
         width: int = 0
         height: int = 0
@@ -187,9 +186,6 @@ namespace splitTime {
         insertBody(body: splitTime.Body) {
             if (this.bodies.indexOf(body) < 0) {
                 this.bodies.push(body)
-                if (this.loader._addingProps) {
-                    this._props.push(body)
-                }
             }
             if (this._cellGrid) {
                 this._cellGrid.addBody(body)

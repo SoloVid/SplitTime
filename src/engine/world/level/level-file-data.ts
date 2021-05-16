@@ -32,11 +32,12 @@ namespace splitTime.level {
             z: number
             height: number
             direction: string // for stairs
-            event: string // for events
-            level: string // for pointers
-            offsetX: number // for pointers
-            offsetY: number // for pointers
-            offsetZ: number // for pointers
+            event: string // for event
+            level: string // for pointer/transport/send
+            offsetX: number // for pointer/transport
+            offsetY: number // for pointer/transport
+            offsetZ: number // for pointer/transport
+            targetPosition: string // for send
         }
 
         export interface Prop {
@@ -82,7 +83,8 @@ namespace splitTime.level {
                     level: type.string,
                     offsetX: type.number,
                     offsetY: type.number,
-                    offsetZ: type.number
+                    offsetZ: type.number,
+                    targetPosition: type.string
                 })),
                 props: type.array(type.object({
                     id: type.string,

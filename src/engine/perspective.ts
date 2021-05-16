@@ -18,16 +18,10 @@ namespace splitTime {
         constructor(world: World, view: ui.View, hud: ui.HUD | null) {
             this.world = world
             this.levelManager = new LevelManager(this.world)
-            this.levelManager.onTransitionStart((oldLevel, newLevel) => {
-                if (oldLevel === null || oldLevel.region === newLevel.region || this.worldRenderer.isAlreadyFaded()) {
-                    return Pledge.as()
-                }
+            this.levelManager.onRegionExit((oldLevel, newLevel) => {
                 return this.worldRenderer.fadeTo(new splitTime.light.Color(255,255,255))
             })
-            this.levelManager.onTransitionEnd((oldLevel, newLevel) => {
-                if (oldLevel === null || oldLevel.region === newLevel.region) {
-                    return Pledge.as()
-                }
+            this.levelManager.onRegionEnter((oldLevel, newLevel) => {
                 return this.worldRenderer.fadeIn()
             })
             this.view = view
@@ -38,7 +32,7 @@ namespace splitTime {
                 this.camera,
                 this.view.see,
                 this.levelManager,
-                () => this.playerBody                
+                () => this.playerBody
             )
             this.hud = hud
         }

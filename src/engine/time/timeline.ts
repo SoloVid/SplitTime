@@ -1,25 +1,28 @@
 namespace splitTime {
     export type game_seconds = number
-    export type game_ms = number
     export type real_seconds = number
-    export type real_ms = number
 
-    function toMs(seconds: number): number {
-        return seconds * 1000
-    }
-
-    function toSeconds(ms: number): number {
-        return ms / 1000
+    interface FixtureEvent {
+        moment: time.Moment
+        event: () => void
+        recurs: game_seconds
     }
 
     class ScheduledEvent<T> {
-        public readonly timeMs: game_ms
+        // constructor(
+        //     time: game_seconds,
+        //     instance: (() => void),
+        //     recurs: game_seconds
+        // )
+        // constructor(
+        //     time: game_seconds,
+        //     instance: time.EventInstance<T>,
+        // )
         constructor(
             public readonly time: game_seconds,
-            public readonly instance: time.EventInstance<T> | (() => void)
-        ) {
-            this.timeMs = toMs(this.time)
-        }
+            public readonly instance: time.EventInstance<T> | (() => void),
+            public readonly recurs: game_seconds = 0
+        ) {}
     }
 
     class TimelineRelation {
@@ -34,6 +37,7 @@ namespace splitTime {
         private timeAdvanceListeners: splitTime.RegisterCallbacks = new splitTime.RegisterCallbacks()
         private regions: splitTime.Region[] = []
 
+        private readonly fixtureEvents: FixtureEvent[] = []
         private upcomingEvents: ScheduledEvent<unknown>[] = []
 
         readonly beginning: time.Moment = new time.Moment(0)
@@ -50,7 +54,7 @@ namespace splitTime {
 
         constructor(public readonly id: string) {}
 
-        registerTimeAdvanceListener(listener: (delta: game_seconds) => void): void {
+        registerTimeAdvanceListener(listener: (delta: game_seconds) => CallbackResult): void {
             this.timeAdvanceListeners.register(listener)
         }
 
@@ -81,10 +85,9 @@ namespace splitTime {
             otherTimeline.timelineRelations.push(new TimelineRelation(this, 1 / otherSecondsPerMySecond))
         }
 
-        getTimeMs(): game_ms {
-            return toMs(this.time)
-        }
-
+        /**
+         * Get the current time in seconds.
+         */
         getTime(): game_seconds {
             return this.time
         }
@@ -105,8 +108,19 @@ namespace splitTime {
          * @param seconds 
          * @param includeRelated 
          */
-        setTime(seconds: game_seconds): void {
+        resetTimeTo(seconds: game_seconds): void {
+            this.upcomingEvents = []
             this.time = seconds
+            for (const fixtureEvent of this.fixtureEvents) {
+                const eventTime = fixtureEvent.moment.getTime()
+                let scheduleTime = eventTime
+                if (scheduleTime < this.time) {
+                    const timeSinceLast = (this.time - eventTime) % fixtureEvent.recurs
+                    const timeFromNow = fixtureEvent.recurs - timeSinceLast
+                    scheduleTime = this.time + timeFromNow
+                }
+                this.scheduleAbsolute(new ScheduledEvent(scheduleTime, fixtureEvent.event, fixtureEvent.recurs))
+            }
         }
 
         advance(seconds: game_seconds, includeRelated: boolean = true): void {
@@ -131,6 +145,13 @@ namespace splitTime {
                 this.time = event.time
                 if (typeof event.instance === "function") {
                     event.instance()
+                    if (event.recurs > 0) {
+                        this.scheduleAbsolute(new ScheduledEvent(
+                            event.time + event.recurs,
+                            event.instance,
+                            event.recurs
+                        ))
+                    }
                 } else {
                     event.instance.run()
                 }
@@ -193,16 +214,27 @@ namespace splitTime {
             event: time.EventInstance<T> | (() => void)
         ): void {
             if (typeof event === "function") {
-                assert(!this.isStarted, "Simple callback event cannot be specified after timeline starts")
+                this.scheduleRecurring(moment, event, 0)
+            } else {
+                this.scheduleAbsolute(
+                    new ScheduledEvent(moment.getTime(), event)
+                )
             }
-            this.scheduleAbsolute(
-                new ScheduledEvent(moment.getTime(), event)
-            )
+        }
+
+        /**
+         * Schedule simple recurring event specified by callback.
+         * This kind of scheduled event cannot be saved.
+         * Scheduling events in this manner must occur before timeline starts.
+         */
+        scheduleRecurring(moment: time.Moment, event: (() => void), recurs: game_seconds): void {
+            assert(!this.isStarted, "Simple callback event cannot be specified after timeline starts")
+            this.fixtureEvents.push({ moment, event, recurs })
         }
 
         scheduleFromNow<T>(
             timeFromNow: game_seconds,
-            eventInstance: time.EventInstance<T>
+            eventInstance: time.EventInstance<T> | (() => void)
         ): void {
             this.scheduleAbsolute(
                 new ScheduledEvent(this.getTime() + timeFromNow, eventInstance)

@@ -3,6 +3,7 @@ namespace splitTime.editor.collage {
         // props
         collageEditHelper: IVueCollageEditHelper | undefined
         collageViewHelper: IVueCollageViewHelper
+        editorInputs: client.UserInputs
         montage: file.collage.Montage
         // data
         placeholderImgSrc: string
@@ -71,6 +72,9 @@ namespace splitTime.editor.collage {
     function setActiveMontage(this: VueMontage, event: MouseEvent): void {
         const alsoSetProperties = !(event as PropertiesEvent).propertiesPanelSet
         if (!!this.collageEditHelper) {
+            if (this.collageEditHelper.traceInProgress) {
+                return
+            }
             this.collageEditHelper.selectMontage(this.montage, alsoSetProperties)
         } else {
             this.collageViewHelper.selectMontage(this.montage)
@@ -81,6 +85,7 @@ namespace splitTime.editor.collage {
         props: {
             collageEditHelper: Object,
             collageViewHelper: Object,
+            editorInputs: Object,
             montage: Object
         },
         data,
@@ -120,10 +125,11 @@ namespace splitTime.editor.collage {
             <montage-frame
                 :collage-edit-helper="collageEditHelper"
                 :collage-view-helper="collageViewHelper"
+                :edit-affects-all-frames="true"
+                :editor-inputs="editorInputs"
+                :highlight="false"
                 :montage="montage"
                 :montage-frame="fileMontageFrame"
-                :edit-affects-all-frames="true"
-                :highlight="false"
             ></montage-frame>
         </div>
     </div>

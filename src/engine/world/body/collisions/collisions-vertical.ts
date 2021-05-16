@@ -2,11 +2,27 @@ namespace splitTime.body.collisions {
     interface VerticalCollisionInfo {
         bodies: Body[]
         events: string[]
-        targetLevel: Level
+        targetOffset: trace.PointerOffset | null
         dzAllowed: number
     }
 
+    interface CachedFallStopBody {
+        body: Body
+        location: ILevelLocation2
+        dimensions: file.collage.BodySpec
+    }
+
+    interface CachedFallStop {
+        location: ILevelLocation2
+        dimensions: file.collage.BodySpec
+        bodies: CachedFallStopBody[]
+        events: string[]
+        targetOffset: trace.PointerOffset | null
+        ignoreBodies: Body[]
+    }
+
     export class Vertical {
+        private lastFallStopped: CachedFallStop | null = null
         constructor(private readonly mover: splitTime.body.Mover) {}
 
         /**
@@ -27,7 +43,7 @@ namespace splitTime.body.collisions {
             if (collisionInfo.dzAllowed !== 0) {
                 this.mover.body.setZ(this.mover.body.z + collisionInfo.dzAllowed)
                 this.mover.body.level.runEvents(collisionInfo.events, this.mover.body)
-                if (collisionInfo.targetLevel !== this.mover.body.level) {
+                if (trace.isPointerOffsetSignificant(collisionInfo.targetOffset, this.mover.body.level)) {
                     this.mover.transportLevelIfApplicable()
                 }
             }
@@ -46,6 +62,17 @@ namespace splitTime.body.collisions {
             dz: number,
             ignoreBodies: Body[] = []
         ): VerticalCollisionInfo {
+            if (this.canApplyCachedFall(level, x, y, z, dz, ignoreBodies)) {
+                return {
+                    bodies: this.lastFallStopped!.bodies.map(a => a.body),
+                    events: this.lastFallStopped!.events,
+                    targetOffset: this.lastFallStopped!.targetOffset,
+                    dzAllowed: 0
+                }
+            }
+
+            this.lastFallStopped = null
+
             //If the body is out of bounds on the Z axis
             if (z + dz < level.lowestLayerZ) {
                 dz = -(z - level.lowestLayerZ)
@@ -76,8 +103,9 @@ namespace splitTime.body.collisions {
             }
 
             let bodies: Body[] = []
-            const targetLevels: { [levelId: string]: Level } = {}
+            const targetOffsets: { [offsetHash: string]: trace.PointerOffset | null } = {}
             var eventIdSet = {}
+            let blocked = false
             for (var i = 0; i < steps; i++) {
                 const originCollisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
                     this.mover.body.collisionMask,
@@ -90,6 +118,7 @@ namespace splitTime.body.collisions {
                 // Ground traces don't cause the blocked flag to be set,
                 // but we can detect the blockage through zBlockedTopEx
                 if (originCollisionInfo.blocked || originCollisionInfo.zBlockedTopEx === lowerBoundZ) {
+                    blocked = true
                     bodies = originCollisionInfo.bodies
                     if (dz < 0) {
                         // Since we started targetZ above our initial point, make sure we don't go up
@@ -103,7 +132,12 @@ namespace splitTime.body.collisions {
                 lowerBoundZ += kHat
                 targetZ += kHat
                 addArrayToSet(originCollisionInfo.events, eventIdSet)
-                targetLevels[originCollisionInfo.targetLevel.id] = originCollisionInfo.targetLevel
+                const targetOffset = originCollisionInfo.targetOffset
+                if (targetOffset === null) {
+                    targetOffsets[splitTime.level.traces.SELF_LEVEL_ID] = null
+                } else {
+                    targetOffsets[targetOffset.getOffsetHash()] = targetOffset
+                }
             }
 
             let dzAllowed = targetZ - z
@@ -113,12 +147,81 @@ namespace splitTime.body.collisions {
                 dzAllowed = dz
             }
 
-            return {
+            const r = {
                 bodies: bodies,
                 events: Object.keys(eventIdSet),
-                targetLevel: chooseTheOneOrDefault(targetLevels, level),
+                targetOffset: chooseTheOneOrDefault(targetOffsets, null),
                 dzAllowed: dzAllowed
             }
+            if (dz < 0 && blocked) {
+                this.lastFallStopped = {
+                    location: { x, y, z: targetZ, level },
+                    dimensions: {
+                        width: this.mover.body.width,
+                        depth: this.mover.body.depth,
+                        height: this.mover.body.height,
+                    },
+                    bodies: r.bodies.map(b => ({
+                        body: b,
+                        location: splitTime.level.copyLocation(b),
+                        dimensions: {
+                            width: b.width,
+                            depth: b.depth,
+                            height: b.height
+                        }
+                    })),
+                    events: r.events,
+                    targetOffset: r.targetOffset,
+                    ignoreBodies: ignoreBodies
+                }
+            }
+            return r
+        }
+
+        private canApplyCachedFall(
+            level: Level,
+            x: number,
+            y: number,
+            z: number,
+            dz: number,
+            ignoreBodies: Body[] = []
+        ): boolean {
+            if (dz >= 0) {
+                return false
+            }
+            if (this.lastFallStopped === null) {
+                return false
+            }
+            if (!splitTime.level.areLocationsEquivalent({x, y, z, level}, this.lastFallStopped.location)) {
+                return false
+            }
+            if (this.lastFallStopped.dimensions.width !== this.mover.body.width ||
+                this.lastFallStopped.dimensions.depth !== this.mover.body.depth ||
+                this.lastFallStopped.dimensions.height !== this.mover.body.height) {
+                return false
+            }
+            if (ignoreBodies.length !== this.lastFallStopped.ignoreBodies.length) {
+                return false
+            }
+            for (let i = 0; i < ignoreBodies.length; i++) {
+                if (ignoreBodies[i] !== this.lastFallStopped.ignoreBodies[i]) {
+                    return false
+                }
+            }
+            for (const body of this.lastFallStopped.bodies) {
+                if (!body.body.hasLevel()) {
+                    return false
+                }
+                if (body.dimensions.width !== body.body.width ||
+                    body.dimensions.depth !== body.body.depth ||
+                    body.dimensions.height !== body.body.height) {
+                    return false
+                }
+                if (!splitTime.level.areLocationsEquivalent(body.body, body.location)) {
+                    return false
+                }
+            }
+            return true
         }
     }
 }

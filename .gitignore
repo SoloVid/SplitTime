@@ -1,5 +1,4 @@
 /build/
-/dist/
 /projects/*
 !/projects/example/
 /node_modules/

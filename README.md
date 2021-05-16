@@ -8,37 +8,44 @@ However, the real distinction of this engine is its 2.5D nature. Although graphi
 ## Development Environment
 Make sure you have [Nodejs](http://nodejs.org/download/) installed.
 
-Also make sure that [Grunt](https://gruntjs.com/) is installed (``npm install -g grunt-cli``).
-
 From the command line, run the following commands to setup development dependencies:
 ```sh
 npm install
 ```
 
+If developing the engine and a game project in tandem,
+run ``npm link`` in the directory of the engine (this repository)
+and then run ``npm link splittime`` in the game project directory.
+
 ### Building
 
 To build the engine:
 ```sh
-grunt build
+npm run -s build
 ```
 
-To build a project (after building the engine):
+To build the project (after building the engine), run ``splittime build`` (e.g. ``npx splittime build``).
+Configure the npm ``build`` script to something like ``tsc && splittime build`` and the following command will execute the build:
 ```sh
-grunt build:<project-name>
+npm run -s build
 ```
 
-_In the previous command, ``<project-name>`` should be replaced with the name of the directory containing the game project as described in the Project Structure section below._
-
-Or to build both:
-```sh
-grunt build build:<project-name>
+If you want editor (VS Code) support, ``tsconfig.json`` in project should look something like:
+```json
+{
+  "extends": "splittime/tsconfig.project.json",
+  "include": [
+    "./src/**/*.ts"
+  ]
+}
 ```
+_(This configuration file should not be expected to affect the actual build with ``splittime build``.)_
 
 ### Running
 
 The SplitTime engine ships with a development server (available after building the engine):
 ```sh
-grunt serve
+npm run start
 ```
 While the server is running, you may access files in your browser at [localhost:8080](http://localhost:8080).
 You'll be able to play-test your game at [localhost:8080/project-name/](http://localhost:8080/project-name/) (where ``project-name`` is the name of the directory of your game project).
@@ -47,12 +54,7 @@ You'll be able to play-test your game at [localhost:8080/project-name/](http://l
 
 To run tests in ``src/engine-test/`` (after building the engine):
 ```sh
-grunt test
-```
-
-Or to build and run tests:
-```sh
-grunt build test
+npm test
 ```
 
 Alternatively, you can run these tests in the browser at [localhost:8080/test-runner.html](http://localhost:8080/test-runner.html) through the development server after building the engine.
@@ -67,8 +69,9 @@ Projects are individual games that reside in separate directories within ``proje
 
 The directories within each project should be
 
-- ``src/`` for all TypeScript files which will be compiled into one file with engine code
-- ``build/`` for Grunt-generated files
+- ``src/`` for all TypeScript files which will be compiled into one file with engine code (now needs to be taken care of at project level)
+- ``build/`` for build-generated files
+    - ``tsjs/`` for ``tsc`` output
 - ``audio/``
     - ``music/`` for music (looping)
     - ``fx/`` for sound effects (non-looping)

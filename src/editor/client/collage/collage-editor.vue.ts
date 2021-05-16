@@ -7,6 +7,11 @@ namespace splitTime.editor.collage {
         collage: file.Collage
         // data
         sharedStuff: SharedStuff
+        traceOptions: {
+            type: string,
+            color: string,
+            help: string
+        }[]
         // computed
         inputs: client.UserInputs
         position: Coordinates2D
@@ -15,6 +20,14 @@ namespace splitTime.editor.collage {
         // methods
         onCollageChange(): void
         onSupervisorControlChange(): void
+    }
+
+    function data(this: VueCollageEditor): Partial<VueCollageEditor> {
+        this.onSupervisorControlChange()
+        return {
+            sharedStuff: new SharedStuff(this as VueCollageEditor),
+            traceOptions: client.traceOptions
+        }
     }
 
     function inputs(this: VueCollageEditor): client.UserInputs {
@@ -74,12 +87,7 @@ namespace splitTime.editor.collage {
             supervisorControl: Object,
             collage: Object
         },
-        data: function() {
-            (this as VueCollageEditor).onSupervisorControlChange()
-            return {
-                sharedStuff: new SharedStuff(this as VueCollageEditor)
-            }
-        },
+        data,
         computed: {
             inputs,
             position,
@@ -97,6 +105,18 @@ namespace splitTime.editor.collage {
 <div class="collage-editor" style="overflow-y: auto;">
     <div class="top-row" style="display: flex; flex-flow: row; height: 50%;">
         <div class="menu">
+            <div class="trace-type-options">
+                <div v-for="(traceOption) in traceOptions"
+                    :key="traceOption.type"
+                    class="option"
+                    :style="{ color: 'white', backgroundColor: traceOption.color }"
+                    @click="sharedStuff.traceTypeSelected = traceOption.type"
+                    :title="traceOption.help"
+                >
+                    {{ traceOption.type }}
+                </div>
+            </div>
+            <hr/>
             <object-properties
                 v-if="!!sharedStuff.propertiesPaneStuff"
                 :editor-global-stuff="editorGlobalStuff"
@@ -114,14 +134,18 @@ namespace splitTime.editor.collage {
                 style="flex-grow: 1;"
                 :collage-edit-helper="sharedStuff"
                 :collage-view-helper="sharedStuff"
+                :editor-inputs="editorInputs"
             ></collage-showcase>
         </div>
     </div>
-    <montage-editor
-        v-if="!!sharedStuff.selectedMontage"
-        :collage-editor-shared="sharedStuff"
-        :montage="sharedStuff.selectedMontage"
-    ></montage-editor>
+    <div style="overflow: auto; height: 50%;">
+        <montage-editor
+            v-if="!!sharedStuff.selectedMontage"
+            :collage-editor-shared="sharedStuff"
+            :editor-inputs="editorInputs"
+            :montage="sharedStuff.selectedMontage"
+        ></montage-editor>
+    </div>
 </div>
         `
     })

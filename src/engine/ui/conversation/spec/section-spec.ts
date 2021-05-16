@@ -6,10 +6,17 @@ namespace splitTime.conversation {
             private readonly localSpeakers: readonly Speaker[] = [],
             public readonly parts: readonly SectionSpecPart[] = [],
             public readonly interruptibles: readonly InterruptibleSpec[] = [],
-            public readonly cancelSection: SectionSpec | null = null
+            public readonly cancelSection: SectionSpec | null = null,
+            public readonly options?: Partial<Options>
         ) {
             for (const part of parts) {
                 part.setParent(this)
+            }
+            for (const i of interruptibles) {
+                i.setParent(this)
+            }
+            if (cancelSection !== null) {
+                cancelSection.setParent(this)
             }
         }
 

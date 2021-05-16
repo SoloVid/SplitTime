@@ -4,8 +4,8 @@ namespace splitTime.conversation {
     export interface DSL {
         /** Explicitly register a speaker as part of this conversation (section) */
         listen(speaker: Speaker): void
-        say(speaker: Speaker, line: string): void
-        section(sectionSetup: () => void): SectionChain
+        say(speaker: Speaker, line: string, options?: Partial<Options>): void
+        section(sectionSetup: () => void, options?: Partial<Options>): SectionChain
         do(action: time.MidEventCallback): void
         // waitUntil(condition: Condition): void
     }
@@ -26,5 +26,10 @@ namespace splitTime.conversation {
             sectionSetup?: () => void,
             ...events: body.CustomEventHandler<void>[]
         ): SectionChain
+    }
+
+    export interface Options {
+        /** Multiplier on importance */
+        importance: number
     }
 }

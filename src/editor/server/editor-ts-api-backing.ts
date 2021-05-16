@@ -1,11 +1,13 @@
 namespace splitTime.editor.server {
     export class EditorTsApiBacking {
         public readonly api = new EditorTsApi()
-        private readonly projectFiles = new ProjectFileTsApiBacking(this.api.projectFiles)
+        private readonly projectFiles: ProjectFileTsApiBacking
         private readonly nodeLibs = new NodeLibs()
-        private readonly pathHelper = new PathHelper()
+        private readonly pathHelper: PathHelper
 
-        constructor() {
+        constructor(private readonly config: Config) {
+            this.pathHelper = new PathHelper(config)
+            this.projectFiles = new ProjectFileTsApiBacking(this.api.projectFiles, config)
             this.api.test1.serve(request => "Here's your string! " + request)
             this.api.test2.serve(request => {
                 return {
@@ -29,7 +31,7 @@ namespace splitTime.editor.server {
                 const path = this.pathHelper.getFilePath(request.projectId, IMAGE_DIR, request.data.imageId)
                 const stats = await this.nodeLibs.fsPromises.stat(path)
                 return {
-                    webPath: this.pathHelper.toWebPath(path),
+                    webPath: this.pathHelper.toProjectWebPath(path),
                     timeModifiedString: "" + stats.mtimeMs
                 }
             })

@@ -35,7 +35,8 @@ namespace splitTime.assets {
         private sounds: { [handle: string]: HowlContainer } = {}
         private currentBkgSound: HowlContainer | null = null
 
-        globalVolume = 1
+        private globalVolume = 1
+        private globalMute = false
 
         registerMusic(relativePath: string, loop = true) {
             this.registerAudio(MUSIC_DIR + relativePath, relativePath, loop)
@@ -93,15 +94,15 @@ namespace splitTime.assets {
                 }
                 if (fadeIn) {
                     currentVolume = sound.howl?.volume() || 0
-                    sound.howl.fade(currentVolume, 1, FADE_DURATION_MS)
+                    sound.howl.fade(currentVolume, this.globalVolume, FADE_DURATION_MS)
                 } else {
-                    sound.howl.volume(1)
+                    sound.howl.volume(this.globalVolume)
                 }
             } else {
                 //Set up the audio file to be used with howler.js API
                 //(howler.js documentation: https://github.com/goldfire/howler.js#documentation )
 
-                var startVolume = 1
+                const startVolume = this.globalVolume
 
                 const howl = new Howl({
                     src: this.root + "/" + sound.relativePath,
@@ -117,7 +118,7 @@ namespace splitTime.assets {
 
                         if (fadeIn) {
                             howl.volume(0)
-                            howl.fade(startVolume, 1, FADE_DURATION_MS)
+                            howl.fade(startVolume, this.globalVolume, FADE_DURATION_MS)
                         }
                     },
                     onfade: () => {
@@ -178,6 +179,21 @@ namespace splitTime.assets {
                     var currentVolume = sound.howl.volume()
                     sound.howl.fade(currentVolume, 0, FADE_DURATION_MS)
                 }
+            }
+        }
+
+        mute() {
+            // TODO: mute new sounds too after this call
+            this.globalMute = true
+            for (const key in this.sounds) {
+                this.sounds[key].howl?.mute(this.globalMute)
+            }
+        }
+
+        unmute() {
+            this.globalMute = false
+            for (const key in this.sounds) {
+                this.sounds[key].howl?.mute(this.globalMute)
             }
         }
     }

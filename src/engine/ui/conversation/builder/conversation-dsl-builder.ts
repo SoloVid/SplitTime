@@ -1,18 +1,24 @@
 namespace splitTime.conversation {
     export class ConversationDslBuilder implements DSL {
-        private sectionBuilder: SectionBuilder = new SectionBuilder()
+        private sectionBuilder: SectionBuilder
+
+        constructor(
+            private readonly options?: Partial<Options>
+        ) {
+            this.sectionBuilder = new SectionBuilder(options)
+        }
 
         listen(speaker: Speaker): void {
             this.sectionBuilder.addSpeaker(speaker)
         }
 
-        say(speaker: Speaker, line: string): void {
+        say(speaker: Speaker, line: string, options?: Partial<Options>): void {
             this.sectionBuilder.addSpeaker(speaker)
-            const lineObj = new Line(speaker, line)
+            const lineObj = new Line(speaker, line, options)
             this.sectionBuilder.append(lineObj)
         }
 
-        section(setup: () => void): SectionBuilderFluentReturn {
+        section(setup: () => void, options?: Partial<Options>): SectionBuilderFluentReturn {
             const newSectionBuilder = new SectionBuilder()
             this.withSectionBuilder(newSectionBuilder, setup)
             this.sectionBuilder.append(newSectionBuilder)

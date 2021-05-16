@@ -1,5 +1,5 @@
 namespace splitTime {
-    type transition_listener = (
+    type TransitionListener = (
         oldLevel: Level | null,
         newLevel: Level
     ) => PromiseLike<void>
@@ -8,21 +8,20 @@ namespace splitTime {
         private readonly world: World
         private currentLevel: Level | null = null
         private transitionInProgress: boolean = false
-        private regionTransitionInProgress: boolean = false
 
-        private transitionStartListener: transition_listener | null = null
-        private transitionEndListener: transition_listener | null = null
+        private regionTransitionStartListener: TransitionListener | null = null
+        private regionTransitionEndListener: TransitionListener | null = null
 
         constructor(world: World) {
             this.world = world
         }
 
-        onTransitionStart(listener: transition_listener) {
-            this.transitionStartListener = listener
+        onRegionExit(listener: TransitionListener) {
+            this.regionTransitionStartListener = listener
         }
 
-        onTransitionEnd(listener: transition_listener) {
-            this.transitionEndListener = listener
+        onRegionEnter(listener: TransitionListener) {
+            this.regionTransitionEndListener = listener
         }
 
         /**
@@ -32,7 +31,7 @@ namespace splitTime {
          * 
          * @param level - the destination level
          */
-        async transition(level: Level): Promise<void> {
+        transition(level: Level): Promise<void> | void {
             if (this.transitionInProgress) {
                 throw new Error(
                     "Level transition is already in progress. Cannot transition to " +
@@ -41,68 +40,52 @@ namespace splitTime {
             }
 
             if (level === this.currentLevel) {
-                await splitTime.Pledge.as()
                 return
             }
 
-            this.transitionInProgress = true
+            if (this.currentLevel === null || this.currentLevel.getRegion() !== level.getRegion()) {
+                this.transitionInProgress = true
+                return this.fullRegionTransition(level).finally(() => {
+                    this.transitionInProgress = false
+                })
+            } else {
+                this.currentLevel.runExitFunction()
+                this.currentLevel = level
+                this.currentLevel.runEnterFunction()
+            }
+       }
 
+        private async fullRegionTransition(level: Level): Promise<void> {
             const enteringLevel = level
             const exitingLevel = this.currentLevel
 
-            //If this is the initial transition at the start of a game
-            const gameLoading = !exitingLevel 
-
-            //This will be true if we are changing regions, but not true for the initial game load
-            this.regionTransitionInProgress =
-                exitingLevel !== null &&
-                exitingLevel.getRegion() !== enteringLevel.getRegion()
-
-            //********Leave current level
-
-            if (this.transitionStartListener) {
-                await this.transitionStartListener(exitingLevel, enteringLevel)
-            }
-
+            // Leave current level
             if (exitingLevel) {
-                exitingLevel.runExitFunction()
-                if (this.regionTransitionInProgress) {
-                    exitingLevel.getRegion().unloadLevels()
+                if (this.regionTransitionStartListener) {
+                    await this.regionTransitionStartListener(exitingLevel, enteringLevel)
                 }
+                exitingLevel.runExitFunction()
+                exitingLevel.getRegion().unloadLevels()
             }
 
-            //********Enter new level
-
+            // Enter new level
             this.currentLevel = enteringLevel
-
-            if (gameLoading || this.regionTransitionInProgress) {
-                await enteringLevel.getRegion().loadForPlay(this.world)
-            }
-
+            await enteringLevel.getRegion().loadForPlay(this.world)
             enteringLevel.runEnterFunction()
-            if (this.transitionEndListener) {
-                await this.transitionEndListener(exitingLevel, enteringLevel)
+            if (this.regionTransitionEndListener) {
+                await this.regionTransitionEndListener(exitingLevel, enteringLevel)
             }
-
-            this.transitionInProgress = false
         }
 
         isTransitioning(): boolean {
             return this.transitionInProgress
         }
 
-        isTransitioningRegions(): boolean {
-            return this.regionTransitionInProgress
-        }
-
-        finishRegionTransition() {
-            this.regionTransitionInProgress = false
-        }
-
         isCurrentSet(): boolean {
             return !!this.currentLevel
         }
 
+        // TODO: Maybe nuke this? We might only care about the current region for most purposes.
         getCurrent(): Level {
             if (!this.currentLevel) {
                 throw new Error("currentLevel is not set")

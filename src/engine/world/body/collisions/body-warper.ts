@@ -69,7 +69,7 @@ namespace splitTime.body {
                             toX = x
                             toY = y
                             events = collisionInfo.events
-                            if (collisionInfo.targetLevel !== level) {
+                            if (trace.isPointerOffsetSignificant(collisionInfo.targetOffset, level)) {
                                 mightMoveLevels = true
                             }
                         }
@@ -106,7 +106,7 @@ namespace splitTime.body {
             x: int,
             y: int,
             z: int
-        ): { blocked: boolean; events: string[]; targetLevel: Level } {
+        ): { blocked: boolean; events: string[]; targetOffset: trace.PointerOffset | null } {
             var left = x - this.body.width / 2
             var top = y - this.body.depth / 2
 
@@ -125,7 +125,7 @@ namespace splitTime.body {
             return {
                 blocked: originCollisionInfo.blocked && originCollisionInfo.zBlockedTopEx !== z,
                 events: originCollisionInfo.events,
-                targetLevel: originCollisionInfo.targetLevel
+                targetOffset: originCollisionInfo.targetOffset
             }
         }
     }

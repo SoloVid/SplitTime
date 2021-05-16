@@ -21,6 +21,9 @@ namespace splitTime {
         ) {}
     }
 
+    /**
+     * @deprecated prefer ILevelLocation2 instead
+     */
     export interface ILevelLocation {
         getX(): number
         getY(): number
@@ -83,6 +86,9 @@ namespace splitTime {
                 location1.z === location2.z
         }
 
+        /**
+         * @deprecated
+         */
         export class Location implements ILevelLocation {
             constructor(
                 public readonly x: number,

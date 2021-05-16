@@ -2,6 +2,7 @@ namespace splitTime.editor.collage {
     interface VueMontageEditor extends client.VueComponent {
         // props
         collageEditorShared: CollageEditorShared
+        editorInputs: client.UserInputs
         montage: file.collage.Montage
         // computed
         collage: file.Collage
@@ -38,12 +39,16 @@ namespace splitTime.editor.collage {
     }
 
     function selectFrame(this: VueMontageEditor, montageFrame: file.collage.MontageFrame, event: MouseEvent): void {
+        if (this.collageEditorShared.traceInProgress) {
+            return
+        }
         this.collageEditorShared.selectMontageFrame(montageFrame, !(event as PropertiesEvent).propertiesPanelSet)
     }
 
     Vue.component("montage-editor", {
         props: {
             collageEditorShared: Object,
+            editorInputs: Object,
             montage: Object
         },
         data: function() {
@@ -66,15 +71,16 @@ namespace splitTime.editor.collage {
     </div>
     <template v-for="frame in montage.frames">
         <div
-            @mousedown="selectFrame(frame, $event)"
+            @mousedown.left="selectFrame(frame, $event)"
         >
             <montage-frame
                 :collage-edit-helper="collageEditorShared"
                 :collage-view-helper="collageEditorShared"
+                :edit-affects-all-frames="false"
+                :editor-inputs="editorInputs"
+                :highlight="frame.frameId === selectedFrameId"
                 :montage="montage"
                 :montage-frame="frame"
-                :edit-affects-all-frames="false"
-                :highlight="frame.frameId === selectedFrameId"
             ></montage-frame>
         </div>
     </template>

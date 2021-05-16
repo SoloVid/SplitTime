@@ -6,7 +6,7 @@ namespace splitTime.body.collisions {
         bodies: Body[] = []
         adjustedZ: number
         events: string[] = []
-        targetLevel: Level | null = null
+        targetOffset: trace.PointerOffset | null = null
 
         constructor(z: number) {
             this.adjustedZ = z
@@ -111,7 +111,7 @@ namespace splitTime.body.collisions {
                             xPixelsRemaining -= Math.ceil(Math.abs(dz))
                             pixelsMovedX++
                             addArrayToSet(xCollisionInfo.events, eventIdSet)
-                            if (xCollisionInfo.targetLevel !== level) {
+                            if (trace.isPointerOffsetSignificant(xCollisionInfo.targetOffset, level)) {
                                 mightMoveLevels = true
                             }
                         }
@@ -155,7 +155,7 @@ namespace splitTime.body.collisions {
                             yPixelsRemaining -= Math.ceil(Math.abs(dz))
                             pixelsMovedY++
                             addArrayToSet(yCollisionInfo.events, eventIdSet)
-                            if (yCollisionInfo.targetLevel !== level) {
+                            if (trace.isPointerOffsetSignificant(yCollisionInfo.targetOffset, level)) {
                                 mightMoveLevels = true
                             }
                         }

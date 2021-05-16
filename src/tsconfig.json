@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig-base-w-decl.json",
+  "include": [
+    "./*.ts"
+  ],
+  "references": []
+}

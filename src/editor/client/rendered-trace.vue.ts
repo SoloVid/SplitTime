@@ -1,19 +1,24 @@
-namespace splitTime.editor.level {
+namespace splitTime.editor.client {
+    export interface IRenderedTraceTracker {
+        track(event: MouseEvent, point?: Coordinates2D): void
+    }
+
     interface VueRenderedTrace {
         // props
-        levelEditorShared: LevelEditorShared
+        acceptMouse: boolean
         metadata: client.EditorMetadata
-        offset: Coordinates2D
+        pointsArray: (Readonly<Coordinates2D> | null)[]
+        server: client.ServerLiaison
+        shouldDragBePrevented: boolean
         trace: splitTime.level.file_data.Trace
+        tracker: IRenderedTraceTracker
         // data
         uid: string
         // computed
-        acceptMouse: boolean
         hasClose: boolean
         height: number
         vertices: Coordinates3D[]
         mousableStyle: object
-        pointsArray: (Readonly<Coordinates2D> | null)[]
         points: string
         pointsShadow: string
         pointsStairsSlope: string
@@ -30,10 +35,6 @@ namespace splitTime.editor.level {
         // methods
         track(point: Coordinates2D): void
         toggleHighlight(highlight: boolean): void
-    }
-
-    function acceptMouse(this: VueRenderedTrace): boolean {
-        return inGroup(this.levelEditorShared.level, this.levelEditorShared.activeGroup, this.trace)
     }
 
     function hasClose(this: VueRenderedTrace): boolean {
@@ -61,10 +62,6 @@ namespace splitTime.editor.level {
         return {
             "pointer-events": this.acceptMouse ? "initial" : "none"
         }
-    }
-
-    function pointsArray(this: VueRenderedTrace): (Readonly<Coordinates2D> | null)[] {
-        return safeExtractTraceArray(this.levelEditorShared.level, this.trace.vertices)
     }
 
     function points(this: VueRenderedTrace): string {
@@ -107,40 +104,15 @@ namespace splitTime.editor.level {
         }, "")
     }
     function pointsStairsSlope(this: VueRenderedTrace): string {
-        var that = this
         const pointsArray2D = this.pointsArray
-        let pointsArray3D: (Coordinates3D | null)[] = []
+        let pointsArray3D: (Coordinates3D)[] = []
         if(this.trace.type === splitTime.trace.Type.STAIRS && !!this.trace.direction && pointsArray2D.length >= 3) {
-            var officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace)
-            var extremes = officialTrace.calculateStairsExtremes()
-            var stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y)
-            var stairsLength = stairsVector.magnitude
-            var totalDZ = that.trace.height
-            pointsArray3D = pointsArray2D.map(point => {
-                if(!point) {
-                    return point
-                }
-                var partUpVector = new splitTime.Vector2D(point.x - extremes.bottom.x, point.y - extremes.bottom.y) 
-                var distanceUp = stairsVector.times(partUpVector.dot(stairsVector) / (stairsLength * stairsLength)).magnitude
-                var height = Math.min(Math.round(totalDZ * (distanceUp / stairsLength)), totalDZ)
-                const point3D = {
-                    x: point.x,
-                    y: point.y,
-                    z: that.trace.z + height
-                }
-                return point3D
-            })
+            const officialTrace = splitTime.trace.TraceSpec.fromRaw(this.trace)
+            pointsArray3D = splitTime.trace.calculateStairsPlane(officialTrace, pointsArray2D)
         }
         return pointsArray3D.reduce(function(pointsStr, point) {
-            var y
-            if(point !== null) {
-                y = point.y - point.z
-                return pointsStr + " " + point.x + "," + y
-            } else if(pointsArray3D.length > 0 && pointsArray3D[0] !== null) {
-                y = pointsArray3D[0].y - pointsArray3D[0].z
-                return pointsStr + " " + pointsArray3D[0].x + "," + y
-            }
-            return pointsStr
+            const y = point.y - point.z
+            return pointsStr + " " + point.x + "," + y
         }, "")
     }
     function traceFill(this: VueRenderedTrace): string {
@@ -172,13 +144,13 @@ namespace splitTime.editor.level {
 
     async function otherLevel(this: VueRenderedTrace): Promise<splitTime.level.FileData> {
         if (!this.trace.level) {
-            return exportLevel(new Level())
+            return level.exportLevel(new level.Level())
         }
-        const s = this.levelEditorShared.server
+        const s = this.server
         return s.api.levelJson.fetch(s.withProject({ levelId: this.trace.level }))
     }
     function otherLevelImgSrc(this: VueRenderedTrace): string {
-        return this.levelEditorShared.server.imgSrc(this.otherLevel.background)
+        return this.server.imgSrc(this.otherLevel.background)
     }
     async function otherLevelImgDim(this: VueRenderedTrace): Promise<Coordinates2D> {
         return new Promise<Coordinates2D>(resolve => {
@@ -193,36 +165,14 @@ namespace splitTime.editor.level {
         })
     }
 
-    function track(this: VueRenderedTrace, point?: Coordinates2D): void {
-        if(this.levelEditorShared.shouldDragBePrevented()) {
+    function track(this: VueRenderedTrace, event: MouseEvent, point?: Coordinates2D): void {
+        if(this.shouldDragBePrevented) {
             return
         }
-        const trace = this.trace
-        const originalPointString = trace.vertices
-        const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
-        const vertices = safeExtractTraceArray(this.levelEditorShared.level, trace.vertices)
-        const originalPoints = point ? [point] : vertices.filter(instanceOf.Coordinates2D)
-        const snappedMover = new client.GridSnapMover(this.levelEditorShared.gridCell, originalPoints)
-        const follower = {
-            shift: (dx: number, dy: number) => {
-                snappedMover.applyDelta(dx, dy)
-                const snappedDelta = snappedMover.getSnappedDelta()
-                var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
-                if (originalPoint) {
-                    regex = new RegExp("\\((" + originalPoint.x + "),\\s*(" + originalPoint.y + ")\\)", "g")
-                }
-                trace.vertices = originalPointString.replace(regex, function(match, p1, p2) {
-                    var newX = Number(p1) + snappedDelta.x
-                    var newY = Number(p2) + snappedDelta.y
-                    return "(" + newX + ", " + newY + ")"
-                })
-            }
-        }
-        this.levelEditorShared.follow(follower)
-        this.levelEditorShared.editProperties(getTracePropertiesStuff(this.levelEditorShared.level, this.trace))
+        this.tracker.track(event, point)
     }
     function toggleHighlight(this: VueRenderedTrace, highlight: boolean): void {
-        if(this.levelEditorShared.shouldDragBePrevented()) {
+        if(this.shouldDragBePrevented) {
             this.metadata.highlighted = false
             return
         }
@@ -232,9 +182,13 @@ namespace splitTime.editor.level {
 
     Vue.component("rendered-trace", {
         props: {
-            levelEditorShared: Object,
+            acceptMouse: Boolean,
             metadata: Object,
-            trace: Object
+            pointsArray: Array,
+            server: Object,
+            shouldDragBePrevented: Boolean,
+            trace: Object,
+            tracker: Object
         },
         data: function() {
             return {
@@ -242,12 +196,10 @@ namespace splitTime.editor.level {
             }
         },
         computed: {
-            acceptMouse,
             hasClose,
             height,
             vertices,
             mousableStyle,
-            pointsArray,
             points,
             pointsShadow,
             pointsStairsSlope,
@@ -262,11 +214,11 @@ namespace splitTime.editor.level {
         asyncComputed: {
             otherLevel: {
                 get: otherLevel,
-                default: exportLevel(new Level())
+                default: level.exportLevel(new level.Level())
             },
             otherLevelImgDim: {
                 get: otherLevelImgDim,
-                default: { x: PLACEHOLDER_WIDTH, y: PLACEHOLDER_WIDTH }
+                default: { x: level.PLACEHOLDER_WIDTH, y: level.PLACEHOLDER_WIDTH }
             }
         },
         methods: {
@@ -308,7 +260,7 @@ namespace splitTime.editor.level {
         :style="mousableStyle"
         v-show="metadata.displayed"
         @dblclick.prevent
-        @mousedown.left="track(null)"
+        @mousedown.left="track($event, null)"
         @mousemove="toggleHighlight(true)"
         @mouseleave="toggleHighlight(false)"
         :points="points"
@@ -324,7 +276,7 @@ namespace splitTime.editor.level {
         :cx="vertex.x"
         :cy="vertex.y - vertex.z"
         r="3"
-        @mousedown.left="track(vertex)"
+        @mousedown.left="track($event, vertex)"
     />
     <!-- Outline for ramp/slope part of stairs; adds more of a 3D look -->
     <polyline

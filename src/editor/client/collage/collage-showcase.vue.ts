@@ -3,6 +3,7 @@ namespace splitTime.editor.collage {
         // props
         collageEditHelper: IVueCollageEditHelper | undefined
         collageViewHelper: IVueCollageViewHelper
+        editorInputs: client.UserInputs
         // computed
         collage: file.Collage
         gridStyle: object
@@ -44,7 +45,8 @@ namespace splitTime.editor.collage {
     Vue.component("collage-showcase", {
         props: {
             collageEditHelper: Object,
-            collageViewHelper: Object
+            collageViewHelper: Object,
+            editorInputs: Object
         },
         data: function() {
             return {
@@ -64,6 +66,7 @@ namespace splitTime.editor.collage {
         <montage
             :collage-edit-helper="collageEditHelper"
             :collage-view-helper="collageViewHelper"
+            :editor-inputs="editorInputs"
             :montage="m"
         ></montage>
     </template>

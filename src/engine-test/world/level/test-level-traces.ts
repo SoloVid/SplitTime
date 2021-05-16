@@ -106,21 +106,20 @@ namespace splitTime.level {
     splitTime.test.scenario(levelTracesTests, "Pointer trace", t => {
         testTraces([pointer1.trace], (coords, collisionInfo) => {
             t.assert(!collisionInfo.containsSolid, "Pointer trace should not be solid at " + coordsStr(coords))
-            const levels = collisionInfo.levels
-            const pointerTraces = collisionInfo.pointerTraces
-            // There should be no more than one here because we're checking
+            const pointerOffsets = collisionInfo.pointerOffsets
+            // There should be exactly one here because we're checking
             // one pixel and there is one pointer trace.
-            // FTODO: Is this a problem that it could be 0 or 1?
-            // The zero case seems to come from referencing coordinates that are
-            // undefined according to the traces specified.
-            t.assert(Object.keys(levels).length <= 1, "Should be no more than one level at " + coordsStr(coords))
+            t.assert(Object.keys(pointerOffsets).length === 1, "Should be one pointer offset at " + coordsStr(coords))
             if (pointer1.overlaps(coords)) {
-                t.assert(Object.keys(pointerTraces).length === 1, "Should be one pointer at " + coordsStr(coords))
-                t.assert(pointer1Level === levels[pointer1Level.id], "Expecting pointer1 level at " + coordsStr(coords))
-                const actualTrace = pointerTraces[pointer1Level.id]
-                t.assert(pointer1.trace === actualTrace, "Expecting pointer1 level trace at " + coordsStr(coords))
+                for (const id in pointerOffsets) {
+                    const offset = pointerOffsets[id]
+                    t.assert(pointer1.trace.getOffsetHash() === offset?.getOffsetHash(), "Expecting pointer1 level trace at " + coordsStr(coords))
+                }
             } else {
-                t.assert(Object.keys(pointerTraces).length === 0, "Should be no pointer at " + coordsStr(coords))
+                for (const id in pointerOffsets) {
+                    const offset = pointerOffsets[id]
+                    t.assert(offset === null, "Should be no actual pointer offset at " + coordsStr(coords))
+                }
             }
         })
     })
@@ -148,9 +147,9 @@ namespace splitTime.level {
             (coords, collisionInfo) => {
                 t.assert(smallCube.overlaps(coords) === collisionInfo.containsSolid,
                     "smallCube at " + coordsStr(coords))
-                t.assert(pointer1.overlaps(coords) === !!collisionInfo.pointerTraces[pointer1Level.id],
+                t.assert(pointer1.overlaps(coords) === !!collisionInfo.pointerOffsets[pointer1.trace.getOffsetHash()],
                     "pointer1 at " + coordsStr(coords))
-                t.assert(pointer2.overlaps(coords) === !!collisionInfo.pointerTraces[pointer2Level.id],
+                t.assert(pointer2.overlaps(coords) === !!collisionInfo.pointerOffsets[pointer2.trace.getOffsetHash()],
                     "pointer2 at " + coordsStr(coords))
                 t.assert(eventBox.overlaps(coords) === !!collisionInfo.events[eventId],
                     "eventBox at " + coordsStr(coords))
@@ -191,7 +190,12 @@ namespace splitTime.level {
 
     const largeSquareVertices = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
     const largeCube = {
-        trace: makeTrace(trace.Type.SOLID, largeSquareVertices, 10, 10),
+        trace: makeTrace({
+            type: trace.Type.SOLID,
+            vertices: largeSquareVertices,
+            z: 10,
+            height: 10
+        }),
         overlaps: function(coords: Coordinates3D) {
             return coords.x >= 10 && coords.x <= 20
                 && coords.y >= 10 && coords.y <= 20
@@ -201,7 +205,12 @@ namespace splitTime.level {
 
     const smallSquareVertices = "(10, 10) (10, 15) (15, 15) (15, 10) (close)"
     const smallCube = {
-        trace: makeTrace(trace.Type.SOLID, smallSquareVertices, 15, 5),
+        trace: makeTrace({
+            type: trace.Type.SOLID,
+            vertices: smallSquareVertices,
+            z: 15,
+            height: 5
+        }),
         overlaps: function(coords: Coordinates3D) {
             return coords.x >= 10 && coords.x <= 15
                 && coords.y >= 10 && coords.y <= 15
@@ -210,18 +219,28 @@ namespace splitTime.level {
     }
 
     const stairs = {
-        trace: makeTrace(trace.Type.STAIRS, largeSquareVertices, 10, 10),
+        trace: makeTrace({
+            type: trace.Type.STAIRS,
+            vertices: largeSquareVertices,
+            z: 10,
+            height: 10,
+            direction: "E"
+        }),
         overlaps: function(coords: Coordinates3D) {
             return largeCube.overlaps(coords)
                 // As x increases (since E), stair steps up
                 && coords.z <= coords.x
         }
     }
-    stairs.trace.spec.direction = direction.interpret("E")
 
     const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
     const ground = {
-        trace: makeTrace(trace.Type.SOLID, groundPoints, 15, 0),
+        trace: makeTrace({
+            type: trace.Type.SOLID,
+            vertices: groundPoints,
+            z: 15,
+            height: 0
+        }),
         overlaps: function(coords: Coordinates3D) {
             return coords.z === 15
         }
@@ -243,47 +262,60 @@ namespace splitTime.level {
 
     const pointer1Vertices = "(12, 12) (12, 21) (21, 21) (21, 12) (close)"
     const pointer1 = {
-        trace: makeTrace(trace.Type.POINTER, pointer1Vertices, 12, 9),
+        trace: makeTrace({
+            type: trace.Type.POINTER,
+            vertices: pointer1Vertices,
+            z: 12,
+            height: 9,
+            level: "pointer1-level",
+            offsetX: 1,
+            offsetY: 1,
+            offsetZ: 1
+        }),
         overlaps: function(coords: Coordinates3D) {
             return coords.x >= 12 && coords.x <= 21
                 && coords.y >= 12 && coords.y <= 21
                 && coords.z >= 12 && coords.z < 21
         }
     }
-    const pointer1Level = new splitTime.Level("pointer1-level", dummyFileData)
-    pointer1.trace.level = pointer1Level
-    pointer1.trace.offsetX = 1
-    pointer1.trace.offsetY = 1
-    pointer1.trace.offsetZ = 1
 
     // We want this second one to overlap with the first
     const pointer2Vertices = "(16, 16) (16, 24) (24, 24) (24, 16) (close)"
     const pointer2 = {
-        trace: makeTrace(trace.Type.POINTER, pointer2Vertices, 12, 9),
+        trace: makeTrace({
+            type: trace.Type.POINTER,
+            vertices: pointer2Vertices,
+            z: 12,
+            height: 9,
+            level: "pointer2-level",
+            offsetX: 2,
+            offsetY: 2,
+            offsetZ: 2
+        }),
         overlaps: function(coords: Coordinates3D) {
             return coords.x >= 16 && coords.x <= 24
                 && coords.y >= 16 && coords.y <= 24
                 && coords.z >= 12 && coords.z < 21
         }
     }
-    const pointer2Level = new splitTime.Level("pointer2-level", dummyFileData)
-    pointer2.trace.level = pointer2Level
-    pointer2.trace.offsetX = 2
-    pointer2.trace.offsetY = 2
-    pointer2.trace.offsetZ = 2
 
     // Also trying to make this one overlap
     const eventVertices = "(14, 14) (14, 17) (17, 17) (17, 14) (close)"
+    const eventId = "test-event"
     const eventBox = {
-        trace: makeTrace(trace.Type.EVENT, eventVertices, 14, 3),
+        trace: makeTrace({
+            type: trace.Type.EVENT,
+            vertices: eventVertices,
+            z: 14,
+            height: 3,
+            event: eventId
+        }),
         overlaps: function(coords: Coordinates3D) {
             return coords.x >= 14 && coords.x <= 17
                 && coords.y >= 14 && coords.y <= 17
                 && coords.z >= 14 && coords.z < 17
         }
     }
-    const eventId = "test-event"
-    eventBox.trace.spec.eventId = eventId
 
     function testTraces(
         traces: Trace[],
@@ -315,10 +347,8 @@ namespace splitTime.level {
         }
     }
 
-    function makeTrace(type: string, points: string, z: number, height: number): Trace {
-        const t = new Trace(new trace.TraceSpec(type, points))
-        t.spec.z = z
-        t.spec.height = height
-        return t
+    function makeTrace(partialTrace: Partial<splitTime.level.file_data.Trace>): Trace {
+        const spec = trace.TraceSpec.fromRaw(splitTime.level.file_data.makeTrace(partialTrace))
+        return new Trace(spec)
     }
 }

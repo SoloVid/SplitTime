@@ -5,16 +5,15 @@ namespace splitTime.conversation {
         hud: ui.HUD,
         advanceEvent: body.CustomEventHandler<void>
     ): ConversationSpecManager {
-        const renderer = new Renderer(perspective.camera)
-        hud.pushRenderer(renderer)
-        const secretary = new Secretary(renderer, perspective)
-        gameLoop.onFrameUpdate(secretary)
-        const helper = new RunnerHelper(
-            secretary,
+        const helper = new HelperInfo(
             () => perspective.playerBody,
             advanceEvent
         )
-        const specManager = new ConversationSpecManager(helper)
+        const renderer = new Renderer(perspective.camera)
+        hud.pushRenderer(renderer)
+        const secretary = new Secretary(renderer, perspective, helper)
+        gameLoop.onFrameUpdate(secretary)
+        const specManager = new ConversationSpecManager(helper, secretary)
         return specManager
     }
 }

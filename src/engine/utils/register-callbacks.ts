@@ -67,33 +67,33 @@ namespace splitTime {
             data?: unknown,
             exceptionCoping: CopingMechanism = CopingMechanism.RETHROW
         ) {
-            this._isRunningCallbacks = true
-            for (var i = this._handlers.length - 1; i >= 0; i--) {
-                // Default to true so exceptions don't continue
-                // var done = true;
-                var done = false
-                try {
-                    const result = this._callFunction(this._handlers[i], data)
-                    if (result === STOP_CALLBACKS) {
-                        done = true
+            try {
+                this._isRunningCallbacks = true
+                for (const handler of this._handlers) {
+                    let done = false
+                    try {
+                        const result = this._callFunction(handler, data)
+                        if (result === STOP_CALLBACKS) {
+                            done = true
+                        }
+                    } catch (ex) {
+                        switch (exceptionCoping) {
+                            case CopingMechanism.RETHROW:
+                                throw ex
+                            case CopingMechanism.LOG:
+                                splitTime.log.error(ex)
+                                break
+                            case CopingMechanism.SUPPRESS:
+                                break
+                        }
                     }
-                } catch (ex) {
-                    switch (exceptionCoping) {
-                        case CopingMechanism.RETHROW:
-                            throw ex
-                        case CopingMechanism.LOG:
-                            splitTime.log.error(ex)
-                            break
-                        case CopingMechanism.SUPPRESS:
-                            break
+                    if (done) {
+                        this._listAwaitingRemoval.push(handler);
                     }
-                    // console.warn("callback will be removed");
                 }
-                if (done) {
-                    this._handlers.splice(i, 1)
-                }
+            } finally {
+                this._isRunningCallbacks = false
             }
-            this._isRunningCallbacks = false
 
             while (this._listAwaitingRegistration.length > 0) {
                 this.register(this._listAwaitingRegistration.shift()!)
@@ -120,7 +120,7 @@ namespace splitTime {
                 }
             }
 
-            console.warn("Invalid registered callback", registered)
+            splitTime.log.warn("Invalid registered callback", registered)
         }
     }
 }
