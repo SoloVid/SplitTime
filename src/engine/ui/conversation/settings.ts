@@ -28,8 +28,7 @@ namespace splitTime.conversation {
     export let FACTOR_PER_SPACE = 0
     export let FACTOR_PER_SHORT_BREAK_PUNCTUATION = 8
     export let FACTOR_PER_LONG_BREAK_PUNCTUATION = 16
-
-    export let DEFAULT_DELAY_MS = 200
+    export let FACTOR_END_OF_LINE = 24
 
     export function howLongForChar(char: string, msPerChar: int): number {
         if (char === SPACE) {

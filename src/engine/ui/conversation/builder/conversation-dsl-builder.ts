@@ -12,6 +12,11 @@ namespace splitTime.conversation {
             this.sectionBuilder.addSpeaker(speaker)
         }
 
+        message(line: string, options?: Partial<Options>): void {
+            const lineObj = new Line(null, line, options)
+            this.sectionBuilder.append(lineObj)
+        }
+
         say(speaker: Speaker, line: string, options?: Partial<Options>): void {
             this.sectionBuilder.addSpeaker(speaker)
             const lineObj = new Line(speaker, line, options)

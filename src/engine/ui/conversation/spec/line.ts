@@ -3,7 +3,7 @@ namespace splitTime.conversation {
         private parent: LineSequence | null = null
 
         constructor(
-            public readonly speaker: Speaker,
+            public readonly speaker: Speaker | null,
             public readonly text: string,
             public readonly options?: Partial<Options>
         ) {}

@@ -1,7 +1,7 @@
 namespace splitTime.player {
     const INTERACT_FUDGE = 16
 
-    export function tryPlayerInteract(playerBody: Body, event: body.CustomEventHandler<void>): void {
+    export function tryPlayerInteract(playerBody: Body, event: body.CustomEventHandler<void>): true | void {
         var possibleInteractions = getPossibleInteractions(playerBody)
 
         var chosenInteraction: {
@@ -19,6 +19,7 @@ namespace splitTime.player {
         if (chosenInteraction) {
             // TODO: This is awkward
             event.trigger(chosenInteraction.body)
+            return true
         }
     }
 

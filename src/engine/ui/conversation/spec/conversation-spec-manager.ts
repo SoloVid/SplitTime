@@ -4,10 +4,8 @@ namespace splitTime.conversation {
         private readonly specs: { [id: string]: ConversationSpec | undefined } = {}
 
         constructor(
-            private readonly helper: HelperInfo,
-            private readonly secretary: Secretary
-        ) {
-        }
+            private readonly startConversation: (inst: ConversationInstance) => void
+        ) {}
 
         register(id: string, setup: SetupFunc, options?: Partial<Options>): time.EventSpec<void> {
             this.builders[id] = new ConversationSpecBuilder(setup, options)
@@ -27,11 +25,7 @@ namespace splitTime.conversation {
         private start(id: string): void {
             const spec = this.getSpecById(id)
             const inst = new ConversationInstance(spec)
-            this.secretary.submitConversation(inst)
-        }
-
-        makeSpeaker(body: Body): Speaker {
-            return new Speaker(this.secretary, body)
+            this.startConversation(inst)
         }
     }
 }

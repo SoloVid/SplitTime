@@ -88,17 +88,25 @@ namespace splitTime.conversation {
                 const elisionRegex = new RegExp("^.{" + drawing.firstCharacterSeen + "}")
                 var dialog = drawing.dialog
                 var location = dialog.getLocation()
-                this.sayFromBoardFocalPoint(
-                    view.see,
-                    {
-                        x: location.x,
-                        y: location.y,
-                        z: location.z
-                    },
-                    dialog.getLineForMeasurement().replace(elisionRegex, elision),
-                    dialog.getDisplayedCurrentLine().replace(elisionRegex, elision),
-                    dialog.speaker
-                )
+                if (location) {
+                    this.sayFromBoardFocalPoint(
+                        view.see,
+                        {
+                            x: location.x,
+                            y: location.y,
+                            z: location.z
+                        },
+                        dialog.getLineForMeasurement().replace(elisionRegex, elision),
+                        dialog.getDisplayedCurrentLine().replace(elisionRegex, elision),
+                        dialog.speaker ?? ""
+                    )
+                } else {
+                    this.simpleMessage(
+                        view.see,
+                        dialog.getLineForMeasurement().replace(elisionRegex, elision),
+                        dialog.getDisplayedCurrentLine().replace(elisionRegex, elision)
+                    )
+                }
             }
         }
 
@@ -108,33 +116,36 @@ namespace splitTime.conversation {
             right: number,
             bottom: number,
             ctx: GenericCanvasRenderingContext2D,
-            pointX: number = -1,
-            pointY: number = -1
+            pointX?: number,
+            pointY?: number
         ) {
-            var CURVE_RADIUS = 10
-            var TRI_CURVE_BUFFER = 2 * CURVE_RADIUS
-            var TRI_BASE_HALF =
+            const CURVE_RADIUS = 10
+            const TRI_CURVE_BUFFER = 2 * CURVE_RADIUS
+            const TRI_BASE_HALF =
                 (IDEAL_TAIL_LENGTH * TRI_BASE_TO_TAIL_LENGTH) / 2
-            var horizontalMid = splitTime.constrain(
-                (2 * pointX + left + right) / 4,
-                left + TRI_CURVE_BUFFER,
-                right - TRI_CURVE_BUFFER
-            )
-            var verticalMid = splitTime.constrain(
-                (2 * pointY + top + bottom) / 4,
-                top + TRI_CURVE_BUFFER,
-                bottom - TRI_CURVE_BUFFER
-            )
+            let horizontalMid = (left + right) / 2
+            let verticalMid = (top + bottom) / 2
 
-            var isLeft = false
-            var isTop = false
-            var isRight = false
-            var isBottom = false
+            let isLeft = false
+            let isTop = false
+            let isRight = false
+            let isBottom = false
             if (pointX !== undefined && pointY !== undefined) {
-                var dLeft = left - pointX
-                var dTop = top - pointY
-                var dRight = pointX - right
-                var dBottom = pointY - bottom
+                horizontalMid = splitTime.constrain(
+                    (2 * pointX + left + right) / 4,
+                    left + TRI_CURVE_BUFFER,
+                    right - TRI_CURVE_BUFFER
+                )
+                verticalMid = splitTime.constrain(
+                    (2 * pointY + top + bottom) / 4,
+                    top + TRI_CURVE_BUFFER,
+                    bottom - TRI_CURVE_BUFFER
+                )
+
+                const dLeft = left - pointX
+                const dTop = top - pointY
+                const dRight = pointX - right
+                const dBottom = pointY - bottom
                 if (pointX < left && dLeft >= dTop && dLeft > dBottom) {
                     isLeft = true
                 } else if (pointY < top && dTop > dRight) {
@@ -150,7 +161,7 @@ namespace splitTime.conversation {
             ctx.moveTo(left + CURVE_RADIUS, top)
             if (isTop) {
                 ctx.lineTo(horizontalMid - TRI_BASE_HALF, top)
-                ctx.lineTo(pointX, pointY)
+                ctx.lineTo(pointX!, pointY!)
                 ctx.lineTo(horizontalMid + TRI_BASE_HALF, top)
             }
             ctx.lineTo(right - CURVE_RADIUS, top)
@@ -164,7 +175,7 @@ namespace splitTime.conversation {
             )
             if (isRight) {
                 ctx.lineTo(right, verticalMid - TRI_BASE_HALF)
-                ctx.lineTo(pointX, pointY)
+                ctx.lineTo(pointX!, pointY!)
                 ctx.lineTo(right, verticalMid + TRI_BASE_HALF)
             }
             ctx.lineTo(right, bottom - CURVE_RADIUS)
@@ -178,7 +189,7 @@ namespace splitTime.conversation {
             )
             if (isBottom) {
                 ctx.lineTo(horizontalMid + TRI_BASE_HALF, bottom)
-                ctx.lineTo(pointX, pointY)
+                ctx.lineTo(pointX!, pointY!)
                 ctx.lineTo(horizontalMid - TRI_BASE_HALF, bottom)
             }
             ctx.lineTo(left + CURVE_RADIUS, bottom)
@@ -192,7 +203,7 @@ namespace splitTime.conversation {
             )
             if (isLeft) {
                 ctx.lineTo(left, verticalMid + TRI_BASE_HALF)
-                ctx.lineTo(pointX, pointY)
+                ctx.lineTo(pointX!, pointY!)
                 ctx.lineTo(left, verticalMid - TRI_BASE_HALF)
             }
             ctx.lineTo(left, top + CURVE_RADIUS)
@@ -214,6 +225,24 @@ namespace splitTime.conversation {
             ctx.fill()
         }
 
+        private simpleMessage(
+            ctx: GenericCanvasRenderingContext2D,
+            fullMessage: string,
+            displayedMessage: string
+        ) {
+            this.drawSpeechBubble(
+                ctx,
+                fullMessage,
+                displayedMessage,
+                (areaWidth, areaHeight) => {
+                    return {
+                        left: this.camera.SCREEN_WIDTH / 2 - areaWidth / 2,
+                        top: this.camera.SCREEN_HEIGHT / 2 - areaHeight / 2
+                    }
+                }
+            )
+        }
+
         private sayFromBoardFocalPoint(
             ctx: GenericCanvasRenderingContext2D,
             focalPoint: { x: number; y: number; z: number },
@@ -228,9 +257,11 @@ namespace splitTime.conversation {
                 ctx,
                 fullMessage,
                 displayedMessage,
-                speakerName,
-                pointRelativeToScreen.x,
-                pointRelativeToScreen.y
+                (areaWidth, areaHeight) => this.calculateDialogPosition(
+                    areaWidth, areaHeight,
+                    pointRelativeToScreen.x, pointRelativeToScreen.y
+                ),
+                speakerName
             )
         }
 
@@ -238,67 +269,79 @@ namespace splitTime.conversation {
             ctx: GenericCanvasRenderingContext2D,
             fullMessage: string,
             displayedMessage: string,
-            speakerName: string,
-            pointX: number,
-            pointY: number
+            calculatePosition: PositionCalculator,
+            speakerName?: string
         ) {
             // TODO: isn't top what we want here? but it looks funny
             ctx.textBaseline = "hanging"
             ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT
 
-            var textHeight = this.getLineHeight(ctx)
-            var lineHeight = textHeight + LINE_SPACING
+            const textHeight = this.getLineHeight(ctx)
+            const lineHeight = textHeight + LINE_SPACING
 
-            var namePadding = TEXT_BOX_PADDING
-            var nameWidth = 0
-            var nameBoxHeight = 0
-            var nameBoxWidth = 0
+            const namePadding = TEXT_BOX_PADDING
+            let nameWidth = 0
+            let nameBoxHeight = 0
+            let nameBoxWidth = 0
             if (CONFIG.SPEAKER_NAMES_ENABLED && speakerName) {
                 nameWidth = ctx.measureText(speakerName).width
                 nameBoxHeight = textHeight + 2 * namePadding
                 nameBoxWidth = nameWidth + 2 * namePadding
             }
 
-            var maxTextWidth = this.calculateIdealizedMaxWidth(
+            const maxTextWidth = this.calculateIdealizedMaxWidth(
                 ctx,
                 fullMessage,
                 lineHeight,
                 nameWidth
             )
-            var lines = this.getLinesFromMessage(
+            const lines = this.getLinesFromMessage(
                 fullMessage,
                 displayedMessage,
                 ctx,
                 maxTextWidth
             )
 
-            var bubbleWidth =
+            const bubbleWidth =
                 Math.max(lines.maxWidth, nameWidth) + 2 * TEXT_BOX_PADDING
-            var wholeBubbleTextHeight = lines.all.length * lineHeight
-            var bubbleHeight = wholeBubbleTextHeight + 2 * TEXT_BOX_PADDING
+            const wholeBubbleTextHeight = lines.all.length * lineHeight
+            const bubbleHeight = wholeBubbleTextHeight + 2 * TEXT_BOX_PADDING
 
-            var position = this.calculateDialogPosition(
+            const position = calculatePosition(
                 bubbleWidth,
-                bubbleHeight + nameBoxHeight,
-                pointX,
-                pointY
+                bubbleHeight + nameBoxHeight
             )
 
-            var messageTop =
-                position.triPointY > position.top
+            let nameBoxShouldBeTop = true
+            if (isPositionPointed(position)) {
+                nameBoxShouldBeTop = position.triPointY > position.top
+            }
+
+            const messageTop =
+                nameBoxShouldBeTop
                     ? position.top + nameBoxHeight
                     : position.top
 
             //Text box
-            this.drawAwesomeRect(
-                position.left,
-                messageTop,
-                position.left + bubbleWidth,
-                messageTop + bubbleHeight,
-                ctx,
-                position.triPointX,
-                position.triPointY
-            )
+            if (isPositionPointed(position)) {
+                this.drawAwesomeRect(
+                    position.left,
+                    messageTop,
+                    position.left + bubbleWidth,
+                    messageTop + bubbleHeight,
+                    ctx,
+                    position.triPointX,
+                    position.triPointY
+                )
+            } else {
+                this.drawAwesomeRect(
+                    position.left,
+                    messageTop,
+                    position.left + bubbleWidth,
+                    messageTop + bubbleHeight,
+                    ctx
+                )
+            }
 
             //Lines
             for (var index = 0; index < lines.displayed.length; index++) {
@@ -313,7 +356,7 @@ namespace splitTime.conversation {
             // Draw speaker box afterward in case it needs to cover part of the triangle
             if (CONFIG.SPEAKER_NAMES_ENABLED && speakerName) {
                 var nameTop =
-                    position.triPointY > position.top
+                    nameBoxShouldBeTop
                         ? position.top
                         : position.top + bubbleHeight
                 var nameBoxLeft = position.left
@@ -372,7 +415,7 @@ namespace splitTime.conversation {
             areaHeight: number,
             focalPointX: number,
             focalPointY: number
-        ): { left: number; top: number; triPointX: number; triPointY: number } {
+        ): PointedDialogPosition {
             // Start centered (around focal point) horizontally
             var idealLeft = splitTime.constrain(
                 focalPointX - areaWidth / 2, // ideal
@@ -509,5 +552,24 @@ namespace splitTime.conversation {
         private getLineHeight(ctx: GenericCanvasRenderingContext2D): number {
             return CONFIG.FONT_SIZE
         }
+    }
+
+    type PositionCalculator = (
+        areaWidth: number,
+        areaHeight: number
+    ) => DialogPosition | PointedDialogPosition
+
+    interface DialogPosition {
+        left: number
+        top: number
+    }
+    interface PointedDialogPosition extends DialogPosition {
+        triPointX: number
+        triPointY: number
+    }
+
+    function isPositionPointed(position: DialogPosition): position is PointedDialogPosition {
+        const p2 = position as PointedDialogPosition
+        return p2.triPointX !== undefined && p2.triPointY !== undefined
     }
 }

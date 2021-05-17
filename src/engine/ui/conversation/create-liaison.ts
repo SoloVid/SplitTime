@@ -1,10 +1,10 @@
 namespace splitTime.conversation {
-    export function createSpecManager(
+    export function createLiaison(
         gameLoop: GameLoop,
         perspective: Perspective,
         hud: ui.HUD,
         advanceEvent: body.CustomEventHandler<void>
-    ): ConversationSpecManager {
+    ): ConversationLiaison {
         const helper = new HelperInfo(
             () => perspective.playerBody,
             advanceEvent
@@ -13,7 +13,7 @@ namespace splitTime.conversation {
         hud.pushRenderer(renderer)
         const secretary = new Secretary(renderer, perspective, helper)
         gameLoop.onFrameUpdate(secretary)
-        const specManager = new ConversationSpecManager(helper, secretary)
-        return specManager
+        const specManager = new ConversationSpecManager(inst => secretary.submitConversation(inst))
+        return new ConversationLiaison(specManager, secretary)
     }
 }

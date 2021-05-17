@@ -52,11 +52,23 @@ namespace splitTime.conversation {
         }
 
         private makeLineSpeechBubble(line: Line): LineSpeechBubble {
-            const speechBubble = new SpeechBubbleState(
-                line.speaker.name,
-                line.text,
-                line.speaker.speechBox
-            )
+            const speaker = line.speaker
+            let speechBubble: SpeechBubbleState
+            if (speaker) {
+                speechBubble = new SpeechBubbleState(
+                    line.text,
+                    speaker.body.level.getRegion().getTimeline(),
+                    speaker.name,
+                    speaker.speechBox
+                )
+            } else {
+                const player = this.helper.playerBodyGetter()
+                assert(!!player, "Player should be accessible for speaker-less dialog")
+                speechBubble = new SpeechBubbleState(
+                    line.text,
+                    player.level.getRegion().getTimeline()
+                )
+            }
             return new LineSpeechBubble(line, speechBubble)
         }
 

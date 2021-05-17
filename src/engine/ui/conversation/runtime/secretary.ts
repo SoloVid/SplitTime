@@ -23,16 +23,10 @@ namespace splitTime.conversation {
     export class Secretary {
         private conversations: TrackedConversation[] = []
 
-        /**
-         * If a dialog has been engaged, it will be stored here.
-         */
-        private engaged: TrackedConversation | null = null
-
         private readonly connoisseur: ConversationConnoisseur
 
         constructor(
             private readonly renderer: Renderer,
-            // FTODO: Make private again
             private readonly perspective: LimitedPerspective,
             private readonly helper: HelperInfo
         ) {
@@ -67,6 +61,14 @@ namespace splitTime.conversation {
 
         advance(conversation: ConversationInstance): void {
             this.getRuntime(conversation).advance()
+        }
+
+        getEngagedConversation(): ConversationInstance | null {
+            const engaged = this.connoisseur.getPicked()
+            if (engaged === null) {
+                return null
+            }
+            return engaged.conversation
         }
 
         getConversationForSpeaker(speaker: Speaker): ConversationInstance | null {
@@ -110,8 +112,8 @@ namespace splitTime.conversation {
                     score = this.connoisseur.calculateContinuingConversationScore(engaged.conversation)
                 } else if (lineSpeechBubble !== null) {
                     const location = lineSpeechBubble.speechBubble.getLocation()
-                                // Related timelines make region check (not present) faulty
-                    if (location.level === currentLevel) {
+                    // Related timelines make region check (not present) faulty
+                    if (location === null || location.level === currentLevel) {
                         score = this.connoisseur.calculateLineImportanceScore(lineSpeechBubble)
                     }
                 }

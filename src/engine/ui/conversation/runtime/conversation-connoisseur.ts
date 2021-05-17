@@ -75,20 +75,21 @@ namespace splitTime.conversation {
         calculateLineImportanceScore(lineSpeechBubble: LineSpeechBubble): number {
             const location = lineSpeechBubble.speechBubble.getLocation()
             if (
+                !!location &&
                 location.level !==
                 this.perspective.levelManager.getCurrent()
             ) {
                 return MIN_SCORE - 1
             }
 
-            var focusPoint = this.perspective.camera.getFocusPoint()
+            const focusPoint = this.perspective.camera.getFocusPoint()
 
-            var distance = splitTime.measurement.distanceEasy(
+            const distance = !!location ? splitTime.measurement.distanceEasy(
                 focusPoint.x,
                 focusPoint.y,
                 location.x,
                 location.y
-            )
+            ) : 1
             const distanceScore =
                 this.perspective.camera.SCREEN_WIDTH /
                 3 /

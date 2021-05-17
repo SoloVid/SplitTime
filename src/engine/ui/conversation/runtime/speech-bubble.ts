@@ -3,6 +3,7 @@ namespace splitTime.conversation {
      * The displayed state of a line of dialogue.
      */
     export class SpeechBubbleState implements Interruptible {
+        private _cutShort: boolean = false
         // can be cut short
         private _effectiveLine: string
         private _pausedAtChar: number = 0
@@ -10,14 +11,13 @@ namespace splitTime.conversation {
         private _isFinished: boolean = false
         private readonly _timeStarted: game_seconds
         private _timePlayedTo: game_seconds
-        private readonly _level: Level
 
         constructor(
-            public readonly speaker: string,
             private _line: string,
-            private readonly location: ILevelLocation2
+            private readonly timeline: Timeline,
+            public readonly speaker?: string,
+            private readonly location?: ILevelLocation2
         ) {
-            this._level = location.level
             for (const conversion of CONVERSIONS) {
                 this._line = conversion.apply(this._line)
             }
@@ -36,11 +36,11 @@ namespace splitTime.conversation {
         }
 
         advanceMethod: AdvanceMethod | null = null
-        delay: number = DEFAULT_DELAY_MS
+        delay: number = DEFAULT_MS_PER_CHAR * FACTOR_END_OF_LINE
         msPerChar = DEFAULT_MS_PER_CHAR
 
-        getLocation(): ILevelLocation2 {
-            return this.location
+        getLocation(): ILevelLocation2 | null {
+            return this.location ?? null
         }
 
         getAdvanceMethod(): AdvanceMethod {
@@ -49,7 +49,9 @@ namespace splitTime.conversation {
 
         setAdvanceMethod(advanceMethod: AdvanceMethod | null, delay?: number): void {
             this.advanceMethod = advanceMethod
-            this.delay = delay || this.delay
+            if (delay !== undefined) {
+                this.delay = delay
+            }
         }
 
         getDisplayedCurrentLine() {
@@ -63,12 +65,17 @@ namespace splitTime.conversation {
             while (keepGoing) {
                 keepGoing = false
                 if (this._pausedAtChar >= this._effectiveLine.length) {
+                    // Cut out the time taken by last character anyway
+                    let shortenedDelay = this.delay
+                    if (!this._cutShort) {
+                        shortenedDelay -= howLongForChar(this._effectiveLine[this._effectiveLine.length - 1], this.msPerChar)
+                    }
                     if (this.getAdvanceMethod() !== AdvanceMethod.AUTO &&
                         this.getAdvanceMethod() !== AdvanceMethod.HYBRID) {
                         // Do nothing
                     } else if (this._timeLastCharacterOut === null) {
                         this._timeLastCharacterOut = this.getTime()
-                    } else if (this.getTime() > this._timeLastCharacterOut + this.delay / 1000) {
+                    } else if (this.getTime() > this._timeLastCharacterOut + shortenedDelay / 1000) {
                         this.triggerFinish()
                     }
                 } else {
@@ -110,6 +117,7 @@ namespace splitTime.conversation {
             if (this._timeLastCharacterOut === null) {
                 this._timeLastCharacterOut = this.getTime()
             }
+            this._cutShort = true
         }
 
         private triggerFinish(): void {
@@ -117,7 +125,7 @@ namespace splitTime.conversation {
         }
 
         private getTime(): game_seconds {
-            return time.getFromLevel(this._level)
+            return this.timeline.getTime()
         }
     }
 }

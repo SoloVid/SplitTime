@@ -18,7 +18,7 @@ namespace splitTime.testRunner {
                 try {
                     testDef.definition(testHelper)
                     passedCount++
-                } catch(e) {
+                } catch(e: unknown) {
                     this.redError("FAIL: " + testDef.description)
                     console.error(e)
                 }
