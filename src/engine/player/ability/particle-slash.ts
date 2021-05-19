@@ -21,10 +21,7 @@ namespace splitTime.player.ability {
         radiansWide: number = Math.PI * 0.5
         radius: number = 24
         hitBoxWidth: number = 16
-        collisionMask: CollisionMask = {
-            membership: 1,
-            search: 1
-        }
+        collisionMask: CollisionMask = {...defaultCollisionMask}
         duration: game_seconds = 0.08
         extraParticleTime: number = 0.03
 

@@ -55,10 +55,7 @@ namespace splitTime {
 
         // TODO: should this be some kind of sliding scale, like friction or mass?
         pushable: boolean = false
-        readonly collisionMask: CollisionMask = {
-            membership: 1,
-            search: 1
-        }
+        readonly collisionMask: CollisionMask = {...defaultCollisionMask}
 
         // TODO: remove parameter when moving templates elsewhere
         constructor() {

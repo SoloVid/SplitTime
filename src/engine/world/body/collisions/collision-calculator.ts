@@ -8,6 +8,10 @@ namespace splitTime {
         // a la Godot collision mask, bit mask of collision groups to cross-check
         search: int
     }
+    export const defaultCollisionMask = {
+        membership: 1,
+        search: ~0
+    }
 
     interface ApiCollisionInfo {
         blocked: boolean
