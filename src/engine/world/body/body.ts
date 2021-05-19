@@ -7,7 +7,7 @@ namespace splitTime {
         id: string = "NOT SET"
         ref: int
         private timeAdvanceListeners: splitTime.RegisterCallbacks
-        private readonly customEvents: { [id: string]: splitTime.RegisterCallbacks } = {}
+        private readonly addOns: { [id: string]: unknown } = {}
         mover: splitTime.body.Mover
 
         // FTODO: I don't think this belongs here
@@ -341,26 +341,14 @@ namespace splitTime {
             this.timeAdvanceListeners.register(handler)
         }
 
-        registerEventListener(id: string, handler: (data: unknown) => CallbackResult): void {
-            this.getCustomEventCallbacks(id).register(handler)
+        hasAddOn(id: string): boolean {
+            return id in this.addOns;
         }
-        removeEventListener(id: string, handler: (data: unknown) => CallbackResult): void {
-            this.getCustomEventCallbacks(id).remove(handler)
+        getAddOn(id: string): unknown {
+            return this.addOns[id];
         }
-        triggerEvent(id: string, data: unknown): void {
-            if (id in this.customEvents) {
-                this.getCustomEventCallbacks(id).run(data)
-            }
-        }
-        hasEventListener(id: string): boolean {
-            return this.getCustomEventCallbacks(id).length > 0
-        }
-
-        private getCustomEventCallbacks(id: string): RegisterCallbacks {
-            if (!(id in this.customEvents)) {
-                this.customEvents[id] = new RegisterCallbacks()
-            }
-            return this.customEvents[id]
+        setAddOn(id: string, value: unknown): void {
+            this.addOns[id] = value;
         }
     }
 }

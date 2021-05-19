@@ -1,27 +1,25 @@
 namespace splitTime.body {
     export class CustomEventHandler<T> {
-        private uid: string
-
-        constructor() {
-            this.uid = generateUID()
-        }
+        private readonly addOn = new BodyAddOn<RegisterCallbacks>(() => new RegisterCallbacks())
 
         registerListener(body: Body, listener: (data: T) => CallbackResult): void {
-            // The cast here should be safe because the only feeder should be this class
-            body.registerEventListener(this.uid, listener as (data: unknown) => CallbackResult)
+            this.addOn.get(body).register(listener)
         }
 
         removeListener(body: Body, listener: (data: T) => splitTime.CallbackResult): void {
-            // The cast here should be safe because the only feeder should be this class
-            body.removeEventListener(this.uid, listener as (data: unknown) => CallbackResult)
+            if (this.hasListener(body)) {
+                this.addOn.get(body).remove(listener)
+            }
         }
 
         trigger(body: Body, data: T): void {
-            body.triggerEvent(this.uid, data)
+            if (this.hasListener(body)) {
+                this.addOn.get(body).run(data)
+            }
         }
 
         hasListener(body: Body): boolean {
-            return body.hasEventListener(this.uid)
+            return this.addOn.isSet(body) && this.addOn.get(body).length > 0
         }
     }
 }
