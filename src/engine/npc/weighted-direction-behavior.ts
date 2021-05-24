@@ -25,27 +25,31 @@ namespace splitTime.npc {
         notifyTimeAdvance(delta: splitTime.game_seconds): void {
             const dirWeights = this.getDirectionWeights()
             this.updateBlacklist()
-            let bestDir: direction_t | null = null
-            let bestWeight = 0
-            for (const dirWeight of dirWeights) {
+            let bestSlot: int | null = null
+            let bestWeight = Number.NEGATIVE_INFINITY
+            for (let i = 0; i < dirWeights.length; i++) {
+                const dirWeight = dirWeights[i]
                 if (this.isBlacklisted(dirWeight.dir)) {
                     continue
                 }
                 if (dirWeight.weight > bestWeight) {
-                    bestDir = dirWeight.dir
+                    bestSlot = i
                     bestWeight = dirWeight.weight
                 } else if (dirWeight.weight === bestWeight) {
                     if (Math.random() < 0.5) {
-                        bestDir = dirWeight.dir
+                        bestSlot = 1
                         bestWeight = dirWeight.weight
                     }
                 }
             }
 
-            if (bestDir === null) {
+            if (bestSlot === null) {
                 this.temporaryDirectionBlacklist = []
                 return
             }
+
+            // const bestDir = dirWeights[bestSlot].dir
+            const bestDir = interpolateMaxAt(dirWeights, bestSlot).dir
 
             const b = this.npc.body
             const TURN_SPEED = 4
@@ -57,7 +61,7 @@ namespace splitTime.npc {
                 const moved = b.mover.zeldaBump(moveDist, b.dir)
 
                 if (!moved) {
-                    this.blacklistDir(bestDir)
+                    this.blacklistDir(dirWeights[bestSlot].dir)
                 }
             }
         }
@@ -102,6 +106,50 @@ namespace splitTime.npc {
                     level: this.npc.body.level
                 }
             })
+        }
+    }
+
+    function interpolateMaxAt(arr: WeightedDirection[], i: int): WeightedDirection {
+        const leftWeight = arr[mod(i - 1, arr.length)].weight
+        const rightWeight = arr[mod(i + 1, arr.length)].weight
+        if (leftWeight === rightWeight) {
+            return arr[i]
+        }
+        let left: [number, number]
+        let right: [number, number]
+        if (leftWeight > rightWeight) {
+            left = [i - 2, i - 1]
+            right = [i, i + 1]
+        } else {
+            left = [i - 1, i]
+            right = [i + 1, i + 2]
+        }
+
+        function point(i: int): [x: number, y: number] {
+            const el = arr[mod(i, arr.length)]
+            return [i, el.weight]
+        }
+
+        // From wikipedia: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
+        const [ x1, y1 ] = point(left[0])
+        const [ x2, y2 ] = point(left[1])
+        const [ x3, y3 ] = point(right[0])
+        const [ x4, y4 ] = point(right[1])
+        const d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+        if (d === 0) {
+            return arr[i]
+        }
+        const interWeight = ((x1*y2 - y1*x2)*(y3 - y4) - (y1 - y2)*(x3*y4 - y3*x4)) / d
+        if (interWeight < arr[i].weight) {
+            return arr[i]
+        }
+        const interI = ((x1*y2 - y1*x2)*(x3 - x4) - (x1 - x2)*(x3*y4 - y3*x4)) / d
+        const dI = interI - i
+        const dDir = direction.difference(arr[mod(i + 1, arr.length)].dir, arr[i].dir) * dI
+        const interDir = direction.normalize(arr[i].dir + dDir)
+        return {
+            dir: interDir,
+            weight: interWeight
         }
     }
 }
