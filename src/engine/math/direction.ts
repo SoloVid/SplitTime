@@ -50,7 +50,7 @@ namespace splitTime.direction {
         }
     }
     export function toString(numDir: direction_t): string {
-        var modDir = splitTime.mod(Math.round(numDir), 4)
+        var modDir = normalize(Math.round(numDir * 10) / 10)
         switch (modDir) {
             case 0:
                 return "E"
@@ -123,15 +123,15 @@ namespace splitTime.direction {
     }
 
     export function getOpposite(dir: direction_t): direction_t {
-        return (dir + 2) % 4
+        return normalize(dir + 2)
     }
 
     export function getRotated(dir: direction_t, howMany90Degrees: number = 1): direction_t {
-        return (dir + howMany90Degrees) % 4
+        return normalize(dir + howMany90Degrees)
     }
 
     export function simplifyToCardinal(realDir: direction_t): direction_t {
-        return splitTime.mod(Math.round(realDir), 4)
+        return normalize(Math.round(realDir))
     }
 
     export function getRandom(): direction_t {
@@ -187,9 +187,7 @@ namespace splitTime.direction {
         dir2: direction_t,
         howMany90Degrees: number = 1
     ): boolean {
-        howMany90Degrees = howMany90Degrees
-        var dDir = Math.abs(dir1 - dir2)
-        return dDir < howMany90Degrees || dDir > 4 - howMany90Degrees
+        return difference(dir1, dir2) < howMany90Degrees
     }
 
     /**
@@ -219,30 +217,22 @@ namespace splitTime.direction {
     }
 
     export function approach(oldDir: direction_t, targetDir: direction_t, step: number): direction_t {
+        oldDir = normalize(oldDir)
+        targetDir = normalize(targetDir)
         if (oldDir > 3 && targetDir < 1) {
-            const stepDir = (oldDir + step) % 4
-            if (stepDir > 3) {
-                // Haven't passed zero
-                return stepDir
-            }
-            if (stepDir > targetDir) {
-                // Overshot
-                return targetDir
-            }
-            return stepDir
+            targetDir += 4
         }
         if (oldDir < 1 && targetDir > 3) {
-            const stepDir = (oldDir - step + 4) % 4
-            if (stepDir < 1) {
-                // Haven't passed zero
-                return stepDir
-            }
-            if (stepDir < targetDir) {
-                // Overshot
-                return targetDir
-            }
-            return stepDir
+            targetDir -= 4
         }
-        return splitTime.approachValue(oldDir, targetDir, step)
+        return normalize(approachValue(oldDir, targetDir, step))
+    }
+
+    export function difference(dir1: direction_t, dir2: direction_t): direction_t {
+        return Math.min(normalize(dir1 - dir2), normalize(dir2 - dir1))
+    }
+
+    export function normalize(dir: direction_t): direction_t {
+        return mod(dir, 4)
     }
 }
