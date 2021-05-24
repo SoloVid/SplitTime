@@ -52,8 +52,9 @@ namespace splitTime {
             }
             if (level.weather.lightningFrequency > 0) {
                 // TODO: tie to time rather than frames
+                const FPS = 60
                 if (
-                    splitTime.randomInt(splitTime.FPS * 60) <=
+                    splitTime.randomInt(FPS * 60) <=
                     level.weather.lightningFrequency
                 ) {
                     ctx.fillStyle = "rgba(255, 255, 255, .75)"

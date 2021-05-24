@@ -1,6 +1,4 @@
 namespace splitTime {
-    export const FPS = 60
-
     function mainGameLoop(gameLoop: GameLoop, timeStamp: number) {
         const timeStampDelta = timeStamp - gameLoop.lastTimeStamp
         gameLoop.lastTimeStamp = timeStamp
@@ -14,22 +12,20 @@ namespace splitTime {
             } catch (ex) {
                 console.error(ex)
             }
-        }
 
-        const endTime = performance.now()
-        const msElapsed = endTime - startTime
+            const endTime = performance.now()
+            const msElapsed = endTime - startTime
 
-        const msPerFrame = timeStampDelta
-        const displayFPS = Math.round(1000 / msPerFrame)
-        scheduleNextLoop(gameLoop)
+            const msPerFrame = timeStampDelta
+            const displayFPS = Math.round(1000 / msPerFrame)
 
-        if (isRunning) {
-            splitTime.debug.setDebugValue("FPS", displayFPS)
-
+            splitTime.debug.setDebugValue(splitTime, "FPS", displayFPS)
             if (splitTime.debug.ENABLED) {
                 splitTime.debug.renderCanvas(perspective.view)
             }
         }
+
+        scheduleNextLoop(gameLoop)
     }
 
     function scheduleNextLoop(gameLoop: GameLoop) {
@@ -41,7 +37,11 @@ namespace splitTime {
         const isCurrentLevelSet = perspective.levelManager.isCurrentSet()
         g.performanceCheckpoint("start loop", 999999)
 
-        const secondsForFrame = Math.min(msElapsed / 1000, 1 / splitTime.FPS)
+        // The max here prevents moving too far forward in a single game frame if we have a hiccup
+        // (e.g. browser hibernating the game loop).
+        const minFPS = 30
+        const maxSecondsPerFrame = 1 / minFPS
+        const secondsForFrame = Math.min(msElapsed / 1000, maxSecondsPerFrame)
         const budget = new FrameBudget(1000 * secondsForFrame)
 
         g.notifyListenersFrameUpdate(secondsForFrame)
@@ -56,10 +56,12 @@ namespace splitTime {
             g.performanceCheckpoint("timeline frame update", budget.takePart(0.4))
 
             splitTime.debug.setDebugValue(
+                splitTime,
                 "Board Bodies",
                 perspective.levelManager.getCurrent().bodies.length
             )
             splitTime.debug.setDebugValue(
+                splitTime,
                 "Focus point",
                 Math.round(perspective.camera.getFocusPoint().x) +
                     "," +
@@ -98,6 +100,7 @@ namespace splitTime {
     export class GameLoop {
         lastTimeStamp: number = 0
         private running: boolean = false
+        private stopOnNext: boolean = false
         private listeners: (FrameNotified | ((seconds: number) => void))[] = []
 
         constructor(public readonly perspective: Perspective) {
@@ -112,11 +115,20 @@ namespace splitTime {
             this.running = false
         }
 
+        step() {
+            this.stopOnNext = true
+            this.running = true
+        }
+
         onFrameUpdate(listener: FrameNotified | ((seconds: number) => void)) {
             this.listeners.push(listener)
         }
 
         notifyListenersFrameUpdate(seconds: number) {
+            if (this.stopOnNext) {
+                this.stopOnNext = false
+                this.running = false
+            }
             for (const listener of this.listeners) {
                 if (typeof listener === "function") {
                     listener(seconds)
@@ -138,7 +150,8 @@ namespace splitTime {
                 if (this.lastPerformanceCheck) {
                     var timePassed =
                         now - this.lastPerformanceCheck
-                    if (timePassed > allowMs) {
+                    const enabled = false
+                    if (timePassed > allowMs && enabled) {
                         splitTime.log.warn(
                             debugName +
                                 ": " +
