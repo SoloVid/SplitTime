@@ -1,13 +1,14 @@
 namespace splitTime.debug {
-    export var ENABLED = true // Master switch
-    export var DRAW_TRACES = false
+    export let ENABLED = true // Master switch
+    export let groupDisplayed: unknown = splitTime
+    export let DRAW_TRACES = false
 
-    var debugDiv: HTMLElement | null = null
-    var debugInfo: { [key: string]: DebugValue } = {}
+    let debugDiv: HTMLElement | null = null
+    const debugInfo: Map<unknown, { [key: string]: DebugValue }> = new Map()
 
-    var DEBOUNCE = 100
-    var LIFE = 2000
-    var frameStabilizer: FrameStabilizer
+    const DEBOUNCE = 100
+    const LIFE = 2000
+    let frameStabilizer: FrameStabilizer
 
     export function attachDebug(parent: HTMLElement) {
         debugDiv = document.createElement("div")
@@ -15,28 +16,35 @@ namespace splitTime.debug {
         frameStabilizer = new splitTime.FrameStabilizer(DEBOUNCE)
     }
 
-    export function setDebugValue(key: string, value: unknown) {
+    export function setDebugValue(group: unknown, key: string, value: unknown) {
         if (!splitTime.debug.ENABLED) {
             return
         }
 
-        if (!debugInfo[key]) {
-            debugInfo[key] = new DebugValue(key)
+        let map = debugInfo.get(group)
+        if (map === undefined) {
+            map = {}
+            debugInfo.set(group, map)
         }
-        debugInfo[key].value = value
-        debugInfo[key].timeUpdated = performance.now()
+
+        if (!map[key]) {
+            map[key] = new DebugValue(key)
+        }
+        map[key].value = value
+        map[key].timeUpdated = performance.now()
     }
 
     export function update() {
+        const map = debugInfo.get(groupDisplayed) ?? {}
         var keys = []
-        for (let key in debugInfo) {
+        for (let key in map) {
             keys.push(key)
         }
         for (var i = 0; i < keys.length; i++) {
             let key = keys[i]
-            var debugValue = debugInfo[key]
+            var debugValue = map[key]
             if (performance.now() - debugValue.timeUpdated > LIFE) {
-                delete debugInfo[key]
+                delete map[key]
             }
         }
     }
@@ -46,14 +54,16 @@ namespace splitTime.debug {
             return
         }
 
+        const map = debugInfo.get(groupDisplayed) ?? {}
+
         var table = "<table border='1'>"
         table += "<tr>"
-        for (var key in debugInfo) {
+        for (var key in map) {
             table += "<th>" + key + "</th>"
         }
         table += "</tr><tr>"
-        for (key in debugInfo) {
-            table += "<td>" + debugInfo[key].value + "</td>"
+        for (key in map) {
+            table += "<td>" + map[key].value + "</td>"
         }
         table += "</tr>"
         table += "</table>"
@@ -62,6 +72,8 @@ namespace splitTime.debug {
     }
 
     export function renderCanvas(view: ui.View) {
+        const map = debugInfo.get(groupDisplayed) ?? {}
+
         var FONT_SIZE = 16
         var SPACING = 5
         view.see.textBaseline = "alphabetic"
@@ -70,8 +82,8 @@ namespace splitTime.debug {
         const lines: string[] = []
         let width = 0
         let height = 0
-        for (var key in debugInfo) {
-            var line = key + ": " + debugInfo[key].value
+        for (var key in map) {
+            var line = key + ": " + map[key].value
             lines.push(line)
             const metrics = view.see.measureText(line)
             width = Math.max(width, metrics.width + 2 * SPACING)
