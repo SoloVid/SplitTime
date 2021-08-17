@@ -1,5 +1,5 @@
 namespace splitTime {
-    export const STOP_CALLBACKS = "SC"
+    export const STOP_CALLBACKS = Symbol("SC")
     export type STOP_CALLBACKS_TYPE = typeof STOP_CALLBACKS
     export type CallbackResult = void | STOP_CALLBACKS_TYPE
     type CallbackFunction = (data?: unknown) => CallbackResult

@@ -9,10 +9,16 @@ namespace splitTime.npc {
         moveStance: string = "run"
         chaseSpeed: pixels_t = 32
 
+        private distanceToKeep = 32
+        private chasingRadiansOff = 0
+
+        private temporaryDirectionBlacklist = {}
+
         constructor(
             private readonly npc: splitTime.Npc,
             private readonly bodyToChaseGetter: () => Body,
-            private readonly howCloseToGet: number
+            private readonly howCloseToGet: number,
+            // private readonly getDirectionWeights: () => Record<direction_t, number>
         ) {
             this.senseDistance = 2 * this.npc.body.width
         }
@@ -46,6 +52,15 @@ namespace splitTime.npc {
             }
 
             if (this.timeWithoutSeeing < this.BLIND_TIME) {
+                // const targetRadiansOff = 2 * Math.PI * Math.random() - Math.PI
+                // this.chasingRadiansOff = approachValue(this.chasingRadiansOff, targetRadiansOff, 0.1)
+                // // const targetLoc = pb
+                // const targetLoc = new InFrontOfBody(pb, this.distanceToKeep, this.chasingRadiansOff)
+                // const closeEnough = 2
+                // if (splitTime.measurement.distanceEasy(b.x, b.y, targetLoc.x, targetLoc.y) <= closeEnough) {
+                //     return
+                // }
+                // const targetDir = splitTime.direction.fromToThing(b, targetLoc)
                 const targetDir = splitTime.direction.fromToThing(b, pb)
                 const TURN_SPEED = 4
                 b.dir = splitTime.direction.approach(b.dir, targetDir, delta * TURN_SPEED)

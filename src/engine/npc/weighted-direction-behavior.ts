@@ -52,8 +52,9 @@ namespace splitTime.npc {
             const bestDir = interpolateMaxAt(dirWeights, bestSlot).dir
 
             const b = this.npc.body
-            const TURN_SPEED = 4
+            const TURN_SPEED = 400000000
 
+            splitTime.debug.setDebugValue(b.id, "bestDir", bestDir.toFixed(2) + " (" + direction.toString(bestDir) + ")")
             b.dir = splitTime.direction.approach(b.dir, bestDir, delta * TURN_SPEED)
 
             if (splitTime.direction.areWithin90Degrees(bestDir, b.dir, 1.5)) {
