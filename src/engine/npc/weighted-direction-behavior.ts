@@ -131,20 +131,19 @@ namespace splitTime.npc {
             return [i, el.weight]
         }
 
-        // From wikipedia: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
-        const [ x1, y1 ] = point(left[0])
-        const [ x2, y2 ] = point(left[1])
-        const [ x3, y3 ] = point(right[0])
-        const [ x4, y4 ] = point(right[1])
-        const d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-        if (d === 0) {
-            return arr[i]
-        }
-        const interWeight = ((x1*y2 - y1*x2)*(y3 - y4) - (y1 - y2)*(x3*y4 - y3*x4)) / d
-        if (interWeight < arr[i].weight) {
-            return arr[i]
-        }
-        const interI = ((x1*y2 - y1*x2)*(x3 - x4) - (x1 - x2)*(x3*y4 - y3*x4)) / d
+        const [ x1, y1 ] = point(i - 1)
+        const [ x2, y2 ] = point(i)
+        const [ x3, y3 ] = point(i + 1)
+
+        // From https://stackoverflow.com/a/717791/4639640
+        const denom = (x1 - x2)*(x1 - x3)*(x2 - x3)
+        const a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2))
+        const b = (Math.pow(x3, 2) * (y1 - y2) + Math.pow(x2, 2) * (y3 - y1) + Math.pow(x1, 2) * (y2 - y3))
+        const c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3)
+        
+        const interI = -b / (2*a)
+        const interWeight = (c - Math.pow(b, 2) / (4*a)) / denom
+
         const dI = interI - i
         const dDir = direction.difference(arr[mod(i + 1, arr.length)].dir, arr[i].dir) * dI
         const interDir = direction.normalize(arr[i].dir + dDir)
