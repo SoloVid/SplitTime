@@ -4,11 +4,19 @@ namespace splitTime.level {
     export namespace traces {
         export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
 
+        interface MinimalLevel {
+            lowestLayerZ: number
+        }
+
         export class CollisionInfo {
             containsSolid: boolean = false
             pointerOffsets: { [offsetHash: string]: splitTime.trace.PointerOffset | null } = {}
-            zBlockedTopEx: int = -4096 // arbitrary
+            zBlockedTopEx: int
             events: { [eventId: string]: true } = {}
+
+            constructor(level: MinimalLevel) {
+                this.zBlockedTopEx = level.lowestLayerZ
+            }
         }
     }
 

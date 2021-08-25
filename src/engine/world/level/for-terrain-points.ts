@@ -9,7 +9,7 @@ namespace splitTime.level {
             start,
             end,
             p => {
-                const collisionInfo = new traces.CollisionInfo()
+                const collisionInfo = new traces.CollisionInfo(level)
                 level.getLevelTraces().calculatePixelColumnCollisionInfo(
                     collisionInfo,
                     Math.floor(p.x),

@@ -65,7 +65,7 @@ namespace splitTime.body {
             for (const xCheck of xChecks) {
                 for (const yCheck of yChecks) {
                     for (const zCheck of zChecks) {
-                        const cornerCollisionInfo = new splitTime.level.traces.CollisionInfo()
+                        const cornerCollisionInfo = new splitTime.level.traces.CollisionInfo(levelFrom)
                         levelTraces.calculatePixelColumnCollisionInfo(
                             cornerCollisionInfo,
                             xCheck,

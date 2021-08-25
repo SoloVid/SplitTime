@@ -10,7 +10,7 @@ namespace splitTime.level {
 
         // x by x
         for (let x = 0; x < width; x++) {
-            const collisionInfo = new traces.CollisionInfo()
+            const collisionInfo = new traces.CollisionInfo({lowestLayerZ: 0})
             levelTraces.calculateVolumeCollision(collisionInfo, x, 1, 0, length, 0, height)
             const coordsStr = "x = " + x
             if (x < 10 || x > 20) {
@@ -22,7 +22,7 @@ namespace splitTime.level {
 
         // y by y
         for (let y = 0; y < length; y++) {
-            const collisionInfo = new traces.CollisionInfo()
+            const collisionInfo = new traces.CollisionInfo({lowestLayerZ: 0})
             levelTraces.calculateVolumeCollision(collisionInfo, 0, width, y, 1, 0, height)
             const coordsStr = "y = " + y
             if (y < 10 || y > 20) {
@@ -34,7 +34,7 @@ namespace splitTime.level {
 
         // z by z
         for (let z = 0; z < height; z++) {
-            const collisionInfo = new traces.CollisionInfo()
+            const collisionInfo = new traces.CollisionInfo({lowestLayerZ: 0})
             levelTraces.calculateVolumeCollision(collisionInfo, 0, width, 0, length, z, z + 1)
             const coordsStr = "z = " + z
             if (z < 10 || z > 20) {
@@ -323,7 +323,7 @@ namespace splitTime.level {
     ) {
         const levelTraces = new Traces(traces, width, length)
         forAllPixels(coords => {
-            const collisionInfo = new splitTime.level.traces.CollisionInfo()
+            const collisionInfo = new splitTime.level.traces.CollisionInfo({lowestLayerZ: 0})
             levelTraces.calculateVolumeCollision(collisionInfo, coords.x, 1, coords.y, 1, coords.z, coords.z + 1)
             pointCallback(coords, collisionInfo)
         })

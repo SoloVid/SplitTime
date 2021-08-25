@@ -164,7 +164,7 @@ namespace splitTime {
             zPixels: number,
             ignoreEvents: boolean
         ): InternalCollisionInfo {
-            var originCollisionInfo = new splitTime.level.traces.CollisionInfo()
+            var originCollisionInfo = new splitTime.level.traces.CollisionInfo(level)
             level
                 .getLevelTraces()
                 .calculateVolumeCollision(

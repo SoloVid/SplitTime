@@ -26,9 +26,10 @@ namespace splitTime.body.collisions {
                 (Math.round(this.mover.body.dir + 3.9) - 0.5) % 4
 
             var me = this
-            var levelTraces = this.mover.body.getLevel().getLevelTraces()
+            const level = this.mover.body.getLevel()
+            var levelTraces = level.getLevelTraces()
             function isCornerOpen(direction: number, howFarAway: number) {
-                var collisionInfo = new splitTime.level.traces.CollisionInfo()
+                var collisionInfo = new splitTime.level.traces.CollisionInfo(level)
                 var testX =
                     x +
                     splitTime.direction.getXSign(direction) *
