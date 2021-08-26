@@ -22,17 +22,24 @@ namespace splitTime {
         targetOffset: trace.PointerOffset | null
     }
 
+    interface MinimalLevel {
+        lowestLayerZ: number
+    }
+
     class InternalCollisionInfo implements ApiCollisionInfo {
         blocked: boolean = false
         bodies: Body[] = []
         vStepUpEstimate: number = 0
-        zBlockedTopEx: number = 0
+        zBlockedTopEx: number
         events: string[] = []
         pointerOffsets: (trace.PointerOffset)[] = []
 
         constructor(
+            level: MinimalLevel,
             public targetOffset: trace.PointerOffset | null
-        ) {}
+        ) {
+            this.zBlockedTopEx = level.lowestLayerZ
+        }
     }
 
     class CollisionCalculator {
@@ -53,7 +60,10 @@ namespace splitTime {
             ignoreBodies: splitTime.Body[] = [],
             ignoreEvents: boolean = false
         ): ApiCollisionInfo {
-            var collisionInfo = new InternalCollisionInfo(null)
+            var collisionInfo = new InternalCollisionInfo(level, null)
+            if (level.lowestLayerZ > startZ) {
+                collisionInfo.vStepUpEstimate = level.lowestLayerZ - startZ
+            }
             function handleFoundBody(otherBody: Body) {
                 for (const ignoreBody of ignoreBodies) {
                     if (otherBody === ignoreBody) {
@@ -179,7 +189,7 @@ namespace splitTime {
                 )
 
             const offset = chooseTheOneOrDefault(originCollisionInfo.pointerOffsets, null)
-            const collisionInfo = new InternalCollisionInfo(offset)
+            const collisionInfo = new InternalCollisionInfo(level, offset)
 
             collisionInfo.zBlockedTopEx = originCollisionInfo.zBlockedTopEx
             collisionInfo.vStepUpEstimate =
