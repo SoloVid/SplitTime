@@ -9,7 +9,10 @@ namespace splitTime.testRunner {
                 tests[index].definition(testHelper)
                 return new TestResult(index, true)
             } catch(e) {
-                return new TestResult(index, false, e.message)
+                if (e instanceof Error) {
+                    return new TestResult(index, false, e.message)
+                }
+                return new TestResult(index, false, JSON.stringify(e))
             }
         }
     
