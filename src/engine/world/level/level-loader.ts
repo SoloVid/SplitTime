@@ -185,7 +185,7 @@ namespace splitTime {
                 trace.load(this.level, world)
                 return trace
             })
-            this.level._levelTraces = new splitTime.level.Traces(
+            this.level._levelTraces = new splitTime.level.Traces2(
                 traces,
                 this.level.width,
                 this.level.yWidth

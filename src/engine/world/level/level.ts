@@ -22,7 +22,7 @@ namespace splitTime {
         yWidth: int = 0
         lowestLayerZ: int = 0
         highestLayerZ: int = 0
-        _levelTraces: level.Traces | null = null
+        _levelTraces: level.Traces2 | null = null
         constructor(levelId: string, levelData: level.FileData) {
             this.id = levelId
             this.loader = new LevelLoader(this, levelData)
@@ -64,7 +64,7 @@ namespace splitTime {
             return this._cellGrid
         }
 
-        getLevelTraces(): splitTime.level.Traces {
+        getLevelTraces(): splitTime.level.Traces2 {
             this.ensureLoaded()
             if (!this._levelTraces) {
                 throw new Error("Level traces unavailable")
