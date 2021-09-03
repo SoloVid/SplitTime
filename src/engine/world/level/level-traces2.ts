@@ -133,7 +133,8 @@ namespace splitTime.level {
                     traceLayer.calculateAreaSolidCollision(
                         collisionInfo,
                         startX, xPixels,
-                        startY, yPixels
+                        startY, yPixels,
+                        minZ
                     )
                 }
             }
@@ -153,7 +154,8 @@ namespace splitTime.level {
                     traceLayer.calculateAreaPointers(
                         pointerInfo,
                         startX, xPixels,
-                        startY, yPixels
+                        startY, yPixels,
+                        minZ, exMaxZ
                     )
                 }
             }
@@ -173,7 +175,8 @@ namespace splitTime.level {
                     traceLayer.calculateAreaEvents(
                         eventInfo,
                         startX, xPixels,
-                        startY, yPixels
+                        startY, yPixels,
+                        minZ, exMaxZ
                     )
                 }
             }

@@ -24,12 +24,12 @@ namespace splitTime.level {
 
             const pointerDataPixel = new Uint8ClampedArray(new ArrayBuffer(pixelDataSize))
             this.pointerData.push(pointerDataPixel)
-            this.pointerTraceBins.push(Array(t.traceBinArraySize).fill(null))
+            this.pointerTraceBins = Array(t.traceBinArraySize).fill(null)
             const pointerTypes = [splitTime.trace.Type.POINTER]
 
             const eventDataPixel = new Uint8ClampedArray(new ArrayBuffer(pixelDataSize))
             this.eventData.push(eventDataPixel)
-            this.eventTraceBins.push(Array(t.traceBinArraySize).fill(null))
+            this.eventTraceBins = Array(t.traceBinArraySize).fill(null)
             const eventTypes = [splitTime.trace.Type.EVENT, splitTime.trace.Type.TRANSPORT, splitTime.trace.Type.SEND]
 
             for (let iGranularity = 0; iGranularity < this.t.granularities.length; iGranularity++) {
@@ -209,6 +209,10 @@ namespace splitTime.level {
 
             const colorsAlreadyPicked: int[] = []
             function getColor(x: int, y: int): int {
+                if (x < 0 || y < 0 || x >= that.t.width || y >= that.t.yWidth) {
+                    return 0
+                }
+
                 const binIndex = Math.floor(y / that.t.traceBinWidth) * that.t.binsWide + Math.floor(x / that.t.traceBinWidth)
                 if (!!colorsAlreadyPicked[binIndex]) {
                     return colorsAlreadyPicked[binIndex]
@@ -238,6 +242,7 @@ namespace splitTime.level {
             xPixels: int,
             startY: int,
             yPixels: int,
+            minZ: int,
         ): void {
             this.calculateAreaCollision(
                 this.solidData, this.t.granularities.length - 1,
@@ -247,7 +252,10 @@ namespace splitTime.level {
                     if (value === 0) {
                         return
                     }
-                    var height = this.z + (value - groundR)
+                    const height = this.z + (value - groundR)
+                    if (height < minZ) {
+                        return
+                    }
                     collisionInfo.containsSolid = true
                     collisionInfo.zBlockedTopEx = Math.max(
                         height,
@@ -263,6 +271,8 @@ namespace splitTime.level {
             xPixels: int,
             startY: int,
             yPixels: int,
+            minZ: number,
+            exMaxZ: number,
         ): void {
             this.calculateAreaCollision(
                 this.pointerData, this.t.granularities.length - 1,
@@ -283,7 +293,7 @@ namespace splitTime.level {
                                 continue
                             }
                             const trace = bin[i]
-                            if (!isOverlap(this.z, this.nextLayerZ - this.z, trace.spec.offsetZ, trace.spec.height)) {
+                            if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
                                 continue
                             }
                             if (trace.spec.type === splitTime.trace.Type.POINTER) {
@@ -301,6 +311,8 @@ namespace splitTime.level {
             xPixels: int,
             startY: int,
             yPixels: int,
+            minZ: number,
+            exMaxZ: number,
         ): void {
             this.calculateAreaCollision(
                 this.pointerData, this.t.granularities.length - 1,
@@ -317,7 +329,7 @@ namespace splitTime.level {
                                 continue
                             }
                             const trace = bin[i]
-                            if (!isOverlap(this.z, this.nextLayerZ - this.z, trace.spec.offsetZ, trace.spec.height)) {
+                            if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
                                 continue
                             }
                             const spec = trace.spec
@@ -346,6 +358,21 @@ namespace splitTime.level {
             yPixels: int,
             handleValue: (value: int, x: int, y: int) => void,
         ): void {
+            // If we've now gotten to pixel granularity, just do simple pixel lookup.
+            if (iGranularity < 0) {
+                const endY = startY + yPixels
+                const endX = startX + xPixels
+                for (let y = startY; y < endY; y++) {
+                    for (let x = startX; x < endX; x++) {
+                        // const pixel = this.getPixelValue(data, x, y)
+                        const pixelIndex = y * this.t.width + x
+                        const pixel = data[0][pixelIndex]
+                        handleValue(pixel, x, y)
+                    }
+                }
+                return
+            }
+
             const granularity = this.t.granularities[iGranularity]
             const endY = startY + yPixels
             const endX = startX + xPixels
@@ -360,9 +387,9 @@ namespace splitTime.level {
                         data,
                         iGranularity,
                         Math.max(startX, xBucket * granularity),
-                        Math.min(granularity, endX - (xBucket * granularity)),
+                        Math.min(granularity, endX - (xBucket * granularity), xPixels),
                         Math.max(startY, yBucket * granularity),
-                        Math.min(granularity, endY - (yBucket * granularity)),
+                        Math.min(granularity, endY - (yBucket * granularity), yPixels),
                         handleValue
                     )
                 }
@@ -402,20 +429,6 @@ namespace splitTime.level {
                 return
             }
 
-            // If we've now gotten to pixel granularity, just do the lookup here.
-            if (iGranularity === 0) {
-                const endY = startY + yPixels
-                const endX = startX + xPixels
-                for (let y = startY; y < endY; y++) {
-                    for (let x = startX; x < endX; x++) {
-                        const pixelIndex = y * this.t.width + x
-                        const pixel = data[0][pixelIndex]
-                        handleValue(pixel, x, y);
-                    }
-                }
-                return
-            }
-
             // Otherwise recurse at the next granularity.
             const iGranularityNext = iGranularity - 1
             // We're calling the higher-level method here because we'll no longer be aligned at the smaller level.
@@ -425,6 +438,11 @@ namespace splitTime.level {
                 startY, yPixels,
                 handleValue
             )
+        }
+
+        private getPixelValue(a: Uint8ClampedArray[], x: int, y: int): int {
+            const pixelIndex = y * this.t.width + x
+            return a[0][pixelIndex]
         }
 
         getDebugTraceCanvas(): splitTime.Canvas {

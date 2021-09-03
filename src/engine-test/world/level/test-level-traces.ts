@@ -6,12 +6,12 @@ namespace splitTime.level {
     // but we're keeping this plane-checking testing to a minimum
     // because it is a little more unwieldy for the complicated cases later.
     splitTime.test.scenario(levelTracesTests, "Plane collisions with cube", t => {
-        var levelTraces = new Traces([largeCube.trace], width, length)
+        var levelTraces = new Traces2([largeCube.trace], width, length)
 
         // x by x
         for (let x = 0; x < width; x++) {
-            const collisionInfo = new traces.CollisionInfo({lowestLayerZ: 0})
-            levelTraces.calculateVolumeCollision(collisionInfo, x, 1, 0, length, 0, height)
+            const collisionInfo = new traces.SolidCollisionInfo({lowestLayerZ: 0})
+            levelTraces.calculateVolumeSolidCollision(collisionInfo, x, 1, 0, length, 0, height)
             const coordsStr = "x = " + x
             if (x < 10 || x > 20) {
                 t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the cube at " + coordsStr)
@@ -22,8 +22,8 @@ namespace splitTime.level {
 
         // y by y
         for (let y = 0; y < length; y++) {
-            const collisionInfo = new traces.CollisionInfo({lowestLayerZ: 0})
-            levelTraces.calculateVolumeCollision(collisionInfo, 0, width, y, 1, 0, height)
+            const collisionInfo = new traces.SolidCollisionInfo({lowestLayerZ: 0})
+            levelTraces.calculateVolumeSolidCollision(collisionInfo, 0, width, y, 1, 0, height)
             const coordsStr = "y = " + y
             if (y < 10 || y > 20) {
                 t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the cube at " + coordsStr)
@@ -34,8 +34,8 @@ namespace splitTime.level {
 
         // z by z
         for (let z = 0; z < height; z++) {
-            const collisionInfo = new traces.CollisionInfo({lowestLayerZ: 0})
-            levelTraces.calculateVolumeCollision(collisionInfo, 0, width, 0, length, z, z + 1)
+            const collisionInfo = new traces.SolidCollisionInfo({lowestLayerZ: 0})
+            levelTraces.calculateVolumeSolidCollision(collisionInfo, 0, width, 0, length, z, z + 1)
             const coordsStr = "z = " + z
             if (z < 10 || z > 20) {
                 t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding with the cube at " + coordsStr)
@@ -51,9 +51,9 @@ namespace splitTime.level {
     splitTime.test.scenario(levelTracesTests, "Point collisions with cube", t => {
         testTraces([largeCube.trace], (coords, collisionInfo) => {
             if (largeCube.overlaps(coords)) {
-                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+                t.assert(collisionInfo.solid.containsSolid, "We should be colliding at " + coordsStr(coords))
             } else {
-                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
+                t.assert(!collisionInfo.solid.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
         })
     })
@@ -62,9 +62,9 @@ namespace splitTime.level {
     splitTime.test.scenario(levelTracesTests, "Collisions with stairs", t => {
         testTraces([stairs.trace], (coords, collisionInfo) => {
             if (stairs.overlaps(coords)) {
-                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+                t.assert(collisionInfo.solid.containsSolid, "We should be colliding at " + coordsStr(coords))
             } else {
-                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
+                t.assert(!collisionInfo.solid.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
         })
     })
@@ -74,9 +74,9 @@ namespace splitTime.level {
     splitTime.test.scenario(levelTracesTests, "Collisions with stairs and cube", t => {
         testTraces([stairs.trace, smallCube.trace], (coords, collisionInfo) => {
             if (smallCube.overlaps(coords) || stairs.overlaps(coords)) {
-                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+                t.assert(collisionInfo.solid.containsSolid, "We should be colliding at " + coordsStr(coords))
             } else {
-                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
+                t.assert(!collisionInfo.solid.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
         })
     })
@@ -85,9 +85,9 @@ namespace splitTime.level {
     splitTime.test.scenario(levelTracesTests, "Collisions with ground trace", t => {
         testTraces([ground.trace], (coords, collisionInfo) => {
             if (ground.overlaps(coords)) {
-                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+                t.assert(collisionInfo.solid.containsSolid, "We should be colliding at " + coordsStr(coords))
             } else {
-                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
+                t.assert(!collisionInfo.solid.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
         })
     })
@@ -96,16 +96,16 @@ namespace splitTime.level {
     splitTime.test.scenario(levelTracesTests, "Collisions with ground and cube", t => {
         testTraces([largeCube.trace, ground.trace], (coords, collisionInfo) => {
             if (largeCube.overlaps(coords) || ground.overlaps(coords)) {
-                t.assert(collisionInfo.containsSolid, "We should be colliding at " + coordsStr(coords))
+                t.assert(collisionInfo.solid.containsSolid, "We should be colliding at " + coordsStr(coords))
             } else {
-                t.assert(!collisionInfo.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
+                t.assert(!collisionInfo.solid.containsSolid, "We shouldn't be colliding at " + coordsStr(coords))
             }
         })
     })
 
     splitTime.test.scenario(levelTracesTests, "Pointer trace", t => {
         testTraces([pointer1.trace], (coords, collisionInfo) => {
-            t.assert(!collisionInfo.containsSolid, "Pointer trace should not be solid at " + coordsStr(coords))
+            t.assert(!collisionInfo.solid.containsSolid, "Pointer trace should not be solid at " + coordsStr(coords))
             const pointerOffsets = collisionInfo.pointerOffsets
             // There should be exactly one here because we're checking
             // one pixel and there is one pointer trace.
@@ -126,7 +126,7 @@ namespace splitTime.level {
 
     splitTime.test.scenario(levelTracesTests, "Event trace", t => {
         testTraces([eventBox.trace], (coords, collisionInfo) => {
-            t.assert(!collisionInfo.containsSolid, "Event trace should not be solid at " + coordsStr(coords))
+            t.assert(!collisionInfo.solid.containsSolid, "Event trace should not be solid at " + coordsStr(coords))
             const events = collisionInfo.events
             if (eventBox.overlaps(coords)) {
                 t.assert(Object.keys(events).length === 1, "Should be one event at " + coordsStr(coords))
@@ -145,7 +145,7 @@ namespace splitTime.level {
         let demonstratedOverlappingAll = false
         testTraces([smallCube.trace, pointer1.trace, pointer2.trace, eventBox.trace],
             (coords, collisionInfo) => {
-                t.assert(smallCube.overlaps(coords) === collisionInfo.containsSolid,
+                t.assert(smallCube.overlaps(coords) === collisionInfo.solid.containsSolid,
                     "smallCube at " + coordsStr(coords))
                 t.assert(pointer1.overlaps(coords) === !!collisionInfo.pointerOffsets[pointer1.trace.getOffsetHash()],
                     "pointer1 at " + coordsStr(coords))
@@ -246,20 +246,6 @@ namespace splitTime.level {
         }
     }
 
-    const dummyFileData: splitTime.level.FileData = {
-        type: "action",
-        region: "region",
-        width: width,
-        height: height,
-        background: "background",
-        backgroundOffsetX: 0,
-        backgroundOffsetY: 0,
-        groups: [],
-        traces: [],
-        props: [],
-        positions: []
-    }
-
     const pointer1Vertices = "(12, 12) (12, 21) (21, 21) (21, 12) (close)"
     const pointer1 = {
         trace: makeTrace({
@@ -317,15 +303,29 @@ namespace splitTime.level {
         }
     }
 
+    interface ConglomerateCollisionInfo {
+        solid: traces.SolidCollisionInfo
+        pointerOffsets: traces.PointerTraceInfo
+        events: traces.EventTraceInfo
+    }
+
     function testTraces(
         traces: Trace[],
-        pointCallback: (coords: Coordinates3D, collisionInfo: traces.CollisionInfo) => void
+        pointCallback: (coords: Coordinates3D, collisionInfo: ConglomerateCollisionInfo) => void
     ) {
-        const levelTraces = new Traces(traces, width, length)
+        const levelTraces = new Traces2(traces, width, length)
         forAllPixels(coords => {
-            const collisionInfo = new splitTime.level.traces.CollisionInfo({lowestLayerZ: 0})
-            levelTraces.calculateVolumeCollision(collisionInfo, coords.x, 1, coords.y, 1, coords.z, coords.z + 1)
-            pointCallback(coords, collisionInfo)
+            const solidCollisionInfo = new splitTime.level.traces.SolidCollisionInfo({lowestLayerZ: 0})
+            levelTraces.calculateVolumeSolidCollision(solidCollisionInfo, coords.x, 1, coords.y, 1, coords.z, coords.z + 1)
+            const pointers = {}
+            levelTraces.calculateVolumePointers(pointers, coords.x, 1, coords.y, 1, coords.z, coords.z + 1)
+            const events = {}
+            levelTraces.calculateVolumeEvents(events, coords.x, 1, coords.y, 1, coords.z, coords.z + 1)
+            pointCallback(coords, {
+                solid: solidCollisionInfo,
+                pointerOffsets: pointers,
+                events: events
+            })
         })
     }
 
