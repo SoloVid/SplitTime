@@ -18,7 +18,6 @@ namespace splitTime {
         bodies: Body[]
         vStepUpEstimate: number
         zBlockedTopEx: number
-        events: string[]
         targetOffset: trace.PointerOffset | null
     }
 
@@ -31,7 +30,6 @@ namespace splitTime {
         bodies: Body[] = []
         vStepUpEstimate: number = 0
         zBlockedTopEx: number
-        events: string[] = []
         pointerOffsets: (trace.PointerOffset)[] = []
 
         constructor(
@@ -45,6 +43,28 @@ namespace splitTime {
     class CollisionCalculator {
         private pointerStack: string[] = []
 
+        getEventsInVolume(
+            level: splitTime.Level,
+            startX: number,
+            xPixels: number,
+            startY: number,
+            yPixels: number,
+            startZ: number,
+            zPixels: number,
+        ): string[] {
+            const eventTracesMap = {}
+            level
+                .getLevelTraces()
+                .calculateVolumeEvents(
+                    eventTracesMap,
+                    Math.floor(startX), Math.ceil(xPixels),
+                    Math.floor(startY), Math.ceil(yPixels),
+                    Math.floor(startZ), Math.ceil(startZ + zPixels)
+                )
+            // TODO: Maybe look through pointers too?
+            return Object.keys(eventTracesMap)
+        }
+
         /**
          * Calculate collisions in volume. This function is primarily useful for gauging a slice of volume (i.e. one-pixel step).
          */
@@ -57,8 +77,7 @@ namespace splitTime {
             yPixels: number,
             startZ: number,
             zPixels: number,
-            ignoreBodies: splitTime.Body[] = [],
-            ignoreEvents: boolean = false
+            ignoreBodies: splitTime.Body[] = []
         ): ApiCollisionInfo {
             var collisionInfo = new InternalCollisionInfo(level, null)
             if (level.lowestLayerZ > startZ) {
@@ -93,15 +112,10 @@ namespace splitTime {
             if (!collisionInfo.blocked) {
                 var traceCollision = this.calculateVolumeTraceCollision(
                     level,
-                    startX,
-                    xPixels,
-                    startY,
-                    yPixels,
-                    startZ,
-                    zPixels,
-                    ignoreEvents
+                    startX, xPixels,
+                    startY, yPixels,
+                    startZ, zPixels
                 )
-                collisionInfo.events = traceCollision.events
                 collisionInfo.targetOffset = traceCollision.targetOffset
                 collisionInfo.blocked = traceCollision.blocked
                 collisionInfo.zBlockedTopEx =
@@ -121,14 +135,10 @@ namespace splitTime {
                             const otherLevelCollisionInfo = this.calculateVolumeCollision(
                                 collisionMask,
                                 pointerOffset.level,
-                                startX + pointerOffset.offsetX,
-                                xPixels,
-                                startY + pointerOffset.offsetY,
-                                yPixels,
-                                startZ + pointerOffset.offsetZ,
-                                zPixels
+                                startX + pointerOffset.offsetX, xPixels,
+                                startY + pointerOffset.offsetY, yPixels,
+                                startZ + pointerOffset.offsetZ, zPixels
                             )
-                            // TODO: maybe add events?
                             // Note that the sign on the offset is flipped here
                             // because we are coming back from the other level's
                             // coordinates to our own.
@@ -171,39 +181,39 @@ namespace splitTime {
             startY: number,
             yPixels: number,
             startZ: number,
-            zPixels: number,
-            ignoreEvents: boolean
+            zPixels: number
         ): InternalCollisionInfo {
-            var originCollisionInfo = new splitTime.level.traces.CollisionInfo(level)
+            const solidCollisionInfo = new splitTime.level.traces.SolidCollisionInfo(level)
             level
                 .getLevelTraces()
-                .calculateVolumeCollision(
-                    originCollisionInfo,
-                    Math.floor(startX),
-                    Math.ceil(xPixels),
-                    Math.floor(startY),
-                    Math.ceil(yPixels),
-                    Math.floor(startZ),
-                    Math.ceil(startZ + zPixels),
-                    ignoreEvents
+                .calculateVolumeSolidCollision(
+                    solidCollisionInfo,
+                    Math.floor(startX), Math.ceil(xPixels),
+                    Math.floor(startY), Math.ceil(yPixels),
+                    Math.floor(startZ), Math.ceil(startZ + zPixels)
                 )
 
-            const offset = chooseTheOneOrDefault(originCollisionInfo.pointerOffsets, null)
+            const pointerTraceInfo: splitTime.level.traces.PointerTraceInfo = {}
+            level
+                .getLevelTraces()
+                .calculateVolumePointers(
+                    pointerTraceInfo,
+                    Math.floor(startX), Math.ceil(xPixels),
+                    Math.floor(startY), Math.ceil(yPixels),
+                    Math.floor(startZ), Math.ceil(startZ + zPixels)
+                )
+
+            const offset = chooseTheOneOrDefault(pointerTraceInfo, null)
             const collisionInfo = new InternalCollisionInfo(level, offset)
 
-            collisionInfo.zBlockedTopEx = originCollisionInfo.zBlockedTopEx
-            collisionInfo.vStepUpEstimate =
-                originCollisionInfo.zBlockedTopEx - startZ
+            collisionInfo.zBlockedTopEx = solidCollisionInfo.zBlockedTopEx
+            collisionInfo.vStepUpEstimate = solidCollisionInfo.zBlockedTopEx - startZ
             collisionInfo.blocked =
-                originCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0
-            for (let id in originCollisionInfo.pointerOffsets) {
-                const offset = originCollisionInfo.pointerOffsets[id]
+                solidCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0
+            for (const offset of Object.values(pointerTraceInfo)) {
                 if (offset !== null) {
                     collisionInfo.pointerOffsets.push(offset)
                 }
-            }
-            for (var eventId in originCollisionInfo.events) {
-                collisionInfo.events.push(eventId)
             }
 
             return collisionInfo

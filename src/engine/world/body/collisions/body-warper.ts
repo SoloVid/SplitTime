@@ -27,24 +27,23 @@ namespace splitTime.body {
             const width = this.body.width
             const depth = this.body.depth
 
-            var startX = Math.round(this.body.x)
-            var startY = Math.round(this.body.y)
-            var z = Math.round(this.body.z)
-            var furthestX = Math.round(
+            const startX = Math.round(this.body.x)
+            const startY = Math.round(this.body.y)
+            const z = Math.round(this.body.z)
+            const furthestX = Math.round(
                 this.body.x +
                     maxDistance * splitTime.direction.getXMagnitude(dir)
             )
-            var furthestY = Math.round(
+            const furthestY = Math.round(
                 this.body.y +
                     maxDistance * splitTime.direction.getYMagnitude(dir)
             )
 
-            var toX: number | null = null
-            var toY: number | null = null
-            var events: string[] = []
+            let toX: number | null = null
+            let toY: number | null = null
             let mightMoveLevels = false
 
-            var me = this
+            const me = this
             splitTime.bresenham.forEachPoint(
                 furthestX,
                 furthestY,
@@ -68,7 +67,6 @@ namespace splitTime.body {
                         if (toX === null) {
                             toX = x
                             toY = y
-                            events = collisionInfo.events
                             if (trace.isPointerOffsetSignificant(collisionInfo.targetOffset, level)) {
                                 mightMoveLevels = true
                             }
@@ -86,6 +84,12 @@ namespace splitTime.body {
                     Math.abs(toY - startY) > depth)
             ) {
                 this.body.put(level, toX, toY, z)
+                const events = COLLISION_CALCULATOR.getEventsInVolume(
+                    level,
+                    this.body.getLeft(), this.body.width,
+                    this.body.getTopY(), this.body.depth,
+                    this.body.z, this.body.height
+                )
                 level.runEvents(events, this.body)
                 if (mightMoveLevels) {
                     var transporter = new splitTime.body.Transporter(this.body)
@@ -106,7 +110,7 @@ namespace splitTime.body {
             x: int,
             y: int,
             z: int
-        ): { blocked: boolean; events: string[]; targetOffset: trace.PointerOffset | null } {
+        ): { blocked: boolean; targetOffset: trace.PointerOffset | null } {
             var left = x - this.body.width / 2
             var top = y - this.body.depth / 2
 
@@ -124,7 +128,6 @@ namespace splitTime.body {
                 )
             return {
                 blocked: originCollisionInfo.blocked && originCollisionInfo.zBlockedTopEx !== z,
-                events: originCollisionInfo.events,
                 targetOffset: originCollisionInfo.targetOffset
             }
         }

@@ -14,7 +14,6 @@ namespace splitTime.body.collisions {
 
             var x = Math.floor(this.mover.body.getX())
             var y = Math.floor(this.mover.body.getY())
-            var z = Math.floor(this.mover.body.getZ())
 
             var dist = maxDistance //Math.min(1, maxDistance);
 
@@ -25,33 +24,30 @@ namespace splitTime.body.collisions {
             var negativeDiagonal =
                 (Math.round(this.mover.body.dir + 3.9) - 0.5) % 4
 
-            var me = this
+            const me = this
             const level = this.mover.body.getLevel()
-            var levelTraces = level.getLevelTraces()
             function isCornerOpen(direction: number, howFarAway: number) {
-                var collisionInfo = new splitTime.level.traces.CollisionInfo(level)
-                var testX =
+                const testX =
                     x +
                     splitTime.direction.getXSign(direction) *
                         (me.mover.body.width / 2 + howFarAway)
-                var testY =
+                const testY =
                     y +
                     splitTime.direction.getYSign(direction) *
                         (me.mover.body.depth / 2 + howFarAway)
-                levelTraces.calculatePixelColumnCollisionInfo(
-                    collisionInfo,
-                    testX,
-                    testY,
-                    me.mover.body.z,
-                    me.mover.body.z + me.mover.body.height,
-                    true
+                const collisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
+                    me.mover.body.collisionMask,
+                    level,
+                    testX, 1,
+                    testY, 1,
+                    me.mover.body.z, me.mover.body.height
                 )
-                return !collisionInfo.containsSolid
+                return !collisionInfo.blocked
             }
 
-            for (var howFarOut = 2; howFarOut <= 5; howFarOut++) {
-                var isCorner1Open = isCornerOpen(positiveDiagonal, howFarOut)
-                var isCorner2Open = isCornerOpen(negativeDiagonal, howFarOut)
+            for (let howFarOut = 2; howFarOut <= 5; howFarOut++) {
+                const isCorner1Open = isCornerOpen(positiveDiagonal, howFarOut)
+                const isCorner2Open = isCornerOpen(negativeDiagonal, howFarOut)
                 if (isCorner1Open && !isCorner2Open) {
                     this.mover.zeldaBump(dist, positiveDiagonal)
                     break

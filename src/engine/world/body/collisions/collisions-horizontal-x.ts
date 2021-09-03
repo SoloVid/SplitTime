@@ -72,16 +72,23 @@ namespace splitTime.body.collisions {
                     ? x + dx + this.mover.body.width / 2
                     : x + dx - this.mover.body.width / 2
             var top = y - this.mover.body.depth / 2
-            return splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+            const solidCollisionInfo = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
                 this.mover.body.collisionMask,
                 level,
-                edgeX,
-                Math.abs(dx),
-                top,
-                this.mover.body.depth,
-                z,
-                this.mover.body.height
+                edgeX, Math.abs(dx),
+                top, this.mover.body.depth,
+                z, this.mover.body.height
             )
+            const events = COLLISION_CALCULATOR.getEventsInVolume(
+                level,
+                edgeX, Math.abs(dx),
+                top, this.mover.body.depth,
+                z, this.mover.body.height
+            )
+            return {
+                ...solidCollisionInfo,
+                events: events
+            }
         }
     }
 }

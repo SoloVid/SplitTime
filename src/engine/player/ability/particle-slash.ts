@@ -70,8 +70,7 @@ namespace splitTime.player.ability {
                         slashBody.x - this.hitBoxWidth / 2, this.hitBoxWidth,
                         slashBody.y - this.hitBoxWidth / 2, this.hitBoxWidth,
                         slashBody.z - this.hitBoxWidth / 2, this.hitBoxWidth,
-                        [slashBody, this.body],
-                        true
+                        [slashBody, this.body]
                     )
                     for (const b of collisionInfo.bodies) {
                         this.onBodyHit(b)

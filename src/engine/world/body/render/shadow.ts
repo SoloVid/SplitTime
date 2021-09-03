@@ -72,8 +72,7 @@ namespace splitTime.body {
                 this.realBody.getLeft(), this.realBody.width,
                 this.realBody.getTopY(), this.realBody.depth,
                 minBottom, scanDist + 1,
-                [this.realBody],
-                true
+                [this.realBody]
             )
             this.shadowBody.x = this.realBody.x
             this.shadowBody.y = this.realBody.y

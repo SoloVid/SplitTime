@@ -52,46 +52,25 @@ namespace splitTime.body {
             y: number,
             z: number
         ): ILevelLocation2 | null {
-            let offsetHash: string | null = null
             var levelTraces = levelFrom.getLevelTraces()
             var left = Math.round(x - this.body.width / 2)
             var topY = Math.round(y - this.body.depth / 2)
-            var roundZ = Math.round(z)
-            var topZ = roundZ + Math.round(this.body.height)
-            const xChecks = [left, left + this.body.width]
-            const yChecks = [topY, topY + this.body.depth]
-            const zChecks = [roundZ, topZ - 1]
-            let pointerOffset: trace.PointerOffset | null = null
-            for (const xCheck of xChecks) {
-                for (const yCheck of yChecks) {
-                    for (const zCheck of zChecks) {
-                        const cornerCollisionInfo = new splitTime.level.traces.CollisionInfo(levelFrom)
-                        levelTraces.calculatePixelColumnCollisionInfo(
-                            cornerCollisionInfo,
-                            xCheck,
-                            yCheck,
-                            zCheck,
-                            zCheck + 1,
-                            true
-                        )
 
-                        const pointerOffsets = cornerCollisionInfo.pointerOffsets
-                        // Make sure no pointer trace is something different
-                        for (var key in pointerOffsets) {
-                            if (offsetHash === null) {
-                                offsetHash = key
-                            } else if (key !== offsetHash) {
-                                return null
-                            }
-                        }
-                        // Make sure the pointer trace actually showed up in the list
-                        if (!offsetHash || !pointerOffsets[offsetHash]) {
-                            return null
-                        }
-                        pointerOffset = pointerOffsets[offsetHash]
-                    }
-                }
+            const pointerInfo: splitTime.level.traces.PointerTraceInfo = {}
+            levelTraces.calculateVolumePointers(
+                pointerInfo,
+                left, this.body.width,
+                topY, this.body.depth,
+                z, this.body.height
+            )
+
+            const offsetHashes = Object.keys(pointerInfo)
+
+            if (offsetHashes.length === 0 || offsetHashes.length > 1) {
+                return null
             }
+
+            const pointerOffset = pointerInfo[offsetHashes[0]]
             if (!pointerOffset || !trace.isPointerOffsetSignificant(pointerOffset, levelFrom)) {
                 return null
             }

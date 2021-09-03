@@ -131,7 +131,15 @@ namespace splitTime.body.collisions {
                 }
                 lowerBoundZ += kHat
                 targetZ += kHat
-                addArrayToSet(originCollisionInfo.events, eventIdSet)
+
+                const events = COLLISION_CALCULATOR.getEventsInVolume(
+                    level,
+                    left, this.mover.body.width,
+                    top, this.mover.body.depth,
+                    lowerBoundZ, 1
+                )
+                addArrayToSet(events, eventIdSet)
+
                 const targetOffset = originCollisionInfo.targetOffset
                 if (targetOffset === null) {
                     targetOffsets[splitTime.level.traces.SELF_LEVEL_ID] = null
