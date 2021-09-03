@@ -149,6 +149,10 @@ namespace splitTime.level {
             minZ: int,
             exMaxZ: int
         ) {
+            // TODO: Check exMaxZ > level.lowestZ maybe.
+            if (exMaxZ <= this.layers[0].z) {
+                pointerInfo[traces.SELF_LEVEL_ID] = null
+            }
             for (const traceLayer of this.layers) {
                 if (exMaxZ > traceLayer.z && minZ < traceLayer.nextLayerZ) {
                     traceLayer.calculateAreaPointers(

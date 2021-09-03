@@ -286,20 +286,27 @@ namespace splitTime.level {
                     const traceBinX = Math.floor(x / this.t.traceBinWidth)
                     const traceBinY = Math.floor(y / this.t.traceBinWidth)
                     const bin = this.pointerTraceBins[traceBinY * this.t.binsWide + traceBinX]
-                    if (bin !== null) {
-                        for (let i = 0; i < bin.length; i++) {
-                            const flag = (value >>> i) & 0x1
-                            if (flag === 0) {
-                                continue
-                            }
-                            const trace = bin[i]
-                            if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
-                                continue
-                            }
-                            if (trace.spec.type === splitTime.trace.Type.POINTER) {
-                                pointerInfo[trace.getOffsetHash()] = trace.getPointerOffset()
-                            }
+                    if (bin === null) {
+                        return
+                    }
+                    let foundOne = false
+                    for (let i = 0; i < bin.length; i++) {
+                        const flag = (value >>> i) & 0x1
+                        if (flag === 0) {
+                            continue
                         }
+                        const trace = bin[i]
+                        if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
+                            continue
+                        }
+                        if (trace.spec.type === splitTime.trace.Type.POINTER) {
+                            foundOne = true
+                            pointerInfo[trace.getOffsetHash()] = trace.getPointerOffset()
+                        }
+                    }
+                    if (!foundOne) {
+                        pointerInfo[traces.SELF_LEVEL_ID] = null
+                        return
                     }
                 }
             )
@@ -315,34 +322,38 @@ namespace splitTime.level {
             exMaxZ: number,
         ): void {
             this.calculateAreaCollision(
-                this.pointerData, this.t.granularities.length - 1,
+                this.eventData, this.t.granularities.length - 1,
                 startX, xPixels,
                 startY, yPixels,
                 (value, x, y) => {
+                    if (value === 0) {
+                        return
+                    }
                     const traceBinX = Math.floor(x / this.t.traceBinWidth)
                     const traceBinY = Math.floor(y / this.t.traceBinWidth)
                     const bin = this.eventTraceBins[traceBinY * this.t.binsWide + traceBinX]
-                    if (bin !== null) {
-                        for (let i = 0; i < bin.length; i++) {
-                            const flag = (value >>> i) & 0x1
-                            if (flag === 0) {
-                                continue
-                            }
-                            const trace = bin[i]
-                            if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
-                                continue
-                            }
-                            const spec = trace.spec
-                            switch (spec.type) {
-                                case splitTime.trace.Type.EVENT:
-                                    assert(spec.eventId !== null, "Event trace has no event ID")
-                                    eventInfo[spec.eventId] = true
-                                    break
-                                case splitTime.trace.Type.TRANSPORT:
-                                case splitTime.trace.Type.SEND:
-                                    eventInfo[spec.getOffsetHash()] = true
-                                    break
-                            }
+                    if (bin === null) {
+                        return
+                    }
+                    for (let i = 0; i < bin.length; i++) {
+                        const flag = (value >>> i) & 0x1
+                        if (flag === 0) {
+                            continue
+                        }
+                        const trace = bin[i]
+                        if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
+                            continue
+                        }
+                        const spec = trace.spec
+                        switch (spec.type) {
+                            case splitTime.trace.Type.EVENT:
+                                assert(spec.eventId !== null, "Event trace has no event ID")
+                                eventInfo[spec.eventId] = true
+                                break
+                            case splitTime.trace.Type.TRANSPORT:
+                            case splitTime.trace.Type.SEND:
+                                eventInfo[spec.getOffsetHash()] = true
+                                break
                         }
                     }
                 }
