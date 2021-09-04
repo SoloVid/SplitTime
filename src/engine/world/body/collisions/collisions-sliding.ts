@@ -45,7 +45,7 @@ namespace splitTime.body.collisions {
                 return !collisionInfo.blocked
             }
 
-            for (let howFarOut = 2; howFarOut <= 5; howFarOut++) {
+            for (let howFarOut = 1; howFarOut <= 5; howFarOut++) {
                 const isCorner1Open = isCornerOpen(positiveDiagonal, howFarOut)
                 const isCorner2Open = isCornerOpen(negativeDiagonal, howFarOut)
                 if (isCorner1Open && !isCorner2Open) {

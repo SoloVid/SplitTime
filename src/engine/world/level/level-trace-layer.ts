@@ -71,8 +71,10 @@ namespace splitTime.level {
                     debugImageData.data[debugIndex + 0] = eventDataPixel[i] * 200
                     debugImageData.data[debugIndex + 1] = pointerDataPixel[i] * 200
                     debugImageData.data[debugIndex + 2] = solidDataPixel[i] * 200
+                    const solidAlpha = solidDataPixel[i] > 0 ? 100 + 2 * solidDataPixel[i] : 0
+                    const specialAlpha = eventDataPixel[i] > 0 || pointerDataPixel[i] > 0 ? 200 : 0
                     // Make it a little transparent so we can see under the traces.
-                    debugImageData.data[debugIndex + 3] = 200
+                    debugImageData.data[debugIndex + 3] = solidAlpha + specialAlpha
                 }
 
                 debugTraceCtx.putImageData(debugImageData, 0, 0)
@@ -369,6 +371,10 @@ namespace splitTime.level {
             yPixels: int,
             handleValue: (value: int, x: int, y: int) => void,
         ): void {
+            startX = Math.max(startX, 0)
+            startY = Math.max(startY, 0)
+            xPixels = Math.min(xPixels, this.t.width - startX)
+            yPixels = Math.min(yPixels, this.t.yWidth - startY)
             // If we've now gotten to pixel granularity, just do simple pixel lookup.
             if (iGranularity < 0) {
                 const endY = startY + yPixels
@@ -385,8 +391,8 @@ namespace splitTime.level {
             }
 
             const granularity = this.t.granularities[iGranularity]
-            const endY = startY + yPixels
             const endX = startX + xPixels
+            const endY = startY + yPixels
             const startXBucket = Math.floor(startX / granularity)
             const startYBucket = Math.floor(startY / granularity)
             const endXBucket = Math.ceil(endX / granularity)
@@ -394,13 +400,19 @@ namespace splitTime.level {
 
             for (let yBucket = startYBucket; yBucket < endYBucket; yBucket++) {
                 for (let xBucket = startXBucket; xBucket < endXBucket; xBucket++) {
+                    // Start of range or start of bucket.
+                    const startXInBucket = Math.max(startX, xBucket * granularity)
+                    const startYInBucket = Math.max(startY, yBucket * granularity)
+                    // End of range or end of bucket or edge of level.
+                    const endXInBucket = Math.min(endX, (xBucket + 1) * granularity, this.t.width)
+                    const endYInBucket = Math.min(endY, (yBucket + 1) * granularity, this.t.yWidth)
                     this.calculateAlignedAreaCollision(
                         data,
                         iGranularity,
-                        Math.max(startX, xBucket * granularity),
-                        Math.min(granularity, endX - (xBucket * granularity), xPixels),
-                        Math.max(startY, yBucket * granularity),
-                        Math.min(granularity, endY - (yBucket * granularity), yPixels),
+                        startXInBucket,
+                        endXInBucket - startXInBucket,
+                        startYInBucket,
+                        endYInBucket - startYInBucket,
                         handleValue
                     )
                 }
