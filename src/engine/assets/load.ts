@@ -26,7 +26,7 @@ namespace splitTime {
             loadingScreen.show(Math.round((itemsLoaded / promiseCollection.length) * 100))
         }
 
-        G.ASSETS = new splitTime.Assets(splitTime.getScriptDirectory(), masterData)
+        // G.ASSETS = new splitTime.Assets(splitTime.getScriptDirectory(), masterData)
 
         for (const preloadedImageFileName of masterData.preloadedImageFiles) {
             promiseCollection.push(

@@ -3,7 +3,7 @@ namespace splitTime {
     export const MAX_SAFE_INTEGER = 9007199254740991
 
     let SCRIPT_DIRECTORY = "<UNKNOWN>"
-    if(__DOM__) {
+    // if(__DOM__) {
         // from https://stackoverflow.com/a/2161748/4639640
         var scripts = document.getElementsByTagName("script")
         var path = scripts[scripts.length - 1].src.split("?")[0] // remove ?query
@@ -11,9 +11,9 @@ namespace splitTime {
             .split("/")
             .slice(0, -1)
             .join("/") // remove last filename part of path
-    } else if(__NODE__) {
-        SCRIPT_DIRECTORY = __dirname
-    }
+    // } else if(__NODE__) {
+    //     SCRIPT_DIRECTORY = __dirname
+    // }
 
     export function getScriptDirectory(): string {
         return SCRIPT_DIRECTORY

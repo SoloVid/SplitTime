@@ -45,7 +45,9 @@ namespace splitTime {
 
             if (this.currentLevel === null || this.currentLevel.getRegion() !== level.getRegion()) {
                 this.transitionInProgress = true
-                return this.fullRegionTransition(level).finally(() => {
+                return this.fullRegionTransition(level).then(() => {
+                    this.transitionInProgress = false
+                }, () => {
                     this.transitionInProgress = false
                 })
             } else {

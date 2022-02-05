@@ -41,7 +41,7 @@ namespace splitTime.agent {
                         this.body.getTopY(), this.body.depth,
                         this.body.z, 1
                     )
-                    if (baseCollisionCheck.includes(this.ladder.eventId)) {
+                    if (baseCollisionCheck.indexOf(this.ladder.eventId) >= 0) {
                         this.ladder.location = level.copyLocation(this.body)
                     } else {
                         this.ladder = null

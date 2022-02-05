@@ -210,7 +210,8 @@ namespace splitTime {
             collisionInfo.vStepUpEstimate = solidCollisionInfo.zBlockedTopEx - startZ
             collisionInfo.blocked =
                 solidCollisionInfo.containsSolid && collisionInfo.vStepUpEstimate > 0
-            for (const offset of Object.values(pointerTraceInfo)) {
+            for (const offsetHash in pointerTraceInfo) {
+                const offset = pointerTraceInfo[offsetHash]
                 if (offset !== null) {
                     collisionInfo.pointerOffsets.push(offset)
                 }

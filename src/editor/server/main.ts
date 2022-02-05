@@ -3,13 +3,13 @@ if (!__NODE__) {
 }
 
 try {
-    const port = parseInt(process.argv[2], 10)
-    const sourceDirectory = process.argv[3] || "."
+    const port = 80 //parseInt(process.argv[2], 10)
+    const sourceDirectory = "."// process.argv[3] || "."
 
     splitTime.editor.server.runServer(port, {
         sourceDirectory
     })
 } catch (e: unknown) {
     console.error(e)
-    process.exit(1)
+    // process.exit(1)
 }
