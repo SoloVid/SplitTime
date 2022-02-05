@@ -6,8 +6,8 @@ namespace splitTime {
         inst(): T
     }
 }
-namespace splitTime.instanceOf {
-    export function Instable(thing: unknown): thing is Instable<unknown> {
+namespace splitTime {
+    export function instanceOfInstable(thing: unknown): thing is Instable<unknown> {
         const instable = thing as Instable<unknown>
         return !!thing && typeof instable.inst === "function"
     }

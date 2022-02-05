@@ -103,7 +103,7 @@ namespace splitTime.direction {
         fromThing: Readonly<Coordinates2D> | ILevelLocation,
         toThing: Readonly<Coordinates2D> | ILevelLocation
     ): direction_t {
-        if (instanceOf.ILevelLocation(fromThing) && instanceOf.ILevelLocation(toThing)) {
+        if (instanceOfILevelLocation(fromThing) && instanceOfILevelLocation(toThing)) {
             return splitTime.direction.fromTo(
                 fromThing.getX(),
                 fromThing.getY(),
@@ -111,7 +111,7 @@ namespace splitTime.direction {
                 toThing.getY()
             )
         }
-        if (instanceOf.Coordinates2D(fromThing) && instanceOf.Coordinates2D(toThing)) {
+        if (instanceOfCoordinates2D(fromThing) && instanceOfCoordinates2D(toThing)) {
             return splitTime.direction.fromTo(
                 fromThing.x,
                 fromThing.y,

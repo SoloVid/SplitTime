@@ -3,8 +3,8 @@ namespace splitTime {
         run(): T
     }
 }
-namespace splitTime.instanceOf {
-    export function Runnable(thing: unknown): thing is Runnable<unknown> {
+namespace splitTime {
+    export function instanceOfRunnable(thing: unknown): thing is Runnable<unknown> {
         const runnable = thing as Runnable<unknown>
         return !!thing && typeof runnable.run === "function"
     }

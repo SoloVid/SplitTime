@@ -80,7 +80,7 @@ namespace splitTime.conversation {
             } else {
                 callback.callBack()
             }
-            if(instanceOf.Interruptible(eventReturn)) {
+            if(instanceOfInterruptible(eventReturn)) {
                 return eventReturn
             }
             return null

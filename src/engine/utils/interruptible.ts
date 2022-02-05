@@ -3,8 +3,8 @@ namespace splitTime {
         interrupt(): void
     }
 }
-namespace splitTime.instanceOf {
-    export function Interruptible(obj: unknown): obj is Interruptible {
+namespace splitTime {
+    export function instanceOfInterruptible(obj: unknown): obj is Interruptible {
         return !!obj && typeof obj === "object" && typeof (obj as Interruptible).interrupt === "function"
     }
 }

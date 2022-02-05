@@ -86,7 +86,7 @@ namespace splitTime.trace {
         /** vertices of trace spec with offset applied */
         getOffsetVertices(): TracePointSpec[] {
             return this.vertices.map(v => {
-                if (instanceOf.Coordinates2D(v)) {
+                if (instanceOfCoordinates2D(v)) {
                     return new Coordinates2D(v.x + this.offset.x, v.y + this.offset.y)
                 }
                 return v

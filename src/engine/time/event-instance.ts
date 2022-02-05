@@ -15,8 +15,8 @@ namespace splitTime.time {
     }
 }
 
-namespace splitTime.instanceOf {
-    export function EventInstance<T>(thing: unknown): thing is time.EventInstance<T> {
+namespace splitTime {
+    export function instanceOfEventInstance<T>(thing: unknown): thing is time.EventInstance<T> {
         const eventInst = thing as time.EventInstance<T>
         return !!thing && typeof eventInst.run === "function"
     }

@@ -8,10 +8,10 @@ namespace splitTime.time {
         ) {}
 
         run(): CallbackReturn {
-            if (instanceOf.Instable(this.callback)) {
+            if (instanceOfInstable(this.callback)) {
                 return this.callback.inst().run()
             }
-            if (instanceOf.Runnable(this.callback)) {
+            if (instanceOfRunnable(this.callback)) {
                 return this.callback.run()
             }
 

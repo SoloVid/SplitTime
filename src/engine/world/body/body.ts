@@ -326,7 +326,7 @@ namespace splitTime {
 
             for (const drawable of this.drawables) {
                 // TODO: either remove check or remove Drawable "extends TimeNotified"
-                if (splitTime.instanceOf.TimeNotified(drawable)) {
+                if (splitTime.instanceOfTimeNotified(drawable)) {
                     drawable.notifyTimeAdvance(delta)
                 }
             }

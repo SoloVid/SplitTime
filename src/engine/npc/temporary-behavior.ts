@@ -13,15 +13,15 @@ namespace splitTime.npc {
     }
 
     export function isBehaviorComplete(b: Behavior): boolean {
-        if (!instanceOf.TemporaryBehavior(b)) {
+        if (!instanceOfTemporaryBehavior(b)) {
             return false
         }
         return b.isComplete()
     }
 }
 
-namespace splitTime.npc.instanceOf {
-    export function TemporaryBehavior(thing: Behavior): thing is TemporaryBehavior {
+namespace splitTime.npc {
+    export function instanceOfTemporaryBehavior(thing: Behavior): thing is TemporaryBehavior {
         return typeof (thing as TemporaryBehavior).isComplete === "function"
     }
 }

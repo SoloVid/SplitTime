@@ -52,7 +52,7 @@ namespace splitTime.editor.collage {
         const originalPointString = trace.vertices
         const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
         const vertices = this.pointsArray
-        const originalPoints = point ? [point] : vertices.filter(instanceOf.Coordinates2D)
+        const originalPoints = point ? [point] : vertices.filter(instanceOfCoordinates2D)
         const snappedMover = new client.GridSnapMover(this.collageEditHelper.gridCell, originalPoints)
         const follower = {
             shift: (dx: number, dy: number) => {

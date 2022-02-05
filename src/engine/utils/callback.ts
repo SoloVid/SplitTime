@@ -3,8 +3,8 @@ namespace splitTime {
         callBack(param: T): void;
     }
 }
-namespace splitTime.instanceOf {
-    export function SimpleCallback(thing: unknown): thing is SimpleCallback<unknown> {
+namespace splitTime {
+    export function instanceOfSimpleCallback(thing: unknown): thing is SimpleCallback<unknown> {
         const callback = thing as SimpleCallback<unknown>
         return !!thing && typeof callback.callBack === "function"
     }

@@ -108,7 +108,7 @@ namespace splitTime.agent {
             }
 
             const stage = this.stages[stageIndex]
-            if (instanceOf.Runnable(stage)) {
+            if (instanceOfRunnable(stage)) {
                 const result = stage.run()
                 if (result !== undefined) {
                     result.then(new StageCallback(this, stageIndex))
@@ -119,14 +119,14 @@ namespace splitTime.agent {
             //     this.npc.spriteBody.putInPosition(stage)
             //     this.lastKnownLocation = stage
             //     this.nextStep()
-            } else if (instanceOf.ILevelLocation2(stage)) {
+            } else if (instanceOfILevelLocation2(stage)) {
                 this.npc.body.putInLocation(stage)
                 this.lastKnownLocation = stage
                 this.nextStep()
             } else {
                 const previousStep = stageIndex > 0 ? this.stages[stageIndex - 1] : null
                 // TODO: support walk as well
-                // const startLocation = instanceOf.Coordinates2D(previousStep) ? previousStep : this.npc.body
+                // const startLocation = instanceOfCoordinates2D(previousStep) ? previousStep : this.npc.body
                 const startLocation = this.lastKnownLocation || this.getCloseLocation()
                 this.currentWalk = new CurrentWalk(startLocation, stage, this.npc.body.level)
                 const targetLocation = this.currentWalk.steps[this.currentWalk.nextDestination]

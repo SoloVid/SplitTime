@@ -122,8 +122,8 @@ namespace splitTime.file {
     }
 }
 
-namespace splitTime.instanceOf {
-    export function jsonable<T>(thing: file.IsJsonable<T>): thing is file.IsJsonable<T> {
+namespace splitTime {
+    export function instanceOfJsonable<T>(thing: file.IsJsonable<T>): thing is file.IsJsonable<T> {
         const type = typeof thing
         switch (type) {
             case "boolean":
@@ -135,7 +135,7 @@ namespace splitTime.instanceOf {
                 if (prototype === Object.prototype) {
                     const obj = thing as { [key: string]: unknown }
                     for (const key in obj) {
-                        if (!jsonable(obj[key] as file.IsJsonable<unknown>)) {
+                        if (!instanceOfJsonable(obj[key] as file.IsJsonable<unknown>)) {
                             return false
                         }
                     }
@@ -143,7 +143,7 @@ namespace splitTime.instanceOf {
                 } else if (prototype === Array.prototype) {
                     const arr = thing as unknown[]
                     for (const item of arr) {
-                        if (!jsonable(item as file.IsJsonable<unknown>)) {
+                        if (!instanceOfJsonable(item as file.IsJsonable<unknown>)) {
                             return false
                         }
                     }

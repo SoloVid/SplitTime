@@ -6,8 +6,8 @@ namespace splitTime {
         notifyFrameUpdate(delta: real_seconds): void
     }
 }
-namespace splitTime.instanceOf {
-    export function FrameNotified(obj: unknown): obj is FrameNotified {
+namespace splitTime {
+    export function instanceOfFrameNotified(obj: unknown): obj is FrameNotified {
         return typeof (obj as FrameNotified).notifyFrameUpdate === "function"
     }
 }

@@ -82,13 +82,13 @@ namespace splitTime.level {
     }
 }
 
-namespace splitTime.instanceOf {
-    export function Coordinates2D(thing: unknown): thing is Coordinates2D {
+namespace splitTime {
+    export function instanceOfCoordinates2D(thing: unknown): thing is Coordinates2D {
         const coords = thing as Readonly<Coordinates2D>
         return !!thing && typeof coords.x === "number" && typeof coords.y === "number"
     }
 
-    export function ILevelLocation(thing: unknown): thing is ILevelLocation {
+    export function instanceOfILevelLocation(thing: unknown): thing is ILevelLocation {
         const location = thing as ILevelLocation
         return !!thing &&
             typeof location.getX === "function" &&
@@ -97,7 +97,7 @@ namespace splitTime.instanceOf {
             typeof location.getLevel === "function"
     }
 
-    export function ILevelLocation2(thing: unknown): thing is ILevelLocation2 {
+    export function instanceOfILevelLocation2(thing: unknown): thing is ILevelLocation2 {
         const location = thing as ILevelLocation2
         return !!thing &&
             typeof location.x === "number" &&

@@ -55,8 +55,8 @@ namespace splitTime.level.file_data {
     export type Position = Prop
 }
 
-namespace splitTime.level.instanceOf {
-    export function FileData(thing: unknown): thing is FileData {
+namespace splitTime.level {
+    export function instanceOfFileData(thing: unknown): thing is FileData {
         return type.isA(thing, type.object<level.FileData>({
             type: type.other<"action">(t => t === "action"),
             region: type.string,

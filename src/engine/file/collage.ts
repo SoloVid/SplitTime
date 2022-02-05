@@ -73,8 +73,8 @@ namespace splitTime.file.collage {
     }
 }
 
-namespace splitTime.file.instanceOf {
-    export function Collage(thing: unknown): thing is file.Collage {
+namespace splitTime.file {
+    export function instanceOfCollage(thing: unknown): thing is file.Collage {
         return type.isA(thing, type.object<file.Collage>({
             image: type.string,
             frames: type.array(type.object({
