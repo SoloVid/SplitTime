@@ -1,16 +1,14 @@
-// Note: TypeScript can't enforce integers; so tread with caution
-type int = number
+namespace splitTime {
+    // Note: TypeScript can't enforce integers; so tread with caution
+    export type int = number
 
-function assert(condition: boolean, message: string): asserts condition {
-    if(!condition) {
+    export function assert(condition: boolean, message: string): asserts condition {
+        if(!condition) {
+            throw new Error(message)
+        }
+    }
+
+    export function assertNever(impossible: never, message: string): never {
         throw new Error(message)
     }
-}
-
-function assertNever(impossible: never, message: string): never {
-    throw new Error(message)
-}
-
-function nop(arg: unknown): void {
-    // Do nothing
 }

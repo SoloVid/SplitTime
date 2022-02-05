@@ -1,4 +1,4 @@
-if (!__NODE__) {
+if (!splitTime.__NODE__) {
     throw new Error("Can't run server unless in Node context!")
 }
 
