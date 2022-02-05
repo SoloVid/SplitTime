@@ -1,85 +1,65 @@
-namespace splitTime.body {
-    export class Transporter {
-        constructor(public readonly body: Body) {}
-
-        private detectApplicableOtherLevel(from: ILevelLocation2): ILevelLocation2 | null {
-            const maxDepth = 20
-            let whereLast = from
-            for (let i = 0; i < maxDepth; i++) {
-                const whereToNext = this._theNextTransport(
-                    whereLast.level,
-                    whereLast.x,
-                    whereLast.y,
-                    whereLast.z
-                )
-                if (whereToNext === null) {
-                    if (whereLast === from) {
-                        return null
-                    }
-                    return whereLast
+import { ILevelLocation2, Level } from "../../../splitTime";
+import { ENABLED } from "../../../utils/debug";
+import { smoothPut } from "../render/ghosty";
+import { PointerTraceInfo } from "../../level/level-traces2";
+import { isPointerOffsetSignificant } from "../../level/trace/trace";
+import * as splitTime from "../../../splitTime";
+export class Transporter {
+    constructor(public readonly body: splitTime.Body) { }
+    private detectApplicableOtherLevel(from: ILevelLocation2): ILevelLocation2 | null {
+        const maxDepth = 20;
+        let whereLast = from;
+        for (let i = 0; i < maxDepth; i++) {
+            const whereToNext = this._theNextTransport(whereLast.level, whereLast.x, whereLast.y, whereLast.z);
+            if (whereToNext === null) {
+                if (whereLast === from) {
+                    return null;
                 }
-                whereLast = whereToNext
+                return whereLast;
             }
-            if (splitTime.debug.ENABLED) {
-                console.warn(
-                    "Cyclic pointer traces detected on level " +
-                        from.level.id +
-                        " near (" +
-                        from.x +
-                        ", " +
-                        from.y +
-                        ", " +
-                        from.z +
-                        ")"
-                )
-            }
-            return null
+            whereLast = whereToNext;
         }
-
-        transportLevelIfApplicable(hintLevelId?: string): void {
-            if (this.body.levelLocked) {
-                return
-            }
-            const whereTo = this.detectApplicableOtherLevel(this.body)
-            if (whereTo !== null) {
-                smoothPut(this.body, whereTo)
-            }
+        if (ENABLED) {
+            console.warn("Cyclic pointer traces detected on level " +
+                from.level.id +
+                " near (" +
+                from.x +
+                ", " +
+                from.y +
+                ", " +
+                from.z +
+                ")");
         }
-
-        private _theNextTransport(
-            levelFrom: splitTime.Level,
-            x: number,
-            y: number,
-            z: number
-        ): ILevelLocation2 | null {
-            var levelTraces = levelFrom.getLevelTraces()
-            var left = Math.round(x - this.body.width / 2)
-            var topY = Math.round(y - this.body.depth / 2)
-
-            const pointerInfo: splitTime.level.traces.PointerTraceInfo = {}
-            levelTraces.calculateVolumePointers(
-                pointerInfo,
-                left, this.body.width,
-                topY, this.body.depth,
-                z, this.body.height
-            )
-
-            const offsetHashes = Object.keys(pointerInfo)
-
-            if (offsetHashes.length === 0 || offsetHashes.length > 1) {
-                return null
-            }
-
-            const pointerOffset = pointerInfo[offsetHashes[0]]
-            if (!pointerOffset || !trace.isPointerOffsetSignificant(pointerOffset, levelFrom)) {
-                return null
-            }
-            return {
-                level: pointerOffset.level,
-                x: x + pointerOffset.offsetX,
-                y: y + pointerOffset.offsetY,
-                z: z + pointerOffset.offsetZ
-            }
+        return null;
+    }
+    transportLevelIfApplicable(hintLevelId?: string): void {
+        if (this.body.levelLocked) {
+            return;
         }
+        const whereTo = this.detectApplicableOtherLevel(this.body);
+        if (whereTo !== null) {
+            smoothPut(this.body, whereTo);
+        }
+    }
+    private _theNextTransport(levelFrom: Level, x: number, y: number, z: number): ILevelLocation2 | null {
+        var levelTraces = levelFrom.getLevelTraces();
+        var left = Math.round(x - this.body.width / 2);
+        var topY = Math.round(y - this.body.depth / 2);
+        const pointerInfo: PointerTraceInfo = {};
+        levelTraces.calculateVolumePointers(pointerInfo, left, this.body.width, topY, this.body.depth, z, this.body.height);
+        const offsetHashes = Object.keys(pointerInfo);
+        if (offsetHashes.length === 0 || offsetHashes.length > 1) {
+            return null;
+        }
+        const pointerOffset = pointerInfo[offsetHashes[0]];
+        if (!pointerOffset || !isPointerOffsetSignificant(pointerOffset, levelFrom)) {
+            return null;
+        }
+        return {
+            level: pointerOffset.level,
+            x: x + pointerOffset.offsetX,
+            y: y + pointerOffset.offsetY,
+            z: z + pointerOffset.offsetZ
+        };
     }
 }

@@ -1,11 +1,8 @@
-namespace splitTime {
-    export interface Runnable<T = void> {
-        run(): T
-    }
+import * as splitTime from "../splitTime";
+export interface Runnable<T = void> {
+    run(): T;
 }
-namespace splitTime {
-    export function instanceOfRunnable(thing: unknown): thing is Runnable<unknown> {
-        const runnable = thing as Runnable<unknown>
-        return !!thing && typeof runnable.run === "function"
-    }
+export function instanceOfRunnable(thing: unknown): thing is splitTime.Runnable<unknown> {
+    const runnable = thing as splitTime.Runnable<unknown>;
+    return !!thing && typeof runnable.run === "function";
 }

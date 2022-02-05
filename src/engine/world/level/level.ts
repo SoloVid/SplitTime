@@ -1,225 +1,192 @@
-namespace splitTime {
-    type EventCallback = ((triggeringBody: Body) => void) | ((triggeringBody: Body, eventId: string) => void)
-
-    export class Level {
-        id: string
-        private loader: LevelLoader
-        private loaded: boolean = false
-        private events: { [id: string]: EventCallback } = {}
-        private enterFunction: (() => void) | null = null
-        private exitFunction: (() => void) | null = null
-        private positions: { [id: string]: Position } = {}
-        region: Region | null = null
-        bodies: Body[] = []
-        background: string = ""
-        backgroundOffsetX: int = 0
-        backgroundOffsetY: int = 0
-        _cellGrid: level.CellGrid | null = null
-        weather: WeatherSettings = new WeatherSettings()
-        type: "action" | null = null
-        width: int = 0
-        height: int = 0
-        yWidth: int = 0
-        lowestLayerZ: int = 0
-        highestLayerZ: int = 0
-        _levelTraces: level.Traces2 | null = null
-        constructor(levelId: string, levelData: level.FileData) {
-            this.id = levelId
-            this.loader = new LevelLoader(this, levelData)
+import { LevelLoader, Position, Region, int, WeatherSettings, World, Canvas, game_seconds } from "../../splitTime";
+import { CellGrid } from "./cell-grid";
+import { Traces2 } from "./level-traces2";
+import { FileData } from "./level-file-data";
+import * as splitTime from "../../splitTime";
+type EventCallback = ((triggeringBody: splitTime.Body) => void) | ((triggeringBody: splitTime.Body, eventId: string) => void);
+export class Level {
+    id: string;
+    private loader: LevelLoader;
+    private loaded: boolean = false;
+    private events: {
+        [id: string]: EventCallback;
+    } = {};
+    private enterFunction: (() => void) | null = null;
+    private exitFunction: (() => void) | null = null;
+    private positions: {
+        [id: string]: Position;
+    } = {};
+    region: Region | null = null;
+    bodies: splitTime.Body[] = [];
+    background: string = "";
+    backgroundOffsetX: int = 0;
+    backgroundOffsetY: int = 0;
+    _cellGrid: CellGrid | null = null;
+    weather: WeatherSettings = new WeatherSettings();
+    type: "action" | null = null;
+    width: int = 0;
+    height: int = 0;
+    yWidth: int = 0;
+    lowestLayerZ: int = 0;
+    highestLayerZ: int = 0;
+    _levelTraces: Traces2 | null = null;
+    constructor(levelId: string, levelData: FileData) {
+        this.id = levelId;
+        this.loader = new LevelLoader(this, levelData);
+    }
+    readFileData(world: World): void {
+        this.loader.readFileData(world);
+    }
+    /**
+     * A level can be referenced but not have a level file.
+     * This method is to help protect against that.
+     */
+    private ensureHasFile(): void | never {
+        if (!this.loader.hasData()) {
+            throw new Error("Not level file found associated with " + this.id);
         }
-
-        readFileData(world: World): void {
-            this.loader.readFileData(world)
+    }
+    private ensureLoaded(): void | never {
+        this.ensureHasFile();
+        if (!this.isLoaded()) {
+            throw new Error("Level " + this.id + " is not currently loaded");
         }
-
-        /**
-         * A level can be referenced but not have a level file.
-         * This method is to help protect against that.
-         */
-        private ensureHasFile(): void | never {
-            if (!this.loader.hasData()) {
-                throw new Error("Not level file found associated with " + this.id)
-            }
+    }
+    load(world: World, levelData: FileData): PromiseLike<void> {
+        return this.loader.loadAssets(world);
+    }
+    getCellGrid(): CellGrid {
+        this.ensureLoaded();
+        if (!this._cellGrid) {
+            throw new Error("CellGrid unavailable");
         }
-
-        private ensureLoaded(): void | never {
-            this.ensureHasFile()
-            if (!this.isLoaded()) {
-                throw new Error("Level " + this.id + " is not currently loaded")
-            }
+        return this._cellGrid;
+    }
+    getLevelTraces(): Traces2 {
+        this.ensureLoaded();
+        if (!this._levelTraces) {
+            throw new Error("Level traces unavailable");
         }
-
-        load(
-            world: World,
-            levelData: splitTime.level.FileData
-        ): PromiseLike<void> {
-            return this.loader.loadAssets(world)
+        return this._levelTraces;
+    }
+    getBackgroundImage(): string {
+        if (!this.background) {
+            throw new Error("Background image for level " + this.id + " is not set");
         }
-
-        getCellGrid(): splitTime.level.CellGrid {
-            this.ensureLoaded()
-            if (!this._cellGrid) {
-                throw new Error("CellGrid unavailable")
-            }
-            return this._cellGrid
+        return this.background;
+    }
+    getDebugTraceCanvas(): Canvas {
+        return this.getLevelTraces().getDebugTraceCanvas();
+    }
+    getRegion(): Region {
+        if (!this.region) {
+            throw new Error('Level "' + this.id + '" is not assigned to a region');
         }
-
-        getLevelTraces(): splitTime.level.Traces2 {
-            this.ensureLoaded()
-            if (!this._levelTraces) {
-                throw new Error("Level traces unavailable")
-            }
-            return this._levelTraces
+        return this.region;
+    }
+    getPosition(positionId: string): Position {
+        this.ensureHasFile();
+        if (!this.positions[positionId]) {
+            throw new Error('Level "' +
+                this.id +
+                '" does not contain the position "' +
+                positionId +
+                '"');
         }
-
-        getBackgroundImage(): string {
-            if (!this.background) {
-                throw new Error(
-                    "Background image for level " + this.id + " is not set"
-                )
-            }
-            return this.background
+        return this.positions[positionId];
+    }
+    getPositionMap(): {
+        [id: string]: Position;
+    } {
+        return this.positions;
+    }
+    registerEnterFunction(fun: () => void) {
+        this.enterFunction = fun;
+    }
+    registerExitFunction(fun: () => void) {
+        this.exitFunction = fun;
+    }
+    registerEvent(eventId: string, callback: EventCallback) {
+        this.events[eventId] = callback;
+    }
+    registerPosition(positionId: string, position: Position) {
+        this.positions[positionId] = position;
+    }
+    runEnterFunction() {
+        if (this.enterFunction) {
+            this.enterFunction();
         }
-
-        getDebugTraceCanvas(): splitTime.Canvas {
-            return this.getLevelTraces().getDebugTraceCanvas()
+    }
+    runExitFunction() {
+        if (this.exitFunction) {
+            this.exitFunction();
         }
-
-        getRegion(): Region {
-            if (!this.region) {
-                throw new Error(
-                    'Level "' + this.id + '" is not assigned to a region'
-                )
-            }
-            return this.region
+    }
+    private runEvent(eventId: string, triggeringBody: splitTime.Body) {
+        var that = this;
+        var fun = this.events[eventId] ||
+            function () {
+                console.warn('Event "' + eventId + '" not found for level ' + that.id);
+            };
+        return fun(triggeringBody, eventId);
+    }
+    runEvents(eventIds: string[], triggeringBody: splitTime.Body) {
+        for (var i = 0; i < eventIds.length; i++) {
+            this.runEvent(eventIds[i], triggeringBody);
         }
-
-        getPosition(positionId: string): splitTime.Position {
-            this.ensureHasFile()
-            if (!this.positions[positionId]) {
-                throw new Error(
-                    'Level "' +
-                        this.id +
-                        '" does not contain the position "' +
-                        positionId +
-                        '"'
-                )
-            }
-            return this.positions[positionId]
+    }
+    notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
+        this.forEachBody(function (body) {
+            body.notifyTimeAdvance(delta, absoluteTime);
+        });
+    }
+    notifyBodyMoved(body: splitTime.Body) {
+        if (this._cellGrid) {
+            this._cellGrid.resort(body);
         }
-
-        getPositionMap(): { [id: string]: Position } {
-            return this.positions
+    }
+    forEachBody(callback: (body: splitTime.Body) => void) {
+        for (var i = 0; i < this.bodies.length; i++) {
+            callback(this.bodies[i]);
         }
-
-        registerEnterFunction(fun: () => void) {
-            this.enterFunction = fun
+    }
+    getBodies(): splitTime.Body[] {
+        return this.bodies;
+    }
+    /**
+     * @deprecated Used to be related to rendering; not sure interface is still appropriate
+     */
+    insertBody(body: splitTime.Body) {
+        if (this.bodies.indexOf(body) < 0) {
+            this.bodies.push(body);
         }
-
-        registerExitFunction(fun: () => void) {
-            this.exitFunction = fun
+        if (this._cellGrid) {
+            this._cellGrid.addBody(body);
         }
-
-        registerEvent(eventId: string, callback: EventCallback) {
-            this.events[eventId] = callback
+    }
+    /**
+     * @deprecated Used to be related to rendering; not sure interface is still appropriate
+     */
+    removeBody(body: splitTime.Body) {
+        if (this._cellGrid) {
+            this._cellGrid.removeBody(body);
         }
-
-        registerPosition(positionId: string, position: Position) {
-            this.positions[positionId] = position
+        var iBody = this.bodies.indexOf(body);
+        if (iBody >= 0) {
+            this.bodies.splice(iBody, 1);
         }
-
-        runEnterFunction() {
-            if (this.enterFunction) {
-                this.enterFunction()
-            }
-        }
-
-        runExitFunction() {
-            if (this.exitFunction) {
-                this.exitFunction()
-            }
-        }
-
-        private runEvent(eventId: string, triggeringBody: Body) {
-            var that = this
-            var fun =
-                this.events[eventId] ||
-                function() {
-                    console.warn(
-                        'Event "' + eventId + '" not found for level ' + that.id
-                    )
-                }
-            return fun(triggeringBody, eventId)
-        }
-
-        runEvents(eventIds: string[], triggeringBody: Body) {
-            for (var i = 0; i < eventIds.length; i++) {
-                this.runEvent(eventIds[i], triggeringBody)
-            }
-        }
-
-        notifyTimeAdvance(delta: game_seconds, absoluteTime: game_seconds) {
-            this.forEachBody(function(body) {
-                body.notifyTimeAdvance(delta, absoluteTime)
-            })
-        }
-
-        notifyBodyMoved(body: Body) {
-            if (this._cellGrid) {
-                this._cellGrid.resort(body)
-            }
-        }
-
-        forEachBody(callback: (body: splitTime.Body) => void) {
-            for (var i = 0; i < this.bodies.length; i++) {
-                callback(this.bodies[i])
-            }
-        }
-
-        getBodies(): splitTime.Body[] {
-            return this.bodies
-        }
-
-        /**
-         * @deprecated Used to be related to rendering; not sure interface is still appropriate
-         */
-        insertBody(body: splitTime.Body) {
-            if (this.bodies.indexOf(body) < 0) {
-                this.bodies.push(body)
-            }
-            if (this._cellGrid) {
-                this._cellGrid.addBody(body)
-            }
-        }
-
-        /**
-         * @deprecated Used to be related to rendering; not sure interface is still appropriate
-         */
-        removeBody(body: splitTime.Body) {
-            if (this._cellGrid) {
-                this._cellGrid.removeBody(body)
-            }
-            var iBody = this.bodies.indexOf(body)
-            if (iBody >= 0) {
-                this.bodies.splice(iBody, 1)
-            }
-        }
-
-        loadForPlay(world: World): PromiseLike<void> {
-            return this.loader.loadForPlay(world).then(() => {
-                this.loaded = true
-            })
-        }
-
-        unload(): void {
-            //TODO: give listeners a chance to clean up
-
-            this.loaded = false
-            this.loader.unload()
-        }
-
-        isLoaded(): boolean {
-            return this.loaded
-        }
+    }
+    loadForPlay(world: World): PromiseLike<void> {
+        return this.loader.loadForPlay(world).then(() => {
+            this.loaded = true;
+        });
+    }
+    unload(): void {
+        //TODO: give listeners a chance to clean up
+        this.loaded = false;
+        this.loader.unload();
+    }
+    isLoaded(): boolean {
+        return this.loaded;
     }
 }

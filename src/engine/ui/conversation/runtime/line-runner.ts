@@ -1,3 +1,4 @@
+export {};
 // namespace splitTime.conversation {
 //     /**
 //      * Class responsible for the lifecycle of a single line of dialogue.
@@ -19,16 +20,13 @@
 //             )
 //             this.speakers = line.getParent().getParent().getSpeakers()
 //         }
-
 //         advance(): void {
 //             this.dialog.advance()
 //         }
-
 //         private registerHandlers() {
 //             this.dialog.registerPlayerInteractHandler(() => this.advance())
 //             this.dialog.registerDialogEndHandler(() => this.stop())
 //         }
-
 //         start(): void {
 //             if (this.started) {
 //                 throw new Error("LineRunner already started!")
@@ -38,12 +36,10 @@
 //             this.registerHandlers()
 //             this.helper.secretary.submit(this.dialog)
 //         }
-
 //         stop(): void {
 //             this.helper.secretary.remove(this.dialog)
 //             this.conversation.notifyNodeCompletion(this.node)
 //         }
-
 //         interrupt(): void {
 //             this.dialog.interrupt()
 //         }

@@ -1,9 +1,5 @@
-namespace splitTime.agent {
-    export class PathSpec {
-        constructor(
-            public readonly id: string,
-            public readonly setup: SetupFunc
-        ) {
-        }
+import { SetupFunc } from "./path-dsl";
+export class PathSpec {
+    constructor(public readonly id: string, public readonly setup: SetupFunc) {
     }
 }
