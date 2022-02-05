@@ -270,10 +270,10 @@ namespace splitTime {
          */
         notifyTimeAdvance(delta: game_seconds): void
     }
-
-    export namespace instanceOf {
-        export function TimeNotified(obj: unknown): obj is TimeNotified {
-            return typeof (obj as TimeNotified).notifyTimeAdvance === "function"
-        }
+}
+namespace splitTime.instanceOf {
+    export function TimeNotified(obj: unknown): obj is TimeNotified {
+        return typeof (obj as TimeNotified).notifyTimeAdvance === "function"
     }
 }
+

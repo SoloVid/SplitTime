@@ -1,24 +1,23 @@
-namespace splitTime {
-    export namespace trace {
-        export interface PointerOffset {
-            readonly level: splitTime.Level
-            readonly offsetX: number
-            readonly offsetY: number
-            readonly offsetZ: number
-            getOffsetHash(): string
-        }
-
-        export function isPointerOffsetSignificant(pointerOffset: PointerOffset | null, startLevel: Level): boolean {
-            if (pointerOffset === null) {
-                return false
-            }
-            if (pointerOffset.level !== startLevel) {
-                return true
-            }
-            return pointerOffset.offsetX !== 0 || pointerOffset.offsetY !== 0 || pointerOffset.offsetZ !== 0
-        }
+namespace splitTime.trace {
+    export interface PointerOffset {
+        readonly level: splitTime.Level
+        readonly offsetX: number
+        readonly offsetY: number
+        readonly offsetZ: number
+        getOffsetHash(): string
     }
 
+    export function isPointerOffsetSignificant(pointerOffset: PointerOffset | null, startLevel: Level): boolean {
+        if (pointerOffset === null) {
+            return false
+        }
+        if (pointerOffset.level !== startLevel) {
+            return true
+        }
+        return pointerOffset.offsetX !== 0 || pointerOffset.offsetY !== 0 || pointerOffset.offsetZ !== 0
+    }
+}
+namespace splitTime {
     export class Trace {
         // vertices: Coordinates2D[] = []
         private _level: splitTime.Level | null = null

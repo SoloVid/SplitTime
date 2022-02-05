@@ -1,25 +1,24 @@
-namespace splitTime.level {
-    export namespace traces {
-        export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
+namespace splitTime.level.traces {
+    export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__"
 
-        interface MinimalLevel {
-            lowestLayerZ: number
-        }
-
-        export class SolidCollisionInfo {
-            containsSolid: boolean = false
-            zBlockedTopEx: int
-
-            constructor(level: MinimalLevel) {
-                this.zBlockedTopEx = level.lowestLayerZ
-            }
-        }
-
-        export type PointerTraceInfo = { [offsetHash: string]: splitTime.trace.PointerOffset | null }
-
-        export type EventTraceInfo = { [eventId: string]: true }
+    interface MinimalLevel {
+        lowestLayerZ: number
     }
 
+    export class SolidCollisionInfo {
+        containsSolid: boolean = false
+        zBlockedTopEx: int
+
+        constructor(level: MinimalLevel) {
+            this.zBlockedTopEx = level.lowestLayerZ
+        }
+    }
+
+    export type PointerTraceInfo = { [offsetHash: string]: splitTime.trace.PointerOffset | null }
+
+    export type EventTraceInfo = { [eventId: string]: true }
+}
+namespace splitTime.level {
     export class Traces2 {
         readonly layerZs: readonly int[]
         readonly layerCount: int

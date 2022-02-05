@@ -72,36 +72,35 @@ namespace splitTime {
             return this.getMontage(this.defaultMontageId, direction)
         }
     }
-
-    export namespace collage {
-        export function makeCollageFromFile(file: file.Collage, allowErrors: boolean = false): Collage {
-            const framesRectMap: { [id: string]: math.Rect } = {}
-            for (const fileFrame of file.frames) {
-                framesRectMap[fileFrame.id] =
-                    math.Rect.make(fileFrame.x, fileFrame.y, fileFrame.width, fileFrame.height)
-            }
-            return new Collage(file.image, file.montages.map(fileMontage => {
-                const dir = !fileMontage.direction ? null :
-                    splitTime.direction.interpret(fileMontage.direction)
-                return new collage.Montage(fileMontage.id,
-                    dir,
-                    fileMontage.frames.map(fpf => {
-                        if (!(fpf.frameId in framesRectMap)) {
-                            throw new Error("Could not find frame " + fpf.frameId +
-                                " for montage " + fileMontage.id)
-                        }
-                        return new collage.Frame(
-                            framesRectMap[fpf.frameId],
-                            new Coordinates2D(fpf.offsetX, fpf.offsetY),
-                            fpf.duration
-                        )
-                    }),
-                    fileMontage.body,
-                    fileMontage.traces,
-                    fileMontage.propPostProcessor,
-                    fileMontage.playerOcclusionFadeFactor
-                )
-            }), file.defaultMontageId, allowErrors)
+}
+namespace splitTime.collage {
+    export function makeCollageFromFile(file: file.Collage, allowErrors: boolean = false): Collage {
+        const framesRectMap: { [id: string]: math.Rect } = {}
+        for (const fileFrame of file.frames) {
+            framesRectMap[fileFrame.id] =
+                math.Rect.make(fileFrame.x, fileFrame.y, fileFrame.width, fileFrame.height)
         }
+        return new Collage(file.image, file.montages.map(fileMontage => {
+            const dir = !fileMontage.direction ? null :
+                splitTime.direction.interpret(fileMontage.direction)
+            return new collage.Montage(fileMontage.id,
+                dir,
+                fileMontage.frames.map(fpf => {
+                    if (!(fpf.frameId in framesRectMap)) {
+                        throw new Error("Could not find frame " + fpf.frameId +
+                            " for montage " + fileMontage.id)
+                    }
+                    return new collage.Frame(
+                        framesRectMap[fpf.frameId],
+                        new Coordinates2D(fpf.offsetX, fpf.offsetY),
+                        fpf.duration
+                    )
+                }),
+                fileMontage.body,
+                fileMontage.traces,
+                fileMontage.propPostProcessor,
+                fileMontage.playerOcclusionFadeFactor
+            )
+        }), file.defaultMontageId, allowErrors)
     }
 }

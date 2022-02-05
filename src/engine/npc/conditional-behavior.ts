@@ -12,16 +12,15 @@ namespace splitTime.npc {
         isConditionMet(): boolean
     }
 
-    export namespace instanceOf {
-        export function ConditionalBehavior(thing: Behavior): thing is ConditionalBehavior {
-            return typeof (thing as ConditionalBehavior).isConditionMet === "function"
-        }
-    }
-
     export function isBehaviorConditionMet(b: Behavior): boolean {
         if (!instanceOf.ConditionalBehavior(b)) {
             return true
         }
         return b.isConditionMet()
+    }
+}
+namespace splitTime.npc.instanceOf {
+    export function ConditionalBehavior(thing: Behavior): thing is ConditionalBehavior {
+        return typeof (thing as ConditionalBehavior).isConditionMet === "function"
     }
 }
