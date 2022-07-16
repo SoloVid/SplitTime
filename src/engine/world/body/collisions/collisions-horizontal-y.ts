@@ -11,9 +11,10 @@ namespace splitTime.body.collisions {
         primary: BodyMoveProjection,
         projections: readonly BodyMoveProjection[],
     ): PixelStepReturn {
+        const ignoreBodies = projections.map(p => p.body)
         let dz = 0
         // Figure out if we're going to need to apply vertical fudge.
-        const simpleCollisionInfo = calculateYPixelCollision(primary.body, level, primary.x.current, primary.y.current, primary.z.current, dy, [])
+        const simpleCollisionInfo = calculateYPixelCollision(primary.body, level, primary.x.current, primary.y.current, primary.z.current, dy, ignoreBodies)
         let bodiesBlockingPrimary: readonly Body[] = simpleCollisionInfo.bodies
         if (simpleCollisionInfo.blocked) {
             if (simpleCollisionInfo.vStepUpEstimate <= splitTime.body.Mover.VERTICAL_FUDGE) {
@@ -31,7 +32,6 @@ namespace splitTime.body.collisions {
             }
         }
 
-        const ignoreBodies = projections.map(p => p.body)
         const collisionInfos: (SimplePixelCollisionReturn)[] = projections.map(p => {
             if (p.y.stopped) {
                 return simpleBlocked

@@ -30,17 +30,6 @@ namespace splitTime.body.collisions {
             const projections = buildStackProjectionList(this.mover.body)
             const primary = projections[0]
 
-            // const bodiesAbove = COLLISION_CALCULATOR.calculateVolumeCollision(
-            //     this.mover.body.collisionMask,
-            //     level,
-            //     this.mover.body.getLeft(),
-            //     this.mover.body.width,
-            //     this.mover.body.getTopY(),
-            //     this.mover.body.depth,
-            //     this.mover.body.z + this.mover.body.height,
-            //     1
-            // ).bodies
-
             let dy = -maxDistance * Math.sin(dir * (Math.PI / 2)) //Total y distance to travel
             if (Math.abs(dy) < ZILCH) {
                 dy = 0
