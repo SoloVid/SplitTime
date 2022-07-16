@@ -25,12 +25,12 @@ namespace splitTime.body {
 
         // This value should be at least 1 for stairs to work,
         // but even higher if stairs are ever to be steeper than 45 degrees.
-        static VERTICAL_FUDGE = 4
+        static VERTICAL_FUDGE = 4 as const
 
         /**
          * Zelda step with input direction
          */
-        zeldaBump(distance: pixels_t, direction: direction_t): boolean {
+        zeldaBump(distance: pixels_t, direction: direction_t, withPush: boolean = false): boolean {
             this.ensureInRegion()
             //Prevent infinite recursion
             if (
@@ -45,12 +45,15 @@ namespace splitTime.body {
             var tDir = this.dir
             //Set direction
             this.dir = direction
-            //Bump
-            var moved = this.horizontal.zeldaStep(direction, distance)
-            //Revert direction;
-            this.dir = tDir
+            try {
+                //Bump
+                var moved = this.horizontal.zeldaStep(direction, distance, withPush)
+            } finally {
+                //Revert direction;
+                this.dir = tDir
 
-            this.bodyExt.bumped = false
+                this.bodyExt.bumped = false
+            }
             return moved > 0
         }
 
@@ -87,5 +90,25 @@ namespace splitTime.body {
             var transporter = new splitTime.body.Transporter(this.body)
             transporter.transportLevelIfApplicable()
         }
+
+        // getAllInfluencedBodies(ignoreBodies: readonly Body[] = []): readonly Body[] {
+        //     // TODO: Some sort of validation that bodies are in valid (non-overlapping) state?
+        //     const bodiesAbove = COLLISION_CALCULATOR.calculateVolumeCollision(
+        //         this.body.collisionMask,
+        //         this.body.level,
+        //         this.body.getLeft(),
+        //         this.body.width,
+        //         this.body.getTopY(),
+        //         this.body.depth,
+        //         this.body.z + this.body.height,
+        //         1
+        //     ).bodies
+        //     const directFound = bodiesAbove.filter(b => !ignoreBodies.includes(b))
+        //     const output = [...directFound]
+        //     for (const b of directFound) {
+        //         output.push(...b.mover.getAllInfluencedBodies(output))
+        //     }
+        //     return output
+        // }
     }
 }

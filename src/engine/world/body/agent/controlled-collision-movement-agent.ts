@@ -73,9 +73,9 @@ namespace splitTime.agent {
                     }
 
                     if (dz === 0) {
-                        this.body.mover.horizontal.zeldaStep(
-                            this.body.dir,
+                        this.body.mover.zeldaBump(
                             speed * delta,
+                            this.body.dir,
                             true
                         )
                     }

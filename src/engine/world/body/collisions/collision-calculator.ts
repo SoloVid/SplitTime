@@ -77,7 +77,7 @@ namespace splitTime {
             yPixels: number,
             startZ: number,
             zPixels: number,
-            ignoreBodies: splitTime.Body[] = []
+            ignoreBodies: readonly splitTime.Body[] = []
         ): ApiCollisionInfo {
             var collisionInfo = new InternalCollisionInfo(level, null)
             if (level.lowestLayerZ > startZ) {

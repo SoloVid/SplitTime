@@ -1,5 +1,5 @@
 namespace splitTime.body.collisions {
-    var ZILCH = 0.000001
+    const ZILCH = 0.000001 as const
 
     export class HorizontalCollisionInfo {
         blocked: boolean = false
@@ -14,12 +14,8 @@ namespace splitTime.body.collisions {
     }
 
     export class Horizontal {
-        horizontalX: HorizontalX
-        horizontalY: HorizontalY
         sliding: Sliding
         constructor(private readonly mover: splitTime.body.Mover) {
-            this.horizontalX = new HorizontalX(mover)
-            this.horizontalY = new HorizontalY(mover)
             this.sliding = new Sliding(mover)
         }
         /**
@@ -27,191 +23,148 @@ namespace splitTime.body.collisions {
          * Includes pushing other Bodys out of the way
          * @returns distance actually moved
          */
-        zeldaStep(dir: number, maxDistance: number, withPush: boolean = false): number {
+        zeldaStep(dir: number, maxDistance: number, withPush: boolean): number {
             this.mover.ensureInRegion()
-            var level = this.mover.body.level
+            const level = this.mover.body.level
 
-            var dy = -maxDistance * Math.sin(dir * (Math.PI / 2)) //Total y distance to travel
+            const projections = buildStackProjectionList(this.mover.body)
+            const primary = projections[0]
+
+            // const bodiesAbove = COLLISION_CALCULATOR.calculateVolumeCollision(
+            //     this.mover.body.collisionMask,
+            //     level,
+            //     this.mover.body.getLeft(),
+            //     this.mover.body.width,
+            //     this.mover.body.getTopY(),
+            //     this.mover.body.depth,
+            //     this.mover.body.z + this.mover.body.height,
+            //     1
+            // ).bodies
+
+            let dy = -maxDistance * Math.sin(dir * (Math.PI / 2)) //Total y distance to travel
             if (Math.abs(dy) < ZILCH) {
                 dy = 0
             }
-            var dyRounded = dy > 0 ? Math.ceil(dy) : Math.floor(dy)
-            var ady = Math.abs(dyRounded)
+            const dyRounded = dy > 0 ? Math.ceil(dy) : Math.floor(dy)
+            const ady = Math.abs(dyRounded)
 
-            var dx = maxDistance * Math.cos(dir * (Math.PI / 2)) //Total x distance to travel
+            let dx = maxDistance * Math.cos(dir * (Math.PI / 2)) //Total x distance to travel
             if (Math.abs(dx) < ZILCH) {
                 dx = 0
             }
-            var dxRounded = dx > 0 ? Math.ceil(dx) : Math.floor(dx)
-            var adx = Math.abs(dxRounded)
+            const dxRounded = dx > 0 ? Math.ceil(dx) : Math.floor(dx)
+            const adx = Math.abs(dxRounded)
 
             //-1 for negative movement on the axis, 1 for positive
-            var jHat = (dy === 0 ? 0 : dyRounded / ady) as unitOrZero
-            var iHat = (dx === 0 ? 0 : dxRounded / adx) as unitOrZero
+            const jHat = (dy === 0 ? 0 : dyRounded / ady) as unitOrZero
+            const iHat = (dx === 0 ? 0 : dxRounded / adx) as unitOrZero
 
-            var maxIterations = adx + ady
-            var xPixelsRemaining = adx
-            var yPixelsRemaining = ady
+            const maxIterations = adx + ady
+            let xPixelsRemaining = adx
+            let yPixelsRemaining = ady
+            let somethingPushed = false
 
-            var outY = false
-            var stoppedY = false
-            var pixelsMovedY = 0
-
-            var outX = false
-            var stoppedX = false
-            var pixelsMovedX = 0
-
-            var oldX = this.mover.body.getX()
-            var oldY = this.mover.body.getY()
-            var currentX = oldX
-            var currentY = oldY
-            var currentZ = this.mover.body.getZ()
-
-            const halfWidth = this.mover.body.width / 2
-            const halfDepth = this.mover.body.depth / 2
-
-            var eventIdSet = {}
-            let mightMoveLevels = false
             for (var i = 0; i < maxIterations; i++) {
-                if (xPixelsRemaining > 0) {
-                    const newX = currentX + iHat
-
-                    //If the body is out of bounds on the x axis
-                    if (
-                        (iHat > 0 && newX + halfWidth >= level.width) ||
-                        (iHat < 0 && newX - halfWidth < 0)
-                    ) {
-                        outX = true
-                    } else {
-                        const xCollisionInfo = this.horizontalX.calculateXPixelCollisionWithStepUp(
-                            level,
-                            currentX,
-                            currentY,
-                            currentZ,
-                            iHat as unit
+                if (xPixelsRemaining > 0 && iHat !== 0 && !primary.x.stopped) {
+                    // Always one less.
+                    xPixelsRemaining--
+                    const xStepResult = projectXPixelStepWithVerticalFudge(level, iHat, primary, projections)
+                    if (withPush && xStepResult.bodiesBlockingPrimary.length > 0) {
+                        // Slow down when pushing.
+                        xPixelsRemaining--
+                        const pushed = this.tryPushOtherBodies(
+                            xStepResult.bodiesBlockingPrimary,
+                            dx > 0
+                                ? splitTime.direction.E
+                                : splitTime.direction.W
                         )
-                        if (xCollisionInfo.blocked) {
-                            stoppedX = true
-                            if (withPush && xCollisionInfo.bodies.length > 0) {
-                                // Slow down when pushing
-                                xPixelsRemaining--
-                                this.tryPushOtherBodies(
-                                    xCollisionInfo.bodies,
-                                    dx > 0
-                                        ? splitTime.direction.E
-                                        : splitTime.direction.W
-                                )
-                            }
-                        } else {
-                            const dz = xCollisionInfo.adjustedZ - currentZ
-                            currentX = newX
-                            currentZ = xCollisionInfo.adjustedZ
-                            xPixelsRemaining--
-                            // Slow down when changing elevation
-                            xPixelsRemaining -= Math.ceil(Math.abs(dz))
-                            pixelsMovedX++
-                            addArrayToSet(xCollisionInfo.events, eventIdSet)
-                            if (trace.isPointerOffsetSignificant(xCollisionInfo.targetOffset, level)) {
-                                mightMoveLevels = true
-                            }
-                        }
+                        somethingPushed ||= pushed
                     }
+                    // Slow down when ascending slope.
+                    xPixelsRemaining -= Math.ceil(Math.abs(xStepResult.dz))
                 }
 
-                if (yPixelsRemaining > 0) {
-                    const newY = currentY + jHat
-                    //Check if out of bounds on the y axis
-                    if (
-                        (jHat > 0 && newY + halfDepth >= level.yWidth) ||
-                        (jHat < 0 && newY - halfDepth < 0)
-                    ) {
-                        outY = true
-                    } else {
-                        const yCollisionInfo = this.horizontalY.calculateYPixelCollisionWithStepUp(
-                            level,
-                            currentX,
-                            currentY,
-                            currentZ,
-                            jHat as unit
+                if (yPixelsRemaining > 0 && jHat !== 0 && !primary.y.stopped) {
+                    // Always one less.
+                    yPixelsRemaining--
+                    const yStepResult = projectYPixelStepWithVerticalFudge(level, jHat, primary, projections)
+                    if (withPush && yStepResult.bodiesBlockingPrimary.length > 0) {
+                        // Slow down when pushing.
+                        yPixelsRemaining--
+                        const pushed = this.tryPushOtherBodies(
+                            yStepResult.bodiesBlockingPrimary,
+                            dy > 0
+                                ? splitTime.direction.S
+                                : splitTime.direction.N
                         )
-                        if (yCollisionInfo.blocked) {
-                            stoppedY = true
-                            if (withPush && yCollisionInfo.bodies.length > 0) {
-                                // Slow down when pushing
-                                yPixelsRemaining--
-                                this.tryPushOtherBodies(
-                                    yCollisionInfo.bodies,
-                                    dy > 0
-                                        ? splitTime.direction.S
-                                        : splitTime.direction.N
-                                )
-                            }
-                        } else {
-                            const dz = yCollisionInfo.adjustedZ - currentZ
-                            currentY = newY
-                            currentZ = yCollisionInfo.adjustedZ
-                            yPixelsRemaining--
-                            // Slow down when changing elevation
-                            yPixelsRemaining -= Math.ceil(Math.abs(dz))
-                            pixelsMovedY++
-                            addArrayToSet(yCollisionInfo.events, eventIdSet)
-                            if (trace.isPointerOffsetSignificant(yCollisionInfo.targetOffset, level)) {
-                                mightMoveLevels = true
-                            }
-                        }
+                        somethingPushed ||= pushed
                     }
+                    // Slow down when ascending slope.
+                    yPixelsRemaining -= Math.ceil(Math.abs(yStepResult.dz))
                 }
             }
 
-            if (ady > 0 && pixelsMovedY > 0) {
-                var yMoved = currentY - oldY
-                var newYFromSteps = oldY + yMoved
-                // Subtract off overshoot
-                var actualNewY = newYFromSteps - (dyRounded - dy)
-                this.mover.body.setY(actualNewY)
+            for (const p of projections) {
+                if (ady > 0 && p.y.pixelsMoved > 0) {
+                    var yMoved = p.y.current - p.y.old
+                    var newYFromSteps = p.y.old + yMoved
+                    // Subtract off overshoot
+                    var actualNewY = newYFromSteps - (dyRounded - dy)
+                    p.body.setY(actualNewY)
+                }
+                if (adx > 0 && p.x.pixelsMoved > 0) {
+                    var xMoved = p.x.current - p.x.old
+                    var newXFromSteps = p.x.old + xMoved
+                    // Subtract off overshoot
+                    var actualNewX = newXFromSteps - (dxRounded - dx)
+                    p.body.setX(actualNewX)
+                }
+                p.body.setZ(p.z.current)
+
+                p.body.level.runEvents(Object.keys(p.eventIdSet), p.body)
+                if (p.mightMoveLevels) {
+                    p.body.mover.transportLevelIfApplicable()
+                }
             }
-            if (adx > 0 && pixelsMovedX > 0) {
-                var xMoved = currentX - oldX
-                var newXFromSteps = oldX + xMoved
-                // Subtract off overshoot
-                var actualNewX = newXFromSteps - (dxRounded - dx)
-                this.mover.body.setX(actualNewX)
-            }
-            this.mover.body.setZ(currentZ)
 
             //If stopped, help person out by sliding around corner
-            var stopped = stoppedX || stoppedY
-            var out = outX || outY
+            var stopped = primary.x.stopped || primary.y.stopped
             if (
                 stopped &&
-                !out &&
-                pixelsMovedX + pixelsMovedY < maxDistance / 2
+                !somethingPushed &&
+                primary.x.pixelsMoved + primary.y.pixelsMoved < maxDistance / 2
             ) {
                 this.sliding.zeldaSlide(maxDistance / 2)
             }
 
-            this.mover.body.level.runEvents(Object.keys(eventIdSet), this.mover.body)
-            if (mightMoveLevels) {
-                this.mover.transportLevelIfApplicable()
-            }
-
             return splitTime.measurement.distanceTrue(
-                oldX,
-                oldY,
+                primary.x.old,
+                primary.y.old,
                 this.mover.body.getX(),
                 this.mover.body.getY()
             )
         }
 
-        tryPushOtherBodies(bodies: Body[], dir: number) {
+        /**
+         * Try to push bodies.
+         * @return true if something was pushed successfully.
+         */
+        tryPushOtherBodies(bodies: readonly Body[], dir: number): boolean {
+            let somethingPushed = false
             this.mover.bodyExt.pushing = true
-            for (const body of bodies) {
-                // TODO: should this be different speeds depending on some parameters?
-                if (body.pushable) {
-                    body.mover.zeldaBump(1, dir)
+            try {
+                // TODO: Push all of these at the same time instead of separately.
+                for (const body of bodies) {
+                    // TODO: should this be different speeds depending on some parameters?
+                    if (body.pushable) {
+                        const pushed = body.mover.zeldaBump(1, dir)
+                        somethingPushed ||= pushed
+                    }
                 }
+            } finally {
+                this.mover.bodyExt.pushing = false
             }
-            this.mover.bodyExt.pushing = false
+            return somethingPushed
         }
     }
 }

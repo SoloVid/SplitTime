@@ -2,93 +2,144 @@
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
 namespace splitTime.body.collisions {
-    export class HorizontalX {
-        constructor(private readonly mover: splitTime.body.Mover) {}
-
-        /**
-         * Check that dx can be accomplished, potentially with vertical adjustment.
-         */
-        calculateXPixelCollisionWithStepUp(
-            level: Level,
-            x: number,
-            y: number,
-            z: number,
-            dx: number
-        ): HorizontalCollisionInfo {
-            var collisionInfo = new HorizontalCollisionInfo(z)
-
-            var simpleCollisionInfo = this.calculateXPixelCollision(level, x, y, z, dx)
-            if (
-                simpleCollisionInfo.blocked &&
-                simpleCollisionInfo.vStepUpEstimate <=
-                    splitTime.body.Mover.VERTICAL_FUDGE
-            ) {
-                const stepUpCollisionInfo = this.mover.vertical.calculateZCollision(
-                    level, x + dx, y, z,
-                    splitTime.body.Mover.VERTICAL_FUDGE
-                )
-                const stepUpZ = z + stepUpCollisionInfo.dzAllowed
-                var simpleStepUpCollisionInfo = this.calculateXPixelCollision(
-                    level, x, y, stepUpZ, dx
-                )
-                if (!simpleStepUpCollisionInfo.blocked) {
-                    const backDownCollisionInfo = this.mover.vertical.calculateZCollision(
-                        level,
-                        x + dx,
-                        y,
-                        stepUpZ,
-                        -splitTime.body.Mover.VERTICAL_FUDGE
-                    )
-                    collisionInfo.adjustedZ = stepUpZ + backDownCollisionInfo.dzAllowed
-                    simpleCollisionInfo = simpleStepUpCollisionInfo
+    /**
+     * Check that dx can be accomplished, potentially with vertical adjustment (for slopes).
+     */
+    export function projectXPixelStepWithVerticalFudge(
+        level: Level,
+        dx: unit,
+        primary: BodyMoveProjection,
+        projections: readonly BodyMoveProjection[],
+    ): PixelStepReturn {
+        let dz = 0
+        // Figure out if we're going to need to apply vertical fudge.
+        const simpleCollisionInfo = calculateXPixelCollision(primary.body, level, primary.x.current, primary.y.current, primary.z.current, dx, [])
+        let bodiesBlockingPrimary: readonly Body[] = simpleCollisionInfo.bodies
+        if (simpleCollisionInfo.blocked) {
+            if (simpleCollisionInfo.vStepUpEstimate <= splitTime.body.Mover.VERTICAL_FUDGE) {
+                dz = simpleCollisionInfo.vStepUpEstimate
+                if (!checkAllCanStepUp(projections, dz)) {
+                    for (const p of projections) p.x.stopped = true
+                    return { dz, bodiesBlockingPrimary }
                 }
+                for (const p of projections) {
+                    p.z.current += dz
+                }
+            } else {
+                for (const p of projections) p.x.stopped = true
+                return { dz, bodiesBlockingPrimary }
             }
-            collisionInfo.blocked = simpleCollisionInfo.blocked
-            collisionInfo.bodies = simpleCollisionInfo.bodies
-            collisionInfo.events = simpleCollisionInfo.events
-            collisionInfo.targetOffset = simpleCollisionInfo.targetOffset
-
-            return collisionInfo
         }
 
-        /**
-         * Check that dx can be accomplished.
-         */
-        calculateXPixelCollision(
-            level: splitTime.Level,
-            x: number,
-            y: number,
-            z: number,
-            dx: number
-        ): {
-            blocked: boolean
-            bodies: splitTime.Body[]
-            vStepUpEstimate: number
-            events: string[]
-            targetOffset: trace.PointerOffset | null
-        } {
-            var edgeX =
-                dx > 0
-                    ? x + dx + this.mover.body.width / 2
-                    : x + dx - this.mover.body.width / 2
-            var top = y - this.mover.body.depth / 2
-            const solidCollisionInfo = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
-                this.mover.body.collisionMask,
-                level,
-                edgeX, Math.abs(dx),
-                top, this.mover.body.depth,
-                z, this.mover.body.height
-            )
-            const events = COLLISION_CALCULATOR.getEventsInVolume(
-                level,
-                edgeX, Math.abs(dx),
-                top, this.mover.body.depth,
-                z, this.mover.body.height
-            )
-            return {
-                ...solidCollisionInfo,
-                events: events
+        const ignoreBodies = projections.map(p => p.body)
+        const collisionInfos: (SimplePixelCollisionReturn)[] = projections.map(p => {
+            if (p.x.stopped) {
+                return simpleBlocked
             }
+            const alreadyCalculated = dz === 0 && p === primary
+            const c = alreadyCalculated ?
+                simpleCollisionInfo :
+                calculateXPixelCollision(p.body, level, p.x.current, p.y.current, p.z.current, dx, ignoreBodies)
+            if (c.blocked) {
+                p.x.stopped = true
+            } else {
+                p.x.current = p.x.current + dx
+            }
+            return c
+        })
+
+        let needToCheckAgain = projections.length > 0
+        while (needToCheckAgain) {
+            needToCheckAgain = false
+            for (let i = 0; i < projections.length; i++) {
+                const p = projections[i]
+                if (p.x.stopped) {
+                    continue
+                }
+                for (const other of projections) {
+                    if (other !== p && doProjectionsOverlap(other, p)) {
+                        p.x.stopped = true
+                        p.x.current = p.x.current - dx
+                        collisionInfos[i] = simpleBlocked
+                        needToCheckAgain = true
+                    }
+                }
+                // Non-primary bodies should only move if a parent moved.
+                if (p !== primary) {
+                    let someParentMoved = false
+                    for (const parent of p.parents) {
+                        if (!parent.x.stopped) {
+                            someParentMoved = true
+                            break
+                        }
+                    }
+                    if (!someParentMoved) {
+                        p.x.stopped = true
+                        p.x.current = p.x.current - dx
+                        collisionInfos[i] = simpleBlocked
+                        needToCheckAgain = true
+                    }
+                }
+            }
+        }
+
+        for (let i = 0; i < projections.length; i++) {
+            const p = projections[i]
+            const c = collisionInfos[i]
+            if (c === null) {
+                // Do nothing.
+            } else if (c.blocked) {
+                p.x.stopped = true
+            } else {
+                p.x.pixelsMoved++
+                addArrayToSet(c.events, p.eventIdSet)
+                if (trace.isPointerOffsetSignificant(c.targetOffset, level)) {
+                    p.mightMoveLevels = true
+                }
+            }
+
+            if (p === primary) {
+                bodiesBlockingPrimary = c?.bodies ?? []
+            }
+        }
+
+        return { dz, bodiesBlockingPrimary }
+        }
+
+    /**
+     * Check that dx can be accomplished.
+     */
+    function calculateXPixelCollision(
+        body: Body,
+        level: Level,
+        x: number,
+        y: number,
+        z: number,
+        dx: unit,
+        ignoreBodies: readonly Body[]
+    ): SimplePixelCollisionReturn {
+        const edgeX =
+            dx > 0
+                ? x + dx + body.width / 2
+                : x + dx - body.width / 2
+        const top = y - body.depth / 2
+        const solidCollisionInfo = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+            body.collisionMask,
+            level,
+            edgeX, Math.abs(dx),
+            top, body.depth,
+            z, body.height,
+            ignoreBodies
+        )
+        const events = COLLISION_CALCULATOR.getEventsInVolume(
+            level,
+            edgeX, Math.abs(dx),
+            top, body.depth,
+            z, body.height
+        )
+        return {
+            ...solidCollisionInfo,
+            events: events
         }
     }
 }
