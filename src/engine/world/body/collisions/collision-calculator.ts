@@ -3,12 +3,12 @@ namespace splitTime {
      * A pair of bit masks that allow bodies to selectively detect collisions with each other.
      */
     export interface CollisionMask {
-        // a la Godot collision layers, bit mask of collision groups this body belongs to
+        /** a la Godot collision layers, bit mask of collision groups this body belongs to */
         membership: int
-        // a la Godot collision mask, bit mask of collision groups to cross-check
+        /** a la Godot collision mask, bit mask of collision groups to cross-check */
         search: int
     }
-    export const defaultCollisionMask = {
+    export const defaultCollisionMask: CollisionMask = {
         membership: 1,
         search: ~0
     }
@@ -65,7 +65,6 @@ namespace splitTime {
             return Object.keys(eventTracesMap)
         }
 
-        // TODO: Add blocked out of bounds.
         /**
          * Calculate collisions in volume. This function is primarily useful for gauging a slice of volume (i.e. one-pixel step).
          */
@@ -83,6 +82,11 @@ namespace splitTime {
             var collisionInfo = new InternalCollisionInfo(level, null)
             if (level.lowestLayerZ > startZ) {
                 collisionInfo.vStepUpEstimate = level.lowestLayerZ - startZ
+            }
+            if (startX < 0 || startX + xPixels >= level.width || startY < 0 || startY + yPixels >= level.yWidth) {
+                collisionInfo.blocked = true
+                collisionInfo.zBlockedTopEx = Infinity
+                collisionInfo.vStepUpEstimate = Infinity
             }
             function handleFoundBody(otherBody: Body) {
                 for (const ignoreBody of ignoreBodies) {
