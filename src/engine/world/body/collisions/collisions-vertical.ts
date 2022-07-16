@@ -18,7 +18,7 @@ namespace splitTime.body.collisions {
         bodies: CachedFallStopBody[]
         events: string[]
         targetOffset: trace.PointerOffset | null
-        ignoreBodies: Body[]
+        ignoreBodies: readonly Body[]
     }
 
     export class Vertical {
@@ -31,24 +31,82 @@ namespace splitTime.body.collisions {
          * @returns {number} Z pixels actually moved
          */
         zeldaVerticalMove(maxDZ: number): number {
-            this.mover.ensureInRegion()
-            const collisionInfo = this.calculateZCollision(
-                this.mover.body.level,
-                this.mover.body.x,
-                this.mover.body.y,
-                this.mover.body.z,
-                maxDZ
-            )
+            const level = this.mover.body.level
 
-            if (collisionInfo.dzAllowed !== 0) {
-                this.mover.body.setZ(this.mover.body.z + collisionInfo.dzAllowed)
-                this.mover.body.level.runEvents(collisionInfo.events, this.mover.body)
-                if (trace.isPointerOffsetSignificant(collisionInfo.targetOffset, this.mover.body.level)) {
-                    this.mover.transportLevelIfApplicable()
+            // const bodies = maxDZ < 0 ? [this.mover.body] : getAllStackedBodies(this.mover.body)
+            const bodies = [this.mover.body, ...getAllStackedBodies(this.mover.body)]
+            bodies.sort((a, b) => (a.z - b.z) * (-maxDZ))
+            // const projections = buildStackProjectionList(this.mover.body)
+            // const primary = projections[0]
+            // const ignoreBodies = projections.map(p => p.body)
+
+            let dzPrimary: number = NaN
+            for (const b of bodies) {
+                const collisionInfo = b.mover.vertical.calculateZCollision(
+                    level,
+                    b.x,
+                    b.y,
+                    b.z,
+                    maxDZ,
+                    maxDZ > 0 ? bodies : [],
+                )
+                if (collisionInfo.dzAllowed === 0) {
+                    return 0
+                }
+                if (b === this.mover.body) {
+                    dzPrimary = collisionInfo.dzAllowed
+                }
+                b.setZ(b.z + collisionInfo.dzAllowed)
+                b.level.runEvents(collisionInfo.events, b)
+                if (trace.isPointerOffsetSignificant(collisionInfo.targetOffset, b.level)) {
+                    b.mover.transportLevelIfApplicable()
                 }
             }
+            return Math.abs(dzPrimary)
 
-            return Math.abs(collisionInfo.dzAllowed)
+            // const collisionInfos1 = bodies.map(b => b.mover.vertical.calculateZCollision(
+            //     level,
+            //     b.x,
+            //     b.y,
+            //     b.z,
+            //     maxDZ,
+            //     bodies,
+            // ))
+
+            // let dzAllowedAll = collisionInfos1.reduce((dzAllowedSoFar, c) => {
+            //     if (Math.abs(c.dzAllowed) < Math.abs(dzAllowedSoFar)) {
+            //         return c.dzAllowed
+            //     }
+            //     return dzAllowedSoFar
+            // }, maxDZ)
+
+            // let collisionInfos2 = collisionInfos1
+            // if (dzAllowedAll !== maxDZ && bodies.length > 1) {
+            //     collisionInfos2 = bodies.map(b => b.mover.vertical.calculateZCollision(
+            //         level,
+            //         b.x,
+            //         b.y,
+            //         b.z,
+            //         dzAllowedAll,
+            //         bodies,
+            //     ))
+            // }
+
+            // if (dzAllowedAll === 0) {
+            //     return 0
+            // }
+
+            // for (let i = 0; i < bodies.length; i++) {
+            //     const b = bodies[i]
+            //     const c = collisionInfos2[i]
+            //     b.setZ(b.z + dzAllowedAll)
+            //     b.level.runEvents(c.events, b)
+            //     if (trace.isPointerOffsetSignificant(c.targetOffset, b.level)) {
+            //         b.mover.transportLevelIfApplicable()
+            //     }
+            // }
+
+            // return Math.abs(dzAllowedAll)
         }
 
         /**
@@ -60,7 +118,7 @@ namespace splitTime.body.collisions {
             y: number,
             z: number,
             dz: number,
-            ignoreBodies: Body[] = []
+            ignoreBodies: readonly Body[] = []
         ): VerticalCollisionInfo {
             if (this.canApplyCachedFall(level, x, y, z, dz, ignoreBodies)) {
                 return {
@@ -151,7 +209,7 @@ namespace splitTime.body.collisions {
             let dzAllowed = targetZ - z
             // If the amount we want to move is more than
             // the amount requested, go with requested
-            if (Math.abs(dzAllowed) > adz) {
+            if (Math.abs(dzAllowed) > Math.abs(dz)) {
                 dzAllowed = dz
             }
 
@@ -192,7 +250,7 @@ namespace splitTime.body.collisions {
             y: number,
             z: number,
             dz: number,
-            ignoreBodies: Body[] = []
+            ignoreBodies: readonly Body[] = []
         ): boolean {
             if (dz >= 0) {
                 return false

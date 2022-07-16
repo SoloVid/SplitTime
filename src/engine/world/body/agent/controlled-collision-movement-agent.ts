@@ -66,9 +66,9 @@ namespace splitTime.agent {
                     let dz = 0
                     if (this.ladder !== null) {
                         if (direction.areWithin90Degrees(this.body.dir, this.ladder.direction)) {
-                            dz = this.body.mover.vertical.zeldaVerticalMove(speed * delta / 2)
+                            dz = this.body.mover.zeldaVerticalBump(speed * delta / 2)
                         } else if (!direction.areWithin90Degrees(this.body.dir, this.ladder.direction, 2)) {
-                            dz = this.body.mover.vertical.zeldaVerticalMove(-speed * delta / 2)
+                            dz = this.body.mover.zeldaVerticalBump(-speed * delta / 2)
                         }
                     }
 
