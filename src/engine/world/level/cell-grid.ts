@@ -453,23 +453,23 @@ namespace splitTime.level {
     }
 
     function isXOverlap(minX: number, exMaxX: number, body: Body) {
-        var bodyLeft = body.getLeft()
+        var bodyLeft = Math.round(body.getLeft())
         var noOverlap =
-            exMaxX <= bodyLeft || bodyLeft + body.width <= minX
+            Math.round(exMaxX) <= bodyLeft || bodyLeft + body.width <= Math.round(minX)
         return !noOverlap
     }
 
     function isYOverlap(minY: number, exMaxY: number, body: Body) {
-        var bodyTop = body.getTopY()
+        var bodyTop = Math.round(body.getTopY())
         var noOverlap =
-            exMaxY <= bodyTop || bodyTop + body.depth <= minY
+            Math.round(exMaxY) <= bodyTop || bodyTop + body.depth <= Math.round(minY)
         return !noOverlap
     }
 
     function isZOverlap(minZ: number, exMaxZ: number, body: Body) {
-        var bodyBottom = body.z
+        var bodyBottom = Math.round(body.z)
         var noOverlap =
-            exMaxZ <= body.z || bodyBottom + body.height <= minZ
+            Math.round(exMaxZ) <= bodyBottom || bodyBottom + body.height <= Math.round(minZ)
         return !noOverlap
     }
 }

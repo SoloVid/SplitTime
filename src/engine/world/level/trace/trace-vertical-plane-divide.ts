@@ -21,7 +21,7 @@ namespace splitTime.trace {
         }
 
         isPointBehindPlane(point: Coordinates3D): boolean {
-            const pointVector = new Vector3D(point.x, point.y, point.z)
+            const pointVector = new Vector3D(Math.round(point.x), Math.round(point.y), Math.round(point.z))
             const pointRelativeToPlane = pointVector.plus(this.v1.times(-1))
             const pointProjectedOntoNormal = this.normal.dot(pointRelativeToPlane)
             const positiveIfSignsSame = this.backSign * pointProjectedOntoNormal

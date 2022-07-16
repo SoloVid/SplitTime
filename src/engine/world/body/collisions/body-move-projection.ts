@@ -54,9 +54,9 @@ namespace splitTime.body.collisions {
     }
 
     export function doProjectionsOverlap(p1: BodyMoveProjection, p2: BodyMoveProjection): boolean {
-        return isOverlap(p1.x.current - p1.body.width / 2, p1.body.width, p2.x.current - p2.body.width / 2, p2.body.width) &&
-            isOverlap(p1.y.current - p1.body.depth / 2, p1.body.depth, p2.y.current - p2.body.depth / 2, p2.body.depth) &&
-            isOverlap(p1.z.current, p1.body.height, p2.z.current, p2.body.height)
+        return isOverlap(Math.round(p1.x.current) - p1.body.width / 2, p1.body.width, Math.round(p2.x.current) - p2.body.width / 2, p2.body.width) &&
+            isOverlap(Math.round(p1.y.current) - p1.body.depth / 2, p1.body.depth, Math.round(p2.y.current) - p2.body.depth / 2, p2.body.depth) &&
+            isOverlap(Math.round(p1.z.current), p1.body.height, Math.round(p2.z.current), p2.body.height)
     }
 
     // export class Horizontal {

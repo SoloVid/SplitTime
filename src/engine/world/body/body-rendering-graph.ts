@@ -209,21 +209,21 @@ namespace splitTime.body {
      * returns true if body2's top is lower than (or at the same z level as) body1's bottom
      */
     function isAbove(body1: GraphBody, body2: GraphBody) {
-        return body1.z >= body2.z + body2.height
+        return Math.round(body1.z) >= Math.round(body2.z) + body2.height
     }
 
     /**
      * returns true if body1's backside is further forward than body2's front side
      */
     function isInFront(body1: GraphBody, body2: GraphBody) {
-        return body1.y - body1.depth / 2 >= body2.y + body2.depth / 2
+        return Math.round(body1.y) - body1.depth / 2 >= Math.round(body2.y) + body2.depth / 2
     }
 
     /**
      * returns true if body1's frontside is further forward than body2's front side
      */
     function isFurtherForward(body1: GraphBody, body2: GraphBody) {
-        return body1.y + body1.depth / 2 > body2.y + body2.depth / 2
+        return Math.round(body1.y) + body1.depth / 2 > Math.round(body2.y) + body2.depth / 2
     }
 
     let nextNodeRef = 1

@@ -22,13 +22,14 @@ namespace splitTime.trace {
         }
 
         isPointAboveStairs(point: Coordinates3D): boolean {
-            if (point.z < this.spec.offsetZ) {
+            const roundZ = Math.round(point.z)
+            if (roundZ < this.spec.offsetZ) {
                 return false
             }
-            if (point.z >= this.spec.offsetZ + this.spec.height) {
+            if (roundZ >= this.spec.offsetZ + this.spec.height) {
                 return true
             }
-            const pointVector = new Vector3D(point.x, point.y, point.z)
+            const pointVector = new Vector3D(Math.round(point.x), Math.round(point.y), roundZ)
             const pointRelativeToPlane = pointVector.plus(this.v1.times(-1))
             const pointProjectedOntoNormal = this.normal.dot(pointRelativeToPlane)
             const positiveIfSignsSame = this.upSign * pointProjectedOntoNormal

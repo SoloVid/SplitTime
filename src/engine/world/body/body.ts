@@ -199,16 +199,18 @@ namespace splitTime {
             return this._z
         }
         setZ(z: number, includeChildren = false) {
-            if (includeChildren) {
-                var children = this.getChildren()
-                for (var i = 0; i < children.length; i++) {
-                    var currentChild = children[i]
-                    var dLayer = currentChild.getZ() - this._z
-                    currentChild.setZ(z + dLayer, true)
-                }
-            }
             if (z !== this._z) {
-                this._z = z
+                const justBarelyBelowInt = Math.ceil(z) < Math.ceil(this._z) && Math.ceil(z) - z < 0.1
+                const adjustedZ = justBarelyBelowInt ? Math.ceil(z) : z
+                if (includeChildren) {
+                    var children = this.getChildren()
+                    for (var i = 0; i < children.length; i++) {
+                        var currentChild = children[i]
+                        const dz = currentChild.getZ() - this._z
+                        currentChild.setZ(adjustedZ + dz, true)
+                    }
+                }
+                this._z = adjustedZ
                 this._resortInBodyOrganizer()
             }
         }
