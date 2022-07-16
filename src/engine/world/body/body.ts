@@ -44,6 +44,8 @@ namespace splitTime {
         GRAVITY = -1280
         // For gravity etc., auto-applied z-axis motion in pixels per second
         zVelocity = 0
+        /** 0-1, how much zVelocity should reflect on impact with ground. */
+        zBounce = 0
 
         // Collision volume dimensions
         /** x-axis base length */
@@ -318,7 +320,7 @@ namespace splitTime {
                         var expectedDZ = this.zVelocity * delta
                         var actualDZ = this.mover.zeldaVerticalBump(expectedDZ)
                         if (Math.abs(actualDZ) < Math.abs(expectedDZ)) {
-                            this.zVelocity = 0
+                            this.zVelocity = this.zBounce * -this.zVelocity
                         }
                     }
                     // Up the velocity after the move so that others can cancel it out beforehand
