@@ -65,6 +65,7 @@ namespace splitTime {
             return Object.keys(eventTracesMap)
         }
 
+        // TODO: Add blocked out of bounds.
         /**
          * Calculate collisions in volume. This function is primarily useful for gauging a slice of volume (i.e. one-pixel step).
          */

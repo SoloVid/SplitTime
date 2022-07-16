@@ -2,6 +2,7 @@ namespace splitTime.body.collisions {
     export interface BodyMoveProjection {
         parents: readonly BodyMoveProjection[]
         body: Body
+        deltasCalculated: boolean
         x: BodyMoveProjectionCoordinate
         y: BodyMoveProjectionCoordinate
         z: {
@@ -15,11 +16,13 @@ namespace splitTime.body.collisions {
     }
 
     interface BodyMoveProjectionCoordinate {
-        out: boolean
+        delta: number
+        // deltaRounded: int
         stopped: boolean
-        pixelsMoved: number
+        pixelsMoved: int
         old: number
         current: number
+        target: number
         /** Temporary variable for whatever you want. */
         // scratch: number
     }
@@ -28,19 +31,26 @@ namespace splitTime.body.collisions {
         return {
             parents: [],
             body: b,
+            deltasCalculated: false,
             x: {
-                out: false,
+                delta: 0,
+                // deltaRounded: 0,
                 stopped: false,
                 pixelsMoved: 0,
                 old: b.getX(),
-                current: b.getX()
+                current: b.getX(),
+                target: b.getX(),
+                // scratch: 0,
             },
             y: {
-                out: false,
+                delta: 0,
+                // deltaRounded: 0,
                 stopped: false,
                 pixelsMoved: 0,
                 old: b.getY(),
-                current: b.getY()
+                current: b.getY(),
+                target: b.getY(),
+                // scratch: 0,
             },
             z: {
                 old: b.getZ(),
@@ -51,6 +61,33 @@ namespace splitTime.body.collisions {
             eventIdSet: {},
             mightMoveLevels: false,
         }
+    }
+
+    export function fillInDeltas(p: BodyMoveProjection): void {
+        if (p.deltasCalculated) {
+            return
+        }
+        const bodiesBelow = COLLISION_CALCULATOR.calculateVolumeCollision(
+            p.body.collisionMask,
+            p.body.level,
+            p.body.getLeft(),
+            p.body.width,
+            p.body.getTopY(),
+            p.body.depth,
+            p.body.z - 1,
+            1
+        ).bodies
+        const parentDeltaSum = p.parents.reduce((sum, parent) => {
+            fillInDeltas(parent)
+            return [sum[0] + parent.x.delta, sum[1] + parent.y.delta] as const
+        }, [0, 0] as readonly [x: number, y: number])
+        p.x.delta = parentDeltaSum[0] / bodiesBelow.length
+        p.x.target = p.x.old + p.x.delta
+        // p.x.deltaRounded = p.x.delta > 0 ? Math.ceil(p.x.delta) : Math.floor(p.x.delta)
+        p.y.delta = parentDeltaSum[1] / bodiesBelow.length
+        p.y.target = p.y.old + p.y.delta
+        // p.y.deltaRounded = p.y.delta > 0 ? Math.ceil(p.y.delta) : Math.floor(p.y.delta)
+        p.deltasCalculated = true
     }
 
     export function doProjectionsOverlap(p1: BodyMoveProjection, p2: BodyMoveProjection): boolean {

@@ -12,6 +12,7 @@ namespace splitTime.body.collisions {
         projections: readonly BodyMoveProjection[],
     ): PixelStepReturn {
         const ignoreBodies = projections.map(p => p.body)
+        const origX = projections.map(p => p.x.current)
         let dz = 0
         // Figure out if we're going to need to apply vertical fudge.
         const simpleCollisionInfo = calculateXPixelCollision(primary.body, level, primary.x.current, primary.y.current, primary.z.current, dx, ignoreBodies)
@@ -43,7 +44,12 @@ namespace splitTime.body.collisions {
             if (c.blocked) {
                 p.x.stopped = true
             } else {
+                // p.x.scratch = p.x.current
                 p.x.current = p.x.current + dx
+                const overshoot = (dx > 0 && p.x.current > p.x.target) || (dx < 0 && p.x.current < p.x.target)
+                if (overshoot) {
+                    p.x.current = p.x.target
+                }
             }
             return c
         })
@@ -59,7 +65,8 @@ namespace splitTime.body.collisions {
                 for (const other of projections) {
                     if (other !== p && doProjectionsOverlap(other, p)) {
                         p.x.stopped = true
-                        p.x.current = p.x.current - dx
+                        p.x.current = origX[i]
+                        // p.x.current = p.x.scratch
                         collisionInfos[i] = simpleBlocked
                         needToCheckAgain = true
                     }
@@ -75,7 +82,8 @@ namespace splitTime.body.collisions {
                     }
                     if (!someParentMoved) {
                         p.x.stopped = true
-                        p.x.current = p.x.current - dx
+                        p.x.current = origX[i]
+                        // p.x.current = p.x.scratch
                         collisionInfos[i] = simpleBlocked
                         needToCheckAgain = true
                     }

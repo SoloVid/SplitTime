@@ -24,7 +24,6 @@ namespace splitTime.body.collisions {
          * @returns distance actually moved
          */
         zeldaStep(dir: number, maxDistance: number, withPush: boolean): number {
-            this.mover.ensureInRegion()
             const level = this.mover.body.level
 
             const projections = buildStackProjectionList(this.mover.body)
@@ -37,6 +36,10 @@ namespace splitTime.body.collisions {
             const dyRounded = dy > 0 ? Math.ceil(dy) : Math.floor(dy)
             const ady = Math.abs(dyRounded)
 
+            primary.y.delta = dy
+            primary.y.target = primary.y.current + dy
+            // primary.y.deltaRounded = dyRounded
+
             let dx = maxDistance * Math.cos(dir * (Math.PI / 2)) //Total x distance to travel
             if (Math.abs(dx) < ZILCH) {
                 dx = 0
@@ -44,9 +47,18 @@ namespace splitTime.body.collisions {
             const dxRounded = dx > 0 ? Math.ceil(dx) : Math.floor(dx)
             const adx = Math.abs(dxRounded)
 
+            primary.x.delta = dx
+            primary.x.target = primary.x.current + dx
+            // primary.x.deltaRounded = dxRounded
+
+            primary.deltasCalculated = true
+            for (const p of projections) {
+                fillInDeltas(p)
+            }
+
             //-1 for negative movement on the axis, 1 for positive
-            const jHat = (dy === 0 ? 0 : dyRounded / ady) as unitOrZero
-            const iHat = (dx === 0 ? 0 : dxRounded / adx) as unitOrZero
+            const jHat = Math.round(dy === 0 ? 0 : dyRounded / ady) as unitOrZero
+            const iHat = Math.round(dx === 0 ? 0 : dxRounded / adx) as unitOrZero
 
             const maxIterations = adx + ady
             let xPixelsRemaining = adx
@@ -94,20 +106,22 @@ namespace splitTime.body.collisions {
             }
 
             for (const p of projections) {
-                if (ady > 0 && p.y.pixelsMoved > 0) {
-                    var yMoved = p.y.current - p.y.old
-                    var newYFromSteps = p.y.old + yMoved
-                    // Subtract off overshoot
-                    var actualNewY = newYFromSteps - (dyRounded - dy)
-                    p.body.setY(actualNewY)
-                }
-                if (adx > 0 && p.x.pixelsMoved > 0) {
-                    var xMoved = p.x.current - p.x.old
-                    var newXFromSteps = p.x.old + xMoved
-                    // Subtract off overshoot
-                    var actualNewX = newXFromSteps - (dxRounded - dx)
-                    p.body.setX(actualNewX)
-                }
+                // if (jHat !== 0 && p.y.pixelsMoved > 0) {
+                //     var yMoved = p.y.current - p.y.old
+                //     var newYFromSteps = p.y.old + yMoved
+                //     // Subtract off overshoot
+                //     var actualNewY = newYFromSteps - (p.y.deltaRounded - dy)
+                //     p.body.setY(actualNewY)
+                // }
+                // if (iHat !== 0 && p.x.pixelsMoved > 0) {
+                //     var xMoved = p.x.current - p.x.old
+                //     var newXFromSteps = p.x.old + xMoved
+                //     // Subtract off overshoot
+                //     var actualNewX = newXFromSteps - (dxRounded - dx)
+                //     p.body.setX(actualNewX)
+                // }
+                p.body.setX(p.x.current)
+                p.body.setY(p.y.current)
                 p.body.setZ(p.z.current)
 
                 p.body.level.runEvents(Object.keys(p.eventIdSet), p.body)
@@ -149,6 +163,7 @@ namespace splitTime.body.collisions {
                         const pushed = body.mover.zeldaBump(1, dir)
                         somethingPushed ||= pushed
                     }
+                    return somethingPushed
                 }
             } finally {
                 this.mover.bodyExt.pushing = false
