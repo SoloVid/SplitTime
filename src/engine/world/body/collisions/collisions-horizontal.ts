@@ -38,7 +38,6 @@ namespace splitTime.body.collisions {
 
             primary.y.delta = dy
             primary.y.target = primary.y.current + dy
-            // primary.y.deltaRounded = dyRounded
 
             let dx = maxDistance * Math.cos(dir * (Math.PI / 2)) //Total x distance to travel
             if (Math.abs(dx) < ZILCH) {
@@ -49,7 +48,6 @@ namespace splitTime.body.collisions {
 
             primary.x.delta = dx
             primary.x.target = primary.x.current + dx
-            // primary.x.deltaRounded = dxRounded
 
             primary.deltasCalculated = true
             for (const p of projections) {
@@ -106,20 +104,6 @@ namespace splitTime.body.collisions {
             }
 
             for (const p of projections) {
-                // if (jHat !== 0 && p.y.pixelsMoved > 0) {
-                //     var yMoved = p.y.current - p.y.old
-                //     var newYFromSteps = p.y.old + yMoved
-                //     // Subtract off overshoot
-                //     var actualNewY = newYFromSteps - (p.y.deltaRounded - dy)
-                //     p.body.setY(actualNewY)
-                // }
-                // if (iHat !== 0 && p.x.pixelsMoved > 0) {
-                //     var xMoved = p.x.current - p.x.old
-                //     var newXFromSteps = p.x.old + xMoved
-                //     // Subtract off overshoot
-                //     var actualNewX = newXFromSteps - (dxRounded - dx)
-                //     p.body.setX(actualNewX)
-                // }
                 p.body.setX(p.x.current)
                 p.body.setY(p.y.current)
                 p.body.setZ(p.z.current)

@@ -66,7 +66,6 @@ namespace splitTime.body.collisions {
                     if (other !== p && doProjectionsOverlap(other, p)) {
                         p.x.stopped = true
                         p.x.current = origX[i]
-                        // p.x.current = p.x.scratch
                         collisionInfos[i] = simpleBlocked
                         needToCheckAgain = true
                     }
@@ -83,7 +82,6 @@ namespace splitTime.body.collisions {
                     if (!someParentMoved) {
                         p.x.stopped = true
                         p.x.current = origX[i]
-                        // p.x.current = p.x.scratch
                         collisionInfos[i] = simpleBlocked
                         needToCheckAgain = true
                     }
