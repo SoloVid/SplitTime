@@ -1,4 +1,7 @@
 namespace splitTime.controls {
+
+    const ZILCH = 0.0000001 as const
+
     class KeyboardDirectionGroup {
         constructor(readonly dir: number, readonly keyCodes: int[]) {}
     }
@@ -26,6 +29,13 @@ namespace splitTime.controls {
                     x += direction.getXMagnitude(group.dir)
                     y += direction.getYMagnitude(group.dir)
                 }
+            }
+
+            if (Math.abs(x) < ZILCH) {
+                x = 0
+            }
+            if (Math.abs(y) < ZILCH) {
+                y = 0
             }
 
             if (x !== 0 || y !== 0) {
