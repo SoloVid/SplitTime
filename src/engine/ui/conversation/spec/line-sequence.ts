@@ -9,7 +9,7 @@ namespace splitTime.conversation {
         private parent: SectionSpec | null = null
 
         constructor(
-            public readonly lines: readonly Line[]
+            public readonly lines: readonly SpeechBubbleContentsSpec[]
         ) {
             for(const line of this.lines) {
                 line.setParent(this)

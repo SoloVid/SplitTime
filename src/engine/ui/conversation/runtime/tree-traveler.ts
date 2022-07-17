@@ -14,7 +14,7 @@ namespace splitTime.conversation {
         }
 
         getNextAfter(node: ConversationLeafNode): ConversationLeafNode | null {
-            if (node instanceof Line) {
+            if (node instanceof SpeechBubbleContentsSpec) {
                 return this.getNextAfterLine(node)
             }
             return this.getNextAfterSectionPart(node)
@@ -56,7 +56,7 @@ namespace splitTime.conversation {
             return null
         }
 
-        private getNextAfterLine(node: Line): ConversationLeafNode | null {
+        private getNextAfterLine(node: SpeechBubbleContentsSpec): ConversationLeafNode | null {
             const lineSequence = node.getParent()
             const thisIndex = lineSequence.lines.indexOf(node)
             const nextIndex = thisIndex + 1
@@ -105,7 +105,7 @@ namespace splitTime.conversation {
 
         getNearestParentSection(node: ConversationLeafNode): SectionSpec
         getNearestParentSection(node: LineSequence | SectionSpec): SectionSpec | null
-        getNearestParentSection(node: SectionSpecPart | Line): SectionSpec | null {
+        getNearestParentSection(node: SectionSpecPart | SpeechBubbleContentsSpec): SectionSpec | null {
             const parent = node.getParent()
             if (parent instanceof SectionSpec) {
                 return parent

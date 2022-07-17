@@ -1,5 +1,5 @@
 namespace splitTime.conversation {
-    type BuilderPart = SectionBuilder | Line | MidConversationAction
+    type BuilderPart = SectionBuilder | SpeechBubbleContentsSpec | MidConversationAction
     export class SectionBuilder {
         private readonly parts: BuilderPart[] = []
         private readonly speakers: Speaker[] = []

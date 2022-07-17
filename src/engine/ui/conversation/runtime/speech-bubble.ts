@@ -5,7 +5,7 @@ namespace splitTime.conversation {
     export class SpeechBubbleState implements Interruptible {
         private _cutShort: boolean = false
         // can be cut short
-        private _effectiveLine: string
+        private _effectiveParts: TextPart[]
         private _pausedAtChar: number = 0
         private _timeLastCharacterOut: game_seconds | null = null
         private _isFinished: boolean = false
@@ -13,26 +13,29 @@ namespace splitTime.conversation {
         private _timePlayedTo: game_seconds
 
         constructor(
-            private _line: string,
+            private _parts: readonly TextPart[],
             private readonly timeline: Timeline,
             public readonly speaker?: string,
             private readonly location?: ILevelLocation2
         ) {
             for (const conversion of CONVERSIONS) {
-                this._line = conversion.apply(this._line)
+                for (const p of this._parts) {
+                    p.text = conversion.apply(p.text)
+                }
             }
             this._timeStarted = this.getTime()
             this._timePlayedTo = this._timeStarted
-            this._effectiveLine = this._line
+            this._effectiveParts = [...this._parts]
         }
 
-        getLineForMeasurement(): string {
-            // This is basically just this._line, but it will have
+        getPartsForMeasurement(): readonly Readonly<TextPart>[] {
+            return this._effectiveParts
+            // This is basically just this._parts, but it will have
             //the interrupt dash character in it if applicable.
-            return (
-                this._effectiveLine +
-                this._line.substring(this._effectiveLine.length)
-            )
+            // return (
+            //     this._effectiveLine +
+            //     this._line.substring(this.getEffectiveCharCount())
+            // )
         }
 
         advanceMethod: AdvanceMethod | null = null
@@ -54,9 +57,24 @@ namespace splitTime.conversation {
             }
         }
 
-        getDisplayedCurrentLine() {
-            return this._effectiveLine.substr(0,
-                Math.min(this._pausedAtChar + 1, this._effectiveLine.length))
+        getDisplayedCurrentParts(): readonly Readonly<TextPart>[] {
+            const parts: TextPart[] = []
+            let charSoFar = 0
+            for (const p of this._effectiveParts) {
+                if (charSoFar + p.text.length <= this._pausedAtChar + 1) {
+                    parts.push(p)
+                    charSoFar += p.text.length
+                } else {
+                    const partText = p.text.substring(0, this._pausedAtChar + 1 - charSoFar)
+                    parts.push({...p, text: partText})
+                    break;
+                }
+            }
+            return parts
+        }
+
+        getDisplayedCharCount(): number {
+            return this.getDisplayedCurrentParts().reduce((sum, p) => sum + p.text.length, 0)
         }
 
         notifyFrameUpdate() {
@@ -64,11 +82,11 @@ namespace splitTime.conversation {
             const now = this.getTime()
             while (keepGoing) {
                 keepGoing = false
-                if (this._pausedAtChar >= this._effectiveLine.length) {
+                if (this._pausedAtChar >= this.getEffectiveCharCount()) {
                     // Cut out the time taken by last character anyway
                     let shortenedDelay = this.delay
                     if (!this._cutShort) {
-                        shortenedDelay -= howLongForChar(this._effectiveLine[this._effectiveLine.length - 1], this.msPerChar)
+                        shortenedDelay -= howLongForChar(this.listToString(this._effectiveParts)[this.getEffectiveCharCount() - 1], this.msPerChar)
                     }
                     if (this.getAdvanceMethod() !== AdvanceMethod.AUTO &&
                         this.getAdvanceMethod() !== AdvanceMethod.HYBRID) {
@@ -79,7 +97,7 @@ namespace splitTime.conversation {
                         this.triggerFinish()
                     }
                 } else {
-                    const charTime = howLongForChar(this._effectiveLine[this._pausedAtChar], this.msPerChar) / 1000
+                    const charTime = howLongForChar(this.listToString(this._effectiveParts)[this._pausedAtChar], this.msPerChar) / 1000
                     if (this._timePlayedTo + charTime <= now) {
                         this._pausedAtChar++
                         this._timePlayedTo += charTime
@@ -90,7 +108,7 @@ namespace splitTime.conversation {
         }
 
         advance() {
-            if (this._pausedAtChar < this._effectiveLine.length) {
+            if (this._pausedAtChar < this.getEffectiveCharCount()) {
                 this.jumpToEnd()
             } else {
                 this.triggerFinish()
@@ -104,16 +122,16 @@ namespace splitTime.conversation {
         interrupt(): void {
             const minCharLeftForDash = 4
             assert(minCharLeftForDash > DASH.length, "DASH should be shorter than required number of characters")
-            const enoughCharLeft = this._pausedAtChar < this._effectiveLine.length - minCharLeftForDash
-            const lineNotYetCutShort = this._effectiveLine === this._line
+            const enoughCharLeft = this._pausedAtChar < this.getEffectiveCharCount() - minCharLeftForDash
+            const lineNotYetCutShort = this.listToString(this._effectiveParts) === this.listToString(this._parts)
             if (enoughCharLeft && lineNotYetCutShort) {
-                this._effectiveLine = this.getDisplayedCurrentLine() + DASH
+                this._effectiveParts = [...this.getDisplayedCurrentParts(), {text:DASH}]
             }
             this.jumpToEnd()
         }
 
         private jumpToEnd(): void {
-            this._pausedAtChar = this._effectiveLine.length
+            this._pausedAtChar = this.getEffectiveCharCount()
             if (this._timeLastCharacterOut === null) {
                 this._timeLastCharacterOut = this.getTime()
             }
@@ -126,6 +144,14 @@ namespace splitTime.conversation {
 
         private getTime(): game_seconds {
             return this.timeline.getTime()
+        }
+
+        private getEffectiveCharCount(): number {
+            return this._effectiveParts.reduce((sum, p) => sum + p.text.length, 0)
+        }
+
+        private listToString(parts: readonly Readonly<TextPart>[]): string {
+            return parts.map(p => p.text).join("")
         }
     }
 }

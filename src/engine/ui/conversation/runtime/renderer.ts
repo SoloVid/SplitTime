@@ -8,7 +8,7 @@ namespace splitTime.conversation {
             public visibility: number = 0
         ) {
             const ELISION_PATTERN_LENGTH = 4
-            const charsSeen = dialog.getDisplayedCurrentLine().length
+            const charsSeen = dialog.getDisplayedCurrentParts().reduce((sum, p) => sum + p.text.length, 0)
             const roundedCharsSeen = charsSeen - (charsSeen % ELISION_PATTERN_LENGTH)
             this.firstCharacterSeen = Math.max(0, roundedCharsSeen - 1)
         }
@@ -84,10 +84,26 @@ namespace splitTime.conversation {
                 // TODO: visibility
                 const ELISION_CHAR = "."
                 let elision = new Array(drawing.firstCharacterSeen + 1).join(ELISION_CHAR)
-                elision = elision.replace(/..../g, "... ")
-                const elisionRegex = new RegExp("^.{" + drawing.firstCharacterSeen + "}")
+                elision = elision.replace(/..../g, "... ").replace(/ (\.{0,2})$/g, (s0, s1) => `.${s1}`)
+                const elideParts = (parts: readonly Readonly<TextPart>[]): TextPart[] => {
+                    const newParts: TextPart[] = [{text: elision}]
+                    let charSoFar = 0
+                    for (const p of parts) {
+                        if (charSoFar + p.text.length <= drawing.firstCharacterSeen) {
+                            charSoFar += p.text.length
+                        } else if (charSoFar < drawing.firstCharacterSeen) {
+                            const partText = p.text.substring(drawing.firstCharacterSeen - charSoFar)
+                            newParts.push({...p, text: partText})
+                            charSoFar += p.text.length;
+                        } else {
+                            newParts.push(p)
+                        }
+                    }
+                    return newParts
+                }
                 var dialog = drawing.dialog
                 var location = dialog.getLocation()
+                const measureParts = elideParts(dialog.getPartsForMeasurement())
                 if (location) {
                     this.sayFromBoardFocalPoint(
                         view.see,
@@ -96,15 +112,15 @@ namespace splitTime.conversation {
                             y: location.y,
                             z: location.z
                         },
-                        dialog.getLineForMeasurement().replace(elisionRegex, elision),
-                        dialog.getDisplayedCurrentLine().replace(elisionRegex, elision),
+                        measureParts,
+                        dialog.getDisplayedCharCount(),
                         dialog.speaker ?? ""
                     )
                 } else {
                     this.simpleMessage(
                         view.see,
-                        dialog.getLineForMeasurement().replace(elisionRegex, elision),
-                        dialog.getDisplayedCurrentLine().replace(elisionRegex, elision)
+                        measureParts,
+                        dialog.getDisplayedCharCount()
                     )
                 }
             }
@@ -227,13 +243,13 @@ namespace splitTime.conversation {
 
         private simpleMessage(
             ctx: GenericCanvasRenderingContext2D,
-            fullMessage: string,
-            displayedMessage: string
+            measureParts: readonly Readonly<TextPart>[],
+            charactersToShow: number,
         ) {
             this.drawSpeechBubble(
                 ctx,
-                fullMessage,
-                displayedMessage,
+                measureParts,
+                charactersToShow,
                 (areaWidth, areaHeight) => {
                     return {
                         left: this.camera.SCREEN_WIDTH / 2 - areaWidth / 2,
@@ -246,8 +262,8 @@ namespace splitTime.conversation {
         private sayFromBoardFocalPoint(
             ctx: GenericCanvasRenderingContext2D,
             focalPoint: { x: number; y: number; z: number },
-            fullMessage: string,
-            displayedMessage: string,
+            measureParts: readonly Readonly<TextPart>[],
+            charactersToShow: number,
             speakerName: string
         ) {
             var pointRelativeToScreen = this.camera.getRelativeToScreen(
@@ -255,8 +271,8 @@ namespace splitTime.conversation {
             )
             this.drawSpeechBubble(
                 ctx,
-                fullMessage,
-                displayedMessage,
+                measureParts,
+                charactersToShow,
                 (areaWidth, areaHeight) => this.calculateDialogPosition(
                     areaWidth, areaHeight,
                     pointRelativeToScreen.x, pointRelativeToScreen.y
@@ -267,8 +283,8 @@ namespace splitTime.conversation {
 
         private drawSpeechBubble(
             ctx: GenericCanvasRenderingContext2D,
-            fullMessage: string,
-            displayedMessage: string,
+            measureParts: readonly Readonly<TextPart>[],
+            charactersToShow: number,
             calculatePosition: PositionCalculator,
             speakerName?: string
         ) {
@@ -290,21 +306,19 @@ namespace splitTime.conversation {
             }
 
             const maxTextWidth = this.calculateIdealizedMaxWidth(
-                ctx,
-                fullMessage,
+                measureParts,
                 lineHeight,
                 nameWidth
             )
-            const lines = this.getLinesFromMessage(
-                fullMessage,
-                displayedMessage,
-                ctx,
+            const drawParts = this.getDrawPartsFromMessage(
+                measureParts,
+                charactersToShow,
                 maxTextWidth
             )
 
             const bubbleWidth =
-                Math.max(lines.maxWidth, nameWidth) + 2 * TEXT_BOX_PADDING
-            const wholeBubbleTextHeight = lines.all.length * lineHeight
+                Math.max(drawParts.overallWidth, nameWidth) + 2 * TEXT_BOX_PADDING
+            const wholeBubbleTextHeight = drawParts.overallHeight + LINE_SPACING
             const bubbleHeight = wholeBubbleTextHeight + 2 * TEXT_BOX_PADDING
 
             const position = calculatePosition(
@@ -344,12 +358,13 @@ namespace splitTime.conversation {
             }
 
             //Lines
-            for (var index = 0; index < lines.displayed.length; index++) {
+            for (const drawPart of drawParts.displayed) {
                 this.drawText(
                     ctx,
-                    lines.displayed[index],
-                    position.left + TEXT_BOX_PADDING,
-                    messageTop + lineHeight * index + TEXT_BOX_PADDING
+                    drawPart.text,
+                    position.left + TEXT_BOX_PADDING + drawPart.offsetX,
+                    messageTop + TEXT_BOX_PADDING + drawPart.offsetY,
+                    getTextPartOptions(drawPart)
                 )
             }
 
@@ -373,7 +388,8 @@ namespace splitTime.conversation {
                     ctx,
                     speakerName,
                     nameBoxLeft + namePadding,
-                    nameTop + namePadding
+                    nameTop + namePadding,
+                    getDefaultTextPartOptions()
                 )
             }
         }
@@ -382,24 +398,25 @@ namespace splitTime.conversation {
             ctx: GenericCanvasRenderingContext2D,
             text: string,
             x: number,
-            y: number
+            y: number,
+            options: Required<TextPartOptions>
         ) {
+            ctx.font = options.fontSize + "px " + options.font
             ctx.strokeStyle = CONFIG.TEXT_OUTLINE_COLOR
             ctx.lineWidth = CONFIG.TEXT_OUTLINE_WIDTH
             ctx.lineJoin = "round"
             ctx.miterLimit = 2
             ctx.strokeText(text, x, y)
-            ctx.fillStyle = CONFIG.TEXT_COLOR
+            ctx.fillStyle = options.color
             ctx.fillText(text, x, y)
         }
 
         private calculateIdealizedMaxWidth(
-            ctx: GenericCanvasRenderingContext2D,
-            fullMessage: string,
+            fullMessageParts: readonly Readonly<TextPart>[],
             lineHeight: number,
             nameWidth: number
         ): number {
-            var singleLineWidth = ctx.measureText(fullMessage).width
+            var singleLineWidth = fullMessageParts.reduce((sum, p) => sum + measureTextPart(p).width, 0)
             var singleLineArea = singleLineWidth * lineHeight
             var proposedWidth =
                 Math.sqrt(singleLineArea / IDEAL_HEIGHT_TO_WIDTH) +
@@ -483,65 +500,82 @@ namespace splitTime.conversation {
             }
         }
 
-        private getLinesFromMessage(
-            fullMessage: string,
-            displayedMessage: string,
-            ctx: GenericCanvasRenderingContext2D,
+        private getDrawPartsFromMessage(
+            measureParts: readonly Readonly<TextPart>[],
+            charactersToShow: number,
             maxRowLength: number
-        ): { maxWidth: number; all: string[]; displayed: string[] } {
-            var initialFont = ctx.font
-            ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT
+        ): { overallWidth: number; overallHeight: number; displayed: readonly Readonly<TextPart & {offsetX: number, offsetY: number}>[] } {
+            type MeasuredPart = TextPart & { width: number, height: number }
+            type PositionedPart = TextPart & { offsetX: number, offsetY: number }
 
-            function getLine(str: string) {
-                var words = str.split(" ")
-                var nextWord = words.shift() as string
-                var line = nextWord
-                var width = ctx.measureText(line).width
-                while (words.length > 0 && width < maxRowLength) {
-                    nextWord = words.shift() as string
-                    line += " " + nextWord
-                    width = ctx.measureText(line).width
+            const splitUp: MeasuredPart[] = measureParts.map(p => {
+                const words = p.text.split(" ")
+                const wordsAndSpaces = words.reduce((soFar, w) => {
+                    if (soFar.length === 0) {
+                        return [w]
+                    }
+                    return [...soFar, " ", w]
+                }, [] as string[])
+                const wordsAndSpaces2 = wordsAndSpaces.filter(w => w !== "")
+                return wordsAndSpaces2.map(w => {
+                    const measurement = measureTextPart(p, w)
+                    return {
+                        text: w,
+                        options: p.options,
+                        width: measurement.width,
+                        height: measurement.height
+                    }
+                })
+            }).reduce((soFar: MeasuredPart[], one: MeasuredPart[]) => [...soFar, ...one], [] as MeasuredPart[])
+
+            type LineInfo = { y: number, width: number, height: number, parts: (MeasuredPart & PositionedPart)[] }
+            let charSoFar = 0
+            let currentLine: LineInfo = { y: 0, width: 0, height: 0, parts: [] }
+            // let currentLineY = 0
+            // let currentLineWidth = 0
+            let maxLineWidth = 0
+            // let currentLineHeight = 0
+            const lines: LineInfo[] = [currentLine]
+            for (const mp of splitUp) {
+                let left = currentLine.width
+                currentLine.width += mp.width
+                if (mp.text === " ") {
+                    // We don't care about drawing spaces,
+                    // and we also don't want to trigger new lines based on them.
+                } else {
+                    if (currentLine.width > maxRowLength) {
+                        const priorLine = currentLine
+                        currentLine = {
+                            y: priorLine.y + priorLine.height + LINE_SPACING,
+                            width: mp.width,
+                            height: 0,
+                            parts: []
+                        }
+                        left = 0
+                        lines.push(currentLine)
+                    }
+                    currentLine.height = Math.max(currentLine.height, mp.height)
+                    if (charSoFar < charactersToShow) {
+                        currentLine.parts.push({
+                            ...mp,
+                            text: mp.text.substring(0, charactersToShow - charSoFar),
+                            offsetX: left, offsetY: currentLine.y
+                        })
+                    }
+                    maxLineWidth = Math.max(maxLineWidth, currentLine.width)
                 }
-
-                if (width > maxRowLength && line !== nextWord) {
-                    words.unshift(nextWord)
-                    line = line.substr(0, line.length - (nextWord.length + 1))
+                charSoFar += mp.text.length
+            }
+            for (const line of lines) {
+                for (const pp of line.parts) {
+                    pp.offsetY += (line.height - pp.height) / 2
                 }
-
-                return line
             }
-
-            var allLines = []
-            var displayedLines = []
-            var maxWidth = 0
-
-            var remainingFullMessage = fullMessage
-            var remainingDisplayedMessage = displayedMessage
-            while (remainingFullMessage.length > 0) {
-                const i: int = allLines.length
-                allLines[i] = getLine(remainingFullMessage)
-                displayedLines[i] = allLines[i].substring(
-                    0,
-                    remainingDisplayedMessage.length
-                )
-                remainingFullMessage = remainingFullMessage
-                    .substring(allLines[i].length)
-                    .trim()
-                remainingDisplayedMessage = remainingDisplayedMessage
-                    .substring(displayedLines[i].length)
-                    .trim()
-                maxWidth = Math.max(
-                    maxWidth,
-                    ctx.measureText(allLines[i]).width
-                )
-            }
-
-            ctx.font = initialFont
 
             return {
-                maxWidth: maxWidth,
-                all: allLines,
-                displayed: displayedLines
+                overallWidth: maxLineWidth,
+                overallHeight: lines.reduce((sum, l) => sum + l.height, 0),
+                displayed: lines.reduce((soFar, l) => [...soFar, ...l.parts], [] as PositionedPart[])
             }
         }
 

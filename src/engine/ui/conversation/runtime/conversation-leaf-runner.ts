@@ -23,7 +23,7 @@ namespace splitTime.conversation {
 
         // run(): void {
             this.handlers.setUp()
-            if(this.node instanceof Line) {
+            if(this.node instanceof SpeechBubbleContentsSpec) {
                 const lineSpeechBubble = this.makeLineSpeechBubble(this.node)
                 this.lineSpeechBubble = lineSpeechBubble
                 this.interruptibleEvent = lineSpeechBubble.speechBubble
@@ -51,12 +51,12 @@ namespace splitTime.conversation {
             }
         }
 
-        private makeLineSpeechBubble(line: Line): LineSpeechBubble {
+        private makeLineSpeechBubble(line: SpeechBubbleContentsSpec): LineSpeechBubble {
             const speaker = line.speaker
             let speechBubble: SpeechBubbleState
             if (speaker) {
                 speechBubble = new SpeechBubbleState(
-                    line.text,
+                    line.parts,
                     speaker.body.level.getRegion().getTimeline(),
                     speaker.name,
                     speaker.speechBox
@@ -65,7 +65,7 @@ namespace splitTime.conversation {
                 const player = this.helper.playerBodyGetter()
                 assert(!!player, "Player should be accessible for speaker-less dialog")
                 speechBubble = new SpeechBubbleState(
-                    line.text,
+                    line.parts,
                     player.level.getRegion().getTimeline()
                 )
             }

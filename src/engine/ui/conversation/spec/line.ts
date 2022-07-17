@@ -1,10 +1,10 @@
 namespace splitTime.conversation {
-    export class Line {
+    export class SpeechBubbleContentsSpec {
         private parent: LineSequence | null = null
 
         constructor(
             public readonly speaker: Speaker | null,
-            public readonly text: string,
+            public readonly parts: readonly TextPart[],
             public readonly options?: Partial<Options>
         ) {}
 
@@ -17,5 +17,9 @@ namespace splitTime.conversation {
             assert(this.parent !== null, "Line parent should have been set")
             return this.parent
         }
+    }
+
+    export function makeSimpleLine(speaker: Speaker | null, line: string, options?: Partial<Options>) {
+        return new SpeechBubbleContentsSpec(speaker, [{text: line}], options)
     }
 }

@@ -3,7 +3,7 @@ namespace splitTime.conversation {
         getEffectiveOptions(node: ConversationLeafNode): Options {
             const section = treeTraveler.getNearestParentSection(node)
             const parentOptions = this.getEffectiveSectionOptions(section)
-            if (node instanceof Line) {
+            if (node instanceof SpeechBubbleContentsSpec) {
                 return this.fillIn(node.options ?? {}, parentOptions)
             }
             return parentOptions
