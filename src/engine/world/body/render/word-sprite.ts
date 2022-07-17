@@ -1,4 +1,6 @@
 namespace splitTime {
+    import CONFIG = splitTime.conversation.Configuration
+
     export class WordSprite implements splitTime.body.Drawable {
         private _time: game_seconds = 0
         constructor(
@@ -35,8 +37,18 @@ namespace splitTime {
         private _drawSimple(ctx: GenericCanvasRenderingContext2D) {
             ctx.globalAlpha = ctx.globalAlpha * this.opacityModifier
 
-            ctx.strokeText(this.text, 0, 0)
-            ctx.fillText(this.text, 0, 0)
+            ctx.textBaseline = "alphabetic"
+            ctx.font = CONFIG.FONT_SIZE + "px " + CONFIG.FONT
+            ctx.strokeStyle = CONFIG.TEXT_OUTLINE_COLOR
+            ctx.lineWidth = CONFIG.TEXT_OUTLINE_WIDTH
+            ctx.lineJoin = "round"
+            ctx.miterLimit = 2
+
+            const width = ctx.measureText(this.text).width
+
+            ctx.strokeText(this.text, -width / 2, 0)
+            ctx.fillStyle = CONFIG.TEXT_COLOR
+            ctx.fillText(this.text, -width / 2, 0)
         }
 
         notifyTimeAdvance(delta: game_seconds) {
