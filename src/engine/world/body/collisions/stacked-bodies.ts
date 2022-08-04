@@ -14,6 +14,10 @@ namespace splitTime.body {
             body.z + body.height,
             1
         ).bodies
+        // Optimization attempt.
+        if (bodiesAbove.length === 0) {
+            return []
+        }
         const directFound = bodiesAbove.filter(b => !ignoreBodies.includes(b))
         const output = [...directFound]
         for (const b of directFound) {
