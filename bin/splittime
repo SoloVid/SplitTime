@@ -12,7 +12,7 @@ switch (command) {
         runScript("../build/editor-server.js", childArgs)
         break
     default:
-        console.error("Unrecognized command")
+        console.error(`Unrecognized command ${command}`)
         process.exit(1)
 }
 
