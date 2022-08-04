@@ -1,7 +1,16 @@
 namespace splitTime.body {
+    export enum ordering {
+        none = 0,
+        bBehindA = 1,
+        aBehindB = 2,
+        softBBehindA = 3,
+        softABehindB = 4,
+    }
+
     export class BodyRenderingGraph {
         private _nodes: (GraphBodyNode | null)[] = []
         private _bodyToNodeIndexMap: { [ref: number]: number } = {}
+        private _currentWalkIndex: number = 0
 
         notifyNewFrame() {
             for (var i = 0; i < this._nodes.length; i++) {
@@ -67,6 +76,7 @@ namespace splitTime.body {
         }
 
         walk(visitCallback: (node: GraphBodyNode) => void): void {
+            this._currentWalkIndex = 0
             for (const node of this._nodes) {
                 if (node) {
                     node.visitedThisFrame = false
@@ -74,22 +84,39 @@ namespace splitTime.body {
             }
             for (const node of this._nodes) {
                 if (node) {
-                    this._visitNode(node, visitCallback)
+                    this._visitNode(node, [], visitCallback)
                 }
             }
         }
 
-        private _visitNode(node: GraphBodyNode, visitCallback: (node: GraphBodyNode) => void) {
+        private _visitNode(node: GraphBodyNode, nodeStack: GraphBodyNode[], visitCallback: (node: GraphBodyNode) => void) {
             if (node.visitedThisFrame) {
                 return
             }
+            // Don't violate hard ordering.
+            for (const nodeBefore of node.before) {
+                for (const nodeAfter of nodeStack) {
+                    if (nodeBefore === nodeAfter) {
+                        return
+                    }
+                }
+            }
             node.visitedThisFrame = true
 
-            for (var i = 0; i < node.before.length; i++) {
-                this._visitNode(node.before[i], visitCallback)
+            nodeStack.push(node)
+
+            for (const nodeBefore of node.before) {
+                this._visitNode(nodeBefore, nodeStack, visitCallback)
             }
 
+            for (const nodeBefore of node.softBefore) {
+                this._visitNode(nodeBefore, nodeStack, visitCallback)
+            }
+
+            nodeStack.pop()
+
             visitCallback(node)
+            this._currentWalkIndex++
         }
 
         private _removeDeadBodies() {
@@ -131,16 +158,10 @@ namespace splitTime.body {
                         continue
                     }
 
-                    const yDiffVal1 = drawArea.y2 - otherDrawArea.y
-                    const yDiffVal2 = otherDrawArea.y2 - drawArea.y
-
                     //Skip if the two bodies don't overlap on the screen's y axis (top to bottom)
-                    if (yDiffVal1 > 0 && yDiffVal2 > 0) {
-                        const xDiffVal1 = otherDrawArea.x2 - drawArea.x
-                        const xDiffVal2 = drawArea.x2 - otherDrawArea.x
-
+                    if (isOverlap(drawArea.y, drawArea.height, otherDrawArea.y, otherDrawArea.height)) {
                         //Skip if the two bodies don't overlap on the x axis (left to right)
-                        if (xDiffVal1 > 0 && xDiffVal2 > 0) {
+                        if (isOverlap(drawArea.x, drawArea.width, otherDrawArea.x, otherDrawArea.width)) {
                             this._constructEdge(
                                 node,
                                 otherNode
@@ -155,72 +176,87 @@ namespace splitTime.body {
          * checks which node is in front, then constructs an edge between them in the directed graph
          */
         private _constructEdge(
-            node1: GraphBodyNode,
-            node2: GraphBodyNode
+            a: GraphBodyNode,
+            b: GraphBodyNode
         ) {
-            //determine which node corresponds to the body in front
-            let nodeInFront = node1
-            let nodeBehind = node2
-            const isThisOrderCorrect = shouldRenderInFront(node2.body, node1.body)
-            if (isThisOrderCorrect === undefined) {
-                return
+            //construct the appropriate edge (make the nodes point to each other)
+            switch (determineOrdering(a.body, b.body)) {
+                case ordering.none:
+                    break
+                case ordering.bBehindA:
+                    a.before.push(b)
+                    break
+                case ordering.aBehindB:
+                    b.before.push(a)
+                    break
+                case ordering.softBBehindA:
+                    a.softBefore.push(b)
+                    break
+                case ordering.softABehindB:
+                    b.softBefore.push(a)
+                    break
             }
-            if (isThisOrderCorrect) {
-                nodeInFront = node2
-                nodeBehind = node1
-            }
-
-            //construct the edge (make the nodes point to each other)
-            nodeInFront.before.push(nodeBehind)
         }
     }
 
     /**
-     * returns true if the body in question should render in front of the other body.
+     * Determines which body should render in front of the other.
      */
-    function shouldRenderInFront(body: GraphBody, otherBody: GraphBody): boolean | undefined {
-        if (isAbove(body, otherBody) || isInFront(body, otherBody)) {
-            //if body1 is completely above or in front
-            return true
+    function determineOrdering(a: GraphBody, b: GraphBody): ordering {
+        // Special case for flat objects.
+        // If both are flat, choose the smaller one to display on top.
+        // This is primarily assuming the larger one is a background.
+        if (a.z === b.z && a.height === 0 && b.height === 0) {
+            const aSmaller = a.width * a.depth < b.width * b.depth
+            return aSmaller ? ordering.softBBehindA : ordering.softABehindB
         }
-        if (isAbove(otherBody, body) || isInFront(otherBody, body)) {
-            //if body2 is completely above or in front
-            return false
+
+        if (isAbove(a, b) || isInFront(a, b)) {
+            //if a is completely above or in front
+            return ordering.bBehindA
         }
-        if (body.shouldRenderInFrontCustom) {
-            return body.shouldRenderInFrontCustom(otherBody)
+        if (isAbove(b, a) || isInFront(b, a)) {
+            //if b is completely above or in front
+            return ordering.aBehindB
         }
-        if (otherBody.shouldRenderInFrontCustom) {
-            const r = otherBody.shouldRenderInFrontCustom(body)
-            return r === undefined ? undefined : !r
+        if (a.shouldRenderInFrontCustom) {
+            const r = a.shouldRenderInFrontCustom(b)
+            if (r !== undefined) {
+                return r ? ordering.bBehindA : ordering.aBehindB
+            }
+        }
+        if (b.shouldRenderInFrontCustom) {
+            const r = b.shouldRenderInFrontCustom(a)
+            if (r !== undefined) {
+                return r ? ordering.aBehindB : ordering.bBehindA
+            }
         }
 
         // If neither body is clearly above or in front,
-        // don't make a determination because this pair's
-        // rendering order could mess with other well-defined
-        // rendering orders for other pairs.
-        return undefined
-        //If neither body is clearly above or in front,
-        //go with the one whose base front is farther forward on the y axis
-        // return isFurtherForward(body1, body2)
+        // go with the one whose base front is farther forward on the y axis.
+        // This is a soft ordering because it might conflict with well-defined orderings.
+        return isFurtherForward(a, b) ? ordering.softBBehindA : ordering.softABehindB
     }
 
     /**
-     * returns true if body2's top is lower than (or at the same z level as) body1's bottom
+     * Is body1 above body2?
+     * @returns true if body2's top is lower than (or at the same z level as) body1's bottom
      */
     function isAbove(body1: GraphBody, body2: GraphBody) {
         return Math.round(body1.z) >= Math.round(body2.z) + body2.height
     }
 
     /**
-     * returns true if body1's backside is further forward than body2's front side
+     * Is body1 in front of body2?
+     * @returns true if body1's backside is further forward than body2's front side
      */
     function isInFront(body1: GraphBody, body2: GraphBody) {
         return Math.round(body1.y) - body1.depth / 2 >= Math.round(body2.y) + body2.depth / 2
     }
 
     /**
-     * returns true if body1's frontside is further forward than body2's front side
+     * Is body1 further forward than body2?
+     * @returns true if body1's frontside is further forward than body2's front side
      */
     function isFurtherForward(body1: GraphBody, body2: GraphBody) {
         return Math.round(body1.y) + body1.depth / 2 > Math.round(body2.y) + body2.depth / 2
@@ -235,6 +271,8 @@ namespace splitTime.body {
         body: GraphBody
         /** bodies drawn before this one */
         before: GraphBodyNode[] = []
+        /** bodies we'd prefer drawn before this one, but there might be issues with this order */
+        softBefore: GraphBodyNode[] = []
         constructor(body: GraphBody) {
             this.ref = nextNodeRef++
             this.body = body
