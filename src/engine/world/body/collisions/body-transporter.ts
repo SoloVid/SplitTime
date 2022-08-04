@@ -61,7 +61,7 @@ namespace splitTime.body {
                 pointerInfo,
                 left, this.body.width,
                 topY, this.body.depth,
-                z, this.body.height
+                Math.floor(z), Math.ceil(z + this.body.height)
             )
 
             const offsetHashes = Object.keys(pointerInfo)
