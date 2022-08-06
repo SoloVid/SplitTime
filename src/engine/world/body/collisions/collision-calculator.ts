@@ -142,7 +142,8 @@ namespace splitTime {
                                 pointerOffset.level,
                                 startX + pointerOffset.offsetX, xPixels,
                                 startY + pointerOffset.offsetY, yPixels,
-                                startZ + pointerOffset.offsetZ, zPixels
+                                startZ + pointerOffset.offsetZ, zPixels,
+                                ignoreBodies
                             )
                             // Note that the sign on the offset is flipped here
                             // because we are coming back from the other level's
