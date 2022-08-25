@@ -97,10 +97,15 @@ namespace splitTime {
 
                 collisionInfo.blocked = true
                 collisionInfo.bodies.push(otherBody)
-                collisionInfo.zBlockedTopEx =
+                // TODO: I've misinterpreted what I meant by zBlockedTopEx. I think I want info about where we're blocked above in addition to below, but right now the logic is wrong.
+                collisionInfo.zBlockedTopEx = Math.max(
+                    collisionInfo.zBlockedTopEx,
                     otherBody.getZ() + otherBody.height
-                collisionInfo.vStepUpEstimate =
+                )
+                collisionInfo.vStepUpEstimate = Math.max(
+                    collisionInfo.vStepUpEstimate,
                     otherBody.getZ() + otherBody.height - startZ
+                )
             }
 
             level.getCellGrid().forEachBody(
@@ -114,18 +119,19 @@ namespace splitTime {
                 handleFoundBody
             )
 
-            if (!collisionInfo.blocked) {
-                var traceCollision = this.calculateVolumeTraceCollision(
+            // TODO: Parameterize short-circuiting behavior.
+            if (!collisionInfo.blocked || true) {
+                const traceCollision = this.calculateVolumeTraceCollision(
                     level,
                     startX, xPixels,
                     startY, yPixels,
                     startZ, zPixels
                 )
                 collisionInfo.targetOffset = traceCollision.targetOffset
-                collisionInfo.blocked = traceCollision.blocked
-                collisionInfo.zBlockedTopEx =
-                    traceCollision.zBlockedTopEx
-                if (traceCollision.blocked) {
+                collisionInfo.blocked ||= traceCollision.blocked
+                collisionInfo.zBlockedTopEx = Math.max(collisionInfo.zBlockedTopEx, traceCollision.zBlockedTopEx)
+                collisionInfo.vStepUpEstimate = Math.max(collisionInfo.vStepUpEstimate, traceCollision.vStepUpEstimate)
+                if (traceCollision.blocked && false) {
                     collisionInfo.vStepUpEstimate =
                         traceCollision.vStepUpEstimate
                 } else {
@@ -155,11 +161,12 @@ namespace splitTime {
                                 backTranslatedZBlockedTopEx)
                             if (otherLevelCollisionInfo.blocked) {
                                 collisionInfo.blocked = true
-                                collisionInfo.bodies =
-                                    otherLevelCollisionInfo.bodies
-                                collisionInfo.vStepUpEstimate =
+                                collisionInfo.bodies.push(...otherLevelCollisionInfo.bodies)
+                                collisionInfo.vStepUpEstimate = Math.max(
+                                    collisionInfo.vStepUpEstimate,
                                     otherLevelCollisionInfo.vStepUpEstimate
-                                break
+                                )
+                                // break
                             }
                             // If we had decided this other level was our target, see if it wants to pawn us off
                             const thisTargetOffset = collisionInfo.targetOffset
@@ -193,7 +200,7 @@ namespace splitTime {
             level
                 .getLevelTraces()
                 .calculateVolumeSolidCollision(
-                    solidCollisionInfo,
+                    solidCollisionInfo, // TODO: Don't floor + ceil?
                     Math.floor(startX), Math.ceil(xPixels),
                     Math.floor(startY), Math.ceil(yPixels),
                     Math.floor(startZ), Math.ceil(startZ + zPixels)
