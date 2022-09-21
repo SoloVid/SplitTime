@@ -1,6 +1,6 @@
-import { SectionSpec } from "./section-spec";
-import { Line } from "./line";
 import { assert } from "../../../splitTime";
+import { SpeechBubbleContentsSpec } from "./line";
+import { SectionSpec } from "./section-spec";
 
 /**
  * This class is meant to be a cheap Section that only holds Lines.

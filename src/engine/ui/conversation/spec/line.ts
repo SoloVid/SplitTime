@@ -1,7 +1,8 @@
-import { LineSequence } from "./line-sequence";
+import { assert } from "../../../splitTime";
 import { Speaker } from "../speaker";
 import { Options } from "./dsl";
-import { assert } from "../../../splitTime";
+import { LineSequence } from "./line-sequence";
+import { TextPart } from "./text-part";
 
 export class SpeechBubbleContentsSpec {
     private parent: LineSequence | null = null

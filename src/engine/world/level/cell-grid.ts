@@ -1,7 +1,6 @@
-import { Level, int, CollisionMask, level } from "../../splitTime";
-import { ENABLED } from "../../utils/debug";
-import { warn } from "../../utils/logger";
 import * as splitTime from "../../splitTime";
+import { CollisionMask, int, log } from "../../splitTime";
+import { Body } from "../body/body";
 
 const PARTITION_SIZE = 32
 

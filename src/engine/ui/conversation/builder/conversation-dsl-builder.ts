@@ -1,11 +1,13 @@
 import { DSL, Options } from "../spec/dsl";
 import { SectionBuilder } from "./section-builder";
 import { Speaker } from "../speaker";
-import { Line } from "../spec/line";
+import { SpeechBubbleContentsSpec } from "../spec/line";
 import { SectionBuilderFluentReturn } from "./section-builder-fluent-return";
 import { MidEventCallback } from "../../../time/mid-event-action";
 import { MidConversationAction } from "../spec/mid-conversation-action";
 import { ConversationSpec } from "../spec/conversation-spec";
+import { FancySetupFunc } from "../misc-types";
+import { buildFancyViaDsl } from "./fancy-dsl-builder";
 export class ConversationDslBuilder implements DSL {
     private sectionBuilder: SectionBuilder;
     constructor(private readonly options?: Partial<Options>) {

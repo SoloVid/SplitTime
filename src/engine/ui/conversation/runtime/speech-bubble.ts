@@ -1,5 +1,6 @@
 import { Interruptible, game_seconds, Timeline, ILevelLocation2, assert } from "../../../splitTime";
 import { CONVERSIONS, AdvanceMethod, DEFAULT_MS_PER_CHAR, FACTOR_END_OF_LINE, howLongForChar, DASH } from "../settings";
+import { TextPart } from "../spec/text-part";
 
 /**
  * The displayed state of a line of dialogue.

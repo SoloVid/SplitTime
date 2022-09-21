@@ -10,22 +10,22 @@ export class Body {
     template: string | null = null
     id: string = "NOT SET"
     ref: int
-    private timeAdvanceListeners: splitTime.RegisterCallbacks
+    private timeAdvanceListeners: RegisterCallbacks
     private readonly addOns: { [id: string]: unknown } = {}
-    mover: splitTime.body.Mover
+    mover: Mover
 
     // FTODO: I don't think this belongs here
     /** @deprecated doesn't belong here */
     fadeEnteringLevelPromise: Pledge | null = null
 
-    drawables: splitTime.body.Drawable[] = []
+    drawables: Drawable[] = []
     shadow = false
     /**
      * If implemented, returns true if this Body should render in front of otherBody
      */
-    shouldRenderInFrontCustom?: (otherBody: body.GraphBody) => (boolean | undefined)
+    shouldRenderInFrontCustom?: (otherBody: GraphBody) => (boolean | undefined)
 
-    private _level: splitTime.Level | null = null
+    private _level: Level | null = null
     /** If true, linking traces won't attempt to change level, and direct setting will throw exception. */
     levelLocked: boolean = false
     /** If true, Body will be destroyed when parent level is unloaded. */
@@ -66,10 +66,10 @@ export class Body {
     // TODO: remove parameter when moving templates elsewhere
     constructor() {
         this.ref = nextRef++
-        this.timeAdvanceListeners = new splitTime.RegisterCallbacks({
+        this.timeAdvanceListeners = new RegisterCallbacks({
             notifyTimeAdvance: null
         })
-        this.mover = new splitTime.body.Mover(this)
+        this.mover = new Mover(this)
     }
     get width(): int {
         return this._width
@@ -267,7 +267,7 @@ export class Body {
     }
 
     private setLevel(
-        level: splitTime.Level | null,
+        level: Level | null,
         includeChildren: boolean = false
     ): void {
         assert(!this.levelLocked, "Cannot set level when levelLocked === true")
@@ -295,7 +295,7 @@ export class Body {
             }
         }
     }
-    getLevel(): splitTime.Level {
+    getLevel(): Level {
         if (!this._level) {
             throw new Error("Body is not in a Level")
         }
@@ -334,14 +334,14 @@ export class Body {
 
         for (const drawable of this.drawables) {
             // TODO: either remove check or remove Drawable "extends TimeNotified"
-            if (splitTime.instanceOf.TimeNotified(drawable)) {
+            if (instanceOfTimeNotified(drawable)) {
                 drawable.notifyTimeAdvance(delta)
             }
         }
     }
 
     registerTimeAdvanceListener(
-        handler: ((delta: game_seconds) => splitTime.CallbackResult) | splitTime.TimeNotified
+        handler: ((delta: game_seconds) => CallbackResult) | TimeNotified
     ) {
         this.timeAdvanceListeners.register(handler)
     }

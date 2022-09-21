@@ -1,10 +1,10 @@
 import { SectionSpec } from "../spec/section-spec";
-import { Line } from "../spec/line";
-    type SectionSpecRawPart = SectionSpec | SpeechBubbleContentsSpec | MidConversationAction
+import { SpeechBubbleContentsSpec } from "../spec/line";
 import { MidConversationAction } from "../spec/mid-conversation-action";
 import { SectionSpecPart } from "../misc-types";
 import { LineSequence } from "../spec/line-sequence";
-type SectionSpecRawPart = SectionSpec | Line | MidConversationAction;
+
+type SectionSpecRawPart = SectionSpec | SpeechBubbleContentsSpec | MidConversationAction;
 export function groupLineSequences(basicParts: readonly SectionSpecRawPart[]): SectionSpecPart[] {
     const formalizedParts: SectionSpecPart[] = [];
         let groupOfLines: SpeechBubbleContentsSpec[] = []

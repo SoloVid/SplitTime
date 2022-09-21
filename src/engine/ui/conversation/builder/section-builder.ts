@@ -1,12 +1,13 @@
-import { Line } from "../spec/line";
-import { MidConversationAction } from "../spec/mid-conversation-action";
-    type BuilderPart = SectionBuilder | SpeechBubbleContentsSpec | MidConversationAction
 import { Speaker } from "../speaker";
-import { InterruptibleSpecBuilder } from "./interruptible-spec-builder";
 import { Options } from "../spec/dsl";
+import { SpeechBubbleContentsSpec } from "../spec/line";
+import { MidConversationAction } from "../spec/mid-conversation-action";
 import { SectionSpec } from "../spec/section-spec";
 import { groupLineSequences } from "./group-line-sequences";
-type BuilderPart = SectionBuilder | Line | MidConversationAction;
+import { InterruptibleSpecBuilder } from "./interruptible-spec-builder";
+
+type BuilderPart = SectionBuilder | SpeechBubbleContentsSpec | MidConversationAction
+
 export class SectionBuilder {
     private readonly parts: BuilderPart[] = [];
     private readonly speakers: Speaker[] = [];

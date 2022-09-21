@@ -4,6 +4,7 @@ import { smoothPut } from "../render/ghosty";
 import { PointerTraceInfo } from "../../level/level-traces2";
 import { isPointerOffsetSignificant } from "../../level/trace/trace";
 import * as splitTime from "../../../splitTime";
+import { Body } from "../body"
 
 export class Transporter {
     constructor(public readonly body: Body) {}
@@ -77,7 +78,7 @@ export class Transporter {
         }
 
         const pointerOffset = pointerInfo[offsetHashes[0]]
-        if (!pointerOffset || !trace.isPointerOffsetSignificant(pointerOffset, levelFrom)) {
+        if (!pointerOffset || !isPointerOffsetSignificant(pointerOffset, levelFrom)) {
             return null
         }
         return {

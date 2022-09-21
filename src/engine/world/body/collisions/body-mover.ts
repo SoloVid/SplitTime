@@ -3,6 +3,7 @@ import { Horizontal } from "./collisions-horizontal";
 import { Vertical } from "./collisions-vertical";
 import { Transporter } from "./body-transporter";
 import * as splitTime from "../../../splitTime";
+import { Body } from "../body"
 
 class BodyExt {
     bumped: boolean = false
@@ -18,14 +19,14 @@ export class Mover {
     body: splitTime.Body
     bodyExt: BodyExt
     dir: direction_t | null = null
-    horizontal: collisions.Horizontal
-    vertical: collisions.Vertical
+    horizontal: Horizontal
+    vertical: Vertical
     constructor(body: Body) {
         this.body = body
         this.bodyExt = new BodyExt()
 
-        this.horizontal = new collisions.Horizontal(this)
-        this.vertical = new collisions.Vertical(this)
+        this.horizontal = new Horizontal(this)
+        this.vertical = new Vertical(this)
     }
 
     // This value should be at least 1 for stairs to work,

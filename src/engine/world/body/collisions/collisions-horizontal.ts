@@ -1,13 +1,12 @@
-import { PointerOffset, isPointerOffsetSignificant } from "../../level/trace/trace";
-import { HorizontalX } from "./collisions-horizontal-x";
-import { HorizontalY } from "./collisions-horizontal-y";
-import { Sliding } from "./collisions-sliding";
-import { Mover } from "./body-mover";
-import { unitOrZero, unit } from "../../../splitTime";
-import { E, W, S, N } from "../../../math/direction";
-import { addArrayToSet } from "./helpers";
-import { distanceTrue } from "../../../math/measurement";
 import * as splitTime from "../../../splitTime";
+import { unitOrZero } from "../../../splitTime";
+import { PointerOffset } from "../../level/trace/trace";
+import { Body } from "../body";
+import { fillInDeltas } from "./body-move-projection";
+import { projectXPixelStepWithVerticalFudge } from "./collisions-horizontal-x";
+import { projectYPixelStepWithVerticalFudge } from "./collisions-horizontal-y";
+import { Sliding } from "./collisions-sliding";
+import { buildStackProjectionList } from "./stacked-bodies";
 
 const ZILCH = 0.000001 as const
 
@@ -16,7 +15,7 @@ export class HorizontalCollisionInfo {
     bodies: Body[] = []
     adjustedZ: number
     events: string[] = []
-    targetOffset: trace.PointerOffset | null = null
+    targetOffset: PointerOffset | null = null
 
     constructor(z: number) {
         this.adjustedZ = z

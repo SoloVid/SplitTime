@@ -2,6 +2,7 @@ import { int, Level } from "../../../splitTime";
 import { PointerOffset } from "../../level/trace/trace";
 import { SolidCollisionInfo, PointerTraceInfo } from "../../level/level-traces2";
 import * as splitTime from "../../../splitTime";
+import { Body } from "../body"
 
 /**
  * A pair of bit masks that allow bodies to selectively detect collisions with each other.
@@ -22,7 +23,7 @@ interface ApiCollisionInfo {
     bodies: Body[]
     vStepUpEstimate: number
     zBlockedTopEx: number
-    targetOffset: trace.PointerOffset | null
+    targetOffset: PointerOffset | null
 }
 
 interface MinimalLevel {
@@ -34,11 +35,11 @@ class InternalCollisionInfo implements ApiCollisionInfo {
     bodies: Body[] = []
     vStepUpEstimate: number = 0
     zBlockedTopEx: number
-    pointerOffsets: (trace.PointerOffset)[] = []
+    pointerOffsets: (PointerOffset)[] = []
 
     constructor(
         level: MinimalLevel,
-        public targetOffset: trace.PointerOffset | null
+        public targetOffset: PointerOffset | null
     ) {
         this.zBlockedTopEx = level.lowestLayerZ
     }
@@ -139,7 +140,7 @@ class CollisionCalculator {
                 collisionInfo.vStepUpEstimate =
                     traceCollision.vStepUpEstimate
             } else {
-                const pointerOffsets: { [id: string]: trace.PointerOffset } = {}
+                const pointerOffsets: { [id: string]: PointerOffset } = {}
                 for (const pointerOffset of traceCollision.pointerOffsets) {
                     const offsetId = pointerOffset.getOffsetHash()
                     if (this.pointerStack.indexOf(offsetId) >= 0) {

@@ -1,6 +1,7 @@
 import { SpeechBubbleState } from "./speech-bubble";
 import { Camera, approachValue, GenericCanvasRenderingContext2D, constrain, int } from "../../../splitTime";
 import { View } from "../../viewport/view";
+import { getDefaultTextPartOptions, getTextPartOptions, measureTextPart, TextPart, TextPartOptions } from "../spec/text-part";
 
 class DialogDrawing {
     public readonly firstCharacterSeen: number
@@ -60,7 +61,7 @@ export class Renderer {
     notifyFrameUpdate() {
         for (const drawing of this.dialogDrawings) {
             if (drawing.incoming) {
-                drawing.visibility = splitTime.approachValue(
+                drawing.visibility = approachValue(
                     drawing.visibility,
                     1,
                     0.1
@@ -69,7 +70,7 @@ export class Renderer {
                 drawing.visibility = 1
                 // TODO: Maybe add event here for dialog fully visible
             } else {
-                drawing.visibility = splitTime.approachValue(
+                drawing.visibility = approachValue(
                     drawing.visibility,
                     0,
                     0.1 
@@ -82,7 +83,7 @@ export class Renderer {
         this.dialogDrawings = this.dialogDrawings.filter(d => d.visibility > 0);
     }
 
-    render(view: ui.View) {
+    render(view: View) {
         for (const drawing of this.dialogDrawings) {
             // TODO: visibility
             const ELISION_CHAR = "."
@@ -150,12 +151,12 @@ export class Renderer {
         let isRight = false
         let isBottom = false
         if (pointX !== undefined && pointY !== undefined) {
-            horizontalMid = splitTime.constrain(
+            horizontalMid = constrain(
                 (2 * pointX + left + right) / 4,
                 left + TRI_CURVE_BUFFER,
                 right - TRI_CURVE_BUFFER
             )
-            verticalMid = splitTime.constrain(
+            verticalMid = constrain(
                 (2 * pointY + top + bottom) / 4,
                 top + TRI_CURVE_BUFFER,
                 bottom - TRI_CURVE_BUFFER
@@ -437,7 +438,7 @@ export class Renderer {
         focalPointY: number
     ): PointedDialogPosition {
         // Start centered (around focal point) horizontally
-        var idealLeft = splitTime.constrain(
+        var idealLeft = constrain(
             focalPointX - areaWidth / 2, // ideal
             MIN_SCREEN_MARGIN, // left side of screen
             this.camera.SCREEN_WIDTH - MIN_SCREEN_MARGIN - areaWidth // right side of screen
@@ -456,7 +457,7 @@ export class Renderer {
                 this.camera.SCREEN_HEIGHT - MIN_SCREEN_MARGIN
             ) {
                 // If below is also off screen, try switching to more of a horizontal approach
-                var idealTop = splitTime.constrain(
+                var idealTop = constrain(
                     focalPointY - areaHeight / 2, // ideal
                     MIN_SCREEN_MARGIN, // top of screen
                     this.camera.SCREEN_HEIGHT -

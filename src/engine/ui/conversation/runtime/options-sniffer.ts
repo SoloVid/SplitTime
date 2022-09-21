@@ -1,9 +1,9 @@
 import { ConversationLeafNode } from "../misc-types";
-import { Options } from "../spec/dsl";
-import { treeTraveler } from "./tree-traveler";
-import { Line } from "../spec/line";
-import { SectionSpec } from "../spec/section-spec";
 import { ConversationSpec } from "../spec/conversation-spec";
+import { Options } from "../spec/dsl";
+import { SpeechBubbleContentsSpec } from "../spec/line";
+import { SectionSpec } from "../spec/section-spec";
+import { treeTraveler } from "./tree-traveler";
 export class OptionsSniffer {
     getEffectiveOptions(node: ConversationLeafNode): Options {
         const section = treeTraveler.getNearestParentSection(node);

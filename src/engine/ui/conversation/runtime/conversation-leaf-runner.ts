@@ -1,14 +1,14 @@
-import { Interruptible, assert, ObjectCallbacks, instanceOfInterruptible } from "../../../splitTime";
-import { ConversationHandlers } from "./conversation-handlers";
-import { LineSpeechBubble } from "./line-speech-bubble";
-import { ConversationPointRuntimeManager } from "./conversation-runtime-manager";
+import { assert, instanceOfInterruptible, Interruptible, ObjectCallbacks } from "../../../splitTime";
 import { ConversationLeafNode } from "../misc-types";
-import { HelperInfo } from "./helper-info";
-import { treeTraveler } from "./tree-traveler";
-import { Line } from "../spec/line";
+import { SpeechBubbleContentsSpec } from "../spec/line";
 import { MidConversationAction } from "../spec/mid-conversation-action";
-import { SpeechBubbleState } from "./speech-bubble";
+import { ConversationHandlers } from "./conversation-handlers";
 import { ConversationPointCompletionCallback } from "./conversation-point-completion-callback";
+import { ConversationPointRuntimeManager } from "./conversation-runtime-manager";
+import { HelperInfo } from "./helper-info";
+import { LineSpeechBubble } from "./line-speech-bubble";
+import { SpeechBubbleState } from "./speech-bubble";
+import { treeTraveler } from "./tree-traveler";
 /**
  * Class responsible for managing the lifecycle of a single conversation point.
  */
@@ -52,8 +52,7 @@ export class ConversationLeafRunner implements Interruptible {
         const speaker = line.speaker;
         let speechBubble: SpeechBubbleState;
         if (speaker) {
-            speechBubble = new SpeechBubbleState(line.text, speaker.body.level.getRegion().getTimeline(), speaker.name, speaker.speechBox);
-                    line.parts,
+            speechBubble = new SpeechBubbleState(line.parts, speaker.body.level.getRegion().getTimeline(), speaker.name, speaker.speechBox);
         }
         else {
             const player = this.helper.playerBodyGetter();

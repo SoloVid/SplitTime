@@ -1,11 +1,13 @@
 // NOTE: This file has a sister that is nearly identical: collisionsHorizontalY.js
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
-import { Mover } from "./body-mover";
-import { Level, COLLISION_CALCULATOR } from "../../../splitTime";
-import { HorizontalCollisionInfo } from "./collisions-horizontal";
-import { PointerOffset } from "../../level/trace/trace";
 import * as splitTime from "../../../splitTime";
+import { COLLISION_CALCULATOR, Level, unit } from "../../../splitTime";
+import { Body } from "../body";
+import { BodyMoveProjection, doProjectionsOverlap } from "./body-move-projection";
+import { PixelStepReturn, simpleBlocked, SimplePixelCollisionReturn } from "./collisions-horizontal-shared";
+import { checkAllCanStepUp } from "./group-step-up";
+import { addArrayToSet } from "./helpers";
 
 /**
  * Check that dx can be accomplished, potentially with vertical adjustment (for slopes).
@@ -104,7 +106,7 @@ export function projectXPixelStepWithVerticalFudge(
         } else {
             p.x.pixelsMoved++
             addArrayToSet(c.events, p.eventIdSet)
-            if (trace.isPointerOffsetSignificant(c.targetOffset, level)) {
+            if (splitTime.trace.isPointerOffsetSignificant(c.targetOffset, level)) {
                 p.mightMoveLevels = true
             }
         }

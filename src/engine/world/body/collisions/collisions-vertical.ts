@@ -6,26 +6,28 @@ import { addArrayToSet } from "./helpers";
 import { SELF_LEVEL_ID } from "../../level/level-traces2";
 import { copyLocation, areLocationsEquivalent } from "../../level/level-location";
 import * as splitTime from "../../../splitTime";
+import { Body } from "../body"
+import { getAllStackedBodies } from "./stacked-bodies";
 
 interface VerticalCollisionInfo {
     bodies: Body[]
     events: string[]
-    targetOffset: trace.PointerOffset | null
+    targetOffset: PointerOffset | null
     dzAllowed: number
 }
 
 interface CachedFallStopBody {
     body: Body
     location: ILevelLocation2
-    dimensions: file.collage.BodySpec
+    dimensions: BodySpec
 }
 
 interface CachedFallStop {
     location: ILevelLocation2
-    dimensions: file.collage.BodySpec
+    dimensions: BodySpec
     bodies: CachedFallStopBody[]
     events: string[]
-    targetOffset: trace.PointerOffset | null
+    targetOffset: PointerOffset | null
     ignoreBodies: readonly Body[]
 }
 
@@ -86,7 +88,7 @@ export class Vertical {
             const c = calculations2[i]
             b.setZ(b.z + c.dzAllowed)
             b.level.runEvents(c.events, b)
-            if (trace.isPointerOffsetSignificant(c.targetOffset, b.level)) {
+            if (isPointerOffsetSignificant(c.targetOffset, b.level)) {
                 b.mover.transportLevelIfApplicable()
             }
         }
@@ -146,7 +148,7 @@ export class Vertical {
         }
 
         let bodies: Body[] = []
-        const targetOffsets: { [offsetHash: string]: trace.PointerOffset | null } = {}
+        const targetOffsets: { [offsetHash: string]: PointerOffset | null } = {}
         var eventIdSet = {}
         let blocked = false
         for (var i = 0; i < steps; i++) {

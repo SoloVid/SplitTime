@@ -1,5 +1,5 @@
 import { Rect } from "../../math/rect";
-import { int } from "../../splitTime";
+import { int, isOverlap } from "../../splitTime";
 import { CanvasRequirements } from "./render/drawable";
 
 export enum ordering {
@@ -32,7 +32,7 @@ export class BodyRenderingGraph {
         if (body.drawables.length === 0) {
             throw new Error("No drawables")
         }
-        const drawArea = math.Rect.make(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0, 0)
+        const drawArea = Rect.make(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0, 0)
         for (const drawable of body.drawables) {
             const singleDrawArea = drawable.getCanvasRequirements().rect
             singleDrawArea.x += body.x
@@ -270,7 +270,7 @@ export class GraphBodyNode {
     readonly ref: int
     shouldBeDrawnThisFrame: boolean = false
     visitedThisFrame: boolean = false
-    drawArea: math.Rect | null = null
+    drawArea: Rect | null = null
     body: GraphBody
     /** bodies drawn before this one */
     before: GraphBodyNode[] = []
@@ -295,5 +295,5 @@ export interface GraphBody {
 }
 
 export interface GraphDrawable {
-    getCanvasRequirements(): splitTime.body.CanvasRequirements
+    getCanvasRequirements(): CanvasRequirements
 }

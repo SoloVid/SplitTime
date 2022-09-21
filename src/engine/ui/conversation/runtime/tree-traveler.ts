@@ -1,11 +1,11 @@
-import { SectionSpec } from "../spec/section-spec";
-import { ConversationLeafNode, SectionSpecPart } from "../misc-types";
-import { Line } from "../spec/line";
-import { CustomEventHandler } from "../../../world/body/custom-event-handler";
-import { ConversationSpec } from "../spec/conversation-spec";
-import { MidConversationAction } from "../spec/mid-conversation-action";
-import { LineSequence } from "../spec/line-sequence";
 import { assertNever } from "../../../splitTime";
+import { CustomEventHandler } from "../../../world/body/custom-event-handler";
+import { ConversationLeafNode, SectionSpecPart } from "../misc-types";
+import { ConversationSpec } from "../spec/conversation-spec";
+import { SpeechBubbleContentsSpec } from "../spec/line";
+import { LineSequence } from "../spec/line-sequence";
+import { MidConversationAction } from "../spec/mid-conversation-action";
+import { SectionSpec } from "../spec/section-spec";
 /**
  * Helper class for navigating forward through the conversation tree.
  */

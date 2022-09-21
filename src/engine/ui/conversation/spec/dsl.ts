@@ -1,6 +1,7 @@
 import { Speaker } from "../speaker";
 import { MidEventCallback } from "../../../time/mid-event-action";
 import { CustomEventHandler } from "../../../world/body/custom-event-handler";
+import { FancySetupFunc } from "../misc-types";
 
 export type Condition = true | (() => boolean)
 
@@ -16,7 +17,7 @@ export interface DSL {
     /** Allow localized interruptions/cancellations. */
     section: (sectionSetup: () => void, options?: Partial<Options>) => SectionChain
     /** Action in the middle of a conversation. */
-    do: (action: time.MidEventCallback) => void
+    do: (action: MidEventCallback) => void
     // waitUntil(condition: Condition): void
 }
 
@@ -39,7 +40,7 @@ export interface SectionChain {
     interruptible(
         condition?: Condition,
         sectionSetup?: () => void,
-        ...events: body.CustomEventHandler<void>[]
+        ...events: CustomEventHandler<void>[]
     ): SectionChain
 }
 

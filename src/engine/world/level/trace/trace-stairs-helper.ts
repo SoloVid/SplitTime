@@ -51,7 +51,7 @@ export class StairsPlane {
  */
 export function calculateStairsPlane(spec: TraceSpec, pointsArray2D: (Coordinates2D | null)[]): Coordinates3D[] {
     const extremes = spec.calculateStairsExtremes()
-    const stairsVector = new splitTime.Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y)
+    const stairsVector = new Vector2D(extremes.top.x - extremes.bottom.x, extremes.top.y - extremes.bottom.y)
     const stairsLength = stairsVector.magnitude
     const stairsUnitVector = stairsVector.times(1 / stairsLength)
     const totalDZ = spec.height
@@ -59,7 +59,7 @@ export function calculateStairsPlane(spec: TraceSpec, pointsArray2D: (Coordinate
         if(!point) {
             return point
         }
-        const partUpVector = new splitTime.Vector2D(point.x - extremes.bottom.x, point.y - extremes.bottom.y)
+        const partUpVector = new Vector2D(point.x - extremes.bottom.x, point.y - extremes.bottom.y)
         const distanceUp = partUpVector.dot(stairsUnitVector)
         // const distanceUp = stairsVector.times(partUpVector.dot(stairsVector) / (stairsLength * stairsLength)).magnitude
         const height = Math.min(Math.round(totalDZ * (distanceUp / stairsLength)), totalDZ)
@@ -98,7 +98,7 @@ export function calculateStairsPlane(spec: TraceSpec, pointsArray2D: (Coordinate
 export function applyStairsRenderingOrder(spriteBody: SpriteBody): void {
     const stairsTrace = findStairsTrace(spriteBody)
     stairsTrace.offset = new Coordinates3D(spriteBody.body.x, spriteBody.body.y, spriteBody.body.z)
-    const strippedPoints = splitTime.trace.ensureNoPositions(stairsTrace.getOffsetVertices())
+    const strippedPoints = ensureNoPositions(stairsTrace.getOffsetVertices())
     const stairsPlane = new StairsPlane(stairsTrace, strippedPoints)
     const verticalPlane = new TraceVerticalPlaneDivide(stairsTrace)
     spriteBody.body.shouldRenderInFrontCustom = otherBody => {
@@ -110,7 +110,7 @@ export function applyStairsRenderingOrder(spriteBody: SpriteBody): void {
 }
 
 function findStairsTrace(spriteBody: SpriteBody): TraceSpec {
-    const collage = G.ASSETS.collages.get(spriteBody.sprite.collageId)
+    const collage = ASSETS.collages.get(spriteBody.sprite.collageId)
     const montage = spriteBody.sprite.defaultMontageId ? collage.getMontage(spriteBody.sprite.defaultMontageId) : collage.getDefaultMontage()
     for (const trace of montage.traces) {
         if (trace.type === Type.STAIRS) {
