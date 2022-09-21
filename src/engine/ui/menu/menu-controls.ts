@@ -1,9 +1,5 @@
-namespace splitTime.menu {
-    export class MenuControls {
-        constructor(
-            readonly joyStick: controls.JoyStick,
-            readonly confirmButton: controls.Button,
-            readonly cancelButton: controls.Button
-        ) {}
-    }
+import { JoyStick } from "../controls/joy-stick";
+import { Button } from "../controls/button";
+export class MenuControls {
+    constructor(readonly joyStick: JoyStick, readonly confirmButton: Button, readonly cancelButton: Button) { }
 }

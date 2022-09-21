@@ -1,27 +1,23 @@
-namespace splitTime.npc {
+import { Behavior } from "./behavior";
+import { npc } from "../splitTime";
+/**
+ * Behavior that should only go on for a certain period of time.
+ *
+ * User of this API should stop calling #notifyTimeAdvance()
+ * on a TemporaryBehavior after #isComplete() returns true.
+ */
+export interface TemporaryBehavior extends Behavior {
     /**
-     * Behavior that should only go on for a certain period of time.
-     *
-     * User of this API should stop calling #notifyTimeAdvance()
-     * on a TemporaryBehavior after #isComplete() returns true.
+     * Has this behavior finished its purpose?
      */
-    export interface TemporaryBehavior extends Behavior {
-        /**
-         * Has this behavior finished its purpose?
-         */
-        isComplete(): boolean
+    isComplete(): boolean;
+}
+export function isBehaviorComplete(b: Behavior): boolean {
+    if (!npc.instanceOfTemporaryBehavior(b)) {
+        return false;
     }
-
-    export namespace instanceOf {
-        export function TemporaryBehavior(thing: Behavior): thing is TemporaryBehavior {
-            return typeof (thing as TemporaryBehavior).isComplete === "function"
-        }
-    }
-
-    export function isBehaviorComplete(b: Behavior): boolean {
-        if (!instanceOf.TemporaryBehavior(b)) {
-            return false
-        }
-        return b.isComplete()
-    }
+    return b.isComplete();
+}
+export function instanceOfTemporaryBehavior(thing: Behavior): thing is npc.TemporaryBehavior {
+    return typeof (thing as npc.TemporaryBehavior).isComplete === "function";
 }

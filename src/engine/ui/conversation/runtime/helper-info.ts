@@ -1,8 +1,5 @@
-namespace splitTime.conversation {
-    export class HelperInfo {
-        constructor(
-            public readonly playerBodyGetter: () => Body | null,
-            public readonly advanceEvent: body.CustomEventHandler<void>
-        ) {}
-    }
+import { CustomEventHandler } from "../../../world/body/custom-event-handler";
+import * as splitTime from "../../../splitTime";
+export class HelperInfo {
+    constructor(public readonly playerBodyGetter: () => splitTime.Body | null, public readonly advanceEvent: CustomEventHandler<void>) { }
 }

@@ -1,27 +1,24 @@
-namespace splitTime {
-    type region_json_t = {
-        id: string
+import { ObjectSerializer } from "../file/object-serializer";
+import { Region, World } from "../splitTime";
+import { AnySerializer, AnyDeserializer } from "../file/any-serializer";
+type region_json_t = {
+    id: string;
+};
+export class RegionSerializer implements ObjectSerializer<Region> {
+    constructor(private readonly world: World) { }
+    isT(thing: unknown): thing is Region {
+        return thing instanceof Region;
     }
-
-    export class RegionSerializer implements file.ObjectSerializer<Region> {
-        constructor(private readonly world: World) {}
-
-        isT(thing: unknown): thing is Region {
-            return thing instanceof Region
+    serialize(s: AnySerializer, thing: Region): region_json_t {
+        for (const level of thing.getLevels()) {
+            s.serialize(level);
         }
-
-        serialize(s: file.AnySerializer, thing: Region): region_json_t {
-            for (const level of thing.getLevels()) {
-                s.serialize(level)
-            }
-            s.serialize(thing.getTimeline())
-            return {
-                id: thing.id
-            }
-        }
-
-        deserialize(s: file.AnyDeserializer, data: region_json_t): Region {
-            return this.world.getRegion(data.id)
-        }
+        s.serialize(thing.getTimeline());
+        return {
+            id: thing.id
+        };
+    }
+    deserialize(s: AnyDeserializer, data: region_json_t): Region {
+        return this.world.getRegion(data.id);
     }
 }

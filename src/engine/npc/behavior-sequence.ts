@@ -1,43 +1,34 @@
-namespace splitTime.npc {
-    export class BehaviorSequence implements TemporaryBehavior {
-
-        private currentBehaviorIndex: int = 0
-
-        constructor(
-            private readonly behaviors: readonly TemporaryBehavior[]
-        ) {}
-
-        isComplete(): boolean {
-            return this.currentBehaviorIndex >= this.behaviors.length
+import { TemporaryBehavior } from "./temporary-behavior";
+import { int, game_seconds } from "../splitTime";
+export class BehaviorSequence implements TemporaryBehavior {
+    private currentBehaviorIndex: int = 0;
+    constructor(private readonly behaviors: readonly TemporaryBehavior[]) { }
+    isComplete(): boolean {
+        return this.currentBehaviorIndex >= this.behaviors.length;
+    }
+    notifySuspension(): void {
+        if (this.isComplete()) {
+            return;
         }
-
-        notifySuspension(): void {
-            if (this.isComplete()) {
-                return
-            }
-            this.currentBehavior.notifySuspension?.()
-            this.checkAdvance()
+        this.currentBehavior.notifySuspension?.();
+        this.checkAdvance();
+    }
+    notifyTimeAdvance(delta: game_seconds): void {
+        if (this.isComplete()) {
+            return;
         }
-
-        notifyTimeAdvance(delta: game_seconds): void {
-            if (this.isComplete()) {
-                return
-            }
-            this.currentBehavior.notifyTimeAdvance(delta)
-            this.checkAdvance()
+        this.currentBehavior.notifyTimeAdvance(delta);
+        this.checkAdvance();
+    }
+    private get currentBehavior(): TemporaryBehavior {
+        if (this.isComplete()) {
+            throw new Error("BehaviorSequence invoked after completion");
         }
-
-        private get currentBehavior(): TemporaryBehavior {
-            if (this.isComplete()) {
-                throw new Error("BehaviorSequence invoked after completion")
-            }
-            return this.behaviors[this.currentBehaviorIndex]
-        }
-
-        private checkAdvance(): void {
-            if (this.currentBehavior.isComplete()) {
-                this.currentBehaviorIndex++
-            }
+        return this.behaviors[this.currentBehaviorIndex];
+    }
+    private checkAdvance(): void {
+        if (this.currentBehavior.isComplete()) {
+            this.currentBehaviorIndex++;
         }
     }
 }

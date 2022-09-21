@@ -1,5 +1,3 @@
-namespace splitTime.conversation {
-    export interface ConversationEndHandler {
-        onConversationEnd(): void
-    }
+export interface ConversationEndHandler {
+    onConversationEnd(): void;
 }

@@ -210,9 +210,9 @@ namespace splitTime.editor {
         this.collage = null
         // Promise.resolve().then(() => {
             const fileObject = JSON.parse(file)
-            if (splitTime.level.instanceOf.FileData(fileObject)) {
+            if (splitTime.level.instanceOfFileData(fileObject)) {
                 this.level = level.importLevel(file)
-            } else if (splitTime.file.instanceOf.Collage(fileObject)) {
+            } else if (splitTime.file.instanceOfCollage(fileObject)) {
                 this.collage = fileObject
             } else {
                 throw new Error("Unrecognized file type")

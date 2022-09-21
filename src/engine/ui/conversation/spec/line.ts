@@ -1,25 +1,28 @@
-namespace splitTime.conversation {
-    export class SpeechBubbleContentsSpec {
-        private parent: LineSequence | null = null
+import { LineSequence } from "./line-sequence";
+import { Speaker } from "../speaker";
+import { Options } from "./dsl";
+import { assert } from "../../../splitTime";
 
-        constructor(
-            public readonly speaker: Speaker | null,
-            public readonly parts: readonly TextPart[],
-            public readonly options?: Partial<Options>
-        ) {}
+export class SpeechBubbleContentsSpec {
+    private parent: LineSequence | null = null
 
-        setParent(parent: LineSequence): void {
-            assert(this.parent === null, "Line parent can only be set once")
-            this.parent = parent
-        }
+    constructor(
+        public readonly speaker: Speaker | null,
+        public readonly parts: readonly TextPart[],
+        public readonly options?: Partial<Options>
+    ) {}
 
-        getParent(): LineSequence {
-            assert(this.parent !== null, "Line parent should have been set")
-            return this.parent
-        }
+    setParent(parent: LineSequence): void {
+        assert(this.parent === null, "Line parent can only be set once")
+        this.parent = parent
     }
 
-    export function makeSimpleLine(speaker: Speaker | null, line: string, options?: Partial<Options>) {
-        return new SpeechBubbleContentsSpec(speaker, [{text: line}], options)
+    getParent(): LineSequence {
+        assert(this.parent !== null, "Line parent should have been set")
+        return this.parent
     }
+}
+
+export function makeSimpleLine(speaker: Speaker | null, line: string, options?: Partial<Options>) {
+    return new SpeechBubbleContentsSpec(speaker, [{text: line}], options)
 }

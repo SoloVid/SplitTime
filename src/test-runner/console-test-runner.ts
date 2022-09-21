@@ -25,11 +25,11 @@ namespace splitTime.testRunner {
             }
             if(passedCount < scenarios.length) {
                 this.redError(passedCount + "/" + scenarios.length + " tests passed")
-                if(__NODE__) {
-                    process.exit(1)
-                } else {
+                // if(__NODE__) {
+                //     process.exit(1)
+                // } else {
                     throw new Error("Test run failed")
-                }
+                // }
             } else {
                 this.greenInfo(passedCount + "/" + scenarios.length + " tests passed")
             }
