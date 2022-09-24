@@ -1,3 +1,3 @@
-interface Signaler {
+export interface Signaler {
     isSignaling(): boolean;
 }

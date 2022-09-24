@@ -1,3 +1,3 @@
-namespace splitTime.utils {
-    splitTime.test.group(utils, "Utils Tests", splitTime)
-}
+import { splitTime } from "../test-split-time"
+
+export const utils = splitTime.group("Utils Tests")

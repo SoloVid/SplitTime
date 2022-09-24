@@ -1,3 +1,3 @@
-namespace splitTime.level {
-    splitTime.test.group(level, "Level Tests", splitTime)
-}
+import { splitTime } from "../../test-split-time"
+
+export const level = splitTime.group("Level Tests")

@@ -1,45 +1,54 @@
-namespace splitTime.testRunner {
-    export type TestFunction = (t: TestHelper) => void
-    export type GroupId = object
+import { test } from "under-the-sun"
+import { __NODE__ } from "../environment"
+import { ExceptionTestHelper } from "./exception-test-helper"
+import { TestHelper } from "./test-helper"
 
-    export class TestDef {
-        constructor(
-            public readonly description: string,
-            public readonly definition: TestFunction,
-            public readonly parentId: GroupId | null
-        ) {}
-    }
+export type TestFunction = (t: TestHelper) => void
+export type GroupId = object
 
-    export class GroupDef {
-        constructor(
-            public readonly id: GroupId,
-            public readonly parentId: GroupId | null,
-            public readonly description: string
-        ) {}
-    }
-
-    export class TestCollection {
-        private scenarios: TestDef[] = []
-        private groups: GroupDef[] = []
-
-        scenario(parent: GroupId | null, description: string, definition: TestFunction): void {
-            this.scenarios.push(new TestDef(description, definition, parent))
-        }
-
-        group(id: GroupId, description: string, parent: GroupId | null = null): void {
-            this.groups.push(new GroupDef(id, parent, description))
-        }
-
-        getScenarios(): readonly TestNode[] {
-            return this.scenarios.map((def, i) => new TestNode(i, def.description, def.definition))
-        }
-
-        getTree(): TestTree {
-            return new TestTree(this.groups, this.scenarios)
-        }
-    }
+export class TestDef {
+    constructor(
+        public readonly description: string,
+        public readonly definition: TestFunction,
+    ) {}
 }
 
-namespace splitTime {
-    export const test = new testRunner.TestCollection()
+export type GlobalTestDef = {
+    id: string,
+    definition: TestFunction,
+}
+
+export class GroupDef {
+    private scenarios: TestDef[] = []
+    private groups: GroupDef[] = []
+
+    constructor(
+        public readonly parentId: GroupId | null,
+        public readonly description: string,
+        public readonly ancestorsDescriptionPrefix: string = "",
+    ) {}
+
+    scenario(description: string, definition: TestFunction): void {
+        this.scenarios.push(new TestDef(description, definition))
+
+        if (__NODE__) {
+            test(this.ancestorsDescriptionPrefix + description, () => definition(new ExceptionTestHelper()))
+        }
+    }
+
+    group(description: string): GroupDef {
+        const group = new GroupDef(parent, description, `${this.ancestorsDescriptionPrefix}${this.description} > `)
+        this.groups.push(group)
+        return group
+    }
+
+    getAllScenarios(): readonly GlobalTestDef[] {
+        return [
+            ...this.scenarios.map(s => ({ id: `${this.ancestorsDescriptionPrefix}${this.description} > ${s.description}`, definition: s.definition })),
+            ...this.groups.reduce((soFar, g) => {
+                const result: GlobalTestDef[] = [...soFar, ...g.getAllScenarios()]
+                return result
+            }, [] as GlobalTestDef[]),
+        ]
+    }
 }

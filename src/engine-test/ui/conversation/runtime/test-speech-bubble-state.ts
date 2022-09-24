@@ -1,161 +1,164 @@
-namespace splitTime.conversation {
-    const group = {}
-    splitTime.test.group(group, "SpeechBubbleState", conversation)
+import { game_seconds, Timeline } from "../../../../engine/time/timeline"
+import { SpeechBubbleState } from "../../../../engine/ui/conversation/runtime/speech-bubble"
+import { AdvanceMethod, DASH, howLongForChar } from "../../../../engine/ui/conversation/settings"
+import { TextPart } from "../../../../engine/ui/conversation/spec/text-part"
+import { conversation } from "../test-conversation"
 
-    const line = "Hi, mom!"
-    const lineParts = [{text: line}]
+const group = conversation.group("SpeechBubbleState")
 
-    splitTime.test.scenario(group, "SpeechBubbleState#notifyFrameUpdate() moves dialog forward", t => {
-        const timeline = new MockTimeline()
-        const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
+const line = "Hi, mom!"
+const lineParts = [{text: line}]
 
-        // Beginning
-        t.assert(!bubble.isFinished(), "Bubble should start unfinished")
-        t.assertEqual(line.charAt(0), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should start with first character")
+group.scenario("SpeechBubbleState#notifyFrameUpdate() moves dialog forward", t => {
+    const timeline = new MockTimeline()
+    const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
 
-        bubble.notifyFrameUpdate()
-        t.assertEqual(line.charAt(0), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should stay as is if no time passed")
+    // Beginning
+    t.assert(!bubble.isFinished(), "Bubble should start unfinished")
+    t.assertEqual(line.charAt(0), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should start with first character")
 
-        // Just before first character advance
-        timeline.time = 0.9 * bubble.msPerChar / 1000
-        bubble.notifyFrameUpdate()
-        t.assertEqual(line.charAt(0), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should stay at first character until msPerChar reached")
+    bubble.notifyFrameUpdate()
+    t.assertEqual(line.charAt(0), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should stay as is if no time passed")
 
-        // Just after first character advance
-        timeline.time = 1.001 * bubble.msPerChar / 1000
-        bubble.notifyFrameUpdate()
-        t.assertEqual(line.substr(0, 2), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should show next character after msPerChar")
+    // Just before first character advance
+    timeline.time = 0.9 * bubble.msPerChar / 1000
+    bubble.notifyFrameUpdate()
+    t.assertEqual(line.charAt(0), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should stay at first character until msPerChar reached")
 
-        const totalTimeForLine = line.split("").reduce(
-            (total, char) => total + howLongForChar(char, bubble.msPerChar), 0) / 1000
-        const lastChar = line.charAt(line.length - 1)
-        const msForLastChar = howLongForChar(lastChar, bubble.msPerChar)
+    // Just after first character advance
+    timeline.time = 1.001 * bubble.msPerChar / 1000
+    bubble.notifyFrameUpdate()
+    t.assertEqual(line.substr(0, 2), partsToString(bubble.getDisplayedCurrentParts()), "Bubble should show next character after msPerChar")
 
-        // Just before last character
-        timeline.time = totalTimeForLine - ((msForLastChar + 1) / 1000)
-        bubble.notifyFrameUpdate()
-        const almostLine = line.substr(0, line.length - 1)
-        t.assertEqual(almostLine, partsToString(bubble.getDisplayedCurrentParts()), "Bubble should advance characters consistently")
-        t.assert(!bubble.isFinished(), "Bubble should remain unfinished while line incomplete")
+    const totalTimeForLine = line.split("").reduce(
+        (total, char) => total + howLongForChar(char, bubble.msPerChar), 0) / 1000
+    const lastChar = line.charAt(line.length - 1)
+    const msForLastChar = howLongForChar(lastChar, bubble.msPerChar)
 
-        // Just after last character
-        timeline.time = 1.001 * totalTimeForLine
-        bubble.notifyFrameUpdate()
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Bubble should hit end of line at correct time")
-        t.assert(!bubble.isFinished(), "Bubble should remain unfinished for delay after line finishes")
+    // Just before last character
+    timeline.time = totalTimeForLine - ((msForLastChar + 1) / 1000)
+    bubble.notifyFrameUpdate()
+    const almostLine = line.substr(0, line.length - 1)
+    t.assertEqual(almostLine, partsToString(bubble.getDisplayedCurrentParts()), "Bubble should advance characters consistently")
+    t.assert(!bubble.isFinished(), "Bubble should remain unfinished while line incomplete")
 
-        // Just before delay end
-        timeline.time = totalTimeForLine + 0.9 * (bubble.delay - msForLastChar) / 1000
-        bubble.notifyFrameUpdate()
-        t.assert(!bubble.isFinished(), "Bubble should remain unfinished for (delay - msForLastChar) after line finishes")
+    // Just after last character
+    timeline.time = 1.001 * totalTimeForLine
+    bubble.notifyFrameUpdate()
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Bubble should hit end of line at correct time")
+    t.assert(!bubble.isFinished(), "Bubble should remain unfinished for delay after line finishes")
 
-        // Just after delay end
-        timeline.time = totalTimeForLine + 1.001 * (bubble.delay - msForLastChar)
-        bubble.notifyFrameUpdate()
-        t.assert(bubble.isFinished(), "Bubble should be finished after delay")
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Bubble should still show full line after finish")
-    })
+    // Just before delay end
+    timeline.time = totalTimeForLine + 0.9 * (bubble.delay - msForLastChar) / 1000
+    bubble.notifyFrameUpdate()
+    t.assert(!bubble.isFinished(), "Bubble should remain unfinished for (delay - msForLastChar) after line finishes")
 
-    splitTime.test.scenario(group, "SpeechBubbleState#advance() jumps to end", t => {
-        const timeline = new MockTimeline()
-        const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
+    // Just after delay end
+    timeline.time = totalTimeForLine + 1.001 * (bubble.delay - msForLastChar)
+    bubble.notifyFrameUpdate()
+    t.assert(bubble.isFinished(), "Bubble should be finished after delay")
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Bubble should still show full line after finish")
+})
 
-        bubble.advance()
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should be displayed")
-        t.assert(!bubble.isFinished(), "Bubble should not be finished immediately after advance")
+group.scenario("SpeechBubbleState#advance() jumps to end", t => {
+    const timeline = new MockTimeline()
+    const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
 
-        timeline.time = bubble.delay / 2 / 1000
-        bubble.notifyFrameUpdate()
-        t.assert(!bubble.isFinished(), "Bubble should still not be finished before delay")
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should still be displayed")
+    bubble.advance()
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should be displayed")
+    t.assert(!bubble.isFinished(), "Bubble should not be finished immediately after advance")
 
-        timeline.time = 1.001 * bubble.delay / 1000
-        bubble.notifyFrameUpdate()
-        t.assert(bubble.isFinished(), "Bubble should finish after delay")
-    })
+    timeline.time = bubble.delay / 2 / 1000
+    bubble.notifyFrameUpdate()
+    t.assert(!bubble.isFinished(), "Bubble should still not be finished before delay")
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should still be displayed")
 
-    splitTime.test.scenario(group, "SpeechBubbleState#advance() x2 forces finish", t => {
-        const timeline = new MockTimeline()
-        const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
+    timeline.time = 1.001 * bubble.delay / 1000
+    bubble.notifyFrameUpdate()
+    t.assert(bubble.isFinished(), "Bubble should finish after delay")
+})
 
-        // Advance to end
-        bubble.advance()
-        // Force finish
-        bubble.advance()
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should be displayed")
-        t.assert(bubble.isFinished(), "Bubble should not be finished immediately after advance")
+group.scenario("SpeechBubbleState#advance() x2 forces finish", t => {
+    const timeline = new MockTimeline()
+    const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
 
-        timeline.time = 0.1
-        bubble.notifyFrameUpdate()
-        t.assert(bubble.isFinished(), "Bubble should still be finished after time passes")
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should still be displayed")
-    })
+    // Advance to end
+    bubble.advance()
+    // Force finish
+    bubble.advance()
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should be displayed")
+    t.assert(bubble.isFinished(), "Bubble should not be finished immediately after advance")
 
-    splitTime.test.scenario(group, "SpeechBubbleState#advance() is required to finish INTERACTION", t => {
-        const timeline = new MockTimeline()
-        const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
-        bubble.setAdvanceMethod(AdvanceMethod.INTERACTION)
+    timeline.time = 0.1
+    bubble.notifyFrameUpdate()
+    t.assert(bubble.isFinished(), "Bubble should still be finished after time passes")
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should still be displayed")
+})
 
-        bubble.notifyFrameUpdate()
-        timeline.time = 9999
-        bubble.notifyFrameUpdate()
-        t.assert(!bubble.isFinished(), "Bubble (INTERACTION) shouldn't finish by itself")
-        bubble.advance()
-        t.assert(bubble.isFinished(), "Bubble (INTERACTION) finishes after advance")
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should still be displayed")
-    })
+group.scenario("SpeechBubbleState#advance() is required to finish INTERACTION", t => {
+    const timeline = new MockTimeline()
+    const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
+    bubble.setAdvanceMethod(AdvanceMethod.INTERACTION)
 
-    splitTime.test.scenario(group, "SpeechBubbleState#interrupt() adds dash and jumps to end", t => {
-        const timeline = new MockTimeline()
-        const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
+    bubble.notifyFrameUpdate()
+    timeline.time = 9999
+    bubble.notifyFrameUpdate()
+    t.assert(!bubble.isFinished(), "Bubble (INTERACTION) shouldn't finish by itself")
+    bubble.advance()
+    t.assert(bubble.isFinished(), "Bubble (INTERACTION) finishes after advance")
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Full line should still be displayed")
+})
 
-        bubble.interrupt()
-        t.assertEqual(line.charAt(0) + DASH, partsToString(bubble.getDisplayedCurrentParts()), "Cut line should be displayed")
-        t.assert(!bubble.isFinished(), "Bubble should not be finished immediately after advance")
+group.scenario("SpeechBubbleState#interrupt() adds dash and jumps to end", t => {
+    const timeline = new MockTimeline()
+    const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
 
-        timeline.time = bubble.delay / 2 / 1000
-        bubble.notifyFrameUpdate()
-        t.assert(!bubble.isFinished(), "Bubble should still not be finished before delay")
-        t.assertEqual(line.charAt(0) + DASH, partsToString(bubble.getDisplayedCurrentParts()), "Cut line should still be displayed")
+    bubble.interrupt()
+    t.assertEqual(line.charAt(0) + DASH, partsToString(bubble.getDisplayedCurrentParts()), "Cut line should be displayed")
+    t.assert(!bubble.isFinished(), "Bubble should not be finished immediately after advance")
 
-        timeline.time = 1.001 * bubble.delay / 1000
-        bubble.notifyFrameUpdate()
-        t.assert(bubble.isFinished(), "Bubble should finish after delay")
-    })
+    timeline.time = bubble.delay / 2 / 1000
+    bubble.notifyFrameUpdate()
+    t.assert(!bubble.isFinished(), "Bubble should still not be finished before delay")
+    t.assertEqual(line.charAt(0) + DASH, partsToString(bubble.getDisplayedCurrentParts()), "Cut line should still be displayed")
 
-    splitTime.test.scenario(group, "SpeechBubbleState#interrupt() just jumps to end if close enough", t => {
-        const timeline = new MockTimeline()
-        const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
+    timeline.time = 1.001 * bubble.delay / 1000
+    bubble.notifyFrameUpdate()
+    t.assert(bubble.isFinished(), "Bubble should finish after delay")
+})
 
-        // FTODO: Don't duplicate stanza with other test.
-        const totalTimeForLine = line.split("").reduce(
-            (total, char) => total + howLongForChar(char, bubble.msPerChar), 0) / 1000
-        const lastChar = line.charAt(line.length - 1)
-        const msForLastChar = howLongForChar(lastChar, bubble.msPerChar)
+group.scenario("SpeechBubbleState#interrupt() just jumps to end if close enough", t => {
+    const timeline = new MockTimeline()
+    const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
 
-        // Just before last character
-        timeline.time = totalTimeForLine - ((msForLastChar + 1) / 1000)
-        bubble.notifyFrameUpdate()
+    // FTODO: Don't duplicate stanza with other test.
+    const totalTimeForLine = line.split("").reduce(
+        (total, char) => total + howLongForChar(char, bubble.msPerChar), 0) / 1000
+    const lastChar = line.charAt(line.length - 1)
+    const msForLastChar = howLongForChar(lastChar, bubble.msPerChar)
 
-        bubble.interrupt()
-        t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Finished line should be displayed")
-        t.assert(!bubble.isFinished(), "Bubble should not be finished immediately after advance")
+    // Just before last character
+    timeline.time = totalTimeForLine - ((msForLastChar + 1) / 1000)
+    bubble.notifyFrameUpdate()
 
-        timeline.time += 1.001 * bubble.delay / 1000
-        bubble.notifyFrameUpdate()
-        t.assert(bubble.isFinished(), "Bubble should finish after delay")
-    })
+    bubble.interrupt()
+    t.assertEqual(line, partsToString(bubble.getDisplayedCurrentParts()), "Finished line should be displayed")
+    t.assert(!bubble.isFinished(), "Bubble should not be finished immediately after advance")
 
-    function makeMockTimeline(): MockTimeline & Timeline {
-        return new MockTimeline() as MockTimeline & Timeline
-    }
+    timeline.time += 1.001 * bubble.delay / 1000
+    bubble.notifyFrameUpdate()
+    t.assert(bubble.isFinished(), "Bubble should finish after delay")
+})
 
-    function partsToString(parts: readonly Readonly<TextPart>[]): string {
-        return parts.reduce((s, p) => s + p.text, "")
-    }
+function makeMockTimeline(): MockTimeline & Timeline {
+    return new MockTimeline() as MockTimeline & Timeline
+}
 
-    class MockTimeline {
-        time: game_seconds = 0
-        readonly getTime = () => this.time
-    }
+function partsToString(parts: readonly Readonly<TextPart>[]): string {
+    return parts.reduce((s, p) => s + p.text, "")
+}
+
+class MockTimeline {
+    time: game_seconds = 0
+    readonly getTime = () => this.time
 }

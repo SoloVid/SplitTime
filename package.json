@@ -31,7 +31,8 @@
     "@types/uglify-js": "^3.0.2",
     "es6-promise": "^4.2.8",
     "howler": "~2.1.3",
-    "typescript": "^4.4.2"
+    "typescript": "~4.8",
+    "under-the-sun": "^1.0.1"
   },
   "dependencies": {
     "concat-with-sourcemaps": "^1.1.0",

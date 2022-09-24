@@ -1,25 +1,25 @@
-namespace splitTime.testRunner {
-    export class ExceptionTestHelper implements TestHelper {
-        assert(expression: boolean, message: string): void {
-            if(!expression) {
-                throw new Error(message)
-            }
-        }
+import { TestHelper } from "./test-helper"
 
-        assertEqual<T>(expected: T, actual: T, message: string): void {
-            if(expected !== actual) {
-                throw new Error(message + "\n\tExpected: |" + JSON.stringify(expected) + "|\n\tActual:   |" + JSON.stringify(actual) + "|\n")
-            }
+export class ExceptionTestHelper implements TestHelper {
+    assert(expression: boolean, message: string): void {
+        if(!expression) {
+            throw new Error(message)
         }
+    }
 
-        assertThrow(callback: () => void, message: string): void {
-            let exceptionThrown = false
-            try {
-                callback()
-            } catch (e: unknown) {
-                exceptionThrown = true
-            }
-            this.assert(exceptionThrown, message)
+    assertEqual<T>(expected: T, actual: T, message: string): void {
+        if(expected !== actual) {
+            throw new Error(message + "\n\tExpected: |" + JSON.stringify(expected) + "|\n\tActual:   |" + JSON.stringify(actual) + "|\n")
         }
+    }
+
+    assertThrow(callback: () => void, message: string): void {
+        let exceptionThrown = false
+        try {
+            callback()
+        } catch (e: unknown) {
+            exceptionThrown = true
+        }
+        this.assert(exceptionThrown, message)
     }
 }

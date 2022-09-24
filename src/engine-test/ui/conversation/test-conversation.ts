@@ -1,3 +1,3 @@
-namespace splitTime.conversation {
-    splitTime.test.group(conversation, "Conversation", splitTime.ui)
-}
+import { ui } from "../test-ui"
+
+export const conversation = ui.group("Conversation")

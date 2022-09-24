@@ -1,3 +1,5 @@
+import { Signaler } from "./signaler";
+
 export class IntervalStabilizer implements Signaler {
     msPerFrame: number;
     maxCounter: number;

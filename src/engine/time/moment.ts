@@ -1,4 +1,4 @@
-import { game_seconds, defer } from "../splitTime";
+import { game_seconds } from "../splitTime";
 export class Moment {
     private cachedActualTimeCalculation: game_seconds | null = null;
     private amountOfTime: game_seconds | null = null;
@@ -10,7 +10,6 @@ export class Moment {
         this.amountOfTime = amountOfTime;
     }
     setTime(amountOfTime: game_seconds, relativeTo: Moment) {
-        defer();
         if (this.amountOfTime !== null) {
             throw new Error("Time of moment has already been set");
         }

@@ -1,3 +1,3 @@
-namespace splitTime {
-    splitTime.test.group(splitTime, "All SplitTime Tests")
-}
+import { GroupDef } from "../test-runner/test"
+
+export const splitTime = new GroupDef(null, "All Tests")
