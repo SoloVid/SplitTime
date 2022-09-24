@@ -8,6 +8,28 @@ import { trace } from "./test-trace"
 
 const aboveOrBelowStairsGroup = trace.group("isPointAboveStairs()")
 
+class StairsFixture {
+    private readonly spec: TraceSpec
+    private readonly points: (Coordinates2D | null)[]
+    private readonly stairsPlane: StairsPlane
+    constructor(
+        direction: string,
+        z: int,
+        height: int,
+        private readonly coords: CoordinateList
+    ) {
+        this.spec = makeSpec(coords, direction, z, height)
+        this.points = this.coords.map(c => new Coordinates3D(c[0], c[1]))
+        this.points.push(null)
+        this.stairsPlane = new StairsPlane(this.spec, this.points)
+    }
+
+    isPointAbove(x: int, y: int, z: int): boolean {
+        const pointCoord = new Coordinates3D(x, y, z)
+        return this.stairsPlane.isPointAboveStairs(pointCoord)
+    }
+}
+
 aboveOrBelowStairsGroup.scenario("Edge cases", t => {
     const stairs = new StairsFixture("E", 1, 5, [
         [0, 0],
@@ -66,28 +88,6 @@ aboveOrBelowStairsGroup.scenario("Diagonal stairs", t => {
 })
 
 type CoordinateList = [x: int, y: int][]
-
-class StairsFixture {
-    private readonly spec: TraceSpec
-    private readonly points: (Coordinates2D | null)[]
-    private readonly stairsPlane: StairsPlane
-    constructor(
-        direction: string,
-        z: int,
-        height: int,
-        private readonly coords: CoordinateList
-    ) {
-        this.spec = makeSpec(coords, direction, z, height)
-        this.points = this.coords.map(c => new Coordinates3D(c[0], c[1]))
-        this.points.push(null)
-        this.stairsPlane = new StairsPlane(this.spec, this.points)
-    }
-
-    isPointAbove(x: int, y: int, z: int): boolean {
-        const pointCoord = new Coordinates3D(x, y, z)
-        return this.stairsPlane.isPointAboveStairs(pointCoord)
-    }
-}
 
 function makeSpec(coords: CoordinateList, direction: string, z: int, height: int): TraceSpec {
     const verticesStr = coords.map(c => "(" + c[0] + ", " + c[1] + ")").join(" ") + " (close)"

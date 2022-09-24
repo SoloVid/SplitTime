@@ -30,10 +30,7 @@ export class GroupDef {
         this.scenarios.push(new TestDef(description, definition))
 
         if (__NODE__) {
-            console.log("setting up UTS test for " + description)
             test(this.ancestorsDescriptionPrefix + description, () => definition(new ExceptionTestHelper()))
-        } else {
-            console.log("NOT setting up UTS test for " + description)
         }
     }
 
