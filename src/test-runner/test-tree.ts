@@ -1,4 +1,4 @@
-import { GroupId, TestFunction } from "./test"
+import { TestFunction } from "./test"
 import { TestStatus, TestStatusType } from "./test-status"
 
 export type Node = GroupNode | TestNode
@@ -6,7 +6,7 @@ export type Node = GroupNode | TestNode
 export class GroupNode {
     public children: Node[] = []
     constructor(
-        public readonly id: GroupId,
+        // public readonly id: GroupId,
         public readonly description: string
     ) {}
 

@@ -9,6 +9,11 @@ const group = conversation.group("SpeechBubbleState")
 const line = "Hi, mom!"
 const lineParts = [{text: line}]
 
+class MockTimeline {
+    time: game_seconds = 0
+    readonly getTime = () => this.time
+}
+
 group.scenario("SpeechBubbleState#notifyFrameUpdate() moves dialog forward", t => {
     const timeline = new MockTimeline()
     const bubble = new SpeechBubbleState(lineParts, timeline as unknown as Timeline)
@@ -150,15 +155,6 @@ group.scenario("SpeechBubbleState#interrupt() just jumps to end if close enough"
     t.assert(bubble.isFinished(), "Bubble should finish after delay")
 })
 
-function makeMockTimeline(): MockTimeline & Timeline {
-    return new MockTimeline() as MockTimeline & Timeline
-}
-
 function partsToString(parts: readonly Readonly<TextPart>[]): string {
     return parts.reduce((s, p) => s + p.text, "")
-}
-
-class MockTimeline {
-    time: game_seconds = 0
-    readonly getTime = () => this.time
 }

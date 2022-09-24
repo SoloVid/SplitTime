@@ -26,4 +26,4 @@ export class TemplateManager {
 // This object is a convenience for game code and should not be used in engine code
 // It is also used by the level editor
 // FTODO: Try to remove this singleton and instead let the game code specify this.
-export const BODY_TEMPLATES = new body.TemplateManager();
+export const BODY_TEMPLATES = new TemplateManager();

@@ -1,18 +1,18 @@
-import { int, assert } from "../splitTime";
+import { int, assert, __NODE__, __DOM__ } from "../splitTime";
 // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
 export const MAX_SAFE_INTEGER = 9007199254740991;
 let SCRIPT_DIRECTORY = "<UNKNOWN>";
-// if(__DOM__) {
-// from https://stackoverflow.com/a/2161748/4639640
-var scripts = document.getElementsByTagName("script");
-var path = scripts[scripts.length - 1].src.split("?")[0]; // remove ?query
-SCRIPT_DIRECTORY = path
-    .split("/")
-    .slice(0, -1)
-    .join("/"); // remove last filename part of path
-// } else if(__NODE__) {
-//     SCRIPT_DIRECTORY = __dirname
-// }
+if(__DOM__) {
+    // from https://stackoverflow.com/a/2161748/4639640
+    var scripts = document.getElementsByTagName("script");
+    var path = scripts[scripts.length - 1].src.split("?")[0]; // remove ?query
+    SCRIPT_DIRECTORY = path
+        .split("/")
+        .slice(0, -1)
+        .join("/"); // remove last filename part of path
+} else if(__NODE__) {
+    SCRIPT_DIRECTORY = __dirname
+}
 export function getScriptDirectory(): string {
     return SCRIPT_DIRECTORY;
 }

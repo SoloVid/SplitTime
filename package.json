@@ -17,7 +17,8 @@
     "build": "tsc -b && node build/tsjs/build-tools/build-engine.js",
     "clean": "rm -rf build",
     "start": "node build/editor-server.js",
-    "test": "node build/engine-test.js"
+    "test0": "node build/engine-test.js",
+    "test": "uts -r esbuild-register src/engine-test"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.15.2",
@@ -30,6 +31,7 @@
     "@types/rrdir": "^8.2.2",
     "@types/uglify-js": "^3.0.2",
     "es6-promise": "^4.2.8",
+    "esbuild-register": "^3.3.3",
     "howler": "~2.1.3",
     "typescript": "~4.8",
     "under-the-sun": "^1.0.1"

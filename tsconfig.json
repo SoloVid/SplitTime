@@ -2,7 +2,7 @@
   "extends": "./src/tsconfig-base.json",
   "references": [
     { "path": "./src" },
-    { "path": "./src/editor" },
+    // { "path": "./src/editor" },
     { "path": "./src/engine" },
     { "path": "./src/engine-test" },
     { "path": "./src/test-runner"}

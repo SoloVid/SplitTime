@@ -4,7 +4,6 @@ import { ExceptionTestHelper } from "./exception-test-helper"
 import { TestHelper } from "./test-helper"
 
 export type TestFunction = (t: TestHelper) => void
-export type GroupId = object
 
 export class TestDef {
     constructor(
@@ -23,7 +22,6 @@ export class GroupDef {
     private groups: GroupDef[] = []
 
     constructor(
-        public readonly parentId: GroupId | null,
         public readonly description: string,
         public readonly ancestorsDescriptionPrefix: string = "",
     ) {}
@@ -32,12 +30,15 @@ export class GroupDef {
         this.scenarios.push(new TestDef(description, definition))
 
         if (__NODE__) {
+            console.log("setting up UTS test for " + description)
             test(this.ancestorsDescriptionPrefix + description, () => definition(new ExceptionTestHelper()))
+        } else {
+            console.log("NOT setting up UTS test for " + description)
         }
     }
 
     group(description: string): GroupDef {
-        const group = new GroupDef(parent, description, `${this.ancestorsDescriptionPrefix}${this.description} > `)
+        const group = new GroupDef(description, `${this.ancestorsDescriptionPrefix}${this.description} > `)
         this.groups.push(group)
         return group
     }
