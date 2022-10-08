@@ -43,6 +43,7 @@ export * from "./world/body/sprite-body";
 export * from "./world/body/collisions/collision-calculator";
 export * from "./world/body/render/animation";
 export * from "./world/body/render/sprite";
+export * from "./world/body/render/word-sprite";
 export * from "./world/level/level-loader";
 export * from "./world/level/level-location";
 export * from "./world/level/level-manager";

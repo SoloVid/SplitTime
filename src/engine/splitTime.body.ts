@@ -15,5 +15,6 @@ export * from "./world/body/render/ghosty";
 export * from "./world/body/render/light";
 export * from "./world/body/render/shadow";
 export * from "./world/body/render/spot-light";
+export * from "./world/body/apply-motion";
 import * as collisions from "./splitTime.body.collisions";
 export { collisions };

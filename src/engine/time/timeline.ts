@@ -32,7 +32,7 @@ export class Timeline {
     private regions: Region[] = [];
     private readonly fixtureEvents: FixtureEvent[] = [];
     private upcomingEvents: ScheduledEvent<unknown>[] = [];
-    readonly beginning: Moment = new Moment(0);
+    readonly beginning: Moment = new Moment(0, null);
     kSecondsPerRealSecond: game_seconds = 1;
     kSecondsPerMinute: number = 60;
     kMinutesPerHour: number = 60;
