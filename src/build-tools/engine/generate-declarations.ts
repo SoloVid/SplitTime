@@ -1,6 +1,6 @@
 import * as fsOrig from "fs"
 import * as pathOrig from "path"
-import * as rrdir from "rrdir"
+import rrdir from "rrdir"
 import { slash, writeFile } from "../common/file-helper"
 const fs = fsOrig.promises
 const path = pathOrig.posix

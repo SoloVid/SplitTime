@@ -1,7 +1,8 @@
 import * as fsOrig from "fs"
 import * as pathOrig from "path"
-import * as rrdir from "rrdir"
-import { join, slash, writeFile } from "../common/file-helper"
+import rrdir from "rrdir"
+import { join, relative, slash, writeFile } from "../common/file-helper"
+import { forAllFiles } from "../common/walk-files"
 import {
     COLLAGE_DIRECTORY,
     IMAGE_DIRECTORY,
@@ -50,37 +51,50 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
     ])
 
     const dataFileContents =
-        "var G = G || {};\nG._GAME_DATA = " + JSON.stringify(gameData) + ";"
-    const generatedFile = "build/generated/data.js"
+        "export const gameData = " + JSON.stringify(gameData) + ";"
+    const generatedFile = "build/generated/game-data.js"
     await writeFile(join(projectRoot, generatedFile), dataFileContents)
 }
 
 async function getAllRelativePaths(dir: string): Promise<string[]> {
     const relPaths: string[] = []
-    for await (const entry of rrdir(dir)) {
-        if (entry.directory) {
-            continue
-        }
-        const relPath = path.relative(dir, slash(entry.path))
-        relPaths.push(relPath)
-    }
+    await forAllFiles(dir, f => {
+        relPaths.push(relative(dir, f))
+    })
+    // for await (const entry of rrdir(dir)) {
+    //     if (entry.directory) {
+    //         continue
+    //     }
+    //     const relPath = path.relative(dir, slash(entry.path))
+    //     relPaths.push(relPath)
+    // }
     return relPaths
 }
 
 async function getJsonFileDataMap(dir: string): Promise<FileDataMap> {
     const map: FileDataMap = {}
-    for await (const entry of rrdir(dir)) {
-        if (entry.directory) {
-            continue
-        }
-        const relPath = path.relative(dir, slash(entry.path))
-        if (/\.json$/.test(entry.path)) {
-            const contents = await fs.readFile(entry.path)
+    await forAllFiles(dir, async f => {
+        const relPath = relative(dir, f)
+        if (/\.json$/.test(relPath)) {
+            const contents = await fs.readFile(f)
             const fileData = JSON.parse(contents.toString())
             map[relPath] = fileData
         } else {
-            console.warn("Non-JSON file found in level directory: " + relPath)
+            console.warn("Non-JSON file found in directory: " + relPath)
         }
-    }
+    })
+    // for await (const entry of rrdir(dir)) {
+    //     if (entry.directory) {
+    //         continue
+    //     }
+    //     const relPath = path.relative(dir, slash(entry.path))
+    //     if (/\.json$/.test(entry.path)) {
+    //         const contents = await fs.readFile(entry.path)
+    //         const fileData = JSON.parse(contents.toString())
+    //         map[relPath] = fileData
+    //     } else {
+    //         console.warn("Non-JSON file found in level directory: " + relPath)
+    //     }
+    // }
     return map
 }

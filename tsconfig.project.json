@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES5",
-    "module": "none",
+    "moduleResolution": "node",
+    "module": "CommonJS",
+    "isolatedModules": true,
     "lib": ["DOM", "ES5", "ES2015"],
     "typeRoots": ["build/@types/"],
     "sourceMap": true,
@@ -9,6 +11,10 @@
     "noEmitOnError": true,
     "strict": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "spt": ["./src/engine/splitTime"],
+      "assets": ["./src/engine/assets/assets"]
+    }
   }
 }

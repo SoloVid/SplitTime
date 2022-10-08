@@ -1,5 +1,12 @@
 {
   "extends": "../../tsconfig-base.json",
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "isolatedModules": true
+  },
   "include": [
     "./**/*.ts"
   ],

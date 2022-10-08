@@ -1,9 +1,10 @@
-namespace splitTime.editor.server {
-    export class Helper {
-        public readonly pathHelper: PathHelper
+import { Config } from "./config"
+import { PathHelper } from "./path-helper"
 
-        constructor(public readonly config: Config) {
-            this.pathHelper = new PathHelper(config)
-        }
+export class Helper {
+    public readonly pathHelper: PathHelper
+
+    constructor(public readonly config: Config) {
+        this.pathHelper = new PathHelper(config)
     }
 }

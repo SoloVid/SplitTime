@@ -7,6 +7,10 @@ export function join(...args: string[]): string {
     return slash(path.join.apply(path, args))
 }
 
+export function relative(from: string, to: string): string {
+    return slash(path.relative(from, to))
+}
+
 export function slash(filePath: string): string {
     return filePath.replace(/\\/g, "/")
 }
