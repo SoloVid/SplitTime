@@ -8,8 +8,8 @@ import { isA, object, string, array, number } from "../utils/type";
  */
 export interface Collage {
     image: string;
-    frames: collage.Frame[];
-    montages: collage.Montage[];
+    frames: readonly collage.Frame[];
+    montages: readonly collage.Montage[];
     /** Reference to a {@link collage.Montage} in {@link Collage#montages} */
     defaultMontageId: string;
 }
@@ -35,9 +35,9 @@ export interface Frame {
 export interface Montage {
     id: string;
     direction: string;
-    frames: MontageFrame[];
+    frames: readonly MontageFrame[];
     body: BodySpec;
-    traces: Trace[];
+    traces: readonly Trace[];
     /**
      * Identifier for a post-processor that will have a chance
      * to touch any props created from this montage.

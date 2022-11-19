@@ -1,5 +1,6 @@
-import { Canvas, GenericCanvasRenderingContext2D, int, assert } from "../../splitTime";
+import { Canvas, GenericCanvasRenderingContext2D, int, assert, Assets } from "../../splitTime";
 import { ENABLED, attachDebug } from "../../utils/debug";
+import { DrawingBoard, makeAssetDrawingBoard } from "./drawing-board";
 /**
  * This is the actual viewing window for the player to see the game.
  * Right now it is just a wrapper for a canvas, but it could
@@ -7,17 +8,19 @@ import { ENABLED, attachDebug } from "../../utils/debug";
  */
 export class View {
     public readonly seeB: Canvas;
-    public readonly see: GenericCanvasRenderingContext2D;
-    constructor(public readonly width: int, public readonly height: int) {
-        this.seeB = new Canvas(width, height);
+    public readonly seeC: GenericCanvasRenderingContext2D;
+    public readonly see: DrawingBoard
+    constructor(private readonly assets: Assets, public readonly width: int, public readonly height: int) {
+        this.see = makeAssetDrawingBoard(assets, width, height)
+        this.seeB = this.see.raw;
         if (this.seeB.element instanceof HTMLCanvasElement) {
             this.seeB.element.setAttribute("id", "game-window");
             this.seeB.element.setAttribute("style", "display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);");
         }
-        this.see = this.seeB.context;
-        this.see.font = "20px Arial";
-        this.see.fillText("If this message persists for more than a few seconds,", 10, 30);
-        this.see.fillText("this game will not run on your browser.", 10, 60);
+        this.seeC = this.seeB.context;
+        this.see.raw.context.font = "20px Arial";
+        this.see.raw.context.fillText("If this message persists for more than a few seconds,", 10, 30);
+        this.see.raw.context.fillText("this game will not run on your browser.", 10, 60);
     }
     /**
      * Attach view to DOM

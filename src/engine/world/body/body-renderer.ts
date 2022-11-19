@@ -4,6 +4,7 @@ import { ENABLED } from "../../utils/debug";
 import { error } from "../../utils/logger";
 import { Drawable } from "./render/drawable";
 import * as splitTime from "../../splitTime";
+import { DrawingBoard } from "../../ui/viewport/drawing-board";
 export class Renderer {
     private readonly graph = new BodyRenderingGraph();
     private _nodes: (BodyNode | null)[] = [];
@@ -14,14 +15,14 @@ export class Renderer {
         x: number;
         y: number;
     } | null = null;
-    private ctx: GenericCanvasRenderingContext2D | null = null;
+    private drawingBoard: DrawingBoard | null = null;
     constructor(private readonly camera: Camera) { }
     notifyNewFrame(screen: {
         x: number;
         y: number;
-    }, ctx: GenericCanvasRenderingContext2D) {
+    }, drawingBoard: DrawingBoard) {
         this.screen = screen;
-        this.ctx = ctx;
+        this.drawingBoard = drawingBoard;
         this.graph.notifyNewFrame();
     }
     /**
@@ -153,23 +154,23 @@ export class Renderer {
     }
     private drawBodyDrawable(node: BodyNode, drawable: Drawable): void {
         //FTODO: revisit
-        if (!this.ctx || !this.screen) {
+        if (!this.drawingBoard || !this.screen) {
             return;
         }
         // TODO: potentially give the body a cleared personal canvas if requested
         // Translate origin to body location
         const translateOriginTarget = drawable.getDesiredOrigin(node.graphNode.body);
-        this.ctx.translate(Math.round(translateOriginTarget.x - this.screen.x), Math.round(translateOriginTarget.y - translateOriginTarget.z - this.screen.y));
+        this.drawingBoard.raw.context.translate(Math.round(translateOriginTarget.x - this.screen.x), Math.round(translateOriginTarget.y - translateOriginTarget.z - this.screen.y));
         //Set the opacity for this body, but ease toward it
         node.opacity = approachValue(node.opacity, node.targetOpacity, 0.05);
-        this.ctx.globalAlpha = node.opacity;
+        this.drawingBoard.raw.context.globalAlpha = node.opacity;
         //Draw the body
-        drawable.draw(this.ctx);
+        drawable.draw(this.drawingBoard);
         //Reset opacity settings back to default (1 - "not opaque")
-        this.ctx.globalAlpha = 1;
+        this.drawingBoard.raw.context.globalAlpha = 1;
         node.targetOpacity = 1;
         // Reset transform
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.drawingBoard.raw.context.setTransform(1, 0, 0, 1, 0, 0);
     }
 }
 class BodyNode {

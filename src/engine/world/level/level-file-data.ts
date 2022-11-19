@@ -10,10 +10,10 @@ export interface FileData {
     background: string;
     backgroundOffsetX: int;
     backgroundOffsetY: int;
-    groups: file_data.Group[];
-    traces: file_data.Trace[];
-    props: file_data.Prop[];
-    positions: file_data.Position[];
+    groups: readonly file_data.Group[];
+    traces: readonly file_data.Trace[];
+    props: readonly file_data.Prop[];
+    positions: readonly file_data.Position[];
 }
 // Expect compiler error if FileData is not jsonable
 let testFileDataJsonable: IsJsonable<FileData, false> = {} as FileData;

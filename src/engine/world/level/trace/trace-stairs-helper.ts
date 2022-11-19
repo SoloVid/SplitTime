@@ -1,9 +1,8 @@
-import { Vector3D, Coordinates2D, assert, Coordinates3D, Vector2D, SpriteBody } from "../../../splitTime";
-import { TraceSpec } from "./trace-spec";
-import { ensureNoPositions } from "./trace-points";
-import { TraceVerticalPlaneDivide } from "./trace-vertical-plane-divide";
-import { ASSETS } from "../../../G";
+import { assert, Coordinates2D, Coordinates3D, SpriteBody, Vector2D, Vector3D } from "../../../splitTime";
 import { Type } from "./trace-misc";
+import { ensureNoPositions } from "./trace-points";
+import { TraceSpec } from "./trace-spec";
+import { TraceVerticalPlaneDivide } from "./trace-vertical-plane-divide";
 
 const upward = new Vector3D(0, 0, 1)
 export class StairsPlane {
@@ -110,7 +109,7 @@ export function applyStairsRenderingOrder(spriteBody: SpriteBody): void {
 }
 
 function findStairsTrace(spriteBody: SpriteBody): TraceSpec {
-    const collage = ASSETS.collages.get(spriteBody.sprite.collageId)
+    const collage = spriteBody.sprite.collage
     const montage = spriteBody.sprite.defaultMontageId ? collage.getMontage(spriteBody.sprite.defaultMontageId) : collage.getDefaultMontage()
     for (const trace of montage.traces) {
         if (trace.type === Type.STAIRS) {

@@ -1,7 +1,8 @@
-import { Drawable, CanvasRequirements } from "./drawable";
-import { Coordinates3D, GenericCanvasRenderingContext2D, COLLISION_CALCULATOR } from "../../../splitTime";
+import { DrawingBoard } from "engine/ui/viewport/drawing-board";
 import { Rect } from "../../../math/rect";
 import * as splitTime from "../../../splitTime";
+import { COLLISION_CALCULATOR, Coordinates3D } from "../../../splitTime";
+import { CanvasRequirements, Drawable } from "./drawable";
 export class Shadow implements Drawable {
     realBody: splitTime.Body;
     shadowBody: splitTime.Body;
@@ -27,19 +28,19 @@ export class Shadow implements Drawable {
     getCanvasRequirements(): CanvasRequirements {
         return new CanvasRequirements(Rect.make(-this.radius / 2, -this.radius / 2, this.radius, this.radius));
     }
-    draw(ctx: GenericCanvasRenderingContext2D) {
+    draw(drawingBoard: DrawingBoard) {
         var // Radii of the white glow.
         innerRadius = 2, outerRadius = this.radius, 
         // Radius of the entire circle.
         radius = this.radius;
-        var gradient = ctx.createRadialGradient(0, 0, innerRadius, 0, 0, outerRadius);
+        var gradient = drawingBoard.raw.context.createRadialGradient(0, 0, innerRadius, 0, 0, outerRadius);
         gradient.addColorStop(0, "rgba(0, 0, 0, .7)");
         gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.scale(1, 0.5);
-        ctx.beginPath();
-        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = gradient;
-        ctx.fill();
+        drawingBoard.raw.context.scale(1, 0.5);
+        drawingBoard.raw.context.beginPath();
+        drawingBoard.raw.context.arc(0, 0, radius, 0, 2 * Math.PI);
+        drawingBoard.raw.context.fillStyle = gradient;
+        drawingBoard.raw.context.fill();
     }
     notifyTimeAdvance(delta: number) {
         // Do nothing

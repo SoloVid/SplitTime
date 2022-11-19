@@ -1,9 +1,9 @@
 import { PropPostProcessor } from "./prop-post-processor";
 import { CompiledGameData, Level, Timeline, Region } from "../splitTime";
-import { _GAME_DATA } from "../G";
+
 export class World {
     public readonly propPostProcessor = new PropPostProcessor();
-    constructor(gameData: CompiledGameData = _GAME_DATA) {
+    constructor(public readonly gameData: CompiledGameData) {
         const levelMap = gameData.levels;
         for (const levelFilePath in levelMap) {
             const levelData = levelMap[levelFilePath];

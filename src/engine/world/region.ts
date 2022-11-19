@@ -1,4 +1,4 @@
-import { Level, Timeline, game_seconds, World } from "../splitTime";
+import { Level, Timeline, game_seconds, World, Assets } from "../splitTime";
 // A region is a logical unit of levels that are loaded together and share a common timeline
 export class Region {
     private levels: Level[] = [];
@@ -29,16 +29,16 @@ export class Region {
             this.levels[iLevel].notifyTimeAdvance(delta, absoluteTime);
         }
     }
-    loadForPlay(world: World): PromiseLike<void> {
+    loadForPlay(world: World, assets: Assets): PromiseLike<void> {
         var promises = [];
         for (var i = 0; i < this.levels.length; i++) {
-            promises.push(this.levels[i].loadForPlay(world));
+            promises.push(this.levels[i].loadForPlay(world, assets));
         }
         return Promise.all(promises).then();
     }
-    unloadLevels() {
+    unloadLevels(assets: Assets) {
         for (var i = 0; i < this.levels.length; i++) {
-            this.levels[i].unload();
+            this.levels[i].unload(assets);
         }
     }
 }

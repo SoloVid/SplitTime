@@ -8,6 +8,7 @@ export async function runEsbuild(entryPointPath: string, tsconfigPath: string, o
         bundle: true,
         platform: "neutral",
         format: "iife",
+        mainFields: ["module"],
         tsconfig: tsconfigPath,
         outfile: outputFilePath,
         sourcemap: true,

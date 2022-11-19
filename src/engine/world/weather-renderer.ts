@@ -1,9 +1,9 @@
+import { DrawingBoard } from "engine/ui/viewport/drawing-board";
 import { int, Canvas, Camera, Level, GenericCanvasRenderingContext2D, mod, randomInt } from "../splitTime";
 import { getFromLevel } from "../time/time-helper";
-import { ASSETS } from "../G";
 // TODO: Try not to let these be global state like this.
-export let RAIN_IMAGE: string = "rain.png";
-export let CLOUDS_IMAGE: string = "stormClouds.png";
+// export let RAIN_IMAGE: string = "rain.png";
+// export let CLOUDS_IMAGE: string = "stormClouds.png";
 const COUNTER_BASE = 25600;
 export class WeatherRenderer {
     private readonly SCREEN_WIDTH: int;
@@ -14,31 +14,31 @@ export class WeatherRenderer {
         this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT;
         this.buffer = new Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
     }
-    render(level: Level, ctx: GenericCanvasRenderingContext2D) {
+    render(level: Level, drawingBoard: DrawingBoard) {
         const screen = this.camera.getScreenCoordinates();
-        this.applyLighting(level, screen, ctx);
+        this.applyLighting(level, screen, drawingBoard);
         const counter = Math.round(getFromLevel(level) * 100) % COUNTER_BASE;
         //Weather
         if (level.weather.isRaining) {
-            ctx.drawImage(ASSETS.images.get(RAIN_IMAGE), -((counter % 100) / 100) * this.SCREEN_WIDTH, ((counter % 25) / 25) * this.SCREEN_HEIGHT -
-                this.SCREEN_HEIGHT);
+            // ctx.drawImage(ASSETS.images.get(RAIN_IMAGE), -((counter % 100) / 100) * this.SCREEN_WIDTH, ((counter % 25) / 25) * this.SCREEN_HEIGHT -
+            //     this.SCREEN_HEIGHT);
         }
         if (level.weather.isCloudy) {
             var CLOUDS_WIDTH = 2560;
             var CLOUDS_HEIGHT = 480;
             var xPixelsShift = -mod(counter - screen.x, CLOUDS_WIDTH);
             var yPixelsShift = mod(screen.y, CLOUDS_HEIGHT);
-            ctx.globalAlpha = level.weather.cloudAlpha;
-            this.drawTiled(ASSETS.images.get(CLOUDS_IMAGE), ctx, xPixelsShift, yPixelsShift);
-            ctx.globalAlpha = 1;
+            drawingBoard.raw.context.globalAlpha = level.weather.cloudAlpha;
+            // this.drawTiled(ASSETS.images.get(CLOUDS_IMAGE), ctx, xPixelsShift, yPixelsShift);
+            drawingBoard.raw.context.globalAlpha = 1;
         }
         if (level.weather.lightningFrequency > 0) {
             // TODO: tie to time rather than frames
             const FPS = 60;
             if (randomInt(FPS * 60) <=
                 level.weather.lightningFrequency) {
-                ctx.fillStyle = "rgba(255, 255, 255, .75)";
-                ctx.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+                drawingBoard.raw.context.fillStyle = "rgba(255, 255, 255, .75)";
+                drawingBoard.raw.context.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
             }
         }
     }
@@ -69,7 +69,7 @@ export class WeatherRenderer {
     private applyLighting(level: Level, screen: {
         x: number;
         y: number;
-    }, ctx: GenericCanvasRenderingContext2D) {
+    }, drawingBoard: DrawingBoard) {
         //Transparentize buffer
         this.buffer.context.clearRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         //Fill with light
@@ -93,10 +93,10 @@ export class WeatherRenderer {
         }
         // Return to default
         this.buffer.context.globalCompositeOperation = "source-over";
-        ctx.globalCompositeOperation = "multiply";
+        drawingBoard.raw.context.globalCompositeOperation = "multiply";
         //Render buffer
-        ctx.drawImage(this.buffer.element, 0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+        drawingBoard.raw.context.drawImage(this.buffer.element, 0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         //Return to default splitTime.image layering
-        ctx.globalCompositeOperation = "source-over";
+        drawingBoard.raw.context.globalCompositeOperation = "source-over";
     }
 }

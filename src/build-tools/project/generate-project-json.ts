@@ -50,9 +50,19 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
             .then(list => { gameData.soundEffectFiles = list }),
     ])
 
-    const dataFileContents =
-        "export const gameData = " + JSON.stringify(gameData) + ";"
-    const generatedFile = "build/generated/game-data.js"
+    const dataFileContents = `// GENERATED FILE. DO NOT MODIFY.
+
+import { Assets, getScriptDirectory } from "splittime"
+
+/** @deprecated Use {@link assets} instead. */
+export const gameData = ${JSON.stringify(gameData, null, 2)} as const
+
+export const assets = new Assets(getScriptDirectory(), gameData)
+/** @deprecated Use {@link assets} instead. */
+export const ASSETS = assets
+
+`;
+    const generatedFile = "build/generated/assets.ts"
     await writeFile(join(projectRoot, generatedFile), dataFileContents)
 }
 

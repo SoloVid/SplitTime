@@ -1,4 +1,4 @@
-import { LevelLoader, Position, Region, int, WeatherSettings, World, Canvas, game_seconds } from "../../splitTime";
+import { LevelLoader, Position, Region, int, WeatherSettings, World, Canvas, game_seconds, Assets } from "../../splitTime";
 import { CellGrid } from "./cell-grid";
 import { Traces2 } from "./level-traces2";
 import { FileData } from "./level-file-data";
@@ -52,8 +52,8 @@ export class Level {
             throw new Error("Level " + this.id + " is not currently loaded");
         }
     }
-    load(world: World, levelData: FileData): PromiseLike<void> {
-        return this.loader.loadAssets(world);
+    load(world: World, levelData: FileData, assets: Assets): PromiseLike<void> {
+        return this.loader.loadAssets(world, assets);
     }
     getCellGrid(): CellGrid {
         this.ensureLoaded();
@@ -176,15 +176,15 @@ export class Level {
             this.bodies.splice(iBody, 1);
         }
     }
-    loadForPlay(world: World): PromiseLike<void> {
-        return this.loader.loadForPlay(world).then(() => {
+    loadForPlay(world: World, assets: Assets): PromiseLike<void> {
+        return this.loader.loadForPlay(world, assets).then(() => {
             this.loaded = true;
         });
     }
-    unload(): void {
+    unload(assets: Assets): void {
         //TODO: give listeners a chance to clean up
         this.loaded = false;
-        this.loader.unload();
+        this.loader.unload(assets);
     }
     isLoaded(): boolean {
         return this.loaded;

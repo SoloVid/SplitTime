@@ -1,7 +1,6 @@
-import { Vector3D, Coordinates3D, SpriteBody, assert } from "../../../splitTime";
-import { TraceSpec } from "./trace-spec";
 import { getXExtremes } from "../../../math/polygon/polygon-turning-points";
-import { ASSETS } from "../../../G";
+import { assert, Coordinates3D, SpriteBody, Vector3D } from "../../../splitTime";
+import { TraceSpec } from "./trace-spec";
 const backward = new Vector3D(0, -1, 0);
 export class TraceVerticalPlaneDivide {
     private readonly v1: Vector3D;
@@ -50,7 +49,7 @@ export function applyVerticalPlaneRenderingOrder(spriteBody: SpriteBody): void {
     };
 }
 function findFirstTrace(spriteBody: SpriteBody): TraceSpec {
-    const collage = ASSETS.collages.get(spriteBody.sprite.collageId);
+    const collage = spriteBody.sprite.collage;
     const montage = spriteBody.sprite.defaultMontageId ? collage.getMontage(spriteBody.sprite.defaultMontageId) : collage.getDefaultMontage();
     assert(montage.traces.length === 1, "Montage must have a single trace");
     return TraceSpec.fromRaw(montage.traces[0]);

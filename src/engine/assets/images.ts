@@ -1,3 +1,7 @@
+export type ImageRef = {
+    load: () => Promise<HTMLImageElement>
+    get: () => HTMLImageElement
+}
 export class Images {
     constructor(private readonly root: string) { }
     private map: {
@@ -6,6 +10,9 @@ export class Images {
     private loadingPromises: {
         [relativePath: string]: Promise<HTMLImageElement>;
     } = {};
+    /**
+     * @deprecated Use {@link get2} instead
+     */
     load(relativePath: string, alias?: string, isPermanent: boolean = false): Promise<HTMLImageElement> {
         if (relativePath in this.loadingPromises) {
             return this.loadingPromises[relativePath];
@@ -28,11 +35,20 @@ export class Images {
         this.loadingPromises[relativePath] = promise;
         return promise;
     }
-    get(name: string): HTMLImageElement {
+    /**
+     * @deprecated Use {@link get2} instead
+     */
+     get(name: string): HTMLImageElement {
         if (!this.map[name]) {
             this.load(name);
             // TODO: throw exception?
         }
         return this.map[name];
+    }
+    get2(relativePath: string, alias?: string, isPermanent: boolean = false): ImageRef {
+        return {
+            load: () => this.load(relativePath, alias, isPermanent),
+            get: () => this.get(relativePath),
+        }
     }
 }

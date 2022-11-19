@@ -55,9 +55,9 @@ export function object<T extends object>(definition: ObjectTypeDefinition<NotArr
         return true;
     };
 }
-type ArrayItemType<T> = T extends (infer U)[] ? U : never;
+type ArrayItemType<T> = T extends readonly (infer U)[] ? U : never;
 type ArrayTypeDefinition<T> = TypeChecker<ArrayItemType<T>>;
-export function array<T extends unknown[]>(checker: ArrayTypeDefinition<T>): TypeChecker<T> {
+export function array<T extends readonly unknown[]>(checker: ArrayTypeDefinition<T>): TypeChecker<T> {
     return function (thing: unknown): thing is T {
         if (!Array.isArray(thing)) {
             return false;

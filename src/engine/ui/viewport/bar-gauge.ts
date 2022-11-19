@@ -17,18 +17,20 @@ export class BarGauge implements Renderer {
         roundedRect.cornerRadius = Math.min(roundedRect.cornerRadius, this.width / 2, this.height / 2);
         const left = mod(this.x, view.width);
         const top = mod(this.y, view.height);
-        roundedRect.doPath(view.see, left, top, this.width, this.height);
-        view.see.strokeStyle = this.outlineStyle;
-        view.see.lineWidth = this.outlineWidth;
-        view.see.stroke();
-        try {
-            view.see.save();
-            view.see.clip();
-            view.see.fillStyle = this.colorGetter().cssString;
-            view.see.fillRect(left, top, this.width * this.fractionGetter(), this.height);
-        }
-        finally {
-            view.see.restore();
-        }
+        view.see.withRawCanvasContext((ctx) => {
+            roundedRect.doPath(ctx, left, top, this.width, this.height);
+            ctx.strokeStyle = this.outlineStyle;
+            ctx.lineWidth = this.outlineWidth;
+            ctx.stroke();
+            try {
+                ctx.save();
+                ctx.clip();
+                ctx.fillStyle = this.colorGetter().cssString;
+                ctx.fillRect(left, top, this.width * this.fractionGetter(), this.height);
+            }
+            finally {
+                ctx.restore();
+            }
+        })
     }
 }

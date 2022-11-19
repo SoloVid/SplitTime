@@ -1,5 +1,5 @@
 import { FileData } from "./level-file-data";
-import { Level, World, Position, Trace, level, assert, Sprite, SpriteBody } from "../../splitTime";
+import { Level, World, Position, Trace, level, assert, Sprite, SpriteBody, Assets } from "../../splitTime";
 import { CellGrid } from "./cell-grid";
 import { interpret } from "../../math/direction";
 import { warn } from "../../utils/logger";
@@ -7,7 +7,6 @@ import { TraceSpec } from "./trace/trace-spec";
 import { Type } from "./trace/trace-misc";
 import { smoothPut } from "../body/render/ghosty";
 import { extractCoordinates } from "./trace/trace-points";
-import { ASSETS } from "../../G";
 import { Traces2 } from "./level-traces2";
 import * as splitTime from "../../splitTime";
 export class LevelLoader {
@@ -109,18 +108,19 @@ export class LevelLoader {
             }
         }
     }
-    private refetchBodies(world: World) {
+    private refetchBodies(world: World, ASSETS: Assets) {
         assert(this.fileData !== null, "Level must have file data");
         this.level._cellGrid = new CellGrid(this.level);
         for (const body of this.level.bodies) {
             this.level._cellGrid.addBody(body);
         }
         for (const prop of this.fileData.props) {
-            const collageMontage = ASSETS.collages.get(prop.collage).getMontage(prop.montage);
+            const collage = ASSETS.collages.get(prop.collage)
+            const collageMontage = collage.getMontage(prop.montage);
             // const sprite = new Sprite(prop.collage, prop.montage)
             const body = new splitTime.Body();
             body.ethereal = true;
-            const sprite = new Sprite(body, prop.collage, prop.montage);
+            const sprite = new Sprite(body, collage, prop.montage);
             sprite.playerOcclusionFadeFactor = collageMontage.playerOcclusionFadeFactor;
             body.width = collageMontage.bodySpec.width;
             body.depth = collageMontage.bodySpec.depth;
@@ -139,12 +139,12 @@ export class LevelLoader {
             }
         }
     }
-    async loadAssets(world: World): Promise<void> {
+    async loadAssets(world: World, ASSETS: Assets): Promise<void> {
         await ASSETS.images.load(this.level.background);
     }
-    async loadForPlay(world: World): Promise<void> {
-        await this.loadAssets(world);
-        this.refetchBodies(world);
+    async loadForPlay(world: World, ASSETS: Assets): Promise<void> {
+        await this.loadAssets(world, ASSETS);
+        this.refetchBodies(world, ASSETS);
         assert(this.fileData !== null, "Level must have file data to be loaded");
         const traceSpecs = this.fileData.traces.map(t => TraceSpec.fromRaw(t));
         for (const prop of this.fileData.props) {
@@ -164,7 +164,7 @@ export class LevelLoader {
         });
         this.level._levelTraces = new Traces2(traces, this.level.width, this.level.yWidth);
     }
-    unload() {
+    unload(ASSETS: Assets) {
         //Clear out all functional maps and other high-memory resources
         this.level._levelTraces = null;
         this.level._cellGrid = null;

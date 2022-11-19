@@ -3,6 +3,7 @@ import { Color } from "../../../light/color";
 import { Drawable, CanvasRequirements } from "./drawable";
 import { Rect } from "../../../math/rect";
 import * as splitTime from "../../../splitTime";
+import { DrawingBoard } from "engine/ui/viewport/drawing-board";
 export class Particle {
     seed: number = Math.random();
     /** Milliseconds since spawned */
@@ -149,17 +150,19 @@ export class ParticleEmitter implements Drawable {
     getCanvasRequirements(): CanvasRequirements {
         return new CanvasRequirements(Rect.make(-this.xres / 2, -this.yres / 2, this.xres, this.yres));
     }
-    draw(ctx: GenericCanvasRenderingContext2D) {
-        const initialOpacity = ctx.globalAlpha;
-        for (const particle of this._particles) {
-            ctx.beginPath();
-            const modColor = new Color(particle.color.r, particle.color.g, particle.color.b, particle.color.a * particle.fadeOpacity);
-            ctx.fillStyle = modColor.cssString;
-            // ctx.globalAlpha = initialOpacity * particle.color.a
-            ctx.arc(particle.position.x, particle.position.y, particle.radius, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.fill();
-        }
+    draw(drawingBoard: DrawingBoard) {
+        drawingBoard.withRawCanvasContext((ctx) => {
+            const initialOpacity = ctx.globalAlpha;
+            for (const particle of this._particles) {
+                ctx.beginPath();
+                const modColor = new Color(particle.color.r, particle.color.g, particle.color.b, particle.color.a * particle.fadeOpacity);
+                ctx.fillStyle = modColor.cssString;
+                // ctx.globalAlpha = initialOpacity * particle.color.a
+                ctx.arc(particle.position.x, particle.position.y, particle.radius, 0, Math.PI * 2, true);
+                ctx.closePath();
+                ctx.fill();
+            }
+        })
     }
     applyLighting(ctx: GenericCanvasRenderingContext2D, intensity: number): void {
         for (const particle of this._particles) {

@@ -108,25 +108,27 @@ export class Renderer {
             var dialog = drawing.dialog
             var location = dialog.getLocation()
             const measureParts = elideParts(dialog.getPartsForMeasurement())
-            if (location) {
-                this.sayFromBoardFocalPoint(
-                    view.see,
-                    {
-                        x: location.x,
-                        y: location.y,
-                        z: location.z
-                    },
-                    measureParts,
-                    dialog.getDisplayedCharCount(),
-                    dialog.speaker ?? ""
-                )
-            } else {
-                this.simpleMessage(
-                    view.see,
-                    measureParts,
-                    dialog.getDisplayedCharCount()
-                )
-            }
+            view.see.withRawCanvasContext((ctx) => {
+                if (location) {
+                    this.sayFromBoardFocalPoint(
+                        ctx,
+                        {
+                            x: location.x,
+                            y: location.y,
+                            z: location.z
+                        },
+                        measureParts,
+                        dialog.getDisplayedCharCount(),
+                        dialog.speaker ?? ""
+                    )
+                } else {
+                    this.simpleMessage(
+                        ctx,
+                        measureParts,
+                        dialog.getDisplayedCharCount()
+                    )
+                }
+            })
         }
     }
 

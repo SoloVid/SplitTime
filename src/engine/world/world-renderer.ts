@@ -1,16 +1,32 @@
-import { int, Canvas, WeatherRenderer, Pledge, Camera, GenericCanvasRenderingContext2D, LevelManager, Coordinates2D, Level } from "../splitTime";
-import { Renderer } from "./body/body-renderer";
+import { DrawingBoard, makeAssetDrawingBoard } from "engine/ui/viewport/drawing-board";
 import { Color } from "../light/color";
-import { Shadow } from "./body/render/shadow";
-import { ENABLED, DRAW_TRACES } from "../utils/debug";
-import { ASSETS } from "../G";
 import * as splitTime from "../splitTime";
-type body_getter = () => splitTime.Body | null;
+import { Assets, Camera, Canvas, Coordinates2D, int, Level, LevelManager, Pledge, WeatherRenderer } from "../splitTime";
+import { DRAW_TRACES, ENABLED } from "../utils/debug";
+import { Renderer } from "./body/body-renderer";
+import { Shadow } from "./body/render/shadow";
+
+type BodyGetter = () => splitTime.Body | null;
+
+type Options = {
+    assets: Assets
+    camera: Camera,
+    see: DrawingBoard,
+    levelManager: LevelManager,
+    playerBodyGetter: BodyGetter,
+}
+
 export class WorldRenderer {
+    private readonly assets: Assets
+    private readonly camera: Camera
+    private readonly see: DrawingBoard
+    private readonly levelManager: LevelManager
+    private readonly playerBodyGetter: BodyGetter
+
     private readonly SCREEN_WIDTH: int;
     private readonly SCREEN_HEIGHT: int;
-    private readonly buffer: Canvas;
-    private readonly snapshot: Canvas;
+    private readonly buffer: DrawingBoard;
+    private readonly snapshot: DrawingBoard;
     private readonly bodyRenderer: Renderer;
     private readonly weatherRenderer: WeatherRenderer;
     private fadingOut: boolean = false;
@@ -21,22 +37,28 @@ export class WorldRenderer {
     private fadeToTransparency: number = 1;
     private fadeOutPromise: Pledge = new Pledge();
     private fadeInPromise: Pledge = new Pledge();
-    constructor(private readonly camera: Camera, private readonly see: GenericCanvasRenderingContext2D, private readonly levelManager: LevelManager, private readonly playerBodyGetter: body_getter) {
-        this.SCREEN_WIDTH = camera.SCREEN_WIDTH;
-        this.SCREEN_HEIGHT = camera.SCREEN_HEIGHT;
-        this.buffer = new Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-        this.snapshot = new Canvas(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+    constructor(options: Options) {
+        this.assets = options.assets
+        this.camera = options.camera
+        this.see = options.see
+        this.levelManager = options.levelManager
+        this.playerBodyGetter = options.playerBodyGetter
+
+        this.SCREEN_WIDTH = this.camera.SCREEN_WIDTH;
+        this.SCREEN_HEIGHT = this.camera.SCREEN_HEIGHT;
+        this.buffer = makeAssetDrawingBoard(this.assets, this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
+        this.snapshot = makeAssetDrawingBoard(this.assets, this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
         this.bodyRenderer = new Renderer(this.camera);
         this.weatherRenderer = new WeatherRenderer(this.camera);
     }
     renderBoardState(forceCalculate: boolean) {
         if (!forceCalculate) {
-            this.see.drawImage(this.snapshot.element, 0, 0);
+            this.see.raw.context.drawImage(this.snapshot.raw.element, 0, 0);
             return;
         }
         const currentLevel = this.levelManager.getCurrent();
         const screen = this.camera.getScreenCoordinates();
-        this.bodyRenderer.notifyNewFrame(screen, this.snapshot.context);
+        this.bodyRenderer.notifyNewFrame(screen, this.snapshot);
         var bodies = currentLevel.getBodies();
         var playerBody = this.playerBodyGetter();
         for (var iBody = 0; iBody < bodies.length; iBody++) {
@@ -55,22 +77,22 @@ export class WorldRenderer {
         }
         //Rendering sequence
         // buffer.context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        this.snapshot.context.clearRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+        this.snapshot.raw.context.clearRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         this.bodyRenderer.render();
-        this.snapshot.context.globalAlpha = 1;
-        this.snapshot.context.globalCompositeOperation = "destination-over";
-        this.drawBackground(this.snapshot.context, screen, currentLevel);
-        this.snapshot.context.globalCompositeOperation = "source-over";
+        this.snapshot.raw.context.globalAlpha = 1;
+        this.snapshot.raw.context.globalCompositeOperation = "destination-over";
+        this.drawBackground(this.snapshot, screen, currentLevel);
+        this.snapshot.raw.context.globalCompositeOperation = "source-over";
         if (ENABLED && DRAW_TRACES) {
             const backShift = this.getBackShift(screen);
-            this.snapshot.context.globalAlpha = 0.5;
-            this.snapshot.context.drawImage(currentLevel.getDebugTraceCanvas().element, screen.x + backShift.x, screen.y + backShift.y, this.SCREEN_WIDTH - 2 * backShift.x, this.SCREEN_HEIGHT - 2 * backShift.y, backShift.x, backShift.y, this.SCREEN_WIDTH - 2 * backShift.x, this.SCREEN_HEIGHT - 2 * backShift.y);
-            this.snapshot.context.globalAlpha = 1;
+            this.snapshot.raw.context.globalAlpha = 0.5;
+            this.snapshot.raw.context.drawImage(currentLevel.getDebugTraceCanvas().element, screen.x + backShift.x, screen.y + backShift.y, this.SCREEN_WIDTH - 2 * backShift.x, this.SCREEN_HEIGHT - 2 * backShift.y, backShift.x, backShift.y, this.SCREEN_WIDTH - 2 * backShift.x, this.SCREEN_HEIGHT - 2 * backShift.y);
+            this.snapshot.raw.context.globalAlpha = 1;
         }
-        this.weatherRenderer.render(currentLevel, this.snapshot.context);
+        this.weatherRenderer.render(currentLevel, this.snapshot);
         // Note: this single call on a perform test is a huge percentage of CPU usage.
         // TODO: Why? Can we improve rendering performance?
-        this.buffer.context.drawImage(this.snapshot.element, 0, 0);
+        this.buffer.raw.context.drawImage(this.snapshot.raw.element, 0, 0);
         //If we need to fade the screen out
         if (this.fadingOut) {
             // We have this separate so that the final draw call finishes first
@@ -92,13 +114,13 @@ export class WorldRenderer {
             }
         }
         //Draw the (semi-)transparent rectangle for fading in/out
-        this.buffer.context.fillStyle = this.fadeToColor.cssString;
-        this.buffer.context.globalAlpha = this.fadeOutAmount + this.fadeInAmount;
-        this.buffer.context.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+        this.buffer.raw.context.fillStyle = this.fadeToColor.cssString;
+        this.buffer.raw.context.globalAlpha = this.fadeOutAmount + this.fadeInAmount;
+        this.buffer.raw.context.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         //Save screen into snapshot
-        this.see.drawImage(this.buffer.element, 0, 0);
+        this.see.raw.context.drawImage(this.buffer.raw.element, 0, 0);
         // reset global alpha
-        this.buffer.context.globalAlpha = 1;
+        this.buffer.raw.context.globalAlpha = 1;
         for (const body of bodies) {
             for (const drawable of body.drawables) {
                 if (typeof drawable.cleanupAfterRender === "function") {
@@ -121,14 +143,30 @@ export class WorldRenderer {
             yBackShift = 0;
         return new Coordinates2D(xBackShift, yBackShift);
     }
-    private drawBackground(ctx: GenericCanvasRenderingContext2D, screen: Coordinates2D, currentLevel: Level): void {
+    private drawBackground(drawingBoard: DrawingBoard, screen: Coordinates2D, currentLevel: Level): void {
         const backShift = this.getBackShift(screen);
         if (currentLevel.getBackgroundImage()) {
-            ctx.drawImage(ASSETS.images.get(currentLevel.getBackgroundImage()), screen.x + backShift.x - currentLevel.backgroundOffsetX, screen.y + backShift.y - currentLevel.backgroundOffsetY, this.SCREEN_WIDTH - 2 * backShift.x, this.SCREEN_HEIGHT - 2 * backShift.y, backShift.x, backShift.y, this.SCREEN_WIDTH - 2 * backShift.x, this.SCREEN_HEIGHT - 2 * backShift.y);
+            drawingBoard.drawImage(
+                currentLevel.getBackgroundImage(),
+                {
+                    x: backShift.x,
+                    y: backShift.y,
+                    width: this.SCREEN_WIDTH - 2 * backShift.x,
+                    height: this.SCREEN_HEIGHT - 2 * backShift.y
+                },
+                {
+                    x: screen.x + backShift.x - currentLevel.backgroundOffsetX,
+                    y: screen.y + backShift.y - currentLevel.backgroundOffsetY,
+                    width: this.SCREEN_WIDTH - 2 * backShift.x,
+                    height: this.SCREEN_HEIGHT - 2 * backShift.y
+                },
+            );
         }
         // Fill in the rest of the background with black (mainly for the case of board being smaller than the screen)
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+        drawingBoard.withRawCanvasContext((ctx) => {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+        })
     }
     isAlreadyFaded(): boolean {
         return this.fadeOutAmount > 0;

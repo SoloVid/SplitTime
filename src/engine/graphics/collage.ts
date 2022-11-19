@@ -4,6 +4,7 @@ import { interpret, simplifyToCardinal } from "../math/direction";
 import { Rect } from "../math/rect";
 import { Frame } from "./frame";
 import * as splitTime from "../splitTime";
+import { ImageRef } from "engine/splitTime.assets";
 const DEFAULT_MONTAGE_DIR = 9999;
 /**
  * Image (e.g. sprite sheet or tile map) with a bunch of associated metadata.
@@ -72,6 +73,7 @@ export class Collage {
         return this.getMontage(this.defaultMontageId, direction);
     }
 }
+
 export function makeCollageFromFile(file: splitTime.file.Collage, allowErrors: boolean = false): splitTime.Collage {
     const framesRectMap: {
         [id: string]: Rect;

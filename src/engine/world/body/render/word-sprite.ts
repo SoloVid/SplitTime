@@ -1,3 +1,4 @@
+import { DrawingBoard } from "engine/ui/viewport/drawing-board"
 import { body, Coordinates3D, game_seconds, GenericCanvasRenderingContext2D, math } from "../../../splitTime"
 import { Configuration as CONFIG } from "../../../splitTime.conversation"
 import { BodySpec } from "../../../splitTime.file.collage"
@@ -26,16 +27,14 @@ export class WordSprite implements Drawable {
         )
     }
 
-    draw(ctx: GenericCanvasRenderingContext2D) {
-        ctx.rotate(this.rotate)
-
-        this._drawSimple(ctx)
-
-        //ctx.rotate(-this.rotate);
-
-        this.rotate = 0
+    draw(drawingBoard: DrawingBoard) {
+        drawingBoard.withRawCanvasContext((ctx) => {
+            ctx.rotate(this.rotate)
+            this._drawSimple(ctx)
+            //ctx.rotate(-this.rotate)
+            this.rotate = 0
+        })
     }
-
     private _drawSimple(ctx: GenericCanvasRenderingContext2D) {
         ctx.globalAlpha = ctx.globalAlpha * this.opacityModifier
 

@@ -3,7 +3,6 @@ import { MenuSpec } from "./menu-spec";
 import { View } from "../viewport/view";
 import { MenuControls } from "./menu-controls";
 import { HUD } from "../viewport/hud";
-import { ASSETS } from "../../G";
 import { simplifyToCardinal, W, N, E, S } from "../../math/direction";
 export class Menu {
     private currentPoint: int = 0;
@@ -34,11 +33,11 @@ export class Menu {
         // this.handleMenu()
         //Draw splitTime.Menu background
         if (this.spec.background) {
-            this.view.see.drawImage(ASSETS.images.get(this.spec.background), 0, 0);
+            this.view.see.drawImage(this.spec.background, { x: 0, y: 0 });
         }
         //Draw cursor
         if (this.spec.cursor) {
-            this.view.see.drawImage(ASSETS.images.get(this.spec.cursor), this.spec.point[this.currentPoint].x, this.spec.point[this.currentPoint].y);
+            this.view.see.drawImage(this.spec.cursor, { x: this.spec.point[this.currentPoint].x, y: this.spec.point[this.currentPoint].y });
         }
     }
     handleMenu() {

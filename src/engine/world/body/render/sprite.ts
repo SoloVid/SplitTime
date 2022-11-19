@@ -1,18 +1,18 @@
-import { Drawable, CanvasRequirements } from "./drawable";
-import { game_seconds, int, Collage, assert, Coordinates3D, GenericCanvasRenderingContext2D } from "../../../splitTime";
+import { DrawingBoard } from "engine/ui/viewport/drawing-board";
 import { BodySpec } from "../../../file/collage";
-import { S } from "../../../math/direction";
-import { Light } from "./light";
-import { ASSETS } from "../../../G";
-import { Montage } from "../../../graphics/montage";
 import { Frame } from "../../../graphics/frame";
+import { Montage } from "../../../graphics/montage";
+import { S } from "../../../math/direction";
 import * as splitTime from "../../../splitTime";
+import { assert, Collage, Coordinates3D, game_seconds, GenericCanvasRenderingContext2D, int } from "../../../splitTime";
+import { CanvasRequirements, Drawable } from "./drawable";
+import { Light } from "./light";
 let nextRef = 10;
 export class Sprite implements Drawable {
     private _time: game_seconds = 0;
     private _timeFrameStarted: game_seconds = 0;
     readonly ref: int;
-    constructor(private readonly body: BodySpec, public readonly collageId: string, public readonly defaultMontageId?: string) {
+    constructor(private readonly body: BodySpec, public readonly collage: Readonly<Collage>, public readonly defaultMontageId?: string) {
         this.ref = nextRef++;
     }
     static DEFAULT_STANCE = "__DEFAULT_STANCE__";
@@ -28,12 +28,12 @@ export class Sprite implements Drawable {
     private dir = S;
     private requestedDir = S;
     light: Light | null = null;
-    private get collage(): Readonly<Collage> {
-        return ASSETS.collages.get(this.collageId);
-    }
-    private getImage(): HTMLImageElement {
-        return ASSETS.images.get(this.collage.image);
-    }
+    // private get collage(): Readonly<Collage> {
+    //     return ASSETS.collages.get(this.collageId);
+    // }
+    // private getImage(): HTMLImageElement {
+    //     return ASSETS.images.get(this.collage.image);
+    // }
     private getCurrentMontage(): Montage {
         if (this.stance === Sprite.DEFAULT_STANCE) {
             if (this.defaultMontageId) {
@@ -53,17 +53,19 @@ export class Sprite implements Drawable {
     getCanvasRequirements(): CanvasRequirements {
         return new CanvasRequirements(this.getCurrentFrame().getTargetBox(this.body));
     }
-    draw(ctx: GenericCanvasRenderingContext2D) {
-        ctx.rotate(this.rotate);
-        this._drawSimple(ctx);
-        //ctx.rotate(-this.rotate);
-        this.rotate = 0;
+    draw(drawingBoard: DrawingBoard) {
+        drawingBoard.withRawCanvasContext((ctx) => {
+            ctx.rotate(this.rotate);
+            this._drawSimple(drawingBoard, ctx);
+            //ctx.rotate(-this.rotate);
+            this.rotate = 0;
+        })
     }
-    private _drawSimple(ctx: GenericCanvasRenderingContext2D) {
+    private _drawSimple(drawingBoard: DrawingBoard, ctx: GenericCanvasRenderingContext2D) {
         const frame = this.getCurrentFrame();
         const targetBox = frame.getTargetBox(this.body);
         ctx.globalAlpha = ctx.globalAlpha * this.opacityModifier;
-        ctx.drawImage(this.getImage(), frame.box.x, frame.box.y, frame.box.width, frame.box.height, targetBox.x, targetBox.y, targetBox.width, targetBox.height);
+        drawingBoard.drawImage(this.collage.image, targetBox, frame.box);
     }
     requestStance(stance: string, dir: number, forceReset = false, hold: boolean = false) {
         this.requestedStance = stance;
@@ -114,7 +116,7 @@ export class Sprite implements Drawable {
             depth: this.body.depth,
             height: this.body.height
         };
-        var clone = new splitTime.Sprite(newBody, this.collageId);
+        var clone = new splitTime.Sprite(newBody, this.collage);
         clone.omniDir = this.omniDir;
         clone.rotate = this.rotate;
         clone.opacityModifier = this.opacityModifier;

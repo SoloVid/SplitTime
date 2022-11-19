@@ -67,24 +67,24 @@ export function renderCanvas(view: View) {
     const map = debugInfo.get(groupDisplayed) ?? {};
     var FONT_SIZE = 16;
     var SPACING = 5;
-    view.see.textBaseline = "alphabetic";
-    view.see.font = FONT_SIZE + "px monospace";
+    view.see.raw.context.textBaseline = "alphabetic";
+    view.see.raw.context.font = FONT_SIZE + "px monospace";
     const lines: string[] = [];
     let width = 0;
     let height = 0;
     for (var key in map) {
         var line = key + ": " + map[key].value;
         lines.push(line);
-        const metrics = view.see.measureText(line);
+        const metrics = view.see.raw.context.measureText(line);
         width = Math.max(width, metrics.width + 2 * SPACING);
         height += FONT_SIZE + SPACING;
     }
-    view.see.fillStyle = "rgba(100, 100, 100, 0.4)";
-    view.see.fillRect(0, view.height - height, width, height);
-    view.see.fillStyle = "#FFFFFF";
+    view.see.raw.context.fillStyle = "rgba(100, 100, 100, 0.4)";
+    view.see.raw.context.fillRect(0, view.height - height, width, height);
+    view.see.raw.context.fillStyle = "#FFFFFF";
     var y = view.height - height + (2 * SPACING + FONT_SIZE / 2);
     for (const line of lines) {
-        view.see.fillText(line, SPACING, y);
+        view.see.raw.context.fillText(line, SPACING, y);
         y += FONT_SIZE + SPACING;
     }
 }

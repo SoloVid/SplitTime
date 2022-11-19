@@ -1,13 +1,14 @@
-import { Level, World } from "../../splitTime";
+import { Assets, Level, World } from "../../splitTime";
 type TransitionListener = (oldLevel: Level | null, newLevel: Level) => PromiseLike<void>;
 export class LevelManager {
-    private readonly world: World;
     private currentLevel: Level | null = null;
     private transitionInProgress: boolean = false;
     private regionTransitionStartListener: TransitionListener | null = null;
     private regionTransitionEndListener: TransitionListener | null = null;
-    constructor(world: World) {
-        this.world = world;
+    constructor(
+        private readonly world: World,
+        private readonly assets: Assets
+    ) {
     }
     onRegionExit(listener: TransitionListener) {
         this.regionTransitionStartListener = listener;
@@ -53,11 +54,11 @@ export class LevelManager {
                 await this.regionTransitionStartListener(exitingLevel, enteringLevel);
             }
             exitingLevel.runExitFunction();
-            exitingLevel.getRegion().unloadLevels();
+            exitingLevel.getRegion().unloadLevels(this.assets);
         }
         // Enter new level
         this.currentLevel = enteringLevel;
-        await enteringLevel.getRegion().loadForPlay(this.world);
+        await enteringLevel.getRegion().loadForPlay(this.world, this.assets);
         enteringLevel.runEnterFunction();
         if (this.regionTransitionEndListener) {
             await this.regionTransitionEndListener(exitingLevel, enteringLevel);
