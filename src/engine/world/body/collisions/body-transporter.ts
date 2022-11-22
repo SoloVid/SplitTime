@@ -1,10 +1,10 @@
-import { ILevelLocation2, Level } from "../../../splitTime";
 import { ENABLED } from "../../../utils/debug";
 import { smoothPut } from "../render/ghosty";
 import { PointerTraceInfo } from "../../level/level-traces2";
 import { isPointerOffsetSignificant } from "../../level/trace/trace";
-import * as splitTime from "../../../splitTime";
 import { Body } from "../body"
+import { ILevelLocation2 } from "engine/world/level/level-location";
+import { Level } from "engine/world/level/level";
 
 export class Transporter {
     constructor(public readonly body: Body) {}
@@ -27,7 +27,7 @@ export class Transporter {
             }
             whereLast = whereToNext
         }
-        if (splitTime.debug.ENABLED) {
+        if (ENABLED) {
             console.warn(
                 "Cyclic pointer traces detected on level " +
                     from.level.id +
@@ -54,7 +54,7 @@ export class Transporter {
     }
 
     private _theNextTransport(
-        levelFrom: splitTime.Level,
+        levelFrom: Level,
         x: number,
         y: number,
         z: number
@@ -63,7 +63,7 @@ export class Transporter {
         var left = Math.round(x - this.body.width / 2)
         var topY = Math.round(y - this.body.depth / 2)
 
-        const pointerInfo: splitTime.level.traces.PointerTraceInfo = {}
+        const pointerInfo: PointerTraceInfo = {}
         levelTraces.calculateVolumePointers(
             pointerInfo,
             left, this.body.width,

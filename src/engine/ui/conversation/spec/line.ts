@@ -1,4 +1,4 @@
-import { assert } from "../../../splitTime";
+import { assert } from "globals";
 import { Speaker } from "../speaker";
 import { Options } from "./dsl";
 import { LineSequence } from "./line-sequence";

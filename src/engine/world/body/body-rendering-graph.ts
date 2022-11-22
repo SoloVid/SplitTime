@@ -1,5 +1,6 @@
+import { isOverlap } from "engine/utils/misc";
+import { int } from "globals";
 import { Rect } from "../../math/rect";
-import { int, isOverlap } from "../../splitTime";
 import { CanvasRequirements } from "./render/drawable";
 
 export enum ordering {

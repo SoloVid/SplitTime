@@ -1,7 +1,8 @@
-import { int, level, type } from "../../splitTime";
-import { file_data } from "../../splitTime.level";
+import * as type from "engine/utils/type";
+import { int } from "globals";
 import { IsJsonable } from "../../file/json";
-import { isA, object, other, string, array, number } from "../../utils/type";
+import { array, isA, number, object, other, string } from "../../utils/type";
+
 export interface FileData {
     type: "action";
     region: string;
@@ -10,10 +11,10 @@ export interface FileData {
     background: string;
     backgroundOffsetX: int;
     backgroundOffsetY: int;
-    groups: readonly file_data.Group[];
-    traces: readonly file_data.Trace[];
-    props: readonly file_data.Prop[];
-    positions: readonly file_data.Position[];
+    groups: readonly Group[];
+    traces: readonly Trace[];
+    props: readonly Prop[];
+    positions: readonly Position[];
 }
 // Expect compiler error if FileData is not jsonable
 let testFileDataJsonable: IsJsonable<FileData, false> = {} as FileData;
@@ -50,8 +51,8 @@ export interface Prop {
 }
 /** Alias */
 export type Position = Prop;
-export function instanceOfFileData(thing: unknown): thing is level.FileData {
-    return isA(thing, object<level.FileData>({
+export function instanceOfFileData(thing: unknown): thing is FileData {
+    return isA(thing, object<FileData>({
         type: other<"action">(t => t === "action"),
         region: string,
         width: type.int,

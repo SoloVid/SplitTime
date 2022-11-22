@@ -1,4 +1,5 @@
-import { int } from "../../splitTime";
+import { int } from "globals";
+
 export enum AdvanceMethod {
     DEFAULT = "HYBRID",
     AUTO = "AUTO",

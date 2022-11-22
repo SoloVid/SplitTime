@@ -1,4 +1,6 @@
-import { RegisterCallbacks, SimpleCallback } from "../splitTime";
+import { SimpleCallback } from "./callback";
+import { RegisterCallbacks } from "./register-callbacks";
+
 /**
  * This class intended to be very similar to RegisterCallbacks or Promise
  * but with the advantage of accommodating serialization.

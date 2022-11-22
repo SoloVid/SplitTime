@@ -1,4 +1,4 @@
-import { int } from "../../../splitTime"
+import { int } from "globals"
 import { isOverlap } from "../../../utils/misc"
 import { Body } from "../body"
 import { COLLISION_CALCULATOR } from "./collision-calculator"

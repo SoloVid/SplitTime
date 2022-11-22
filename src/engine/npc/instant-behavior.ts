@@ -1,5 +1,5 @@
+import { game_seconds } from "engine/time/timeline";
 import { TemporaryBehavior } from "./temporary-behavior";
-import { game_seconds } from "../splitTime";
 export class InstantBehavior implements TemporaryBehavior {
     private done = false;
     constructor(private readonly callback: () => void) { }

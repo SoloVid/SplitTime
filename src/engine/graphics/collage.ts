@@ -1,10 +1,10 @@
-import { Montage } from "./montage";
-import { direction_t, Coordinates2D } from "../splitTime";
-import { interpret, simplifyToCardinal } from "../math/direction";
+import { Collage as CollageFile } from "engine/file/collage";
+import { Coordinates2D } from "engine/world/level/level-location";
+import { direction_t, interpret, simplifyToCardinal } from "../math/direction";
 import { Rect } from "../math/rect";
 import { Frame } from "./frame";
-import * as splitTime from "../splitTime";
-import { ImageRef } from "engine/splitTime.assets";
+import { Montage } from "./montage";
+
 const DEFAULT_MONTAGE_DIR = 9999;
 /**
  * Image (e.g. sprite sheet or tile map) with a bunch of associated metadata.
@@ -74,7 +74,7 @@ export class Collage {
     }
 }
 
-export function makeCollageFromFile(file: splitTime.file.Collage, allowErrors: boolean = false): splitTime.Collage {
+export function makeCollageFromFile(file: CollageFile, allowErrors: boolean = false): Collage {
     const framesRectMap: {
         [id: string]: Rect;
     } = {};
@@ -82,7 +82,7 @@ export function makeCollageFromFile(file: splitTime.file.Collage, allowErrors: b
         framesRectMap[fileFrame.id] =
             Rect.make(fileFrame.x, fileFrame.y, fileFrame.width, fileFrame.height);
     }
-    return new splitTime.Collage(file.image, file.montages.map(fileMontage => {
+    return new Collage(file.image, file.montages.map(fileMontage => {
         const dir = !fileMontage.direction ? null :
             interpret(fileMontage.direction);
         return new Montage(fileMontage.id, dir, fileMontage.frames.map(fpf => {

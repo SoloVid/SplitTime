@@ -1,4 +1,5 @@
-import { RegisterCallbacks, CallbackResult } from "../splitTime";
+import { RegisterCallbacks, CallbackResult } from "engine/utils/register-callbacks";
+
 // TODO: Where should this comment move to?
 /**
  * Stamina is a somewhat abstract concept centered around

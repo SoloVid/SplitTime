@@ -1,15 +1,16 @@
-import { collage } from "../splitTime.file";
 import { IsJsonable } from "./json";
-import { int, game_seconds, file, type } from "../splitTime";
 import { Trace } from "../world/level/level-file-data";
 import { isA, object, string, array, number } from "../utils/type";
+import { int } from "globals";
+import { game_seconds } from "engine/time/timeline";
+import * as type from "engine/utils/type"
 /**
  * Serializable form of {@link splitTime.Collage}, specifically used in JSON file format.
  */
 export interface Collage {
     image: string;
-    frames: readonly collage.Frame[];
-    montages: readonly collage.Montage[];
+    frames: readonly Frame[];
+    montages: readonly Montage[];
     /** Reference to a {@link collage.Montage} in {@link Collage#montages} */
     defaultMontageId: string;
 }
@@ -68,8 +69,8 @@ export interface BodySpec {
     // along z axis
     height: int;
 }
-export function instanceOfCollage(thing: unknown): thing is file.Collage {
-    return isA(thing, object<file.Collage>({
+export function instanceOfCollage(thing: unknown): thing is Collage {
+    return isA(thing, object<Collage>({
         image: string,
         frames: array(object({
             id: string,

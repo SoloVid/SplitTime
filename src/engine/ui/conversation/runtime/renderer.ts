@@ -1,7 +1,9 @@
 import { SpeechBubbleState } from "./speech-bubble";
-import { Camera, approachValue, GenericCanvasRenderingContext2D, constrain, int } from "../../../splitTime";
 import { View } from "../../viewport/view";
 import { getDefaultTextPartOptions, getTextPartOptions, measureTextPart, TextPart, TextPartOptions } from "../spec/text-part";
+import { Camera } from "engine/ui/viewport/camera";
+import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
+import { approachValue, constrain } from "engine/utils/misc";
 
 class DialogDrawing {
     public readonly firstCharacterSeen: number

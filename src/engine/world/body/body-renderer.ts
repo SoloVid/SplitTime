@@ -1,10 +1,13 @@
 import { BodyRenderingGraph, GraphBodyNode } from "./body-rendering-graph";
-import { GenericCanvasRenderingContext2D, Camera, assert, approachValue } from "../../splitTime";
 import { ENABLED } from "../../utils/debug";
 import { error } from "../../utils/logger";
 import { Drawable } from "./render/drawable";
-import * as splitTime from "../../splitTime";
+import { Body } from "engine/world/body/body"
 import { DrawingBoard } from "../../ui/viewport/drawing-board";
+import { Camera } from "engine/ui/viewport/camera";
+import { approachValue } from "engine/utils/misc";
+import { assert } from "globals";
+
 export class Renderer {
     private readonly graph = new BodyRenderingGraph();
     private _nodes: (BodyNode | null)[] = [];
@@ -28,7 +31,7 @@ export class Renderer {
     /**
      * receives a body that needs to be rendered (called by BoardRenderer)
      */
-    feedBody(body: splitTime.Body, isPlayer: boolean): void {
+    feedBody(body: Body, isPlayer: boolean): void {
         if (body.drawables.length === 0) {
             return;
         }
@@ -49,7 +52,7 @@ export class Renderer {
             }
         }
     }
-    private _getBodyNode(graphNode: GraphBodyNode, body?: splitTime.Body): BodyNode {
+    private _getBodyNode(graphNode: GraphBodyNode, body?: Body): BodyNode {
         // If the node is in the map, return it.
         if (graphNode.ref in this._nodeByGraphRef) {
             const node = this._nodes[this._nodeByGraphRef[graphNode.ref]];
@@ -83,7 +86,7 @@ export class Renderer {
             this.drawBodyTo(node);
         });
     }
-    private isBodyOnScreen(body: splitTime.Body): boolean {
+    private isBodyOnScreen(body: Body): boolean {
         //optimization for not drawing if out of bounds
         var screen = this.camera.getScreenCoordinates();
         var screenBottom = screen.y + this.camera.SCREEN_HEIGHT;
@@ -177,5 +180,5 @@ class BodyNode {
     isPlayer: boolean = false;
     opacity: number = 1;
     targetOpacity: number = 1;
-    constructor(readonly body: splitTime.Body, readonly graphNode: GraphBodyNode) { }
+    constructor(readonly body: Body, readonly graphNode: GraphBodyNode) { }
 }

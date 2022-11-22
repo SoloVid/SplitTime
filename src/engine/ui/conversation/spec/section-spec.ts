@@ -3,7 +3,8 @@ import { Speaker } from "../speaker";
 import { SectionSpecPart } from "../misc-types";
 import { InterruptibleSpec } from "./interruptible-spec";
 import { Options } from "./dsl";
-import { assert } from "../../../splitTime";
+import { assert } from "globals";
+
 export class SectionSpec {
     private parent: SectionSpec | ConversationSpec | null = null;
     constructor(private readonly localSpeakers: readonly Speaker[] = [], public readonly parts: readonly SectionSpecPart[] = [], public readonly interruptibles: readonly InterruptibleSpec[] = [], public readonly cancelSection: SectionSpec | null = null, public readonly options?: Partial<Options>) {

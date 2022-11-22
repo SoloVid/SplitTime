@@ -1,11 +1,10 @@
-import { direction_t, fromToThing } from "../../splitTime.direction"
 import { Body } from "./body"
-import * as splitTime from "../../../splitTime"
 import { STOP_CALLBACKS } from "../../utils/register-callbacks"
 import { Indirect, redirect } from "../../redirect"
-import { game_seconds } from "../../splitTime"
-import { distanceTrue, pixels_t } from "../../splitTime.measurement"
 import { Coordinates3D } from "../level/level-location"
+import { direction_t, fromToThing } from "engine/math/direction"
+import { pixels_t, distanceTrue } from "engine/math/measurement"
+import { game_seconds } from "engine/time/timeline"
 
 export function applyMotion(body: Body, dir: direction_t, speed: number, acceleration: number) {
     body.registerTimeAdvanceListener(delta => {

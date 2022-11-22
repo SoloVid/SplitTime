@@ -1,4 +1,3 @@
-import * as splitTime from "../splitTime";
 export class Vector2D {
     x: number;
     y: number;
@@ -7,7 +6,7 @@ export class Vector2D {
         this.y = y;
     }
     static angular(angle: number, magnitude: number) {
-        return new splitTime.Vector2D(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
+        return new Vector2D(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
     }
     get angle(): number {
         return Math.atan2(this.y, this.x);

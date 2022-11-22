@@ -1,6 +1,8 @@
 import { ObjectSerializer } from "../../file/object-serializer";
-import { Level, World } from "../../splitTime";
 import { AnySerializer, AnyDeserializer } from "../../file/any-serializer";
+import { World } from "../world";
+import { Level } from "./level";
+
 type level_json_t = {
     id: string;
 };

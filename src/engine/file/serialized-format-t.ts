@@ -1,5 +1,5 @@
+import { int } from "globals";
 import { jsonable } from "./json";
-import { int } from "../splitTime";
 export type serialized_format_t = {
     [typeId: string]: jsonable;
 };

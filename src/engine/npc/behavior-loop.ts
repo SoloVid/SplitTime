@@ -1,6 +1,6 @@
+import { game_seconds } from "engine/time/timeline";
 import { Behavior } from "./behavior";
 import { TemporaryBehavior } from "./temporary-behavior";
-import { game_seconds } from "../splitTime";
 export class BehaviorLoop implements Behavior {
     private baseBehavior: TemporaryBehavior;
     constructor(private readonly baseBehaviorCreator: () => TemporaryBehavior) {

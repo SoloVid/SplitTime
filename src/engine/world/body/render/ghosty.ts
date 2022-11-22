@@ -1,8 +1,13 @@
-import { Sprite, SpriteBody, ILevelLocation2, Pledge, STOP_CALLBACKS } from "../../../splitTime";
 import { Drawable } from "./drawable";
-import * as splitTime from "../../../splitTime";
+import { Body } from "engine/world/body/body"
+import { Sprite } from "./sprite";
+import { Pledge } from "engine/utils/pledge";
+import { STOP_CALLBACKS } from "engine/utils/register-callbacks";
+import { ILevelLocation2 } from "engine/world/level/level-location";
+import { SpriteBody } from "../sprite-body";
+
 /** @deprecated need to develop some patterns that don't involve this */
-export function extractSprite(body: splitTime.Body): Sprite {
+export function extractSprite(body: Body): Sprite {
     const sprite = tryExtractSprite(body);
     if (sprite === null) {
         throw new Error("No Sprite associated with Body");
@@ -10,7 +15,7 @@ export function extractSprite(body: splitTime.Body): Sprite {
     return sprite;
 }
 /** @deprecated need to develop some patterns that don't involve this */
-export function tryExtractSprite(body: splitTime.Body): Sprite | null {
+export function tryExtractSprite(body: Body): Sprite | null {
     for (const drawable of body.drawables) {
         if (drawable instanceof Sprite) {
             return drawable;
@@ -20,21 +25,21 @@ export function tryExtractSprite(body: splitTime.Body): Sprite | null {
 }
 export function createGhost(sourceSpriteBody: SpriteBody, location: ILevelLocation2): SpriteBody {
     const tempSprite = sourceSpriteBody.sprite.clone();
-    const tempBody = new splitTime.Body();
+    const tempBody = new Body();
     tempBody.width = 0;
     tempBody.depth = 0;
     tempBody.putInLocation(location);
     tempBody.drawables.push(tempSprite);
     return new SpriteBody(tempSprite, tempBody);
 }
-export function fadeInBody(body: splitTime.Body, startOpacity: number = 0, maxOpacity: number = 1, speed: number = 2): PromiseLike<void> {
+export function fadeInBody(body: Body, startOpacity: number = 0, maxOpacity: number = 1, speed: number = 2): PromiseLike<void> {
     const promises = [];
     for (const d of body.drawables) {
         promises.push(fadeInBodyDrawable(body, d, startOpacity, maxOpacity, speed));
     }
     return Pledge.when(promises) as PromiseLike<void>;
 }
-function fadeInBodyDrawable(body: splitTime.Body, d: Drawable, startOpacity: number = 0, maxOpacity: number = 1, speed: number = 2): Pledge {
+function fadeInBodyDrawable(body: Body, d: Drawable, startOpacity: number = 0, maxOpacity: number = 1, speed: number = 2): Pledge {
     d.opacityModifier = startOpacity;
     const pledge = new Pledge();
     body.registerTimeAdvanceListener(delta => {
@@ -49,14 +54,14 @@ function fadeInBodyDrawable(body: splitTime.Body, d: Drawable, startOpacity: num
     });
     return pledge;
 }
-export function fadeOutBody(body: splitTime.Body, startOpacity = 1, speed: number = 2): PromiseLike<void> {
+export function fadeOutBody(body: Body, startOpacity = 1, speed: number = 2): PromiseLike<void> {
     const promises = [];
     for (const d of body.drawables) {
         promises.push(fadeOutBodyDrawable(body, d, startOpacity, speed));
     }
     return Pledge.when(promises) as PromiseLike<void>;
 }
-function fadeOutBodyDrawable(body: splitTime.Body, d: Drawable, startOpacity = 1, speed: number = 2): Pledge {
+function fadeOutBodyDrawable(body: Body, d: Drawable, startOpacity = 1, speed: number = 2): Pledge {
     d.opacityModifier = startOpacity;
     const pledge = new Pledge();
     body.registerTimeAdvanceListener(delta => {
@@ -71,7 +76,7 @@ function fadeOutBodyDrawable(body: splitTime.Body, d: Drawable, startOpacity = 1
     });
     return pledge;
 }
-export function smoothPut(body: splitTime.Body, location: ILevelLocation2): PromiseLike<void> {
+export function smoothPut(body: Body, location: ILevelLocation2): PromiseLike<void> {
     const spriteBody = new SpriteBody(extractSprite(body), body);
     const ghost = createGhost(spriteBody, body);
     // If either finishes, we don't want the other to continue

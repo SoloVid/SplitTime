@@ -1,6 +1,6 @@
 import { ConditionalBehavior, isBehaviorConditionMet } from "./conditional-behavior";
 import { Behavior } from "./behavior";
-import { game_seconds } from "../splitTime";
+import { game_seconds } from "engine/time/timeline";
 export class ExtraConditionalBehavior implements ConditionalBehavior {
     constructor(private readonly baseBehavior: Behavior, private readonly conditionChecker: () => boolean) { }
     isConditionMet(): boolean {

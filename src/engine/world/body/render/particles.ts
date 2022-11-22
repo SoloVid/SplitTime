@@ -1,9 +1,14 @@
-import { Vector2D, particles, randomRanged, constrain, RegisterCallbacks, ILevelLocation2, Coordinates3D, GenericCanvasRenderingContext2D } from "../../../splitTime";
 import { Color } from "../../../light/color";
 import { Drawable, CanvasRequirements } from "./drawable";
 import { Rect } from "../../../math/rect";
-import * as splitTime from "../../../splitTime";
+import { Body } from "engine/world/body/body"
 import { DrawingBoard } from "engine/ui/viewport/drawing-board";
+import { Vector2D } from "engine/math/vector2d";
+import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
+import { constrain } from "engine/utils/misc";
+import { randomRanged } from "engine/utils/random";
+import { RegisterCallbacks } from "engine/utils/register-callbacks";
+import { ILevelLocation2, Coordinates3D } from "engine/world/level/level-location";
 export class Particle {
     seed: number = Math.random();
     /** Milliseconds since spawned */
@@ -20,10 +25,10 @@ export class Particle {
     lightRadius: number = this.radius;
     lightIntensity: number = 0;
     advanceTime(emitter: ParticleEmitter, msPassed: number): void {
-        particles.applyBasicPhysics(emitter, this, msPassed);
-        particles.applyLazyEffect(emitter, this, msPassed);
-        particles.applyColorShift(emitter, this, msPassed);
-        particles.applyOpacityShift(emitter, this, msPassed);
+        applyBasicPhysics(emitter, this, msPassed);
+        applyLazyEffect(emitter, this, msPassed);
+        applyColorShift(emitter, this, msPassed);
+        applyOpacityShift(emitter, this, msPassed);
         // this.updateHandler(emitter, this, msPassed);
     }
     isOccasion(howOften: number, msPassed: number): boolean {
@@ -194,7 +199,7 @@ export class ParticleEmitter implements Drawable {
     }
 }
 export function putNew(location: ILevelLocation2, generateParticle: InitializeParticleFunction): ParticleEmitter {
-    var tempBody = new splitTime.Body();
+    var tempBody = new Body();
     tempBody.width = 0;
     tempBody.depth = 0;
     tempBody.height = 0;

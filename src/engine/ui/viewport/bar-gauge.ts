@@ -2,7 +2,8 @@ import { Renderer } from "./hud";
 import { Color } from "../../light/color";
 import { View } from "./view";
 import { RoundedRect } from "./rounded-rect";
-import { mod } from "../../splitTime";
+import { mod } from "engine/utils/misc";
+
 export class BarGauge implements Renderer {
     x: number = 0;
     y: number = 0;

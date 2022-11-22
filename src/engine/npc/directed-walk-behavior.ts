@@ -1,8 +1,10 @@
 import { Behavior } from "./behavior";
 import { TemporaryBehavior } from "./temporary-behavior";
-import { Npc, ILevelLocation2, Indirect, game_seconds, Coordinates3D } from "../splitTime";
-import { fromToThing } from "../splitTime.direction";
-import { areWithin90Degrees } from "../math/direction";
+import { areWithin90Degrees, fromToThing } from "../math/direction";
+import { Indirect } from "engine/redirect";
+import { game_seconds } from "engine/time/timeline";
+import { ILevelLocation2, Coordinates3D } from "engine/world/level/level-location";
+import { Npc } from "./npc";
 export class DirectedWalkBehavior implements Behavior, TemporaryBehavior {
     constructor(private readonly npc: Npc, private readonly targetLocation: ILevelLocation2, private readonly speed: Indirect<number>, private readonly stance: string) { }
     isComplete(): boolean {

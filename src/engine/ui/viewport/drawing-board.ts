@@ -1,4 +1,4 @@
-import { Assets } from "engine/splitTime"
+import { Assets } from "engine/assets/assets"
 import type { int } from "globals"
 import { Canvas, GenericCanvasRenderingContext2D } from "./canvas"
 

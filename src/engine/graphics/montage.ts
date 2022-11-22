@@ -1,8 +1,10 @@
-import { direction_t, int, game_seconds } from "../splitTime";
 import { Frame } from "./frame";
 import { BodySpec } from "../file/collage";
 import { Trace } from "../world/level/level-file-data";
 import { Rect, calculateTotalRectArea } from "../math/rect";
+import { direction_t } from "engine/math/direction";
+import { int } from "globals";
+import { game_seconds } from "engine/time/timeline";
 /**
  * Animation of {@link Collage} {@link Frame}s with associated physics metadata
  */

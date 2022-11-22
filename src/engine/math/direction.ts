@@ -1,5 +1,8 @@
-import { ILevelLocation, Coordinates2D, instanceOfILevelLocation, direction, instanceOfCoordinates2D, randomRanged, randomInt, unitOrZero, mod, approachValue } from "../splitTime";
-import * as splitTime from "../splitTime";
+import { approachValue, mod } from "engine/utils/misc";
+import { randomInt, randomRanged } from "engine/utils/random";
+import { Coordinates2D, ILevelLocation, instanceOfCoordinates2D, instanceOfILevelLocation } from "engine/world/level/level-location";
+import { unitOrZero } from "./measurement";
+
 export type direction_t = number;
 export const E = 0;
 export const N = 1;
@@ -14,7 +17,7 @@ export const WS = SW;
 export const SE = 3.5;
 export const ES = SE;
 const lookup: {
-    [dir: string]: splitTime.direction_t;
+    [dir: string]: direction_t;
 } = {
     "E": E,
     "N": N,
@@ -29,7 +32,7 @@ const lookup: {
     "SE": SE,
     "ES": ES
 };
-export function interpret(inputDir: string | number): splitTime.direction_t {
+export function interpret(inputDir: string | number): direction_t {
     if (typeof inputDir === "string") {
         if (isNaN(+inputDir)) {
             return fromString(inputDir);
@@ -40,7 +43,7 @@ export function interpret(inputDir: string | number): splitTime.direction_t {
     }
     return inputDir;
 }
-export function fromString(stringDir: string): splitTime.direction_t {
+export function fromString(stringDir: string): direction_t {
     if (typeof lookup[stringDir] !== "undefined") {
         return lookup[stringDir];
     }
@@ -48,7 +51,7 @@ export function fromString(stringDir: string): splitTime.direction_t {
         throw new Error("Invalid direction: " + stringDir);
     }
 }
-export function toString(numDir: splitTime.direction_t): string {
+export function toString(numDir: direction_t): string {
     var modDir = normalize(Math.round(numDir * 10) / 10);
     switch (modDir) {
         case 0:
@@ -71,7 +74,7 @@ export function toString(numDir: splitTime.direction_t): string {
     }
 }
 //Get direction from one point to another (both in Maven orientation)
-export function fromTo(fromX: number, fromY: number, toX: number, toY: number): splitTime.direction_t {
+export function fromTo(fromX: number, fromY: number, toX: number, toY: number): direction_t {
     if (fromX == toX) {
         if (fromY < toY)
             return 3;
@@ -86,43 +89,43 @@ export function fromTo(fromX: number, fromY: number, toX: number, toY: number): 
     return (baseDir + 4) % 4;
 }
 //Get direction from one thing to another (both in Maven orientation)
-export function fromToThing(fromThing: ILevelLocation, toThing: ILevelLocation): splitTime.direction_t;
-export function fromToThing(fromThing: Readonly<Coordinates2D>, toThing: Readonly<Coordinates2D>): splitTime.direction_t;
-export function fromToThing(fromThing: Readonly<Coordinates2D> | ILevelLocation, toThing: Readonly<Coordinates2D> | ILevelLocation): splitTime.direction_t {
+export function fromToThing(fromThing: ILevelLocation, toThing: ILevelLocation): direction_t;
+export function fromToThing(fromThing: Readonly<Coordinates2D>, toThing: Readonly<Coordinates2D>): direction_t;
+export function fromToThing(fromThing: Readonly<Coordinates2D> | ILevelLocation, toThing: Readonly<Coordinates2D> | ILevelLocation): direction_t {
     if (instanceOfILevelLocation(fromThing) && instanceOfILevelLocation(toThing)) {
-        return direction.fromTo(fromThing.getX(), fromThing.getY(), toThing.getX(), toThing.getY());
+        return fromTo(fromThing.getX(), fromThing.getY(), toThing.getX(), toThing.getY());
     }
     if (instanceOfCoordinates2D(fromThing) && instanceOfCoordinates2D(toThing)) {
-        return direction.fromTo(fromThing.x, fromThing.y, toThing.x, toThing.y);
+        return fromTo(fromThing.x, fromThing.y, toThing.x, toThing.y);
     }
     throw new Error("Types of from and to should be matched");
 }
-export function getOpposite(dir: splitTime.direction_t): splitTime.direction_t {
+export function getOpposite(dir: direction_t): direction_t {
     return normalize(dir + 2);
 }
-export function getRotated(dir: splitTime.direction_t, howMany90Degrees: number = 1): splitTime.direction_t {
+export function getRotated(dir: direction_t, howMany90Degrees: number = 1): direction_t {
     return normalize(dir + howMany90Degrees);
 }
-export function simplifyToCardinal(realDir: splitTime.direction_t): splitTime.direction_t {
+export function simplifyToCardinal(realDir: direction_t): direction_t {
     return normalize(Math.round(realDir));
 }
-export function getRandom(): splitTime.direction_t {
+export function getRandom(): direction_t {
     return randomRanged(0, 4);
 }
-export function getRandomCardinal(): splitTime.direction_t {
+export function getRandomCardinal(): direction_t {
     return randomInt(4) - 1;
 }
-export function getRandomOctal(): splitTime.direction_t {
+export function getRandomOctal(): direction_t {
     return (randomInt(8) - 1) / 2;
 }
-export function getXMagnitude(direction: string | splitTime.direction_t): number {
+export function getXMagnitude(direction: string | direction_t): number {
     if (typeof direction === "string") {
-        return splitTime.direction.getXMagnitude(splitTime.direction.fromString(direction));
+        return getXMagnitude(fromString(direction));
     }
     return Math.cos(direction * (Math.PI / 2));
 }
-export function getXSign(direction: string | splitTime.direction_t) {
-    var magnitude = splitTime.direction.getXMagnitude(direction);
+export function getXSign(direction: string | direction_t) {
+    var magnitude = getXMagnitude(direction);
     if (magnitude > 0.1) {
         return 1;
     }
@@ -131,14 +134,14 @@ export function getXSign(direction: string | splitTime.direction_t) {
     }
     return 0;
 }
-export function getYMagnitude(direction: string | splitTime.direction_t): number {
+export function getYMagnitude(direction: string | direction_t): number {
     if (typeof direction === "string") {
-        return splitTime.direction.getYMagnitude(splitTime.direction.fromString(direction));
+        return getYMagnitude(fromString(direction));
     }
     return -Math.sin(direction * (Math.PI / 2));
 }
-export function getYSign(direction: string | splitTime.direction_t): unitOrZero {
-    var magnitude = splitTime.direction.getYMagnitude(direction);
+export function getYSign(direction: string | direction_t): unitOrZero {
+    var magnitude = getYMagnitude(direction);
     if (magnitude > 0.1) {
         return 1;
     }
@@ -147,7 +150,7 @@ export function getYSign(direction: string | splitTime.direction_t): unitOrZero 
     }
     return 0;
 }
-export function areWithin90Degrees(dir1: splitTime.direction_t, dir2: splitTime.direction_t, howMany90Degrees: number = 1): boolean {
+export function areWithin90Degrees(dir1: direction_t, dir2: direction_t, howMany90Degrees: number = 1): boolean {
     return difference(dir1, dir2) < howMany90Degrees;
 }
 /**
@@ -155,7 +158,7 @@ export function areWithin90Degrees(dir1: splitTime.direction_t, dir2: splitTime.
  * @param direction SplitTime direction
  * @param invert (default true) change from y-axis down to up
  */
-export function toRadians(direction: splitTime.direction_t, invert: boolean = true): number {
+export function toRadians(direction: direction_t, invert: boolean = true): number {
     let radians = direction * (Math.PI / 2);
     if (invert) {
         radians = -radians;
@@ -167,14 +170,14 @@ export function toRadians(direction: splitTime.direction_t, invert: boolean = tr
  * @param radians direction in radians
  * @param invert (default true) change from y-axis down to up
  */
-export function fromRadians(radians: number, invert: boolean = true): splitTime.direction_t {
+export function fromRadians(radians: number, invert: boolean = true): direction_t {
     if (invert) {
         radians = -radians;
     }
     let direction = mod(radians / (Math.PI / 2), 4);
     return direction;
 }
-export function approach(oldDir: splitTime.direction_t, targetDir: splitTime.direction_t, step: number): splitTime.direction_t {
+export function approach(oldDir: direction_t, targetDir: direction_t, step: number): direction_t {
     oldDir = normalize(oldDir);
     targetDir = normalize(targetDir);
     if (oldDir > 3 && targetDir < 1) {
@@ -185,9 +188,9 @@ export function approach(oldDir: splitTime.direction_t, targetDir: splitTime.dir
     }
     return normalize(approachValue(oldDir, targetDir, step));
 }
-export function difference(dir1: splitTime.direction_t, dir2: splitTime.direction_t): splitTime.direction_t {
+export function difference(dir1: direction_t, dir2: direction_t): direction_t {
     return Math.min(normalize(dir1 - dir2), normalize(dir2 - dir1));
 }
-export function normalize(dir: splitTime.direction_t): splitTime.direction_t {
+export function normalize(dir: direction_t): direction_t {
     return mod(dir, 4);
 }

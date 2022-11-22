@@ -1,7 +1,7 @@
-import { TimeNotified, game_seconds } from "../splitTime";
 import { Behavior } from "./behavior";
 import { TemporaryBehavior, isBehaviorComplete } from "./temporary-behavior";
 import { ConditionalBehavior, isBehaviorConditionMet } from "./conditional-behavior";
+import { game_seconds, TimeNotified } from "engine/time/timeline";
 export class BehaviorParallel implements TimeNotified, Behavior, TemporaryBehavior, ConditionalBehavior {
     constructor(private readonly behaviors: (Behavior | TemporaryBehavior | ConditionalBehavior)[]) { }
     isComplete(): boolean {

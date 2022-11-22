@@ -1,4 +1,4 @@
-import { PointerOffset } from "../../../splitTime.trace"
+import { PointerOffset } from "engine/world/level/trace/trace"
 import { Body } from "../body"
 
 export const simpleBlocked = {

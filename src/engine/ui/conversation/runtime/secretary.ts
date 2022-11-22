@@ -1,4 +1,3 @@
-import { Camera, Level, assert } from "../../../splitTime";
 import { ConversationInstance } from "./conversation-instance";
 import { ConversationRuntimeManager } from "./conversation-runtime-manager";
 import { ConversationConnoisseur } from "./conversation-connoisseur";
@@ -7,7 +6,11 @@ import { HelperInfo } from "./helper-info";
 import { CustomEventHandler } from "../../../world/body/custom-event-handler";
 import { Speaker } from "../speaker";
 import { LineSpeechBubble } from "./line-speech-bubble";
-import * as splitTime from "../../../splitTime";
+import { Body } from "engine/world/body/body"
+import assert from "assert";
+import { Camera } from "engine/ui/viewport/camera";
+import { Level } from "engine/world/level/level";
+
 const MIN_SCORE = 1;
 interface LimitedPerspective {
     camera: Camera;
@@ -15,7 +18,7 @@ interface LimitedPerspective {
         isCurrentSet(): boolean;
         getCurrent: () => Level;
     };
-    playerBody: splitTime.Body | null;
+    playerBody: Body | null;
 }
 interface TrackedConversation {
     conversation: ConversationInstance;

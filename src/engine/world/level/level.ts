@@ -1,9 +1,18 @@
-import { LevelLoader, Position, Region, int, WeatherSettings, World, Canvas, game_seconds, Assets } from "../../splitTime";
 import { CellGrid } from "./cell-grid";
 import { Traces2 } from "./level-traces2";
 import { FileData } from "./level-file-data";
-import * as splitTime from "../../splitTime";
-type EventCallback = ((triggeringBody: splitTime.Body) => void) | ((triggeringBody: splitTime.Body, eventId: string) => void);
+import { Body } from "engine/world/body/body"
+import { Assets } from "engine/assets/assets";
+import { game_seconds } from "engine/time/timeline";
+import { Canvas } from "engine/ui/viewport/canvas";
+import { int } from "globals";
+import { Region } from "../region";
+import { WeatherSettings } from "../weather-settings";
+import { World } from "../world";
+import { LevelLoader } from "./level-loader";
+import { Position } from "./position";
+
+type EventCallback = ((triggeringBody: Body) => void) | ((triggeringBody: Body, eventId: string) => void);
 export class Level {
     id: string;
     private loader: LevelLoader;
@@ -17,7 +26,7 @@ export class Level {
         [id: string]: Position;
     } = {};
     region: Region | null = null;
-    bodies: splitTime.Body[] = [];
+    bodies: Body[] = [];
     background: string = "";
     backgroundOffsetX: int = 0;
     backgroundOffsetY: int = 0;
@@ -122,7 +131,7 @@ export class Level {
             this.exitFunction();
         }
     }
-    private runEvent(eventId: string, triggeringBody: splitTime.Body) {
+    private runEvent(eventId: string, triggeringBody: Body) {
         var that = this;
         var fun = this.events[eventId] ||
             function () {
@@ -130,7 +139,7 @@ export class Level {
             };
         return fun(triggeringBody, eventId);
     }
-    runEvents(eventIds: string[], triggeringBody: splitTime.Body) {
+    runEvents(eventIds: string[], triggeringBody: Body) {
         for (var i = 0; i < eventIds.length; i++) {
             this.runEvent(eventIds[i], triggeringBody);
         }
@@ -140,23 +149,23 @@ export class Level {
             body.notifyTimeAdvance(delta, absoluteTime);
         });
     }
-    notifyBodyMoved(body: splitTime.Body) {
+    notifyBodyMoved(body: Body) {
         if (this._cellGrid) {
             this._cellGrid.resort(body);
         }
     }
-    forEachBody(callback: (body: splitTime.Body) => void) {
+    forEachBody(callback: (body: Body) => void) {
         for (var i = 0; i < this.bodies.length; i++) {
             callback(this.bodies[i]);
         }
     }
-    getBodies(): splitTime.Body[] {
+    getBodies(): Body[] {
         return this.bodies;
     }
     /**
      * @deprecated Used to be related to rendering; not sure interface is still appropriate
      */
-    insertBody(body: splitTime.Body) {
+    insertBody(body: Body) {
         if (this.bodies.indexOf(body) < 0) {
             this.bodies.push(body);
         }
@@ -167,7 +176,7 @@ export class Level {
     /**
      * @deprecated Used to be related to rendering; not sure interface is still appropriate
      */
-    removeBody(body: splitTime.Body) {
+    removeBody(body: Body) {
         if (this._cellGrid) {
             this._cellGrid.removeBody(body);
         }

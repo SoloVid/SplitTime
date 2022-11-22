@@ -1,12 +1,14 @@
-import { int, Level } from "../../splitTime";
-import * as splitTime from "../../splitTime";
+import { Body } from "engine/world/body/body"
+import { int } from "globals";
+import { Level } from "./level";
+
 /**
  * @param {int} value
- * @param {function(splitTime.Body)} callback
+ * @param {function(Body)} callback
  * @param {BodiesSortedByOneValue} bodiesSortHolder
  * @return {boolean}
  */
-function forEachBodyAtValue(value: int, callback: (arg0: splitTime.Body) => void, bodiesSortHolder: BodiesSortedByOneValue | null): boolean {
+function forEachBodyAtValue(value: int, callback: (arg0: Body) => void, bodiesSortHolder: BodiesSortedByOneValue | null): boolean {
     if (bodiesSortHolder === null) {
         console.warn("Attempting to use BodyOrganizer before initialized");
         return false;
@@ -31,7 +33,7 @@ function forEachBodyAtValue(value: int, callback: (arg0: splitTime.Body) => void
                 return true;
             }
             foundBody = true;
-            callback(sortedItem.body as splitTime.Body);
+            callback(sortedItem.body as Body);
             // } else if(sortedItem.value > value) {
             //     // Will this optimization help?
             //     return foundBody;
@@ -42,7 +44,7 @@ function forEachBodyAtValue(value: int, callback: (arg0: splitTime.Body) => void
 var BUFFER = 10000;
 export class BodyOrganizer {
     _initialized: boolean;
-    _bodies: splitTime.Body[];
+    _bodies: Body[];
     _bodySet: {
         [ref: number]: boolean;
     };
@@ -54,13 +56,13 @@ export class BodyOrganizer {
     _sortedByZBottom: BodiesSortedByOneValue | null = null;
     /**
      * A class for arranging bodies for collisions
-     * @param {splitTime.Level} [level]
+     * @param {Level} [level]
      * @constructor
-     * @alias splitTime.Level.BodyOrganizer
+     * @alias Level.BodyOrganizer
      */
     constructor(level: Level) {
         this._initialized = false;
-        /** @type {splitTime.Body[]} */
+        /** @type {Body[]} */
         this._bodies = [];
         this._bodySet = {};
         if (level) {
@@ -68,7 +70,7 @@ export class BodyOrganizer {
         }
     }
     /**
-     * @param {splitTime.Level} level
+     * @param {Level} level
      */
     initialize(level: Level) {
         var maxX32 = Math.ceil(level.width / 32);
@@ -86,16 +88,16 @@ export class BodyOrganizer {
         }
     }
     /**
-     * @return {splitTime.Body[]}
+     * @return {Body[]}
      */
-    getBodies(): splitTime.Body[] {
+    getBodies(): Body[] {
         return this._bodies;
     }
     /**
      * Register a body with the organizer (such as on level entrance)
-     * @param {splitTime.Body} body
+     * @param {Body} body
      */
-    addBody(body: splitTime.Body) {
+    addBody(body: Body) {
         if (this._bodySet[body.ref]) {
             return;
         }
@@ -114,9 +116,9 @@ export class BodyOrganizer {
     }
     /**
      * Deregister a body from the organizer (such as on level exit)
-     * @param {splitTime.Body} body
+     * @param {Body} body
      */
-    removeBody(body: splitTime.Body) {
+    removeBody(body: Body) {
         for (var i = this._bodies.length - 1; i >= 0; i++) {
             this._bodies.splice(i, 1);
         }
@@ -135,9 +137,9 @@ export class BodyOrganizer {
      * Force the organizer to resort the body in question.
      * This method assumes all other bodies in the organizer are already sorted.
      * Should be called every time coordinates of body change.
-     * @param {splitTime.Body} body
+     * @param {Body} body
      */
-    resort(body: splitTime.Body) {
+    resort(body: Body) {
         if (!this._initialized) {
             return;
         }
@@ -159,22 +161,22 @@ export class BodyOrganizer {
      * If so, run callback for each one.
      * @return whether bodies were found
      */
-    forEachXLeft(x: int, callback: (body: splitTime.Body) => void): boolean {
+    forEachXLeft(x: int, callback: (body: Body) => void): boolean {
         return forEachBodyAtValue(x, callback, this._sortedByXLeft);
     }
-    forEachXRight(x: int, callback: (body: splitTime.Body) => void) {
+    forEachXRight(x: int, callback: (body: Body) => void) {
         return forEachBodyAtValue(x, callback, this._sortedByXRight);
     }
-    forEachYTop(y: int, callback: (body: splitTime.Body) => void) {
+    forEachYTop(y: int, callback: (body: Body) => void) {
         return forEachBodyAtValue(y, callback, this._sortedByYTop);
     }
-    forEachYBottom(y: int, callback: (body: splitTime.Body) => void) {
+    forEachYBottom(y: int, callback: (body: Body) => void) {
         return forEachBodyAtValue(y, callback, this._sortedByYBottom);
     }
-    forEachZTop(z: int, callback: (body: splitTime.Body) => void) {
+    forEachZTop(z: int, callback: (body: Body) => void) {
         return forEachBodyAtValue(z, callback, this._sortedByZTop);
     }
-    forEachZBottom(z: int, callback: (body: splitTime.Body) => void) {
+    forEachZBottom(z: int, callback: (body: Body) => void) {
         return forEachBodyAtValue(z, callback, this._sortedByZBottom);
     }
 }
@@ -183,7 +185,7 @@ class BodiesSortedByOneValue {
     valueLookup32: number[];
     sortedByValue: {
         value: number;
-        body: splitTime.Body | {
+        body: Body | {
             ref: int;
         };
     }[];
@@ -208,19 +210,19 @@ class BodiesSortedByOneValue {
     _getBeyondMaxValue() {
         return this.max32Value * 32 + BUFFER;
     }
-    addBody(body: splitTime.Body) {
+    addBody(body: Body) {
         this.sortedByValue.push({
             value: this._getBeyondMaxValue(),
             body: body
         });
         this.reverseSortLookup[body.ref] = this.sortedByValue.length - 1;
     }
-    removeBody(body: splitTime.Body) {
+    removeBody(body: Body) {
         this.resortBody(body, this._getBeyondMaxValue());
         this.sortedByValue.splice(this.reverseSortLookup[body.ref], 1);
         delete this.reverseSortLookup[body.ref];
     }
-    resortBody(body: splitTime.Body, value: number) {
+    resortBody(body: Body, value: number) {
         if (Math.floor(value) !== value) {
             console.warn("Non-integer value: " + value);
         }
@@ -236,7 +238,7 @@ class BodiesSortedByOneValue {
             this.resortBodyDownward(body, value);
         }
     }
-    resortBodyUpward(body: splitTime.Body, value: number) {
+    resortBodyUpward(body: Body, value: number) {
         var currentIndex = this.reverseSortLookup[body.ref];
         var oldValue = this.sortedByValue[currentIndex].value;
         while (currentIndex + 1 < this.sortedByValue.length &&
@@ -257,7 +259,7 @@ class BodiesSortedByOneValue {
             this.valueLookup32[index32]--;
         }
     }
-    resortBodyDownward(body: splitTime.Body, value: number) {
+    resortBodyDownward(body: Body, value: number) {
         var currentIndex = this.reverseSortLookup[body.ref];
         var oldValue = this.sortedByValue[currentIndex].value;
         while (currentIndex - 1 >= 0 &&

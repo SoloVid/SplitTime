@@ -1,6 +1,6 @@
-import { Coordinates2D, Coordinates3D, ILevelLocation2 } from "../../../splitTime";
 import { WalkOptions, PathDsl } from "./path-dsl";
 import { MidEventAction, MidEventCallback } from "../../../time/mid-event-action";
+import { Coordinates2D, Coordinates3D, ILevelLocation2 } from "engine/world/level/level-location";
 export class Walk {
     constructor(public readonly location: Readonly<Coordinates2D> | Readonly<Coordinates3D>, public readonly options: WalkOptions | null = null) { }
 }

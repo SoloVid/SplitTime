@@ -4,7 +4,8 @@ import { ConversationInstance } from "../runtime/conversation-instance";
 import { SetupFunc } from "../misc-types";
 import { Options } from "./dsl";
 import { EventSpec } from "../../../time/event-spec";
-import { assert } from "../../../splitTime";
+import { assert } from "globals";
+
 export class ConversationSpecManager {
     private readonly builders: {
         [id: string]: ConversationSpecBuilder | undefined;

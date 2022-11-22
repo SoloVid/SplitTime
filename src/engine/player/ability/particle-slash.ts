@@ -1,9 +1,16 @@
-import { direction_t, game_seconds, Pledge, STOP_CALLBACKS, CollisionMask, defaultCollisionMask, randomRanged, InFrontOfBody, COLLISION_CALCULATOR } from "../../splitTime";
 import { IAbility } from "./ability";
 import { ParticleEmitter } from "../../world/body/render/particles";
 import { Color } from "../../light/color";
-import * as splitTime from "../../splitTime";
-export function knockBack(body: splitTime.Body, dir: direction_t, speed: number, duration: game_seconds, zVelocityBump: number = 0): PromiseLike<void> {
+import { direction_t } from "engine/math/direction";
+import { game_seconds } from "engine/time/timeline";
+import { Pledge } from "engine/utils/pledge";
+import { randomRanged } from "engine/utils/random";
+import { STOP_CALLBACKS } from "engine/utils/register-callbacks";
+import { CollisionMask, defaultCollisionMask, COLLISION_CALCULATOR } from "engine/world/body/collisions/collision-calculator";
+import { InFrontOfBody } from "engine/world/body/in-front-of-body";
+import { Body } from "engine/world/body/body";
+
+export function knockBack(body: Body, dir: direction_t, speed: number, duration: game_seconds, zVelocityBump: number = 0): PromiseLike<void> {
     const pledge = new Pledge();
     let knockBackTime = 0;
     body.zVelocity = zVelocityBump;
@@ -25,9 +32,9 @@ export class ParticleSlash implements IAbility {
     collisionMask: CollisionMask = { ...defaultCollisionMask };
     duration: game_seconds = 0.08;
     extraParticleTime: number = 0.03;
-    constructor(private readonly body: splitTime.Body, private readonly onBodyHit: (body: splitTime.Body) => void) { }
+    constructor(private readonly body: Body, private readonly onBodyHit: (body: Body) => void) { }
     use(): boolean {
-        const slashBody = new splitTime.Body();
+        const slashBody = new Body();
         slashBody.width = 0;
         slashBody.depth = 0;
         const particles = new ParticleEmitter(slashBody, p => {

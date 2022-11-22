@@ -1,5 +1,6 @@
 import { CustomEventHandler } from "../../../world/body/custom-event-handler";
-import * as splitTime from "../../../splitTime";
+import { Body } from "engine/world/body/body"
+
 export class HelperInfo {
-    constructor(public readonly playerBodyGetter: () => splitTime.Body | null, public readonly advanceEvent: CustomEventHandler<void>) { }
+    constructor(public readonly playerBodyGetter: () => Body | null, public readonly advanceEvent: CustomEventHandler<void>) { }
 }

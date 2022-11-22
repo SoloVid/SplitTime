@@ -1,9 +1,10 @@
-import { int, direction_t, pixels_t } from "../../../splitTime";
 import { Horizontal } from "./collisions-horizontal";
 import { Vertical } from "./collisions-vertical";
 import { Transporter } from "./body-transporter";
-import * as splitTime from "../../../splitTime";
 import { Body } from "../body"
+import { direction_t } from "engine/math/direction";
+import { pixels_t } from "engine/math/measurement";
+import { int } from "globals";
 
 class BodyExt {
     bumped: boolean = false
@@ -16,7 +17,7 @@ class BodyExt {
 }
 
 export class Mover {
-    body: splitTime.Body
+    body: Body
     bodyExt: BodyExt
     dir: direction_t | null = null
     horizontal: Horizontal
@@ -93,7 +94,7 @@ export class Mover {
     }
 
     transportLevelIfApplicable() {
-        var transporter = new splitTime.body.Transporter(this.body)
+        var transporter = new Transporter(this.body)
         transporter.transportLevelIfApplicable()
     }
 

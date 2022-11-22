@@ -1,6 +1,9 @@
+import { Perspective } from "engine/perspective";
+import { LoadingScreen } from "engine/ui/loading-screen";
+import { assert } from "globals";
 import { Collage, instanceOfCollage } from "../file/collage";
-import { assert, Assets, LoadingScreen, Perspective } from "../splitTime";
 import { FileData, instanceOfFileData } from "../world/level/level-file-data";
+import { Assets } from "./assets";
 
 export interface CompiledGameData {
     levels: {

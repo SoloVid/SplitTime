@@ -1,5 +1,5 @@
+import { assert } from "globals";
 import { ObjectSerializer } from "./object-serializer";
-import { assert } from "../splitTime";
 export class ObjectSerializerPool {
     private readonly objectSerializers: {
         [id: string]: ObjectSerializer<unknown>;

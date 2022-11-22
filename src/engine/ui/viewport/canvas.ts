@@ -1,4 +1,7 @@
-import { int, assert, __NODE__, __WORKER__ } from "../../splitTime";
+import assert from "assert";
+import { __NODE__, __WORKER__ } from "environment";
+import { int } from "globals";
+
 export type GenericCanvasRenderingContext2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 export class Canvas {
     public readonly element: HTMLCanvasElement | OffscreenCanvas

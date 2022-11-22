@@ -1,4 +1,3 @@
-import { file } from "../splitTime";
 // Some reference material:
 // https://www.typescriptlang.org/docs/handbook/advanced-types.html
 // https://medium.com/dailyjs/typescript-create-a-condition-based-subset-types-9d902cea5b8c
@@ -85,7 +84,7 @@ export class JsonHandler {
         return type;
     }
 }
-export function instanceOfJsonable<T>(thing: file.IsJsonable<T>): thing is file.IsJsonable<T> {
+export function instanceOfJsonable<T>(thing: IsJsonable<T>): thing is IsJsonable<T> {
     const type = typeof thing;
     switch (type) {
         case "boolean":
@@ -99,7 +98,7 @@ export function instanceOfJsonable<T>(thing: file.IsJsonable<T>): thing is file.
                     [key: string]: unknown;
                 };
                 for (const key in obj) {
-                    if (!instanceOfJsonable(obj[key] as file.IsJsonable<unknown>)) {
+                    if (!instanceOfJsonable(obj[key] as IsJsonable<unknown>)) {
                         return false;
                     }
                 }
@@ -108,7 +107,7 @@ export function instanceOfJsonable<T>(thing: file.IsJsonable<T>): thing is file.
             else if (prototype === Array.prototype) {
                 const arr = thing as unknown[];
                 for (const item of arr) {
-                    if (!instanceOfJsonable(item as file.IsJsonable<unknown>)) {
+                    if (!instanceOfJsonable(item as IsJsonable<unknown>)) {
                         return false;
                     }
                 }

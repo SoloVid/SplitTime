@@ -1,4 +1,6 @@
-import { int, assert, __NODE__, __DOM__ } from "../splitTime";
+import { __DOM__, __NODE__ } from "environment";
+import { assert, int } from "globals";
+
 // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
 export const MAX_SAFE_INTEGER = 9007199254740991;
 let SCRIPT_DIRECTORY = "<UNKNOWN>";

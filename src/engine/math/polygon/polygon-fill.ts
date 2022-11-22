@@ -1,5 +1,7 @@
+import { assert, int } from "globals";
+import { unit } from "../measurement";
+import { Vector2D } from "../vector2d";
 import { Polygon } from "./polygon";
-import { int, unit, Vector2D, assert } from "../../splitTime";
 export function fillPolygon(polygon: Polygon, callback: (x: int, y: int) => void): void {
     const edgesWaiting: EdgeInfo[] = [];
     for (let i = 0; i < polygon.vertices.length; i++) {

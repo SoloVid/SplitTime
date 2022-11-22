@@ -1,8 +1,14 @@
-import { direction_t, ILevelLocation2, pixels_t, Npc, game_seconds, int, direction, mod } from "../splitTime";
 import { Behavior } from "./behavior";
 import { setDebugValue } from "../utils/debug";
-import { approach, areWithin90Degrees, difference, normalize } from "../math/direction";
-import { distanceEasy } from "../math/measurement";
+import { approach, areWithin90Degrees, difference, direction_t, normalize } from "../math/direction";
+import { distanceEasy, pixels_t } from "../math/measurement";
+import { game_seconds } from "engine/time/timeline";
+import { mod } from "engine/utils/misc";
+import { ILevelLocation2 } from "engine/world/level/level-location";
+import { int } from "globals";
+import { Npc } from "./npc";
+import * as direction from "engine/math/direction"
+
 interface WeightedDirection {
     dir: direction_t;
     weight: number;

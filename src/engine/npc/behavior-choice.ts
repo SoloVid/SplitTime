@@ -1,8 +1,9 @@
-import { TimeNotified, int, assert, game_seconds } from "../splitTime";
 import { Behavior } from "./behavior";
 import { TemporaryBehavior, isBehaviorComplete } from "./temporary-behavior";
 import { ConditionalBehavior, isBehaviorConditionMet } from "./conditional-behavior";
 import { PRIORITY, DIRECTED, IDLE } from "./npc-priority";
+import { game_seconds, TimeNotified } from "engine/time/timeline";
+import { assert, int } from "globals";
 export class BehaviorChoice implements TimeNotified, Behavior, TemporaryBehavior, ConditionalBehavior {
     private readonly behaviorMap: {
         [priority: number]: Behavior | null;

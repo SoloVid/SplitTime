@@ -1,5 +1,6 @@
-import { Npc, int } from "../splitTime";
-import * as splitTime from "../splitTime";
+import { int } from "globals";
+import { Npc } from "./npc";
+
 // The levels below are just default suggestions
 /** First-priority e.g. talking / attacking */
 export const PRIORITY = 0;
@@ -8,5 +9,5 @@ export const DIRECTED = 1;
 /** Last-resort behavior e.g. wandering */
 export const IDLE = 2;
 export class NpcPriority {
-    constructor(public readonly npc: Npc, public readonly level: int = splitTime.npc.PRIORITY) { }
+    constructor(public readonly npc: Npc, public readonly level: int = PRIORITY) { }
 }

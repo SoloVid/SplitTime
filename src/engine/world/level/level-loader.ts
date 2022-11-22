@@ -1,5 +1,4 @@
 import { FileData } from "./level-file-data";
-import { Level, World, Position, Trace, level, assert, Sprite, SpriteBody, Assets } from "../../splitTime";
 import { CellGrid } from "./cell-grid";
 import { interpret } from "../../math/direction";
 import { warn } from "../../utils/logger";
@@ -8,7 +7,16 @@ import { Type } from "./trace/trace-misc";
 import { smoothPut } from "../body/render/ghosty";
 import { extractCoordinates } from "./trace/trace-points";
 import { Traces2 } from "./level-traces2";
-import * as splitTime from "../../splitTime";
+import { Body } from "engine/world/body/body"
+import { assert } from "globals";
+import { Assets } from "engine/assets/assets";
+import { Sprite } from "../body/render/sprite";
+import { SpriteBody } from "../body/sprite-body";
+import { World } from "../world";
+import { Level } from "./level";
+import { Position } from "./position";
+import { Trace } from "./trace/trace";
+
 export class LevelLoader {
     private fileData: FileData | null = null;
     constructor(private readonly level: Level, private readonly levelData: FileData) { }
@@ -57,8 +65,8 @@ export class LevelLoader {
                 case Type.TRANSPORT:
                     const pointerOffset = t.getPointerOffset();
                     const transportTraceId = traceSpec.getOffsetHash();
-                    this.level.registerEvent(transportTraceId, ((trace, level) => {
-                        return (body: splitTime.Body) => {
+                    this.level.registerEvent(transportTraceId, ((trace) => {
+                        return (body: Body) => {
                             if (body.levelLocked) {
                                 return;
                             }
@@ -69,19 +77,19 @@ export class LevelLoader {
                                 z: body.z + pointerOffset.offsetZ
                             });
                         };
-                    })(t, level));
+                    })(t));
                     break;
                 case Type.SEND:
                     const sendTraceId = traceSpec.getOffsetHash();
-                    this.level.registerEvent(sendTraceId, ((trace, level) => {
-                        return (body: splitTime.Body) => {
+                    this.level.registerEvent(sendTraceId, ((trace) => {
+                        return (body: Body) => {
                             if (body.levelLocked) {
                                 return;
                             }
                             const targetPosition = trace.getTargetPosition();
                             smoothPut(body, targetPosition);
                         };
-                    })(t, level));
+                    })(t));
                     break;
                 case Type.PATH:
                     this.connectPositionsFromPath(t.spec);
@@ -118,7 +126,7 @@ export class LevelLoader {
             const collage = ASSETS.collages.get(prop.collage)
             const collageMontage = collage.getMontage(prop.montage);
             // const sprite = new Sprite(prop.collage, prop.montage)
-            const body = new splitTime.Body();
+            const body = new Body();
             body.ethereal = true;
             const sprite = new Sprite(body, collage, prop.montage);
             sprite.playerOcclusionFadeFactor = collageMontage.playerOcclusionFadeFactor;

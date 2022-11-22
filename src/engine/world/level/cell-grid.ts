@@ -1,6 +1,10 @@
-import * as splitTime from "../../splitTime";
-import { CollisionMask, int, log } from "../../splitTime";
+import { debug, log } from "console";
+import { ENABLED } from "engine/utils/debug";
+import { warn } from "engine/utils/logger";
+import { int } from "globals";
 import { Body } from "../body/body";
+import { CollisionMask } from "../body/collisions/collision-calculator";
+import { Level } from "./level";
 
 const PARTITION_SIZE = 32
 
@@ -9,14 +13,14 @@ const PARTITION_SIZE = 32
  */
 export class CellGrid {
     private _initialized: boolean
-    private _waitingBodies: splitTime.Body[]
+    private _waitingBodies: Body[]
     private _whereAreBodies: { [bodyRef: number]: WhereIsBody | undefined }
-    private _grids: splitTime.Body[][][]
+    private _grids: Body[][][]
     _xCells: number
     _yCells: number
     _zCells: number
 
-    constructor(private readonly level: splitTime.Level) {
+    constructor(private readonly level: Level) {
         this._initialized = false
         this._waitingBodies = []
         this._whereAreBodies = {}
@@ -45,7 +49,7 @@ export class CellGrid {
     /**
      * Register a body with the organizer (such as on level entrance)
      */
-    addBody(body: splitTime.Body) {
+    addBody(body: Body) {
         if (this._whereAreBodies[body.ref]) {
             return
         }
@@ -73,10 +77,10 @@ export class CellGrid {
                     iX++
                 ) {
                     var cell = this._grids[iZ][iY * this._xCells + iX]
-                    if (splitTime.debug.ENABLED) {
+                    if (ENABLED) {
                         for (var i = 0; i < cell.length; i++) {
                             if (cell[i] === body) {
-                                log.warn(
+                                warn(
                                     "Body " +
                                         body.ref +
                                         " added to cell more than once"
@@ -95,7 +99,7 @@ export class CellGrid {
     /**
      * Deregister a body from the organizer (such as on level exit)
      */
-    removeBody(body: splitTime.Body) {
+    removeBody(body: Body) {
         if (!this._initialized) {
             for (
                 var iBody = this._waitingBodies.length - 1;
@@ -145,9 +149,9 @@ export class CellGrid {
      * Force the organizer to resort the body in question.
      * This method assumes all other bodies in the organizer are already sorted.
      * Should be called every time coordinates of body change.
-     * @param {splitTime.Body} body
+     * @param {Body} body
      */
-    resort(body: splitTime.Body) {
+    resort(body: Body) {
         if (!this._initialized) {
             return
         }
@@ -169,7 +173,7 @@ export class CellGrid {
 
         function addToCell(body: Body, x: int, y: int, z: int) {
             var cell = me._grids[z][y * me._xCells + x]
-            if (splitTime.debug.ENABLED) {
+            if (ENABLED) {
                 for (var i = 0; i < cell.length; i++) {
                     if (cell[i] === body) {
                         console.warn(
@@ -209,10 +213,10 @@ export class CellGrid {
      * @param blacklistArea cells to ignore
      */
     private _adjustCellClaims(
-        body: splitTime.Body,
+        body: Body,
         whitelistArea: WhereIsBody,
         blacklistArea: WhereIsBody,
-        callback: (body: splitTime.Body, x: int, y: int, z: int) => void
+        callback: (body: Body, x: int, y: int, z: int) => void
     ) {
         var iX, iY, iZ
 
@@ -350,7 +354,7 @@ export class CellGrid {
         exMaxX: number,
         exMaxY: number,
         exMaxZ: number,
-        callback: (arg0: splitTime.Body) => void
+        callback: (arg0: Body) => void
     ) {
         var bodiesHit: { [bodyRef: number]: true } = {}
         for (
@@ -429,7 +433,7 @@ class WhereIsBody {
     readonly minXCellIndex: int
     readonly exMaxXCellIndex: int
 
-    constructor(cellGrid: splitTime.level.CellGrid, body?: splitTime.Body) {
+    constructor(cellGrid: CellGrid, body?: Body) {
         if (body) {
             const left = body.getLeft()
             const right = left + body.width

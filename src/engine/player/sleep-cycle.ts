@@ -1,10 +1,12 @@
-import { TimeNotified, WorldRenderer, game_seconds } from "../splitTime";
 import { MeteredStat } from "./metered-stat";
 import { Color } from "../light/color";
-import * as splitTime from "../splitTime";
+import { TimeNotified, game_seconds } from "engine/time/timeline";
+import { WorldRenderer } from "engine/world/world-renderer";
+import { Body } from "engine/world/body/body";
+
 export class SleepCycle implements TimeNotified {
     inBed: boolean = false;
-    constructor(private readonly body: splitTime.Body, private readonly stamina: MeteredStat, private readonly worldRenderer: WorldRenderer, public onKO: () => void = () => { }, public onWake: () => void = () => { }) {
+    constructor(private readonly body: Body, private readonly stamina: MeteredStat, private readonly worldRenderer: WorldRenderer, public onKO: () => void = () => { }, public onWake: () => void = () => { }) {
         this.stamina.registerEmptyListener(() => { this.startSleep(); });
         // TODO: add oversleep?
         this.stamina.registerMaxedListener(() => { this.stopSleep(); });

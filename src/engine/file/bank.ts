@@ -1,4 +1,5 @@
-import { RegisterCallbacks } from "../splitTime";
+import { RegisterCallbacks } from "engine/utils/register-callbacks";
+
 export class Bank {
     private onNewCallbacks: RegisterCallbacks = new RegisterCallbacks();
     private onLoadCallbacks: RegisterCallbacks = new RegisterCallbacks();

@@ -1,4 +1,3 @@
-import { TimeNotified, Indirect, SpriteBody, direction_t, game_seconds } from "../splitTime";
 import { AbilityPool } from "./ability/ability-pool";
 import { ControlledCollisionMovement } from "../world/body/agent/controlled-collision-movement-agent";
 import { LocationHistory } from "./location-history";
@@ -6,7 +5,12 @@ import { PlayerManager } from "./player-manager";
 import { JoyStick } from "../ui/controls/joy-stick";
 import { MeteredStat } from "./metered-stat";
 import { IAbility } from "./ability/ability";
-import * as splitTime from "../splitTime";
+import { direction_t } from "engine/math/direction";
+import { Indirect } from "engine/redirect";
+import { TimeNotified, game_seconds } from "engine/time/timeline";
+import { SpriteBody } from "engine/world/body/sprite-body";
+import { Body } from "engine/world/body/body";
+
 const ATTACK_ABILITY = "ATTACK_ABILITY";
 const JUMP_ABILITY = "JUMP_ABILITY";
 const SPECIAL_ABILITY = "SPECIAL_ABILITY";
@@ -20,7 +24,7 @@ export class PlayerAgent implements TimeNotified {
         this.abilities = new AbilityPool(spriteBody.body);
         this.movementAgent = new ControlledCollisionMovement(spriteBody);
     }
-    get body(): splitTime.Body {
+    get body(): Body {
         return this.spriteBody.body;
     }
     setJumpAbility(ability: IAbility) {

@@ -1,4 +1,8 @@
-import { Level, int, ILevelLocation2, Coordinates3D, Coordinates2D, approachValue } from "../../splitTime";
+import { approachValue } from "engine/utils/misc";
+import { Level } from "engine/world/level/level";
+import { ILevelLocation2, Coordinates3D, Coordinates2D } from "engine/world/level/level-location";
+import { int } from "globals";
+
 type LevelGetter = () => Level;
 /**
  * This class tracks the position of the camera in the game world.

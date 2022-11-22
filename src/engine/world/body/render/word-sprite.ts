@@ -1,8 +1,12 @@
 import { DrawingBoard } from "engine/ui/viewport/drawing-board"
-import { body, Coordinates3D, game_seconds, GenericCanvasRenderingContext2D, math } from "../../../splitTime"
-import { Configuration as CONFIG } from "../../../splitTime.conversation"
-import { BodySpec } from "../../../splitTime.file.collage"
+import { Configuration as CONFIG } from "engine/ui/conversation/runtime/renderer"
 import { CanvasRequirements, Drawable } from "./drawable"
+import { BodySpec } from "engine/file/collage"
+import { game_seconds } from "engine/time/timeline"
+import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas"
+import { Coordinates3D } from "engine/world/level/level-location"
+import { Rect } from "engine/math/rect"
+import { Light } from "./light"
 
 export class WordSprite implements Drawable {
     private _time: game_seconds = 0
@@ -23,7 +27,7 @@ export class WordSprite implements Drawable {
 
     getCanvasRequirements(): CanvasRequirements {
         return new CanvasRequirements(
-            math.Rect.make(-200, -200, 400, 400)
+            Rect.make(-200, -200, 400, 400)
         )
     }
 
@@ -63,7 +67,7 @@ export class WordSprite implements Drawable {
         // Do nothing.
     }
 
-    getLight(): body.Light | null {
+    getLight(): Light | null {
         return null
     }
 }

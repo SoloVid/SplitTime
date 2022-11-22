@@ -1,4 +1,5 @@
-import { Vector2D } from "../splitTime";
+import { Vector2D } from "./vector2d";
+
 export function angleBetween(v1: Vector2D, v2: Vector2D, vRef: Vector2D = new Vector2D()): number {
     const v1Rel = v1.plus(vRef.times(-1));
     const v2Rel = v2.plus(vRef.times(-1));

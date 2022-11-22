@@ -1,7 +1,7 @@
 import { AnySerializer } from "./any-serializer";
 import { serialized_format_t, serialized_object_bucket_t } from "./serialized-format-t";
-import { int } from "../splitTime";
 import { ObjectSerializerPool } from "./object-serializer-pool";
+import { int } from "globals";
 export class MasterSerialization implements AnySerializer {
     public readonly data: serialized_format_t = {};
     private nextUniqueId: int = 10;

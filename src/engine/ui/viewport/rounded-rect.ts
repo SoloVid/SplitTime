@@ -1,4 +1,5 @@
-import { GenericCanvasRenderingContext2D } from "../../splitTime";
+import { GenericCanvasRenderingContext2D } from "./canvas";
+
 export class RoundedRect {
     cornerRadius: number = 10;
     fill(ctx: GenericCanvasRenderingContext2D, x: number, y: number, width: number, height: number): void {

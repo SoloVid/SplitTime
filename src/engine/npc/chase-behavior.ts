@@ -1,11 +1,12 @@
 import { Behavior } from "./behavior";
 import { ConditionalBehavior } from "./conditional-behavior";
-import { game_seconds, pixels_t, Npc, Sprite } from "../splitTime";
-import { fromToThing } from "../splitTime.direction";
-import { approach, areWithin90Degrees, getOpposite } from "../math/direction";
-import { distanceTrue } from "../math/measurement";
+import { approach, areWithin90Degrees, fromToThing, getOpposite } from "../math/direction";
+import { distanceTrue, pixels_t } from "../math/measurement";
 import { canDetect } from "../world/body/detection";
-import * as splitTime from "../splitTime";
+import { game_seconds } from "engine/time/timeline";
+import { Sprite } from "engine/world/body/render/sprite";
+import { Npc } from "./npc";
+import { Body } from "engine/world/body/body";
 export class ChaseBehavior implements Behavior, ConditionalBehavior {
     private timeWithoutSeeing: game_seconds = Number.POSITIVE_INFINITY;
     BLIND_TIME: game_seconds = 2;
@@ -17,7 +18,7 @@ export class ChaseBehavior implements Behavior, ConditionalBehavior {
     private distanceToKeep = 32;
     private chasingRadiansOff = 0;
     private temporaryDirectionBlacklist = {};
-    constructor(private readonly npc: Npc, private readonly bodyToChaseGetter: () => splitTime.Body, private readonly howCloseToGet: number) {
+    constructor(private readonly npc: Npc, private readonly bodyToChaseGetter: () => Body, private readonly howCloseToGet: number) {
         this.senseDistance = 2 * this.npc.body.width;
     }
     private inLevel(): boolean {

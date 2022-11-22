@@ -1,4 +1,5 @@
-import { TimeNotified } from "../splitTime";
+import { TimeNotified } from "engine/time/timeline";
+
 export interface Behavior extends TimeNotified {
     /**
      * Notify the behavior that, starting this frame,

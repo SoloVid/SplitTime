@@ -1,5 +1,8 @@
-import { SpriteBody, assert, DEBUG } from "../splitTime";
+import { DEBUG } from "compiler-defines";
+import { assert } from "globals";
+import { SpriteBody } from "./body/sprite-body";
 import { Prop } from "./level/level-file-data";
+
 type Processor = (spriteBody: SpriteBody, rawProp: Prop) => void;
 export class PropPostProcessor {
     private readonly processorMap: {

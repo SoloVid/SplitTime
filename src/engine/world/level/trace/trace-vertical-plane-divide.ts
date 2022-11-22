@@ -1,6 +1,10 @@
+import assert from "assert";
+import { Vector3D } from "engine/math/vector3d";
+import { SpriteBody } from "engine/world/body/sprite-body";
 import { getXExtremes } from "../../../math/polygon/polygon-turning-points";
-import { assert, Coordinates3D, SpriteBody, Vector3D } from "../../../splitTime";
+import { Coordinates3D } from "../level-location";
 import { TraceSpec } from "./trace-spec";
+
 const backward = new Vector3D(0, -1, 0);
 export class TraceVerticalPlaneDivide {
     private readonly v1: Vector3D;

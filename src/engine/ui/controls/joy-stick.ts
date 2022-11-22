@@ -1,6 +1,7 @@
-import { int, CallbackResult, STOP_CALLBACKS } from "../../splitTime";
 import { Keyboard } from "./keyboard";
 import { getXMagnitude, getYMagnitude, fromTo } from "../../math/direction";
+import { CallbackResult, STOP_CALLBACKS } from "engine/utils/register-callbacks";
+import { int } from "globals";
 
     const ZILCH = 0.0000001 as const
 

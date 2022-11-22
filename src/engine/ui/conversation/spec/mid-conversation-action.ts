@@ -1,6 +1,7 @@
 import { SectionSpec } from "./section-spec";
 import { MidEventAction, MidEventCallback } from "../../../time/mid-event-action";
-import { assert } from "../../../splitTime";
+import { assert } from "globals";
+
 export class MidConversationAction {
     private parent: SectionSpec | null = null;
     private readonly midEventAction: MidEventAction;

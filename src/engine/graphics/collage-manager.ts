@@ -1,5 +1,5 @@
-import { Collage, CompiledGameData } from "../splitTime";
-import { makeCollageFromFile } from "./collage";
+import { CompiledGameData } from "engine/assets/load";
+import { Collage, makeCollageFromFile } from "./collage";
 export class CollageManager {
     private readonly collageMap: {
         [collageFilePath: string]: Collage;

@@ -1,4 +1,6 @@
-import { Level, game_seconds } from "../splitTime";
+import { Level } from "engine/world/level/level";
+import { game_seconds } from "./timeline";
+
 interface MinimalBody {
     level: Level;
 }

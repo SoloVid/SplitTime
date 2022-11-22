@@ -1,10 +1,13 @@
-import { areWithin90Degrees, fromToThing, getXMagnitude, getYMagnitude } from "../../../math/direction";
-import * as splitTime from "../../../splitTime";
-import { Coordinates3D, direction_t, ILevelLocation2, Indirect, redirect, Sprite, SpriteBody } from "../../../splitTime";
-import { areLocationsEquivalent, copyLocation } from "../../level/level-location";
+import { Indirect, redirect } from "engine/redirect";
+import { game_seconds, TimeNotified } from "engine/time/timeline";
+import { areWithin90Degrees, direction_t, fromToThing, getXMagnitude, getYMagnitude } from "../../../math/direction";
+import { areLocationsEquivalent, Coordinates3D, copyLocation, ILevelLocation2 } from "../../level/level-location";
 import { Body } from "../body";
+import { COLLISION_CALCULATOR } from "../collisions/collision-calculator";
+import { Sprite } from "../render/sprite";
+import { SpriteBody } from "../sprite-body";
 
-export class ControlledCollisionMovement implements splitTime.TimeNotified {
+export class ControlledCollisionMovement implements TimeNotified {
     private targetLevelLocation: Readonly<Coordinates3D> | null = null
     private targetDirection: number | null = null
     private ladder: EngagedLadder | null = null
@@ -40,7 +43,7 @@ export class ControlledCollisionMovement implements splitTime.TimeNotified {
         if (this.ladder !== null) {
             if (!areLocationsEquivalent(this.ladder.location, this.body)) {
                 // FTODO: should this check more/different part of Body than base?
-                const baseCollisionCheck = splitTime.COLLISION_CALCULATOR.getEventsInVolume(
+                const baseCollisionCheck = COLLISION_CALCULATOR.getEventsInVolume(
                     this.body.level,
                     this.body.getLeft(), this.body.width,
                     this.body.getTopY(), this.body.depth,
@@ -55,7 +58,7 @@ export class ControlledCollisionMovement implements splitTime.TimeNotified {
         }
     }
 
-    notifyTimeAdvance(delta: splitTime.game_seconds) {
+    notifyTimeAdvance(delta: game_seconds) {
         this.checkLadder()
         if (this.ladder !== null) {
             this.body.zVelocity = 0

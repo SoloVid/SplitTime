@@ -1,4 +1,6 @@
-import { assert, instanceOfInterruptible, Interruptible, ObjectCallbacks } from "../../../splitTime";
+import { instanceOfInterruptible, Interruptible } from "engine/utils/interruptible";
+import { ObjectCallbacks } from "engine/utils/object-callbacks";
+import { assert } from "globals";
 import { ConversationLeafNode } from "../misc-types";
 import { SpeechBubbleContentsSpec } from "../spec/line";
 import { MidConversationAction } from "../spec/mid-conversation-action";
@@ -9,6 +11,7 @@ import { HelperInfo } from "./helper-info";
 import { LineSpeechBubble } from "./line-speech-bubble";
 import { SpeechBubbleState } from "./speech-bubble";
 import { treeTraveler } from "./tree-traveler";
+
 /**
  * Class responsible for managing the lifecycle of a single conversation point.
  */

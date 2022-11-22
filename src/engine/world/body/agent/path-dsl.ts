@@ -1,4 +1,4 @@
-import { Coordinates2D, Coordinates3D, ILevelLocation2 } from "../../../splitTime";
+import { Coordinates2D, Coordinates3D, ILevelLocation2 } from "engine/world/level/level-location";
 import { MidEventCallback } from "../../../time/mid-event-action";
 export type SetupFunc = (d: PathDsl) => void;
 export type WalkOptions = {

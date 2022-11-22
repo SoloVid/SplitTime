@@ -1,5 +1,5 @@
-import { Configuration } from "../../../splitTime.conversation"
 import { Canvas } from "../../viewport/canvas"
+import { Configuration } from "../runtime/renderer"
 
 export interface TextPart {
     text: string

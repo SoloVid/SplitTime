@@ -1,5 +1,7 @@
-import { Canvas, GenericCanvasRenderingContext2D, int, assert, Assets } from "../../splitTime";
+import { Assets } from "engine/assets/assets";
+import { assert, int } from "globals";
 import { ENABLED, attachDebug } from "../../utils/debug";
+import { Canvas, GenericCanvasRenderingContext2D } from "./canvas";
 import { DrawingBoard, makeAssetDrawingBoard } from "./drawing-board";
 /**
  * This is the actual viewing window for the player to see the game.

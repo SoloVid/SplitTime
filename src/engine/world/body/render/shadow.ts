@@ -1,17 +1,19 @@
 import { DrawingBoard } from "engine/ui/viewport/drawing-board";
 import { Rect } from "../../../math/rect";
-import * as splitTime from "../../../splitTime";
-import { COLLISION_CALCULATOR, Coordinates3D } from "../../../splitTime";
+import { Body } from "engine/world/body/body"
 import { CanvasRequirements, Drawable } from "./drawable";
+import { Coordinates3D } from "engine/world/level/level-location";
+import { COLLISION_CALCULATOR } from "../collisions/collision-calculator";
+
 export class Shadow implements Drawable {
-    realBody: splitTime.Body;
-    shadowBody: splitTime.Body;
+    realBody: Body;
+    shadowBody: Body;
     minRadius: number;
     maxRadius: number;
     radius: number;
-    constructor(body: splitTime.Body) {
+    constructor(body: Body) {
         this.realBody = body;
-        this.shadowBody = new splitTime.Body();
+        this.shadowBody = new Body();
         this.shadowBody.drawables.push(this);
         this.shadowBody.width = body.width;
         this.shadowBody.depth = body.depth;

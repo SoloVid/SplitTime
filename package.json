@@ -19,11 +19,9 @@
     "build:editor-server": "esbuild src/editor/server/main.ts --bundle --platform=node --outfile=build/editor-server.js",
     "build:engine-iife": "esbuild src/engine/splitTime.ts --global-name=splitTime --bundle --platform=browser --outfile=build/engine.js",
     "build:engine": "esbuild src/engine/splitTime.ts --bundle --format=esm --outfile=build/engine.mjs",
-    "build:test-cli": "esbuild src/build-tools/build-cli.ts --bundle --platform=node --outfile=build/test-cli.js --external:typescript/bin/tsc",
     "check-types": "tsc -b -f",
     "clean": "rm -rf build",
     "start": "node build/editor-server.js",
-    "test0": "node build/engine-test.js",
     "test": "uts -r esbuild-register src/engine-test"
   },
   "devDependencies": {

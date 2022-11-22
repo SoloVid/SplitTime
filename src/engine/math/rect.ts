@@ -1,4 +1,5 @@
-import { math, Coordinates2D } from "../splitTime";
+import { Coordinates2D } from "engine/world/level/level-location";
+
 export class Rect {
     private _x: number = 0;
     private _y: number = 0;
@@ -64,7 +65,7 @@ export function calculateTotalRectArea(rects: Rect[]): Rect {
         lowY = Math.min(lowY, rect.y);
         highY = Math.max(highY, rect.y2);
     }
-    return math.Rect.make(lowX, lowY, highX - lowX, highY - lowY);
+    return Rect.make(lowX, lowY, highX - lowX, highY - lowY);
 }
 export function calculateTotalArea(points: Coordinates2D[]): Rect {
     let lowX = Number.POSITIVE_INFINITY;
@@ -77,5 +78,5 @@ export function calculateTotalArea(points: Coordinates2D[]): Rect {
         lowY = Math.min(lowY, p.y);
         highY = Math.max(highY, p.y);
     }
-    return math.Rect.make(lowX, lowY, highX - lowX, highY - lowY);
+    return Rect.make(lowX, lowY, highX - lowX, highY - lowY);
 }

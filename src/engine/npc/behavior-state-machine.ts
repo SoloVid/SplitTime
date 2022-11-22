@@ -1,4 +1,4 @@
-import { TimeNotified, game_seconds } from "../splitTime";
+import { TimeNotified, game_seconds } from "engine/time/timeline";
 import { Behavior } from "./behavior";
 import { ConditionalBehavior, isBehaviorConditionMet } from "./conditional-behavior";
 export class BehaviorStateMachine implements TimeNotified, Behavior, ConditionalBehavior {

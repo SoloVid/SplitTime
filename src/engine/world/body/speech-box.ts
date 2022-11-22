@@ -1,11 +1,13 @@
-import { ILevelLocation2, Level } from "../../splitTime";
-import * as splitTime from "../../splitTime";
+import { Level } from "../level/level";
+import { ILevelLocation2 } from "../level/level-location";
+import { Body } from "./body"
+
 export class SpeechBox implements ILevelLocation2 {
-    body: splitTime.Body;
+    body: Body;
     offsetX: number;
     offsetY: number;
     offsetZ: number;
-    constructor(body: splitTime.Body, offsetZ: number = 0, offsetX: number = 0, offsetY: number = 0) {
+    constructor(body: Body, offsetZ: number = 0, offsetX: number = 0, offsetY: number = 0) {
         this.body = body;
         this.offsetX = offsetX;
         this.offsetY = offsetY;

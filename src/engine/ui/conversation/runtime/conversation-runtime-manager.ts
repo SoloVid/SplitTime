@@ -5,7 +5,8 @@ import { LineSpeechBubble } from "./line-speech-bubble";
 import { ConversationInstance } from "./conversation-instance";
 import { HelperInfo } from "./helper-info";
 import { warn } from "../../../utils/logger";
-import * as splitTime from "../../../splitTime";
+import { Body } from "engine/world/body/body"
+
 interface Current {
     // action: ConversationLeafNode
     // section: SectionSpec
@@ -14,7 +15,7 @@ interface Current {
 export interface IConversationRuntimeManager {
     // isFinished(): boolean
     interrupt(event: CustomEventHandler<void>): void;
-    pullOut(body: splitTime.Body): void;
+    pullOut(body: Body): void;
     advance(): void;
 }
 export interface ConversationPointRuntimeManager {
@@ -63,7 +64,7 @@ export class ConversationRuntimeManager implements IConversationRuntimeManager, 
         const interrupted = this.conversation.tryInterrupt(event);
         this.maybeUpdateCurrent(interrupted);
     }
-    pullOut(body: splitTime.Body): void {
+    pullOut(body: Body): void {
         if (this.activeLineSpeechBubble !== null) {
             this.activeLineSpeechBubble.speechBubble.interrupt();
         }

@@ -1,7 +1,9 @@
-import { TimeNotified, Coordinates3D, body, GenericCanvasRenderingContext2D } from "../../../splitTime";
 import { Light } from "./light";
 import { Rect } from "../../../math/rect";
 import { DrawingBoard } from "engine/ui/viewport/drawing-board";
+import { TimeNotified } from "engine/time/timeline";
+import { Coordinates3D } from "engine/world/level/level-location";
+
 export interface Drawable extends TimeNotified {
     playerOcclusionFadeFactor: number;
     opacityModifier: number;
@@ -19,7 +21,7 @@ export interface Drawable extends TimeNotified {
      * The position of the rectangle will be assumed relative
      * to whatever the whereDefaultWouldBe parameter will be.
      */
-    getCanvasRequirements(): body.CanvasRequirements;
+    getCanvasRequirements(): CanvasRequirements;
     draw(drawingBoard: DrawingBoard): void;
     prepareForRender(): void;
     cleanupAfterRender(): void;

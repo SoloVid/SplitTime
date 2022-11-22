@@ -1,9 +1,12 @@
 import { TracePointSpec, interpretPointString, ensureNoPositions } from "./trace-points";
-import { direction_t, Coordinates3D, Vector2D, assert, instanceOfCoordinates2D, Coordinates2D } from "../../../splitTime";
 import { Trace } from "../level-file-data";
 import { Type } from "./trace-misc";
-import { interpret, toRadians } from "../../../math/direction";
+import { direction_t, interpret, toRadians } from "../../../math/direction";
 import { Polygon } from "../../../math/polygon/polygon";
+import assert from "assert";
+import { Vector2D } from "engine/math/vector2d";
+import { Coordinates3D, instanceOfCoordinates2D, Coordinates2D } from "../level-location";
+
 export class TraceSpec {
     readonly type: string;
     readonly vertices: TracePointSpec[];

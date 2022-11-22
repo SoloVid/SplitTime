@@ -1,13 +1,14 @@
 import { PointerOffset, isPointerOffsetSignificant } from "../../level/trace/trace";
-import { ILevelLocation2, Level, unitOrZero, COLLISION_CALCULATOR, chooseTheOneOrDefault } from "../../../splitTime";
 import { BodySpec } from "../../../file/collage";
 import { Mover } from "./body-mover";
 import { addArrayToSet } from "./helpers";
 import { SELF_LEVEL_ID } from "../../level/level-traces2";
-import { copyLocation, areLocationsEquivalent } from "../../level/level-location";
-import * as splitTime from "../../../splitTime";
+import { copyLocation, areLocationsEquivalent, ILevelLocation2 } from "../../level/level-location";
 import { Body } from "../body"
 import { getAllStackedBodies } from "./stacked-bodies";
+import { unitOrZero } from "engine/math/measurement";
+import { Level } from "engine/world/level/level";
+import { COLLISION_CALCULATOR, chooseTheOneOrDefault } from "./collision-calculator";
 
 interface VerticalCollisionInfo {
     bodies: Body[]
@@ -33,7 +34,7 @@ interface CachedFallStop {
 
 export class Vertical {
     private lastFallStopped: CachedFallStop | null = null
-    constructor(private readonly mover: splitTime.body.Mover) {}
+    constructor(private readonly mover: Mover) {}
 
     /**
      * Move the body along the Z-axis up to the specified (maxZ) number of pixels.
@@ -187,7 +188,7 @@ export class Vertical {
 
             const targetOffset = originCollisionInfo.targetOffset
             if (targetOffset === null) {
-                targetOffsets[splitTime.level.traces.SELF_LEVEL_ID] = null
+                targetOffsets[SELF_LEVEL_ID] = null
             } else {
                 targetOffsets[targetOffset.getOffsetHash()] = targetOffset
             }
@@ -216,7 +217,7 @@ export class Vertical {
                 },
                 bodies: r.bodies.map(b => ({
                     body: b,
-                    location: splitTime.level.copyLocation(b),
+                    location: copyLocation(b),
                     dimensions: {
                         width: b.width,
                         depth: b.depth,
@@ -245,7 +246,7 @@ export class Vertical {
         if (this.lastFallStopped === null) {
             return false
         }
-        if (!splitTime.level.areLocationsEquivalent({x, y, z, level}, this.lastFallStopped.location)) {
+        if (!areLocationsEquivalent({x, y, z, level}, this.lastFallStopped.location)) {
             return false
         }
         if (this.lastFallStopped.dimensions.width !== this.mover.body.width ||
@@ -270,7 +271,7 @@ export class Vertical {
                 body.dimensions.height !== body.body.height) {
                 return false
             }
-            if (!splitTime.level.areLocationsEquivalent(body.body, body.location)) {
+            if (!areLocationsEquivalent(body.body, body.location)) {
                 return false
             }
         }

@@ -1,6 +1,7 @@
 import { Light } from "./light";
 import { Color } from "../../../light/color";
-import { GenericCanvasRenderingContext2D } from "../../../splitTime";
+import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
+
 export class SpotLight implements Light {
     constructor(public intensity: number = 0, public radius: number = 150) { }
     color: Color = new Color(255, 255, 255);

@@ -1,9 +1,10 @@
-import { TimeNotified, game_seconds } from "../splitTime";
+import { TimeNotified, game_seconds } from "engine/time/timeline";
 import { MeteredStat } from "./metered-stat";
-import * as splitTime from "../splitTime";
+import { Body } from "engine/world/body/body";
+
 export class FallDamageWatcher implements TimeNotified {
     private prevZVelocity: number;
-    constructor(private readonly body: splitTime.Body, private readonly stamina: MeteredStat, private readonly minZVelocityForDamage: number = 640) {
+    constructor(private readonly body: Body, private readonly stamina: MeteredStat, private readonly minZVelocityForDamage: number = 640) {
         this.prevZVelocity = this.body.zVelocity;
     }
     notifyTimeAdvance(delta: game_seconds): void {

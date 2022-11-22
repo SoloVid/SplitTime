@@ -1,4 +1,6 @@
-import { game_seconds, STOP_CALLBACKS } from "../splitTime";
+import { STOP_CALLBACKS } from "engine/utils/register-callbacks";
+import { game_seconds } from "./timeline";
+
 interface Host {
     registerTimeAdvanceListener(listener: (delta: game_seconds) => void): void;
 }

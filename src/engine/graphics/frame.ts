@@ -1,6 +1,7 @@
 import { Rect } from "../math/rect";
-import { Coordinates2D, game_seconds } from "../splitTime";
 import { BodySpec } from "../file/collage";
+import { Coordinates2D } from "engine/world/level/level-location";
+import { game_seconds } from "engine/time/timeline";
 /**
  * A single frame of animation as part of a {@link Montage} of a {@link Collage}
  */

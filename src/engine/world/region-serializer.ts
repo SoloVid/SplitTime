@@ -1,6 +1,8 @@
 import { ObjectSerializer } from "../file/object-serializer";
-import { Region, World } from "../splitTime";
 import { AnySerializer, AnyDeserializer } from "../file/any-serializer";
+import { Region } from "./region";
+import { World } from "./world";
+
 type region_json_t = {
     id: string;
 };

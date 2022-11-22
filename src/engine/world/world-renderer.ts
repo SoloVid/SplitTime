@@ -1,12 +1,19 @@
 import { DrawingBoard, makeAssetDrawingBoard } from "engine/ui/viewport/drawing-board";
 import { Color } from "../light/color";
-import * as splitTime from "../splitTime";
-import { Assets, Camera, Canvas, Coordinates2D, int, Level, LevelManager, Pledge, WeatherRenderer } from "../splitTime";
 import { DRAW_TRACES, ENABLED } from "../utils/debug";
 import { Renderer } from "./body/body-renderer";
 import { Shadow } from "./body/render/shadow";
+import { Body } from "engine/world/body/body"
+import { Assets } from "engine/assets/assets";
+import { Camera } from "engine/ui/viewport/camera";
+import { Pledge } from "engine/utils/pledge";
+import { int } from "globals";
+import { Level } from "./level/level";
+import { Coordinates2D } from "./level/level-location";
+import { LevelManager } from "./level/level-manager";
+import { WeatherRenderer } from "./weather-renderer";
 
-type BodyGetter = () => splitTime.Body | null;
+type BodyGetter = () => Body | null;
 
 type Options = {
     assets: Assets

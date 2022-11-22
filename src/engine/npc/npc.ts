@@ -1,7 +1,8 @@
+import { Sprite } from "engine/world/body/render/sprite";
+import { SpriteBody } from "engine/world/body/sprite-body";
 import { ControlledCollisionMovement } from "../world/body/agent/controlled-collision-movement-agent";
-import { SpriteBody, Sprite } from "../splitTime";
 import { BehaviorChoice } from "./behavior-choice";
-import * as splitTime from "../splitTime";
+import { Body } from "engine/world/body/body";
 export class Npc {
     public readonly movementAgent: ControlledCollisionMovement;
     constructor(public readonly spriteBody: SpriteBody, public readonly behavior: BehaviorChoice = new BehaviorChoice()) {
@@ -10,7 +11,7 @@ export class Npc {
             this.movementAgent.notifyTimeAdvance(delta);
         });
     }
-    get body(): splitTime.Body {
+    get body(): Body {
         return this.spriteBody.body;
     }
     get sprite(): Sprite {

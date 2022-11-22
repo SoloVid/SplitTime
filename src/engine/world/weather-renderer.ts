@@ -1,6 +1,12 @@
+import { randomInt } from "crypto";
+import { Camera } from "engine/ui/viewport/camera";
+import { Canvas, GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
 import { DrawingBoard } from "engine/ui/viewport/drawing-board";
-import { int, Canvas, Camera, Level, GenericCanvasRenderingContext2D, mod, randomInt } from "../splitTime";
+import { mod } from "engine/utils/misc";
+import { int } from "globals";
 import { getFromLevel } from "../time/time-helper";
+import { Level } from "./level/level";
+
 // TODO: Try not to let these be global state like this.
 // export let RAIN_IMAGE: string = "rain.png";
 // export let CLOUDS_IMAGE: string = "stormClouds.png";

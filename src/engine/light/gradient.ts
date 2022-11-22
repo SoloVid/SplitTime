@@ -1,5 +1,5 @@
+import { mod } from "engine/utils/misc";
 import { Color } from "./color";
-import { mod } from "../splitTime";
 class ColorStop {
     constructor(public offset: number, public color: Color) { }
 }

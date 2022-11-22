@@ -1,9 +1,19 @@
-import { SimpleCallback, int, Coordinates2D, Position, Level, ILevelLocation2, ObjectCallbacks, Npc, Indirect, game_seconds, instanceOfRunnable, instanceOfILevelLocation2, Coordinates3D } from "../../../splitTime";
 import { Walk, PathDslBuilder } from "./path-dsl-builder";
 import { Behavior } from "../../../npc/behavior";
 import { DirectedWalkBehavior } from "../../../npc/directed-walk-behavior";
 import { MidEventAction } from "../../../time/mid-event-action";
 import { PathSpec } from "./path-spec";
+import { Npc } from "engine/npc/npc";
+import { Indirect } from "engine/redirect";
+import { game_seconds } from "engine/time/timeline";
+import { SimpleCallback } from "engine/utils/callback";
+import { ObjectCallbacks } from "engine/utils/object-callbacks";
+import { instanceOfRunnable } from "engine/utils/runnable";
+import { Level } from "engine/world/level/level";
+import { Coordinates2D, ILevelLocation2, instanceOfILevelLocation2, Coordinates3D } from "engine/world/level/level-location";
+import { Position } from "engine/world/level/position";
+import { int } from "globals";
+
 class StageCallback implements SimpleCallback<void> {
     constructor(private readonly pathWalker: PathWalker, private readonly stage: int) { }
     callBack(): void {

@@ -1,4 +1,8 @@
-import { Level, Timeline, game_seconds, World, Assets } from "../splitTime";
+import { Assets } from "engine/assets/assets";
+import { Timeline, game_seconds } from "engine/time/timeline";
+import { Level } from "./level/level";
+import { World } from "./world";
+
 // A region is a logical unit of levels that are loaded together and share a common timeline
 export class Region {
     private levels: Level[] = [];

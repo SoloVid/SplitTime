@@ -1,12 +1,13 @@
-import * as splitTime from "../../../splitTime";
-import { unitOrZero } from "../../../splitTime";
+import { distanceTrue, unitOrZero } from "engine/math/measurement";
 import { PointerOffset } from "../../level/trace/trace";
 import { Body } from "../body";
 import { fillInDeltas } from "./body-move-projection";
+import { Mover } from "./body-mover";
 import { projectXPixelStepWithVerticalFudge } from "./collisions-horizontal-x";
 import { projectYPixelStepWithVerticalFudge } from "./collisions-horizontal-y";
 import { Sliding } from "./collisions-sliding";
 import { buildStackProjectionList } from "./stacked-bodies";
+import * as direction from "engine/math/direction"
 
 const ZILCH = 0.000001 as const
 
@@ -24,7 +25,7 @@ export class HorizontalCollisionInfo {
 
 export class Horizontal {
     sliding: Sliding
-    constructor(private readonly mover: splitTime.body.Mover) {
+    constructor(private readonly mover: Mover) {
         this.sliding = new Sliding(mover)
     }
     /**
@@ -83,8 +84,8 @@ export class Horizontal {
                     const pushed = this.tryPushOtherBodies(
                         xStepResult.bodiesBlockingPrimary,
                         dx > 0
-                            ? splitTime.direction.E
-                            : splitTime.direction.W
+                            ? direction.E
+                            : direction.W
                     )
                     somethingPushed ||= pushed
                 }
@@ -102,8 +103,8 @@ export class Horizontal {
                     const pushed = this.tryPushOtherBodies(
                         yStepResult.bodiesBlockingPrimary,
                         dy > 0
-                            ? splitTime.direction.S
-                            : splitTime.direction.N
+                            ? direction.S
+                            : direction.N
                     )
                     somethingPushed ||= pushed
                 }
@@ -133,7 +134,7 @@ export class Horizontal {
             this.sliding.zeldaSlide(maxDistance / 2)
         }
 
-        return splitTime.measurement.distanceTrue(
+        return distanceTrue(
             primary.x.old,
             primary.y.old,
             this.mover.body.getX(),

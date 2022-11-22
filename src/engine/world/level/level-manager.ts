@@ -1,4 +1,7 @@
-import { Assets, Level, World } from "../../splitTime";
+import { Assets } from "engine/assets/assets";
+import { World } from "../world";
+import { Level } from "./level";
+
 type TransitionListener = (oldLevel: Level | null, newLevel: Level) => PromiseLike<void>;
 export class LevelManager {
     private currentLevel: Level | null = null;

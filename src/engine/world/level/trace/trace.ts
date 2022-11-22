@@ -1,5 +1,9 @@
-import { Level, World, trace, Position, Vector2D } from "../../../splitTime";
+import { Vector2D } from "engine/math/vector2d";
+import { World } from "engine/world/world";
+import { Level } from "../level";
+import { Position } from "../position";
 import { TraceSpec } from "./trace-spec";
+
 export interface PointerOffset {
     readonly level: Level;
     readonly offsetX: number;
@@ -30,8 +34,8 @@ export class Trace {
     load(level: Level, world: World) {
         this._level = this.spec.linkLevel ? world.getLevel(this.spec.linkLevel) : null;
     }
-    getPointerOffset(): trace.PointerOffset {
-        return this as trace.PointerOffset;
+    getPointerOffset(): PointerOffset {
+        return this as PointerOffset;
     }
     get level(): Level {
         if (this._level === null) {

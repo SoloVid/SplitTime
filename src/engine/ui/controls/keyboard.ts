@@ -1,5 +1,7 @@
-import { __EDITOR__, RegisterCallbacks, CallbackResult } from "../../splitTime";
+import { RegisterCallbacks, CallbackResult } from "engine/utils/register-callbacks";
+import { __EDITOR__ } from "environment";
 import { SPACE, DOWN, UP, LEFT, RIGHT } from "./keycode";
+
 export class Keyboard {
     private keyDown: {
         [keyCode: number]: boolean;

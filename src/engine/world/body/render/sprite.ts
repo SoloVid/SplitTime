@@ -1,12 +1,17 @@
+import assert from "assert";
+import { Collage } from "engine/graphics/collage";
+import { game_seconds } from "engine/time/timeline";
+import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
 import { DrawingBoard } from "engine/ui/viewport/drawing-board";
+import { Coordinates3D } from "engine/world/level/level-location";
+import { int } from "globals";
 import { BodySpec } from "../../../file/collage";
 import { Frame } from "../../../graphics/frame";
 import { Montage } from "../../../graphics/montage";
 import { S } from "../../../math/direction";
-import * as splitTime from "../../../splitTime";
-import { assert, Collage, Coordinates3D, game_seconds, GenericCanvasRenderingContext2D, int } from "../../../splitTime";
 import { CanvasRequirements, Drawable } from "./drawable";
 import { Light } from "./light";
+
 let nextRef = 10;
 export class Sprite implements Drawable {
     private _time: game_seconds = 0;
@@ -22,7 +27,7 @@ export class Sprite implements Drawable {
     opacityModifier = 1;
     playerOcclusionFadeFactor = 0;
     private stance: string | null = null;
-    private requestedStance = splitTime.Sprite.DEFAULT_STANCE;
+    private requestedStance = Sprite.DEFAULT_STANCE;
     private requestedFrameReset = false;
     private frame = 0;
     private dir = S;
@@ -74,7 +79,7 @@ export class Sprite implements Drawable {
         this.autoReset = !hold;
     }
     private resetStance() {
-        this.requestStance(splitTime.Sprite.DEFAULT_STANCE, this.dir, true);
+        this.requestStance(Sprite.DEFAULT_STANCE, this.dir, true);
     }
     notifyTimeAdvance(delta: game_seconds) {
         this._time += delta;
@@ -110,13 +115,13 @@ export class Sprite implements Drawable {
     getLight(): Light | null {
         return this.light;
     }
-    clone(): splitTime.Sprite {
+    clone(): Sprite {
         const newBody = {
             width: this.body.width,
             depth: this.body.depth,
             height: this.body.height
         };
-        var clone = new splitTime.Sprite(newBody, this.collage);
+        var clone = new Sprite(newBody, this.collage);
         clone.omniDir = this.omniDir;
         clone.rotate = this.rotate;
         clone.opacityModifier = this.opacityModifier;

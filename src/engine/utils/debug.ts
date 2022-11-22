@@ -1,8 +1,10 @@
-import { FrameStabilizer, debug } from "../splitTime";
+import { FrameStabilizer } from "engine/time/frame-stabilizer";
 import { View } from "../ui/viewport/view";
-import * as splitTime from "../splitTime";
+
+export const defaultGroup: Record<string, unknown> = {}
+
 export let ENABLED = true; // Master switch
-export let groupDisplayed: unknown = splitTime;
+export let groupDisplayed: unknown = defaultGroup;
 export let DRAW_TRACES = false;
 let debugDiv: HTMLElement | null = null;
 const debugInfo: Map<unknown, {
@@ -17,7 +19,7 @@ export function attachDebug(parent: HTMLElement) {
     frameStabilizer = new FrameStabilizer(DEBOUNCE);
 }
 export function setDebugValue(group: unknown, key: string, value: unknown) {
-    if (!debug.ENABLED) {
+    if (!ENABLED) {
         return;
     }
     let map = debugInfo.get(group);

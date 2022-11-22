@@ -1,4 +1,6 @@
-import { int, Coordinates3D } from "../splitTime";
+import { Coordinates3D } from "engine/world/level/level-location";
+import { int } from "globals";
+
 export enum ReturnCode {
     EXIT_EARLY,
     CONTINUE

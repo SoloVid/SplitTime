@@ -1,7 +1,14 @@
-import { int, RegisterCallbacks, Pledge, Level, game_seconds, direction_t, CollisionMask, defaultCollisionMask, ILevelLocation2, assert, instanceOfTimeNotified, CallbackResult, TimeNotified } from "../../splitTime";
 import { Mover } from "./collisions/body-mover";
 import { Drawable } from "./render/drawable";
 import { GraphBody } from "./body-rendering-graph";
+import { direction_t } from "engine/math/direction";
+import { game_seconds, instanceOfTimeNotified, TimeNotified } from "engine/time/timeline";
+import { Pledge } from "engine/utils/pledge";
+import { RegisterCallbacks, CallbackResult } from "engine/utils/register-callbacks";
+import { assert, int } from "globals";
+import { Level } from "../level/level";
+import { ILevelLocation2 } from "../level/level-location";
+import { CollisionMask, defaultCollisionMask } from "./collisions/collision-calculator";
 
 var nextRef = 10 //reserve first 10
 

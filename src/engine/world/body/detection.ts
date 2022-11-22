@@ -1,12 +1,14 @@
 import { distanceEasy, distanceTrue } from "../../math/measurement";
-import { areWithin90Degrees } from "../../math/direction";
-import { fromToThing } from "../../splitTime.direction";
-import { level, ILevelLocation, COLLISION_CALCULATOR } from "../../splitTime";
+import { areWithin90Degrees, fromToThing } from "../../math/direction";
 import { forEachPoint, ReturnCode } from "../../math/bresenham";
-import * as splitTime from "../../splitTime";
+import type { Body } from "./body"
+import { ILevelLocation } from "../level/level-location";
+import { COLLISION_CALCULATOR } from "./collisions/collision-calculator";
+import { Location } from "../level/level-location";
+
 const ARBITRARY_MAX_DETECTION_RADIUS = 256;
 const ARBITRARY_DETECTION_RADIUS = 48;
-export function canDetect(detective: splitTime.Body, target: splitTime.Body, sightDistance: number = ARBITRARY_MAX_DETECTION_RADIUS, senseDistance: number = ARBITRARY_DETECTION_RADIUS): boolean {
+export function canDetect(detective: Body, target: Body, sightDistance: number = ARBITRARY_MAX_DETECTION_RADIUS, senseDistance: number = ARBITRARY_DETECTION_RADIUS): boolean {
     if (detective.getLevel() !== target.getLevel()) {
         return false;
     }
@@ -17,23 +19,23 @@ export function canDetect(detective: splitTime.Body, target: splitTime.Body, sig
     }
     return false;
 }
-function canSee(detective: splitTime.Body, target: splitTime.Body): boolean {
+function canSee(detective: Body, target: Body): boolean {
     if (!areWithin90Degrees(detective.dir, fromToThing(detective, target), 1.5)) {
         return false;
     }
-    const centerOfDetective = new level.Location(detective.x, detective.y, detective.z + detective.height / 2, detective.level);
-    const centerOfTarget = new level.Location(target.x, target.y, target.z + target.height / 2, target.level);
+    const centerOfDetective = new Location(detective.x, detective.y, detective.z + detective.height / 2, detective.level);
+    const centerOfTarget = new Location(target.x, target.y, target.z + target.height / 2, target.level);
     if (doesRayReach(centerOfDetective, centerOfTarget, detective, target)) {
         return true;
     }
     // TODO: add more rays
     return false;
 }
-function isJustNearEnough(detective: splitTime.Body, target: splitTime.Body, senseDistance: number): boolean {
+function isJustNearEnough(detective: Body, target: Body, senseDistance: number): boolean {
     var proximity = distanceTrue(detective.x, detective.y, target.x, target.y);
     return proximity < senseDistance;
 }
-function doesRayReach(start: ILevelLocation, end: ILevelLocation, detective: splitTime.Body, target: splitTime.Body): boolean {
+function doesRayReach(start: ILevelLocation, end: ILevelLocation, detective: Body, target: Body): boolean {
     let blocked = false;
     // TODO: 3D bresenham
     forEachPoint(start.getX(), start.getY(), end.getX(), end.getY(), (x, y) => {
@@ -52,7 +54,7 @@ function doesRayReach(start: ILevelLocation, end: ILevelLocation, detective: spl
     return !blocked;
 }
 // Copied from CellGrid
-function isZOverlap(body1: splitTime.Body, body2: splitTime.Body) {
+function isZOverlap(body1: Body, body2: Body) {
     var noOverlap = body1.z + body1.height <= body2.z ||
         body2.z + body2.height <= body1.z;
     return !noOverlap;

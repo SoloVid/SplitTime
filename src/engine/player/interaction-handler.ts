@@ -1,13 +1,13 @@
 import { CustomEventHandler } from "../world/body/custom-event-handler";
 import { distanceTrue } from "../math/measurement";
-import { areWithin90Degrees } from "../math/direction";
-import { fromToThing } from "../splitTime.direction";
-import * as splitTime from "../splitTime";
+import { areWithin90Degrees, fromToThing } from "../math/direction";
+import { Body } from "engine/world/body/body";
+
 const INTERACT_FUDGE = 16;
-export function tryPlayerInteract(playerBody: splitTime.Body, event: CustomEventHandler<void>): true | void {
+export function tryPlayerInteract(playerBody: Body, event: CustomEventHandler<void>): true | void {
     var possibleInteractions = getPossibleInteractions(playerBody);
     var chosenInteraction: {
-        body: splitTime.Body;
+        body: Body;
         score: number;
     } | null = null;
     var highestScore = 0;
@@ -24,8 +24,8 @@ export function tryPlayerInteract(playerBody: splitTime.Body, event: CustomEvent
         return true;
     }
 }
-export function getPossibleInteractions(playerBody: splitTime.Body): {
-    body: splitTime.Body;
+export function getPossibleInteractions(playerBody: Body): {
+    body: Body;
     score: number;
 }[] {
     var level = playerBody.getLevel();
@@ -42,7 +42,7 @@ export function getPossibleInteractions(playerBody: splitTime.Body): {
     }
     return possibleInteractions;
 }
-export function howLikelyIsPlayerInteracting(playerBody: splitTime.Body, otherBody: splitTime.Body): number {
+export function howLikelyIsPlayerInteracting(playerBody: Body, otherBody: Body): number {
     if (otherBody === playerBody) {
         return 0;
     }

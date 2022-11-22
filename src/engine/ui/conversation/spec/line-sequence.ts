@@ -1,4 +1,4 @@
-import { assert } from "../../../splitTime";
+import { assert } from "globals";
 import { SpeechBubbleContentsSpec } from "./line";
 import { SectionSpec } from "./section-spec";
 

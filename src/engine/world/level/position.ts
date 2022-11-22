@@ -1,5 +1,6 @@
-import { ILevelLocation, ILevelLocation2, Level, Coordinates2D } from "../../splitTime";
-import { areCoordinatesEquivalent } from "../../splitTime.level";
+import { Level } from "./level";
+import { ILevelLocation, ILevelLocation2, Coordinates2D, areCoordinatesEquivalent } from "./level-location";
+
 export class Position implements ILevelLocation, ILevelLocation2 {
     private readonly pathsToOtherPositions: PathToPosition[] = [];
     constructor(readonly level: Level, readonly x: number, readonly y: number, readonly z: number, readonly dir: number, readonly stance: string) {

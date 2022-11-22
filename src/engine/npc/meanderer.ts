@@ -1,9 +1,11 @@
-import { Npc, ILevelLocation2, game_seconds, randomRanged } from "../splitTime";
 import { Behavior } from "./behavior";
-import { S, getRandom } from "../math/direction";
+import { S, getRandom, fromToThing } from "../math/direction";
 import { BehaviorStateMachine } from "./behavior-state-machine";
 import { getFromBody } from "../time/time-helper";
-import { fromToThing } from "../splitTime.direction";
+import { game_seconds } from "engine/time/timeline";
+import { randomRanged } from "engine/utils/random";
+import { ILevelLocation2 } from "engine/world/level/level-location";
+import { Npc } from "./npc";
 enum MeanderState {
     WAITING = "WAITING",
     WALKING = "WALKING"

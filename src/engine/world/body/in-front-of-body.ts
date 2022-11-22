@@ -1,8 +1,9 @@
-import { ILevelLocation2 } from "../../splitTime";
 import { toRadians } from "../../math/direction";
-import * as splitTime from "../../splitTime";
+import { Body } from "./body"
+import { ILevelLocation2 } from "../level/level-location";
+
 export class InFrontOfBody implements ILevelLocation2 {
-    constructor(private readonly body: splitTime.Body, private readonly howFar: number, private readonly radiansOff: number = 0, private readonly offsetZ: number = 0) {
+    constructor(private readonly body: Body, private readonly howFar: number, private readonly radiansOff: number = 0, private readonly offsetZ: number = 0) {
     }
     get x() {
         return this.body.x + this.howFar * Math.cos(this.angleInRadians);

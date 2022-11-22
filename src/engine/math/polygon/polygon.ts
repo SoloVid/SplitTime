@@ -1,6 +1,8 @@
-import { Vector2D, assert, mod, int, MAX_SAFE_INTEGER } from "../../splitTime";
+import { MAX_SAFE_INTEGER, mod } from "engine/utils/misc";
+import { assert, int } from "globals";
 import { angleBisector } from "../angle";
 import { midpoint } from "../measurement";
+import { Vector2D } from "../vector2d";
 export class Polygon {
     private readonly isClockwise: boolean;
     constructor(readonly vertices: readonly Vector2D[]) {

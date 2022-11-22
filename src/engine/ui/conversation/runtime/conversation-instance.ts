@@ -3,9 +3,10 @@ import { SectionSpec } from "../spec/section-spec";
 import { TreeTraveler } from "./tree-traveler";
 import { ConversationSpec } from "../spec/conversation-spec";
 import { Speaker } from "../speaker";
-import { assert } from "../../../splitTime";
 import { CustomEventHandler } from "../../../world/body/custom-event-handler";
-import * as splitTime from "../../../splitTime";
+import { assert } from "globals";
+import { Body } from "engine/world/body/body"
+
 interface Current {
     action: ConversationLeafNode;
     section: SectionSpec;
@@ -57,7 +58,7 @@ export class ConversationInstance {
         };
         this.current = newCurrent;
     }
-    tryCancel(body: splitTime.Body): boolean {
+    tryCancel(body: Body): boolean {
         if (this.current === null) {
             return false;
         }
@@ -72,7 +73,7 @@ export class ConversationInstance {
         this.goToNode(cancelNext);
         return true;
     }
-    private shouldBeCanceled(node: ConversationLeafNode, leavingBody: splitTime.Body): boolean {
+    private shouldBeCanceled(node: ConversationLeafNode, leavingBody: Body): boolean {
         const section = this.treeTraveler.getNearestParentSection(node);
         const speakers = section.getSpeakers();
         return speakers.some(s => s.body === leavingBody);

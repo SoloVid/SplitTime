@@ -1,4 +1,8 @@
-import { assert, Coordinates2D, Coordinates3D, SpriteBody, Vector2D, Vector3D } from "../../../splitTime";
+import { Vector2D } from "engine/math/vector2d";
+import { Vector3D } from "engine/math/vector3d";
+import { SpriteBody } from "engine/world/body/sprite-body";
+import { assert } from "globals";
+import { Coordinates2D, Coordinates3D } from "../level-location";
 import { Type } from "./trace-misc";
 import { ensureNoPositions } from "./trace-points";
 import { TraceSpec } from "./trace-spec";

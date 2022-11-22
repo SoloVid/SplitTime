@@ -1,8 +1,10 @@
-import { int, Canvas, Trace, assert, MAX_SAFE_INTEGER, __DOM__ } from "../../splitTime";
-import { PointerOffset } from "./trace/trace";
+import { PointerOffset, Trace } from "./trace/trace";
 import { TraceLayer } from "./level-trace-layer";
 import { ENABLED } from "../../utils/debug";
-import { traces } from "../../splitTime.level";
+import { Canvas } from "engine/ui/viewport/canvas";
+import { MAX_SAFE_INTEGER } from "engine/utils/misc";
+import { __DOM__ } from "environment";
+import { assert, int } from "globals";
 export const SELF_LEVEL_ID = "__SELF_LEVEL_ID__";
 interface MinimalLevel {
     lowestLayerZ: number;
@@ -102,17 +104,17 @@ export class Traces2 {
         }
         return newZArray.sort((a, b) => a - b);
     }
-    calculateVolumeSolidCollision(collisionInfo: traces.SolidCollisionInfo, startX: int, xPixels: int, startY: int, yPixels: int, minZ: int, exMaxZ: int) {
+    calculateVolumeSolidCollision(collisionInfo: SolidCollisionInfo, startX: int, xPixels: int, startY: int, yPixels: int, minZ: int, exMaxZ: int) {
         for (const traceLayer of this.layers) {
             if (exMaxZ > traceLayer.z && minZ < traceLayer.nextLayerZ) {
                 traceLayer.calculateAreaSolidCollision(collisionInfo, startX, xPixels, startY, yPixels, minZ);
             }
         }
     }
-    calculateVolumePointers(pointerInfo: traces.PointerTraceInfo, startX: int, xPixels: int, startY: int, yPixels: int, minZ: int, exMaxZ: int) {
+    calculateVolumePointers(pointerInfo: PointerTraceInfo, startX: int, xPixels: int, startY: int, yPixels: int, minZ: int, exMaxZ: int) {
         // TODO: Check exMaxZ > level.lowestZ maybe.
         if (exMaxZ <= this.layers[0].z) {
-            pointerInfo[traces.SELF_LEVEL_ID] = null;
+            pointerInfo[SELF_LEVEL_ID] = null;
         }
         for (const traceLayer of this.layers) {
             if (exMaxZ > traceLayer.z && minZ < traceLayer.nextLayerZ) {
@@ -120,7 +122,7 @@ export class Traces2 {
             }
         }
     }
-    calculateVolumeEvents(eventInfo: traces.EventTraceInfo, startX: int, xPixels: int, startY: int, yPixels: int, minZ: int, exMaxZ: int) {
+    calculateVolumeEvents(eventInfo: EventTraceInfo, startX: int, xPixels: int, startY: int, yPixels: int, minZ: int, exMaxZ: int) {
         for (const traceLayer of this.layers) {
             if (exMaxZ > traceLayer.z && minZ < traceLayer.nextLayerZ) {
                 traceLayer.calculateAreaEvents(eventInfo, startX, xPixels, startY, yPixels, minZ, exMaxZ);

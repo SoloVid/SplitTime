@@ -1,5 +1,6 @@
-import { Indirect, redirect } from "../splitTime";
+import { Indirect, redirect } from "engine/redirect";
 import { Color } from "../light/color";
+
 export class WeatherSettings {
     isRaining: boolean = false;
     // Number of lightning strikes per minute

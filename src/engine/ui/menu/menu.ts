@@ -1,9 +1,11 @@
-import { int, Pledge, STOP_CALLBACKS } from "../../splitTime";
 import { MenuSpec } from "./menu-spec";
 import { View } from "../viewport/view";
 import { MenuControls } from "./menu-controls";
 import { HUD } from "../viewport/hud";
 import { simplifyToCardinal, W, N, E, S } from "../../math/direction";
+import { Pledge } from "engine/utils/pledge";
+import { STOP_CALLBACKS } from "engine/utils/register-callbacks";
+import { int } from "globals";
 export class Menu {
     private currentPoint: int = 0;
     constructor(private readonly spec: MenuSpec, private readonly view: View, private readonly controls: MenuControls, private readonly hud: HUD) { }

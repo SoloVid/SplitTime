@@ -1,8 +1,8 @@
-import { int, Level } from "../../../splitTime";
 import { PointerOffset } from "../../level/trace/trace";
 import { SolidCollisionInfo, PointerTraceInfo } from "../../level/level-traces2";
-import * as splitTime from "../../../splitTime";
 import { Body } from "../body"
+import { int } from "globals";
+import { Level } from "engine/world/level/level";
 
 /**
  * A pair of bit masks that allow bodies to selectively detect collisions with each other.
@@ -49,7 +49,7 @@ class CollisionCalculator {
     private pointerStack: string[] = []
 
     getEventsInVolume(
-        level: splitTime.Level,
+        level: Level,
         startX: number,
         xPixels: number,
         startY: number,
@@ -75,14 +75,14 @@ class CollisionCalculator {
      */
     calculateVolumeCollision(
         collisionMask: CollisionMask,
-        level: splitTime.Level,
+        level: Level,
         startX: number,
         xPixels: number,
         startY: number,
         yPixels: number,
         startZ: number,
         zPixels: number,
-        ignoreBodies: readonly splitTime.Body[] = []
+        ignoreBodies: readonly Body[] = []
     ): ApiCollisionInfo {
         var collisionInfo = new InternalCollisionInfo(level, null)
         if (level.lowestLayerZ > startZ) {
@@ -193,7 +193,7 @@ class CollisionCalculator {
      * Check that the volume is open in level collision canvas data.
      */
     private calculateVolumeTraceCollision(
-        level: splitTime.Level,
+        level: Level,
         startX: number,
         xPixels: number,
         startY: number,
@@ -201,7 +201,7 @@ class CollisionCalculator {
         startZ: number,
         zPixels: number
     ): InternalCollisionInfo {
-        const solidCollisionInfo = new splitTime.level.traces.SolidCollisionInfo(level)
+        const solidCollisionInfo = new SolidCollisionInfo(level)
         level
             .getLevelTraces()
             .calculateVolumeSolidCollision(
@@ -211,7 +211,7 @@ class CollisionCalculator {
                 Math.floor(startZ), Math.ceil(startZ + zPixels)
             )
 
-        const pointerTraceInfo: splitTime.level.traces.PointerTraceInfo = {}
+        const pointerTraceInfo: PointerTraceInfo = {}
         level
             .getLevelTraces()
             .calculateVolumePointers(

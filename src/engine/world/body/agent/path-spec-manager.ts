@@ -1,7 +1,7 @@
 import { PathSpec } from "./path-spec";
-import { int, assert } from "../../../splitTime";
 import { DIRECTED } from "../../../npc/npc-priority";
 import { SetupFunc } from "./path-dsl";
+import { assert, int } from "globals";
 export class PathSpecManager {
     private specs: {
         [id: string]: PathSpec;

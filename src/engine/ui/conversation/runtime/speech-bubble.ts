@@ -1,4 +1,7 @@
-import { Interruptible, game_seconds, Timeline, ILevelLocation2, assert } from "../../../splitTime";
+import assert from "assert";
+import { game_seconds, Timeline } from "engine/time/timeline";
+import { Interruptible } from "engine/utils/interruptible";
+import { ILevelLocation2 } from "engine/world/level/level-location";
 import { CONVERSIONS, AdvanceMethod, DEFAULT_MS_PER_CHAR, FACTOR_END_OF_LINE, howLongForChar, DASH } from "../settings";
 import { TextPart } from "../spec/text-part";
 

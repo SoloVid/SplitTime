@@ -1,4 +1,4 @@
-import { assertNever } from "../../../splitTime";
+import { assertNever } from "globals";
 import { CustomEventHandler } from "../../../world/body/custom-event-handler";
 import { ConversationLeafNode, SectionSpecPart } from "../misc-types";
 import { ConversationSpec } from "../spec/conversation-spec";

@@ -1,9 +1,14 @@
 import { PlayerParty } from "./player-party";
-import { Perspective, SpriteBody, assert, direction_t, InFrontOfBody } from "../splitTime";
 import { JoyStick } from "../ui/controls/joy-stick";
 import { MeteredStat } from "./metered-stat";
 import { PlayerAgent } from "./player-agent";
-import * as splitTime from "../splitTime";
+import assert from "assert";
+import { direction_t } from "engine/math/direction";
+import { Perspective } from "engine/perspective";
+import { InFrontOfBody } from "engine/world/body/in-front-of-body";
+import { SpriteBody } from "engine/world/body/sprite-body";
+import { Body } from "engine/world/body/body";
+
 export class PlayerManager {
     party: PlayerParty;
     private _controlsLocked: boolean = false;
@@ -16,13 +21,13 @@ export class PlayerManager {
     getActive(): PlayerAgent | null {
         return this.party.getActive();
     }
-    getActiveBody(): splitTime.Body {
+    getActiveBody(): Body {
         const activeAgent = this.getActive();
         assert(activeAgent !== null, "activePlayerAgent is null");
         return activeAgent.body;
     }
-    getLadderEvent(direction: direction_t): (body: splitTime.Body, eventId: string) => void {
-        return (body: splitTime.Body, eventId: string) => {
+    getLadderEvent(direction: direction_t): (body: Body, eventId: string) => void {
+        return (body: Body, eventId: string) => {
             const agent = this.getActive();
             if (agent !== null && body === agent.body) {
                 agent.setLadder(eventId, direction);

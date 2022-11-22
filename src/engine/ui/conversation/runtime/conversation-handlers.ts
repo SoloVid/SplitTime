@@ -2,8 +2,9 @@ import { ConversationPointRuntimeManager } from "./conversation-runtime-manager"
 import { ConversationLeafNode } from "../misc-types";
 import { SectionSpec } from "../spec/section-spec";
 import { CustomEventHandler } from "../../../world/body/custom-event-handler";
-import { CallbackResult, STOP_CALLBACKS } from "../../../splitTime";
-import * as splitTime from "../../../splitTime";
+import { CallbackResult, STOP_CALLBACKS } from "engine/utils/register-callbacks";
+import { Body } from "engine/world/body/body";
+
 /**
  * Class responsible for managing the lifecycle of Body events associated with conversation points.
  */
@@ -68,6 +69,6 @@ export class ConversationHandlers {
 }
 interface EventListenerSpec {
     event: CustomEventHandler<void>;
-    body: splitTime.Body;
+    body: Body;
     callback: () => CallbackResult;
 }

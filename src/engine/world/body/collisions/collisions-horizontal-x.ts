@@ -1,10 +1,13 @@
 // NOTE: This file has a sister that is nearly identical: collisionsHorizontalY.js
 // Currently, the implementations are separate for performance concerns, but merging is a consideration.
 
-import * as splitTime from "../../../splitTime";
-import { COLLISION_CALCULATOR, Level, unit } from "../../../splitTime";
+import { unit } from "engine/math/measurement";
+import { Level } from "engine/world/level/level";
+import { isPointerOffsetSignificant } from "engine/world/level/trace/trace";
 import { Body } from "../body";
 import { BodyMoveProjection, doProjectionsOverlap } from "./body-move-projection";
+import { Mover } from "./body-mover";
+import { COLLISION_CALCULATOR } from "./collision-calculator";
 import { PixelStepReturn, simpleBlocked, SimplePixelCollisionReturn } from "./collisions-horizontal-shared";
 import { checkAllCanStepUp } from "./group-step-up";
 import { addArrayToSet } from "./helpers";
@@ -25,7 +28,7 @@ export function projectXPixelStepWithVerticalFudge(
     const simpleCollisionInfo = calculateXPixelCollision(primary.body, level, primary.x.current, primary.y.current, primary.z.current, dx, ignoreBodies)
     let bodiesBlockingPrimary: readonly Body[] = simpleCollisionInfo.bodies
     if (simpleCollisionInfo.blocked) {
-        if (simpleCollisionInfo.vStepUpEstimate <= splitTime.body.Mover.VERTICAL_FUDGE) {
+        if (simpleCollisionInfo.vStepUpEstimate <= Mover.VERTICAL_FUDGE) {
             dz = simpleCollisionInfo.vStepUpEstimate
             if (!checkAllCanStepUp(projections, dz)) {
                 for (const p of projections) p.x.stopped = true
@@ -106,7 +109,7 @@ export function projectXPixelStepWithVerticalFudge(
         } else {
             p.x.pixelsMoved++
             addArrayToSet(c.events, p.eventIdSet)
-            if (splitTime.trace.isPointerOffsetSignificant(c.targetOffset, level)) {
+            if (isPointerOffsetSignificant(c.targetOffset, level)) {
                 p.mightMoveLevels = true
             }
         }
@@ -136,7 +139,7 @@ function calculateXPixelCollision(
             ? x + dx + body.width / 2
             : x + dx - body.width / 2
     const top = y - body.depth / 2
-    const solidCollisionInfo = splitTime.COLLISION_CALCULATOR.calculateVolumeCollision(
+    const solidCollisionInfo = COLLISION_CALCULATOR.calculateVolumeCollision(
         body.collisionMask,
         level,
         edgeX, Math.abs(dx),

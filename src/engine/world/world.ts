@@ -1,5 +1,8 @@
+import { CompiledGameData } from "engine/assets/load";
+import { Timeline } from "engine/time/timeline";
+import { Level } from "./level/level";
 import { PropPostProcessor } from "./prop-post-processor";
-import { CompiledGameData, Level, Timeline, Region } from "../splitTime";
+import { Region } from "./region";
 
 export class World {
     public readonly propPostProcessor = new PropPostProcessor();

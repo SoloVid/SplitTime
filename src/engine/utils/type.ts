@@ -1,4 +1,5 @@
-import * as splitTime from "../splitTime";
+import type { int as Int } from "globals"
+
 type TypeChecker<T> = (thing: unknown) => thing is T;
 export function isA<T>(thing: unknown, checker: TypeChecker<T>): thing is T {
     return checker(thing);
@@ -15,7 +16,7 @@ export function other<T = never>(callback: IfNotNever<NoInfer<T>, (thing: unknow
 }
 export const string = other<string>(thing => typeof thing === "string");
 export const number = other<number>(thing => typeof thing === "number");
-export const int = other<splitTime.int>(thing => typeof thing === "number" && Number.isInteger(thing));
+export const int = other<Int>(thing => typeof thing === "number" && Number.isInteger(thing));
 export const boolean = other<boolean>(thing => typeof thing === "boolean");
 type NotArray<T> = T extends unknown[] ? never : T;
 type ObjectTypeDefinition<T> = {

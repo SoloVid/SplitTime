@@ -1,4 +1,5 @@
-import { int } from "../../splitTime";
+import { int } from "globals";
+
 type menu_option_handler = () => void;
 export class MenuSpec {
     point: {

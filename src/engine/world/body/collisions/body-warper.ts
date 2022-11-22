@@ -1,12 +1,13 @@
 import { getXMagnitude, getYMagnitude } from "../../../math/direction";
 import { forEachPoint, ReturnCode } from "../../../math/bresenham";
 import { isPointerOffsetSignificant, PointerOffset } from "../../level/trace/trace";
-import { COLLISION_CALCULATOR, int } from "../../../splitTime";
 import { Transporter } from "./body-transporter";
 import { distanceTrue } from "../../../math/measurement";
-import * as splitTime from "../../../splitTime";
+import { Body } from "engine/world/body/body"
+import { int } from "globals";
+import { COLLISION_CALCULATOR } from "./collision-calculator";
 export class Warper {
-    constructor(private readonly body: splitTime.Body) {
+    constructor(private readonly body: Body) {
     }
     /**
      * Check that body is in current region

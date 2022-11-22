@@ -1,8 +1,9 @@
 import { AnyDeserializer } from "./any-serializer";
-import { int, Pledge } from "../splitTime";
 import { serialized_format_t, serialized_object_bucket_t } from "./serialized-format-t";
 import { jsonable } from "./json";
 import { ObjectSerializerPool } from "./object-serializer-pool";
+import { int } from "globals";
+import { Pledge } from "engine/utils/pledge";
 class DeserializeSecondPass implements AnyDeserializer {
     private idPromisePairs: {
         objectId: int;

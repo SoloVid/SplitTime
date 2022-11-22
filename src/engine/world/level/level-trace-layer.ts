@@ -1,8 +1,13 @@
-import { Trace, Canvas, int, __DOM__, isOverlap, constrain, assert } from "../../splitTime";
 import { Traces2, SolidCollisionInfo, PointerTraceInfo, SELF_LEVEL_ID, EventTraceInfo } from "./level-traces2";
 import { Type } from "./trace/trace-misc";
 import { ENABLED } from "../../utils/debug";
 import { fillPolygon } from "../../math/polygon/polygon-fill";
+import { Canvas } from "engine/ui/viewport/canvas";
+import { isOverlap, constrain } from "engine/utils/misc";
+import { __DOM__ } from "environment";
+import { assert, int } from "globals";
+import { Trace } from "./trace/trace";
+
 const groundR = 1;
 export class TraceLayer {
     /** An array of arrays (array per granularity) containing height-map of solid traces plus flag for pointers. */

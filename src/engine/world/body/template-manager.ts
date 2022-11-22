@@ -1,20 +1,20 @@
-import { body } from "../../splitTime";
-import * as splitTime from "../../splitTime";
+import { Body } from "engine/world/body/body"
+
 /** @deprecated maybe because this is painful to use and is less important because of collage montages */
 export class TemplateManager {
     private templates: {
-        [templateName: string]: () => splitTime.Body;
+        [templateName: string]: () => Body;
     } = {};
-    register(templateName: string, callback: () => splitTime.Body) {
+    register(templateName: string, callback: () => Body) {
         // Test function
-        if (!(callback() instanceof splitTime.Body)) {
+        if (!(callback() instanceof Body)) {
             throw new Error('Callback for Body template "' +
                 templateName +
                 "\" doesn't return a Body");
         }
         this.templates[templateName] = callback;
     }
-    getInstance(templateName: string): splitTime.Body {
+    getInstance(templateName: string): Body {
         if (!this.templates[templateName]) {
             throw new Error("Body template " + templateName + " not found");
         }

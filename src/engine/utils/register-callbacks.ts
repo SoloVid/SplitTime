@@ -1,5 +1,6 @@
-import { Pledge, int } from "../splitTime";
+import { int } from "globals";
 import { error, warn } from "./logger";
+import { Pledge } from "./pledge";
 export const STOP_CALLBACKS = Symbol("SC");
 export type STOP_CALLBACKS_TYPE = typeof STOP_CALLBACKS;
 export type CallbackResult = void | STOP_CALLBACKS_TYPE;

@@ -1,5 +1,6 @@
-import { Coordinates2D } from "../../../splitTime";
 import { warn } from "../../../utils/logger";
+import { Coordinates2D } from "../level-location";
+
 export type TracePointSpec = Readonly<Coordinates2D> | string | null;
 export function ensureNoPositions(vertices: TracePointSpec[]): (Readonly<Coordinates2D> | null)[] {
     const nonPosVertices: (Coordinates2D | null)[] = [];

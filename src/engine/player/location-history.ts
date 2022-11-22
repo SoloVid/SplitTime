@@ -1,5 +1,7 @@
-import { ILevelLocation2, int, assert, mod } from "../splitTime";
-import { areLocationsEquivalent, copyLocation } from "../world/level/level-location";
+import assert from "assert";
+import { mod } from "engine/utils/misc";
+import { int } from "globals";
+import { areLocationsEquivalent, copyLocation, ILevelLocation2 } from "../world/level/level-location";
 export class LocationHistory {
     private readonly circularBuffer: (ILevelLocation2 | undefined)[];
     private nextPosition = 0;

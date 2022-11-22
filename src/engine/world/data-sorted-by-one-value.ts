@@ -1,4 +1,5 @@
-import { int } from "../splitTime";
+import { int } from "globals";
+
 const BUFFER = 10000;
 export class DataSortedByOneValue {
     private readonly bucketSize: int;

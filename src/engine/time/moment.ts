@@ -1,4 +1,5 @@
-import { game_seconds } from "../splitTime";
+import { game_seconds } from "./timeline";
+
 export class Moment {
     private cachedActualTimeCalculation: game_seconds | null = null;
     /**

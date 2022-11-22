@@ -1,7 +1,8 @@
-import { setDebugValue, ENABLED, renderCanvas } from "./utils/debug";
-import { FrameNotified, Perspective } from "./splitTime";
+import { Perspective } from "./perspective";
+import { FrameNotified } from "./time/frame-notified";
+import { setDebugValue, ENABLED, renderCanvas, defaultGroup } from "./utils/debug";
 import { warn, error } from "./utils/logger";
-import * as splitTime from "./splitTime";
+
 function mainGameLoop(gameLoop: GameLoop, timeStamp: number) {
     const timeStampDelta = timeStamp - gameLoop.lastTimeStamp;
     gameLoop.lastTimeStamp = timeStamp;
@@ -19,7 +20,7 @@ function mainGameLoop(gameLoop: GameLoop, timeStamp: number) {
         const msElapsed = endTime - startTime;
         const msPerFrame = timeStampDelta;
         const displayFPS = Math.round(1000 / msPerFrame);
-        setDebugValue(splitTime, "FPS", displayFPS);
+        setDebugValue(defaultGroup, "FPS", displayFPS);
         if (ENABLED) {
             renderCanvas(perspective.view);
         }
@@ -47,8 +48,8 @@ function mainGameLoopBody(g: GameLoop, msElapsed: number) {
         const timeline = region.getTimeline();
         timeline.notifyFrameUpdate(secondsForFrame);
         g.performanceCheckpoint("timeline frame update", budget.takePart(0.4));
-        setDebugValue(splitTime, "Board Bodies", perspective.levelManager.getCurrent().bodies.length);
-        setDebugValue(splitTime, "Focus point", Math.round(perspective.camera.getFocusPoint().x) +
+        setDebugValue(defaultGroup, "Board Bodies", perspective.levelManager.getCurrent().bodies.length);
+        setDebugValue(defaultGroup, "Focus point", Math.round(perspective.camera.getFocusPoint().x) +
             "," +
             Math.round(perspective.camera.getFocusPoint().y) +
             "," +

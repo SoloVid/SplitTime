@@ -1,9 +1,12 @@
 import { Moment } from "./moment";
 import { EventInstance } from "./event-instance";
-import { RegisterCallbacks, Region, CallbackResult, pad, assert } from "../splitTime";
 import { ENABLED } from "../utils/debug";
 import { warn } from "../utils/logger";
-import * as splitTime from "../splitTime";
+import assert from "assert";
+import { pad } from "engine/utils/misc";
+import { RegisterCallbacks, CallbackResult } from "engine/utils/register-callbacks";
+import { Region } from "engine/world/region";
+
 export type game_seconds = number;
 export type real_seconds = number;
 interface FixtureEvent {
@@ -219,6 +222,6 @@ export interface TimeNotified {
      */
     notifyTimeAdvance(delta: game_seconds): void;
 }
-export function instanceOfTimeNotified(obj: unknown): obj is splitTime.TimeNotified {
-    return typeof (obj as splitTime.TimeNotified).notifyTimeAdvance === "function";
+export function instanceOfTimeNotified(obj: unknown): obj is TimeNotified {
+    return typeof (obj as TimeNotified).notifyTimeAdvance === "function";
 }

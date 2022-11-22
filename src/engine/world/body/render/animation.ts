@@ -1,6 +1,9 @@
-import { TimeNotified, RegisterCallbacks, Sprite, Callback } from "../../../splitTime";
+import { TimeNotified } from "engine/time/timeline";
+import { RegisterCallbacks, Callback } from "engine/utils/register-callbacks";
 import { Behavior } from "../../../npc/behavior";
 import { debug } from "../../../utils/logger";
+import { Sprite } from "./sprite";
+
 const DUMMY_SECONDS = 2;
 export class Animation implements TimeNotified, Behavior {
     private secondsPassed = 0;

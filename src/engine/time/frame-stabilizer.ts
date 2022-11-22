@@ -1,5 +1,6 @@
-import { IntervalStabilizer } from "../splitTime";
+import { IntervalStabilizer } from "./interval-stabilizer";
 import { Signaler } from "./signaler";
+
 export class FrameStabilizer implements Signaler {
     _internalStabilizer: IntervalStabilizer;
     constructor(msPerFrame: number, maxCounter: number = 1) {

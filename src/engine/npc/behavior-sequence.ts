@@ -1,5 +1,6 @@
+import { game_seconds } from "engine/time/timeline";
+import { int } from "globals";
 import { TemporaryBehavior } from "./temporary-behavior";
-import { int, game_seconds } from "../splitTime";
 export class BehaviorSequence implements TemporaryBehavior {
     private currentBehaviorIndex: int = 0;
     constructor(private readonly behaviors: readonly TemporaryBehavior[]) { }

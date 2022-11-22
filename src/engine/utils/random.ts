@@ -1,4 +1,5 @@
-import { int } from "../splitTime";
+import { int } from "globals";
+
 /**
  * Math.random() is uniform distribution. This is normal.
  */

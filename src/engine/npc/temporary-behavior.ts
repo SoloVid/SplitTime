@@ -1,5 +1,4 @@
 import { Behavior } from "./behavior";
-import { npc } from "../splitTime";
 /**
  * Behavior that should only go on for a certain period of time.
  *
@@ -13,11 +12,11 @@ export interface TemporaryBehavior extends Behavior {
     isComplete(): boolean;
 }
 export function isBehaviorComplete(b: Behavior): boolean {
-    if (!npc.instanceOfTemporaryBehavior(b)) {
+    if (!instanceOfTemporaryBehavior(b)) {
         return false;
     }
     return b.isComplete();
 }
-export function instanceOfTemporaryBehavior(thing: Behavior): thing is npc.TemporaryBehavior {
-    return typeof (thing as npc.TemporaryBehavior).isComplete === "function";
+export function instanceOfTemporaryBehavior(thing: Behavior): thing is TemporaryBehavior {
+    return typeof (thing as TemporaryBehavior).isComplete === "function";
 }

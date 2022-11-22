@@ -1,4 +1,4 @@
-import { Vector2D } from "../../splitTime";
+import { Vector2D } from "../vector2d";
 import { Polygon } from "./polygon";
 interface XExtremes {
     left: Vector2D;

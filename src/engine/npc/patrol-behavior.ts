@@ -1,10 +1,15 @@
 import { Behavior } from "./behavior";
 import { BehaviorLoop } from "./behavior-loop";
-import { Npc, Position, game_seconds, Indirect, assert, int } from "../splitTime";
 import { DirectedWalkBehavior } from "./directed-walk-behavior";
 import { WaitBehavior } from "./wait-behavior";
 import { BehaviorSequence } from "./behavior-sequence";
 import { distanceEasy } from "../math/measurement";
+import { Indirect } from "engine/redirect";
+import { game_seconds } from "engine/time/timeline";
+import { assert, int } from "globals";
+import { Npc } from "./npc";
+import { Position } from "engine/world/level/position";
+
 export class PatrolBehavior implements Behavior {
     private underlyingBehavior: BehaviorLoop | null = null;
     constructor(private readonly npc: Npc, private readonly positions: readonly Position[], private readonly waitAtEach: game_seconds, private readonly speed: Indirect<number>, private readonly walkStance: string) {

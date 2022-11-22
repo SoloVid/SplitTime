@@ -1,4 +1,8 @@
-import { GenericCanvasRenderingContext2D, constrain, assert, __NODE__, Canvas } from "../splitTime";
+import { Canvas, GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
+import { constrain } from "engine/utils/misc";
+import { __NODE__ } from "environment";
+import { assert } from "globals";
+
 //This is only used for color validation. It will not be drawn.
 var dummyContext: GenericCanvasRenderingContext2D | null = null;
 export class Color {

@@ -1,5 +1,8 @@
-import { Coordinates2D, GenericCanvasRenderingContext2D, Canvas, int } from "../splitTime";
+import { GenericCanvasRenderingContext2D, Canvas } from "engine/ui/viewport/canvas";
+import { Coordinates2D } from "engine/world/level/level-location";
+import { int } from "globals";
 import { Color } from "../light/color";
+
 export function drawShapeOpaque(points: (Readonly<Coordinates2D> | null)[], target: GenericCanvasRenderingContext2D | null, extraBuffer: Canvas, color: string | CanvasGradient | ((x: int, y: int) => Color)): void {
     extraBuffer.context.clearRect(0, 0, extraBuffer.width, extraBuffer.height);
     if (points.length === 0 || points[0] === null) {

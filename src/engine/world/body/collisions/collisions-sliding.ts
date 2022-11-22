@@ -1,6 +1,7 @@
 import { Mover } from "./body-mover";
 import { getXSign, getYSign } from "../../../math/direction";
-import { COLLISION_CALCULATOR } from "../../../splitTime";
+import { COLLISION_CALCULATOR } from "./collision-calculator";
+
 export class Sliding {
     mover: Mover;
     constructor(mover: Mover) {

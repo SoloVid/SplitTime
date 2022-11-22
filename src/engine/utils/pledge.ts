@@ -1,4 +1,3 @@
-import * as splitTime from "../splitTime";
 export class Pledge implements PromiseLike<unknown> {
     callBacks: Function[];
     babyPromises: Pledge[];
@@ -15,16 +14,16 @@ export class Pledge implements PromiseLike<unknown> {
         }
         if (this.isResolved()) {
             var result = callBack(this.data);
-            if (result instanceof splitTime.Pledge) {
+            if (result instanceof Pledge) {
                 return result;
             }
             else {
-                return splitTime.Pledge.as(result);
+                return Pledge.as(result);
             }
         }
         else {
             this.callBacks.push(callBack);
-            var baby = new splitTime.Pledge();
+            var baby = new Pledge();
             this.babyPromises.push(baby);
             return baby;
         }
@@ -38,9 +37,9 @@ export class Pledge implements PromiseLike<unknown> {
         this.data = data;
         while (this.callBacks.length > 0) {
             var callBack = this.callBacks.shift() as Function;
-            var babyPromise = this.babyPromises.shift() as splitTime.Pledge;
+            var babyPromise = this.babyPromises.shift() as Pledge;
             var result = callBack(data);
-            if (result instanceof splitTime.Pledge) {
+            if (result instanceof Pledge) {
                 //callback returned promise
                 var tPromise = result;
                 if (tPromise.isResolved()) {
@@ -51,7 +50,7 @@ export class Pledge implements PromiseLike<unknown> {
                     //callback returned unresolved promise
                     while (babyPromise.callBacks.length > 0) {
                         tPromise.callBacks.push(babyPromise.callBacks.shift() as Function);
-                        tPromise.babyPromises.push(babyPromise.babyPromises.shift() as splitTime.Pledge);
+                        tPromise.babyPromises.push(babyPromise.babyPromises.shift() as Pledge);
                     }
                 }
             }
@@ -65,12 +64,12 @@ export class Pledge implements PromiseLike<unknown> {
         return this.resolved;
     }
     static as(data?: unknown) {
-        var prom = new splitTime.Pledge();
+        var prom = new Pledge();
         prom.resolve(data);
         return prom;
     }
-    static when(arr: splitTime.Pledge[]): PromiseLike<unknown> {
-        var prom = new splitTime.Pledge();
+    static when(arr: Pledge[]): PromiseLike<unknown> {
+        var prom = new Pledge();
         var results: unknown[] = [];
         function addResult(index: number, data: unknown) {
             results[index] = data;
@@ -96,8 +95,8 @@ export class Pledge implements PromiseLike<unknown> {
         checkResolve();
         return prom;
     }
-    static whenAny(arr: splitTime.Pledge[]): splitTime.Pledge {
-        var prom = new splitTime.Pledge();
+    static whenAny(arr: Pledge[]): Pledge {
+        var prom = new Pledge();
         var isResolved = false;
         function callback(data: unknown) {
             if (!isResolved) {
@@ -112,15 +111,15 @@ export class Pledge implements PromiseLike<unknown> {
     }
 }
 export class PledgeCollection {
-    promises: splitTime.Pledge[];
+    promises: Pledge[];
     constructor() {
         this.promises = [];
     }
-    add(prom: splitTime.Pledge) {
+    add(prom: Pledge) {
         this.promises.push(prom);
     }
     then(callBack: () => void) {
-        return splitTime.Pledge.when(this.promises).then(callBack);
+        return Pledge.when(this.promises).then(callBack);
     }
 }
 export function getPlaceholderPledge(): Pledge {

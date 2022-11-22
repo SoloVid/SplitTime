@@ -1,5 +1,7 @@
-import { RegisterCallbacks, CallbackResult, int, STOP_CALLBACKS } from "../../splitTime";
+import { RegisterCallbacks, CallbackResult, STOP_CALLBACKS } from "engine/utils/register-callbacks";
+import { int } from "globals";
 import { Keyboard } from "./keyboard";
+
 export class Button {
     _bindings: {
         obsolete: boolean;

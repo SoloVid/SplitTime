@@ -1,9 +1,12 @@
-import { Camera, Level, MAX_SAFE_INTEGER } from "../../../splitTime";
 import { ConversationInstance } from "./conversation-instance";
 import { LineSpeechBubble } from "./line-speech-bubble";
 import { distanceEasy } from "../../../math/measurement";
 import { optionsSniffer } from "./options-sniffer";
-import * as splitTime from "../../../splitTime";
+import { Camera } from "engine/ui/viewport/camera";
+import { MAX_SAFE_INTEGER } from "engine/utils/misc";
+import { Level } from "engine/world/level/level";
+import { Body } from "engine/world/body/body";
+
 const MIN_SCORE = 1;
 interface LimitedPerspective {
     camera: Camera;
@@ -11,7 +14,7 @@ interface LimitedPerspective {
         isCurrentSet(): boolean;
         getCurrent: () => Level;
     };
-    playerBody: splitTime.Body | null;
+    playerBody: Body | null;
 }
 interface LastPicked {
     conversation: ConversationInstance;

@@ -1,7 +1,8 @@
 import { IAbility } from "./ability";
-import { game_seconds } from "../../splitTime";
 import { getFromBody } from "../../time/time-helper";
-import * as splitTime from "../../splitTime";
+import { game_seconds } from "engine/time/timeline";
+import { Body } from "engine/world/body/body"
+
 interface AbilitySpec {
     ability: IAbility;
     coolDown: game_seconds;
@@ -11,7 +12,7 @@ export class AbilityPool {
     private readonly abilityMap: {
         [type: string]: AbilitySpec | undefined;
     } = {};
-    constructor(private readonly body: splitTime.Body) { }
+    constructor(private readonly body: Body) { }
     use(type: string): void {
         const spec = this.abilityMap[type];
         if (spec && !this.isFrozen()) {

@@ -1,5 +1,5 @@
+import { game_seconds } from "engine/time/timeline";
 import { Behavior } from "./behavior";
-import { game_seconds } from "../splitTime";
 export class PlannedBehavior implements Behavior {
     private plannedBehavior: Behavior | null = null;
     constructor(private readonly plan: () => Behavior) { }
