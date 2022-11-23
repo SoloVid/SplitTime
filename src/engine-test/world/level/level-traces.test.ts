@@ -1,12 +1,7 @@
-import { trace } from "../../../engine/splitTime"
-import { traces, Coordinates3D } from "../../../engine/splitTime.level"
-import { SolidCollisionInfo, Traces2 } from "../../../engine/splitTime.level.traces"
-import { Trace } from "../../../engine/splitTime.trace"
-import { Trace as FileDataTrace } from "../../../engine/world/level/level-file-data"
+import { SolidCollisionInfo, Traces2 } from "engine/world/level/level-traces2"
 import { assert } from "../../../globals"
+import { coordsStr, eventBox, eventId, ground, height, largeCube, length, pointer1, pointer2, smallCube, stairs, testTraces, width } from "./level-traces-fixture"
 import { level } from "./test-level"
-import { makeTrace as makeTraceProper } from "../../../engine/world/level/level-file-data-helpers"
-import { largeCube, width, length, height, testTraces, stairs, smallCube, coordsStr, ground, pointer1, eventBox, eventId, pointer2 } from "./level-traces-fixture"
 
 const levelTracesTests = level.group("Level Traces Tests")
 
@@ -18,7 +13,7 @@ levelTracesTests.scenario("Plane collisions with cube", t => {
 
     // x by x
     for (let x = 0; x < width; x++) {
-        const collisionInfo = new traces.SolidCollisionInfo({lowestLayerZ: 0})
+        const collisionInfo = new SolidCollisionInfo({lowestLayerZ: 0})
         levelTraces.calculateVolumeSolidCollision(collisionInfo, x, 1, 0, length, 0, height)
         const coordsStr = "x = " + x
         if (x < 10 || x > 20) {
@@ -30,7 +25,7 @@ levelTracesTests.scenario("Plane collisions with cube", t => {
 
     // y by y
     for (let y = 0; y < length; y++) {
-        const collisionInfo = new traces.SolidCollisionInfo({lowestLayerZ: 0})
+        const collisionInfo = new SolidCollisionInfo({lowestLayerZ: 0})
         levelTraces.calculateVolumeSolidCollision(collisionInfo, 0, width, y, 1, 0, height)
         const coordsStr = "y = " + y
         if (y < 10 || y > 20) {
@@ -42,7 +37,7 @@ levelTracesTests.scenario("Plane collisions with cube", t => {
 
     // z by z
     for (let z = 0; z < height; z++) {
-        const collisionInfo = new traces.SolidCollisionInfo({lowestLayerZ: 0})
+        const collisionInfo = new SolidCollisionInfo({lowestLayerZ: 0})
         levelTraces.calculateVolumeSolidCollision(collisionInfo, 0, width, 0, length, z, z + 1)
         const coordsStr = "z = " + z
         if (z < 10 || z > 20) {

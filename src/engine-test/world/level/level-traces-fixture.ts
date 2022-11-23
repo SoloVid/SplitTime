@@ -1,10 +1,9 @@
-import { trace } from "../../../engine/splitTime"
-import { traces, Coordinates3D } from "../../../engine/splitTime.level"
-import { SolidCollisionInfo, Traces2 } from "../../../engine/splitTime.level.traces"
-import { Trace } from "../../../engine/splitTime.trace"
+import { Coordinates3D } from "engine/world/level/level-location"
+import { EventTraceInfo, PointerTraceInfo, SolidCollisionInfo, Traces2 } from "engine/world/level/level-traces2"
+import { Trace } from "engine/world/level/trace/trace"
+import { Type } from "engine/world/level/trace/trace-misc"
+import { TraceSpec } from "engine/world/level/trace/trace-spec"
 import { Trace as FileDataTrace } from "../../../engine/world/level/level-file-data"
-import { assert } from "../../../globals"
-import { level } from "./test-level"
 import { makeTrace as makeTraceProper } from "../../../engine/world/level/level-file-data-helpers"
 
 export const width = 30
@@ -14,7 +13,7 @@ export const height = 30
 const largeSquareVertices = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
 export const largeCube = {
     trace: makeTrace({
-        type: trace.Type.SOLID,
+        type: Type.SOLID,
         vertices: largeSquareVertices,
         z: 10,
         height: 10
@@ -29,7 +28,7 @@ export const largeCube = {
 const smallSquareVertices = "(10, 10) (10, 15) (15, 15) (15, 10) (close)"
 export const smallCube = {
     trace: makeTrace({
-        type: trace.Type.SOLID,
+        type: Type.SOLID,
         vertices: smallSquareVertices,
         z: 15,
         height: 5
@@ -43,7 +42,7 @@ export const smallCube = {
 
 export const stairs = {
     trace: makeTrace({
-        type: trace.Type.STAIRS,
+        type: Type.STAIRS,
         vertices: largeSquareVertices,
         z: 10,
         height: 10,
@@ -59,7 +58,7 @@ export const stairs = {
 const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
 export const ground = {
     trace: makeTrace({
-        type: trace.Type.SOLID,
+        type: Type.SOLID,
         vertices: groundPoints,
         z: 15,
         height: 0
@@ -72,7 +71,7 @@ export const ground = {
 const pointer1Vertices = "(12, 12) (12, 21) (21, 21) (21, 12) (close)"
 export const pointer1 = {
     trace: makeTrace({
-        type: trace.Type.POINTER,
+        type: Type.POINTER,
         vertices: pointer1Vertices,
         z: 12,
         height: 9,
@@ -92,7 +91,7 @@ export const pointer1 = {
 const pointer2Vertices = "(16, 16) (16, 24) (24, 24) (24, 16) (close)"
 export const pointer2 = {
     trace: makeTrace({
-        type: trace.Type.POINTER,
+        type: Type.POINTER,
         vertices: pointer2Vertices,
         z: 12,
         height: 9,
@@ -113,7 +112,7 @@ const eventVertices = "(14, 14) (14, 17) (17, 17) (17, 14) (close)"
 export const eventId = "test-event"
 export const eventBox = {
     trace: makeTrace({
-        type: trace.Type.EVENT,
+        type: Type.EVENT,
         vertices: eventVertices,
         z: 14,
         height: 3,
@@ -127,9 +126,9 @@ export const eventBox = {
 }
 
 interface ConglomerateCollisionInfo {
-    solid: traces.SolidCollisionInfo
-    pointerOffsets: traces.PointerTraceInfo
-    events: traces.EventTraceInfo
+    solid: SolidCollisionInfo
+    pointerOffsets: PointerTraceInfo
+    events: EventTraceInfo
 }
 
 export function testTraces(
@@ -171,6 +170,6 @@ export function forAllPixels(callback: (coords: Coordinates3D) => void) {
 }
 
 export function makeTrace(partialTrace: Partial<FileDataTrace>): Trace {
-    const spec = trace.TraceSpec.fromRaw(makeTraceProper(partialTrace))
+    const spec = TraceSpec.fromRaw(makeTraceProper(partialTrace))
     return new Trace(spec)
 }

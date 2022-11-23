@@ -1,4 +1,6 @@
-import { Canvas, Coordinates2D, light } from "../../engine/splitTime"
+import { Color } from "engine/light/color"
+import { Canvas } from "engine/ui/viewport/canvas"
+import { Coordinates2D } from "engine/world/level/level-location"
 import { drawShapeOpaque } from "../../engine/utils/draw-shape"
 import { __NODE__ } from "../../environment"
 import { utils } from "./test-utils"
@@ -7,30 +9,30 @@ if (!__NODE__) {
     const drawShapeTests = utils.group("Shape Drawing Tests")
 
     drawShapeTests.scenario("Validate colors", t => {
-        const color = new light.Color(255, 100, 1)
+        const color = new Color(255, 100, 1)
         const colorString = color.cssString
-        t.assert(light.Color.isValidColor(colorString), "Should be a valid color: 255, 100, 1")
+        t.assert(Color.isValidColor(colorString), "Should be a valid color: 255, 100, 1")
 
-        t.assert(!light.Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
+        t.assert(!Color.isValidColor("invalidBlue"), "Should be invalid color: 'invalidBlue'")
 
         var errString
         try{
-            const invalidColor = new light.Color("invalidBlue")
+            const invalidColor = new Color("invalidBlue")
         } catch (error) {
             errString = error
         }
         t.assert(!!errString, "Passing an invalid color name should throw an error.")
 
-        const outOfBoundsColor = new light.Color(-1, 256, 3.5)
-        const roundedColor = new light.Color(0, 255, 4)
+        const outOfBoundsColor = new Color(-1, 256, 3.5)
+        const roundedColor = new Color(0, 255, 4)
         t.assertEqual(outOfBoundsColor.cssString, roundedColor.cssString, "Out-of-bounds or non-integer RGB values should be rounded to nearest valid RGB value.")
 
-        const whiteColor = new light.Color("white")
+        const whiteColor = new Color("white")
         t.assertEqual(255, whiteColor.r, "The color name 'white' should have an R value of 255.")
         t.assertEqual(255, whiteColor.g, "The color name 'white' should have an G value of 255.")
         t.assertEqual(255, whiteColor.b, "The color name 'white' should have an B value of 255.")
 
-        const fuchsia = new light.Color("fuchsia")
+        const fuchsia = new Color("fuchsia")
         t.assertEqual(255, fuchsia.r, "The color name 'fuchsia' should have an R value of 255.")
         t.assertEqual(0, fuchsia.g, "The color name 'fuchsia' should have an G value of 0.")
         t.assertEqual(255, fuchsia.b, "The color name 'fuchsia' should have an B value of 255.")
@@ -47,7 +49,7 @@ if (!__NODE__) {
 
         const target = new Canvas(30, 30)
         const buffer = new Canvas(target.width, target.height)
-        const color = new light.Color(255, 100, 1)
+        const color = new Color(255, 100, 1)
 
         drawShapeOpaque(points, target.context, buffer, color.cssString)
 
@@ -90,7 +92,7 @@ if (!__NODE__) {
 
         const target = new Canvas(30, 30)
         const buffer = new Canvas(target.width, target.height)
-        const color = new light.Color(255, 100, 1)
+        const color = new Color(255, 100, 1)
 
         drawShapeOpaque(points, target.context, buffer, color.cssString)
 
@@ -127,7 +129,7 @@ if (!__NODE__) {
 
         const target = new Canvas(30, 30)
         const buffer = new Canvas(target.width, target.height)
-        const color = new light.Color(255, 100, 1)
+        const color = new Color(255, 100, 1)
 
         drawShapeOpaque(points, target.context, buffer, color.cssString)
 
