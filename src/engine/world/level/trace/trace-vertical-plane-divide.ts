@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "globals";
 import { Vector3D } from "engine/math/vector3d";
 import { SpriteBody } from "engine/world/body/sprite-body";
 import { getXExtremes } from "../../../math/polygon/polygon-turning-points";

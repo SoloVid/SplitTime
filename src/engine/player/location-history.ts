@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "globals";
 import { mod } from "engine/utils/misc";
 import { int } from "globals";
 import { areLocationsEquivalent, copyLocation, ILevelLocation2 } from "../world/level/level-location";

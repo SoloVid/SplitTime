@@ -2,7 +2,7 @@ import { Moment } from "./moment";
 import { EventInstance } from "./event-instance";
 import { ENABLED } from "../utils/debug";
 import { warn } from "../utils/logger";
-import assert from "assert";
+import { assert } from "globals";
 import { pad } from "engine/utils/misc";
 import { RegisterCallbacks, CallbackResult } from "engine/utils/register-callbacks";
 import { Region } from "engine/world/region";

@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "globals";
 import { game_seconds, Timeline } from "engine/time/timeline";
 import { Interruptible } from "engine/utils/interruptible";
 import { ILevelLocation2 } from "engine/world/level/level-location";

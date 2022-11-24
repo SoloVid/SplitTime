@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "globals";
 import { __NODE__, __WORKER__ } from "environment";
 import { int } from "globals";
 

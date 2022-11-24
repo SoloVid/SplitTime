@@ -2,7 +2,7 @@ import { PlayerParty } from "./player-party";
 import { JoyStick } from "../ui/controls/joy-stick";
 import { MeteredStat } from "./metered-stat";
 import { PlayerAgent } from "./player-agent";
-import assert from "assert";
+import { assert } from "globals";
 import { direction_t } from "engine/math/direction";
 import { Perspective } from "engine/perspective";
 import { InFrontOfBody } from "engine/world/body/in-front-of-body";

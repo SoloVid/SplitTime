@@ -1,4 +1,4 @@
-import assert from "assert";
+import { assert } from "globals";
 import { Collage } from "engine/graphics/collage";
 import { game_seconds } from "engine/time/timeline";
 import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";

@@ -7,7 +7,7 @@ import { CustomEventHandler } from "../../../world/body/custom-event-handler";
 import { Speaker } from "../speaker";
 import { LineSpeechBubble } from "./line-speech-bubble";
 import { Body } from "engine/world/body/body"
-import assert from "assert";
+import { assert } from "globals";
 import { Camera } from "engine/ui/viewport/camera";
 import { Level } from "engine/world/level/level";
 
