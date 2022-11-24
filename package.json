@@ -8,9 +8,50 @@
     "url": "github:SoloVid/SplitTime"
   },
   "private": true,
-  "main": "build/engine.js",
-  "module": "build/engine.mjs",
-  "types": "build/@types/splitTime/engine/splitTime.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/api/index.ts",
+      "types1": "./build/@types/splitTime/splitTime.d.ts",
+      "default": "./build/api/index.js"
+    },
+    "./agent": {
+      "types": "./src/api/agent.ts",
+      "default": "./build/api/agent.js"
+    },
+    "./body": {
+      "types": "./src/api/body.ts",
+      "default": "./build/api/body.js"
+    },
+    "./controls": {
+      "types": "./src/api/controls.ts",
+      "default": "./build/api/controls.js"
+    },
+    "./conversation": {
+      "types": "./src/api/conversation.ts",
+      "default": "./build/api/conversation.js"
+    },
+    "./file": {
+      "types": "./src/api/file.ts",
+      "default": "./build/api/file.js"
+    },
+    "./player": {
+      "types": "./src/api/player.ts",
+      "default": "./build/api/player.js"
+    },
+    "./system": {
+      "types": "./src/api/system.ts",
+      "default": "./build/api/system.js"
+    },
+    "./time": {
+      "types": "./src/api/time.ts",
+      "default": "./build/api/time.js"
+    },
+    "./ui": {
+      "types": "./src/api/ui.ts",
+      "default": "./build/api/ui.js"
+    }
+  },
   "bin": {
     "splittime": "bin/splittime"
   },
@@ -18,7 +59,8 @@
     "build:build-cli": "esbuild src/build-tools/build-cli.ts --bundle --platform=node --outfile=build/build-cli.js --external:esbuild",
     "build:editor-server": "esbuild src/editor/server/main.ts --bundle --platform=node --outfile=build/editor-server.js",
     "build:engine-iife": "esbuild src/engine/splitTime.ts --global-name=splitTime --bundle --platform=browser --outfile=build/engine.js",
-    "build:engine": "esbuild src/engine/splitTime.ts --bundle --format=esm --outfile=build/engine.mjs",
+    "build:engine1": "esbuild src/engine/splitTime.ts --bundle --format=esm --outfile=build/engine.mjs",
+    "build:engine": "esbuild src/api/index.ts src/api/time.ts --bundle --splitting --outdir=build/api --format=esm",
     "check-types": "tsc -b -f",
     "clean": "rm -rf build",
     "start": "node build/editor-server.js",
