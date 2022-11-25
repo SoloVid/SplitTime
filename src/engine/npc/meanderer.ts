@@ -1,7 +1,7 @@
 import { Behavior } from "./behavior";
 import { S, getRandom, fromToThing } from "../math/direction";
 import { BehaviorStateMachine } from "./behavior-state-machine";
-import { getFromBody } from "../time/time-helper";
+import { getTimeFromBody } from "../time/time-helper";
 import { game_seconds } from "engine/time/timeline";
 import { randomRanged } from "engine/utils/random";
 import { ILevelLocation2 } from "engine/world/level/level-location";
@@ -16,7 +16,7 @@ export function makeMeanderingBehavior(npc: Npc, home: ILevelLocation2): Behavio
     let dir = S;
     const stateMachine = new BehaviorStateMachine(() => state);
     npc.body.registerTimeAdvanceListener(delta => {
-        const time = getFromBody(npc.body);
+        const time = getTimeFromBody(npc.body);
         if (time >= waitUntil) {
             if (state === MeanderState.WAITING) {
                 walk();
@@ -28,7 +28,7 @@ export function makeMeanderingBehavior(npc: Npc, home: ILevelLocation2): Behavio
     });
     function wait() {
         state = MeanderState.WAITING;
-        waitUntil = getFromBody(npc.body) + randomRanged(1, 2);
+        waitUntil = getTimeFromBody(npc.body) + randomRanged(1, 2);
     }
     function walk() {
         state = MeanderState.WALKING;
@@ -38,7 +38,7 @@ export function makeMeanderingBehavior(npc: Npc, home: ILevelLocation2): Behavio
         if (Math.random() < 0.33) {
             dir = fromToThing(npc.body, home);
         }
-        waitUntil = getFromBody(npc.body) + randomRanged(1, 3);
+        waitUntil = getTimeFromBody(npc.body) + randomRanged(1, 3);
     }
     stateMachine.set(MeanderState.WAITING, {
         notifyTimeAdvance() {

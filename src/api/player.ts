@@ -1,2 +1,7 @@
+export { FallDamageWatcher } from "engine/player/fall-damage-watcher"
+export { tryPlayerInteract } from "engine/player/interaction-handler"
+export { MeteredStat } from "engine/player/metered-stat"
+export { PlayerAgent } from "engine/player/player-agent"
 export { PlayerManager } from "engine/player/player-manager"
 export { PlayerParty } from "engine/player/player-party"
+export { SleepCycle } from "engine/player/sleep-cycle"

@@ -198,7 +198,7 @@ export class ParticleEmitter implements Drawable {
         throw new Error("not yet implemented");
     }
 }
-export function putNew(location: ILevelLocation2, generateParticle: InitializeParticleFunction): ParticleEmitter {
+export function putNewParticles(location: ILevelLocation2, generateParticle: InitializeParticleFunction): ParticleEmitter {
     var tempBody = new Body();
     tempBody.width = 0;
     tempBody.depth = 0;

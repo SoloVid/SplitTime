@@ -1,5 +1,5 @@
 import { IAbility } from "./ability";
-import { getFromBody } from "../../time/time-helper";
+import { getTimeFromBody } from "../../time/time-helper";
 import { game_seconds } from "engine/time/timeline";
 import { Body } from "engine/world/body/body"
 
@@ -18,7 +18,7 @@ export class AbilityPool {
         if (spec && !this.isFrozen()) {
             const used = spec.ability.use();
             if (used) {
-                this.freezeUntil = getFromBody(this.body) + spec.coolDown;
+                this.freezeUntil = getTimeFromBody(this.body) + spec.coolDown;
             }
         }
     }
@@ -35,7 +35,7 @@ export class AbilityPool {
         };
     }
     isFrozen(): boolean {
-        const now = getFromBody(this.body);
+        const now = getTimeFromBody(this.body);
         return now <= this.freezeUntil;
     }
 }

@@ -52,7 +52,8 @@ export async function generateProjectJson(projectRoot: string): Promise<void> {
 
     const dataFileContents = `// GENERATED FILE. DO NOT MODIFY.
 
-import { Assets, getScriptDirectory } from "splittime"
+import { Assets } from "splittime"
+import { getScriptDirectory } from "splittime/system"
 
 /** @deprecated Use {@link assets} instead. */
 export const gameData = ${JSON.stringify(gameData, null, 2)} as const

@@ -19,6 +19,9 @@ export function attachDebug(parent: HTMLElement) {
     frameStabilizer = new FrameStabilizer(DEBOUNCE);
 }
 export function setDebugValue(group: unknown, key: string, value: unknown) {
+    if (!group) {
+        group = defaultGroup
+    }
     if (!ENABLED) {
         return;
     }

@@ -1,7 +1,7 @@
 import { Behavior } from "./behavior";
 import { TemporaryBehavior, isBehaviorComplete } from "./temporary-behavior";
 import { ConditionalBehavior, isBehaviorConditionMet } from "./conditional-behavior";
-import { PRIORITY, DIRECTED, IDLE } from "./npc-priority";
+import { priority } from "./npc-priority";
 import { game_seconds, TimeNotified } from "engine/time/timeline";
 import { assert, int } from "globals";
 export class BehaviorChoice implements TimeNotified, Behavior, TemporaryBehavior, ConditionalBehavior {
@@ -9,7 +9,7 @@ export class BehaviorChoice implements TimeNotified, Behavior, TemporaryBehavior
         [priority: number]: Behavior | null;
     } = {};
     private levelUsed: int | null = null;
-    constructor(private readonly priorityLevels: readonly int[] = [PRIORITY, DIRECTED, IDLE]) {
+    constructor(private readonly priorityLevels: readonly int[] = [priority.PRIORITY, priority.DIRECTED, priority.IDLE]) {
         assert(this.priorityLevels.length !== 0, "At least one priority level should be specified");
         for (const level of this.priorityLevels) {
             this.behaviorMap[level] = null;
@@ -41,7 +41,7 @@ export class BehaviorChoice implements TimeNotified, Behavior, TemporaryBehavior
         }
         this.levelUsed = null;
     }
-    hasPriority(level: int = PRIORITY): boolean {
+    hasPriority(level: int = priority.PRIORITY): boolean {
         this.ensureLevelApplicable(level);
         return this.behaviorMap[level] !== null;
     }

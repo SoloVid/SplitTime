@@ -1,10 +1,10 @@
-import { randomInt } from "crypto";
 import { Camera } from "engine/ui/viewport/camera";
 import { Canvas, GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
 import { DrawingBoard } from "engine/ui/viewport/drawing-board";
 import { mod } from "engine/utils/misc";
+import { randomInt } from "engine/utils/random";
 import { int } from "globals";
-import { getFromLevel } from "../time/time-helper";
+import { getTimeFromLevel } from "../time/time-helper";
 import { Level } from "./level/level";
 
 // TODO: Try not to let these be global state like this.
@@ -23,7 +23,7 @@ export class WeatherRenderer {
     render(level: Level, drawingBoard: DrawingBoard) {
         const screen = this.camera.getScreenCoordinates();
         this.applyLighting(level, screen, drawingBoard);
-        const counter = Math.round(getFromLevel(level) * 100) % COUNTER_BASE;
+        const counter = Math.round(getTimeFromLevel(level) * 100) % COUNTER_BASE;
         //Weather
         if (level.weather.isRaining) {
             // ctx.drawImage(ASSETS.images.get(RAIN_IMAGE), -((counter % 100) / 100) * this.SCREEN_WIDTH, ((counter % 25) / 25) * this.SCREEN_HEIGHT -

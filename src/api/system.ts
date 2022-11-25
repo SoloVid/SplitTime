@@ -1,2 +1,5 @@
 export { setDebugValue } from "engine/utils/debug"
+export { delay } from "engine/utils/delay"
+export * from "engine/utils/logger"
+export { getScriptDirectory } from "engine/utils/misc"
 export { __DOM__, __NODE__, __WORKER__ } from "environment"

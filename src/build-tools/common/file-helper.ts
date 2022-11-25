@@ -48,5 +48,5 @@ export async function getEngineModuleRoot(projectRoot: string): Promise<string> 
 
 export async function writeFile(filePath: string, fileContents?: string | Buffer): Promise<void> {
     await fs.mkdir(path.dirname(filePath), { recursive: true })
-    await fs.writeFile(filePath, fileContents)
+    await fs.writeFile(filePath, fileContents ?? "")
 }

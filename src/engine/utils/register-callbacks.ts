@@ -15,6 +15,8 @@ export enum CopingMechanism {
     LOG
 }
 export class RegisterCallbacks {
+    static STOP_CALLBACKS: STOP_CALLBACKS_TYPE = STOP_CALLBACKS
+
     private _handlers: Callback[] = [];
     private _isRunningCallbacks: boolean = false;
     private _listAwaitingRegistration: Callback[] = [];

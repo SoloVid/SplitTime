@@ -12,7 +12,7 @@ export async function writeTsconfig(projectPath: string): Promise<void> {
 async function getTsconfig(projectPath: string): Promise<Tsconfig> {
   const config = makeDefaultTsconfig()
   const userConfig = await getUserTsconfig(projectPath)
-  console.log(userConfig)
+//   console.log(userConfig)
   const baseConfig = await getBaseProjectTsconfig()
   if (userConfig !== null) {
       if (userConfig.extends) {
@@ -22,7 +22,7 @@ async function getTsconfig(projectPath: string): Promise<Tsconfig> {
           for (const option in userConfig.compilerOptions) {
               if (option === "baseUrl") {
                   const relPathFromGeneratedConfigToUserConfig = relative(join(projectPath, dirname(tsconfigLocation)), projectPath)
-                  console.log("baseUrl!", relPathFromGeneratedConfigToUserConfig)
+                //   console.log("baseUrl!", relPathFromGeneratedConfigToUserConfig)
                   config.compilerOptions.baseUrl = join(relPathFromGeneratedConfigToUserConfig, userConfig.compilerOptions.baseUrl!)
               // } else if (option === "paths") {
               //     const relPathFromGeneratedConfigToUserConfig = relative(join(projectPath, dirname(tsconfigLocation)), projectPath)
@@ -41,7 +41,7 @@ async function getTsconfig(projectPath: string): Promise<Tsconfig> {
       // }
   }
   config.compilerOptions.outDir = "../tsjs"
-  console.log(config)
+//   console.log(config)
   return config
 }
 
@@ -82,7 +82,7 @@ async function getBaseProjectTsconfig(): Promise<Tsconfig | null> {
 export const tsconfigLocation = "build/generated/tsconfig.json"
 function makeDefaultTsconfig(): Required<Tsconfig> {
   return {
-      // extends: "splittime/tsconfig.project.json",
+      extends: "splittime/tsconfig.project.json",
       compilerOptions: {},
       include: [
           "../../src/**/*.ts"
@@ -90,7 +90,7 @@ function makeDefaultTsconfig(): Required<Tsconfig> {
   }
 }
 
-interface Tsconfig {
+export interface Tsconfig {
   extends?: string
   compilerOptions?: CompilerOptions
   include?: string[]
