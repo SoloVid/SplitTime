@@ -29,71 +29,13 @@
     "./ui": "./build/api/ui.js",
     "./utils": "./build/api/utils.js"
   },
-  "exportsA": {
-    ".": {
-      "types": "./build/@types/api/index.d.ts",
-      "types1": "./build/@types/splitTime/splitTime.d.ts",
-      "default": "./build/api/index.js"
-    },
-    "./ability": {
-      "types": "./build/@types/api/ability.d.ts",
-      "default": "./build/api/ability.js"
-    },
-    "./agent": {
-      "types": "./build/@types/api/agent.d.ts",
-      "default": "./build/api/agent.js"
-    },
-    "./body": {
-      "types": "./build/@types/api/body.d.ts",
-      "default": "./build/api/body.js"
-    },
-    "./controls": {
-      "types": "./build/@types/api/controls.d.ts",
-      "default": "./build/api/controls.js"
-    },
-    "./conversation": {
-      "types": "./build/@types/api/conversation.d.ts",
-      "default": "./build/api/conversation.js"
-    },
-    "./file": {
-      "types": "./build/@types/api/file.d.ts",
-      "default": "./build/api/file.js"
-    },
-    "./math": {
-      "types": "./build/@types/api/math.d.ts",
-      "default": "./build/api/math.js"
-    },
-    "./npc": {
-      "types": "./build/@types/api/npc.d.ts",
-      "default": "./build/api/npc.js"
-    },
-    "./physics": {
-      "types": "./build/@types/api/physics.d.ts",
-      "default": "./build/api/physics.js"
-    },
-    "./player": {
-      "types": "./build/@types/api/player.d.ts",
-      "default": "./build/api/player.js"
-    },
-    "./system": {
-      "types": "./build/@types/api/system.d.ts",
-      "default": "./build/api/system.js"
-    },
-    "./time": {
-      "types": "./build/@types/api/time.d.ts",
-      "default": "./build/api/time.js"
-    },
-    "./ui": {
-      "types": "./build/@types/api/ui.d.ts",
-      "default": "./build/api/ui.js"
-    }
-  },
   "bin": {
     "splittime": "bin/splittime"
   },
   "scripts": {
     "build": "run-p build:build-cli build:editor-server build:engine",
     "build:build-cli": "esbuild src/build-tools/build-cli.ts --bundle --platform=node --outfile=build/build-cli.js --external:esbuild",
+    "build:editor-client": "esbuild src/editor/esbuild/index.tsx --bundle --platform=browser --jsx=automatic --outfile=build/editor-client.js",
     "build:editor-server": "esbuild src/editor/server/main.ts --bundle --platform=node --outfile=build/editor-server.js",
     "build:engine": "node bin/internal/build-engine",
     "build:internal-build-cli": "esbuild src/build-tools/internal-build-cli.ts --bundle --platform=node --outfile=build/internal-build-cli.js --external:esbuild",
@@ -107,7 +49,8 @@
     "test": "run-p test:*",
     "test:types": "tsc --noEmit",
     "test:unit": "uts -r esbuild-register src/engine-test",
-    "watch:build:type-declarations": "ts-node-dev --transpile-only src/build-tools/engine/build-type-declarations.ts"
+    "watch:build:type-declarations": "ts-node-dev --transpile-only src/build-tools/engine/build-type-declarations.ts",
+    "wmr": "wmr --cwd src/editor/wmr"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.15.2",
@@ -135,13 +78,18 @@
     "express": "^4.17.1",
     "find-root": "^1.1.0",
     "glob": "^7.1.6",
+    "preact": "^10.11.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "rrdir": "^8.2.1",
     "source-map-support": "^0.5.19",
     "sync-directory": "^2.2.17",
     "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.1.0",
     "uglify-js": "^3.13.0",
     "vue": "^2.6.12",
-    "vue-async-computed": "^3.9.0"
+    "vue-async-computed": "^3.9.0",
+    "wmr": "^3.8.0"
   },
   "files": [
     "*",

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxFactory": "preact.h",
+    "jsxFragmentFactory": "preact.Fragment",
+    "strict": true,
+    "noEmit": true,
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "baseUrl": "./public",
+    "paths": {
+      "engine/*": ["../../../engine/*"],
+      "engine-api/*": ["../../../api/*"],
+      "engine-api": ["../../../api/index.ts"],
+      "server/*": ["../../server/*"]
+    }
+  },
+  "include": ["node_modules/wmr/types.d.ts", "**/*"],
+  "typeAcquisition": {
+    "enable": true
+  }
+}
