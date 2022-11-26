@@ -1,3 +1,5 @@
+import { type Immutable } from "engine/utils/immutable"
+
 export type InputChangeEvent<T> = {
   target: {
     value: T
@@ -10,3 +12,12 @@ export function makeClassNames(classMap: Record<string, boolean>) {
     .map(([name]) => name)
     .join(" ")
 }
+
+// export function makeStyleString(styleMap: Record<string, string>) {
+//   return Object.entries(classMap)
+//     .filter(([name, shouldShow]) => shouldShow)
+//     .map(([name]) => name)
+//     .join(" ")
+// }
+
+export type ImmutableSetter<T> = (transform: (before: Immutable<T>) => Immutable<T>) => void

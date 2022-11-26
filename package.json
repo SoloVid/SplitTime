@@ -35,7 +35,7 @@
   "scripts": {
     "build": "run-p build:build-cli build:editor-server build:engine",
     "build:build-cli": "esbuild src/build-tools/build-cli.ts --bundle --platform=node --outfile=build/build-cli.js --external:esbuild",
-    "build:editor-client": "esbuild src/editor/esbuild/index.tsx --bundle --platform=browser --jsx=automatic --outfile=build/editor-client.js",
+    "build:editor-client": "esbuild src/editor/esbuild/index.tsx --bundle --platform=browser --jsx=automatic --outfile=build/editor-client.js --sourcemap",
     "build:editor-server": "esbuild src/editor/server/main.ts --bundle --platform=node --outfile=build/editor-server.js",
     "build:engine": "node bin/internal/build-engine",
     "build:internal-build-cli": "esbuild src/build-tools/internal-build-cli.ts --bundle --platform=node --outfile=build/internal-build-cli.js --external:esbuild",

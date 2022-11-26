@@ -6,12 +6,13 @@ import { Collage as FileCollage, instanceOfCollage } from "engine/file/collage"
 import { Pledge } from "engine/utils/pledge"
 import { instanceOfFileData } from "engine/world/level/level-file-data"
 import { useEffect, useState } from "preact/hooks"
+import CollageEditor from "./collage/collage-editor"
 import { exportCollageJson, exportLevel, exportLevelJson, importLevel, updatePageTitle } from "./editor-functions"
 import FileBrowser from "./file-browser"
 import { CheckboxInput, NumberInput } from "./input"
 import { Level } from "./level/extended-level-format"
 import { ServerLiaison } from "./server-liaison"
-import { Followable } from "./shared-types"
+import { Followable, GlobalEditorShared } from "./shared-types"
 
 const UNDO_STACK_SIZE = 1000
 
@@ -118,6 +119,24 @@ export default function Editor({ server }: EditorProps) {
   const [level, setLevel] = useState<Level | null>(null)
   const [triggerSettings, setTriggerSettings] = useState<{ f: () => void }>({ f: () => {} })
 
+  const globalEditorStuff: GlobalEditorShared = {
+    gridEnabled,
+    gridCell,
+    server,
+    time,
+    userInputs: {
+      mouse,
+      ctrlDown,
+    },
+    createUndoPoint,
+    openFileSelect,
+    setFollowers,
+    setOnDelete,
+    setOnSettings(callback) {
+      setTriggerSettings({f: callback})
+    },
+  }
+
   function createCollage() {
     setShowNewDialog(false)
     if (collage) {
@@ -147,10 +166,6 @@ export default function Editor({ server }: EditorProps) {
     setLevel(new Level())
     updatePageTitle("level untitled")
   }
-
-//   function clickFileChooser(this: VueEditor) {
-//     this.$refs.fileInput.click()
-//   }
 
   function editSettings(): void {
     triggerSettings.f()
@@ -350,7 +365,7 @@ export default function Editor({ server }: EditorProps) {
     setShowFileBrowser(true)
   }
 
-  function openFileSelect(rootDirectory: string, callback: FileBrowserReturnListener): PromiseLike<string> {
+  function openFileSelect(rootDirectory: string): PromiseLike<string> {
     const pledge = new Pledge()
     setFileBrowserReturnListener({f: filePath => pledge.resolve(filePath)})
     setFileBrowserTitle("Select File")
@@ -420,13 +435,12 @@ export default function Editor({ server }: EditorProps) {
           />
       </div>
     </div>}
-    {/* {!!collage && <collage-editor
-      :editor-inputs="inputs"
-      :editor-global-stuff="globalEditorStuff"
-      :supervisor-control="supervisorControl"
-      :collage="collage"
+    {!!collage && <CollageEditor
+      editorGlobalStuff={globalEditorStuff}
+      collage={collage}
       style="flex-grow: 1; overflow: hidden;"
-    ></collage-editor>} */}
+      setCollage={setCollage}
+    />}
     {/* { !!level && <level-editor
       v-if="level"
       :editor-inputs="inputs"

@@ -2,22 +2,24 @@ import { Trace } from "api/file"
 import { Type as TraceType } from "engine/world/level/trace/trace-misc"
 import { FieldOptions, ObjectProperties } from "./field-options"
 
-export function getTracePropertiesStuff(trace: Trace, deleteCallback: () => void): ObjectProperties {
-    interface TraceFieldOptions {
-        id: FieldOptions
-        group: FieldOptions
-        type: FieldOptions
-        vertices: FieldOptions
-        z: FieldOptions
-        height: FieldOptions
-        direction?: FieldOptions
-        event?: FieldOptions
-        level?: FieldOptions
-        offsetX?: FieldOptions
-        offsetY?: FieldOptions
-        offsetZ?: FieldOptions
-        targetPosition?: FieldOptions
-    }
+interface TraceFieldOptions {
+    id: FieldOptions
+    group: FieldOptions
+    type: FieldOptions
+    vertices: FieldOptions
+    z: FieldOptions
+    height: FieldOptions
+    direction?: FieldOptions
+    event?: FieldOptions
+    level?: FieldOptions
+    offsetX?: FieldOptions
+    offsetY?: FieldOptions
+    offsetZ?: FieldOptions
+    targetPosition?: FieldOptions
+}
+type SimplifiedTrace = { [K in keyof Required<TraceFieldOptions>]: string | number }
+
+export function getTracePropertiesStuff(trace: Trace, deleteCallback: () => void): ObjectProperties<SimplifiedTrace> {
     let fields: TraceFieldOptions = {
         id: {},
         group: {},
@@ -48,8 +50,6 @@ export function getTracePropertiesStuff(trace: Trace, deleteCallback: () => void
             fields.targetPosition = {}
             break
         }
-
-    type SimplifiedTrace = { [K in keyof Required<typeof fields>]: string | number }
 
     return {
         title: "Trace Properties",

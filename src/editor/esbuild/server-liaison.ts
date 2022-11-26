@@ -1,6 +1,7 @@
 import { EditorTsApi } from "editor/server/api/editor-ts-api"
 import { WithProject } from "editor/server/api-wrappings"
-import { Cache } from "./cache"
+import { Cache, UnderlyingCacheObject } from "./cache"
+import { ImmutableSetter } from "./preact-help"
 
 export class ServerLiaison {
     api = new EditorTsApi()
@@ -8,18 +9,24 @@ export class ServerLiaison {
     private readonly imageSrcCache: Cache<string>
 
     constructor(
-        public projectId: string
+        public projectId: string,
+        cacheObject: UnderlyingCacheObject<string>,
+        setCacheObject: ImmutableSetter<UnderlyingCacheObject<string>>,
     ) {
-        this.imageSrcCache = new Cache(async fileName => {
-            try {
-                const info = await this.api.imageInfo.fetch(this.withProject({ imageId: fileName }))
-                return info.webPath + "?" + info.timeModifiedString
-            } catch (e: unknown) {
-                //TODO: Get placeholder
-                return "TODO:placeholder"
-                // return level.getPlaceholderImage()
-            }
-        })
+        this.imageSrcCache = new Cache(
+            async fileName => {
+                try {
+                    const info = await this.api.imageInfo.fetch(this.withProject({ imageId: fileName }))
+                    return info.webPath + "?" + info.timeModifiedString
+                } catch (e: unknown) {
+                    //TODO: Get placeholder
+                    return "TODO:placeholder"
+                    // return level.getPlaceholderImage()
+                }
+            },
+            cacheObject,
+            setCacheObject,
+        )
         this.imageSrcCache.cacheLifeRandomFactor = 5
     }
 

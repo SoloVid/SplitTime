@@ -1,42 +1,53 @@
 import { randomRangedInt } from "api/math"
 import { warn } from "api/system"
+import { Immutable } from "engine/utils/immutable"
+import { ImmutableSetter } from "./preact-help"
+
+export type UnderlyingCacheObject<T> = { [id: string]: CacheEntry<T> }
 
 export class Cache<T> {
 
-    private readonly cache: { [id: string]: CacheEntry<T> } = {}
     // Setting this to a higher number can help ensure that cache misses don't all happen at exactly the same time
     cacheLifeRandomFactor = 0
 
     constructor(
         private readonly getCallback: (id: string) => (T | PromiseLike<T>),
-        private readonly cacheLife: number = DEFAULT_CACHE_LIFE
+        private readonly cacheObject: Immutable<UnderlyingCacheObject<T>>,
+        private readonly setCacheObject: ImmutableSetter<UnderlyingCacheObject<T>>,
+        private readonly cacheLife: number = DEFAULT_CACHE_LIFE,
     ) { }
 
-    private getCacheEntry(id: string): CacheEntry<T> {
-        if (!(id in this.cache)) {
-            // TODO: What to do with this set?
-            // MaybeVue.set(this.cache, id, {
-            //     refetchAt: 0,
-            //     isLoading: false,
-            //     failed: false,
-            //     data: null
-            // })
-            this.cache[id] = {
-                refetchAt: 0,
-                isLoading: false,
-                failed: false,
-                data: null
-            }
+    private getCacheEntry(id: string): Immutable<CacheEntry<T>> {
+        const cacheEntry = this.cacheObject[id] ?? {
+            refetchAt: 0,
+            isLoading: false,
+            failed: false,
+            data: null
         }
-        const collageInfo = this.cache[id]
-        if (!collageInfo.isLoading && collageInfo.refetchAt <= performance.now()) {
-            collageInfo.isLoading = true
+        if (!(id in this.cacheObject)) {
+            this.setCacheObject((before) => ({
+                ...before,
+                [id]: cacheEntry
+            }))
+        }
+        if (!cacheEntry.isLoading && cacheEntry.refetchAt <= performance.now()) {
+            this.updateCacheEntry(id, {isLoading: true})
             this.load(id)
         }
-        if (collageInfo.failed) {
+        if (cacheEntry.failed) {
             throw new Error("Unable to get item from cache \"" + id + "\"")
         }
-        return collageInfo
+        return cacheEntry
+    }
+
+    private updateCacheEntry(id: string, cacheEntry: Partial<Immutable<CacheEntry<T>>>) {
+        this.setCacheObject((before) => ({
+            ...before,
+            [id]: {
+                ...before[id],
+                ...cacheEntry,
+            }
+        }))
     }
 
     /**
@@ -45,21 +56,26 @@ export class Cache<T> {
      * If there was an error while trying to load the item the last time,
      * this method will throw an exception.
      */
-    get(id: string): T | null | never {
+    get(id: string): Immutable<T> | null | never {
         return this.getCacheEntry(id).data
     }
 
     async load(id: string): Promise<void> {
-        const cacheEntry = this.cache[id]
+        const cacheEntry = this.cacheObject[id]
         try {
-            cacheEntry.data = await this.getCallback(id)
-            cacheEntry.failed = false
+            const data = await this.getCallback(id)
+            this.updateCacheEntry(id, {
+                data: data as Immutable<T>,
+                failed: false
+            })
         } catch (e: unknown) {
             warn("Failed to load item \"" + cacheEntry + "\" for cache", e)
-            cacheEntry.failed = true
+            this.updateCacheEntry(id, {failed: true})
         } finally {
-            cacheEntry.refetchAt = performance.now() + this.cacheLife + randomRangedInt(-this.cacheLifeRandomFactor, this.cacheLifeRandomFactor)
-            cacheEntry.isLoading = false
+            this.updateCacheEntry(id, {
+                refetchAt: performance.now() + this.cacheLife + randomRangedInt(-this.cacheLifeRandomFactor, this.cacheLifeRandomFactor),
+                isLoading: false,
+            })
         }
     }
 }

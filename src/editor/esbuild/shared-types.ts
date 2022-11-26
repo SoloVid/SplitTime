@@ -2,6 +2,7 @@ import { assert, Coordinates2D } from "api"
 import { Vector2D } from "api/math"
 import { game_seconds } from "engine/time/timeline"
 import { generateUID } from "engine/utils/misc"
+import { getCoords } from "./editor-functions"
 import { ServerLiaison } from "./server-liaison"
 
 export interface Followable {
@@ -16,25 +17,27 @@ export interface VueComponent {
 
 export interface GlobalEditorShared {
     readonly gridEnabled: boolean
-    readonly gridCell: Vector2D
+    readonly gridCell: { readonly x: number, readonly y: number }
     readonly server: ServerLiaison
     readonly time: game_seconds
+    readonly userInputs: UserInputs
     createUndoPoint(): void
     openFileSelect(rootDirectory: string): PromiseLike<string>
     setFollowers(newFollowers: Followable[]): void
     setOnDelete(callback: () => void): void
+    setOnSettings(callback: () => void): void
 }
 
 export type UserInputs = {
-    mouse: {
-        x: number,
-        y: number,
-        isDown: boolean
+    readonly mouse: {
+        readonly x: number,
+        readonly y: number,
+        readonly isDown: boolean
     }
-    ctrlDown: boolean
+    readonly ctrlDown: boolean
 }
 
-export function getRelativeMouse(userInputs: UserInputs, vueComponent: VueComponent): Coordinates2D {
+export function getRelativeMouse(userInputs: UserInputs, $el: HTMLElement): Coordinates2D {
     // if (!vueComponent.$el) {
     //     return {
     //         x: 0,
@@ -42,10 +45,10 @@ export function getRelativeMouse(userInputs: UserInputs, vueComponent: VueCompon
     //     }
     // }
     // const $pos = $(vueComponent.$el).position()
-    assert(!!vueComponent.$el, "Element required")
+    // assert(!!vueComponent.$el, "Element required")
     // TODO: getCoords
-    // const pos = getCoords(vueComponent.$el)
-    const pos = { left: 123, top: 456 }
+    const pos = getCoords($el)
+    // const pos = { left: 123, top: 456 }
     return {
         x: userInputs.mouse.x - pos.left,
         y: userInputs.mouse.y - pos.top

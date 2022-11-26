@@ -9,7 +9,7 @@ export class GridSnapMover {
     private totalMovement = 0
 
     constructor(
-        private gridCell: Vector2D,
+        private gridCell: { readonly x: number, readonly y: number },
         originalPoints: readonly Readonly<Coordinates2D>[]
     ) {
         if (originalPoints.length === 0) {
