@@ -163,9 +163,9 @@ export function getObjectProperties(collage: Immutable<Collage>, setCollage: Imm
             // TODO: More type safety?
             return properties as any
         }
-        if (path[2] === "bodySpec") {
-            assert(path.length === 3, `Unexpected bodySpec path: ${JSON.stringify(path)}`)
-            const properties: ObjectProperties<SimplifiedBodySpec, ["montages", number, "bodySpec"]> = {
+        if (path[2] === "body") {
+            assert(path.length === 3, `Unexpected body path: ${JSON.stringify(path)}`)
+            const properties: ObjectProperties<SimplifiedBodySpec, ["montages", number, "body"]> = {
                 // TODO: More type safety?
                 ...baseProperties as any,
                 title: "Body Spec Properties",

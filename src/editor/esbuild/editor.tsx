@@ -3,6 +3,7 @@ import { keycode } from "api/controls"
 import { json } from "api/file"
 import { debug } from "api/system"
 import { Collage as FileCollage, instanceOfCollage } from "engine/file/collage"
+import { Immutable } from "engine/utils/immutable"
 import { Pledge } from "engine/utils/pledge"
 import { instanceOfFileData } from "engine/world/level/level-file-data"
 import { useEffect, useState } from "preact/hooks"
@@ -33,14 +34,15 @@ export default function Editor({ server }: EditorProps) {
   }, [])
 
   const [gridEnabled, setGridEnabled] = useState(false)
-  const [gridCell, setGridCell] = useState({ x: 32, y: 32 })
+  const [explicitGridCell, setExplicitGridCell] = useState({ x: 32, y: 32 })
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
   const [onDeleteCallback, setOnDeleteCallback] = useState<{f: () => void}>({f:() => { }})
   const [undoStack, setUndoStack] = useState<readonly string[]>([])
   const [redoStack, setRedoStack] = useState<readonly string[]>([])
 
-  
+  const gridCell = gridEnabled ? explicitGridCell : { x: 1, y: 1 }
+
   function createUndoPoint(): void {
     if (!level && !collage) {
       return
@@ -115,7 +117,7 @@ export default function Editor({ server }: EditorProps) {
     isDown: false
   })
   const [ctrlDown, setCtrlDown] = useState(false)
-  const [collage, setCollage] = useState<FileCollage | null>(null)
+  const [collage, setCollage] = useState<Immutable<FileCollage> | null>(null)
   const [level, setLevel] = useState<Level | null>(null)
   const [triggerSettings, setTriggerSettings] = useState<{ f: () => void }>({ f: () => {} })
 
@@ -276,6 +278,7 @@ export default function Editor({ server }: EditorProps) {
         setCtrlDown(true)
         break
       case keycode.LEFT:
+        console.log("left")
         moveFollowers(-gridCell.x, 0)
         break
       case keycode.UP:
@@ -404,11 +407,11 @@ export default function Editor({ server }: EditorProps) {
       </label>
       {gridEnabled && <label>
         x:
-        <NumberInput value={gridCell.x} onChange={(newValue) => setGridCell({...gridCell, x: newValue})} style="width: 48px;"/>
+        <NumberInput value={gridCell.x} onChange={(newValue) => setExplicitGridCell({...gridCell, x: newValue})} style="width: 48px;"/>
       </label>}
       {gridEnabled && <label>
         y:
-        <NumberInput value={gridCell.y} onChange={(newValue) => setGridCell({...gridCell, y: newValue})} style="width: 48px;"/>
+        <NumberInput value={gridCell.y} onChange={(newValue) => setExplicitGridCell({...gridCell, y: newValue})} style="width: 48px;"/>
       </label>}
     </div>
     {showNewDialog && <div className="modal-backdrop">

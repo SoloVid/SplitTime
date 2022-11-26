@@ -8,6 +8,8 @@ import { GlobalEditorShared, UserInputs } from "../shared-types"
 import { traceOptions } from "../trace-options"
 import { makeSharedStuff } from "./collage-editor-shared"
 import CollageLayout from "./collage-layout"
+import CollageShowcase from "./collage-showcase"
+import MontageEditor from "./montage-editor"
 import { getObjectProperties } from "./properties-stuffs"
 import { EDITOR_PADDING } from "./shared-types"
 
@@ -124,21 +126,19 @@ export default function CollageEditor(props: CollageEditorProps) {
         />
       </div>
       <div class="collage-showcase-container" style="flex-grow: 1; overflow: auto;">
-        {/* <collage-showcase
+        <CollageShowcase
           style="flex-grow: 1;"
-          // :collage-edit-helper="sharedStuff"
-          // :collage-view-helper="sharedStuff"
-          // :editor-inputs="editorInputs"
-        ></collage-showcase> */}
+          collageEditHelper={sharedStuff}
+          collageViewHelper={sharedStuff}
+        />
       </div>
     </div>
     <div style="overflow: auto; height: 50%;">
-      {/* <montage-editor
-        // v-if="!!sharedStuff.selectedMontage"
-        // :collage-editor-shared="sharedStuff"
-        // :editor-inputs="editorInputs"
-        // :montage="sharedStuff.selectedMontage"
-      ></montage-editor> */}
+      {!!sharedStuff.selectedMontage && !!sharedStuff.selectedMontageIndex && <MontageEditor
+        collageEditorShared={sharedStuff}
+        montageIndex={sharedStuff.selectedMontageIndex}
+        montage={sharedStuff.selectedMontage}
+      />}
     </div>
   </div>
 }

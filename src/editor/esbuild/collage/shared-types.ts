@@ -44,6 +44,6 @@ export const MIN_FRAME_LEN = 12
 //     selectMontage(montage: Montage, andProperties?: boolean): void
 // }
 
-// export interface PropertiesEvent {
-//     propertiesPanelSet?: boolean
-// }
+export interface PropertiesEvent {
+    propertiesPanelSet?: boolean
+}

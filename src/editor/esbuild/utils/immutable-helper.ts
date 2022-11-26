@@ -1,3 +1,4 @@
+import { rethrowError } from "engine/utils/error";
 import { Immutable } from "engine/utils/immutable";
 import { assert } from "globals";
 import { ImmutableSetter } from "../preact-help";
@@ -28,22 +29,26 @@ export function getByPath<T extends object | readonly unknown[], Path extends Ba
   if (path.length === 0) {
     return obj
   }
-  const [firstPathPart, ...otherPathParts] = path
-  if (typeof firstPathPart === "number") {
-    assert(firstPathPart >= 0, "First path part is number but is negative")
-    assert(Array.isArray(obj), "First path part is number, so array expected")
-    assert(firstPathPart < obj.length, "First path part is number but is beyond array range")
-    return getByPath(obj[firstPathPart], otherPathParts)
-  }
+  try {
+    const [firstPathPart, ...otherPathParts] = path
+    if (typeof firstPathPart === "number") {
+      assert(firstPathPart >= 0, "First path part is number but is negative")
+      assert(Array.isArray(obj), "First path part is number, so array expected")
+      assert(firstPathPart < obj.length, "First path part is number but is beyond array range")
+      return getByPath(obj[firstPathPart], otherPathParts)
+    }
 
-  assert(typeof obj === "object", "First path part is string, so object expected")
-  assert(obj !== null, "First path part is string but object is null")
-  assert(firstPathPart in obj, "First path part is string but is not in object")
-  return getByPath(
-    // TODO: Make this type-case more specific.
-    obj[firstPathPart as keyof typeof obj] as any,
-    otherPathParts,
-  )
+    assert(typeof obj === "object", "First path part is string, so object expected")
+    assert(obj !== null, "First path part is string but object is null")
+    assert(firstPathPart in obj, "First path part is string but is not in object")
+    return getByPath(
+      // TODO: Make this type-case more specific.
+      obj[firstPathPart as keyof typeof obj] as any,
+      otherPathParts,
+    )
+  } catch (e) {
+    rethrowError(e, `getByPath error for ${JSON.stringify(path)} of ${JSON.stringify(obj)}`)
+  }
 }
 
 export function updateImmutableObject<T extends object | readonly unknown[], Path extends readonly (string | number)[]>(obj: Immutable<T>, setter: ImmutableSetter<T>, path: Path, value: Drilled<T, Path> | undefined) {

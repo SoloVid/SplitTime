@@ -13,11 +13,10 @@ export function makeClassNames(classMap: Record<string, boolean>) {
     .join(" ")
 }
 
-// export function makeStyleString(styleMap: Record<string, string>) {
-//   return Object.entries(classMap)
-//     .filter(([name, shouldShow]) => shouldShow)
-//     .map(([name]) => name)
-//     .join(" ")
-// }
+export function makeStyleString(styleMap: Record<string, string>) {
+  return Object.entries(styleMap)
+    .map(([key, value]) => `${key}:${value}`)
+    .join(";")
+}
 
 export type ImmutableSetter<T> = (transform: (before: Immutable<T>) => Immutable<T>) => void

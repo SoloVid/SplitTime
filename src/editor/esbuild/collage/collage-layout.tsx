@@ -1,5 +1,6 @@
 import { Frame } from "engine/file/collage"
 import { useMemo, useRef } from "preact/hooks"
+import GridLines from "../grid-lines"
 import { getRelativeMouse } from "../shared-types"
 import { SharedStuff } from "./collage-editor-shared"
 import FrameRectangle from "./frame-rectangle"
@@ -10,25 +11,6 @@ type CollageLayoutProps = {
 }
 
 export default function CollageLayout(props: CollageLayoutProps) {
-  // interface VueCollageLayout extends client.VueComponent {
-  //   // props
-  //   editorInputs: client.UserInputs
-  //   collageEditorShared: CollageEditorShared
-  //   // data
-  //   editorPadding: number
-  //   // computed
-  //   backgroundSrc: string
-  //   collage: file.Collage
-  //   containerWidth: number
-  //   containerHeight: number
-  //   framesSorted: file.collage.Frame[]
-  //   viewBox: string
-  //   // asyncComputed
-  //   // methods
-  //   // handleKeyDown(event: KeyboardEvent): void
-  //   startNewFrame(): void
-  // }
-
   const {
     collageEditorShared
   } = props
@@ -44,17 +26,17 @@ export default function CollageLayout(props: CollageLayoutProps) {
   const containerHeight = height + 2*EDITOR_PADDING
 
   const framesSorted = useMemo(() => {
-    const frameArrayCopy = collage.frames.slice()
-    frameArrayCopy.sort((a, b) => {
-      if (a === collageEditorShared.selectedFrame) {
+    const framesWithIndices = collage.frames.map((f, i) => ({ f, i }))
+    framesWithIndices.sort((a, b) => {
+      if (a.f === collageEditorShared.selectedFrame) {
         return 1
       }
-      if (b === collageEditorShared.selectedFrame) {
+      if (b.f === collageEditorShared.selectedFrame) {
         return -1
       }
       return 0
     })
-    return frameArrayCopy
+    return framesWithIndices
   }, [collage.frames, collageEditorShared.selectedFrame])
 
   const viewBox = "" + -EDITOR_PADDING + " " + -EDITOR_PADDING + " " + containerWidth + " " + containerHeight
@@ -106,26 +88,19 @@ export default function CollageLayout(props: CollageLayoutProps) {
     <svg
       style="position:absolute; left: 0; top: 0; width: 100%; height: 100%"
     >
-      {framesSorted.map((frame, i) => (
+      {framesSorted.map((frame) => (
         <FrameRectangle
-          key={frame.id}
+          key={frame.f.id}
           collageEditorShared={collageEditorShared}
-          frameIndex={i}
-          frame={frame}
+          frameIndex={frame.i}
+          frame={frame.f}
           offset={{x: EDITOR_PADDING, y: EDITOR_PADDING}}
         />
       ))}
-      {/* <frame-rectangle v-for="frame in framesSorted"
-        :key="frame.id"
-        :collage-editor-shared="collageEditorShared"
-        :frame="frame"
-        :offset="{x: editorPadding, y: editorPadding}"
-      ></frame-rectangle> */}
     </svg>
-    {/* <grid-lines
-      v-if="collageEditorShared.gridEnabled"
-      :grid-cell="collageEditorShared.gridCell"
-      :origin="{x: editorPadding, y: editorPadding}"
-    ></grid-lines> */}
+    {collageEditorShared.globalStuff.gridEnabled && <GridLines
+      gridCell={collageEditorShared.globalStuff.gridCell}
+      origin={{x: EDITOR_PADDING, y: EDITOR_PADDING}}
+    />}
   </div>
 }

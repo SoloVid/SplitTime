@@ -113,9 +113,7 @@ function SingleProperty(props: SinglePropertyProps) {
     setIsTempEmpty(false)
   }
 
-  function title(): string {
-    return fieldOptions.title || fieldKey
-  }
+  const title = fieldOptions.title || fieldKey
 
   function setValue(value: unknown): void {
     if (typeof value === "number" || typeof value === "string") {

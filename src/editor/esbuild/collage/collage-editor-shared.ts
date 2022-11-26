@@ -167,3 +167,4 @@ export function makeSharedStuff({ globalStuff, collage, setCollage }: MakeShared
 }
 
 export type SharedStuff = ReturnType<typeof makeSharedStuff>
+export type ReadonlySharedStuff = Pick<SharedStuff, never>

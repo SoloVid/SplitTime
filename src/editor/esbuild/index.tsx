@@ -1,3 +1,5 @@
+import "preact/debug"
+
 import { render } from "preact"
 import { useState } from "preact/hooks";
 import { UnderlyingCacheObject } from "./cache";
@@ -13,9 +15,10 @@ const projectName = url.substring(url.indexOf(slug) + slug.length + 1)
 
 Promise.resolve().then(() => exerciseApi())
 
-window.onbeforeunload = function() {
-    return true;
-};
+// TODO: Re-enable confirmation
+// window.onbeforeunload = function() {
+//     return true;
+// };
 
 export default function EsbuildEditor() {
   const [serverCacheObject, setServerCacheObject] = useState<UnderlyingCacheObject<string>>({})
