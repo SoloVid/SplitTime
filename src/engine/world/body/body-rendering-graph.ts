@@ -284,17 +284,17 @@ export class GraphBodyNode {
 }
 
 export interface GraphBody {
-    ref: int
-    drawables: GraphDrawable[]
-    x: number
-    y: number
-    z: number
-    width: int
-    depth: int
-    height: int
-    shouldRenderInFrontCustom?: (otherBody: GraphBody) => (boolean | undefined)
+    readonly ref: int
+    readonly drawables: readonly GraphDrawable[]
+    readonly x: number
+    readonly y: number
+    readonly z: number
+    readonly width: int
+    readonly depth: int
+    readonly height: int
+    readonly shouldRenderInFrontCustom?: (otherBody: GraphBody) => (boolean | undefined)
 }
 
 export interface GraphDrawable {
-    getCanvasRequirements(): CanvasRequirements
+    readonly getCanvasRequirements: () => CanvasRequirements
 }

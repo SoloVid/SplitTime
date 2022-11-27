@@ -1,7 +1,7 @@
 import { Collage } from "engine/file/collage"
 import { type Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
-import { useRef } from "preact/hooks"
+import { useEffect, useRef } from "preact/hooks"
 import { ImmutableSetter } from "../preact-help"
 import PropertiesPane from "../properties"
 import { GlobalEditorShared, UserInputs } from "../shared-types"
@@ -85,11 +85,11 @@ export default function CollageEditor(props: CollageEditorProps) {
   //   sharedStuff.setSelectedMontage(null)
   // }, [collage])
 
-  // useEffect(() => {
-  //   editorGlobalStuff.setOnSettings(() => {
-  //     sharedStuff.editProperties(getCollagePropertiesStuff(collage, setCollage))
-  //   })
-  // }, [])
+  useEffect(() => {
+    editorGlobalStuff.setOnSettings(() => {
+      sharedStuff.setPropertiesPath([])
+    })
+  }, [])
 
   // I'm not sure there's a scenario this makes sense, but it was in the Vue implementation.
   // useEffect(() => {
@@ -117,7 +117,7 @@ export default function CollageEditor(props: CollageEditorProps) {
         <hr/>
         {!!sharedStuff.propertiesPath && <PropertiesPane
           editorGlobalStuff={editorGlobalStuff}
-          spec={getObjectProperties(collage, setCollage, sharedStuff.propertiesPath)}
+          spec={getObjectProperties(collage, setCollage, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))}
         />}
       </div>
       <div class="collage-layout-container" style="flex-grow: 1; height: 100%; overflow: auto">

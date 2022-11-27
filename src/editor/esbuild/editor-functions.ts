@@ -3,10 +3,12 @@ import { FileData, IsJsonable, json, Position as FilePosition, Prop as FileProp,
 import { Vector2D } from "api/math"
 import { BodySpec } from "engine/file/collage"
 import { Canvas } from "engine/ui/viewport/canvas"
+import { Immutable } from "engine/utils/immutable"
 import { Group as FileGroup } from "engine/world/level/level-file-data"
 import { makeTrace } from "engine/world/level/level-file-data-helpers"
 import { Type as TraceType } from "engine/world/level/trace/trace-misc"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
+import { FileLevel } from "./file-types"
 import { GridSnapMover } from "./grid-snap-mover"
 import { Level, Position, Trace } from "./level/extended-level-format"
 import { EditorMetadata, withMetadata } from "./shared-types"
@@ -94,32 +96,33 @@ export function exportLevel(levelObject: Level): FileData {
     }
 }
 
-export function exportLevelJson(levelObject: Level): json {
+export function exportLevelJson(levelObject: FileLevel): json {
     // TODO: Where is export?
     return "{}"
     // return toJson(exportLevel(levelObject))
 }
 
-export function importLevel(levelText: string): Level {
+export function importLevel(levelText: string): FileLevel {
     const levelFile = JSON.parse(levelText) as FileData
-    const levelObject = new Level()
-    levelObject.region = levelFile.region
-    levelObject.width = levelFile.width
-    levelObject.height = levelFile.height
-    levelObject.background = levelFile.background
-    levelObject.backgroundOffsetX = levelFile.backgroundOffsetX
-    levelObject.backgroundOffsetY = levelFile.backgroundOffsetY
-    levelObject.groups = levelFile.groups.map(g => withMetadata("group", g))
-    levelObject.traces = levelFile.traces.map(t => withMetadata("trace", t))
-    levelObject.props = levelFile.props.map(p => withMetadata("prop", p))
-    levelObject.positions = levelFile.positions.map(p => withMetadata("position", p))
-    return levelObject
+    return levelFile
+    // const levelObject = new Level()
+    // levelObject.region = levelFile.region
+    // levelObject.width = levelFile.width
+    // levelObject.height = levelFile.height
+    // levelObject.background = levelFile.background
+    // levelObject.backgroundOffsetX = levelFile.backgroundOffsetX
+    // levelObject.backgroundOffsetY = levelFile.backgroundOffsetY
+    // levelObject.groups = levelFile.groups.map(g => withMetadata("group", g))
+    // levelObject.traces = levelFile.traces.map(t => withMetadata("trace", t))
+    // levelObject.props = levelFile.props.map(p => withMetadata("prop", p))
+    // levelObject.positions = levelFile.positions.map(p => withMetadata("position", p))
+    // return levelObject
 }
 
-export function getGroupById(level: Level, groupId: string): FileGroup {
+export function getGroupById(level: FileLevel, groupId: string): FileGroup {
     for (const group of level.groups) {
-        if (group.obj.id === groupId) {
-            return group.obj
+        if (group.id === groupId) {
+            return group
         }
     }
     return {
@@ -131,17 +134,17 @@ export function getGroupById(level: Level, groupId: string): FileGroup {
 }
 
 type FileThing = FileTrace | FileProp | FilePosition
-export function inGroup(level: Level, group: string, obj: FileThing): boolean {
+export function inGroup(level: FileLevel, group: string, obj: FileThing): boolean {
     return checkGroupMatch(level, group, obj.group)
 }
-export function checkGroupMatch(level: Level, realGroup: string, testGroup: string): boolean {
+export function checkGroupMatch(level: FileLevel, realGroup: string, testGroup: string): boolean {
     if (realGroup === "") {
-        return level.groups.every(g => g.obj.id !== testGroup)
+        return level.groups.every(g => g.id !== testGroup)
     }
     return realGroup === testGroup
 }
 
-export function addNewTrace(levelObject: Level, groupId: string, type: string): Trace {
+export function makeNewTrace(levelObject: FileLevel, groupId: string, type: string): FileTrace {
     const group = getGroupById(levelObject, groupId)
     var z = group.defaultZ
     var height = group.defaultHeight
@@ -149,37 +152,34 @@ export function addNewTrace(levelObject: Level, groupId: string, type: string): 
         type = TraceType.SOLID
         height = 0
     }
-    const traceObj = makeTrace({
+    return makeTrace({
         group: group.id,
         type: type,
         z: z,
         height: height,
     })
-    const trace = withMetadata<"trace", FileTrace>("trace", traceObj)
-    levelObject.traces.push(trace)
-    return trace
 }
 
-export function safeExtractTraceArray(levelObject: Level, traceStr: string): (Readonly<Coordinates2D> | null)[] {
+export function safeExtractTraceArray(levelObject: Immutable<FileLevel>, traceStr: string): (Readonly<Coordinates2D> | null)[] {
     const pointSpecs = interpretPointString(traceStr)
     return convertPositions(pointSpecs, getPositionMap(levelObject))
 }
 
-function getPositionMap(levelObject: Level): { [id: string]: Readonly<Coordinates2D> } {
+function getPositionMap(levelObject: Immutable<FileLevel>): { [id: string]: Readonly<Coordinates2D> } {
     const positionMap: { [id: string]: Readonly<Coordinates2D> } = {}
     for(const p of levelObject.positions) {
-        positionMap[p.obj.id] = p.obj
+        positionMap[p.id] = p
     }
     return positionMap
 }
 
-export function findClosestPosition(levelObject: Level, x: number, y: number): Position | null {
+export function findClosestPosition(levelObject: FileLevel, x: number, y: number): FilePosition | null {
     let closestDistance = Number.MAX_SAFE_INTEGER
-    let closestPosition: Position | null = null
+    let closestPosition: FilePosition | null = null
 
     levelObject.positions.forEach(pos => {
-        const dx = pos.obj.x - x
-        const dy = pos.obj.y - y
+        const dx = pos.x - x
+        const dy = pos.y - y
         const dist = Math.sqrt((dx * dx) + (dy * dy))
         if(dist < closestDistance) {
             closestDistance = dist
@@ -211,7 +211,7 @@ export function getPlaceholderImage(): string {
     return placeholderImageUrl
 }
 
-export function createSnapMontageMover(gridCell: Vector2D, bodySpec: BodySpec, coords: Coordinates2D): GridSnapMover {
+export function createSnapMontageMover(gridCell: Coordinates2D, bodySpec: BodySpec, coords: Coordinates2D): GridSnapMover {
     const x = coords.x
     const y = coords.y
     const left = x - bodySpec.width / 2

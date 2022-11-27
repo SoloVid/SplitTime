@@ -136,3 +136,30 @@ export class FrameWrapper implements Frame {
         this.setFrame({height: newHeight})
     }
 }
+
+export function updateFrameId(setCollage: ImmutableSetter<Collage>, oldId: string, newId: string) {
+    setCollage((before) => ({
+        ...before,
+        frames: before.frames.map(f => {
+            if (f.id !== oldId) {
+                return f
+            }
+            return {
+                ...f,
+                id: newId,
+            }
+        }),
+        montages: before.montages.map(m => ({
+            ...m,
+            frames: m.frames.map(mf => {
+                if (mf.frameId !== oldId) {
+                    return mf
+                }
+                return {
+                    ...mf,
+                    id: newId,
+                }
+            })
+        }))
+    }))
+}

@@ -51,8 +51,8 @@ export function getByPath<T extends object | readonly unknown[], Path extends Ba
   }
 }
 
-export function updateImmutableObject<T extends object | readonly unknown[], Path extends readonly (string | number)[]>(obj: Immutable<T>, setter: ImmutableSetter<T>, path: Path, value: Drilled<T, Path> | undefined) {
-  setter((before) => makeUpdatedObject(obj, path, value))
+export function updateImmutableObject<T extends object | readonly unknown[], Path extends readonly (string | number)[]>(setter: ImmutableSetter<T>, path: Path, value: Drilled<T, Path> | undefined) {
+  setter((before) => makeUpdatedObject(before, path, value))
 }
 
 export function makeUpdatedObject<T extends unknown, Path extends readonly (string | number)[]>(obj: Immutable<T>, path: Path, value: Drilled<T, Path> | undefined): Immutable<T> {

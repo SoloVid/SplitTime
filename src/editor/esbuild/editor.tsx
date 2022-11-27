@@ -10,8 +10,10 @@ import { useEffect, useState } from "preact/hooks"
 import CollageEditor from "./collage/collage-editor"
 import { exportCollageJson, exportLevel, exportLevelJson, importLevel, updatePageTitle } from "./editor-functions"
 import FileBrowser from "./file-browser"
+import { FileLevel } from "./file-types"
 import { CheckboxInput, NumberInput } from "./input"
 import { Level } from "./level/extended-level-format"
+import LevelEditor from "./level/level-editor"
 import { ServerLiaison } from "./server-liaison"
 import { Followable, GlobalEditorShared } from "./shared-types"
 
@@ -118,7 +120,7 @@ export default function Editor({ server }: EditorProps) {
   })
   const [ctrlDown, setCtrlDown] = useState(false)
   const [collage, setCollage] = useState<Immutable<FileCollage> | null>(null)
-  const [level, setLevel] = useState<Level | null>(null)
+  const [level, setLevel] = useState<FileLevel | null>(null)
   const [triggerSettings, setTriggerSettings] = useState<{ f: () => void }>({ f: () => {} })
 
   const globalEditorStuff: GlobalEditorShared = {
@@ -165,7 +167,19 @@ export default function Editor({ server }: EditorProps) {
       }
     }
 
-    setLevel(new Level())
+    setLevel({
+      type: "action",
+      region: "",
+      width: 640,
+      height: 480,
+      background: "",
+      backgroundOffsetX: 0,
+      backgroundOffsetY: 0,
+      groups: [],
+      traces: [],
+      props: [],
+      positions: [],
+    })
     updatePageTitle("level untitled")
   }
 
@@ -307,7 +321,7 @@ export default function Editor({ server }: EditorProps) {
         debug("No level to export")
       } else {
         debug("export of level JSON:")
-        debug(exportLevel(level))
+        debug(level)
       }
     }
   }
@@ -441,16 +455,14 @@ export default function Editor({ server }: EditorProps) {
     {!!collage && <CollageEditor
       editorGlobalStuff={globalEditorStuff}
       collage={collage}
-      style="flex-grow: 1; overflow: hidden;"
       setCollage={setCollage}
-    />}
-    {/* { !!level && <level-editor
-      v-if="level"
-      :editor-inputs="inputs"
-      :editor-global-stuff="globalEditorStuff"
-      :supervisor-control="supervisorControl"
-      :level="level"
       style="flex-grow: 1; overflow: hidden;"
-    ></level-editor>} */}
+    />}
+    { !!level && <LevelEditor
+      editorGlobalStuff={globalEditorStuff}
+      level={level}
+      setLevel={setLevel}
+      style="flex-grow: 1; overflow: hidden;"
+    />}
   </div>
 }

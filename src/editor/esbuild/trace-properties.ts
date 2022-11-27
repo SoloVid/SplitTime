@@ -58,3 +58,38 @@ export function getTracePropertiesStuff(trace: Trace, deleteCallback: () => void
         doDelete: deleteCallback
     }
 }
+
+export function getTracePropertiesFields(trace: Trace): { readonly [K in keyof SimplifiedTrace]?: FieldOptions } {
+    let fields: TraceFieldOptions = {
+        id: {},
+        group: {},
+        type: {
+            readonly: true
+        },
+        vertices: {},
+        z: {},
+        height: {}
+    }
+
+    switch(trace.type) {
+        case TraceType.STAIRS:
+            fields.direction = {}
+            break
+        case TraceType.EVENT:
+            fields.event = {}
+            break
+        case TraceType.POINTER:
+        case TraceType.TRANSPORT:
+            fields.level = {}
+            fields.offsetX = {}
+            fields.offsetY = {}
+            fields.offsetZ = {}
+            break
+        case TraceType.SEND:
+            fields.level = {}
+            fields.targetPosition = {}
+            break
+        }
+
+    return fields
+}

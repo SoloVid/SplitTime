@@ -1,4 +1,4 @@
-import { SharedStuff } from "./collage-editor-shared"
+import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { Montage as FileMontage } from "engine/file/collage"
 import { getPlaceholderImage } from "../editor-functions"
 import { useMemo } from "preact/hooks"
@@ -9,8 +9,7 @@ import MontageFrame from "./montage-frame"
 
 type MontageProps = {
   collageEditHelper: SharedStuff | undefined
-  // TODO: Tailor view interface.
-  collageViewHelper: SharedStuff
+  collageViewHelper: SharedStuffViewOnly
   montageIndex: number
   montage: FileMontage
 }

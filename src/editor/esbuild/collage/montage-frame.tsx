@@ -1,4 +1,4 @@
-import { SharedStuff } from "./collage-editor-shared"
+import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { Montage as FileMontage, MontageFrame as FileMontageFrame } from "engine/file/collage"
 import { useMemo, useRef } from "preact/hooks"
 import { Rect } from "engine/math/rect"
@@ -9,11 +9,11 @@ import { Type as TraceType } from "engine/world/level/trace/trace-misc"
 import { assert } from "globals"
 import { Immutable } from "engine/utils/immutable"
 import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
+import RenderedMontageTrace from "./rendered-montage-trace"
 
 type MontageFrameProps = {
   collageEditHelper: SharedStuff | undefined
-  // TODO: Tailor view interface.
-  collageViewHelper: SharedStuff
+  collageViewHelper: SharedStuffViewOnly
   editAffectsAllFrames: boolean
   highlight: boolean
   montageIndex: number
@@ -219,7 +219,7 @@ export default function MontageFrame(props: MontageFrameProps) {
     const gridCell = { x: 1, y: 1 }
     const snappedX = Math.round(x / gridCell.x) * gridCell.x
     const snappedY = Math.round(y / gridCell.y) * gridCell.y
-    var literalPoint = "(" +
+    const literalPoint = "(" +
       Math.floor(snappedX) + ", " +
       Math.floor(snappedY) + ")"
     const traceInProgress = helper.traceInProgress
@@ -231,10 +231,11 @@ export default function MontageFrame(props: MontageFrameProps) {
       }
     } else if(isRightClick) {
       if(!traceInProgress) {
-        var trace = addNewTrace(montage, traceType)
+        const trace = addNewTrace(montage, traceType)
+        const newTraceIndex = montage.traces.length
         trace.vertices = literalPoint
         helper.setTraceInProgress(trace)
-        helper.editProperties(getTracePropertiesStuff(montage, trace))
+        helper.setPropertiesPath(["montages", montageIndex, "traces", newTraceIndex])
         markEventAsPropertiesSet(event)
       } else {
         if(!inputs.ctrlDown) {
@@ -260,17 +261,19 @@ export default function MontageFrame(props: MontageFrameProps) {
       />
     </div>
     {collageEditHelper && <svg style={svgStyle}>
-      {/* <template v-for="trace in montage.traces">
-        <rendered-montage-trace
-          :collage-edit-helper="collageEditHelper"
-          :collage-view-helper="collageViewHelper"
-          :montage="montage"
-          :montage-frame="montageFrame"
-          :metadata="{}"
-          :trace="trace"
-          :transform="svgTransform"
-        ></rendered-montage-trace>
-      </template> */}
+      {montage.traces.map((trace, i) => (
+        <RenderedMontageTrace
+          collageEditHelper={collageEditHelper}
+          collageViewHelper={collageViewHelper}
+          montageIndex={montageIndex}
+          montage={montage}
+          montageFrame={montageFrame}
+          // metadata={{}}
+          traceIndex={i}
+          trace={trace}
+          transform={svgTransform}
+        />
+      ))}
       {/* Base */}
       <rect
         transform={svgTransform}

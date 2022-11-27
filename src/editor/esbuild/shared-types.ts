@@ -2,6 +2,7 @@ import { assert, Coordinates2D } from "api"
 import { Vector2D } from "api/math"
 import { game_seconds } from "engine/time/timeline"
 import { generateUID } from "engine/utils/misc"
+import { useState } from "preact/hooks"
 import { getCoords } from "./editor-functions"
 import { ServerLiaison } from "./server-liaison"
 
@@ -60,10 +61,10 @@ export interface EditorSupervisorControl {
 }
 
 export class EditorMetadata {
-    displayed: boolean = true
-    editorId: string = generateUID()
-    highlighted: boolean = false
-    locked: boolean = false
+    readonly displayed: boolean = true
+    readonly editorId: string = generateUID()
+    readonly highlighted: boolean = false
+    readonly locked: boolean = false
 }
 
 export function withMetadata<TypeString, T>(type: TypeString, obj: T): ObjectWithEditorMetadata<TypeString, T> {
@@ -76,4 +77,14 @@ export class ObjectWithEditorMetadata<TypeString, T> {
         public obj: T,
         public metadata: EditorMetadata = new EditorMetadata()
     ) {}
+}
+
+export function useObjectWithEditorMetadata<TypeString, T>(type: TypeString, obj: T) {
+    const [metadata, setMetadata] = useState(new EditorMetadata())
+    return {
+        type,
+        obj,
+        metadata,
+        setMetadata,
+    }
 }

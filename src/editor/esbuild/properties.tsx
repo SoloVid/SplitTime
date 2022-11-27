@@ -13,7 +13,6 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
   const { editorGlobalStuff, spec } = props
   function updateField(fieldKey: string, newValue: string | number, oldValue: string | number) {
     updateImmutableObject(
-      spec.topLevelThing,
       spec.setTopLevelThing,
       [...spec.pathToImportantThing, fieldKey],
       // TODO: More type safety?
@@ -29,8 +28,9 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
     if (!window.confirm("Are you sure you want to delete this?")) {
       return
     }
-    updateImmutableObject(spec.topLevelThing, spec.setTopLevelThing, spec.pathToImportantThing, undefined)
-    spec.onDelete()
+    updateImmutableObject(spec.setTopLevelThing, spec.pathToImportantThing, undefined)
+    // TODO: More type safety?
+    spec.onDelete(getByPath(spec.topLevelThing, spec.pathToImportantThing) as any)
   }
 
   // TODO: More type safety?
@@ -44,7 +44,7 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
       value: getByPath(spec.topLevelThing, [...spec.pathToImportantThing, key]) as string | number,
     }))
 
-  return <div class="object-properties">
+  return <div className="object-properties">
     <div><strong>{ spec.title }</strong></div>
     {listForRender.map((p) => (
     <SingleProperty
@@ -56,7 +56,7 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
       setField={(newValue) => updateField(p.key, newValue, p.value)}
     />
     ))}
-    {/* <a v-if="!!spec.doDelete" class="btn" @click="doDelete">Delete</a> */}
+    {spec.allowDelete && <a className="btn" onClick={doDelete}>Delete</a>}
   </div>
 }
 

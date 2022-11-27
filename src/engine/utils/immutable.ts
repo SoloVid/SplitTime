@@ -2,6 +2,7 @@
 // and https://github.com/Microsoft/TypeScript/issues/13923#issuecomment-716706151
 
 export type Immutable<T> =
+  // T extends Immutable<infer U> ? T :
   T extends ImmutablePrimitive ? T :
   T extends Map<infer K, infer V> ? ImmutableMap<K, V> :
   T extends Set<infer M> ? ImmutableSet<M> : ImmutableObject<T>; 

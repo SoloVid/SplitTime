@@ -2,6 +2,7 @@ import { EditorTsApi } from "editor/server/api/editor-ts-api"
 import { WithProject } from "editor/server/api-wrappings"
 import { Cache, UnderlyingCacheObject } from "./cache"
 import { ImmutableSetter } from "./preact-help"
+import { Immutable } from "engine/utils/immutable"
 
 export class ServerLiaison {
     api = new EditorTsApi()
@@ -10,7 +11,7 @@ export class ServerLiaison {
 
     constructor(
         public projectId: string,
-        cacheObject: UnderlyingCacheObject<string>,
+        cacheObject: Immutable<UnderlyingCacheObject<string>>,
         setCacheObject: ImmutableSetter<UnderlyingCacheObject<string>>,
     ) {
         this.imageSrcCache = new Cache(

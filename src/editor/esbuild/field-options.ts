@@ -16,7 +16,7 @@ export interface ObjectProperties<T extends unknown, Path extends readonly (stri
   readonly fields: { readonly [K in keyof Drilled<T, Path>]: FieldOptions }
   readonly allowDelete: boolean
   readonly setTopLevelThing: ImmutableSetter<T>
-  readonly onDelete: () => void
+  readonly onDelete: (thing: Drilled<T, Path>) => void
   readonly onUpdate: <K extends keyof Drilled<T, Path>>(field: K, newValue: Drilled<T, Path>[K], oldValue: Drilled<T, Path>[K]) => void
 }
 

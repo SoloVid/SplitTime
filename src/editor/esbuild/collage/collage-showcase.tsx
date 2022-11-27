@@ -1,15 +1,14 @@
 import { assert } from "globals"
 import { useMemo } from "preact/hooks"
 import { makeStyleString } from "../preact-help"
-import { ReadonlySharedStuff, SharedStuff } from "./collage-editor-shared"
+import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { CollageHelper } from "./collage-helper"
 import Montage from "./montage"
 
 type CollageShowcaseProps = {
-  style: string
-  collageEditHelper: SharedStuff | undefined
-  // TODO: Tailor view interface.
-  collageViewHelper: SharedStuff
+  style?: string
+  collageEditHelper?: SharedStuff | undefined
+  collageViewHelper: SharedStuffViewOnly
 }
 
 export default function CollageShowcase(props: CollageShowcaseProps) {
@@ -51,7 +50,7 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
     collageEditHelper.selectMontage(newMontageIndex, true)
   }
 
-  return <div style={`${gridStyle};${props.style}`}>
+  return <div style={`${gridStyle};${props.style ?? ""}`}>
     {collage.montages.map((m, i) => (
       <Montage
         collageEditHelper={collageEditHelper}
