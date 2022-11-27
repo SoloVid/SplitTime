@@ -35,10 +35,10 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     levelEditorShared.editorState,
     levelEditorShared.setEditorState
   )
-  // TODO: This sorting stuff seems to hang the app rn. Fix this.
-  // const bodyManager = useEntityBodyManager(level, levelEditorShared.collageManager)
-  // const allEntitiesSorted = useSortedEntities(allEntities, bodyManager)
-  const allEntitiesSorted = allEntities
+  const bodyManager = useEntityBodyManager(level, levelEditorShared.collageManager)
+  const allEntitiesSorted = useSortedEntities(allEntities, bodyManager)
+  // This is the workaround if the sorting hangs up the UI too much.
+  // const allEntitiesSorted = allEntities
 
   const backgroundStyle = useMemo(() => {
     const leftPadding = EDITOR_PADDING + level.backgroundOffsetX

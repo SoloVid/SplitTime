@@ -1,16 +1,17 @@
 import { Immutable } from "engine/utils/immutable"
 import { BodyRenderingGraph } from "engine/world/body/body-rendering-graph"
-import { useMemo } from "preact/hooks"
+import { useMemo, useState } from "preact/hooks"
 import { EditorEntity, EntityBodyManager } from "./entity-body-manager"
 
 export function useSortedEntities(
   entities: readonly Immutable<EditorEntity>[],
   bodyManager: EntityBodyManager,
 ) {
+  const [graph] = useState(new BodyRenderingGraph())
   return useMemo(() => {
     // We instantiate these in here rather than as class members
     // because it prevents Vue from tracking all of the internals (extra overhead)
-    const graph = new BodyRenderingGraph()
+    // const graph = new BodyRenderingGraph()
     const bodyRefToEntity: { [bodyRef: number]: EditorEntity } = {}
     graph.notifyNewFrame()
     for (const entity of entities) {

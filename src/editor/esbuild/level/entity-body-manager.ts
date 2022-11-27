@@ -46,18 +46,17 @@ export function useEntityBodyManager(
       }
     }
   })
-  const [editorIdToBody, setEditorIdToBody] = useState<Immutable<{ [editorId: string]: GraphBody }>>({})
+
+  // In the Vue implementation, I had some sort of caching implementation.
+  // When I tried to translate it (commented out code in this file),
+  // it hung up the UI, so I've removed it for now.
+  // const [editorIdToBody, setEditorIdToBody] = useState<Immutable<{ [editorId: string]: GraphBody }>>({})
 
   return {
     getUpdatedBody(editorEntity: EditorEntity): Immutable<GraphBody> | null {
       const editorId = editorEntity.metadata.editorId
-      const body = {...(editorIdToBody[editorId] ?? new Body())}
-      if (!(editorId in editorIdToBody)) {
-        setEditorIdToBody({
-          ...editorIdToBody,
-          [editorId]: body,
-        })
-      }
+      const body = new Body()
+      // const body = {...(editorIdToBody[editorId] ?? new Body())}
       try {
         if (editorEntity.type === "trace") {
           if (!applyTrace(body, editorEntity.obj)) {
@@ -82,10 +81,10 @@ export function useEntityBodyManager(
         }
         return body
       } finally {
-        setEditorIdToBody({
-          ...editorIdToBody,
-          [editorId]: body,
-        })
+        // setEditorIdToBody({
+        //   ...editorIdToBody,
+        //   [editorId]: body,
+        // })
       }
     }
   }
