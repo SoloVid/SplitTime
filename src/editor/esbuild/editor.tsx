@@ -226,18 +226,20 @@ export default function Editor({ server }: EditorProps) {
   }
 
   function handleMouseMove(event: MouseEvent): void {
-    const newX = event.pageX
-    const newY = event.pageY
-    const oldX = mouse.x
-    const oldY = mouse.y
-    setMouse({
-      ...mouse,
-      x: newX,
-      y: newY,
+    setMouse((before) => {
+      const newX = Math.round(event.pageX)
+      const newY = Math.round(event.pageY)
+      const oldX = before.x
+      const oldY = before.y
+      const dx = newX - oldX
+      const dy = newY - oldY
+      moveFollowers(dx, dy, false)
+      return {
+        ...before,
+        x: newX,
+        y: newY,
+      }
     })
-    const dx = newX - oldX
-    const dy = newY - oldY
-    moveFollowers(dx, dy, false)
     // TODO: prevent default?
   }
 
