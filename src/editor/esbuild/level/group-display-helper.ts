@@ -1,24 +1,6 @@
 import { checkGroupMatch, inGroup } from "../editor-functions"
 import { EditorGroupEntity, EditorLevel, EditorPositionEntity, EditorPropEntity, EditorTraceEntity } from "./extended-level-format"
 
-// export function useGroupDisplayHelper(
-//   level: FileLevel,
-//   group: FileGroup | undefined
-// ) {
-//   const groupId = group?.id || ""
-
-//   const subGroups = useMemo(() => {
-//     return level.groups.filter(group => checkGroupMatch(level, groupId, group.parent))
-//   }, [level, groupId])
-//   const traces = useMemo(() => {
-//     return level.traces.filter(trace => inGroup(level, groupId, trace))
-//   }, [level, groupId])
-//   const props = useMemo(() => {
-//     return level.props.filter(prop => inGroup(level, groupId, prop))
-//   }, [level, groupId])
-//   const positions = useMemo(() => {
-//     return level.positions.filter(pos => inGroup(level, groupId, pos))
-//   }, [level, group])
 export class GroupDisplayHelper {
   private readonly memoized = makeMemoPad()
 

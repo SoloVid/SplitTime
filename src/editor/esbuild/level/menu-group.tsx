@@ -1,7 +1,5 @@
 import { debug } from "engine/utils/logger"
-import { useMemo, useState } from "preact/hooks"
-import { checkGroupMatch, inGroup } from "../editor-functions"
-import { FileGroup } from "../file-types"
+import { useState } from "preact/hooks"
 import { CheckboxInput } from "../input"
 import { makeClassNames, onlyLeft, preventDefault } from "../preact-help"
 import { EditorEntity, EditorGroupEntity, EditorPositionEntity, EditorPropEntity, EditorTraceEntity } from "./extended-level-format"
@@ -21,62 +19,16 @@ export default function MenuGroup({
 }: MenuGroupProps) {
   const level = levelEditorShared.level
 
-  // interface VueMenuGroup {
-  //   // props
-  //   levelEditorShared: LevelEditorShared
-  //   level: Level
-  //   group: Group | undefined
-  //   // data
-  //   collapsed: boolean
-  //   displayHelper: GroupDisplayHelper
-  //   // computed
-  //   groupId: string
-  //   subGroups: Group[]
-  //   traces: Trace[]
-  //   props: Prop[]
-  //   positions: Position[]
-  //   allDisplayed: boolean
-  //   // methods
-  //   edit(): void
-  //   editTrace(trace: Trace): void
-  //   editProp(prop: Prop): void
-  //   editPosition(position: Position): void
-  //   toggleAllDisplayed(): void
-  // }
-
   const [collapsed, setCollapsed] = useState(true)
   const displayHelper = new GroupDisplayHelper(
     level,
     group
   )
 
-  // const groupId = group === undefined ? "" : group.obj.id
-
   const subGroups = displayHelper.subGroups
   const traces = displayHelper.traces
   const props = displayHelper.props
   const positions = displayHelper.positions
-
-  // const subGroups = useMemo(
-  //   () => level.groups.filter(group => checkGroupMatch(level, groupId, group.obj.parent)),
-  //   [level, groupId]
-  // )
-  // const traces = useMemo(
-  //   () => level.traces.filter(trace => inGroup(level, groupId, trace.obj)),
-  //   [group, groupId]
-  // )
-  // const props = useMemo(
-  //   () => level.props.filter(prop => inGroup(level, groupId, prop.obj)),
-  //   []
-  // )
-  // const positions = useMemo(
-  //   () => level.positions.filter(pos => inGroup(level, groupId, pos.obj)),
-  //   []
-  // )
-  // const allDisplayed = useMemo(
-  //   () => this.allSubGroupsDisplayed && this.allTracesDisplayed && this.allPropsDisplayed && this.allPositionsDisplayed,
-  //   []
-  // )
 
   function edit(): void {
     levelEditorShared.setActiveGroup(group ?? null)
@@ -178,49 +130,6 @@ export default function MenuGroup({
         editEntity: editPosition,
         titlePrefix: "Position",
       }))}
-      {/* <div className="trace"
-        onMouseEnter={() => trace.setMetadata(before => ({...before, highlighted: true}))}
-        onMouseLeave={() => trace.setMetadata(before => ({...before, highlighted: false}))}
-      >
-        <i className={`fas fa-${TRACE_ICON}`}></i>
-        <CheckboxInput
-          value={trace.metadata.displayed}
-          onChange={(newValue) => trace.metadata.displayed = newValue}
-        />
-        <span onClick={onlyLeft(() => editTrace(trace))} className="pointer">
-          <span>{trace.obj.id || `Trace ${traceIndex}`}</span>
-        </span>
-      </div> */}
-      {/* {props.map((prop, propIndex) => (
-        <div className="prop"
-          onMouseEnter={() => prop.metadata.highlighted = true}
-          onMouseLeave={() => prop.metadata.highlighted = false}
-        >
-          <i className={`fas fa-${PROP_ICON}`}></i>
-          <CheckboxInput
-            value={prop.metadata.displayed}
-            onChange={(newValue) => prop.metadata.displayed = newValue}
-          />
-          <span onClick={onlyLeft(() => editProp(prop))} className="pointer">
-            <span>{prop.obj.id || `Prop ${propIndex}`}</span>
-          </span>
-        </div>
-      ))} */}
-      {/* {positions.map((position, positionIndex) => (
-        <div className="position"
-          onMouseEnter={() => position.metadata.highlighted = true}
-          onMouseLeave={() => position.metadata.highlighted = false}
-        >
-          <i className={`fas fa-${POSITION_ICON}`}></i>
-          <CheckboxInput
-            value={position.metadata.displayed}
-            onChange={(newValue) => position.metadata.displayed = newValue}
-          />
-          <span onClick={onlyLeft(() => editPosition(position))} className="pointer">
-            <span>{position.obj.id || `Position ${positionIndex}`}</span>
-          </span>
-        </div>
-      ))} */}
     </div>}
   </div>
 }

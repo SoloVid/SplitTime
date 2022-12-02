@@ -19,7 +19,7 @@ interface TraceFieldOptions {
 }
 type SimplifiedTrace = { [K in keyof Required<TraceFieldOptions>]: string | number }
 
-export function getTracePropertiesStuff(trace: Trace, deleteCallback: () => void): ObjectProperties<SimplifiedTrace> {
+export function getTracePropertiesStuff(trace: Trace, deleteCallback: () => void) {
     let fields: TraceFieldOptions = {
         id: {},
         group: {},

@@ -9,14 +9,6 @@ type LevelTreeProps = {
 }
 
 export default function LevelTree(props: LevelTreeProps) {
-  // interface VueLevelTree extends client.VueComponent {
-  //   // props
-  //   levelEditorShared: LevelEditorShared
-  //   // computed
-  //   level: Level
-  //   // methods
-  //   createGroup(): void
-  // }
   const {
     levelEditorShared,
   } = props

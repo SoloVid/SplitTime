@@ -27,12 +27,10 @@ export type EditorLevel = {
 type TemplateEditorEntity<Type extends string, ObjectType> = {
   type: Type
   keyInLevel: `${Type}s`
-  // index: number
   obj: Immutable<ObjectType>
   setObj: ImmutableSetter<ObjectType>
   metadata: Immutable<EditorMetadata>
   setMetadata: ImmutableSetter<EditorMetadata>
-  // deleteFromLevel: () => void
 }
 
 export type EditorGroupEntity = TemplateEditorEntity<"group", FileGroup>

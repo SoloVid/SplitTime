@@ -71,15 +71,15 @@ export function safeGetColor(trace: FileTrace, metadata: EditorMetadata) {
 
 export const DEFAULT_GROUP_HEIGHT = 64
 
-export function getLevelPageTitle(filePath: string, level: Level): string {
+export function getLevelPageTitle(filePath: string, region?: string): string {
     let title = filePath ? filePath : "untitled"
-    if (level.region) {
-        title += " (" + level.region + ")"
+    if (region) {
+        title += " (" + region + ")"
     }
     return title
 }
 
-export function exportLevel(levelObject: Level): FileData {
+export function exportLevel(levelObject: EditorLevel): FileData {
     return {
         type: "action",
         region: levelObject.region,

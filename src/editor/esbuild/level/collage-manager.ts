@@ -9,7 +9,7 @@ import { ImmutableSetter } from "../preact-help"
 import { useState } from "preact/hooks"
 
 export function useCollageManager(server: ServerLiaison) {
-  const [cacheObject, setCacheObject] = useState<UnderlyingCacheObject<CollageInfo>>({})
+  const [cacheObject, setCacheObject] = useState<Immutable<UnderlyingCacheObject<CollageInfo>>>({})
   const collageManager = new CollageManager(server, cacheObject, setCacheObject)
   return collageManager
 }

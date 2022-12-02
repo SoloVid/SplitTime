@@ -7,7 +7,6 @@ import GridLines from "../grid-lines"
 import { makeStyleString, preventDefault } from "../preact-help"
 import { UserInputs } from "../shared-types"
 import { useEntityBodyManager } from "./entity-body-manager"
-import { useEntities } from "./entity-mapper"
 import { useSortedEntities } from "./entity-sort-helper"
 import { SharedStuff } from "./level-editor-shared"
 import RenderedLevelTrace from "./rendered-level-trace"
@@ -29,12 +28,6 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
 
   const $el = useRef<HTMLDivElement>(null)
 
-  // const allEntities = useEntities(
-  //   level,
-  //   levelEditorShared.setLevel,
-  //   levelEditorShared.editorState,
-  //   levelEditorShared.setEditorState
-  // )
   const allEntities = [...level.props, ...level.positions, ...level.traces]
   const bodyManager = useEntityBodyManager(level, levelEditorShared.collageManager)
   const allEntitiesSorted = useSortedEntities(allEntities, bodyManager)
@@ -264,12 +257,6 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         <RenderedProposition
           levelEditorShared={levelEditorShared}
           entity={entity}
-          // entityType={entity.type}
-          // entityIndex={entity.index}
-          // p={entity.obj}
-          // setP={entity.setObj}
-          // metadata={entity.metadata}
-          // setMetadata={entity.setMetadata}
         />
       </div>}
       {entity.type === "trace" && <svg
@@ -279,11 +266,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         <RenderedLevelTrace
           transform={traceTransform}
           levelEditorShared={levelEditorShared}
-          // metadata={entity.metadata}
-          // setMetadata={entity.setMetadata}
-          // traceIndex={entity.index}
           trace={entity}
-          // setTrace={entity.setObj}
         />
       </svg>}
     </div>

@@ -58,7 +58,6 @@ type SimplifiedPosition = { [K in keyof Required<typeof positionFields>]: string
 export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: ImmutableSetter<EditorLevel>, path: BasePath, clearProperties: () => void): GenericObjectProperties {
   const baseOnDelete = () => {
     clearProperties()
-    // updateImmutableObject(setLevelEditorState, path, undefined)
   }
   const baseProperties: Partial<GenericObjectProperties> = {
     topLevelThing: level,

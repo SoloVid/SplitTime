@@ -3,17 +3,14 @@ import { generateUID } from "engine/utils/misc"
 import { Coordinates2D, instanceOfCoordinates2D } from "engine/world/level/level-location"
 import { useMemo, useState } from "preact/hooks"
 import { inGroup, safeExtractTraceArray } from "../editor-functions"
-import { FileTrace } from "../file-types"
 import { GridSnapMover } from "../grid-snap-mover"
-import { ImmutableSetter, makeImmutableObjectSetterUpdater } from "../preact-help"
+import { makeImmutableObjectSetterUpdater } from "../preact-help"
 import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
-import { EditorMetadata } from "../shared-types"
 import { EditorTraceEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
 
 type RenderedLevelTraceProps = {
   levelEditorShared: SharedStuff
-  // traceIndex: number
   trace: Immutable<EditorTraceEntity>
   transform?: string
 }
@@ -21,11 +18,7 @@ type RenderedLevelTraceProps = {
 export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   const {
     levelEditorShared,
-    // metadata,
-    // setMetadata,
-    // traceIndex,
     trace,
-    // setTrace,
   } = props
 
   const level = levelEditorShared.level

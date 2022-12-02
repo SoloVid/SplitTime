@@ -7,21 +7,13 @@ import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useMemo } from "preact/hooks"
 import { createSnapMontageMover, getPlaceholderImage, inGroup, PLACEHOLDER_WIDTH } from "../editor-functions"
-import { FilePosition, FileProp } from "../file-types"
-import { ImmutableSetter, makeImmutableObjectSetterUpdater, onlyLeft, preventDefault } from "../preact-help"
-import { EditorMetadata } from "../shared-types"
+import { makeImmutableObjectSetterUpdater, onlyLeft, preventDefault } from "../preact-help"
 import { EditorPositionEntity, EditorPropEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
 
 type RenderedPropositionProps = {
   readonly levelEditorShared: SharedStuff
   readonly entity: Immutable<EditorPropEntity> | Immutable<EditorPositionEntity>
-  // readonly p: Immutable<FileProp | FilePosition>
-  // readonly setP: ImmutableSetter<FileProp | FilePosition>
-  // readonly entityType: "prop" | "position"
-  // readonly entityIndex: number
-  // readonly metadata: Immutable<EditorMetadata>
-  // readonly setMetadata: ImmutableSetter<EditorMetadata>
 }
 
 const NOT_READY = "NOT_READY"
@@ -32,11 +24,6 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   const {
     levelEditorShared,
     entity,
-    // setP,
-    // entityType,
-    // entityIndex,
-    // metadata,
-    // setMetadata,
   } = props
   const p = entity.obj
   const metadata = entity.metadata
@@ -147,11 +134,6 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
       }
     })
     levelEditorShared.setPropertiesPanel(entity)
-    // if (entityType === "prop") {
-    //   levelEditorShared.setPropertiesPath(["props", entityIndex])
-    // } else {
-    //   levelEditorShared.setPropertiesPath(["positions", entityIndex])
-    // }
   }
 
   return <>{metadata.displayed && <div
