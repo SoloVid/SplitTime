@@ -1,10 +1,11 @@
 import { Immutable } from "engine/utils/immutable"
 import { BodyRenderingGraph } from "engine/world/body/body-rendering-graph"
 import { useMemo, useState } from "preact/hooks"
-import { EditorEntity, EntityBodyManager } from "./entity-body-manager"
+import { EntityBodyManager } from "./entity-body-manager"
+import { EditorEntity, GraphicalEditorEntity } from "./extended-level-format"
 
 export function useSortedEntities(
-  entities: readonly Immutable<EditorEntity>[],
+  entities: readonly Immutable<GraphicalEditorEntity>[],
   bodyManager: EntityBodyManager,
 ) {
   const [graph] = useState(new BodyRenderingGraph())

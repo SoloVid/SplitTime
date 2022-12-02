@@ -1,40 +1,23 @@
-import { Body } from "engine/world/body/body"
 import { getDefaultTopLeft } from "engine/graphics/frame"
 import { Montage } from "engine/graphics/montage"
 import { calculateTotalArea, Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
-import { GraphBody, GraphDrawable } from "engine/world/body/body-rendering-graph"
+import { Body } from "engine/world/body/body"
+import { GraphBody } from "engine/world/body/body-rendering-graph"
 import { CanvasRequirements } from "engine/world/body/render/drawable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useState } from "preact/hooks"
 import { defaultBodySpec } from "../collage/collage-helper"
 import { PLACEHOLDER_WIDTH, safeExtractTraceArray } from "../editor-functions"
 import { FileLevel, FilePosition, FileProp, FileTrace } from "../file-types"
-import { ImmutableSetter } from "../preact-help"
-import { EditorMetadata } from "../shared-types"
 import { CollageManager } from "./collage-manager"
-import { Level, Position, Prop, Trace } from "./extended-level-format"
-
-type TemplateEditorEntity<Type, ObjectType> = {
-  type: Type
-  index: number
-  obj: Immutable<ObjectType>
-  setObj: ImmutableSetter<ObjectType>
-  metadata: Immutable<EditorMetadata>
-  setMetadata: ImmutableSetter<EditorMetadata>
-}
-
-type EditorPositionEntity = TemplateEditorEntity<"position", FilePosition>
-type EditorPropEntity = TemplateEditorEntity<"prop", FileProp>
-type EditorTraceEntity = TemplateEditorEntity<"trace", FileTrace>
-
-export type EditorEntity = EditorPositionEntity | EditorPropEntity | EditorTraceEntity
+import { EditorLevel, GraphicalEditorEntity } from "./extended-level-format"
 
 // From https://stackoverflow.com/a/43001581/4639640
 type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
 export function useEntityBodyManager(
-  level: Immutable<FileLevel>,
+  level: EditorLevel,
   collageManager: CollageManager,
 ) {
   const [placeholderDrawable] = useState(() => {
@@ -53,7 +36,7 @@ export function useEntityBodyManager(
   // const [editorIdToBody, setEditorIdToBody] = useState<Immutable<{ [editorId: string]: GraphBody }>>({})
 
   return {
-    getUpdatedBody(editorEntity: EditorEntity): Immutable<GraphBody> | null {
+    getUpdatedBody(editorEntity: Immutable<GraphicalEditorEntity>): Immutable<GraphBody> | null {
       const editorId = editorEntity.metadata.editorId
       const body = new Body()
       // const body = {...(editorIdToBody[editorId] ?? new Body())}

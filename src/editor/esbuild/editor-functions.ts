@@ -1,6 +1,5 @@
 import { Coordinates2D, int } from "api"
 import { FileData, IsJsonable, json, Position as FilePosition, Prop as FileProp, Trace as FileTrace } from "api/file"
-import { Vector2D } from "api/math"
 import { BodySpec } from "engine/file/collage"
 import { Canvas } from "engine/ui/viewport/canvas"
 import { Immutable } from "engine/utils/immutable"
@@ -10,8 +9,8 @@ import { Type as TraceType } from "engine/world/level/trace/trace-misc"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
 import { FileLevel } from "./file-types"
 import { GridSnapMover } from "./grid-snap-mover"
-import { Level, Position, Trace } from "./level/extended-level-format"
-import { EditorMetadata, withMetadata } from "./shared-types"
+import { EditorLevel, EditorPositionEntity } from "./level/extended-level-format"
+import { EditorMetadata } from "./shared-types"
 import { traceOptions } from "./trace-options"
 
 export function updatePageTitle(title: string) {
@@ -119,10 +118,10 @@ export function importLevel(levelText: string): FileLevel {
     // return levelObject
 }
 
-export function getGroupById(level: FileLevel, groupId: string): FileGroup {
+export function getGroupById(level: Immutable<EditorLevel>, groupId: string): FileGroup {
     for (const group of level.groups) {
-        if (group.id === groupId) {
-            return group
+        if (group.obj.id === groupId) {
+            return group.obj
         }
     }
     return {
@@ -134,17 +133,17 @@ export function getGroupById(level: FileLevel, groupId: string): FileGroup {
 }
 
 type FileThing = FileTrace | FileProp | FilePosition
-export function inGroup(level: FileLevel, group: string, obj: FileThing): boolean {
+export function inGroup(level: EditorLevel, group: string, obj: FileThing): boolean {
     return checkGroupMatch(level, group, obj.group)
 }
-export function checkGroupMatch(level: FileLevel, realGroup: string, testGroup: string): boolean {
+export function checkGroupMatch(level: EditorLevel, realGroup: string, testGroup: string): boolean {
     if (realGroup === "") {
-        return level.groups.every(g => g.id !== testGroup)
+        return level.groups.every(g => g.obj.id !== testGroup)
     }
     return realGroup === testGroup
 }
 
-export function makeNewTrace(levelObject: FileLevel, groupId: string, type: string): FileTrace {
+export function makeNewTrace(levelObject: EditorLevel, groupId: string, type: string): FileTrace {
     const group = getGroupById(levelObject, groupId)
     var z = group.defaultZ
     var height = group.defaultHeight
@@ -160,26 +159,26 @@ export function makeNewTrace(levelObject: FileLevel, groupId: string, type: stri
     })
 }
 
-export function safeExtractTraceArray(levelObject: Immutable<FileLevel>, traceStr: string): (Readonly<Coordinates2D> | null)[] {
+export function safeExtractTraceArray(levelObject: Immutable<EditorLevel>, traceStr: string): (Readonly<Coordinates2D> | null)[] {
     const pointSpecs = interpretPointString(traceStr)
     return convertPositions(pointSpecs, getPositionMap(levelObject))
 }
 
-function getPositionMap(levelObject: Immutable<FileLevel>): { [id: string]: Readonly<Coordinates2D> } {
+function getPositionMap(levelObject: Immutable<EditorLevel>): { [id: string]: Readonly<Coordinates2D> } {
     const positionMap: { [id: string]: Readonly<Coordinates2D> } = {}
     for(const p of levelObject.positions) {
-        positionMap[p.id] = p
+        positionMap[p.obj.id] = p.obj
     }
     return positionMap
 }
 
-export function findClosestPosition(levelObject: FileLevel, x: number, y: number): FilePosition | null {
+export function findClosestPosition(levelObject: Immutable<EditorLevel>, x: number, y: number): EditorPositionEntity | null {
     let closestDistance = Number.MAX_SAFE_INTEGER
-    let closestPosition: FilePosition | null = null
+    let closestPosition: EditorPositionEntity | null = null
 
     levelObject.positions.forEach(pos => {
-        const dx = pos.x - x
-        const dy = pos.y - y
+        const dx = pos.obj.x - x
+        const dy = pos.obj.y - y
         const dist = Math.sqrt((dx * dx) + (dy * dy))
         if(dist < closestDistance) {
             closestDistance = dist

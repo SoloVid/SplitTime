@@ -7,6 +7,7 @@ import Editor from "./editor";
 import { ServerLiaison } from "./server-liaison";
 import SvgPatterns from "./svg-patterns";
 import { exerciseApi } from "./test";
+import TestComponent from "./test-component";
 
 const slug = "edit"
 const url = window.location.href
@@ -29,6 +30,7 @@ export default function EsbuildEditor() {
       server={serverLiaison}
     />
     <SvgPatterns />
+    {/* <TestComponent /> */}
   </>
 }
 

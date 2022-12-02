@@ -66,3 +66,25 @@ export function CheckboxInput(props: InputProps<boolean>) {
     {...otherProps}
   />
 }
+
+type SelectProps<T extends string | number> = {
+  readonly value: T
+  readonly onChange: (newValue: T) => void
+  readonly options: readonly (readonly [value: T, display: string])[]
+} & Omit<HTMLAttributes<HTMLSelectElement>, "onChange" | "value">
+
+export function SelectInput<T extends string | number>(props: SelectProps<T>) {
+  return <select value={props.value} onChange={(e) => {
+    const target = e.target
+    assert(target !== null, "select target should be defined")
+    const newValue = (target as unknown as Record<string, unknown>).value as T
+    props.onChange(newValue)
+  }}>
+    {props.options.map(([value, display]) => (
+      <option value={value}>{display}</option>
+    ))}
+    <option value="A">A</option>
+    <option value="B">B</option>
+    <option value="C">C</option>
+  </select>
+}

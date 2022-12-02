@@ -1,0 +1,4 @@
+
+Seems like the Preact implementation continuously rebuilds like everything (because of the time thing presumably). Can we get it to cache stuff more aggressively?
+
+Why can't the rendered trace update the editor metadata to highlight itself in the UI?

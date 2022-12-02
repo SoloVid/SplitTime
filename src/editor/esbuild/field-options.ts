@@ -13,6 +13,7 @@ export interface ObjectProperties<T extends unknown, Path extends readonly (stri
   readonly title: string,
   readonly topLevelThing: Immutable<T>
   readonly pathToImportantThing: Path
+  readonly pathToDeleteThing?: SubPath<Path> | undefined
   readonly fields: { readonly [K in keyof Drilled<T, Path>]: FieldOptions }
   readonly allowDelete: boolean
   readonly setTopLevelThing: ImmutableSetter<T>
@@ -21,3 +22,7 @@ export interface ObjectProperties<T extends unknown, Path extends readonly (stri
 }
 
 export type GenericObjectProperties = ObjectProperties<Record<string, unknown>, readonly (string | number)[]>
+
+type SubPath<T extends readonly unknown[]> = T extends [...(infer EarlyPathPart), (infer LastPathPart)]
+  ? (T | SubPath<EarlyPathPart>)
+  : []

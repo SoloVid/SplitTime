@@ -455,12 +455,14 @@ export default function Editor({ server }: EditorProps) {
       </div>
     </div>}
     {!!collage && <CollageEditor
+      key={lastServerFile}
       editorGlobalStuff={globalEditorStuff}
       collage={collage}
       setCollage={setCollage}
       style="flex-grow: 1; overflow: hidden;"
     />}
     { !!level && <LevelEditor
+      key={lastServerFile}
       editorGlobalStuff={globalEditorStuff}
       level={level}
       setLevel={setLevel}

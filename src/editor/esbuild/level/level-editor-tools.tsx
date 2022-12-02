@@ -1,17 +1,13 @@
 import { COLLAGE_DIR } from "engine/assets/assets"
-import { Collage, makeCollageFromFile } from "engine/graphics/collage"
-import { game_seconds } from "engine/time/timeline"
-import { assert } from "globals"
+import { makeCollageFromFile } from "engine/graphics/collage"
 import { useState } from "preact/hooks"
 import { SharedStuffViewOnly as CollageSharedStuff } from "../collage/collage-editor-shared"
 import CollageShowcase from "../collage/collage-showcase"
-import { FileCollage, FileMontage } from "../file-types"
 import { makeClassNames, onlyLeft } from "../preact-help"
-import { ServerLiaison } from "../server-liaison"
 import { GlobalEditorShared } from "../shared-types"
 import { traceOptions } from "../trace-options"
 import { SharedStuff } from "./level-editor-shared"
-import { LevelEditorShared, Mode, POSITION_ICON, PROP_ICON, TRACE_ICON } from "./shared-types"
+import { Mode, POSITION_ICON, PROP_ICON, TRACE_ICON } from "./shared-types"
 
 type LevelEditorToolsProps = {
   editorGlobalStuff: GlobalEditorShared

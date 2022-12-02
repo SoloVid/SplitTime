@@ -1,12 +1,14 @@
 import { Immutable } from "engine/utils/immutable"
-import { useEffect, useRef } from "preact/hooks"
+import { useEffect, useRef, useState } from "preact/hooks"
 import { FileLevel } from "../file-types"
 import { ImmutableSetter, onlyLeft } from "../preact-help"
 import PropertiesPane from "../properties"
 import { GlobalEditorShared } from "../shared-types"
+import { useEditorLevel } from "./extended-level-format"
 import { useSharedStuff } from "./level-editor-shared"
 import LevelEditorTools from "./level-editor-tools"
 import LevelGraphicalEditor from "./level-graphical-editor"
+import LevelTree from "./level-tree"
 import { getObjectProperties } from "./properties-stuffs"
 
 type LevelEditorProps = {
@@ -16,17 +18,24 @@ type LevelEditorProps = {
   style: string
 }
 
+export function useStatefulLevelEditor(props: LevelEditorProps) {
+  const [levelEditor] = useState(() => LevelEditor(props))
+  return levelEditor
+}
+
 export default function LevelEditor(props: LevelEditorProps) {
   const {
     editorGlobalStuff,
-    level,
+    level: fileLevel,
     setLevel,
   } = props
 
+  const [editorLevel, setEditorLevel] = useEditorLevel(fileLevel)
+
   const sharedStuff = useSharedStuff({
     globalStuff: editorGlobalStuff,
-    level,
-    setLevel,
+    level: editorLevel,
+    setLevel: setEditorLevel,
   })
 
   const $el = useRef<HTMLDivElement>(null)
@@ -38,7 +47,7 @@ export default function LevelEditor(props: LevelEditorProps) {
 
   useEffect(() => {
     editorGlobalStuff.setOnSettings(() => {
-      sharedStuff.setPropertiesPath([])
+      sharedStuff.setPropertiesPanel(editorLevel)
     })
   }, [])
 
@@ -81,7 +90,7 @@ export default function LevelEditor(props: LevelEditorProps) {
         <hr/>
         {!!sharedStuff.propertiesPath && <PropertiesPane
           editorGlobalStuff={editorGlobalStuff}
-          spec={getObjectProperties(level, setLevel, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))}
+          spec={getObjectProperties(editorLevel, setEditorLevel, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPanel(null))}
         />}
       </div>
       <div
@@ -96,16 +105,16 @@ export default function LevelEditor(props: LevelEditorProps) {
         />
       </div>
 
-      {/* <div
-        class="vertical-resize-bar"
-        @mousedown.left.prevent="trackRightMenuResize"
+      <div
+        className="vertical-resize-bar"
+        onMouseDown={onlyLeft(trackRightMenuResize, true)}
         style="flex-shrink: 0; left: 0;"
       ></div>
-      <div ref={$rightMenu} class="menu" style="flex-shrink: 0; width: 128px; position: relative;">
-        <level-tree
-          :level-editor-shared="sharedStuff"
-        ></level-tree>
-      </div> */}
+      <div ref={$rightMenu} className="menu" style="flex-shrink: 0; width: 128px; position: relative;">
+        <LevelTree
+        levelEditorShared={sharedStuff}
+        />
+      </div>
     </div>
 
     <div id="info-pane" style="padding: 2px;">

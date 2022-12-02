@@ -10,16 +10,18 @@ import { createSnapMontageMover, getPlaceholderImage, inGroup, PLACEHOLDER_WIDTH
 import { FilePosition, FileProp } from "../file-types"
 import { ImmutableSetter, makeImmutableObjectSetterUpdater, onlyLeft, preventDefault } from "../preact-help"
 import { EditorMetadata } from "../shared-types"
+import { EditorPositionEntity, EditorPropEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
 
 type RenderedPropositionProps = {
   readonly levelEditorShared: SharedStuff
-  readonly p: Immutable<FileProp | FilePosition>
-  readonly setP: ImmutableSetter<FileProp | FilePosition>
-  readonly entityType: "prop" | "position"
-  readonly entityIndex: number
-  readonly metadata: Immutable<EditorMetadata>
-  readonly setMetadata: ImmutableSetter<EditorMetadata>
+  readonly entity: Immutable<EditorPropEntity> | Immutable<EditorPositionEntity>
+  // readonly p: Immutable<FileProp | FilePosition>
+  // readonly setP: ImmutableSetter<FileProp | FilePosition>
+  // readonly entityType: "prop" | "position"
+  // readonly entityIndex: number
+  // readonly metadata: Immutable<EditorMetadata>
+  // readonly setMetadata: ImmutableSetter<EditorMetadata>
 }
 
 const NOT_READY = "NOT_READY"
@@ -29,17 +31,19 @@ const NOT_AVAILABLE = "NOT_AVAILABLE"
 export default function RenderedProposition(props: RenderedPropositionProps) {
   const {
     levelEditorShared,
-    p,
-    setP,
-    entityType,
-    entityIndex,
-    metadata,
-    setMetadata,
+    entity,
+    // setP,
+    // entityType,
+    // entityIndex,
+    // metadata,
+    // setMetadata,
   } = props
+  const p = entity.obj
+  const metadata = entity.metadata
   const time = levelEditorShared.globalStuff.time
   const level = levelEditorShared.level
-  const updateP = makeImmutableObjectSetterUpdater(setP)
-  const updateMetadata = makeImmutableObjectSetterUpdater(setMetadata)
+  const updateP = makeImmutableObjectSetterUpdater(entity.setObj)
+  const updateMetadata = makeImmutableObjectSetterUpdater(entity.setMetadata)
 
   const collage = useMemo<Immutable<Collage> | typeof NOT_READY | typeof NOT_AVAILABLE>(() => {
     if (p.collage === "") {
@@ -104,7 +108,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
       top: positionTop + 'px',
       width: frame.box.width + 'px',
       height: frame.box.height + 'px',
-      "pointer-events": inGroup(level, levelEditorShared.activeGroup, p) ? "initial" : "none"
+      "pointer-events": inGroup(level, levelEditorShared.activeGroup?.obj.id ?? "", p) ? "initial" : "none"
     }
   }, [p, metadata, positionLeft, positionTop, frame, level, levelEditorShared.activeGroup])
 
@@ -142,15 +146,16 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
         }))
       }
     })
-    if (entityType === "prop") {
-      levelEditorShared.setPropertiesPath(["props", entityIndex])
-    } else {
-      levelEditorShared.setPropertiesPath(["positions", entityIndex])
-    }
+    levelEditorShared.setPropertiesPanel(entity)
+    // if (entityType === "prop") {
+    //   levelEditorShared.setPropertiesPath(["props", entityIndex])
+    // } else {
+    //   levelEditorShared.setPropertiesPath(["positions", entityIndex])
+    // }
   }
 
   return <>{metadata.displayed && <div
-    className={`draggable ${entityType}`}
+    className={`draggable ${entity.type}`}
     onDblClick={preventDefault}
     onMouseDown={onlyLeft(track)}
     onMouseMove={() => toggleHighlight(true)}

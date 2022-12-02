@@ -8,29 +8,29 @@ import { GridSnapMover } from "../grid-snap-mover"
 import { ImmutableSetter, makeImmutableObjectSetterUpdater } from "../preact-help"
 import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
 import { EditorMetadata } from "../shared-types"
+import { EditorTraceEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
 
 type RenderedLevelTraceProps = {
   levelEditorShared: SharedStuff
-  metadata: Immutable<EditorMetadata>
-  traceIndex: number
-  trace: Immutable<FileTrace>
-  setTrace: ImmutableSetter<FileTrace>
+  // traceIndex: number
+  trace: Immutable<EditorTraceEntity>
   transform?: string
 }
 
 export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   const {
     levelEditorShared,
-    metadata,
-    traceIndex,
+    // metadata,
+    // setMetadata,
+    // traceIndex,
     trace,
-    setTrace,
+    // setTrace,
   } = props
 
   const level = levelEditorShared.level
   const activeGroup = levelEditorShared.activeGroup
-  const updateTrace = makeImmutableObjectSetterUpdater(setTrace)
+  const updateTrace = makeImmutableObjectSetterUpdater(trace.setObj)
 
   const tracker: IRenderedTraceTracker = {
     track: (e, p) => trackInternal(p)
@@ -38,12 +38,12 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   const [uid] = useState(generateUID())
 
   const acceptMouse = useMemo(() => {
-    return inGroup(level, activeGroup, trace)
+    return inGroup(level, activeGroup?.obj.id ?? "", trace.obj)
   }, [level, activeGroup, trace])
 
   const pointsArray = useMemo(() => {
-    return safeExtractTraceArray(level, trace.vertices)
-  }, [level, trace.vertices])
+    return safeExtractTraceArray(level, trace.obj.vertices)
+  }, [level, trace.obj.vertices])
 
   const shouldDragBePrevented = levelEditorShared.shouldDragBePrevented()
 
@@ -51,9 +51,9 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     if(shouldDragBePrevented) {
       return
     }
-    const originalPointString = trace.vertices
+    const originalPointString = trace.obj.vertices
     const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
-    const vertices = safeExtractTraceArray(level, trace.vertices)
+    const vertices = safeExtractTraceArray(level, trace.obj.vertices)
     const originalPoints = point ? [point] : vertices.filter(instanceOfCoordinates2D)
     const snappedMover = new GridSnapMover(levelEditorShared.globalStuff.gridCell, originalPoints)
     const follower = {
@@ -73,16 +73,17 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
       }
     }
     levelEditorShared.follow(follower)
-    levelEditorShared.setPropertiesPath(["traces", traceIndex])
+    levelEditorShared.setPropertiesPanel(trace)
   }
 
   return <RenderedTrace
     acceptMouse={acceptMouse}
-    metadata={metadata}
+    metadata={trace.metadata}
+    setMetadata={trace.setMetadata}
     pointsArray={pointsArray}
     server={levelEditorShared.globalStuff.server}
     shouldDragBePrevented={shouldDragBePrevented}
-    trace={trace}
+    trace={trace.obj}
     tracker={tracker}
     transform={props.transform}
   />

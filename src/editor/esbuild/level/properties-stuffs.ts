@@ -2,12 +2,13 @@ import { IMAGE_DIR } from "engine/assets/assets"
 import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
 import { GenericObjectProperties, ObjectProperties } from "../field-options"
-import { FileLevel, FileTrace } from "../file-types"
+import { FileTrace } from "../file-types"
 import { ImmutableSetter } from "../preact-help"
 import { getTracePropertiesFields } from "../trace-properties"
 import { BasePath, getByPath } from "../utils/immutable-helper"
+import { EditorLevel } from "./extended-level-format"
 import { onGroupIdUpdate } from "./group-wrapper"
-import { onPositionDelete, onPositionIdUpdate, PositionWrapper } from "./position-wrapper"
+import { onPositionDelete, onPositionIdUpdate } from "./position-wrapper"
 
 const levelFieldObject = {
   region: {},
@@ -54,15 +55,17 @@ const positionFields = {
 }
 type SimplifiedPosition = { [K in keyof Required<typeof positionFields>]: string | number }
 
-export function getObjectProperties(level: Immutable<FileLevel>, setLevel: ImmutableSetter<FileLevel>, path: BasePath, clearProperties: () => void): GenericObjectProperties {
+export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: ImmutableSetter<EditorLevel>, path: BasePath, clearProperties: () => void): GenericObjectProperties {
+  const baseOnDelete = () => {
+    clearProperties()
+    // updateImmutableObject(setLevelEditorState, path, undefined)
+  }
   const baseProperties: Partial<GenericObjectProperties> = {
     topLevelThing: level,
     pathToImportantThing: path,
     // TODO: More type safety?
     setTopLevelThing: setLevel as any,
-    onDelete: () => {
-      clearProperties()
-    },
+    onDelete: baseOnDelete,
     onUpdate: () => {
       // Do nothing by default.
     },
@@ -80,12 +83,13 @@ export function getObjectProperties(level: Immutable<FileLevel>, setLevel: Immut
     return properties as any
   }
   if (path[0] === "groups") {
-    assert(path.length == 2, `Unexpected path within groups: ${JSON.stringify(path)}`)
-    const properties: ObjectProperties<FileLevel, ["groups", number]> = {
+    assert(path.length == 3, `Unexpected path within groups: ${JSON.stringify(path)}`)
+    const properties: ObjectProperties<EditorLevel, ["groups", number, "obj"]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Group Properties",
       fields: groupFields,
+      pathToDeleteThing: [path[0], path[1]],
       onUpdate: (field, newValue, oldValue) => {
         if (field === "id") {
           onGroupIdUpdate(setLevel, oldValue as string, newValue as string)
@@ -96,25 +100,27 @@ export function getObjectProperties(level: Immutable<FileLevel>, setLevel: Immut
     return properties as any
   }
   if (path[0] === "props") {
-    assert(path.length == 2, `Unexpected path within props: ${JSON.stringify(path)}`)
-    const properties: ObjectProperties<FileLevel, ["props", number]> = {
+    assert(path.length == 3, `Unexpected path within props: ${JSON.stringify(path)}`)
+    const properties: ObjectProperties<EditorLevel, ["props", number, "obj"]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Prop Properties",
       fields: propFields,
+      pathToDeleteThing: [path[0], path[1]],
     }
     // TODO: More type safety?
     return properties as any
   }
   if (path[0] === "positions") {
-    assert(path.length == 2, `Unexpected path within positions: ${JSON.stringify(path)}`)
-    const properties: ObjectProperties<FileLevel, ["positions", number]> = {
+    assert(path.length == 3, `Unexpected path within positions: ${JSON.stringify(path)}`)
+    const properties: ObjectProperties<EditorLevel, ["positions", number, "obj"]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Position Properties",
       fields: positionFields,
+      pathToDeleteThing: [path[0], path[1]],
       onDelete: (position) => {
-        clearProperties()
+        baseOnDelete()
         onPositionDelete(setLevel, position)
       },
       onUpdate: (field, newValue, oldValue) => {
@@ -127,14 +133,15 @@ export function getObjectProperties(level: Immutable<FileLevel>, setLevel: Immut
     return properties as any
   }
   if (path[0] === "traces") {
-    assert(path.length === 2, `Unexpected path within traces: ${JSON.stringify(path)}`)
+    assert(path.length === 3, `Unexpected path within traces: ${JSON.stringify(path)}`)
     const initialTrace = getByPath(level, path)
     const fieldObject = getTracePropertiesFields(initialTrace as FileTrace)
-    const properties: ObjectProperties<FileLevel, ["traces", number]> = {
+    const properties: ObjectProperties<EditorLevel, ["traces", number, "obj"]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Trace Properties",
       fields: fieldObject,
+      pathToDeleteThing: [path[0], path[1]],
     }
     // TODO: More type safety?
     return properties as any

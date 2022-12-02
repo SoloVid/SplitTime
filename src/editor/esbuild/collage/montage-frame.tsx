@@ -86,8 +86,8 @@ export default function MontageFrame(props: MontageFrameProps) {
       }
     }
     const mouse = {
-      x: editorInputs.mouse.x - position.x,
-      y: editorInputs.mouse.y - position.y,
+      x: Math.round(editorInputs.mouse.x - position.x),
+      y: Math.round(editorInputs.mouse.y - position.y),
       isDown: editorInputs.mouse.isDown
     }
     return {
