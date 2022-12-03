@@ -93,15 +93,14 @@ export class Renderer {
         var screenRightEdge = screen.x + this.camera.SCREEN_WIDTH;
         for (const drawable of body.drawables) {
             const drawArea = drawable.getCanvasRequirements().rect;
-            drawArea.x += body.x;
             //Combine y and z axes to get the "screen y" position,
             // which is the y location on the 2D screen
-            drawArea.y += body.y - body.z;
+            const combinedScreenY = body.y - body.z;
             //If the body is in bounds
-            if (drawArea.y2 >= screen.y &&
-                drawArea.x2 >= screen.x &&
-                drawArea.y <= screenBottom &&
-                drawArea.x <= screenRightEdge) {
+            if (drawArea.y2 + combinedScreenY >= screen.y &&
+                drawArea.x2 + body.x >= screen.x &&
+                drawArea.y + combinedScreenY <= screenBottom &&
+                drawArea.x + body.x <= screenRightEdge) {
                 return true;
             }
         }

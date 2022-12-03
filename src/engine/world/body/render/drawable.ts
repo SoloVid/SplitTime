@@ -28,7 +28,7 @@ export interface Drawable extends TimeNotified {
     getLight(): Light | null;
 }
 export class CanvasRequirements {
-    readonly rect: Rect;
+    readonly rect: Readonly<Rect>;
     readonly isCleared: boolean = false;
     constructor(rect: Rect) {
         this.rect = rect;

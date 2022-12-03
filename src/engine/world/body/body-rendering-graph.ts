@@ -36,14 +36,13 @@ export class BodyRenderingGraph {
         const drawArea = Rect.make(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, 0, 0)
         for (const drawable of body.drawables) {
             const singleDrawArea = drawable.getCanvasRequirements().rect
-            singleDrawArea.x += body.x
             //Combine y and z axes to get the "screen y" position,
             // which is the y location on the 2D screen
-            singleDrawArea.y += body.y - body.z
-            drawArea.x = Math.min(drawArea.x, singleDrawArea.x)
-            drawArea.x2 = Math.max(drawArea.x2, singleDrawArea.x2)
-            drawArea.y = Math.min(drawArea.y, singleDrawArea.y)
-            drawArea.y2 = Math.max(drawArea.y2, singleDrawArea.y2)
+            const combinedScreenY = body.y - body.z
+            drawArea.x = Math.min(drawArea.x, singleDrawArea.x + body.x)
+            drawArea.x2 = Math.max(drawArea.x2, singleDrawArea.x2 + body.x)
+            drawArea.y = Math.min(drawArea.y, singleDrawArea.y + combinedScreenY)
+            drawArea.y2 = Math.max(drawArea.y2, singleDrawArea.y2 + combinedScreenY)
         }
         var node = this._getBodyNode(body)
         // FTODO: cache stuff we care about and check here if anything actually changed
