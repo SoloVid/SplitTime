@@ -19,10 +19,10 @@ type LevelEditorProps = {
   style: string
 }
 
-export function useStatefulLevelEditor(props: LevelEditorProps) {
-  const [levelEditor] = useState(() => LevelEditor(props))
-  return levelEditor
-}
+// export function useStatefulLevelEditor(props: LevelEditorProps) {
+//   const [levelEditor] = useState(() => LevelEditor(props))
+//   return levelEditor
+// }
 
 export default function LevelEditor(props: LevelEditorProps) {
   const {
@@ -36,7 +36,6 @@ export default function LevelEditor(props: LevelEditorProps) {
   const sharedStuff = useSharedStuff({
     globalStuff: editorGlobalStuff,
     level: editorLevel,
-    setLevel: setEditorLevel,
   })
 
   const $el = useRef<HTMLDivElement>(null)

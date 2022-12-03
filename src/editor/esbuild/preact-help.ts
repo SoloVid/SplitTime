@@ -20,7 +20,10 @@ export function makeStyleString(styleMap: Record<string, string>) {
     .join(";")
 }
 
+export type TaggedImmutableSetter<T> = (tag: string | null, transform: (before: Immutable<T>) => Immutable<T>) => void
+
 export type ImmutableSetter<T> = (transform: (before: Immutable<T>) => Immutable<T>) => void
+export type OptionalTaggedImmutableSetter<T> = (transform: (before: Immutable<T>) => Immutable<T>, tag?: string) => void
 export type ImmutableUpdater<T> = (updates: Immutable<Partial<T>> | ((before: Immutable<T>) => Immutable<Partial<T>>)) => void
 
 export function makeImmutableObjectSetterUpdater<T extends object>(setter: ImmutableSetter<T>): ImmutableUpdater<T> {

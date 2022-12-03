@@ -16,8 +16,6 @@ import LevelEditor from "./level/level-editor"
 import { ServerLiaison } from "./server-liaison"
 import { Followable, GlobalEditorShared } from "./shared-types"
 
-const UNDO_STACK_SIZE = 1000
-
 type FileBrowserReturnListener = {f: (filePath: string) => void}
 
 type EditorProps = {
@@ -30,59 +28,8 @@ export default function Editor({ server }: EditorProps) {
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
   const [onDeleteCallback, setOnDeleteCallback] = useState<{f: () => void}>({f:() => { }})
-  const [undoStack, setUndoStack] = useState<readonly string[]>([])
-  const [redoStack, setRedoStack] = useState<readonly string[]>([])
 
   const gridCell = gridEnabled ? explicitGridCell : { x: 1, y: 1 }
-
-  function createUndoPoint(): void {
-    if (!level && !collage) {
-      return
-    }
-    const currentState = exportString()
-    // Don't push if this is a duplicate state
-    if (undoStack[undoStack.length - 1] === currentState) {
-      return
-    }
-    const newUndoStack = [...undoStack, currentState]
-    if (newUndoStack.length > UNDO_STACK_SIZE) {
-      newUndoStack.shift()
-    }
-    setUndoStack(newUndoStack)
-    setRedoStack([])
-  }
-
-  function undo(): void {
-    const currentState = exportString()
-    let state: string = currentState
-    const newUndoStack = [...undoStack]
-    while (state === currentState) {
-      if (newUndoStack.length === 0) {
-        debug("Can't undo; already at earliest")
-        return
-      }
-      state = newUndoStack.pop() as string
-    }
-    setUndoStack(newUndoStack)
-    setRedoStack([...redoStack, currentState])
-    importString(state)
-  }
-
-  function redo(): void {
-    const currentState = exportString()
-    let state: string = currentState
-    const newRedoStack = [...redoStack]
-    while (state === currentState) {
-      if (newRedoStack.length === 0) {
-        debug("Can't redo; already at latest")
-        return
-      }
-      state = newRedoStack.pop() as string
-    }
-    setRedoStack(newRedoStack)
-    setUndoStack([...undoStack, currentState])
-    importString(state)
-  }
 
   function setFollowers(newFollowers: null | readonly Followable[]): void {
     setPreviousFollowers(followers)
@@ -121,7 +68,6 @@ export default function Editor({ server }: EditorProps) {
       mouse,
       ctrlDown,
     },
-    createUndoPoint,
     openFileSelect,
     setFollowers,
     setOnDelete,
@@ -237,7 +183,6 @@ export default function Editor({ server }: EditorProps) {
       ...mouse,
       isDown: true
     })
-    createUndoPoint()
   }
 
   function handleMouseUp(event: MouseEvent): void {
@@ -248,7 +193,6 @@ export default function Editor({ server }: EditorProps) {
     if (followers !== null) {
       setFollowers(null)
     }
-    createUndoPoint()
   }
 
   function handleKeyDown(event: KeyboardEvent): void {
@@ -264,19 +208,7 @@ export default function Editor({ server }: EditorProps) {
     var specialKey = true
     switch (event.which) {
       case keycode.DEL:
-        createUndoPoint()
         onDeleteCallback.f()
-        createUndoPoint()
-        break;
-      case keycode.Z:
-        if (ctrlKey) {
-          undo()
-        }
-        break;
-      case keycode.Y:
-        if (ctrlKey) {
-          redo()
-        }
         break;
       case keycode.CTRL:
       case keycode.SHIFT:

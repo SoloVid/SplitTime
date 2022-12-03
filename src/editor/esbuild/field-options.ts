@@ -1,5 +1,5 @@
 import { Immutable } from "engine/utils/immutable"
-import { ImmutableSetter } from "./preact-help"
+import { OptionalTaggedImmutableSetter } from "./preact-help"
 import { Drilled } from "./utils/immutable-helper"
 
 export interface FieldOptions {
@@ -16,7 +16,7 @@ export interface ObjectProperties<T extends unknown, Path extends readonly (stri
   readonly pathToDeleteThing?: SubPath<Path> | undefined
   readonly fields: { readonly [K in keyof Drilled<T, Path>]: FieldOptions }
   readonly allowDelete: boolean
-  readonly setTopLevelThing: ImmutableSetter<T>
+  readonly setTopLevelThing: OptionalTaggedImmutableSetter<T>
   readonly onDelete: (thing: Drilled<T, Path>) => void
   readonly onUpdate: <K extends keyof Drilled<T, Path>>(field: K, newValue: Drilled<T, Path>[K], oldValue: Drilled<T, Path>[K]) => void
 }

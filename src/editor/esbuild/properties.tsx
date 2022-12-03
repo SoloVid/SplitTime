@@ -61,7 +61,7 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
 }
 
 type SinglePropertyProps = {
-  readonly editorGlobalStuff: Pick<GlobalEditorShared, "createUndoPoint" | "openFileSelect">
+  readonly editorGlobalStuff: Pick<GlobalEditorShared, "openFileSelect">
   readonly value: string | number
   readonly fieldKey: string
   readonly fieldOptions: FieldOptions
@@ -79,18 +79,7 @@ function SingleProperty(props: SinglePropertyProps) {
 
   const [isTempEmpty, setIsTempEmpty] = useState(false)
 
-  // function propertyExists(): boolean {
-  //   return fieldKey in thing
-  // }
-
   const rawValue = useMemo(() => {
-    // if (!propertyExists) {
-    //   throw new Error("Can't access raw value (" + fieldKey + ") when it doesn't exist!")
-    // }
-    // if (this.isTempEmpty) {
-    //   return ""
-    // }
-    // const value = thing[fieldKey]
     if (typeof value !== "number" && typeof value !== "string") {
       throw new Error("Value (" + fieldKey + ") isn't a string or number")
     }
@@ -98,9 +87,6 @@ function SingleProperty(props: SinglePropertyProps) {
   }, [fieldKey, value, isTempEmpty])
 
   function setRawValue(newValue: string | number): void {
-    // if (!propertyExists) {
-    //   throw new Error("Can't access raw value (" + fieldKey + ") when it doesn't exist!")
-    // }
     const oldValue = rawValue
     if (typeof newValue !== typeof oldValue) {
       if (typeof oldValue === "number" && !newValue) {
@@ -146,7 +132,7 @@ function SingleProperty(props: SinglePropertyProps) {
   }
 
   function onChange(): void {
-    editorGlobalStuff.createUndoPoint()
+    // editorGlobalStuff.createUndoPoint()
   }
 
   function isReadonly(): boolean {

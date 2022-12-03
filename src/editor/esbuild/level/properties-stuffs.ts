@@ -3,7 +3,7 @@ import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
 import { GenericObjectProperties, ObjectProperties } from "../field-options"
 import { FileTrace } from "../file-types"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter, OptionalTaggedImmutableSetter } from "../preact-help"
 import { getTracePropertiesFields } from "../trace-properties"
 import { BasePath, getByPath } from "../utils/immutable-helper"
 import { EditorLevel } from "./extended-level-format"
@@ -55,7 +55,7 @@ const positionFields = {
 }
 type SimplifiedPosition = { [K in keyof Required<typeof positionFields>]: string | number }
 
-export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: ImmutableSetter<EditorLevel>, path: BasePath, clearProperties: () => void): GenericObjectProperties {
+export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: OptionalTaggedImmutableSetter<EditorLevel>, path: BasePath, clearProperties: () => void): GenericObjectProperties {
   const baseOnDelete = () => {
     clearProperties()
   }

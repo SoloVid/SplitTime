@@ -4,7 +4,6 @@ import { Coordinates2D, instanceOfCoordinates2D } from "engine/world/level/level
 import { useMemo, useState } from "preact/hooks"
 import { inGroup, safeExtractTraceArray } from "../editor-functions"
 import { GridSnapMover } from "../grid-snap-mover"
-import { makeImmutableObjectSetterUpdater } from "../preact-help"
 import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
 import { EditorTraceEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
@@ -23,7 +22,6 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
 
   const level = levelEditorShared.level
   const activeGroup = levelEditorShared.activeGroup
-  const updateTrace = makeImmutableObjectSetterUpdater(trace.setObj)
 
   const tracker: IRenderedTraceTracker = {
     track: (e, p) => trackInternal(p)
@@ -62,7 +60,10 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
           var newY = Number(p2) + snappedDelta.y
           return "(" + newX + ", " + newY + ")"
         })
-        updateTrace({vertices: newVertices})
+        trace.setObj((before) => ({
+          ...before,
+          vertices: newVertices,
+        }), `vertex:${JSON.stringify(originalPoint)}`)
       }
     }
     levelEditorShared.follow(follower)

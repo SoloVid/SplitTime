@@ -1,7 +1,7 @@
 import { rethrowError } from "engine/utils/error";
 import { Immutable } from "engine/utils/immutable";
 import { assert } from "globals";
-import { ImmutableSetter } from "../preact-help";
+import { ImmutableSetter, OptionalTaggedImmutableSetter } from "../preact-help";
 
 type DebugNever<Message extends string, ExtraData = never> = [never, Message, ExtraData]
 type AssertExtends<T, Extends, Message extends String> = T extends Extends ? T : never
@@ -51,8 +51,8 @@ export function getByPath<T extends object | readonly unknown[], Path extends Ba
   }
 }
 
-export function updateImmutableObject<T extends object | readonly unknown[], Path extends readonly (string | number)[]>(setter: ImmutableSetter<T>, path: Path, value: Drilled<T, Path> | undefined) {
-  setter((before) => makeUpdatedObject(before, path, value))
+export function updateImmutableObject<T extends object | readonly unknown[], Path extends readonly (string | number)[]>(setter: OptionalTaggedImmutableSetter<T>, path: Path, value: Drilled<T, Path> | undefined) {
+  setter((before) => makeUpdatedObject(before, path, value), path.map(p => `${p}`).join("/"))
 }
 
 export function makeUpdatedObject<T extends unknown, Path extends readonly (string | number)[]>(obj: Immutable<T>, path: Path, value: Drilled<T, Path> | undefined): Immutable<T> {

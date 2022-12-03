@@ -13,14 +13,12 @@ import { Mode } from "./shared-types"
 type MakeSharedStuffOptions = {
   globalStuff: GlobalEditorShared
   level: Immutable<EditorLevel>
-  setLevel: ImmutableSetter<EditorLevel>
 }
 
 export function useSharedStuff(options: MakeSharedStuffOptions) {
   const {
     globalStuff,
     level,
-    setLevel,
   } = options
 
   const collageManager = useCollageManager(globalStuff.server)
@@ -37,7 +35,7 @@ export function useSharedStuff(options: MakeSharedStuffOptions) {
 
   return {
     globalStuff,
-    level, setLevel,
+    level,
     collageManager,
     activeGroup, setActiveGroup,
     mode, setMode,
