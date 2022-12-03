@@ -49,8 +49,6 @@ export default function FrameRectangle(props: FrameRectangleProps) {
     ]
   }, [frame])
 
-  const backgroundSrc = collageEditorShared.globalStuff.server.imgSrc(collage.image)
-
   function track(point?: Coordinates2D): void {
     collageEditorShared.trackFrame(frameIndex, point)
   }

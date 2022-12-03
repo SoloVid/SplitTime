@@ -10,12 +10,25 @@ export class Cache<T> {
     // Setting this to a higher number can help ensure that cache misses don't all happen at exactly the same time
     cacheLifeRandomFactor = 0
 
+    private cacheObject: Immutable<UnderlyingCacheObject<T>>
+    private setCacheObject: ImmutableSetter<UnderlyingCacheObject<T>>
+
     constructor(
         private readonly getCallback: (id: string) => (T | PromiseLike<T>),
-        private readonly cacheObject: Immutable<UnderlyingCacheObject<T>>,
-        private readonly setCacheObject: ImmutableSetter<UnderlyingCacheObject<T>>,
+        cacheObject: Immutable<UnderlyingCacheObject<T>>,
+        setCacheObject: ImmutableSetter<UnderlyingCacheObject<T>>,
         private readonly cacheLife: number = DEFAULT_CACHE_LIFE,
-    ) { }
+    ) {
+        // We keep a local copy so that updates happen synchronously in addition to asynchronously.
+        this.cacheObject = cacheObject
+        this.setCacheObject = (transform) => {
+            setCacheObject((before) => {
+                const after = transform(before)
+                this.cacheObject = after
+                return after
+            })
+        }
+    }
 
     private getCacheEntry(id: string): Immutable<CacheEntry<T>> {
         const cacheEntry = this.cacheObject[id] ?? {
@@ -63,11 +76,13 @@ export class Cache<T> {
     async load(id: string): Promise<void> {
         const cacheEntry = this.cacheObject[id]
         try {
+            console.log("loading", id)
             const data = await this.getCallback(id)
             this.updateCacheEntry(id, {
                 data: data as Immutable<T>,
                 failed: false
             })
+            console.log("loaded", id)
         } catch (e: unknown) {
             warn("Failed to load item \"" + cacheEntry + "\" for cache", e)
             this.updateCacheEntry(id, {failed: true})

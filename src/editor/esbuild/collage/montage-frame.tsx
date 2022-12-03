@@ -1,6 +1,6 @@
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { Montage as FileMontage, MontageFrame as FileMontageFrame } from "engine/file/collage"
-import { useMemo, useRef } from "preact/hooks"
+import { useContext, useMemo, useRef } from "preact/hooks"
 import { Rect } from "engine/math/rect"
 import { makeStyleString } from "../preact-help"
 import { EDITOR_PADDING, PropertiesEvent } from "./shared-types"
@@ -10,6 +10,7 @@ import { assert } from "globals"
 import { Immutable } from "engine/utils/immutable"
 import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
 import RenderedMontageTrace from "./rendered-montage-trace"
+import { imageContext } from "../server-liaison"
 
 type MontageFrameProps = {
   collageEditHelper: SharedStuff | undefined
@@ -116,7 +117,8 @@ export default function MontageFrame(props: MontageFrameProps) {
     return "translate(" + x + " " + y + ")"
   }, [frameTargetBox])
 
-  const imgSrc = collageViewHelper.globalStuff.server.imgSrc(collageViewHelper.collage.image)
+  const projectImages = useContext(imageContext)
+  const imgSrc = projectImages.imgSrc(collageViewHelper.collage.image)
 
   function markEventAsPropertiesSet(event: MouseEvent): void {
     // Somewhat type-unsafe way of letting upper events know they should try to set properties

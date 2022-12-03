@@ -5,10 +5,10 @@ import { Coordinates2D, Coordinates3D } from "engine/world/level/level-location"
 import { Type as TraceType } from "engine/world/level/trace/trace-misc"
 import { TraceSpec } from "engine/world/level/trace/trace-spec"
 import { calculateStairsPlane } from "engine/world/level/trace/trace-stairs-helper"
-import { useEffect, useMemo, useState } from "preact/hooks"
+import { useContext, useEffect, useMemo, useState } from "preact/hooks"
 import { getPlaceholderImage, PLACEHOLDER_WIDTH, safeGetColor } from "./editor-functions"
 import { ImmutableSetter, makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "./preact-help"
-import { ServerLiaison } from "./server-liaison"
+import { imageContext, ServerLiaison } from "./server-liaison"
 import { EditorMetadata } from "./shared-types"
 import { TRACE_GROUND_COLOR, TRACE_GROUND_HIGHLIGHT_COLOR } from "./trace-options"
 
@@ -126,7 +126,8 @@ export default function RenderedTrace(props: RenderedTraceProps) {
   }
   const [otherLevel] = useOtherLevel(server, trace.level)
 
-  const otherLevelImgSrc = otherLevel === null ? getPlaceholderImage() : server.imgSrc(otherLevel.background)
+  const projectImages = useContext(imageContext)
+  const otherLevelImgSrc = otherLevel === null ? getPlaceholderImage() : projectImages.imgSrc(otherLevel.background)
 
   function useImgDim(imgSrc: string | null) {
     const [dim, setDim] = useState({x: PLACEHOLDER_WIDTH, y: PLACEHOLDER_WIDTH})

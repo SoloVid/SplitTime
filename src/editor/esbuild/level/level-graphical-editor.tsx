@@ -6,6 +6,7 @@ import { createSnapMontageMover, findClosestPosition, getGroupById, makeNewTrace
 import GridLines from "../grid-lines"
 import { makeStyleString, preventDefault } from "../preact-help"
 import { UserInputs } from "../shared-types"
+import LevelBackground from "./level-background"
 import { useEntityBodies } from "./entity-body-manager"
 import { useSortedEntities } from "./entity-sort-helper"
 import { SharedStuff } from "./level-editor-shared"
@@ -33,22 +34,12 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     () => [...level.props, ...level.positions, ...level.traces],
     [level.props, level.positions, level.traces]
   )
+  // console.log("allEntities", allEntities)
   const entityBodies = useEntityBodies(level, levelEditorShared.collageManager, allEntities)
   // const bodyManager = useEntityBodyManager(level, levelEditorShared.collageManager)
   const allEntitiesSorted = useSortedEntities(allEntities, entityBodies)
   // This is the workaround if the sorting hangs up the UI too much.
   // const allEntitiesSorted = allEntities
-
-  const backgroundStyle = useMemo(() => {
-    const leftPadding = EDITOR_PADDING + level.backgroundOffsetX
-    const topPadding = EDITOR_PADDING + level.backgroundOffsetY
-    const styleMap = {
-      position: 'absolute',
-      left: leftPadding + 'px',
-      top: topPadding + 'px'
-    }
-    return makeStyleString(styleMap)
-  }, [level])
 
   const inputs = useMemo<UserInputs>(() => {
     let position = {
@@ -86,8 +77,6 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   })
 
   const traceTransform = "translate(" + EDITOR_PADDING + "," + EDITOR_PADDING + ")"
-
-  const backgroundSrc = levelEditorShared.globalStuff.server.imgSrc(level.background)
 
   function getActiveFileGroup() {
     return getGroupById(level, levelEditorShared.activeGroup?.obj.id ?? "")
@@ -248,8 +237,8 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     onDblClick={preventDefault}
     onDragStart={preventDefault}
   >
-    {!!backgroundSrc && <img className="background" src={backgroundSrc} style={backgroundStyle} />}
-    
+    <LevelBackground level={level} />
+
     {allEntitiesSorted.map((entity) => (
     <div
       key={entity.metadata.editorId}

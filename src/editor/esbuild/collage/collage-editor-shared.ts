@@ -18,16 +18,25 @@ import { MIN_FRAME_LEN } from "./shared-types"
 type MakeSharedStuffOptions = {
   readonly globalStuff: GlobalEditorShared,
   readonly collage: Immutable<Collage>,
-  readonly setCollage: ImmutableSetter<Collage>
+  readonly setCollageNull: ImmutableSetter<Collage | null>
 }
 
-export function makeSharedStuff({ globalStuff, collage, setCollage }: MakeSharedStuffOptions) {
+export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSharedStuffOptions) {
   const [info, setInfo] = useState<Record<string, string>>({})
   const [propertiesPath, setPropertiesPath] = useState<BasePath | null>([])
   const [traceInProgress, setTraceInProgress] = useState<FileTrace | null>(null)
   const [traceTypeSelected, setTraceTypeSelected] = useState("")
   const [selectedFrameIndex, setSelectedFrameIndex] = useState<number | null>(null)
   const [selectedMontageIndex, setSelectedMontageIndex] = useState<number | null>(null)
+
+  const setCollage: ImmutableSetter<Collage> = (transform => {
+    setCollageNull(before => {
+      if (before === null) {
+        return null
+      }
+      return transform(before)
+    })
+  })
 
   return {
     globalStuff, collage, setCollage,
@@ -172,4 +181,4 @@ export type SharedStuffViewOnly = Pick<SharedStuff,
   "realCollage" |
   "selectedMontage" |
   "selectMontage"
-> & { globalStuff: Pick<GlobalEditorShared, "server" | "time" | "userInputs">}
+> & { globalStuff: Pick<GlobalEditorShared, "server" | "userInputs">}

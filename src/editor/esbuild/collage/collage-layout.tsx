@@ -1,6 +1,7 @@
 import { Frame } from "engine/file/collage"
-import { useMemo, useRef } from "preact/hooks"
+import { useContext, useMemo, useRef } from "preact/hooks"
 import GridLines from "../grid-lines"
+import { imageContext } from "../server-liaison"
 import { getRelativeMouse } from "../shared-types"
 import { SharedStuff } from "./collage-editor-shared"
 import FrameRectangle from "./frame-rectangle"
@@ -41,8 +42,8 @@ export default function CollageLayout(props: CollageLayoutProps) {
 
   const viewBox = "" + -EDITOR_PADDING + " " + -EDITOR_PADDING + " " + containerWidth + " " + containerHeight
 
-  // TODO: Make sure this is reactive.
-  const backgroundSrc = collageEditorShared.globalStuff.server.imgSrc(collage.image)
+  const projectImages = useContext(imageContext)
+  const backgroundSrc = projectImages.imgSrc(collage.image)
 
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
 

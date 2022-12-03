@@ -120,6 +120,7 @@ export function useEntityBodies(
     const collage = collageManager.getRealCollage(p.collage)
     const drawable = collageManager.getSimpleGraphDrawable(p.collage, p.montage, p.dir)
     if (!collage || !drawable) {
+      console.log("collage", collage, "drawable", drawable)
       return false
     }
     let montage: Montage

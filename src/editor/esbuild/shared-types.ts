@@ -20,7 +20,6 @@ export interface GlobalEditorShared {
     readonly gridEnabled: boolean
     readonly gridCell: { readonly x: number, readonly y: number }
     readonly server: ServerLiaison
-    readonly time: game_seconds
     readonly userInputs: UserInputs
     createUndoPoint(): void
     openFileSelect(rootDirectory: string): PromiseLike<string>

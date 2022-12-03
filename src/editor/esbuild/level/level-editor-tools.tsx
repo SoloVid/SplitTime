@@ -35,7 +35,6 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
     },
     globalStuff: {
       server: levelEditorShared.globalStuff.server,
-      time: levelEditorShared.globalStuff.time,
       userInputs: levelEditorShared.globalStuff.userInputs,
     },
     selectMontage: setMontageIndex,

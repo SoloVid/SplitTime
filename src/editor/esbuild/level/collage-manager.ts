@@ -6,11 +6,11 @@ import { Cache, UnderlyingCacheObject } from "../cache"
 import { Immutable } from "engine/utils/immutable"
 import { GraphDrawable } from "engine/world/body/body-rendering-graph"
 import { ImmutableSetter } from "../preact-help"
-import { useState } from "preact/hooks"
+import { useMemo, useState } from "preact/hooks"
 
 export function useCollageManager(server: ServerLiaison) {
   const [cacheObject, setCacheObject] = useState<Immutable<UnderlyingCacheObject<CollageInfo>>>({})
-  const collageManager = new CollageManager(server, cacheObject, setCacheObject)
+  const collageManager = useMemo(() => new CollageManager(server, cacheObject, setCacheObject), [server, cacheObject])
   return collageManager
 }
 

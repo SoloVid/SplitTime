@@ -15,6 +15,7 @@ import { CheckboxInput, NumberInput } from "./input"
 import LevelEditor from "./level/level-editor"
 import { ServerLiaison } from "./server-liaison"
 import { Followable, GlobalEditorShared } from "./shared-types"
+import { TimeProvider } from "./time-context"
 
 const UNDO_STACK_SIZE = 1000
 
@@ -25,15 +26,6 @@ type EditorProps = {
 }
 
 export default function Editor({ server }: EditorProps) {
-  const [time, setTime] = useState(0)
-  
-  useEffect(() => {
-    const TIME_INTERVAL = 50;
-    setInterval(function() {
-      setTime((oldTime) => oldTime += TIME_INTERVAL / 1000)
-    }, TIME_INTERVAL);
-  }, [])
-
   const [gridEnabled, setGridEnabled] = useState(false)
   const [explicitGridCell, setExplicitGridCell] = useState({ x: 32, y: 32 })
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
@@ -126,7 +118,6 @@ export default function Editor({ server }: EditorProps) {
     gridEnabled,
     gridCell,
     server,
-    time,
     userInputs: {
       mouse,
       ctrlDown,
@@ -404,7 +395,7 @@ export default function Editor({ server }: EditorProps) {
     });
   }, [])
 
-  return <div
+  return <TimeProvider><div
     onMouseMove={handleMouseMove}
     onMouseDown={handleMouseDown}
     onMouseUp={handleMouseUp}
@@ -467,5 +458,5 @@ export default function Editor({ server }: EditorProps) {
       setLevel={setLevel}
       style="flex-grow: 1; overflow: hidden;"
     />}
-  </div>
+  </div></TimeProvider>
 }

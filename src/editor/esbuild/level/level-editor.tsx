@@ -14,7 +14,7 @@ import { getObjectProperties } from "./properties-stuffs"
 type LevelEditorProps = {
   editorGlobalStuff: GlobalEditorShared
   level: Immutable<FileLevel>
-  setLevel: ImmutableSetter<FileLevel>
+  setLevel: ImmutableSetter<FileLevel | null>
   style: string
 }
 

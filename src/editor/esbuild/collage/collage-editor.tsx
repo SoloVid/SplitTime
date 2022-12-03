@@ -17,7 +17,7 @@ type CollageEditorProps = {
   readonly editorGlobalStuff: GlobalEditorShared
   readonly collage: Immutable<Collage>
   readonly style: string
-  readonly setCollage: ImmutableSetter<Collage>
+  readonly setCollage: ImmutableSetter<Collage | null>
 }
 
 export default function CollageEditor(props: CollageEditorProps) {
@@ -37,7 +37,7 @@ export default function CollageEditor(props: CollageEditorProps) {
   // }))
   const sharedStuff = makeSharedStuff({
     collage: collage,
-    setCollage,
+    setCollageNull: setCollage,
     globalStuff: editorGlobalStuff,
   })
 
@@ -117,7 +117,7 @@ export default function CollageEditor(props: CollageEditorProps) {
         <hr/>
         {!!sharedStuff.propertiesPath && <PropertiesPane
           editorGlobalStuff={editorGlobalStuff}
-          spec={getObjectProperties(collage, setCollage, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))}
+          spec={getObjectProperties(collage, sharedStuff.setCollage, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))}
         />}
       </div>
       <div class="collage-layout-container" style="flex-grow: 1; height: 100%; overflow: auto">

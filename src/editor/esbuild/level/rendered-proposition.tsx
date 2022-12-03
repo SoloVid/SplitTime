@@ -5,9 +5,11 @@ import { Montage } from "engine/graphics/montage"
 import { Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
-import { useMemo } from "preact/hooks"
+import { useContext, useMemo } from "preact/hooks"
 import { createSnapMontageMover, getPlaceholderImage, inGroup, PLACEHOLDER_WIDTH } from "../editor-functions"
 import { makeImmutableObjectSetterUpdater, onlyLeft, preventDefault } from "../preact-help"
+import { imageContext } from "../server-liaison"
+import { Time } from "../time-context"
 import { EditorPositionEntity, EditorPropEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
 
@@ -27,7 +29,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   } = props
   const p = entity.obj
   const metadata = entity.metadata
-  const time = levelEditorShared.globalStuff.time
+  const time = useContext(Time)
   const level = levelEditorShared.level
   const updateP = makeImmutableObjectSetterUpdater(entity.setObj)
   const updateMetadata = makeImmutableObjectSetterUpdater(entity.setMetadata)
@@ -99,6 +101,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     }
   }, [p, metadata, positionLeft, positionTop, frame, level, levelEditorShared.activeGroup])
 
+  const projectImages = useContext(imageContext)
   const imgSrc = useMemo(() => {
     const c = collage
     if (c === NOT_READY) {
@@ -107,8 +110,8 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     if (c === NOT_AVAILABLE) {
       return getPlaceholderImage()
     }
-    return levelEditorShared.globalStuff.server.imgSrc(c.image)
-  }, [collage, levelEditorShared.globalStuff.server])
+    return projectImages.imgSrc(c.image)
+  }, [collage, projectImages])
 
   function toggleHighlight(highlight: boolean): void {
     if(levelEditorShared.shouldDragBePrevented()) {

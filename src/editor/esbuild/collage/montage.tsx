@@ -1,11 +1,12 @@
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { Montage as FileMontage } from "engine/file/collage"
 import { getPlaceholderImage } from "../editor-functions"
-import { useMemo } from "preact/hooks"
+import { useContext, useMemo } from "preact/hooks"
 import { makeStyleString } from "../preact-help"
 import { PropertiesEvent } from "./shared-types"
 import { Rect } from "engine/math/rect"
 import MontageFrame from "./montage-frame"
+import { Time } from "../time-context"
 
 type MontageProps = {
   collageEditHelper: SharedStuff | undefined
@@ -22,6 +23,8 @@ export default function Montage(props: MontageProps) {
     montage,
   } = props
 
+  const time = useContext(Time)
+
   const placeholderImgSrc = getPlaceholderImage()
 
   const realMontage = useMemo(() => {
@@ -33,14 +36,14 @@ export default function Montage(props: MontageProps) {
     if (realMontage.frames.length === 0) {
       return null
     }
-    const realFrame = realMontage.getFrameAt(collageViewHelper.globalStuff.time)
+    const realFrame = realMontage.getFrameAt(time)
     const frameIndex = realMontage.frames.indexOf(realFrame)
     return {
       index: frameIndex,
       fileFrame: montage.frames[frameIndex],
       targetBox: realFrame.getTargetBox(realMontage.bodySpec),
     }
-  }, [realMontage, collageViewHelper.globalStuff.time, montage.frames])
+  }, [realMontage, time, montage.frames])
 
   const overallArea = useMemo(() => {
     if (montage.frames.length === 0) {
