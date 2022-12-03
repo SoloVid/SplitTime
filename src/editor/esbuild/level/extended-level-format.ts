@@ -2,6 +2,7 @@ import { int } from "api"
 import { Immutable } from "engine/utils/immutable"
 import { Group as FileGroup, Position as FilePosition, Prop as FileProp, Trace as FileTrace } from "engine/world/level/level-file-data"
 import { useState } from "preact/hooks"
+import { exportLevel } from "../editor-functions"
 import { defaultFileGroup, defaultFilePosition, defaultFileProp, defaultFileTrace, FileLevel } from "../file-types"
 import { ImmutableSetter } from "../preact-help"
 import { EditorMetadata } from "../shared-types"
@@ -42,40 +43,49 @@ export type EditorEntity = EditorGroupEntity | EditorPositionEntity | EditorProp
 /** Unlike {@link EditorEntity} these are displayed in the graphical editor. */
 export type GraphicalEditorEntity = EditorPositionEntity | EditorPropEntity | EditorTraceEntity
 
-export function useEditorLevel(fileLevel: FileLevel): [EditorLevel, ImmutableSetter<EditorLevel>] {
-  const setEditorLevel1: ImmutableSetter<EditorLevel> = (...args) => setEditorLevel2(...args)
-  const [editorLevel, setEditorLevel2] = useState<EditorLevel>(() => ({
+export function useEditorLevel(fileLevel: FileLevel, setFileLevel: ImmutableSetter<FileLevel | null>): [EditorLevel, ImmutableSetter<EditorLevel>] {
+  const setEditorLevel: ImmutableSetter<EditorLevel> = (transform) => {
+    console.log("take 2")
+    setEditorLevelInternal((beforeEditor) => {
+      console.log("setting level")
+      const afterEditor = transform(beforeEditor)
+      setFileLevel((beforeFile) => exportLevel(afterEditor))
+      return afterEditor
+    })
+  }
+  // const setEditorLevel: ImmutableSetter<EditorLevel> = (...args) => setEditorLevelInternal(...args)
+  const [editorLevel, setEditorLevelInternal] = useState<EditorLevel>(() => ({
     region: fileLevel.region,
     width: fileLevel.width,
     height: fileLevel.height,
     background: fileLevel.background,
     backgroundOffsetX: fileLevel.backgroundOffsetX,
     backgroundOffsetY: fileLevel.backgroundOffsetY,
-    groups: fileLevel.groups.map(g => makeEditorEntityFromFileObject(setEditorLevel1, g, "group")),
+    groups: fileLevel.groups.map(g => makeEditorEntityFromFileObject(setEditorLevel, g, "group")),
     addGroup: (init) => {
-      const newEntity = makeEditorEntityFromFileObject<EditorGroupEntity>(setEditorLevel1, { ...defaultFileGroup, ...init }, "group")
-      setEditorLevel1((before) => ({...before, groups: [...before.groups, newEntity]}))
+      const newEntity = makeEditorEntityFromFileObject<EditorGroupEntity>(setEditorLevel, { ...defaultFileGroup, ...init }, "group")
+      setEditorLevel((before) => ({...before, groups: [...before.groups, newEntity]}))
       return newEntity
     },
-    traces: fileLevel.traces.map(t => makeEditorEntityFromFileObject(setEditorLevel1, t, "trace")),
+    traces: fileLevel.traces.map(t => makeEditorEntityFromFileObject(setEditorLevel, t, "trace")),
     addTrace: (init) => {
-      const newEntity = makeEditorEntityFromFileObject<EditorTraceEntity>(setEditorLevel1, { ...defaultFileTrace, ...init }, "trace")
-      setEditorLevel1((before) => ({...before, traces: [...before.traces, newEntity]}))
+      const newEntity = makeEditorEntityFromFileObject<EditorTraceEntity>(setEditorLevel, { ...defaultFileTrace, ...init }, "trace")
+      setEditorLevel((before) => ({...before, traces: [...before.traces, newEntity]}))
       return newEntity
     },
-    props: fileLevel.props.map(p => makeEditorEntityFromFileObject(setEditorLevel1, p, "prop")),
+    props: fileLevel.props.map(p => makeEditorEntityFromFileObject(setEditorLevel, p, "prop")),
     addProp: (init) => {
-      const newEntity = makeEditorEntityFromFileObject<EditorPropEntity>(setEditorLevel1, { ...defaultFileProp, ...init }, "prop")
-      setEditorLevel1((before) => ({...before, props: [...before.props, newEntity]}))
+      const newEntity = makeEditorEntityFromFileObject<EditorPropEntity>(setEditorLevel, { ...defaultFileProp, ...init }, "prop")
+      setEditorLevel((before) => ({...before, props: [...before.props, newEntity]}))
       return newEntity
     },
-    positions: fileLevel.positions.map(p => makeEditorEntityFromFileObject(setEditorLevel1, p, "position")),
+    positions: fileLevel.positions.map(p => makeEditorEntityFromFileObject(setEditorLevel, p, "position")),
     addPosition: (init) => {
-      const newEntity = makeEditorEntityFromFileObject<EditorPositionEntity>(setEditorLevel1, { ...defaultFilePosition, ...init }, "position")
-      setEditorLevel1((before) => ({...before, positions: [...before.positions, newEntity]}))
+      const newEntity = makeEditorEntityFromFileObject<EditorPositionEntity>(setEditorLevel, { ...defaultFilePosition, ...init }, "position")
+      setEditorLevel((before) => ({...before, positions: [...before.positions, newEntity]}))
       return newEntity
     },
   }))
 
-  return [editorLevel, setEditorLevel2]
+  return [editorLevel, setEditorLevel]
 }

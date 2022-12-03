@@ -30,7 +30,6 @@ export function useSharedStuff(options: MakeSharedStuffOptions) {
   const [selectedCollage] = useCollageJson(globalStuff.server, selectedCollageId)
   const [selectedMontage, setSelectedMontage] = useState<string | null>(null)
   const [selectedMontageDirection, setSelectedMontageDirection] = useState<string | null>(null)
-  // const [selectedMontageObject, setSelectedMontageObject] = useState<FileMontage | null>(null)
   const [selectedTraceType, setSelectedTraceType] = useState<string>(Type.SOLID)
   const [pathInProgress, setPathInProgress] = useState<Immutable<EditorTraceEntity> | null>(null)
   const [info, setInfo] = useState<Record<string, string | number>>({})
@@ -42,14 +41,13 @@ export function useSharedStuff(options: MakeSharedStuffOptions) {
     collageManager,
     activeGroup, setActiveGroup,
     mode, setMode,
-    selectedCollage, selectedCollageId, //setSelectedCollageId,
+    selectedCollage, selectedCollageId,
     selectedMontage, setSelectedMontage,
     selectedMontageDirection, setSelectedMontageDirection,
-    // selectedMontageObject, setSelectedMontageObject,
     selectedTraceType, setSelectedTraceType,
     pathInProgress, setPathInProgress,
     info, setInfo,
-    propertiesPath, //setPropertiesPath,
+    propertiesPath,
 
     shouldDragBePrevented(): boolean {
       return globalStuff.userInputs.mouse.isDown || pathInProgress !== null

@@ -8,7 +8,7 @@ import { Pledge } from "engine/utils/pledge"
 import { instanceOfFileData } from "engine/world/level/level-file-data"
 import { useEffect, useState } from "preact/hooks"
 import CollageEditor from "./collage/collage-editor"
-import { exportCollageJson, exportLevelJson, importLevel, updatePageTitle } from "./editor-functions"
+import { exportJson, importLevel, updatePageTitle } from "./editor-functions"
 import FileBrowser from "./file-browser"
 import { FileLevel } from "./file-types"
 import { CheckboxInput, NumberInput } from "./input"
@@ -178,9 +178,9 @@ export default function Editor({ server }: EditorProps) {
 
   function exportString(): json {
     if (level) {
-      return exportLevelJson(level)
+      return exportJson(level)
     } else if (collage) {
-      return exportCollageJson(collage)
+      return exportJson(collage)
     } else {
       throw new Error("What are you trying to export?")
     }
@@ -307,11 +307,14 @@ export default function Editor({ server }: EditorProps) {
     if (event.which == keycode.SHIFT || event.which === keycode.CTRL) {
       setCtrlDown(false)
     } else if (event.which == keycode.ESC) {
-      if (level === null) {
-        debug("No level to export")
-      } else {
+      if (level !== null) {
         debug("export of level JSON:")
         debug(level)
+      } else if (collage !== null) {
+        debug("export of collage JSON:")
+        debug(collage)
+      } else {
+        debug("nothing to export")
       }
     }
   }
@@ -385,13 +388,13 @@ export default function Editor({ server }: EditorProps) {
   }
 
   useEffect(() => {
-    window.addEventListener("keydown", e => {
-      handleKeyDown(e)
-    });
-    window.addEventListener("keyup", e => {
-      handleKeyUp(e)
-    });
-  }, [])
+    window.addEventListener("keydown", handleKeyDown)
+    window.addEventListener("keyup", handleKeyUp)
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown)
+      window.removeEventListener("keyup", handleKeyUp)
+    }
+  })
 
   return <div
     onMouseMove={handleMouseMove}

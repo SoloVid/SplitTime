@@ -1,10 +1,11 @@
 import { Immutable } from "engine/utils/immutable"
 import { useEffect, useRef, useState } from "preact/hooks"
+import { exportLevel } from "../editor-functions"
 import { FileLevel } from "../file-types"
 import { ImmutableSetter, onlyLeft } from "../preact-help"
 import PropertiesPane from "../properties"
 import { GlobalEditorShared } from "../shared-types"
-import { useEditorLevel } from "./extended-level-format"
+import { EditorLevel, useEditorLevel } from "./extended-level-format"
 import { useSharedStuff } from "./level-editor-shared"
 import LevelEditorTools from "./level-editor-tools"
 import LevelGraphicalEditor from "./level-graphical-editor"
@@ -27,10 +28,10 @@ export default function LevelEditor(props: LevelEditorProps) {
   const {
     editorGlobalStuff,
     level: fileLevel,
-    setLevel,
+    setLevel: setFileLevel,
   } = props
 
-  const [editorLevel, setEditorLevel] = useEditorLevel(fileLevel)
+  const [editorLevel, setEditorLevel] = useEditorLevel(fileLevel, setFileLevel)
 
   const sharedStuff = useSharedStuff({
     globalStuff: editorGlobalStuff,
