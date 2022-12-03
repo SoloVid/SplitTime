@@ -55,7 +55,6 @@ export function useEntityBodies(
   // const [editorIdToBody, setEditorIdToBody] = useState<Immutable<{ [editorId: string]: GraphBody }>>({})
 
   function makeBodyForEntity(editorEntity: Immutable<GraphicalEditorEntity>): Immutable<EditorGraphBody> | null {
-    // console.log(`Making new body for ${editorEntity.metadata.editorId}`)
     const body = makeWriteableBody()
     if (editorEntity.type === "trace") {
       if (!applyTrace(body, editorEntity.obj)) {
@@ -120,7 +119,6 @@ export function useEntityBodies(
     const collage = collageManager.getRealCollage(p.collage)
     const drawable = collageManager.getSimpleGraphDrawable(p.collage, p.montage, p.dir)
     if (!collage || !drawable) {
-      console.log("collage", collage, "drawable", drawable)
       return false
     }
     let montage: Montage

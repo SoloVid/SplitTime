@@ -10,7 +10,6 @@ export function useSortedEntities(
 ) {
   const [graph] = useState(new BodyRenderingGraph())
   return useMemo(() => {
-    console.log("resorting", bodies)
     graph.notifyNewFrame()
     for (const b of bodies) {
       graph.feedBody(b)
@@ -22,7 +21,6 @@ export function useSortedEntities(
       const editorGraphBody = node.body as EditorGraphBody
       editorIdOrderMap[editorGraphBody.editorId] = order++
     })
-    console.log(editorIdOrderMap)
     const sortedEntities: Immutable<GraphicalEditorEntity>[] = new Array(entities.length)
     let unsortedPosition = entities.length - 1
     for (const e of entities) {

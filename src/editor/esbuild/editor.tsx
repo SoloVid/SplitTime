@@ -15,7 +15,6 @@ import { CheckboxInput, NumberInput } from "./input"
 import LevelEditor from "./level/level-editor"
 import { ServerLiaison } from "./server-liaison"
 import { Followable, GlobalEditorShared } from "./shared-types"
-import { TimeProvider } from "./time-context"
 
 const UNDO_STACK_SIZE = 1000
 
@@ -284,7 +283,6 @@ export default function Editor({ server }: EditorProps) {
         setCtrlDown(true)
         break
       case keycode.LEFT:
-        console.log("left")
         moveFollowers(-gridCell.x, 0)
         break
       case keycode.UP:
@@ -395,7 +393,7 @@ export default function Editor({ server }: EditorProps) {
     });
   }, [])
 
-  return <TimeProvider><div
+  return <div
     onMouseMove={handleMouseMove}
     onMouseDown={handleMouseDown}
     onMouseUp={handleMouseUp}
@@ -458,5 +456,5 @@ export default function Editor({ server }: EditorProps) {
       setLevel={setLevel}
       style="flex-grow: 1; overflow: hidden;"
     />}
-  </div></TimeProvider>
+  </div>
 }

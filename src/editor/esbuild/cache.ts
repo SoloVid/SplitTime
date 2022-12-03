@@ -76,13 +76,11 @@ export class Cache<T> {
     async load(id: string): Promise<void> {
         const cacheEntry = this.cacheObject[id]
         try {
-            console.log("loading", id)
             const data = await this.getCallback(id)
             this.updateCacheEntry(id, {
                 data: data as Immutable<T>,
                 failed: false
             })
-            console.log("loaded", id)
         } catch (e: unknown) {
             warn("Failed to load item \"" + cacheEntry + "\" for cache", e)
             this.updateCacheEntry(id, {failed: true})

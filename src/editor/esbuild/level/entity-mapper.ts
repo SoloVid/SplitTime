@@ -37,7 +37,6 @@ export function makeEditorEntityFromFileObject<T extends EditorEntity>(
     obj: e,
     setObj: ((transform: ImmutableTransform<T["obj"]>) => {
       updateEntity((entityBefore) => {
-        console.log("updating entity", metadataInitial.editorId)
         const objAfter = transform(entityBefore.obj as Immutable<T["obj"]>)
         return {
           ...entityBefore,
@@ -48,7 +47,6 @@ export function makeEditorEntityFromFileObject<T extends EditorEntity>(
     metadata: metadataInitial,
     setMetadata: ((transform: ImmutableTransform<EditorMetadata>) => {
       updateEntity((entityBefore) => {
-        console.log("updating metadata", metadataInitial.editorId)
         const metadataAfter = transform(entityBefore.metadata)
         return {
           ...entityBefore,
