@@ -35,7 +35,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   const updateMetadata = makeImmutableObjectSetterUpdater(entity.setMetadata)
 
   const collage = useMemo<Immutable<Collage> | typeof NOT_READY | typeof NOT_AVAILABLE>(() => {
-    if (p.collage === "") {
+    if (p.collage === "" || p.montage === "") {
       return NOT_AVAILABLE
     }
     try {

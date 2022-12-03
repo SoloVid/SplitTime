@@ -1,6 +1,6 @@
 import { COLLAGE_DIR } from "engine/assets/assets"
 import { makeCollageFromFile } from "engine/graphics/collage"
-import { useState } from "preact/hooks"
+import { useEffect, useState } from "preact/hooks"
 import { SharedStuffViewOnly as CollageSharedStuff } from "../collage/collage-editor-shared"
 import CollageShowcase from "../collage/collage-showcase"
 import { makeClassNames, onlyLeft } from "../preact-help"
@@ -15,12 +15,27 @@ type LevelEditorToolsProps = {
 }
 
 function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuff | null {
-  const [montageIndex, setMontageIndex] = useState<number | null>(null)
+  const [montageIndex, setMontageIndexInternal] = useState<number | null>(null)
 
   const collage = levelEditorShared.selectedCollage
   if (collage === null) {
     return null
   }
+
+  const selectMontage = (montageIndex: number | null) => {
+    setMontageIndexInternal(montageIndex)
+    if (montageIndex === null) {
+      levelEditorShared.setSelectedMontage(null)
+      levelEditorShared.setSelectedMontageDirection(null)
+      return
+    }
+
+    const m = collage.montages[montageIndex]
+    levelEditorShared.setSelectedMontage(m.id)
+    levelEditorShared.setSelectedMontageDirection(m.direction)
+  }
+
+  useEffect(() => selectMontage(null), [collage])
 
   return {
     collage,
@@ -37,7 +52,7 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
       server: levelEditorShared.globalStuff.server,
       userInputs: levelEditorShared.globalStuff.userInputs,
     },
-    selectMontage: setMontageIndex,
+    selectMontage,
   }
 }
 
@@ -88,7 +103,7 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
         <i className={`fas fa-${POSITION_ICON}`}></i>
       </div>
     </div>
-    <div className="trace-type-options" v-show="mode === 'trace'">
+    {mode === "trace" && <div className="trace-type-options">
       {traceOptions.map((traceOption) => (
         <div
           key={traceOption.type}
@@ -100,8 +115,8 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
           { traceOption.type }
         </div>
       ))}
-    </div>
-    <div className="collage-tool" v-show="mode === 'prop' || mode === 'position'">
+    </div>}
+    {(mode === 'prop' || mode === 'position') && <div className="collage-tool">
       <input
         value={levelEditorShared.selectedCollageId ?? ""}
         onDblClick={onlyLeft(launchCollageFileBrowser)}
@@ -113,6 +128,6 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
         collageViewHelper={collageViewHelper}
         style="padding: 5px;"
       />}
-    </div>
+    </div>}
   </div>
 }
