@@ -77,7 +77,7 @@ export default function MenuGroup({
 
   return <div className="menu-group">
     {!!group && <>
-      <span onClick={(before) => setCollapsed(!before)} onMouseDown={preventDefault} className="pointer">
+      <span onClick={() => setCollapsed((before) => !before)} onMouseDown={preventDefault} className="pointer">
         {collapsed && <i className="fas fa-caret-right"></i>}
         {!collapsed && <i className="fas fa-caret-down"></i>}
       </span>

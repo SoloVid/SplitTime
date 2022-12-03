@@ -120,6 +120,9 @@ export default function RenderedTrace(props: RenderedTraceProps) {
   function useOtherLevel(s: ServerLiaison, levelId: string) {
     const [levelJson, setLevelJson] = useState<FileData | null>(null)
     useEffect(() => {
+      if (!levelId) {
+        return
+      }
       s.api.levelJson.fetch(s.withProject({ levelId })).then(setLevelJson)
     }, [levelId])
     return [levelJson]
