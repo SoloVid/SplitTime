@@ -4,7 +4,7 @@ import { makePositionPoint } from "engine/world/level/trace/trace-points"
 import { useMemo, useRef } from "preact/hooks"
 import { createSnapMontageMover, findClosestPosition, getGroupById, makeNewTrace } from "../editor-functions"
 import GridLines from "../grid-lines"
-import { makeStyleString, preventDefault } from "../preact-help"
+import { ImmutableSetter, makeStyleString, preventDefault } from "../preact-help"
 import { UserInputs } from "../shared-types"
 import LevelBackground from "./level-background"
 import { useEntityBodies } from "./entity-body-manager"
@@ -34,9 +34,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     () => [...level.props, ...level.positions, ...level.traces],
     [level.props, level.positions, level.traces]
   )
-  // console.log("allEntities", allEntities)
   const entityBodies = useEntityBodies(level, levelEditorShared.collageManager, allEntities)
-  // const bodyManager = useEntityBodyManager(level, levelEditorShared.collageManager)
   const allEntitiesSorted = useSortedEntities(allEntities, entityBodies)
   // This is the workaround if the sorting hangs up the UI too much.
   // const allEntitiesSorted = allEntities
@@ -169,12 +167,18 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
       var closestPosition = findClosestPosition(level, inputs.mouse.x, yInGroup)
       var positionPoint = closestPosition ? makePositionPoint(closestPosition.obj.id) : ""
       const pathInProgress = levelEditorShared.pathInProgress
+      function addPathInProgressVertex(newVertex: string) {
+        pathInProgress?.setObj((before) => ({
+          ...before,
+          vertices: before.vertices + " " + newVertex,
+        }))
+      }
       if(isLeftClick) {
         if(pathInProgress) {
           if(levelEditorShared.selectedTraceType == "path" && inputs.ctrlDown) {
-            pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint
+            addPathInProgressVertex(positionPoint)
           } else {
-            pathInProgress.vertices = pathInProgress.vertices + " " + literalPoint
+            addPathInProgressVertex(literalPoint)
           }
         }
       } else if(isRightClick) {
@@ -190,16 +194,16 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
           const newEntity = levelEditorShared.level.addTrace(trace)
           // TODO: Lookup will fail because state hasn't propagated?
           levelEditorShared.setPropertiesPanel(newEntity)
-          levelEditorShared.setPathInProgress(trace)
+          levelEditorShared.setPathInProgress(newEntity)
         } else {
           if(!inputs.ctrlDown) {
             if(pathInProgress.type == Type.PATH) {
               if(closestPosition) {
-                pathInProgress.vertices = pathInProgress.vertices + " " + positionPoint
+                addPathInProgressVertex(positionPoint)
               }
             }
             else {
-              pathInProgress.vertices = pathInProgress.vertices + " (close)"
+              addPathInProgressVertex("(close)")
             }
           }
           levelEditorShared.setPathInProgress(null)

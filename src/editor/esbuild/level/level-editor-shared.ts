@@ -7,7 +7,7 @@ import { ImmutableSetter } from "../preact-help"
 import { Followable, GlobalEditorShared } from "../shared-types"
 import { BasePath } from "../utils/immutable-helper"
 import { useCollageManager } from "./collage-manager"
-import { EditorEntity, EditorGroupEntity, EditorLevel } from "./extended-level-format"
+import { EditorEntity, EditorGroupEntity, EditorLevel, EditorTraceEntity } from "./extended-level-format"
 import { Mode } from "./shared-types"
 
 type MakeSharedStuffOptions = {
@@ -24,7 +24,7 @@ export function useSharedStuff(options: MakeSharedStuffOptions) {
   } = options
 
   const collageManager = useCollageManager(globalStuff.server)
-  const [activeGroup, setActiveGroup] = useState<EditorGroupEntity | null>(level.groups.length > 0 ? level.groups[0] : null)
+  const [activeGroup, setActiveGroup] = useState<Immutable<EditorGroupEntity> | null>(level.groups.length > 0 ? level.groups[0] : null)
   const [mode, setMode] = useState<Mode>("trace")
   const [selectedCollageId, setSelectedCollageId] = useState<string | null>(null)
   const [selectedCollage] = useCollageJson(globalStuff.server, selectedCollageId)
@@ -32,7 +32,7 @@ export function useSharedStuff(options: MakeSharedStuffOptions) {
   const [selectedMontageDirection, setSelectedMontageDirection] = useState<string | null>(null)
   // const [selectedMontageObject, setSelectedMontageObject] = useState<FileMontage | null>(null)
   const [selectedTraceType, setSelectedTraceType] = useState<string>(Type.SOLID)
-  const [pathInProgress, setPathInProgress] = useState<FileTrace | null>(null)
+  const [pathInProgress, setPathInProgress] = useState<Immutable<EditorTraceEntity> | null>(null)
   const [info, setInfo] = useState<Record<string, string | number>>({})
   const [propertiesPath, setPropertiesPath] = useState<BasePath | null>([])
 
