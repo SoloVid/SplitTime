@@ -83,8 +83,5 @@ export function SelectInput<T extends string | number>(props: SelectProps<T>) {
     {props.options.map(([value, display]) => (
       <option value={value}>{display}</option>
     ))}
-    <option value="A">A</option>
-    <option value="B">B</option>
-    <option value="C">C</option>
   </select>
 }

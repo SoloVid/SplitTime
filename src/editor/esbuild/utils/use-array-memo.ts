@@ -1,6 +1,15 @@
 import { useEffect, useState } from "preact/hooks";
+import { EditorPropEntity } from "../level/extended-level-format";
+import { getByPath } from "./immutable-helper";
 
-export function useArrayMemo<Input, Output, KeyField extends (keyof Input) | null>(
+type SubKeyPaths<T, Key extends (keyof T)> = Key extends string ? (readonly [Key] | readonly [Key, ...KeyPaths<T[Key]>]) : never
+type KeyPaths<T> = T extends Record<string, unknown>
+  ? (SubKeyPaths<T, keyof T>)
+  : never
+
+type A = KeyPaths<EditorPropEntity>
+
+export function useArrayMemo<Input, Output, KeyField extends (keyof Input) | KeyPaths<Input> | null>(
   inputArray: readonly Input[],
   keyField: KeyField,
   map: (input: Input, index: number) => Output,
@@ -10,27 +19,44 @@ export function useArrayMemo<Input, Output, KeyField extends (keyof Input) | nul
     ? Input[KeyField]
     : number
   type State = {
-    mappings: Map<KeyType, [Input, Output]>,
+    mappings: Map<KeyType, readonly [Input, Output]>,
     outputArray: readonly Output[],
   }
 
+  function getKey(input: Input, index: number): KeyType {
+    if (keyField === null) {
+      return index as KeyType
+    }
+    if (typeof keyField === "string") {
+      return input[keyField as keyof Input] as KeyType
+    }
+    // TODO: More type safety?
+    return getByPath(input as object, keyField as any) as KeyType
+  }
+
   function updateState(before: State): State {
-    const mappedArray = inputArray.map((input, i) => {
-      const key = (keyField !== null ? input[keyField] : i) as KeyType
+    function calculate(input: Input, i: number) {
+      const key = getKey(input, i)
+      // const key = (keyField !== null ? input[keyField] : i) as KeyType
       const [previousInput, previousOutput] = before.mappings.get(key) ?? [null, null]
       if (previousInput === input) {
-        return [input, previousOutput as Output] as const
+        return [key, previousOutput as Output] as const
       }
       const newOutput = map(input, i)
-      return [input, newOutput] as const
-    })
-    const mappingsAsMap = new Map()
-    for (const [input, output] of mappedArray) {
-      mappingsAsMap.set(input, output)
+      const mapping = [input, newOutput] as const
+      mappingsAsMap.set(key, mapping)
+      return [key, newOutput] as const
     }
+    const mappingsAsMap = new Map<KeyType, readonly [Input, Output]>()
+    const mappedArray: Output[] = []
+    inputArray.forEach((input, i) => {
+      const [key, output] = calculate(input, i)
+      mappingsAsMap.set(key, [input, output])
+      mappedArray.push(output)
+    })
     return {
       mappings: mappingsAsMap,
-      outputArray: mappedArray.map(([,output]) => output),
+      outputArray: mappedArray,
     }
   }
 
@@ -39,9 +65,11 @@ export function useArrayMemo<Input, Output, KeyField extends (keyof Input) | nul
   //   mappings: new Map(),
   //   outputArray: [],
   // }))
-  const [state, setState] = useState<State>({
-    mappings: new Map(),
-    outputArray: [],
+  const [state, setState] = useState<State>(() => {
+    return {
+      mappings: new Map(),
+      outputArray: [],
+    }
   })
 
   useEffect(() => {

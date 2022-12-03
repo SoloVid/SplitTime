@@ -45,12 +45,12 @@ export type GraphicalEditorEntity = EditorPositionEntity | EditorPropEntity | Ed
 export function useEditorLevel(fileLevel: FileLevel): [EditorLevel, ImmutableSetter<EditorLevel>] {
   const setEditorLevel1: ImmutableSetter<EditorLevel> = (...args) => setEditorLevel2(...args)
   const [editorLevel, setEditorLevel2] = useState<EditorLevel>(() => ({
-    region: "",
-    width: 640,
-    height: 480,
-    background: "",
-    backgroundOffsetX: 0,
-    backgroundOffsetY: 0,
+    region: fileLevel.region,
+    width: fileLevel.width,
+    height: fileLevel.height,
+    background: fileLevel.background,
+    backgroundOffsetX: fileLevel.backgroundOffsetX,
+    backgroundOffsetY: fileLevel.backgroundOffsetY,
     groups: fileLevel.groups.map(g => makeEditorEntityFromFileObject(setEditorLevel1, g, "group")),
     addGroup: (init) => {
       const newEntity = makeEditorEntityFromFileObject<EditorGroupEntity>(setEditorLevel1, { ...defaultFileGroup, ...init }, "group")

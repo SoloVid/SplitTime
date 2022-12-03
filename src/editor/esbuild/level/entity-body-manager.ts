@@ -6,19 +6,25 @@ import { Body } from "engine/world/body/body"
 import { GraphBody } from "engine/world/body/body-rendering-graph"
 import { CanvasRequirements } from "engine/world/body/render/drawable"
 import { Coordinates2D } from "engine/world/level/level-location"
-import { useState } from "preact/hooks"
+import { useMemo, useState } from "preact/hooks"
 import { defaultBodySpec } from "../collage/collage-helper"
 import { PLACEHOLDER_WIDTH, safeExtractTraceArray } from "../editor-functions"
 import { FileLevel, FilePosition, FileProp, FileTrace } from "../file-types"
+import { useArrayMemo } from "../utils/use-array-memo"
 import { CollageManager } from "./collage-manager"
 import { EditorLevel, GraphicalEditorEntity } from "./extended-level-format"
 
 // From https://stackoverflow.com/a/43001581/4639640
 type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
-export function useEntityBodyManager(
+export type EditorGraphBody = GraphBody & { editorId: string }
+
+let nextRef = 1
+
+export function useEntityBodies(
   level: EditorLevel,
   collageManager: CollageManager,
+  allEntities: readonly Immutable<GraphicalEditorEntity>[],
 ) {
   const [placeholderDrawable] = useState(() => {
     const topLeft = getDefaultTopLeft(defaultBodySpec, Rect.make(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH))
@@ -30,45 +36,51 @@ export function useEntityBodyManager(
     }
   })
 
+  function makeWriteableBody(): Writeable<GraphBody> {
+    return {
+      ref: nextRef++,
+      drawables: [],
+      x: 0,
+      y: 0,
+      z: 0,
+      width: 0,
+      depth: 0,
+      height: 0,
+    }
+  }
+
   // In the Vue implementation, I had some sort of caching implementation.
   // When I tried to translate it (commented out code in this file),
   // it hung up the UI, so I've removed it for now.
   // const [editorIdToBody, setEditorIdToBody] = useState<Immutable<{ [editorId: string]: GraphBody }>>({})
 
-  return {
-    getUpdatedBody(editorEntity: Immutable<GraphicalEditorEntity>): Immutable<GraphBody> | null {
-      const editorId = editorEntity.metadata.editorId
-      const body = new Body()
-      // const body = {...(editorIdToBody[editorId] ?? new Body())}
-      try {
-        if (editorEntity.type === "trace") {
-          if (!applyTrace(body, editorEntity.obj)) {
+  function makeBodyForEntity(editorEntity: Immutable<GraphicalEditorEntity>): Immutable<EditorGraphBody> | null {
+    // console.log(`Making new body for ${editorEntity.metadata.editorId}`)
+    const body = makeWriteableBody()
+    if (editorEntity.type === "trace") {
+      if (!applyTrace(body, editorEntity.obj)) {
+        return null
+      }
+    } else {
+      const p = editorEntity.obj
+      body.x = p.x
+      body.y = p.y
+      body.z = p.z
+      if (p.collage === "") {
+        applyPlaceholder(body)
+      } else {
+        try {
+          if (!applyProposition(body, p)) {
             return null
           }
-        } else {
-          const p = editorEntity.obj
-          body.x = p.x
-          body.y = p.y
-          body.z = p.z
-          if (p.collage === "") {
-            applyPlaceholder(body)
-          } else {
-            try {
-              if (!applyProposition(body, p)) {
-                return null
-              }
-            } catch (e: unknown) {
-              applyPlaceholder(body)
-            }
-          }
+        } catch (e: unknown) {
+          applyPlaceholder(body)
         }
-        return body
-      } finally {
-        // setEditorIdToBody({
-        //   ...editorIdToBody,
-        //   [editorId]: body,
-        // })
       }
+    }
+    return {
+      ...body,
+      editorId: editorEntity.metadata.editorId,
     }
   }
 
@@ -136,6 +148,16 @@ export function useEntityBodyManager(
     // }
     body.drawables = [placeholderDrawable]
   }
+
+  const entityBodies = useArrayMemo(
+    allEntities,
+    ["metadata", "editorId"] as const,
+    makeBodyForEntity,
+    [collageManager],
+  )
+
+  const filteredEntityBodies = useMemo(() => entityBodies.filter(e => e !== null), [entityBodies])
+  return filteredEntityBodies as readonly Immutable<EditorGraphBody>[]
 }
 
-export type EntityBodyManager = ReturnType<typeof useEntityBodyManager>
+// export type EntityBodyManager = ReturnType<typeof useEntityBodyManager>

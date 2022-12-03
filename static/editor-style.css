@@ -199,3 +199,7 @@ input.block, textarea.block, select.block {
     width: 100%;
     display: block;
 }
+
+.info-key-value {
+    margin-right: 8px;
+}

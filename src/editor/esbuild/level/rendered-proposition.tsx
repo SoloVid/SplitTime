@@ -123,13 +123,15 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
       return
     }
     const snappedMover = createSnapMontageMover(levelEditorShared.globalStuff.gridCell, montage.bodySpec, p)
+    const originalX = entity.obj.x
+    const originalY = entity.obj.y
     levelEditorShared.follow({
       shift: (dx, dy) => {
         snappedMover.applyDelta(dx, dy)
         const snappedDelta = snappedMover.getSnappedDelta()
         updateP((before) => ({
-          x: before.x + snappedDelta.x,
-          y: before.y + snappedDelta.y,
+          x: originalX + snappedDelta.x,
+          y: originalY + snappedDelta.y,
         }))
       }
     })

@@ -6,7 +6,7 @@ import { createSnapMontageMover, findClosestPosition, getGroupById, makeNewTrace
 import GridLines from "../grid-lines"
 import { makeStyleString, preventDefault } from "../preact-help"
 import { UserInputs } from "../shared-types"
-import { useEntityBodyManager } from "./entity-body-manager"
+import { useEntityBodies } from "./entity-body-manager"
 import { useSortedEntities } from "./entity-sort-helper"
 import { SharedStuff } from "./level-editor-shared"
 import RenderedLevelTrace from "./rendered-level-trace"
@@ -28,9 +28,14 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
 
   const $el = useRef<HTMLDivElement>(null)
 
-  const allEntities = [...level.props, ...level.positions, ...level.traces]
-  const bodyManager = useEntityBodyManager(level, levelEditorShared.collageManager)
-  const allEntitiesSorted = useSortedEntities(allEntities, bodyManager)
+  // const allEntities = [...level.props, ...level.positions, ...level.traces]
+  const allEntities = useMemo(
+    () => [...level.props, ...level.positions, ...level.traces],
+    [level.props, level.positions, level.traces]
+  )
+  const entityBodies = useEntityBodies(level, levelEditorShared.collageManager, allEntities)
+  // const bodyManager = useEntityBodyManager(level, levelEditorShared.collageManager)
+  const allEntitiesSorted = useSortedEntities(allEntities, entityBodies)
   // This is the workaround if the sorting hangs up the UI too much.
   // const allEntitiesSorted = allEntities
 

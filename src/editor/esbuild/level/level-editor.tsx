@@ -119,7 +119,7 @@ export default function LevelEditor(props: LevelEditorProps) {
 
     <div id="info-pane" style="padding: 2px;">
       {Object.entries(sharedStuff.info).map(([name, value]) => (
-        <span key={name}>
+        <span key={name} className="info-key-value">
           {name}: {value}
         </span>
       ))}
