@@ -23,10 +23,12 @@ export default function MontageEditor(props: MontageEditorProps) {
   const selectedFrameId = collageEditorShared.selectedFrame === null ? null : collageEditorShared.selectedFrame.id
 
   const widestFrameWidth = useMemo(() => {
-    return collage.frames.reduce((maxWidth, f) => {
-      return Math.max(maxWidth, f.width)
-    }, 0)
-  }, [collage.frames])
+    return montage.frames
+      .map(mf => collage.frames.find(f => mf.frameId === f.id))
+      .reduce((maxWidth, f) => {
+        return Math.max(maxWidth, f?.width ?? 0)
+      }, 0)
+  }, [montage.frames, collage.frames])
   const widestFrameWidthS = widestFrameWidth * scale
 
   const gridStyle = useMemo(() => {

@@ -175,6 +175,7 @@ export function getObjectProperties(collage: Immutable<Collage>, setCollage: Imm
         ...baseProperties as any,
         title: "Body Spec Properties",
         fields: bodySpecFieldObject,
+        allowDelete: false,
       }
       // TODO: More type safety?
       return properties as any

@@ -71,8 +71,8 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
           regex = new RegExp("\\((" + originalPoint.x + "),\\s*(" + originalPoint.y + ")\\)", "g")
         }
         trace.vertices = originalPointString.replace(regex, function(match, p1, p2) {
-          var newX = Number(p1) + snappedDelta.x
-          var newY = Number(p2) + snappedDelta.y
+          var newX = Math.round(Number(p1) + snappedDelta.x)
+          var newY = Math.round(Number(p2) + snappedDelta.y)
           return "(" + newX + ", " + newY + ")"
         })
       }

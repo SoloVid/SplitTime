@@ -216,16 +216,16 @@ export default function Editor({ server }: EditorProps) {
         setCtrlDown(true)
         break
       case keycode.LEFT:
-        moveFollowers(-gridCell.x, 0)
+        moveFollowers(-gridCell.x * globalEditorStuff.scale, 0)
         break
       case keycode.UP:
-        moveFollowers(0, -gridCell.y)
+        moveFollowers(0, -gridCell.y * globalEditorStuff.scale)
         break
       case keycode.RIGHT:
-        moveFollowers(gridCell.x, 0)
+        moveFollowers(gridCell.x * globalEditorStuff.scale, 0)
         break
       case keycode.DOWN:
-        moveFollowers(0, gridCell.y)
+        moveFollowers(0, gridCell.y * globalEditorStuff.scale)
         break
       default:
         specialKey = false

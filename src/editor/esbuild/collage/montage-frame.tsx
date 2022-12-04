@@ -14,6 +14,7 @@ import { imageContext } from "../server-liaison"
 import { getRelativeMouse } from "../shared-types"
 import { useScaledImageDimensions } from "../utils/scaled-image"
 import { useScaledImageSize } from "../utils/image-size"
+import { GridSnapMover } from "../grid-snap-mover"
 
 type MontageFrameProps = {
   collageEditHelper: SharedStuff | undefined
@@ -165,10 +166,15 @@ export default function MontageFrame(props: MontageFrameProps) {
     if (collageEditHelper.traceInProgress) {
       return
     }
+    const original = { x: montageFrame.offsetX, y: montageFrame.offsetY }
+    const originals = montage.frames.map(mf => ({ x: mf.offsetX, y: mf.offsetY }))
+    const snappedMover = new GridSnapMover({ x: 1, y: 1 }, [original])
     collageEditHelper.follow({
       shift(dx: number, dy: number) {
         const dxScaled = dx / scale
         const dyScaled = dy / scale
+        snappedMover.applyDelta(dxScaled, dyScaled)
+        const snappedDelta = snappedMover.getSnappedDelta()
         collageEditHelper.setCollage((before) => ({
           ...before,
           montages: before.montages.map((m, i) => {
@@ -183,8 +189,8 @@ export default function MontageFrame(props: MontageFrameProps) {
                 }
                 return {
                   ...mf,
-                  offsetX: mf.offsetX - dxScaled,
-                  offsetY: mf.offsetY - dyScaled,
+                  offsetX: Math.round(originals[j].x - snappedDelta.x),
+                  offsetY: Math.round(originals[j].y - snappedDelta.y),
                 }
               })
             }

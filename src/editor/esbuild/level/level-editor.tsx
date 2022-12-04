@@ -55,6 +55,9 @@ export default function LevelEditor(props: LevelEditorProps) {
         return
       }
       const propertiesStuff = getObjectProperties(editorLevel, setEditorLevel, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPanel(null))
+      if (!propertiesStuff.allowDelete) {
+        return
+      }
       updateImmutableObject(setEditorLevel, propertiesStuff.pathToDeleteThing ?? sharedStuff.propertiesPath, undefined)
       sharedStuff.setPropertiesPanel(null)
     })
