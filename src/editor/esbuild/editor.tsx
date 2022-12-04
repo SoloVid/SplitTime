@@ -13,6 +13,7 @@ import FileBrowser from "./file-browser"
 import { FileLevel } from "./file-types"
 import { CheckboxInput, NumberInput } from "./input"
 import LevelEditor from "./level/level-editor"
+import { globalEditorPreferences } from "./preferences"
 import { ServerLiaison } from "./server-liaison"
 import { Followable, GlobalEditorShared } from "./shared-types"
 
@@ -23,13 +24,13 @@ type EditorProps = {
 }
 
 export default function Editor({ server }: EditorProps) {
-  const [gridEnabled, setGridEnabled] = useState(false)
-  const [explicitGridCell, setExplicitGridCell] = useState({ x: 32, y: 32 })
+  const [lastServerFile, setLastServerFile] = useState<string | null>(null)
+  const [preferences, setPreferences] = globalEditorPreferences.use(lastServerFile)
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
   const [onDeleteCallback, setOnDeleteCallback] = useState<{f: () => void}>({f:() => { }})
 
-  const gridCell = gridEnabled ? explicitGridCell : { x: 1, y: 1 }
+  const gridCell = preferences.gridEnabled ? preferences.gridCell : { x: 1, y: 1 }
 
   function setFollowers(newFollowers: null | readonly Followable[]): void {
     setPreviousFollowers(followers)
@@ -47,7 +48,6 @@ export default function Editor({ server }: EditorProps) {
   const [fileBrowserStartDirectory, setFileBrowserStartDirectory] = useState("")
   const [fileBrowserStartFileName, setFileBrowserStartFileName] = useState("")
   const [fileBrowserTitle, setFileBrowserTitle] = useState("Select File")
-  const [lastServerFile, setLastServerFile] = useState<string | null>(null)
   const [showFileBrowser, setShowFileBrowser] = useState(false)
   const [showNewDialog, setShowNewDialog] = useState(false)
   const [mouse, setMouse] = useState({
@@ -61,7 +61,7 @@ export default function Editor({ server }: EditorProps) {
   const [triggerSettings, setTriggerSettings] = useState<{ f: () => void }>({ f: () => {} })
 
   const globalEditorStuff: GlobalEditorShared = {
-    gridEnabled,
+    gridEnabled: preferences.gridEnabled,
     gridCell,
     server,
     userInputs: {
@@ -336,22 +336,36 @@ export default function Editor({ server }: EditorProps) {
     style="display: flex; flex-flow: column; height: 100vh;"
   >
     <div className="menu-bar">
-      <a onClick={() => setShowNewDialog(true)}>New</a>
-      <a onClick={openFileOpen}>Open</a>
-      <a onClick={openFileSave}>Save</a>
-      <a onClick={editSettings}>Edit Settings</a>
-      <label>
-        Grid:
-        <CheckboxInput value={gridEnabled} onChange={setGridEnabled} />
-      </label>
-      {gridEnabled && <label>
-        x:
-        <NumberInput value={gridCell.x} onChange={(newValue) => setExplicitGridCell({...gridCell, x: newValue})} style="width: 48px;"/>
-      </label>}
-      {gridEnabled && <label>
-        y:
-        <NumberInput value={gridCell.y} onChange={(newValue) => setExplicitGridCell({...gridCell, y: newValue})} style="width: 48px;"/>
-      </label>}
+      {(!level && !collage) && <>
+        <a onClick={() => setShowNewDialog(true)}>New</a>
+        <a onClick={openFileOpen}>Open</a>
+      </>}
+      {(level || collage) && <>
+        <a onClick={openFileSave}>Save</a>
+        <a onClick={editSettings}>Edit Settings</a>
+        <label>
+          Grid:
+          <CheckboxInput value={preferences.gridEnabled} onChange={(b) => setPreferences((p) => ({...p, gridEnabled: b}))} />
+        </label>
+        {preferences.gridEnabled && <>
+          <label>
+            x:
+            <NumberInput
+              value={gridCell.x}
+              onChange={(x) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, x: x}}))}
+              style="width: 48px;"
+            />
+          </label>
+          <label>
+            y:
+            <NumberInput
+              value={gridCell.y}
+              onChange={(y) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, y: y}}))}
+              style="width: 48px;"
+            />
+          </label>
+        </>}
+      </>}
     </div>
     {showNewDialog && <div className="modal-backdrop">
       <div className="modal-body">
@@ -386,6 +400,7 @@ export default function Editor({ server }: EditorProps) {
     />}
     { !!level && <LevelEditor
       key={lastServerFile}
+      id={lastServerFile ?? "unknown"}
       editorGlobalStuff={globalEditorStuff}
       level={level}
       setLevel={setLevel}
