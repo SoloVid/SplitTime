@@ -1,8 +1,6 @@
-import "preact/debug"
+import "preact/debug";
 
-import { render } from "preact"
-import { useState } from "preact/hooks";
-import { UnderlyingCacheObject } from "./cache";
+import { render } from "preact";
 import Editor from "./editor";
 import { ProjectImagesProvider, ServerLiaison } from "./server-liaison";
 import SvgPatterns from "./svg-patterns";
@@ -17,10 +15,9 @@ const projectName = url.substring(url.indexOf(slug) + slug.length + 1)
 
 Promise.resolve().then(() => exerciseApi())
 
-// TODO: Re-enable confirmation
-// window.onbeforeunload = function() {
-//     return true;
-// };
+window.onbeforeunload = function() {
+    return true;
+};
 
 export default function EsbuildEditor() {
   const serverLiaison = new ServerLiaison(projectName)

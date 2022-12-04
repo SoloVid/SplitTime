@@ -49,6 +49,17 @@ export default function LevelEditor(props: LevelEditorProps) {
     })
   }, [])
 
+  useEffect(() => {
+    editorGlobalStuff.setOnDelete(() => {
+      if (sharedStuff.propertiesPath === null || sharedStuff.propertiesPath.length === 0) {
+        return
+      }
+      const propertiesStuff = getObjectProperties(editorLevel, setEditorLevel, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPanel(null))
+      updateImmutableObject(setEditorLevel, propertiesStuff.pathToDeleteThing ?? sharedStuff.propertiesPath, undefined)
+      sharedStuff.setPropertiesPanel(null)
+    })
+  }, [sharedStuff.propertiesPath])
+
   const MIN_MENU_WIDTH = 32
   function trackLeftMenuResize(): void {
     sharedStuff.follow({

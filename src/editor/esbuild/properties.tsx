@@ -25,9 +25,9 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
     if (!spec.allowDelete) {
       return
     }
-    if (!window.confirm("Are you sure you want to delete this?")) {
-      return
-    }
+    // if (!window.confirm("Are you sure you want to delete this?")) {
+    //   return
+    // }
     updateImmutableObject(spec.setTopLevelThing, spec.pathToDeleteThing ?? spec.pathToImportantThing, undefined)
     // TODO: More type safety?
     spec.onDelete(getByPath(spec.topLevelThing, spec.pathToImportantThing) as any)

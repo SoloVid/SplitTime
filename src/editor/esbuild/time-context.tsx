@@ -8,9 +8,12 @@ export function TimeProvider({ children }: { children: any }) {
   
   useEffect(() => {
     const TIME_INTERVAL = 50;
-    setInterval(function() {
+    const handle = setInterval(function() {
       setTime((oldTime) => oldTime += TIME_INTERVAL / 1000)
-    }, TIME_INTERVAL);
+    }, TIME_INTERVAL)
+    return () => {
+      clearInterval(handle)
+    }
   }, [])
 
   return (
