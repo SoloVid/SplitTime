@@ -63,6 +63,7 @@ export default function Editor({ server }: EditorProps) {
   const globalEditorStuff: GlobalEditorShared = {
     gridEnabled: preferences.gridEnabled,
     gridCell,
+    scale: preferences.zoom / 100,
     server,
     userInputs: {
       mouse,
@@ -343,12 +344,12 @@ export default function Editor({ server }: EditorProps) {
       {(level || collage) && <>
         <a onClick={openFileSave}>Save</a>
         <a onClick={editSettings}>Edit Settings</a>
-        <label>
+        <label className="margin-right">
           Grid:
           <CheckboxInput value={preferences.gridEnabled} onChange={(b) => setPreferences((p) => ({...p, gridEnabled: b}))} />
         </label>
         {preferences.gridEnabled && <>
-          <label>
+          <label className="margin-right">
             x:
             <NumberInput
               value={gridCell.x}
@@ -356,7 +357,7 @@ export default function Editor({ server }: EditorProps) {
               style="width: 48px;"
             />
           </label>
-          <label>
+          <label className="margin-right">
             y:
             <NumberInput
               value={gridCell.y}
@@ -365,6 +366,15 @@ export default function Editor({ server }: EditorProps) {
             />
           </label>
         </>}
+        <label className="margin-right">
+            Zoom:
+            <NumberInput
+              step={10}
+              value={preferences.zoom}
+              onChange={(z) => setPreferences((p) => ({...p, zoom: z}))}
+              style="width: 48px;"
+            />%
+          </label>
       </>}
     </div>
     {showNewDialog && <div className="modal-backdrop">

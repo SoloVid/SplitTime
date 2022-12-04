@@ -10,6 +10,7 @@ type FrameRectangleProps = {
   frameIndex: number
   frame: Frame
   offset: Coordinates2D
+  scale?: number
 }
 
 export default function FrameRectangle(props: FrameRectangleProps) {
@@ -18,19 +19,26 @@ export default function FrameRectangle(props: FrameRectangleProps) {
     frameIndex,
     frame,
     offset,
+    scale = 1,
   } = props
 
   const collage = collageEditorShared.collage
+  const frameS = {
+    x: Math.round(frame.x * scale),
+    y: Math.round(frame.y * scale),
+    width: Math.round(frame.width * scale),
+    height: Math.round(frame.height * scale),
+  }
 
   const GRAB_BOX_WIDTH = 8
   const grabBox = useMemo(() => {
     return Rect.make(
-      frame.x + frame.width / 2 - GRAB_BOX_WIDTH / 2,
-      frame.y + frame.height / 2 - GRAB_BOX_WIDTH / 2,
+      frameS.x + frameS.width / 2 - GRAB_BOX_WIDTH / 2,
+      frameS.y + frameS.height / 2 - GRAB_BOX_WIDTH / 2,
       GRAB_BOX_WIDTH,
       GRAB_BOX_WIDTH
     )
-  }, [frame])
+  }, [frameS])
 
   const isSelected = collageEditorShared.selectedFrame === frame
 
@@ -50,7 +58,7 @@ export default function FrameRectangle(props: FrameRectangleProps) {
   }, [frame])
 
   function track(point?: Coordinates2D): void {
-    collageEditorShared.trackFrame(frameIndex, point)
+    collageEditorShared.trackFrame(frameIndex, frame, point)
   }
 
   function addToMontage(): void {
@@ -77,10 +85,10 @@ export default function FrameRectangle(props: FrameRectangleProps) {
   return <g>
     {/* Outline */}
     <rect
-      x={frame.x + offset.x}
-      y={frame.y + offset.y}
-      width={frame.width}
-      height={frame.height}
+      x={frameS.x + offset.x}
+      y={frameS.y + offset.y}
+      width={frameS.width}
+      height={frameS.height}
       stroke={traceStroke}
       stroke-width="2"
       fill={traceFill}
@@ -92,8 +100,8 @@ export default function FrameRectangle(props: FrameRectangleProps) {
         style="cursor: grab;"
         class="hoverable"
         fill="purple"
-        cx={vertex.x + offset.x}
-        cy={vertex.y + offset.y}
+        cx={vertex.x * scale + offset.x}
+        cy={vertex.y * scale + offset.y}
         r="4"
       />
     ))}

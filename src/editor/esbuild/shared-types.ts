@@ -17,7 +17,10 @@ export interface VueComponent {
 export interface GlobalEditorShared {
   readonly gridEnabled: boolean
   readonly gridCell: { readonly x: number, readonly y: number }
+  /** Zoom multiplier. (1 is actual size) */
+  readonly scale: number
   readonly server: ServerLiaison
+  /** Note: Mouse values NOT scaled by zoom. */
   readonly userInputs: UserInputs
   openFileSelect(rootDirectory: string): PromiseLike<string>
   setFollowers(newFollowers: Followable[]): void

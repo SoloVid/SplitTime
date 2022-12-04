@@ -31,10 +31,6 @@ export default function CollageEditor(props: CollageEditorProps) {
 
   const $el = useRef<null | HTMLDivElement>(null)
 
-  // const [sharedStuff, setSharedStuff] = useState(makeSharedStuff({
-  //   collage: collage,
-  //   globalStuff: editorGlobalStuff,
-  // }))
   const sharedStuff = makeSharedStuff({
     collage: collage,
     setCollageNull: setCollage,
@@ -80,23 +76,11 @@ export default function CollageEditor(props: CollageEditorProps) {
     return $el.current.clientHeight
   }
 
-  // useEffect(() => {
-  //   sharedStuff.setSelectedFrame(null)
-  //   sharedStuff.setSelectedMontage(null)
-  // }, [collage])
-
   useEffect(() => {
     editorGlobalStuff.setOnSettings(() => {
       sharedStuff.setPropertiesPath([])
     })
   }, [])
-
-  // I'm not sure there's a scenario this makes sense, but it was in the Vue implementation.
-  // useEffect(() => {
-  //   editorGlobalStuff.setOnSettings(() => {
-  //     sharedStuff.editProperties(getCollagePropertiesStuff(collage))
-  //   })
-  // }, [supervisorControl])
 
   return <div ref={$el} className="collage-editor" style={`overflow-y: auto;${style}`}>
     <div class="top-row" style="display: flex; flex-flow: row; height: 50%;">
@@ -139,6 +123,14 @@ export default function CollageEditor(props: CollageEditorProps) {
         montageIndex={sharedStuff.selectedMontageIndex}
         montage={sharedStuff.selectedMontage}
       />}
+    </div>
+
+    <div id="info-pane" style="padding: 2px;position:fixed;bottom:0;">
+      {Object.entries(sharedStuff.info).map(([name, value]) => (
+        <span key={name} className="info-key-value">
+          {name}: {value}
+        </span>
+      ))}
     </div>
   </div>
 }

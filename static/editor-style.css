@@ -203,3 +203,7 @@ input.block, textarea.block, select.block {
 .info-key-value {
     margin-right: 8px;
 }
+
+.margin-right {
+    margin-right: 8px;
+}

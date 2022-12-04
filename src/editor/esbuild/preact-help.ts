@@ -52,3 +52,14 @@ export function onlyLeft(handler: (e: MouseEvent) => void, preventDefault: boole
     }
   }
 }
+
+export function onlyRight(handler: (e: MouseEvent) => void, preventDefault: boolean = false) {
+  return (e: MouseEvent) => {
+    if (e.button === 2) {
+      handler(e)
+    }
+    if (preventDefault) {
+      e.preventDefault()
+    }
+  }
+}

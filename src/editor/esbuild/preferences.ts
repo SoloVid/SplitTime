@@ -56,12 +56,14 @@ function makePreferences<T extends object>(prefix: string, defaultPreferences: I
 export const globalEditorPreferences = makePreferences<{
   readonly gridEnabled: boolean
   readonly gridCell: { readonly x: int, readonly y: int }
+  readonly zoom: number
 }>("editor-prefs:", {
   gridEnabled: false,
   gridCell: {
     x: 32,
     y: 32,
   },
+  zoom: 100,
 })
 
 export const levelEditorPreferences = makePreferences<{

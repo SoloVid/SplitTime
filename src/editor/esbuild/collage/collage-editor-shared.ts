@@ -5,6 +5,7 @@ import { Collage as RealCollage, makeCollageFromFile } from "engine/graphics/col
 import { Immutable } from "engine/utils/immutable"
 import { useState } from "preact/hooks"
 import { ObjectProperties } from "../field-options"
+import { FileFrame } from "../file-types"
 import { GridSnapMover } from "../grid-snap-mover"
 import { ImmutableSetter } from "../preact-help"
 import { Followable, GlobalEditorShared } from "../shared-types"
@@ -22,7 +23,7 @@ type MakeSharedStuffOptions = {
 }
 
 export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSharedStuffOptions) {
-  const [info, setInfo] = useState<Record<string, string>>({})
+  const [info, setInfo] = useState<Record<string, string | number>>({})
   const [propertiesPath, setPropertiesPath] = useState<BasePath | null>([])
   const [traceInProgress, setTraceInProgress] = useState<FileTrace | null>(null)
   const [traceTypeSelected, setTraceTypeSelected] = useState("")
@@ -101,10 +102,9 @@ export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSh
       }
     },
   
-    trackFrame(frameIndex: number, point?: Coordinates2D): void {
+    trackFrame(frameIndex: number, frame: Immutable<FileFrame>, point?: Coordinates2D): void {
       setTraceInProgress(null)
       this.selectFrame(frameIndex, true)
-      const frame = collage.frames[frameIndex]
       const left = frame.x
       const top = frame.y
       const width = frame.width
@@ -127,7 +127,9 @@ export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSh
       const snappedMover = new GridSnapMover(globalStuff.gridCell, originalPoints)
       const follower = {
         shift: (dx: number, dy: number) => {
-          snappedMover.applyDelta(dx, dy)
+          const dxScaled = dx / globalStuff.scale
+          const dyScaled = dy / globalStuff.scale
+          snappedMover.applyDelta(dxScaled, dyScaled)
           const snappedDelta = snappedMover.getSnappedDelta()
           setCollage((before) => {
             const newFrame = {...before.frames[frameIndex]}
