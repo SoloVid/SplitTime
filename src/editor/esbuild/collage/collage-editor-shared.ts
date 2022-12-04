@@ -13,6 +13,7 @@ import { BasePath } from "../utils/immutable-helper"
 import { FrameWrapper } from "./frame-wrapper"
 import { MontageFrameWrapper } from "./montage-frame-wrapper"
 import { MontageWrapper } from "./montage-wrapper"
+import { Type as TraceType } from "engine/world/level/trace/trace-misc"
 // import { getCollagePropertiesStuff, getFramePropertiesStuff, getMontageFramePropertiesStuff, getMontagePropertiesStuff } from "./properties-stuffs"
 import { MIN_FRAME_LEN } from "./shared-types"
 
@@ -26,7 +27,7 @@ export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSh
   const [info, setInfo] = useState<Record<string, string | number>>({})
   const [propertiesPath, setPropertiesPath] = useState<BasePath | null>([])
   const [traceInProgress, setTraceInProgress] = useState<FileTrace | null>(null)
-  const [traceTypeSelected, setTraceTypeSelected] = useState("")
+  const [traceTypeSelected, setTraceTypeSelected] = useState<(typeof TraceType)[keyof typeof TraceType]>(TraceType.SOLID)
   const [selectedFrameIndex, setSelectedFrameIndex] = useState<number | null>(null)
   const [selectedMontageIndex, setSelectedMontageIndex] = useState<number | null>(null)
 
@@ -56,14 +57,14 @@ export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSh
     },
 
     get selectedFrame(): Frame | null {
-      if (selectedFrameIndex) {
+      if (selectedFrameIndex !== null) {
         return collage.frames[selectedFrameIndex]
       }
       return null
     },
 
     get selectedMontage(): Montage | null {
-      if (selectedMontageIndex) {
+      if (selectedMontageIndex !== null) {
         return collage.montages[selectedMontageIndex]
       }
       return null
@@ -183,4 +184,4 @@ export type SharedStuffViewOnly = Pick<SharedStuff,
   "realCollage" |
   "selectedMontage" |
   "selectMontage"
-> & { globalStuff: Pick<GlobalEditorShared, "server" | "userInputs">}
+> & { globalStuff: Pick<GlobalEditorShared, "scale" | "server" | "userInputs">}

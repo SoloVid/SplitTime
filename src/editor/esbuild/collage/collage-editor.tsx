@@ -2,7 +2,7 @@ import { Collage } from "engine/file/collage"
 import { type Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useEffect, useRef } from "preact/hooks"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter, makeClassNames } from "../preact-help"
 import PropertiesPane from "../properties"
 import { GlobalEditorShared, UserInputs } from "../shared-types"
 import { traceOptions } from "../trace-options"
@@ -90,10 +90,12 @@ export default function CollageEditor(props: CollageEditorProps) {
           <div
             key={traceOption.type}
             className="option"
+            // className={makeClassNames({"option": true, "selected": sharedStuff.traceTypeSelected === traceOption.type})}
             style={`color: white; background-color: ${traceOption.color};`}
             onClick={() => sharedStuff.setTraceTypeSelected(traceOption.type)}
             title={traceOption.help}
           >
+            {sharedStuff.traceTypeSelected === traceOption.type && ">> "}
             { traceOption.type }
           </div>
           ))}
@@ -118,7 +120,7 @@ export default function CollageEditor(props: CollageEditorProps) {
       </div>
     </div>
     <div style="overflow: auto; height: 50%;">
-      {!!sharedStuff.selectedMontage && !!sharedStuff.selectedMontageIndex && <MontageEditor
+      {!!sharedStuff.selectedMontage && sharedStuff.selectedMontageIndex !== null && <MontageEditor
         collageEditorShared={sharedStuff}
         montageIndex={sharedStuff.selectedMontageIndex}
         montage={sharedStuff.selectedMontage}

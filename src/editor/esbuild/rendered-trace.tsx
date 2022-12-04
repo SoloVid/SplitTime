@@ -17,6 +17,7 @@ type RenderedTraceProps = {
   metadata: Immutable<EditorMetadata>
   setMetadata?: ImmutableSetter<EditorMetadata>
   pointsArray: (Readonly<Coordinates2D> | null)[]
+  scale?: number
   server: ServerLiaison
   shouldDragBePrevented: boolean
   trace: Immutable<Trace>
@@ -34,6 +35,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     metadata,
     setMetadata,
     pointsArray,
+    scale = 1,
     server,
     shouldDragBePrevented,
     trace,
@@ -46,38 +48,48 @@ export default function RenderedTrace(props: RenderedTraceProps) {
 
   const hasClose = pointsArray.length > 0 && pointsArray[pointsArray.length - 1] === null
   const height = trace.height
+  
+  const pointsArrayS = useMemo(() => pointsArray.map(
+    p => p === null ? null : { x: p.x * scale, y: p.y * scale}
+  ), [pointsArray, scale])
 
-  const vertices = useMemo<Coordinates3D[]>(() => {
+  const vertices = useMemo(() => {
     const nonNullPoints = pointsArray.filter(point => {
       return point !== null
     }) as Readonly<Coordinates2D>[]
     return nonNullPoints.map(point => {
-      return {
+      const actual = {
         x: point.x,
         y: point.y,
-        z: trace.z
+        z: trace.z,
       }
+      const scaled = {
+        x: actual.x * scale,
+        y: actual.y * scale,
+        z: actual.z * scale,
+      }
+      return {actual, scaled}
     })
-  }, [pointsArray, trace])
+  }, [pointsArray, trace, scale])
 
   const mousableStyle = makeStyleString({
     "pointer-events": acceptMouse ? "initial" : "none"
   })
 
-  const points = useMemo(() => {
-    return pointsArray.map(point => {
+  const pointsS = useMemo(() => {
+    return pointsArrayS.map(point => {
       if(point !== null) {
         const y = point.y - trace.z
         return point.x + "," + y
-      } else if(pointsArray.length > 0 && pointsArray[0] !== null) {
-        const y = pointsArray[0].y - trace.z
-        return pointsArray[0].x + "," + y
+      } else if(pointsArrayS.length > 0 && pointsArrayS[0] !== null) {
+        const y = pointsArrayS[0].y - trace.z
+        return pointsArrayS[0].x + "," + y
       }
       return ""
     }).join(" ")
-  }, [pointsArray, trace])
-  const pointsShadow = useMemo(() => {
-    const pointsArray2D = pointsArray
+  }, [pointsArrayS, trace])
+  const pointsShadowS = useMemo(() => {
+    const pointsArray2D = pointsArrayS
     const pointsArray3D = pointsArray2D.map(point => {
       if(!point) {
         return null
@@ -100,9 +112,9 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       }
       return pointsStr
     }, "")
-  }, [pointsArray, trace])
-  const pointsStairsSlope = useMemo(() => {
-    const pointsArray2D = pointsArray
+  }, [pointsArrayS, trace])
+  const pointsStairsSlopeS = useMemo(() => {
+    const pointsArray2D = pointsArrayS
     let pointsArray3D: (Coordinates3D)[] = []
     if(trace.type === TraceType.STAIRS && !!trace.direction && pointsArray2D.length >= 3) {
       const officialTrace = TraceSpec.fromRaw(trace)
@@ -112,7 +124,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       const y = point.y - point.z
       return pointsStr + " " + point.x + "," + y
     }, "")
-  }, [pointsArray, trace])
+  }, [pointsArrayS, trace])
 
   const otherLevelDisplayed = (trace.type === TraceType.POINTER ||
     trace.type === TraceType.TRANSPORT) && metadata.highlighted
@@ -219,7 +231,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       onMouseDown={onlyLeft((e) => track(e, undefined))}
       onMouseMove={() => toggleHighlight(true)}
       onMouseLeave={() => toggleHighlight(false)}
-      points={points}
+      points={pointsS}
       stroke={traceStroke}
       fill={traceFill}
     />}
@@ -228,28 +240,28 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     <circle
       style={mousableStyle}
       className="hoverable"
-      cx={vertex.x}
-      cy={vertex.y - vertex.z}
+      cx={vertex.scaled.x}
+      cy={vertex.scaled.y - vertex.scaled.z}
       r="3"
-      onMouseDown={onlyLeft((e) => track(e, vertex))}
+      onMouseDown={onlyLeft((e) => track(e, vertex.actual))}
     />
     ))}
     {/* Outline for ramp/slope part of stairs; adds more of a 3D look */}
-    {metadata.displayed && pointsStairsSlope && <polyline
-      points={pointsStairsSlope}
+    {metadata.displayed && pointsStairsSlopeS && <polyline
+      points={pointsStairsSlopeS}
       stroke="red" stroke-width="5" fill="none"
       style="pointer-events: none;"
     />}
     {/* Up-arrows fill pattern on ramp/slope plus additional dashed outline on top of the previous */}
-    {metadata.displayed && pointsStairsSlope && <polyline
-      points={pointsStairsSlope}
+    {metadata.displayed && pointsStairsSlopeS && <polyline
+      points={pointsStairsSlopeS}
       stroke="black" stroke-width="2" stroke-dasharray="10,5"
       fill="url(#up-arrows-pattern)"
       style="pointer-events: none;"
     />}
     {/* Outline and fill for the top (z-axis/height) face area of the trace's volume */}
     {metadata.displayed && traceShadowDisplayed && <polyline
-      points={pointsShadow}
+      points={pointsShadowS}
       fill={traceShadowFill}
       stroke={traceShadowStroke}
       style="pointer-events: none;"

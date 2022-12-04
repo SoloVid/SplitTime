@@ -40,8 +40,8 @@ export type UserInputs = {
 export function getRelativeMouse(userInputs: UserInputs, $el: HTMLElement): Coordinates2D {
   const pos = getCoords($el)
   return {
-    x: userInputs.mouse.x - pos.left,
-    y: userInputs.mouse.y - pos.top
+    x: Math.round(userInputs.mouse.x - pos.left),
+    y: Math.round(userInputs.mouse.y - pos.top),
   }
 }
 

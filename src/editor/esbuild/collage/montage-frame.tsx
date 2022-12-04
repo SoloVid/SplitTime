@@ -1,5 +1,5 @@
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
-import { Montage as FileMontage, MontageFrame as FileMontageFrame } from "engine/file/collage"
+import { BodySpec, Montage as FileMontage, MontageFrame as FileMontageFrame } from "engine/file/collage"
 import { useContext, useMemo, useRef } from "preact/hooks"
 import { Rect } from "engine/math/rect"
 import { makeStyleString } from "../preact-help"
@@ -11,6 +11,9 @@ import { Immutable } from "engine/utils/immutable"
 import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
 import RenderedMontageTrace from "./rendered-montage-trace"
 import { imageContext } from "../server-liaison"
+import { getRelativeMouse } from "../shared-types"
+import { useScaledImageDimensions } from "../utils/scaled-image"
+import { useScaledImageSize } from "../utils/image-size"
 
 type MontageFrameProps = {
   collageEditHelper: SharedStuff | undefined
@@ -35,10 +38,17 @@ export default function MontageFrame(props: MontageFrameProps) {
     montageFrame,
   } = props
 
-  const $el = useRef<HTMLDivElement>(null)
+  const $el = useRef<HTMLDivElement>(document.createElement("div"))
 
   const body = montage.body
   const editorInputs = collageViewHelper.globalStuff.userInputs
+  const scale = collageViewHelper.globalStuff.scale
+
+  const bodyS: BodySpec = {
+    width: body.width * scale,
+    depth: body.depth * scale,
+    height: body.height * scale,
+  }
 
   const bodyFrontRectRelative = useMemo(() => {
     return Rect.make(
@@ -48,6 +58,12 @@ export default function MontageFrame(props: MontageFrameProps) {
       body.height
     )
   }, [body])
+  const bodyFrontRectRelativeS = useMemo(() => Rect.make(
+    bodyFrontRectRelative.x * scale,
+    bodyFrontRectRelative.y * scale,
+    bodyFrontRectRelative.width * scale,
+    bodyFrontRectRelative.height * scale,
+  ), [bodyFrontRectRelative])
 
   const frame = useMemo(() => {
     const montageIndex = collageViewHelper.collage.montages.indexOf(montage)
@@ -60,65 +76,75 @@ export default function MontageFrame(props: MontageFrameProps) {
     collageViewHelper.realCollage.montages,
   ])
 
+  const frameBoxS = useMemo(() => {
+    return Rect.make(
+      frame.box.x * scale,
+      frame.box.y * scale,
+      frame.box.width * scale,
+      frame.box.height * scale,
+    )
+  }, [frame.box, scale])
+
   const frameTargetBox = useMemo(() => {
     return frame.getTargetBox(body)
   }, [frame, body])
+
+  const frameTargetBoxS = useMemo(() => {
+    return Rect.make(
+      frameTargetBox.x * scale,
+      frameTargetBox.y * scale,
+      frameTargetBox.width * scale,
+      frameTargetBox.height * scale,
+    )
+  }, [frameTargetBox, scale])
 
   const imageDivStyle = useMemo(() => {
     const styleMap = {
       position: 'relative',
       overflow: 'hidden',
-      width: frameTargetBox.width + 'px',
-      height: frameTargetBox.height + 'px',
+      width: frameTargetBoxS.width + 'px',
+      height: frameTargetBoxS.height + 'px',
       outline: highlight ? "4px solid red" : "none"
     }
     return makeStyleString(styleMap)
   }, [frameTargetBox, highlight])
 
   const inputs = useMemo(() => {
-    let position = {
-      x: 0,
-      y: 0
-    }
-    if ($el.current) {
-      position = {
-        x: $el.current.offsetLeft - $el.current.parentElement!.scrollLeft,
-        y: $el.current.offsetTop - $el.current.parentElement!.scrollTop
-      }
-    }
+    const basicRelMouse = getRelativeMouse(editorInputs, $el.current)
     const mouse = {
-      x: Math.round(editorInputs.mouse.x - position.x),
-      y: Math.round(editorInputs.mouse.y - position.y),
+      x: Math.round((basicRelMouse.x / scale) + frameTargetBox.x),
+      y: Math.round((basicRelMouse.y / scale) + frameTargetBox.y),
       isDown: editorInputs.mouse.isDown
     }
     return {
       mouse,
       ctrlDown: editorInputs.ctrlDown
     }
-  }, [$el.current, editorInputs])
+  }, [$el.current, editorInputs, frameTargetBox, scale])
 
   const svgStyle = useMemo(() => {
     const styleMap = {
       position: 'absolute',
       left: (-EDITOR_PADDING) + "px",
       top: (-EDITOR_PADDING) + "px",
-      width: (frameTargetBox.width + 2 * EDITOR_PADDING) + "px",
-      height: (frameTargetBox.height + 2 * EDITOR_PADDING) + "px",
+      width: (frameTargetBoxS.width + 2 * EDITOR_PADDING) + "px",
+      height: (frameTargetBoxS.height + 2 * EDITOR_PADDING) + "px",
       // Note: pointer events need to be manually turned back on for child elements that care
       "pointer-events": "none"
     }
     return makeStyleString(styleMap)
-  }, [frameTargetBox])
+  }, [frameTargetBoxS])
 
   const svgTransform = useMemo(() => {
     // Note that the frameTargetBox coordinates are typically negative
-    const x = EDITOR_PADDING - frameTargetBox.x
-    const y = EDITOR_PADDING - frameTargetBox.y
+    const x = EDITOR_PADDING - frameTargetBoxS.x
+    const y = EDITOR_PADDING - frameTargetBoxS.y
     return "translate(" + x + " " + y + ")"
-  }, [frameTargetBox])
+  }, [frameTargetBoxS])
 
   const projectImages = useContext(imageContext)
   const imgSrc = projectImages.imgSrc(collageViewHelper.collage.image)
+  const scaledImageSize = useScaledImageSize(imgSrc, scale)
 
   function markEventAsPropertiesSet(event: MouseEvent): void {
     // Somewhat type-unsafe way of letting upper events know they should try to set properties
@@ -141,6 +167,8 @@ export default function MontageFrame(props: MontageFrameProps) {
     }
     collageEditHelper.follow({
       shift(dx: number, dy: number) {
+        const dxScaled = dx / scale
+        const dyScaled = dy / scale
         collageEditHelper.setCollage((before) => ({
           ...before,
           montages: before.montages.map((m, i) => {
@@ -155,8 +183,8 @@ export default function MontageFrame(props: MontageFrameProps) {
                 }
                 return {
                   ...mf,
-                  offsetX: mf.offsetX - dx,
-                  offsetY: mf.offsetY - dy,
+                  offsetX: mf.offsetX - dxScaled,
+                  offsetY: mf.offsetY - dyScaled,
                 }
               })
             }
@@ -213,8 +241,8 @@ export default function MontageFrame(props: MontageFrameProps) {
       return
     }
 
-    const y = inputs.mouse.y + frameTargetBox.y
-    const x = inputs.mouse.x + frameTargetBox.x
+    const y = inputs.mouse.y
+    const x = inputs.mouse.x
     const isLeftClick = event.which === 1
     const isRightClick = event.which === 3
 
@@ -249,17 +277,37 @@ export default function MontageFrame(props: MontageFrameProps) {
     }
   }
 
+  function handleMouseMove(event: MouseEvent): void {
+    collageEditHelper?.setInfo((before) => ({
+      ...before,
+      x: inputs.mouse.x,
+      ["y-z"]: inputs.mouse.y,
+    }))
+  }
+
+  function handleMouseOut(event: MouseEvent): void {
+    collageEditHelper?.setInfo((before) => {
+      const { x, ["y-z"]: y, ...restBefore } = before
+      return restBefore
+    })
+  }
+
   return <div style="position: relative;"
     ref={$el}
     onContextMenu={(e) => e.preventDefault()}
     onMouseUp={handleMouseUp}
+    onMouseMove={handleMouseMove}
+    onMouseOut={handleMouseOut}
   >
     <div
       style={imageDivStyle}
     >
-      <img 
+      <img
         src={imgSrc}
-        style={`position: absolute; left: ${-frame.box.x}px; top: ${-frame.box.y}px`}
+        width={scaledImageSize?.width}
+        height={scaledImageSize?.height}
+        //width=${scaledImageDimensions.x}px; height=${scaledImageDimensions.y}px;
+        style={`position: absolute; left: ${-frameBoxS.x}px; top: ${-frameBoxS.y}px`}
       />
     </div>
     {collageEditHelper && <svg style={svgStyle}>
@@ -279,10 +327,10 @@ export default function MontageFrame(props: MontageFrameProps) {
       {/* Base */}
       <rect
         transform={svgTransform}
-        x={bodyFrontRectRelative.x}
-        y={bodyFrontRectRelative.y + body.height - body.depth}
-        width={body.width}
-        height={body.depth}
+        x={bodyFrontRectRelativeS.x}
+        y={bodyFrontRectRelativeS.y + bodyS.height - bodyS.depth}
+        width={bodyS.width}
+        height={bodyS.depth}
         stroke="red"
         stroke-width="2"
         stroke-dasharray="2,1"
@@ -294,10 +342,10 @@ export default function MontageFrame(props: MontageFrameProps) {
         style="pointer-events: initial; cursor: grab;"
         onMouseDown={(e) => { if (e.button === 0) trackBody(e) }}
         onDblClick={editBody}
-        x={bodyFrontRectRelative.x}
-        y={bodyFrontRectRelative.y}
-        width={bodyFrontRectRelative.width}
-        height={bodyFrontRectRelative.height}
+        x={bodyFrontRectRelativeS.x}
+        y={bodyFrontRectRelativeS.y}
+        width={bodyFrontRectRelativeS.width}
+        height={bodyFrontRectRelativeS.height}
         fill="url(#diagonal-hatch)"
         stroke="red"
         stroke-width="2"
@@ -309,10 +357,10 @@ export default function MontageFrame(props: MontageFrameProps) {
         style="pointer-events: initial; cursor: grab;"
         onMouseDown={(e) => { if (e.button === 0) trackBody(e) }}
         onDblClick={editBody}
-        x={bodyFrontRectRelative.x}
-        y={bodyFrontRectRelative.y - body.depth}
-        width={body.width}
-        height={body.depth}
+        x={bodyFrontRectRelativeS.x}
+        y={bodyFrontRectRelativeS.y - bodyS.depth}
+        width={bodyS.width}
+        height={bodyS.depth}
         fill="url(#diagonal-hatch)"
         stroke="red"
         stroke-width="2"

@@ -1,5 +1,5 @@
 import { Immutable } from "engine/utils/immutable"
-import { Type } from "engine/world/level/trace/trace-misc"
+import { Type as TraceType } from "engine/world/level/trace/trace-misc"
 import { useState } from "preact/hooks"
 import { useCollageJson } from "../collage/use-collage"
 import { FileLevel, FileTrace } from "../file-types"
@@ -28,7 +28,7 @@ export function useSharedStuff(options: MakeSharedStuffOptions) {
   const [selectedCollage] = useCollageJson(globalStuff.server, selectedCollageId)
   const [selectedMontage, setSelectedMontage] = useState<string | null>(null)
   const [selectedMontageDirection, setSelectedMontageDirection] = useState<string | null>(null)
-  const [selectedTraceType, setSelectedTraceType] = useState<string>(Type.SOLID)
+  const [selectedTraceType, setSelectedTraceType] = useState<(typeof TraceType)[keyof typeof TraceType]>(TraceType.SOLID)
   const [pathInProgress, setPathInProgress] = useState<Immutable<EditorTraceEntity> | null>(null)
   const [info, setInfo] = useState<Record<string, string | number>>({})
   const [propertiesPath, setPropertiesPath] = useState<BasePath | null>([])

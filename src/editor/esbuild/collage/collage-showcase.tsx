@@ -1,5 +1,5 @@
 import { assert } from "globals"
-import { useMemo } from "preact/hooks"
+import { useMemo, useRef } from "preact/hooks"
 import { makeStyleString } from "../preact-help"
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { CollageHelper } from "./collage-helper"
@@ -18,25 +18,29 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
   } = props
 
   const collage = collageViewHelper.collage
+  const scale = collageViewHelper.globalStuff.scale
+  const $el = useRef<HTMLDivElement>(document.createElement("div"))
+  const maxMontageWidth = $el.current.offsetWidth
 
   const widestMontageWidth = useMemo(() => {
     const width = collageViewHelper.realCollage.montages.reduce((maxWidth, m) => {
       const mWidth = m.getOverallArea().width
       return Math.max(maxWidth, mWidth)
     }, 0)
-    return Math.max(width, 16)
-  }, [collageViewHelper])
+    return Math.min(Math.max(width, 16), maxMontageWidth)
+  }, [collageViewHelper, maxMontageWidth])
+  const widestMontageWidthS = widestMontageWidth * scale
 
   const gridStyle = useMemo(() => {
     const styleMap = {
       display: "grid",
-      "grid-template-columns": "repeat(auto-fill, minmax(" + widestMontageWidth + "px, 1fr))",
+      "grid-template-columns": "repeat(auto-fill, minmax(" + widestMontageWidthS + "px, 1fr))",
       "grid-gap": "0.5rem",
       "align-items": "center",
       "justify-items": "center"
     }
     return makeStyleString(styleMap)
-  }, [widestMontageWidth])
+  }, [widestMontageWidthS])
 
   function createNewMontage(): void {
     const collageHelper = new CollageHelper(collage)
@@ -50,7 +54,7 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
     collageEditHelper.selectMontage(newMontageIndex, true)
   }
 
-  return <div style={`${gridStyle};${props.style ?? ""}`}>
+  return <div ref={$el} style={`${gridStyle};${props.style ?? ""}`}>
     {collage.montages.map((m, i) => (
       <Montage
         collageEditHelper={collageEditHelper}

@@ -33,6 +33,8 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     transform,
   } = props
 
+  const scale = collageViewHelper.globalStuff.scale
+
   const [metadata, setMetadata] = useState(new EditorMetadata())
   const tracker: IRenderedTraceTracker = {
     track: (e, p) => {
@@ -60,7 +62,9 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     const snappedMover = new GridSnapMover(collageEditHelper.globalStuff.gridCell, originalPoints)
     const follower = {
       shift: (dx: number, dy: number) => {
-        snappedMover.applyDelta(dx, dy)
+        const dxScaled = dx / scale
+        const dyScaled = dy / scale
+        snappedMover.applyDelta(dxScaled, dyScaled)
         const snappedDelta = snappedMover.getSnappedDelta()
         var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
         if (originalPoint) {
@@ -81,6 +85,7 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     acceptMouse={acceptMouse}
     metadata={metadata}
     pointsArray={pointsArray}
+    scale={scale}
     server={collageViewHelper.globalStuff.server}
     shouldDragBePrevented={shouldDragBePrevented}
     trace={trace}

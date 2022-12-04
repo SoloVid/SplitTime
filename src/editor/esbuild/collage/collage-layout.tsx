@@ -4,6 +4,8 @@ import GridLines from "../grid-lines"
 import { onlyRight, preventDefault } from "../preact-help"
 import { imageContext } from "../server-liaison"
 import { getRelativeMouse, UserInputs } from "../shared-types"
+import { useScaledImageSize } from "../utils/image-size"
+import { useScaledImageDimensions } from "../utils/scaled-image"
 import { SharedStuff } from "./collage-editor-shared"
 import FrameRectangle from "./frame-rectangle"
 import { EDITOR_PADDING, MIN_FRAME_LEN } from "./shared-types"
@@ -21,7 +23,7 @@ export default function CollageLayout(props: CollageLayoutProps) {
   const scale = collageEditorShared.globalStuff.scale
 
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
-  const $image = useRef<HTMLImageElement | null>(null)
+  // const $image = useRef<HTMLImageElement | null>(null)
 
   const editorInputs = collageEditorShared.globalStuff.userInputs
   const mouse = useMemo(() => {
@@ -59,40 +61,26 @@ export default function CollageLayout(props: CollageLayoutProps) {
     return framesWithIndices
   }, [collage.frames, collageEditorShared.selectedFrame])
 
-  const framesSortedScaled = useMemo(() => {
-    return framesSorted.map((f) => ({
-      i: f.i,
-      f: {
-        ...f.f,
-        x: f.f.x * scale,
-        y: f.f.y * scale,
-        width: f.f.width * scale,
-        height: f.f.height * scale,
-      }
-    }))
-  }, [framesSorted, scale])
+  // const framesSortedScaled = useMemo(() => {
+  //   return framesSorted.map((f) => ({
+  //     i: f.i,
+  //     f: {
+  //       ...f.f,
+  //       x: f.f.x * scale,
+  //       y: f.f.y * scale,
+  //       width: f.f.width * scale,
+  //       height: f.f.height * scale,
+  //     }
+  //   }))
+  // }, [framesSorted, scale])
 
-  const viewBox = "" + -EDITOR_PADDING + " " + -EDITOR_PADDING + " " + containerWidth + " " + containerHeight
+  // const viewBox = "" + -EDITOR_PADDING + " " + -EDITOR_PADDING + " " + containerWidth + " " + containerHeight
 
   const projectImages = useContext(imageContext)
   const backgroundSrc = projectImages.imgSrc(collage.image)
 
-  const imageDimensions = useMemo(() => {
-    if (!$image.current) {
-      return { x: 32, y: 32 }
-    }
-    return {
-      x: $image.current.naturalWidth,
-      y: $image.current.naturalHeight,
-    }
-  }, [$image.current])
-
-  const scaledDimensions = useMemo(() => {
-    return {
-      x: Math.round(imageDimensions.x * scale),
-      y: Math.round(imageDimensions.y * scale),
-    }
-  }, [imageDimensions.x, imageDimensions.y, scale])
+  // const scaledDimensions = useScaledImageDimensions($image, scale)
+  const scaledSize = useScaledImageSize(backgroundSrc, scale)
 
   function startNewFrame(): void {
     let frameIndex = collage.frames.length
@@ -146,9 +134,11 @@ export default function CollageLayout(props: CollageLayoutProps) {
   >
     <div style={`padding: ${EDITOR_PADDING}px`}>
       {!!backgroundSrc && <img
-        ref={$image}
+        // ref={$image}
         src={backgroundSrc}
-        style={`width: ${scaledDimensions.x}px; height: ${scaledDimensions.y}px;`}
+        width={scaledSize?.width}
+        height={scaledSize?.height}
+        // style={`width: ${scaledDimensions.x}px; height: ${scaledDimensions.y}px;`}
       />}
     </div>
     <svg

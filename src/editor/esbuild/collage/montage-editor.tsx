@@ -18,6 +18,7 @@ export default function MontageEditor(props: MontageEditorProps) {
   } = props
 
   const collage = collageEditorShared.collage
+  const scale = collageEditorShared.globalStuff.scale
 
   const selectedFrameId = collageEditorShared.selectedFrame === null ? null : collageEditorShared.selectedFrame.id
 
@@ -26,14 +27,15 @@ export default function MontageEditor(props: MontageEditorProps) {
       return Math.max(maxWidth, f.width)
     }, 0)
   }, [collage.frames])
+  const widestFrameWidthS = widestFrameWidth * scale
 
   const gridStyle = useMemo(() => {
     return {
       display: "grid",
-      "grid-template-columns": "repeat(auto-fill, minmax(" + widestFrameWidth + "px, 1fr))",
+      "grid-template-columns": "repeat(auto-fill, minmax(" + widestFrameWidthS + "px, 1fr))",
       "grid-gap": "0.5rem"
     }
-  }, [widestFrameWidth])
+  }, [widestFrameWidthS])
 
   function selectFrame(montageFrameIndex: number, event: MouseEvent): void {
     if (collageEditorShared.traceInProgress) {

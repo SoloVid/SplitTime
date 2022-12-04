@@ -49,6 +49,7 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
       return makeCollageFromFile(collage, true)
     },
     globalStuff: {
+      scale: 1,
       server: levelEditorShared.globalStuff.server,
       userInputs: levelEditorShared.globalStuff.userInputs,
     },
@@ -112,6 +113,7 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
           onClick={() => selectTraceOption(traceOption.type)}
           title={traceOption.help}
         >
+            {levelEditorShared.selectedTraceType === traceOption.type && ">> "}
           { traceOption.type }
         </div>
       ))}

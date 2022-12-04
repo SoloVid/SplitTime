@@ -23,6 +23,8 @@ export default function Montage(props: MontageProps) {
     montage,
   } = props
 
+  const scale = collageViewHelper.globalStuff.scale
+
   const time = useContext(Time)
 
   const placeholderImgSrc = getPlaceholderImage()
@@ -52,23 +54,30 @@ export default function Montage(props: MontageProps) {
     }
     return realMontage.getOverallArea()
   }, [montage, realMontage])
+  const overallAreaS = useMemo(() => Rect.make(
+    overallArea.x * scale,
+    overallArea.y * scale,
+    overallArea.width * scale,
+    overallArea.height * scale,
+  ), [overallArea])
 
   const containerStyle = useMemo(() => {
     const styleMap = {
       position: 'relative',
-      width: overallArea.width + 'px',
-      height: overallArea.height + 'px',
+      width: overallAreaS.width + 'px',
+      height: overallAreaS.height + 'px',
       outline: montage === collageViewHelper.selectedMontage ? "4px solid red" : "none"
     }
     return makeStyleString(styleMap)
-  }, [overallArea, montage, collageViewHelper.selectedMontage])
+  }, [overallAreaS, montage, collageViewHelper.selectedMontage])
 
   const frameDivStyle = useMemo(() => {
     const targetBox = currentFrame ? currentFrame.targetBox : { x: 16, y: 16 }
+    const targetBoxS = { x: targetBox.x * scale, y: targetBox.y * scale }
     const styleMap = {
       position: 'absolute',
-      left: (targetBox.x - overallArea.x) + 'px',
-      top: (targetBox.y - overallArea.y) + 'px'
+      left: (targetBoxS.x - overallAreaS.x) + 'px',
+      top: (targetBoxS.y - overallAreaS.y) + 'px'
     }
     return makeStyleString(styleMap)
   }, [currentFrame, overallArea])
