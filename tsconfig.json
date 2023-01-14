@@ -2,11 +2,6 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    // "jsx": "preserve",
-    // "jsxFactory": "preact.h",
-    // "jsxFragmentFactory": "preact.Fragment",
-    // "jsxFactory": "h",
-    // "jsxFragmentFactory": "Fragment",
     "declaration": true,
     "declarationMap": true,
     "declarationDir": "./build",
@@ -21,17 +16,14 @@
     "outDir": "./build/tmp",
     "strict": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    // "paths": {
-    //   "react/jsx-runtime": ["preact/jsx-runtime"]
-    // }
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "./src/*.ts",
     "./src/api/**/*.ts",
     "./src/build-tools/**/*.ts",
-    "./src/editor/esbuild/**/*.ts",
-    "./src/editor/esbuild/**/*.tsx",
+    "./src/editor/client/**/*.ts",
+    "./src/editor/client/**/*.tsx",
     "./src/editor/server/**/*.ts",
     "./src/engine/**/*.ts",
     "./src/engine-test/**/*.ts",

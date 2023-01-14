@@ -1,7 +1,8 @@
 import assert from "node:assert"
 import { readdir, readFile, writeFile } from "node:fs/promises"
+import { sep as sepNative } from "node:path"
 import { dirname, join, relative, sep as sepPosix } from "node:path/posix"
-import { relative as relativeNative, sep as sepNative } from "node:path"
+import stripJsonComments from "strip-json-comments"
 import { Tsconfig } from "../project/tsconfig"
 import { forAllFiles } from "./walk-files"
 
@@ -12,7 +13,9 @@ export async function resolveDeclarationNonRelativePaths(dir: string) {
   dir = dir.split(sepNative).join(sepPosix)
   // console.log(dir)
   const tsconfigContents = await readFile(join(dir, "tsconfig.json"), "utf-8")
-  const tsconfig = JSON.parse(tsconfigContents) as Tsconfig
+  const withoutComments = stripJsonComments(tsconfigContents)
+  console.log(withoutComments)
+  const tsconfig = JSON.parse(withoutComments) as Tsconfig
   const rootDir = tsconfig.compilerOptions?.rootDir
   assert(rootDir, "rootDir should be set in tsconfig.json")
   const declarationDir = tsconfig.compilerOptions?.declarationDir
