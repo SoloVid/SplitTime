@@ -23,6 +23,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     levelEditorShared,
   } = props
 
+  const scale = levelEditorShared.globalStuff.scale
   const editorInputs = levelEditorShared.globalStuff.userInputs
   const editorPadding = EDITOR_PADDING
   const level = levelEditorShared.level
@@ -51,8 +52,8 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
       }
     }
     const mouse = {
-      x: Math.round(editorInputs.mouse.x - position.x - EDITOR_PADDING),
-      y: Math.round(editorInputs.mouse.y - position.y - EDITOR_PADDING),
+      x: Math.round((editorInputs.mouse.x - position.x - EDITOR_PADDING) / scale),
+      y: Math.round((editorInputs.mouse.y - position.y - EDITOR_PADDING) / scale),
       // FTODO: only is down when inside level editor
       isDown: editorInputs.mouse.isDown
     }
@@ -62,11 +63,11 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     }
   }, [$el.current, editorInputs])
 
-  const containerWidth = level.width + 2*EDITOR_PADDING
-  const containerHeight = useMemo(() => {
-    var addedHeight = level.groups.length > 0 ? level.groups[level.groups.length - 1].obj.defaultZ : 0
-    return level.height + 2*EDITOR_PADDING + addedHeight
-  }, [level.groups, level.height])
+  const containerWidth = (level.width * scale) + 2*EDITOR_PADDING
+  const addedHeight = useMemo(() => {
+    return level.groups.length > 0 ? level.groups[level.groups.length - 1].obj.defaultZ : 0
+  }, [level.groups])
+  const containerHeight = ((level.height + addedHeight) * scale) + 2*EDITOR_PADDING
 
   const levelOffsetStyle = makeStyleString({
     position: 'absolute',
@@ -75,6 +76,11 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   })
 
   const traceTransform = "translate(" + EDITOR_PADDING + "," + EDITOR_PADDING + ")"
+
+  const scaledGridCell = {
+    x: Math.round(levelEditorShared.globalStuff.gridCell.x * scale),
+    y: Math.round(levelEditorShared.globalStuff.gridCell.y * scale),
+  }
 
   function getActiveFileGroup() {
     return getGroupById(level, levelEditorShared.activeGroup?.obj.id ?? "")
@@ -241,7 +247,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     onDblClick={preventDefault}
     onDragStart={preventDefault}
   >
-    <LevelBackground level={level} />
+    <LevelBackground level={level} scale={scale} />
 
     {allEntitiesSorted.map((entity) => (
     <div
@@ -271,7 +277,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     ))}
 
     {levelEditorShared.globalStuff.gridEnabled && <GridLines
-      gridCell={levelEditorShared.globalStuff.gridCell}
+      gridCell={scaledGridCell}
       origin={{x: editorPadding, y: editorPadding}}
     />}
   </div>

@@ -69,7 +69,10 @@ export default function MenuGroup({
         value={o.entity.metadata.displayed}
         onChange={(newValue) => o.entity.setMetadata(before => ({...before, displayed: newValue}))}
       />
-      <span onClick={onlyLeft(() => o.editEntity(o.entity))} className="pointer">
+      <span onClick={onlyLeft(() => {
+        o.editEntity(o.entity)
+        levelEditorShared.setActiveGroup(group ?? null)
+      })} className="pointer">
         <span>{o.entity.obj.id || `${o.titlePrefix} ${o.index}`}</span>
       </span>
     </div>

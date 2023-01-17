@@ -7,9 +7,10 @@ import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useContext, useMemo } from "preact/hooks"
 import { createSnapMontageMover, getPlaceholderImage, inGroup, PLACEHOLDER_WIDTH } from "../editor-functions"
-import { makeImmutableObjectSetterUpdater, onlyLeft, preventDefault } from "../preact-help"
+import { makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "../preact-help"
 import { imageContext } from "../server-liaison"
 import { Time } from "../time-context"
+import { useScaledImageSize } from "../utils/image-size"
 import { EditorPositionEntity, EditorPropEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
 
@@ -27,6 +28,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     levelEditorShared,
     entity,
   } = props
+  const scale = levelEditorShared.globalStuff.scale
   const p = entity.obj
   const metadata = entity.metadata
   const time = useContext(Time)
@@ -84,22 +86,19 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     return box
   }, [body, frame, p])
 
-  const positionLeft = useMemo(() => framePosition.x, [framePosition])
-  const positionTop = useMemo(() => framePosition.y, [framePosition])
-
-  const styleString = useMemo(() => {
-    return {
+  const containerMaskStyleString = useMemo(() => {
+    return makeStyleString({
       outline: metadata.highlighted ? "2px solid yellow" : "",
       backgroundColor: metadata.highlighted ? "yellow" : "initial",
       position: 'absolute',
       overflow: 'hidden',
-      left: positionLeft + 'px',
-      top: positionTop + 'px',
-      width: frame.box.width + 'px',
-      height: frame.box.height + 'px',
+      left: (framePosition.x * scale) + 'px',
+      top: (framePosition.y * scale) + 'px',
+      width: (frame.box.width * scale) + 'px',
+      height: (frame.box.height * scale) + 'px',
       "pointer-events": inGroup(level, levelEditorShared.activeGroup?.obj.id ?? "", p) ? "initial" : "none"
-    }
-  }, [p, metadata, positionLeft, positionTop, frame, level, levelEditorShared.activeGroup])
+    })
+  }, [p, metadata, framePosition, frame, level, levelEditorShared.activeGroup, scale])
 
   const projectImages = useContext(imageContext)
   const imgSrc = useMemo(() => {
@@ -112,6 +111,15 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     }
     return projectImages.imgSrc(c.image)
   }, [collage, projectImages])
+  const scaledSize = useScaledImageSize(imgSrc, scale)
+
+  const imgStyleString = scaledSize ? makeStyleString({
+    position: "absolute",
+    left: `${-frame.box.x * scale}px`,
+    top: `${-frame.box.y * scale}px`,
+    width: scaledSize.width + "px",
+    height: scaledSize.height + "px",
+  }) : { display: "none" }
 
   function toggleHighlight(highlight: boolean): void {
     if(levelEditorShared.shouldDragBePrevented()) {
@@ -130,7 +138,9 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     const originalY = entity.obj.y
     levelEditorShared.follow({
       shift: (dx, dy) => {
-        snappedMover.applyDelta(dx, dy)
+        const dxScaled = dx / scale
+        const dyScaled = dy / scale
+        snappedMover.applyDelta(dxScaled, dyScaled)
         const snappedDelta = snappedMover.getSnappedDelta()
         updateP((before) => ({
           x: originalX + snappedDelta.x,
@@ -147,11 +157,11 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     onMouseDown={onlyLeft(track)}
     onMouseMove={() => toggleHighlight(true)}
     onMouseLeave={() => toggleHighlight(false)}
-    style={styleString}
+    style={containerMaskStyleString}
   >
     <img
       src={imgSrc}
-      style={`position: absolute; left: ${-frame.box.x}px; top: ${-frame.box.y}px`}
+      style={imgStyleString}
     />
   </div>}</>
 }

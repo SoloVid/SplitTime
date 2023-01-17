@@ -20,6 +20,7 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     trace,
   } = props
 
+  const scale = levelEditorShared.globalStuff.scale
   const level = levelEditorShared.level
   const activeGroup = levelEditorShared.activeGroup
 
@@ -49,7 +50,9 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     const snappedMover = new GridSnapMover(levelEditorShared.globalStuff.gridCell, originalPoints)
     const follower = {
       shift: (dx: number, dy: number) => {
-        snappedMover.applyDelta(dx, dy)
+        const dxScaled = dx / scale
+        const dyScaled = dy / scale
+        snappedMover.applyDelta(dxScaled, dyScaled)
         const snappedDelta = snappedMover.getSnappedDelta()
         var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
         if (originalPoint) {
@@ -75,6 +78,7 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     metadata={trace.metadata}
     setMetadata={trace.setMetadata}
     pointsArray={pointsArray}
+    scale={scale}
     server={levelEditorShared.globalStuff.server}
     shouldDragBePrevented={shouldDragBePrevented}
     trace={trace.obj}
