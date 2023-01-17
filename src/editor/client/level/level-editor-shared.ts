@@ -1,5 +1,5 @@
 import { Immutable } from "engine/utils/immutable"
-import { Type as TraceType } from "engine/world/level/trace/trace-misc"
+import { TraceType } from "engine/world/level/trace/trace-type"
 import { useState } from "preact/hooks"
 import { useCollageJson } from "../collage/use-collage"
 import { FileLevel, FileTrace } from "../file-types"

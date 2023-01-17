@@ -1,4 +1,4 @@
-import { Type as TraceType } from "engine/world/level/trace/trace-misc"
+import { TraceType } from "engine/world/level/trace/trace-type"
 
 export const TRACE_GROUND_COLOR = "rgba(100, 100, 100, .5)"
 export const TRACE_GROUND_HIGHLIGHT_COLOR = "rgba(200, 200, 50, .5)"

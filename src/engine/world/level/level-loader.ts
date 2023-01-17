@@ -3,7 +3,7 @@ import { CellGrid } from "./cell-grid";
 import { interpret } from "../../math/direction";
 import { warn } from "../../utils/logger";
 import { TraceSpec } from "./trace/trace-spec";
-import { Type } from "./trace/trace-misc";
+import { TraceType } from "./trace/trace-type";
 import { smoothPut } from "../body/render/ghosty";
 import { extractCoordinates } from "./trace/trace-points";
 import { Traces2 } from "./level-traces2";
@@ -62,7 +62,7 @@ export class LevelLoader {
             const t = new Trace(traceSpec);
             t.load(this.level, world);
             switch (traceSpec.type) {
-                case Type.TRANSPORT:
+                case TraceType.TRANSPORT:
                     const pointerOffset = t.getPointerOffset();
                     const transportTraceId = traceSpec.getOffsetHash();
                     this.level.registerEvent(transportTraceId, ((trace) => {
@@ -79,7 +79,7 @@ export class LevelLoader {
                         };
                     })(t));
                     break;
-                case Type.SEND:
+                case TraceType.SEND:
                     const sendTraceId = traceSpec.getOffsetHash();
                     this.level.registerEvent(sendTraceId, ((trace) => {
                         return (body: Body) => {
@@ -91,7 +91,7 @@ export class LevelLoader {
                         };
                     })(t));
                     break;
-                case Type.PATH:
+                case TraceType.PATH:
                     this.connectPositionsFromPath(t.spec);
                     break;
             }

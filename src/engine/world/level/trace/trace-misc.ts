@@ -1,13 +1,3 @@
-export const Type = {
-    SOLID: "solid",
-    STAIRS: "stairs",
-    GROUND: "ground",
-    EVENT: "event",
-    PATH: "path",
-    POINTER: "pointer",
-    TRANSPORT: "transport",
-    SEND: "send",
-};
 export const RColor = {
     SOLID: 255,
     EVENT: 100,

@@ -1,5 +1,5 @@
 import { Trace } from "api/file"
-import { Type as TraceType } from "engine/world/level/trace/trace-misc"
+import { TraceType } from "engine/world/level/trace/trace-type"
 import { FieldOptions, ObjectProperties } from "./field-options"
 
 interface TraceFieldOptions {

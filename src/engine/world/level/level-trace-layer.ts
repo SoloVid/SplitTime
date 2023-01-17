@@ -1,5 +1,5 @@
 import { Traces2, SolidCollisionInfo, PointerTraceInfo, SELF_LEVEL_ID, EventTraceInfo } from "./level-traces2";
-import { Type } from "./trace/trace-misc";
+import { TraceType } from "./trace/trace-type";
 import { ENABLED } from "../../utils/debug";
 import { fillPolygon } from "../../math/polygon/polygon-fill";
 import { Canvas } from "engine/ui/viewport/canvas";
@@ -26,11 +26,11 @@ export class TraceLayer {
         const pointerDataPixel = new Uint8ClampedArray(new ArrayBuffer(pixelDataSize));
         this.pointerData.push(pointerDataPixel);
         this.pointerTraceBins = Array(t.traceBinArraySize).fill(null);
-        const pointerTypes = [Type.POINTER];
+        const pointerTypes = [TraceType.POINTER];
         const eventDataPixel = new Uint8ClampedArray(new ArrayBuffer(pixelDataSize));
         this.eventData.push(eventDataPixel);
         this.eventTraceBins = Array(t.traceBinArraySize).fill(null);
-        const eventTypes = [Type.EVENT, Type.TRANSPORT, Type.SEND];
+        const eventTypes = [TraceType.EVENT, TraceType.TRANSPORT, TraceType.SEND];
         for (let iGranularity = 0; iGranularity < this.t.granularities.length; iGranularity++) {
             const granularity = this.t.granularities[iGranularity];
             const bucketsWide = this.t.granularityBucketsWide[iGranularity];
@@ -101,17 +101,17 @@ export class TraceLayer {
         const pixelHeight = constrain(traceHeightFromMinZ, 0, maxHeight);
         const topR = Math.min(255, pixelHeight + groundR);
         switch (spec.type) {
-            case Type.SOLID:
+            case TraceType.SOLID:
                 fillPolygon(spec.getPolygon(), (x, y) => {
                     markAt(x, y, topR);
                 });
                 break;
-            case Type.GROUND:
+            case TraceType.GROUND:
                 fillPolygon(spec.getPolygon(), (x, y) => {
                     markAt(x, y, groundR);
                 });
                 break;
-            case Type.STAIRS:
+            case TraceType.STAIRS:
                 const stairsExtremes = spec.calculateStairsExtremes();
                 const bottom = stairsExtremes.bottom;
                 const dx = stairsExtremes.top.x - stairsExtremes.bottom.x;
@@ -252,7 +252,7 @@ export class TraceLayer {
                 if (!isOverlap(minZ, exMaxZ - minZ, trace.spec.offsetZ, trace.spec.height)) {
                     continue;
                 }
-                if (trace.spec.type === Type.POINTER) {
+                if (trace.spec.type === TraceType.POINTER) {
                     foundOne = true;
                     pointerInfo[trace.getOffsetHash()] = trace.getPointerOffset();
                 }
@@ -285,12 +285,12 @@ export class TraceLayer {
                 }
                 const spec = trace.spec;
                 switch (spec.type) {
-                    case Type.EVENT:
+                    case TraceType.EVENT:
                         assert(spec.eventId !== null, "Event trace has no event ID");
                         eventInfo[spec.eventId] = true;
                         break;
-                    case Type.TRANSPORT:
-                    case Type.SEND:
+                    case TraceType.TRANSPORT:
+                    case TraceType.SEND:
                         eventInfo[spec.getOffsetHash()] = true;
                         break;
                 }

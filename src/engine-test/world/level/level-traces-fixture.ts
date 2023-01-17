@@ -1,8 +1,8 @@
 import { Coordinates3D } from "engine/world/level/level-location"
 import { EventTraceInfo, PointerTraceInfo, SolidCollisionInfo, Traces2 } from "engine/world/level/level-traces2"
 import { Trace } from "engine/world/level/trace/trace"
-import { Type } from "engine/world/level/trace/trace-misc"
 import { TraceSpec } from "engine/world/level/trace/trace-spec"
+import { TraceType } from "engine/world/level/trace/trace-type"
 import { Trace as FileDataTrace } from "../../../engine/world/level/level-file-data"
 import { makeTrace as makeTraceProper } from "../../../engine/world/level/level-file-data-helpers"
 
@@ -13,7 +13,7 @@ export const height = 30
 const largeSquareVertices = "(10, 10) (10, 20) (20, 20) (20, 10) (close)"
 export const largeCube = {
     trace: makeTrace({
-        type: Type.SOLID,
+        type: TraceType.SOLID,
         vertices: largeSquareVertices,
         z: 10,
         height: 10
@@ -28,7 +28,7 @@ export const largeCube = {
 const smallSquareVertices = "(10, 10) (10, 15) (15, 15) (15, 10) (close)"
 export const smallCube = {
     trace: makeTrace({
-        type: Type.SOLID,
+        type: TraceType.SOLID,
         vertices: smallSquareVertices,
         z: 15,
         height: 5
@@ -42,7 +42,7 @@ export const smallCube = {
 
 export const stairs = {
     trace: makeTrace({
-        type: Type.STAIRS,
+        type: TraceType.STAIRS,
         vertices: largeSquareVertices,
         z: 10,
         height: 10,
@@ -58,7 +58,7 @@ export const stairs = {
 const groundPoints = "(0, 0) (0, 30) (30, 30) (30, 0) (close)"
 export const ground = {
     trace: makeTrace({
-        type: Type.SOLID,
+        type: TraceType.SOLID,
         vertices: groundPoints,
         z: 15,
         height: 0
@@ -71,7 +71,7 @@ export const ground = {
 const pointer1Vertices = "(12, 12) (12, 21) (21, 21) (21, 12) (close)"
 export const pointer1 = {
     trace: makeTrace({
-        type: Type.POINTER,
+        type: TraceType.POINTER,
         vertices: pointer1Vertices,
         z: 12,
         height: 9,
@@ -91,7 +91,7 @@ export const pointer1 = {
 const pointer2Vertices = "(16, 16) (16, 24) (24, 24) (24, 16) (close)"
 export const pointer2 = {
     trace: makeTrace({
-        type: Type.POINTER,
+        type: TraceType.POINTER,
         vertices: pointer2Vertices,
         z: 12,
         height: 9,
@@ -112,7 +112,7 @@ const eventVertices = "(14, 14) (14, 17) (17, 17) (17, 14) (close)"
 export const eventId = "test-event"
 export const eventBox = {
     trace: makeTrace({
-        type: Type.EVENT,
+        type: TraceType.EVENT,
         vertices: eventVertices,
         z: 14,
         height: 3,

@@ -13,7 +13,7 @@ import { BasePath } from "../utils/immutable-helper"
 import { FrameWrapper } from "./frame-wrapper"
 import { MontageFrameWrapper } from "./montage-frame-wrapper"
 import { MontageWrapper } from "./montage-wrapper"
-import { Type as TraceType } from "engine/world/level/trace/trace-misc"
+import { TraceType } from "engine/world/level/trace/trace-type"
 // import { getCollagePropertiesStuff, getFramePropertiesStuff, getMontageFramePropertiesStuff, getMontagePropertiesStuff } from "./properties-stuffs"
 import { MIN_FRAME_LEN } from "./shared-types"
 

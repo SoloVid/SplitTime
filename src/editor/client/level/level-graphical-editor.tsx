@@ -1,5 +1,5 @@
 import { Coordinates2D, Coordinates3D } from "engine/world/level/level-location"
-import { Type } from "engine/world/level/trace/trace-misc"
+import { TraceType } from "engine/world/level/trace/trace-type"
 import { makePositionPoint } from "engine/world/level/trace/trace-points"
 import { useMemo, useRef } from "preact/hooks"
 import { createSnapMontageMover, findClosestPosition, getGroupById, makeNewTrace } from "../editor-functions"
@@ -185,7 +185,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         if(!pathInProgress) {
           const trace = makeNewTrace(level, getActiveFileGroup().id, levelEditorShared.selectedTraceType)
           
-          if(levelEditorShared.selectedTraceType == Type.PATH && !inputs.ctrlDown) {
+          if(levelEditorShared.selectedTraceType == TraceType.PATH && !inputs.ctrlDown) {
             trace.vertices = positionPoint
           } else {
             trace.vertices = literalPoint
@@ -197,7 +197,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
           levelEditorShared.setPathInProgress(newEntity)
         } else {
           if(!inputs.ctrlDown) {
-            if(pathInProgress.type == Type.PATH) {
+            if(pathInProgress.type == TraceType.PATH) {
               if(closestPosition) {
                 addPathInProgressVertex(positionPoint)
               }

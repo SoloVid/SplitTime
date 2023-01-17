@@ -3,7 +3,7 @@ import { Vector3D } from "engine/math/vector3d";
 import { SpriteBody } from "engine/world/body/sprite-body";
 import { assert } from "globals";
 import { Coordinates2D, Coordinates3D } from "../level-location";
-import { Type } from "./trace-misc";
+import { TraceType } from "./trace-type";
 import { ensureNoPositions } from "./trace-points";
 import { TraceSpec } from "./trace-spec";
 import { TraceVerticalPlaneDivide } from "./trace-vertical-plane-divide";
@@ -116,7 +116,7 @@ function findStairsTrace(spriteBody: SpriteBody): TraceSpec {
     const collage = spriteBody.sprite.collage
     const montage = spriteBody.sprite.defaultMontageId ? collage.getMontage(spriteBody.sprite.defaultMontageId) : collage.getDefaultMontage()
     for (const trace of montage.traces) {
-        if (trace.type === Type.STAIRS) {
+        if (trace.type === TraceType.STAIRS) {
             return TraceSpec.fromRaw(trace)
         }
     }

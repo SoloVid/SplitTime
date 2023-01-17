@@ -1,6 +1,6 @@
 import { TracePointSpec, interpretPointString, ensureNoPositions } from "./trace-points";
 import { Trace } from "../level-file-data";
-import { Type } from "./trace-misc";
+import { TraceType } from "./trace-type";
 import { direction_t, interpret, toRadians } from "../../../math/direction";
 import { Polygon } from "../../../math/polygon/polygon";
 import { assert } from "globals";
@@ -28,21 +28,21 @@ export class TraceSpec {
         this.z = +rawTrace.z;
         this.height = +rawTrace.height;
         switch (this.type) {
-            case Type.STAIRS:
+            case TraceType.STAIRS:
                 this.direction = interpret(rawTrace.direction);
                 break;
-            case Type.EVENT:
+            case TraceType.EVENT:
                 this.eventId = rawTrace.event;
                 break;
-            case Type.POINTER:
-            case Type.TRANSPORT:
+            case TraceType.POINTER:
+            case TraceType.TRANSPORT:
                 this.linkLevel = rawTrace.level;
                 this.linkOffsetX = rawTrace.offsetX;
                 this.linkOffsetY = rawTrace.offsetY;
                 this.linkOffsetZ = rawTrace.offsetZ;
                 this.generateOffsetHash();
                 break;
-            case Type.SEND:
+            case TraceType.SEND:
                 this.linkLevel = rawTrace.level;
                 this.linkPosition = rawTrace.targetPosition;
                 this.generateOffsetHash();

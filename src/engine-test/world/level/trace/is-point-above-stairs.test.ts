@@ -1,8 +1,8 @@
 import { makeTrace } from "../../../../engine/world/level/level-file-data-helpers"
 import { Coordinates2D, Coordinates3D } from "../../../../engine/world/level/level-location"
-import { Type } from "../../../../engine/world/level/trace/trace-misc"
 import { TraceSpec } from "../../../../engine/world/level/trace/trace-spec"
 import { StairsPlane } from "../../../../engine/world/level/trace/trace-stairs-helper"
+import { TraceType } from "../../../../engine/world/level/trace/trace-type"
 import { int } from "../../../../globals"
 import { trace } from "./test-trace"
 
@@ -92,7 +92,7 @@ type CoordinateList = [x: int, y: int][]
 function makeSpec(coords: CoordinateList, direction: string, z: int, height: int): TraceSpec {
     const verticesStr = coords.map(c => "(" + c[0] + ", " + c[1] + ")").join(" ") + " (close)"
     const specFile = makeTrace({
-        type: Type.STAIRS,
+        type: TraceType.STAIRS,
         vertices: verticesStr,
         direction,
         z,
