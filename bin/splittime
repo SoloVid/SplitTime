@@ -6,13 +6,13 @@ const command = process.argv[2]
 const childArgs = process.argv.slice(3)
 switch (command) {
     case "build":
-        runScript("../build/build-cli.js", childArgs)
+        runScript("../lib/build-cli.js", childArgs)
         break
     case "serve":
-        runScript("../build/editor-server.js", childArgs)
+        runScript("../lib/editor-server.js", childArgs)
         break
     case "test":
-        runScript("../build/test-cli.js", childArgs)
+        runScript("../lib/test-cli.js", childArgs)
         break
     default:
         console.error(`Unrecognized command ${command}`)

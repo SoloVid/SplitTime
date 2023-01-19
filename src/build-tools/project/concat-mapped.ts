@@ -25,11 +25,11 @@ export function concatProjectSource(projectRoot: string): Promise<void> {
 export async function concatEntireGameJs(projectRoot: string): Promise<void> {
     const engineRoot = await getEngineModuleRoot(projectRoot)
     const files = [
-        join(engineRoot, "build/engine.js"),
-        join(engineRoot, "build/tsjs/defer.def.js"),
+        join(engineRoot, "lib/engine.js"),
+        join(engineRoot, "lib/tsjs/defer.def.js"),
         join(projectRoot, "build/generated/**/*.js"),
         join(projectRoot, "build/project-source.js"),
-        join(engineRoot, "build/tsjs/defer.run.js"),
+        join(engineRoot, "lib/tsjs/defer.run.js"),
     ]
     return concatFilesWithSourceMaps(files, projectRoot + "/dist/game.js")
 }

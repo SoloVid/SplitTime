@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 
     <script src="/engine/node_modules/vue/dist/vue.js"></script>
-    <script src="/engine/build/engine-test.js"></script>
+    <script src="/engine/lib/engine-test.js"></script>
 
     <link href="/engine/node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
     <style>
@@ -125,7 +125,7 @@
                     }
                 },
                 run: function() {
-                    var runner = new splitTime.testRunner.WorkerTestRunner(nextWorkerId++, "/engine/build/engine-test.js", this.item)
+                    var runner = new splitTime.testRunner.WorkerTestRunner(nextWorkerId++, "/engine/lib/engine-test.js", this.item)
                     this.runner = runner
                     var that = this
                     runner.launch().then(function() {

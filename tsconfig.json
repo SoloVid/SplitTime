@@ -4,7 +4,7 @@
     "jsxImportSource": "preact",
     "declaration": true,
     "declarationMap": true,
-    "declarationDir": "./build",
+    "declarationDir": "./lib",
     "rootDir": "./src",
     "baseUrl": "./src",
     "target": "ES2017",
@@ -13,7 +13,7 @@
     "module": "CommonJS",
     "isolatedModules": true,
     "lib": ["DOM", "ES5", "ES2015"],
-    "outDir": "./build/tmp",
+    "outDir": "./lib/tmp",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
