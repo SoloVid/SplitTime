@@ -1,7 +1,12 @@
-import { debounce } from "build-tools/common/debounce"
 import chokidar from "chokidar"
+import { makeBuildAll } from "./build-all"
+import { getBuildToolsBuilder } from "./build-tools-builder"
 import type { Builder } from "./builder"
+import { getCheckTypesBuilder } from "./check-types-builder"
+import { getEditorClientBuilder } from "./editor-client-builder"
+import { getEditorServerBuilder } from "./editor-server-builder"
 import { getEngineBuilder } from "./engine-builder"
+import { getRunTestsBuilder } from "./run-tests-builder"
 import { getTypeDeclarationBuilder } from "./type-declaration-builder"
 
 void run()
@@ -17,22 +22,48 @@ async function run() {
 
 async function runUnsafe() {
   let watch = false
+  let buildBuildTools = false
+  let buildEditorClient = false
+  let buildEditorServer = false
   let buildEngine = false
+  let checkTypes = false
   let generateTypeDeclarations = false
+  let runTests = false
+
+  function enableAll() {
+    buildBuildTools = true
+    buildEditorClient = true
+    buildEditorServer = true
+    buildEngine = true
+    checkTypes = true
+    generateTypeDeclarations = true
+    runTests = true
+  }
 
   const args = process.argv.slice(2)
-  if (args.length === 0) {
-    buildEngine = true
-  }
   while (args.length > 0) {
     const option = args.shift()
     switch (option) {
       case "--all":
-        buildEngine = true
-        generateTypeDeclarations = true
+        enableAll()
+        break
+      case "--build-tools":
+        buildBuildTools = true
+        break
+      case "--check":
+        checkTypes = true
+        break
+      case "--editor-client":
+        buildEditorClient = true
+        break
+      case "--editor-server":
+        buildEditorServer = true
         break
       case "--engine":
         buildEngine = true
+        break
+      case "--test":
+        runTests = true
         break
       case "--type-declarations":
         generateTypeDeclarations = true
@@ -45,76 +76,36 @@ async function runUnsafe() {
     }
   }
 
-  const buildSomething = buildEngine
+  const buildSomething = buildBuildTools || buildEditorClient || buildEditorServer || buildEngine || checkTypes || generateTypeDeclarations || runTests
+  if (!buildSomething) {
+    enableAll()
+  }
 
   const builders: Builder[] = []
+  if (buildBuildTools) {
+    builders.push(await getBuildToolsBuilder())
+  }
+  if (buildEditorClient) {
+    builders.push(await getEditorClientBuilder())
+  }
+  if (buildEditorServer) {
+    builders.push(await getEditorServerBuilder())
+  }
   if (buildEngine) {
     builders.push(await getEngineBuilder())
+  }
+  if (checkTypes) {
+    builders.push(await getCheckTypesBuilder())
   }
   if (generateTypeDeclarations) {
     builders.push(await getTypeDeclarationBuilder())
   }
-
-  const debouncedBuilders = builders.map(b => ({
-    ...b,
-    run: debounce(b.run, 50),
-  }))
-  const peopleWatching = new Map<unknown, number>()
-  function imWatching(p: unknown) {
-    const currentCount = peopleWatching.get(p) ?? 0
-    peopleWatching.set(p, currentCount + 1)
-  }
-  function imDoneWatching(p: unknown) {
-    const currentCount = peopleWatching.get(p) ?? 1
-    if (currentCount <= 1) {
-      peopleWatching.delete(p)
-    } else {
-      peopleWatching.set(p, currentCount - 1)
-    }
-  }
-  function howManyWatching(p: unknown) {
-    return peopleWatching.get(p) ?? 0
+  if (runTests) {
+    builders.push(await getRunTestsBuilder())
   }
 
-  let currentBuildNumber = 0
-  // let howManyGoing = 0
-  const buildAll = async () => {
-    const fullStart = performance.now()
-    currentBuildNumber++
-    // howManyGoing++
-    const myBuild = currentBuildNumber
-    try {
-      await Promise.all(debouncedBuilders.map(async b => {
-        let promise: PromiseLike<number> = Promise.resolve(0)
-        let duration = 0
-        try {
-          promise = b.run()
-          imWatching(promise)
-          try {
-            duration = await promise
-          } finally {
-            imDoneWatching(promise)
-          }
-          if (howManyWatching(promise) === 0) {
-            greenInfo(`${currentBuildNumber > myBuild ? "(stale) " : ""}${b.name} finished in ${Math.round(duration)} ms`)
-          }
-        } catch (e) {
-          if (howManyWatching(promise) === 0) {
-            redError(`${currentBuildNumber > myBuild ? "(stale) " : ""}${b.name} failed`)
-            if (b.printErrors) {
-              console.error(e)
-            }
-          }
-        }
-      }))
-    } finally {
-      // howManyGoing--
-      if (currentBuildNumber === myBuild && builders.length > 1) {
-        const fullDuration = Math.round(performance.now() - fullStart)
-        cyanInfo(`${builders.length} builds finished after ${fullDuration} ms`)
-      }
-    }
-  }
+  const buildAll = makeBuildAll(builders)
+
   if (watch) {
     const watchList = builders.reduce((l, b) => [...l, ...b.watchList], [] as readonly string[])
     chokidar.watch(watchList, {
@@ -128,14 +119,4 @@ async function runUnsafe() {
     })
   }
   await buildAll()
-}
-
-function redError(message: string) {
-  console.error("\x1b[31m%s\x1b[0m", message);
-}
-function greenInfo(message: string) {
-  console.info("\x1b[32m%s\x1b[0m", message);
-}
-function cyanInfo(message: string) {
-  console.info("\x1b[36m%s\x1b[0m", message);
 }

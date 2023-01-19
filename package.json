@@ -33,25 +33,13 @@
     "splittime": "bin/splittime"
   },
   "scripts": {
-    "build": "node bin/internal/build.mjs",
-    "build:legacy": "run-p build:build-cli build:editor-server build:editor-client build:engine",
-    "build:build-cli": "esbuild src/build-tools/build-cli.ts --bundle --platform=node --outfile=lib/build-cli.js --external:esbuild",
-    "build:editor-client": "esbuild src/editor/client/index.tsx --bundle --platform=browser --jsx=automatic --outfile=lib/editor-client.js --sourcemap",
-    "build:editor-server": "esbuild src/editor/server/main.ts --bundle --platform=node --outfile=lib/editor-server.js",
-    "build:engine": "node bin/internal/build-engine",
-    "build:internal-build-cli": "esbuild src/build-tools/internal-build-cli.ts --bundle --platform=node --outfile=lib/internal-build-cli.js --external:esbuild --sourcemap",
-    "prebuild:type-declarations": "npm run build:internal-build-cli",
-    "build:type-declarations:raw": "tsc --emitDeclarationOnly",
-    "build:type-declarations:resolve-paths": "node lib/internal-build-cli.js resolve-paths",
-    "build:type-declarations": "run-s build:type-declarations:raw build:type-declarations:resolve-paths",
+    "build": "node build",
+    "build:type-declarations": "tsc --emitDeclarationOnly",
     "clean": "rm -rf lib",
     "start": "node lib/editor-server.js",
-    "dev:server": "",
     "test": "run-p test:*",
     "test:types": "tsc --noEmit",
-    "test:unit": "uts -r esbuild-register src/engine-test",
-    "watch:build:type-declarations": "ts-node-dev --transpile-only src/build-tools/engine/build-type-declarations.ts",
-    "wmr": "wmr --cwd src/editor/wmr"
+    "test:unit": "uts -r esbuild-register src/engine-test"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.15.2",

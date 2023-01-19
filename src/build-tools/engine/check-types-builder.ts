@@ -1,32 +1,25 @@
 import { fork } from "node:child_process"
 import { join } from "node:path"
-import { resolveDeclarationNonRelativePaths } from "../common/resolve-non-relative-paths"
 import type { Builder } from "./builder"
 import rootDir from "./root-dir"
 
 const srcRoot = join(__dirname, "..", "..")
-const projectRoot = join(srcRoot, "..")
 
-export async function getTypeDeclarationBuilder(): Promise<Builder> {
+export async function getCheckTypesBuilder(): Promise<Builder> {
   return {
-    name: "type declaration generation",
-    run: generateAndModifyDeclarationFiles,
+    name: "check types",
+    run: runTsc,
     printErrors: false,
     watchList: [join(rootDir, "src")],
   }
 }
 
-async function generateAndModifyDeclarationFiles() {
-  await generateDeclarationFiles()
-  await resolveDeclarationNonRelativePaths(projectRoot)
-}
-
-async function generateDeclarationFiles(): Promise<void> {
+async function runTsc(): Promise<void> {
   const tscBinaryPath = require.resolve("typescript/bin/tsc")
   const process = fork(tscBinaryPath, [
-      "--emitDeclarationOnly",
+      "--noEmit",
   ], {
-      cwd: join(srcRoot, ".."),
+      cwd: rootDir,
       stdio: "inherit"
   })
   return new Promise((resolve, reject) => {
