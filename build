@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+
+const args = process.argv.slice(2)
+const isWatch = args.includes("--watch")
+const preloadModule = "esbuild-register"
+const script = "./src/build-tools/engine/build"
+
+if (!isWatch) {
+  require(preloadModule)
+  require(script)
+} else {
+  const { fork } = require("node:child_process")
+  const { join } = require("node:path")
+  const toWatch = join(__dirname, "src", "build-tools")
+  const chokidar = require('chokidar')
+  let controller = null
+  function kickOff() {
+    controller = new AbortController()
+    const child = fork(script, args, {
+      execArgv: ["-r", preloadModule],
+      signal: controller.signal,
+      stdio: "inherit",
+    })
+    child.on("error", (e) => {
+      if (e.code !== "ABORT_ERR") {
+        console.error(e)
+      }
+    })
+  }
+  chokidar.watch(toWatch, {
+    ignoreInitial: true,
+  }).on("all", (event, path) => {
+    console.log(`Change detected: ${path}`)
+    controller.abort()
+    kickOff()
+  })
+  kickOff()
+}

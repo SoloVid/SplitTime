@@ -14,7 +14,7 @@ export async function resolveDeclarationNonRelativePaths(dir: string) {
   // console.log(dir)
   const tsconfigContents = await readFile(join(dir, "tsconfig.json"), "utf-8")
   const withoutComments = stripJsonComments(tsconfigContents)
-  console.log(withoutComments)
+  // console.log(withoutComments)
   const tsconfig = JSON.parse(withoutComments) as Tsconfig
   const rootDir = tsconfig.compilerOptions?.rootDir
   assert(rootDir, "rootDir should be set in tsconfig.json")
