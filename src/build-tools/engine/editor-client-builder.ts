@@ -20,6 +20,7 @@ export async function getEditorClientBuilder(): Promise<Builder> {
   return {
     name: "editor client build",
     run: () => ctx.rebuild(),
+    close: () => ctx.dispose(),
     printErrors: false,
     watchList: [editorClientDir, apiDir, engineDir],
   }

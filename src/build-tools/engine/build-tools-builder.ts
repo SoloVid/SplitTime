@@ -1,7 +1,6 @@
 import esbuild from "esbuild"
 import { join } from "node:path"
 import type { Builder } from "./builder"
-import { apiDir, engineDir } from "./engine-builder"
 import rootDir from "./root-dir"
 
 export const buildToolsDir = join(rootDir, "src", "build-tools")
@@ -20,6 +19,7 @@ export async function getBuildToolsBuilder(): Promise<Builder> {
   return {
     name: "editor server build",
     run: () => ctx.rebuild(),
+    close: () => ctx.dispose(),
     printErrors: false,
     watchList: [buildToolsDir],
   }

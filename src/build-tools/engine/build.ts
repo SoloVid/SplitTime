@@ -62,6 +62,26 @@ async function runUnsafe() {
       case "--engine":
         buildEngine = true
         break
+      case "--help":
+      case "-h":
+        console.info(`
+Usage: node ${process.argv[1]} [options]
+
+Build stuff in the project.
+By default, only fast and necessary builds are completed.
+
+Options:
+  --all                        build everything
+  --build-tools                build tools used for project builds
+  --check                      check types
+  --editor-client              build client side of editor
+  --editor-server              build server side of editor
+  --engine                     build engine code
+  --test                       run unit tests
+  --type-declarations          generate type declarations (for projects)
+  --watch                      watch files and automatically rebuild
+`)
+        process.exit(2)
       case "--test":
         runTests = true
         break
@@ -78,7 +98,10 @@ async function runUnsafe() {
 
   const buildSomething = buildBuildTools || buildEditorClient || buildEditorServer || buildEngine || checkTypes || generateTypeDeclarations || runTests
   if (!buildSomething) {
-    enableAll()
+    buildBuildTools = true
+    buildEditorClient = true
+    buildEditorServer = true
+    buildEngine = true
   }
 
   const builders: Builder[] = []
@@ -119,4 +142,7 @@ async function runUnsafe() {
     })
   }
   await buildAll()
+  if (!watch) {
+    await Promise.all(builders.map(b => b.close ? b.close() : undefined))
+  }
 }

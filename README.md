@@ -8,7 +8,7 @@ However, the real distinction of this engine is its 2.5D nature. Although graphi
 ## Development Environment
 Make sure you have [Nodejs](http://nodejs.org/download/) installed.
 
-From the command line, run the following commands to setup development dependencies:
+From the command line, run the following commands to set up development dependencies:
 ```sh
 npm install
 ```
@@ -17,12 +17,22 @@ If developing the engine and a game project in tandem,
 run ``npm link`` in the directory of the engine (this repository)
 and then run ``npm link splittime`` in the game project directory.
 
+Alternatively, you can set your ``splittime`` dependency in your project to a local file:
+
+```
+"splittime": "file:<relative path to>/engine"
+```
+
 ### Building
 
 To build the engine:
 ```sh
-npm run -s build
+node build --all
+# or with just the fastest and necessary stuff:
+# node build
 ```
+
+_We're just running the ``build`` JS script in the root of this project._
 
 To build the project (after building the engine), run ``splittime build`` (e.g. ``npx splittime build``).
 Configure the npm ``build`` script to something like ``tsc && splittime build`` and the following command will execute the build:
@@ -50,22 +60,26 @@ npm run start
 While the server is running, you may access files in your browser at [localhost:8080](http://localhost:8080).
 You'll be able to play-test your game at [localhost:8080/project-name/](http://localhost:8080/project-name/) (where ``project-name`` is the name of the directory of your game project).
 
+<!--
+TODO: This section is out of date. Update or remove.
 ### Testing
 
-To run tests in ``src/engine-test/`` (after building the engine):
+To run tests in ``src/engine-test/``:
 ```sh
 npm test
 ```
 
 Alternatively, you can run these tests in the browser at [localhost:8080/test-runner.html](http://localhost:8080/test-runner.html) through the development server after building the engine.
+-->
 
 ### Cleaning
 
-To get a clean build, delete the ``build`` directory
-(in engine or project), and run your desired build.
+To get a clean build, delete the ``lib`` (engine) or ``build`` (game project)
+directory, and run your desired build.
 
 ## Project Structure
-Projects are individual games that reside in separate directories within ``projects/``. All of the files specific to your game are to be located within this directory.
+Projects are individual games that reside in separate directories within ``projects/``.
+All of the files specific to your game are to be located within this directory.
 
 The directories within each project should be
 
@@ -85,10 +99,6 @@ Within the game code, all resources should be referenced relative to their asset
 The launch point of the game should be some HTML file (probably ``index.html``) in the project home directory. This file should include ``<script src="dist/game.js"></script>`` and later call ``G.launch();`` as defined somewhere in the game's source files.
 
 Note that all TS files in ``src/`` will be included within ``dist/game.js``.
-Generally speaking, no ordering of project source files should be assumed.
-However, each directory's direct source files will come before source files in subdirectories.
-Also, you may use ``defer(() => { ... })`` to ensure that some code gets run after all definitions.
-_Why this scheme? It's a combination of bucking against modules/imports and simplicity of implementation._
 
 ## Distribution
 All files in a project's home ``dist/`` directory should be served in the production environment.

@@ -19,6 +19,7 @@ export async function getEditorServerBuilder(): Promise<Builder> {
   return {
     name: "editor server build",
     run: () => ctx.rebuild(),
+    close: () => ctx.dispose(),
     printErrors: false,
     watchList: [editorServerDir, apiDir, engineDir],
   }

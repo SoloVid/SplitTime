@@ -22,6 +22,7 @@ export async function getEngineBuilder(): Promise<Builder> {
   return {
     name: "engine build",
     run: () => ctx.rebuild(),
+    close: () => ctx.dispose(),
     printErrors: false,
     watchList: [apiDir, engineDir],
   }
