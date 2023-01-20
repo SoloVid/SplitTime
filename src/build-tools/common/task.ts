@@ -1,4 +1,5 @@
 import { performance } from "perf_hooks"
+import { greenInfo } from "./color-output"
 
 export async function task(
     name: string,
@@ -13,6 +14,6 @@ async function timeThis(name: string, callback: () => PromiseLike<unknown>): Pro
     const start = performance.now()
     await callback()
     const end = performance.now()
-    const seconds = ((end - start) / 1000).toFixed(1)
-    console.log(`${name} - ${seconds}s`)
+    const ms = Math.round(end - start)
+    greenInfo(`${name} finished in ${ms} ms`)
 }

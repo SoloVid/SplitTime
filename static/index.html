@@ -13,13 +13,26 @@
 
         .bgimg {
             /* background-image: url('INSERT_PIC'); */
-            background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+            /* background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%); */
+
+            /* Created with https://www.css-gradient.com */
+            /* background: #E5E681;
+            background: -webkit-radial-gradient(top, #E5E681, #84CEFF);
+            background: -moz-radial-gradient(top, #E5E681, #84CEFF);
+            background: radial-gradient(to bottom, #E5E681, #84CEFF); */
+
+            /* Created with https://www.css-gradient.com */
+            background: #FFFFBB;
+            background: -webkit-radial-gradient(top, #FFFFBB, #910103);
+            background: -moz-radial-gradient(top, #FFFFBB, #910103);
+            background: radial-gradient(to bottom, #FFFFBB, #910103);
+
             height: 100%;
             background-position: center;
             background-size: cover;
             position: relative;
-            color: white;
-            font-family: "Courier New", Courier, monospace;
+            /* color: white; */
+            /* font-family: "Courier New", Courier, monospace; */
             font-size: 25px;
         }
 
@@ -46,6 +59,10 @@
         hr {
             margin: auto;
             width: 40%;
+            border: 2px solid black;
+            border-bottom: none;
+            border-left: none;
+            border-right: none;
         }
     </style>
 </head>
@@ -63,15 +80,16 @@
             <div>
                 <script>
                     function openProjectPage(prefix) {
-                        var projectName = window.prompt("Project directory name:");
-                        if (projectName !== undefined) {
-                            window.location = "/" + prefix + "/" + projectName;
-                        }
+                        window.location = prefix
+                        // var projectName = window.prompt("Project directory name:");
+                        // if (projectName !== undefined) {
+                        //     window.location = "/" + prefix + "/" + projectName;
+                        // }
                     }
                 </script>
                 <a class="btn" onclick="openProjectPage('run')">Run</a>
                 <a class="btn" onclick="openProjectPage('edit')">Edit</a>
-                <a class="btn" href="/static/test-runner.html">Test Engine</a>
+                <!-- <a class="btn" href="/static/test-runner.html">Test Engine</a> -->
             </div>
         </div>
         <div class="bottomleft">

@@ -17,7 +17,7 @@ if (!isWatch) {
   function kickOff() {
     controller = new AbortController()
     const child = fork(script, args, {
-      execArgv: ["-r", preloadModule],
+      execArgv: ["--enable-source-maps", "-r", preloadModule],
       signal: controller.signal,
       stdio: "inherit",
     })

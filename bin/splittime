@@ -1,27 +1,62 @@
 #!/usr/bin/env node
 
-const child_process = require("child_process")
+const { fork } = require("node:child_process")
+const chokidar = require('chokidar')
 
 const command = process.argv[2]
 const childArgs = process.argv.slice(3)
+
+const isWatch = childArgs.includes("--watch")
+const buildScript = "../lib/project-build-cli.js"
+const serveScript = "../lib/editor-server.js"
+
+const runScript = isWatch ? runAndWatchScript : runScriptOnce
+
 switch (command) {
     case "build":
-        runScript("../lib/build-cli.js", childArgs)
+        runScript(buildScript, childArgs)
+        break
+    case "dev":
+        runAndWatchScript(buildScript, ["--watch", ...childArgs])
+        runAndWatchScript(serveScript, childArgs)
         break
     case "serve":
-        runScript("../lib/editor-server.js", childArgs)
-        break
-    case "test":
-        runScript("../lib/test-cli.js", childArgs)
+        runScript(serveScript, childArgs)
         break
     default:
-        console.error(`Unrecognized command ${command}`)
+        console.error(`Unrecognized command "${command}"; expected "build", "dev", or "serve"`)
         process.exit(1)
 }
 
-function runScript(scriptPath, args) {
+function runScriptOnce(scriptPath, args) {
     const actualPath = require.resolve(scriptPath)
-    child_process.fork(actualPath, args, {
+    fork(actualPath, args, {
         stdio: "inherit"
     })
+}
+
+function runAndWatchScript(scriptPath, args) {
+    const actualPath = require.resolve(scriptPath)
+    let controller = null
+    function kickOff() {
+      controller = new AbortController()
+      const child = fork(actualPath, args, {
+        execArgv: ["--enable-source-maps"],
+        signal: controller.signal,
+        stdio: "inherit",
+      })
+      child.on("error", (e) => {
+        if (e.code !== "ABORT_ERR") {
+          console.error(e)
+        }
+      })
+    }
+    chokidar.watch(actualPath, {
+      ignoreInitial: true,
+    }).on("all", (event, path) => {
+      console.log(`Change detected: ${path}`)
+      controller.abort()
+      kickOff()
+    })
+    kickOff()
 }

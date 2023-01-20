@@ -23,6 +23,33 @@ Alternatively, you can set your ``splittime`` dependency in your project to a lo
 "splittime": "file:<relative path to>/engine"
 ```
 
+### TL;DR
+
+Where the engine's at now, you're probably developing the engine alongside your project.
+
+Open one terminal in the engine directory:
+
+```
+node build --watch --all
+```
+
+Open a different terminal in the game directory:
+
+```
+npx splittime dev --check
+```
+
+Go to [localhost:8080](http://localhost:8080).
+
+*Alternatively* if you want the fastest experience with the least safety, leave off type-checking/tests:
+
+```
+# in engine directory
+node build --watch
+# in game directory
+npx splittime dev
+```
+
 ### Building
 
 To build the engine:
@@ -35,7 +62,7 @@ node build --all
 _We're just running the ``build`` JS script in the root of this project._
 
 To build the project (after building the engine), run ``splittime build`` (e.g. ``npx splittime build``).
-Configure the npm ``build`` script to something like ``tsc && splittime build`` and the following command will execute the build:
+Configure the npm ``build`` script to something like ``splittime build`` and the following command will execute the build:
 ```sh
 npm run -s build
 ```
@@ -55,10 +82,10 @@ _(This configuration file should not be expected to affect the actual build with
 
 The SplitTime engine ships with a development server (available after building the engine):
 ```sh
-npm run start
+npx splittime dev
 ```
 While the server is running, you may access files in your browser at [localhost:8080](http://localhost:8080).
-You'll be able to play-test your game at [localhost:8080/project-name/](http://localhost:8080/project-name/) (where ``project-name`` is the name of the directory of your game project).
+You'll be able to play-test your game at [localhost:8080/run](http://localhost:8080/run).
 
 <!--
 TODO: This section is out of date. Update or remove.
@@ -105,6 +132,6 @@ All files in a project's home ``dist/`` directory should be served in the produc
 
 ## Editing Collages/Levels
 Level files should be saved in a project's ``levels/`` directory, but levels are edited via the SplitTime development server.
-After building the project and starting the development server, launch [localhost:8080/editor.html](http://localhost:8080/editor.html) in your browser, and provide the name of your project's directory.
+After building the project and starting the development server, launch [localhost:8080/edit](http://localhost:8080/edit) in your browser, and provide the name of your project's directory.
 
 Since this document is not meant to be an authoritative source for the editor's interface, we'll assume you can figure out how to use it from that point.

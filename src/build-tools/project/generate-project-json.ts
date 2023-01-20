@@ -1,7 +1,5 @@
-import * as fsOrig from "fs"
-import * as pathOrig from "path"
-import rrdir from "rrdir"
-import { join, relative, slash, writeFile } from "../common/file-helper"
+import fs from "node:fs/promises"
+import { join, relative, writeFile } from "../common/file-helper"
 import { forAllFiles } from "../common/walk-files"
 import {
     COLLAGE_DIRECTORY,
@@ -11,8 +9,6 @@ import {
     PRELOADED_IMAGE_DIRECTORY,
     SOUND_EFFECT_DIRECTORY
 } from "./constants"
-const fs = fsOrig.promises
-const path = pathOrig.posix
 
 type FileDataMap = { [relFilePath: string]: object }
 
@@ -72,13 +68,6 @@ async function getAllRelativePaths(dir: string): Promise<string[]> {
     await forAllFiles(dir, f => {
         relPaths.push(relative(dir, f))
     })
-    // for await (const entry of rrdir(dir)) {
-    //     if (entry.directory) {
-    //         continue
-    //     }
-    //     const relPath = path.relative(dir, slash(entry.path))
-    //     relPaths.push(relPath)
-    // }
     return relPaths
 }
 
@@ -94,18 +83,5 @@ async function getJsonFileDataMap(dir: string): Promise<FileDataMap> {
             console.warn("Non-JSON file found in directory: " + relPath)
         }
     })
-    // for await (const entry of rrdir(dir)) {
-    //     if (entry.directory) {
-    //         continue
-    //     }
-    //     const relPath = path.relative(dir, slash(entry.path))
-    //     if (/\.json$/.test(entry.path)) {
-    //         const contents = await fs.readFile(entry.path)
-    //         const fileData = JSON.parse(contents.toString())
-    //         map[relPath] = fileData
-    //     } else {
-    //         console.warn("Non-JSON file found in level directory: " + relPath)
-    //     }
-    // }
     return map
 }

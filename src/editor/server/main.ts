@@ -6,8 +6,17 @@ if (!__NODE__) {
 }
 
 try {
-    const port = parseInt(process.argv[2], 10)
-    const sourceDirectory = process.argv[3] || "."
+    const port = process.argv.slice(2).reduce((found, arg) => {
+        if (found !== null) {
+            return found
+        }
+        if (/^\d+$/.test(arg)) {
+            return parseInt(arg, 10)
+        }
+        return null
+    }, null as null | number) ?? 8080
+    // const sourceDirectory = process.argv[3] || "."
+    const sourceDirectory = "."
 
     runServer(port, {
         sourceDirectory

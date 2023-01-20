@@ -1,4 +1,3 @@
-import type { IsJsonable } from "engine/file/json"
 import { __NODE__ } from "environment"
 import type { int } from "globals"
 import type { Response, Server } from "./server-lite"
@@ -12,10 +11,6 @@ import { ApiServer } from "./api-server"
 export const staticPath = "static"
 
 export function runServer(port: int, config: Config): void {
-    if (!__NODE__) {
-        throw new Error("Can't run server unless in Node context!")
-    }
-
     const app = express()
 
     const root = require("find-root")(__dirname)
@@ -47,6 +42,6 @@ export function runServer(port: int, config: Config): void {
 
     // start the Express server
     app.listen(port, () => {
-        console.log( `server started at http://localhost:${ port }` )
+        console.info(`Server listening on port \x1b[33m${port}\x1b[0m (\x1b[36mhttp://localhost:${port}\x1b[0m)`)
     })
 }
