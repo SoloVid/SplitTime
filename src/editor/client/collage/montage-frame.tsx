@@ -222,7 +222,8 @@ export default function MontageFrame(props: MontageFrameProps) {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      targetPosition: ""
+      targetPosition: "",
+      color: "",
     }
     collageEditHelper?.setCollage((before) => ({
       ...before,

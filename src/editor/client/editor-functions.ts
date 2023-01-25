@@ -59,6 +59,9 @@ export function safeGetColor(trace: FileTrace, metadata: EditorMetadata) {
     return "rgba(255, 255, 0, 0.8)"
   }
   let type = trace.type
+  if(type === TraceType.RENDER) {
+    return trace.color
+  }
   if(type === TraceType.SOLID && +trace.height === 0) {
     type = TraceType.GROUND
   }

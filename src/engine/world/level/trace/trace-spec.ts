@@ -20,6 +20,7 @@ export class TraceSpec {
     private offsetHash: string = "";
     readonly direction: direction_t | null = null;
     readonly eventId: string = "";
+    readonly color: string = "";
     /** variable offset to apply to all coordinates, e.g. position of body if spec is relative */
     offset: Coordinates3D = new Coordinates3D();
     private constructor(rawTrace: FileTrace) {
@@ -46,6 +47,9 @@ export class TraceSpec {
                 this.linkLevel = rawTrace.level ?? "";
                 this.linkPosition = rawTrace.targetPosition ?? "";
                 this.generateOffsetHash();
+                break;
+            case TraceType.RENDER:
+                this.color = rawTrace.color ?? "";
                 break;
         }
     }

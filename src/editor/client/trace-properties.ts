@@ -17,6 +17,7 @@ interface TraceFieldOptions {
     offsetY?: FieldOptions
     offsetZ?: FieldOptions
     targetPosition?: FieldOptions
+    color?: FieldOptions
 }
 type SimplifiedTrace = { [K in keyof Required<TraceFieldOptions>]: string | number }
 
@@ -36,6 +37,7 @@ export const tracePropertyFields = {
     offsetY: {},
     offsetZ: {},
     targetPosition: {},
+    color: {},
 }
 
 export function makeDefaultTrace(traceType: TraceTypeType): FileTrace {
@@ -65,6 +67,9 @@ export function makeDefaultTrace(traceType: TraceTypeType): FileTrace {
         case TraceType.SEND:
             trace.level = ""
             trace.targetPosition = ""
+            break
+        case TraceType.RENDER:
+            trace.color = ""
             break
     }
 

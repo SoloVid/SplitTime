@@ -34,6 +34,10 @@ export const TraceType = {
    * (probably in another level).
    */
   SEND: "send",
+  /**
+   * Polygon that will be rendered, per custom logic.
+   */
+  RENDER: "render",
 } as const
 
 export type TraceTypeType = (typeof TraceType)[keyof typeof TraceType]
