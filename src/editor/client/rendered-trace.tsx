@@ -11,6 +11,7 @@ import { ImmutableSetter, makeImmutableObjectSetterUpdater, makeStyleString, onl
 import { imageContext, ServerLiaison } from "./server-liaison"
 import { EditorMetadata } from "./shared-types"
 import { TRACE_GROUND_COLOR, TRACE_GROUND_HIGHLIGHT_COLOR } from "./trace-options"
+import { assert } from "globals"
 
 type RenderedTraceProps = {
   acceptMouse: boolean
@@ -87,6 +88,123 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       }
       return ""
     }).join(" ")
+  }, [pointsArrayS, trace])
+  const curvePathS = useMemo(() => {
+    type BzCurveOptions = {
+      /** true if closed polygon; false if dangling line termination */
+      closedCircuit?: boolean
+      /** 0 is straight line */
+      f?: number
+      /** Intended to be 1, but can tweak smoothness (lower values?). */
+      t?: number
+    }
+
+    // Adapted from https://stackoverflow.com/a/39559854/4639640
+    /**
+     * Return sequence of specs for either
+     * [CanvasRenderingContext2D.bezierCurveTo()](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/bezierCurveTo) or
+     * [SVG `C`](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#b%C3%A9zier_curves)
+     */
+    function bzCurve(
+      points: readonly Coordinates2D[],
+      {
+        closedCircuit = false,
+        f = 0.2,
+        t = 1,
+      }: BzCurveOptions = {}
+    ) {
+      function getRelativePoint(i: number, d: number) {
+        if (closedCircuit) {
+          return points[(i + d + points.length) % points.length]
+        }
+        const j = i + d
+        if (j < 0 || j >= points.length) {
+          return null
+        }
+        return points[j]
+      }
+
+      function getDxDy(p1: Coordinates2D | null, p2: Coordinates2D | null) {
+        if (p1 === null || p2 === null) {
+          return {
+            x: 0,
+            y: 0,
+          }
+        }
+        return {
+          x: (p2.x - p1.x) * -f,
+          y: (p2.y - p1.y) * -f,
+        }
+      }
+
+      function getCurveAt(i: number) {
+        const prePreP = getRelativePoint(i, -2)
+        const preP = getRelativePoint(i, -1)
+        assert(preP !== null, `getCurveAt() returned null for preP (i = ${i})`)
+        const curP = points[i]
+        const nexP = getRelativePoint(i, +1)
+        const d1 = getDxDy(prePreP, curP)
+        const d2 = getDxDy(preP, nexP)
+        return {
+          control1: { x: preP.x - d1.x, y: preP.y - d1.y },
+          control2: { x: curP.x + d2.x, y: curP.y + d2.y },
+          target: { x: curP.x, y: curP.y },
+        }
+      }
+
+      const bzCurves2 = points.slice(1).map((p, i) => getCurveAt(i + 1))
+      if (closedCircuit) {
+        bzCurves2.push(getCurveAt(0))
+      }
+      return bzCurves2
+
+      const bzCurves: {
+        control1: Coordinates2D,
+        control2: Coordinates2D,
+        target: Coordinates2D,
+      }[] = []
+
+      let m = 0
+      let dx1 = 0
+      let dy1 = 0
+
+      let preP = closedCircuit ? points[points.length - 1] : points[0]
+      for (let i = 1; i < points.length; i++) {
+        const curP = points[i]
+        const nexP = closedCircuit ? points[(i + 1) % points.length] : points[i + 1]
+        let dx2: number
+        let dy2: number
+        if (nexP) {
+          function slope(a: Coordinates2D, b: Coordinates2D) {
+            return (b.y-a.y)/(b.x-a.x);
+          }
+          m = slope(preP, nexP)
+          dx2 = (nexP.x - curP.x) * -f
+          dy2 = dx2 * m * t
+        } else {
+          dx2 = 0
+          dy2 = 0
+        }
+        console.log(`1: ${preP.x} - ${dx1}, ${preP.y} - ${dy1}`)
+        console.log(`2: ${curP.x} + ${dx2}, ${curP.y} + ${dy2}`)
+        bzCurves.push({
+          control1: { x: preP.x - dx1, y: preP.y - dy1 },
+          control2: { x: curP.x + dx2, y: curP.y + dy2 },
+          target: { x: curP.x, y: curP.y },
+        })
+        dx1 = dx2
+        dy1 = dy2
+        preP = curP
+      }
+
+      return bzCurves
+    }
+    const defPoints = pointsArrayS.filter(p => p !== null) as Coordinates2D[]
+    const fp = defPoints[0]
+    const curves = bzCurve(defPoints, { closedCircuit: true })
+    console.log(curves)
+    const curveStrings = curves.map(c => `C ${c.control1.x} ${c.control1.y}, ${c.control2.x}, ${c.control2.y}, ${c.target.x} ${c.target.y}`)
+    return `M ${fp.x} ${fp.y} ${curveStrings.join(" ")}` 
   }, [pointsArrayS, trace])
   const pointsShadowS = useMemo(() => {
     const pointsArray2D = pointsArrayS
@@ -235,6 +353,9 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       stroke={traceStroke}
       fill={traceFill}
     />}
+    {/* Curved outline */}
+    {/* <path d="M 10 10 C 20 20, 40 20, 50 10" stroke="orange" fill="transparent"/> */}
+    <path d={curvePathS} stroke="orange" fill="transparent"/>
     {/* Points/vertices */}
     {metadata.displayed && vertices.map((vertex) => (
     <circle
