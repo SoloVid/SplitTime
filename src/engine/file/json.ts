@@ -2,7 +2,8 @@
 // https://www.typescriptlang.org/docs/handbook/advanced-types.html
 // https://medium.com/dailyjs/typescript-create-a-condition-based-subset-types-9d902cea5b8c
 type primitive = null | boolean | number | string;
-type DefinitelyNotJsonable = ((...args: any[]) => any) | undefined;
+type Function2 = ((...args: any[]) => any)
+type DefinitelyNotJsonable = Function2 | undefined;
 /**
  * Returns an unsatisfiable type (will have never components) if the type T
  * is not a simple object that may be demonstrably converted to JSON without loss.
@@ -12,20 +13,20 @@ type DefinitelyNotJsonable = ((...args: any[]) => any) | undefined;
  * If AllowUnknown is true, unknown components will result in unknown.
  * If AllowUnknown is false, unknown components will result in an unsatisfiable type (a never).
  */
-export type IsJsonable<T, AllowUnknown = true> = 
+export type IsJsonable<T, AllowUnknown = true, AllowUndefined = false> = 
 // Check if there are any non-jsonable types represented in the union
 // Note: use of tuples in this first condition side-steps distributive conditional types
 // (see https://github.com/microsoft/TypeScript/issues/29368#issuecomment-453529532)
 [
-    Extract<T, DefinitelyNotJsonable>
+    Extract<T, AllowUndefined extends false ? DefinitelyNotJsonable : Function2>
 ] extends [
     never
-] ? T extends primitive ? T : T extends (infer U)[] ? IsJsonable<U, AllowUnknown>[] : T extends object ? {
+] ? T extends primitive ? T : T extends (infer U)[] ? IsJsonable<U, AllowUnknown, AllowUndefined>[] : T extends object ? {
     [K in keyof T]: T[K];
 } extends T ? {
     [P in keyof T]: 
     // Recursive call for children
-    IsJsonable<T[P], AllowUnknown>;
+    IsJsonable<T[P], AllowUnknown, AllowUndefined>;
 } : never : AllowUnknown extends false ? never : [
     Exclude<T, unknown>
 ] extends [

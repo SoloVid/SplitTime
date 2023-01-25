@@ -169,7 +169,7 @@ export function forAllPixels(callback: (coords: Coordinates3D) => void) {
     }
 }
 
-export function makeTrace(partialTrace: Partial<FileDataTrace>): Trace {
+export function makeTrace(partialTrace: Partial<FileDataTrace> & Pick<FileDataTrace, "type">): Trace {
     const spec = TraceSpec.fromRaw(makeTraceProper(partialTrace))
     return new Trace(spec)
 }

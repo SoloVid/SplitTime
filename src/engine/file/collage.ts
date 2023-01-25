@@ -1,9 +1,10 @@
 import { IsJsonable } from "./json";
 import { Trace } from "../world/level/level-file-data";
-import { isA, object, string, array, number } from "../utils/type";
+import { isA, object, string, array, number, stringEnum } from "../utils/type";
 import { int } from "globals";
 import { game_seconds } from "engine/time/timeline";
 import * as type from "engine/utils/type"
+import { TraceType } from "engine/world/level/trace/trace-type";
 /**
  * Serializable form of {@link splitTime.Collage}, specifically used in JSON file format.
  */
@@ -15,7 +16,7 @@ export interface Collage {
     defaultMontageId: string;
 }
 // Expect compiler error here if Collage is not jsonable
-let testCollageJsonable: IsJsonable<Collage, false> = {} as Collage;
+let testCollageJsonable: IsJsonable<Collage, false, true> = {} as Collage;
 /**
  * Component of {@link Collage}, specifically used in JSON file format.
  * Specific rectangle within the collage image.
@@ -96,7 +97,7 @@ export function instanceOfCollage(thing: unknown): thing is Collage {
             traces: array(object({
                 id: string,
                 group: string,
-                type: string,
+                type: stringEnum(Object.values(TraceType)),
                 vertices: string,
                 z: number,
                 height: number,
@@ -106,7 +107,8 @@ export function instanceOfCollage(thing: unknown): thing is Collage {
                 offsetX: number,
                 offsetY: number,
                 offsetZ: number,
-                targetPosition: string
+                targetPosition: string,
+                color: string,
             })),
             propPostProcessor: string,
             playerOcclusionFadeFactor: number

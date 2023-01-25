@@ -9,7 +9,7 @@ import { ImmutableSetter, TaggedImmutableSetter } from "./preact-help"
 type Options<Hydrated, Dehydrated> = {
   // value: Hydrated
   // setValue: ImmutableSetter<Hydrated>
-  dehydrate: (hydrated: Immutable<Hydrated>) => IsJsonable<Dehydrated>
+  dehydrate: (hydrated: Immutable<Hydrated>) => IsJsonable<Dehydrated, false, true>
   hydrate: (dehydrated: Dehydrated) => Immutable<Hydrated>
 }
 

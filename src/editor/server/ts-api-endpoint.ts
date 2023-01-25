@@ -17,11 +17,11 @@ export class TsApiEndpoint<RequestType, ResponseType> {
      * Define how the server will handle a request to this endpoint.
      * Should only be called from the server.
      */
-    serve(handler: (request: IsJsonable<RequestType>) => (IsJsonable<ResponseType> | PromiseLike<IsJsonable<ResponseType>>)): void {
+    serve(handler: (request: IsJsonable<RequestType, true, true>) => (IsJsonable<ResponseType, true, true> | PromiseLike<IsJsonable<ResponseType, true, true>>)): void {
         assert(__NODE__, "TsApiEndpoint#serve() should only be called from the server")
         this.middleware.serve(this.id, requestJson => {
             // Trust cast because object from #fetch()
-            const request = requestJson as IsJsonable<RequestType>
+            const request = requestJson as IsJsonable<RequestType, true, true>
             return handler(request)
         })
     }
@@ -30,10 +30,10 @@ export class TsApiEndpoint<RequestType, ResponseType> {
      * Make a request to the server for this endpoint.
      * Should only be called from the client.
      */
-    async fetch(request: IsJsonable<RequestType>): Promise<IsJsonable<ResponseType>> {
+    async fetch(request: IsJsonable<RequestType, true, true>): Promise<IsJsonable<ResponseType, true, true>> {
         assert(!__NODE__, "TsApiEndpoint#fetch() should only be called from the client")
         const responseJson = await this.middleware.fetch(this.id, request)
         // Trust cast because object from #serve()
-        return responseJson as IsJsonable<ResponseType>
+        return responseJson as IsJsonable<ResponseType, true, true>
     }
 }

@@ -4,7 +4,7 @@ import { assert } from "globals"
 import { GenericObjectProperties, ObjectProperties } from "../field-options"
 import { FileTrace } from "../file-types"
 import { ImmutableSetter, OptionalTaggedImmutableSetter } from "../preact-help"
-import { getTracePropertiesFields } from "../trace-properties"
+import { tracePropertyFields } from "../trace-properties"
 import { BasePath, getByPath } from "../utils/immutable-helper"
 import { EditorLevel } from "./extended-level-format"
 import { onGroupIdUpdate } from "./group-wrapper"
@@ -133,13 +133,11 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
   }
   if (path[0] === "traces") {
     assert(path.length === 3, `Unexpected path within traces: ${JSON.stringify(path)}`)
-    const initialTrace = getByPath(level, path)
-    const fieldObject = getTracePropertiesFields(initialTrace as FileTrace)
     const properties: ObjectProperties<EditorLevel, ["traces", number, "obj"]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Trace Properties",
-      fields: fieldObject,
+      fields: tracePropertyFields,
       pathToDeleteThing: [path[0], path[1]],
     }
     // TODO: More type safety?

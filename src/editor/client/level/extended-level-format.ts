@@ -4,9 +4,10 @@ import { Immutable } from "engine/utils/immutable"
 import { Group as FileGroup, Position as FilePosition, Prop as FileProp, Trace as FileTrace } from "engine/world/level/level-file-data"
 import { useState } from "preact/hooks"
 import { exportLevel } from "../editor-functions"
-import { defaultFileGroup, defaultFilePosition, defaultFileProp, defaultFileTrace, FileLevel } from "../file-types"
+import { defaultFileGroup, defaultFilePosition, defaultFileProp, FileLevel } from "../file-types"
 import { ImmutableSetter, OptionalTaggedImmutableSetter, TaggedImmutableSetter } from "../preact-help"
 import { EditorMetadata } from "../shared-types"
+import { makeDefaultTrace } from "../trace-properties"
 import { useUndoStackState } from "../undo"
 import { makeEditorEntityFromFileObject, makeEditorEntitySetMethods } from "./entity-mapper"
 
@@ -20,7 +21,7 @@ export type EditorLevel = {
   groups: readonly EditorGroupEntity[]
   addGroup: (init: Partial<FileGroup>) => EditorGroupEntity
   traces: readonly EditorTraceEntity[]
-  addTrace: (init: Partial<FileTrace>) => EditorTraceEntity
+  addTrace: (init: Partial<FileTrace> & Pick<FileTrace, "type">) => EditorTraceEntity
   props: readonly EditorPropEntity[]
   addProp: (init: Partial<FileProp>) => EditorPropEntity
   positions: readonly EditorPositionEntity[]
@@ -124,7 +125,7 @@ export function useEditorLevel(fileLevel: FileLevel, setFileLevel: ImmutableSett
         return newEntity
       },
       addTrace: (init) => {
-        const newEntity = makeEditorEntityFromFileObject<EditorTraceEntity>(setEditorLevel, { ...defaultFileTrace, ...init }, "trace")
+        const newEntity = makeEditorEntityFromFileObject<EditorTraceEntity>(setEditorLevel, { ...makeDefaultTrace(init.type), ...init }, "trace")
         setEditorLevel(null, (before) => ({...before, traces: [...before.traces, newEntity]}))
         return newEntity
       },

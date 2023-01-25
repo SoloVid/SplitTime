@@ -5,7 +5,7 @@ import { Rect } from "engine/math/rect"
 import { makeStyleString } from "../preact-help"
 import { EDITOR_PADDING, PropertiesEvent } from "./shared-types"
 import { Trace as FileTrace } from "engine/world/level/level-file-data"
-import { TraceType } from "engine/world/level/trace/trace-type"
+import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { assert } from "globals"
 import { Immutable } from "engine/utils/immutable"
 import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
@@ -201,7 +201,7 @@ export default function MontageFrame(props: MontageFrameProps) {
     event.preventDefault()
   }
 
-  function addNewTrace(montage: FileMontage, type: string): FileTrace {
+  function addNewTrace(montage: FileMontage, type: TraceTypeType): FileTrace {
     const z = 0
     const defaultHeight = DEFAULT_GROUP_HEIGHT
     let height = defaultHeight

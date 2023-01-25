@@ -1,7 +1,8 @@
 import * as type from "engine/utils/type";
 import { int } from "globals";
 import { IsJsonable } from "../../file/json";
-import { array, isA, number, object, other, string } from "../../utils/type";
+import { array, isA, number, object, optional, other, string, stringEnum } from "../../utils/type";
+import { TraceType, TraceTypeType } from "./trace/trace-type";
 
 export interface FileData {
     type: "action";
@@ -17,7 +18,7 @@ export interface FileData {
     positions: readonly Position[];
 }
 // Expect compiler error if FileData is not jsonable
-let testFileDataJsonable: IsJsonable<FileData, false> = {} as FileData;
+let testFileDataJsonable: IsJsonable<FileData, false, true> = {} as FileData;
 export interface Group {
     id: string;
     parent: string;
@@ -27,17 +28,18 @@ export interface Group {
 export interface Trace {
     id: string;
     group: string;
-    type: string;
+    type: TraceTypeType;
     vertices: string;
     z: number;
     height: number;
-    direction: string; // for stairs
-    event: string; // for event
-    level: string; // for pointer/transport/send
-    offsetX: number; // for pointer/transport
-    offsetY: number; // for pointer/transport
-    offsetZ: number; // for pointer/transport
-    targetPosition: string; // for send
+    direction?: string; // for stairs
+    event?: string; // for event
+    level?: string; // for pointer/transport/send
+    offsetX?: number; // for pointer/transport
+    offsetY?: number; // for pointer/transport
+    offsetZ?: number; // for pointer/transport
+    targetPosition?: string; // for send
+    color?: string; // for render
 }
 export interface Prop {
     id: string;
@@ -69,17 +71,18 @@ export function instanceOfFileData(thing: unknown): thing is FileData {
         traces: array(object({
             id: string,
             group: string,
-            type: string,
+            type: stringEnum(Object.values(TraceType)),
             vertices: string,
             z: number,
             height: number,
-            direction: string,
-            event: string,
-            level: string,
-            offsetX: number,
-            offsetY: number,
-            offsetZ: number,
-            targetPosition: string
+            direction: optional(string),
+            event: optional(string),
+            level: optional(string),
+            offsetX: optional(number),
+            offsetY: optional(number),
+            offsetZ: optional(number),
+            targetPosition: optional(string),
+            color: optional(string),
         })),
         props: array(object({
             id: string,

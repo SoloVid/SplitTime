@@ -1,9 +1,7 @@
 import { __NODE__ } from "environment"
 import type { int } from "globals"
-import type { Response, Server } from "./server-lite"
 import { Config } from "./config"
 import { prefixRun, prefixStatic, prefixEngine, prefixEdit } from "./constants"
-// import express = require("express")
 import express from "express"
 import path = require("path")
 import { ApiServer } from "./api-server"

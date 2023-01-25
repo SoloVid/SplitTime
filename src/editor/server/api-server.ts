@@ -14,7 +14,7 @@ export class ApiServer implements Server {
         ]
     }
 
-    async handle<T>(url: string, body: IsJsonable<T>): Promise<NonNullable<Response>> {
+    async handle<T>(url: string, body: IsJsonable<T, true, true>): Promise<NonNullable<Response>> {
         for (const api of this.apis) {
             const response = await api.handle(url, body)
             if (response !== null) {

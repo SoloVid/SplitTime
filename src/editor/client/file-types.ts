@@ -43,20 +43,3 @@ export const defaultFilePosition = {
   dir: "",
 } as const
 const testFilePosition: FilePosition = defaultFilePosition
-
-export const defaultFileTrace = {
-  id: "",
-  group: "",
-  type: "",
-  vertices: "",
-  z: 0,
-  height: 0,
-  direction: "",
-  event: "",
-  level: "",
-  offsetX: 0,
-  offsetY: 0,
-  offsetZ: 0,
-  targetPosition: "",
-} as const
-const testFileTrace: FileTrace = defaultFileTrace

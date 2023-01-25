@@ -6,7 +6,7 @@ type Handler<RequestType, ResponseType> = (request: RequestType) => (ResponseTyp
 
 interface IdRequest<T> {
     id: string
-    requestData: IsJsonable<T>
+    requestData: IsJsonable<T, true, true>
 }
 
 /**
@@ -16,13 +16,13 @@ interface IdRequest<T> {
  * Use {@link TsApiEndpoint} or {@link TsApiHelper} instead.
  */
 export class TsApiMiddleware implements Server<unknown, unknown> {
-    private readonly handlerMap: { [id: string]: Handler<IsJsonable<unknown>, IsJsonable<unknown>> } = {}
+    private readonly handlerMap: { [id: string]: Handler<IsJsonable<unknown, true, true>, IsJsonable<unknown, true, true>> } = {}
 
     constructor(
         private readonly url: string
     ) {}
 
-    serve<RequestType, ResponseType>(id: string, handler: Handler<IsJsonable<RequestType>, IsJsonable<ResponseType>>): void {
+    serve<RequestType, ResponseType>(id: string, handler: Handler<IsJsonable<RequestType, true, true>, IsJsonable<ResponseType, true, true>>): void {
         if (!__NODE__) {
             throw new Error("Endpoints can only be served on Node server")
         }
@@ -33,7 +33,7 @@ export class TsApiMiddleware implements Server<unknown, unknown> {
         this.handlerMap[id] = handler as Handler<unknown, unknown>
     }
 
-    async fetch<RequestType, ResponseType>(id: string, data: IsJsonable<RequestType>): Promise<IsJsonable<ResponseType>> {
+    async fetch<RequestType, ResponseType>(id: string, data: IsJsonable<RequestType, true, true>): Promise<IsJsonable<ResponseType, true, true>> {
         if (__NODE__) {
             throw new Error("Endpoints can only be fetched from client")
         }
@@ -59,7 +59,7 @@ export class TsApiMiddleware implements Server<unknown, unknown> {
         return response.json()
     }
 
-    async handle<RequestType, ResponseType>(url: string, body: IsJsonable<RequestType>):
+    async handle<RequestType, ResponseType>(url: string, body: IsJsonable<RequestType, true, true>):
             Promise<Response<ResponseType>> {
         if (url !== this.url) {
             return null
@@ -76,7 +76,7 @@ export class TsApiMiddleware implements Server<unknown, unknown> {
         try {
             const response = await this.handlerMap[requestJson.id](requestJson.requestData)
             return {
-                responseBody: response as unknown as IsJsonable<ResponseType>
+                responseBody: response as unknown as IsJsonable<ResponseType, true, true>
             }
         } catch (e: unknown) {
             console.log(e)

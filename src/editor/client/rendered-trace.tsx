@@ -129,7 +129,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
   const otherLevelDisplayed = (trace.type === TraceType.POINTER ||
     trace.type === TraceType.TRANSPORT) && metadata.highlighted
 
-  function useOtherLevel(s: ServerLiaison, levelId: string) {
+  function useOtherLevel(s: ServerLiaison, levelId: string | undefined) {
     const [levelJson, setLevelJson] = useState<FileData | null>(null)
     useEffect(() => {
       if (!levelId) {
@@ -201,8 +201,8 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       {/* Window to linked level FTODO: change to showing more than just background */}
       {otherLevelDisplayed && otherLevel && <pattern
         id={'img-' + uid}
-        x={-trace.offsetX}
-        y={-trace.offsetY + trace.offsetZ}
+        x={-(trace.offsetX ?? 0)}
+        y={-(trace.offsetY ?? 0) + (trace.offsetZ ?? 0)}
         width={otherLevel.width + 1000}
         height={otherLevel.height + 1000}
         patternUnits="userSpaceOnUse"

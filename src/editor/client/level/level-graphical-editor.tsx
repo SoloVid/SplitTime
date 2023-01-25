@@ -203,7 +203,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
           levelEditorShared.setPathInProgress(newEntity)
         } else {
           if(!inputs.ctrlDown) {
-            if(pathInProgress.type == TraceType.PATH) {
+            if(pathInProgress.obj.type == TraceType.PATH) {
               if(closestPosition) {
                 addPathInProgressVertex(positionPoint)
               }

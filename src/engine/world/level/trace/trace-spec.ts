@@ -1,6 +1,6 @@
 import { TracePointSpec, interpretPointString, ensureNoPositions } from "./trace-points";
-import { Trace } from "../level-file-data";
-import { TraceType } from "./trace-type";
+import { Trace as FileTrace } from "../level-file-data";
+import { TraceType, TraceTypeType } from "./trace-type";
 import { direction_t, interpret, toRadians } from "../../../math/direction";
 import { Polygon } from "../../../math/polygon/polygon";
 import { assert } from "globals";
@@ -8,7 +8,7 @@ import { Vector2D } from "engine/math/vector2d";
 import { Coordinates3D, instanceOfCoordinates2D, Coordinates2D } from "../level-location";
 
 export class TraceSpec {
-    readonly type: string;
+    readonly type: TraceTypeType;
     readonly vertices: TracePointSpec[];
     readonly z: number = 0;
     readonly height: number = 0;
@@ -22,29 +22,29 @@ export class TraceSpec {
     readonly eventId: string = "";
     /** variable offset to apply to all coordinates, e.g. position of body if spec is relative */
     offset: Coordinates3D = new Coordinates3D();
-    private constructor(rawTrace: Trace) {
+    private constructor(rawTrace: FileTrace) {
         this.type = rawTrace.type;
         this.vertices = interpretPointString(rawTrace.vertices);
         this.z = +rawTrace.z;
         this.height = +rawTrace.height;
         switch (this.type) {
             case TraceType.STAIRS:
-                this.direction = interpret(rawTrace.direction);
+                this.direction = interpret(rawTrace.direction ?? "");
                 break;
             case TraceType.EVENT:
-                this.eventId = rawTrace.event;
+                this.eventId = rawTrace.event ?? "";
                 break;
             case TraceType.POINTER:
             case TraceType.TRANSPORT:
-                this.linkLevel = rawTrace.level;
-                this.linkOffsetX = rawTrace.offsetX;
-                this.linkOffsetY = rawTrace.offsetY;
-                this.linkOffsetZ = rawTrace.offsetZ;
+                this.linkLevel = rawTrace.level ?? "";
+                this.linkOffsetX = rawTrace.offsetX ?? 0;
+                this.linkOffsetY = rawTrace.offsetY ?? 0;
+                this.linkOffsetZ = rawTrace.offsetZ ?? 0;
                 this.generateOffsetHash();
                 break;
             case TraceType.SEND:
-                this.linkLevel = rawTrace.level;
-                this.linkPosition = rawTrace.targetPosition;
+                this.linkLevel = rawTrace.level ?? "";
+                this.linkPosition = rawTrace.targetPosition ?? "";
                 this.generateOffsetHash();
                 break;
         }
@@ -52,7 +52,7 @@ export class TraceSpec {
     /**
      * Basically a constructor for Trace from level file data
      */
-    static fromRaw(rawTrace: Trace): TraceSpec {
+    static fromRaw(rawTrace: FileTrace): TraceSpec {
         return new TraceSpec(rawTrace);
     }
     getOffsetHash() {

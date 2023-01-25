@@ -5,7 +5,7 @@ import { Trace as FileTrace, Trace } from "engine/world/level/level-file-data"
 import { assert } from "globals"
 import { GenericObjectProperties, ObjectProperties } from "../field-options"
 import { ImmutableSetter } from "../preact-help"
-import { getTracePropertiesFields, getTracePropertiesStuff as getTracePropertiesStuffShared } from "../trace-properties"
+import { tracePropertyFields } from "../trace-properties"
 import { BasePath, getByPath } from "../utils/immutable-helper"
 import { FrameWrapper, updateFrameId } from "./frame-wrapper"
 import { MontageFrameWrapper } from "./montage-frame-wrapper"
@@ -193,13 +193,11 @@ export function getObjectProperties(collage: Immutable<Collage>, setCollage: Imm
     }
     if (path[2] === "traces") {
       assert(path.length === 4, `Unexpected (montage) traces path: ${JSON.stringify(path)}`)
-      const initialTrace = getByPath(collage, path)
-      const fieldObject = getTracePropertiesFields(initialTrace as Trace)
       const properties: ObjectProperties<Collage, ["montages", number, "traces", number]> = {
         // TODO: More type safety?
         ...baseProperties as any,
         title: "Trace Properties",
-        fields: fieldObject,
+        fields: tracePropertyFields,
       }
       // TODO: More type safety?
       return properties as any

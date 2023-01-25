@@ -47,9 +47,9 @@ export const traceOptions = [
 ]
 
 export const collageTraceOptions = traceOptions.filter(
-  o => ![
+  o => !([
     TraceType.PATH,
     TraceType.POINTER,
     TraceType.TRANSPORT,
-  ].includes(o.type)
+  ] as readonly string[]).includes(o.type)
 )

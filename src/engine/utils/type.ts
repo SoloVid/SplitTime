@@ -14,7 +14,23 @@ export function other<T = never>(callback: IfNotNever<NoInfer<T>, (thing: unknow
         return callback(thing);
     };
 }
+export function optional<T>(checker: TypeChecker<T>): TypeChecker<T | undefined> {
+    return function (thing: unknown): thing is T | undefined {
+        if (thing === undefined) {
+            return true
+        }
+        return checker(thing)
+    }
+}
 export const string = other<string>(thing => typeof thing === "string");
+export function stringEnum<T extends string>(values: readonly T[]) {
+    return function (thing: unknown): thing is T {
+        if (!string(thing)) {
+            return false
+        }
+        return (values as readonly string[]).includes(thing)
+    }
+}
 export const number = other<number>(thing => typeof thing === "number");
 export const int = other<Int>(thing => typeof thing === "number" && Number.isInteger(thing));
 export const boolean = other<boolean>(thing => typeof thing === "boolean");
@@ -35,11 +51,11 @@ export function object<T extends object>(definition: ObjectTypeDefinition<NotArr
         };
         const keysAllowed: string[] = [];
         for (const key in definition) {
+            const checker = definition[key];
             keysAllowed.push(key);
-            if (!(key in thing)) {
+            if (!(key in thing) && !checker(undefined)) {
                 return false;
             }
-            const checker = definition[key];
             // FTODO: This is technically type unsafe as far as the type assertion goes
             // because the for loop keeps us from precisely knowing what the type of definition[key] is.
             // However, if the static type checking on this "object" function signature

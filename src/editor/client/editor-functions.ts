@@ -5,13 +5,14 @@ import { Canvas } from "engine/ui/viewport/canvas"
 import { Immutable } from "engine/utils/immutable"
 import { Group as FileGroup } from "engine/world/level/level-file-data"
 import { makeTrace } from "engine/world/level/level-file-data-helpers"
-import { TraceType } from "engine/world/level/trace/trace-type"
+import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
 import { FileLevel } from "./file-types"
 import { GridSnapMover } from "./grid-snap-mover"
 import { EditorLevel, EditorPositionEntity } from "./level/extended-level-format"
 import { EditorMetadata } from "./shared-types"
 import { traceOptions } from "./trace-options"
+import { makeDefaultTrace } from "./trace-properties"
 
 export function updatePageTitle(title: string) {
   document.title = title
@@ -49,7 +50,7 @@ export function getCoords(elem: HTMLElement): { top: int, left: int } {
   return { top: Math.round(top), left: Math.round(left) }
 }
 
-export function exportJson<T>(data: IsJsonable<T>): json {
+export function exportJson<T>(data: IsJsonable<T, false, true>): json {
   return JSON.stringify(data, null, 2)
 }
 
@@ -125,7 +126,7 @@ export function checkGroupMatch(level: EditorLevel, realGroup: string, testGroup
   return realGroup === testGroup
 }
 
-export function makeNewTrace(levelObject: EditorLevel, groupId: string, type: string): FileTrace {
+export function makeNewTrace(levelObject: EditorLevel, groupId: string, type: TraceTypeType): FileTrace {
   const group = getGroupById(levelObject, groupId)
   var z = group.defaultZ
   var height = group.defaultHeight
@@ -133,12 +134,12 @@ export function makeNewTrace(levelObject: EditorLevel, groupId: string, type: st
     type = TraceType.SOLID
     height = 0
   }
-  return makeTrace({
+  return {
+    ...makeDefaultTrace(type),
     group: group.id,
-    type: type,
     z: z,
     height: height,
-  })
+  }
 }
 
 export function safeExtractTraceArray(levelObject: Immutable<EditorLevel>, traceStr: string): (Readonly<Coordinates2D> | null)[] {

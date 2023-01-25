@@ -1,5 +1,6 @@
 import { COLLAGE_DIR } from "engine/assets/assets"
 import { makeCollageFromFile } from "engine/graphics/collage"
+import { TraceTypeType } from "engine/world/level/trace/trace-type"
 import { useEffect, useState } from "preact/hooks"
 import { SharedStuffViewOnly as CollageSharedStuff } from "../collage/collage-editor-shared"
 import CollageShowcase from "../collage/collage-showcase"
@@ -78,7 +79,7 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
   function selectModeOption(mode: Mode): void {
     levelEditorShared.setMode(mode)
   }
-  function selectTraceOption(type: string): void {
+  function selectTraceOption(type: TraceTypeType): void {
     levelEditorShared.setMode("trace")
     levelEditorShared.setSelectedTraceType(type)
   }
