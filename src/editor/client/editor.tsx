@@ -21,11 +21,35 @@ type FileBrowserReturnListener = {f: (filePath: string) => void}
 
 type EditorProps = {
   readonly server: ServerLiaison
+  readonly filePath: string | null
+  readonly setFilePath: (newFilePath: string) => void
 }
 
-export default function Editor({ server }: EditorProps) {
-  const [lastServerFile, setLastServerFile] = useState<string | null>(null)
-  const [preferences, setPreferences] = globalEditorPreferences.use(lastServerFile)
+export default function Editor({ server, filePath, setFilePath }: EditorProps) {
+  const [loadingFile, setLoadingFile] = useState(true)
+  useEffect(() => {
+    if (filePath === null) {
+      setLoadingFile(false)
+      return
+    }
+    setLoadingFile(true)
+    server.api.projectFiles.readFile.fetch(
+      server.withProject({ filePath }))
+    .then((response) => {
+      setLoadingFile(false)
+      const contents = atob(response.base64Contents)
+      try {
+        importString(contents)
+      } catch (e: unknown) {
+        alert("Editing this file type is not supported. Is it possible your data is corrupted?")
+      }
+    }, (e) => {
+      setLoadingFile(false)
+      window.alert("Failed to open file (see console error)")
+      console.error(e)
+    })
+  }, [server, filePath])
+  const [preferences, setPreferences] = globalEditorPreferences.use(filePath)
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
   const [onDeleteCallback, setOnDeleteCallback] = useState<{f: () => void}>({f:() => { }})
@@ -252,28 +276,19 @@ export default function Editor({ server }: EditorProps) {
     }
   }
 
-  async function onServerFileSelected(filePath: string): Promise<void> {
+  async function onServerFileSelected(newFilePath: string): Promise<void> {
     setShowFileBrowser(false)
-    if (!filePath) {
+    if (!newFilePath) {
       return
     }
     assert(fileBrowserReturnListener !== null, "Who is waiting for file browser?")
-    fileBrowserReturnListener.f(filePath)
+    fileBrowserReturnListener.f(newFilePath)
     setFileBrowserReturnListener(null)
   }
 
   function openFileOpen(): void {
-    setFileBrowserReturnListener({ f: async filePath => {
-      setLastServerFile(filePath)
-      const response = await server.api.projectFiles.readFile.fetch(
-        server.withProject({ filePath }))
-      const contents = atob(response.base64Contents)
-      try {
-        importString(contents)
-        updatePageTitle(filePath)
-      } catch (e: unknown) {
-        alert("Editing this file type is not supported. Is it possible your data is corrupted?")
-      }
+    setFileBrowserReturnListener({ f: async newFilePath => {
+      setFilePath(newFilePath)
     } })
     setFileBrowserTitle("Open File")
     setFileBrowserConfirmActionText("Open")
@@ -286,18 +301,17 @@ export default function Editor({ server }: EditorProps) {
   function openFileSave(): void {
     let preloadDirectory = ""
     let preloadFileName = ""
-    if (lastServerFile !== null) {
-      const lastSlash = lastServerFile.lastIndexOf("/")
-      preloadDirectory = lastServerFile.substring(0, lastSlash)
-      preloadFileName = lastServerFile.substring(lastSlash + 1)
+    if (filePath !== null) {
+      const lastSlash = filePath.lastIndexOf("/")
+      preloadDirectory = filePath.substring(0, lastSlash)
+      preloadFileName = filePath.substring(lastSlash + 1)
     }
-    setFileBrowserReturnListener({ f: async filePath => {
-      setLastServerFile(filePath)
+    setFileBrowserReturnListener({ f: async newFilePath => {
       const fileContents = exportString()
       await server.api.projectFiles.writeFile.fetch(
-        server.withProject({ filePath, base64Contents: btoa(fileContents) })
+        server.withProject({ filePath: newFilePath, base64Contents: btoa(fileContents) })
       )
-      updatePageTitle(filePath)
+      setFilePath(newFilePath)
     } })
     setFileBrowserTitle("Save File As")
     setFileBrowserConfirmActionText("Save")
@@ -310,7 +324,7 @@ export default function Editor({ server }: EditorProps) {
 
   function openFileSelect(rootDirectory: string): PromiseLike<string> {
     const pledge = new Pledge()
-    setFileBrowserReturnListener({f: filePath => pledge.resolve(filePath)})
+    setFileBrowserReturnListener({f: newFilePath => pledge.resolve(newFilePath)})
     setFileBrowserTitle("Select File")
     setFileBrowserConfirmActionText("Select")
     setFileBrowserRoot(rootDirectory)
@@ -337,6 +351,7 @@ export default function Editor({ server }: EditorProps) {
     style="display: flex; flex-flow: column; height: 100vh;"
   >
     <div className="menu-bar">
+      {(!loadingFile) && <>
       {(!level && !collage) && <>
         <a onClick={() => setShowNewDialog(true)}>New</a>
         <a onClick={openFileOpen}>Open</a>
@@ -374,7 +389,8 @@ export default function Editor({ server }: EditorProps) {
               onChange={(z) => setPreferences((p) => ({...p, zoom: z}))}
               style="width: 48px;"
             />%
-          </label>
+        </label>
+      </>}
       </>}
     </div>
     {showNewDialog && <div className="modal-backdrop">
@@ -402,15 +418,15 @@ export default function Editor({ server }: EditorProps) {
       </div>
     </div>}
     {!!collage && <CollageEditor
-      key={lastServerFile}
+      key={filePath}
       editorGlobalStuff={globalEditorStuff}
       collage={collage}
       setCollage={setCollage}
       style="flex-grow: 1; overflow: hidden;"
     />}
     { !!level && <LevelEditor
-      key={lastServerFile}
-      id={lastServerFile ?? "unknown"}
+      key={filePath}
+      id={filePath ?? "unknown"}
       editorGlobalStuff={globalEditorStuff}
       level={level}
       setLevel={setLevel}
