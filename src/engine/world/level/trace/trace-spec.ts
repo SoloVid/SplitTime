@@ -21,6 +21,7 @@ export class TraceSpec {
     readonly direction: direction_t | null = null;
     readonly eventId: string = "";
     readonly color: string = "";
+    readonly curved: boolean = false;
     /** variable offset to apply to all coordinates, e.g. position of body if spec is relative */
     offset: Coordinates3D = new Coordinates3D();
     private constructor(rawTrace: FileTrace) {
@@ -50,6 +51,7 @@ export class TraceSpec {
                 break;
             case TraceType.RENDER:
                 this.color = rawTrace.color ?? "";
+                this.curved = rawTrace.curved ?? false;
                 break;
         }
     }

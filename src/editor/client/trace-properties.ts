@@ -38,6 +38,7 @@ export const tracePropertyFields = {
     offsetZ: {},
     targetPosition: {},
     color: {},
+    curved: {},
 }
 
 export function makeDefaultTrace(traceType: TraceTypeType): FileTrace {
@@ -70,6 +71,7 @@ export function makeDefaultTrace(traceType: TraceTypeType): FileTrace {
             break
         case TraceType.RENDER:
             trace.color = ""
+            trace.curved = true
             break
     }
 

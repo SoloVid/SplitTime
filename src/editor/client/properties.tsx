@@ -1,6 +1,6 @@
 import { useMemo, useState } from "preact/hooks"
 import { FieldOptions, GenericObjectProperties, ObjectProperties } from "./field-options"
-import { MultilineStringInput, NumberInput, StringInput } from "./input"
+import { CheckboxInput, MultilineStringInput, NumberInput, StringInput } from "./input"
 import { GlobalEditorShared } from "./shared-types"
 import { getByPath, updateImmutableObject } from "./utils/immutable-helper"
 
@@ -62,7 +62,7 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
 
 type SinglePropertyProps = {
   readonly editorGlobalStuff: Pick<GlobalEditorShared, "openFileSelect">
-  readonly value: string | number
+  readonly value: string | number | boolean
   readonly fieldKey: string
   readonly fieldOptions: FieldOptions
   readonly setField: (newValue: string | number) => void
@@ -80,8 +80,8 @@ function SingleProperty(props: SinglePropertyProps) {
   const [isTempEmpty, setIsTempEmpty] = useState(false)
 
   const rawValue = useMemo(() => {
-    if (typeof value !== "number" && typeof value !== "string") {
-      throw new Error("Value (" + fieldKey + ") isn't a string or number")
+    if (typeof value !== "boolean" && typeof value !== "number" && typeof value !== "string") {
+      throw new Error("Value (" + fieldKey + ") isn't a string or number or boolean")
     }
     return value
   }, [fieldKey, value, isTempEmpty])
@@ -108,6 +108,9 @@ function SingleProperty(props: SinglePropertyProps) {
   }
 
   const inputType = useMemo(() => {
+    if (typeof rawValue === "boolean") {
+      return "boolean"
+    }
     if (typeof rawValue === "number") {
       return "number"
     }
@@ -149,6 +152,12 @@ function SingleProperty(props: SinglePropertyProps) {
     />}
     {inputType === 'textarea' && <MultilineStringInput
       value={rawValue as string}
+      onChange={(v) => { setValue(v); onChange() }}
+      readonly={isReadonly()}
+      className="block"
+    />}
+    {inputType === 'boolean' && <CheckboxInput
+      value={rawValue as boolean}
       onChange={(v) => { setValue(v); onChange() }}
       readonly={isReadonly()}
       className="block"

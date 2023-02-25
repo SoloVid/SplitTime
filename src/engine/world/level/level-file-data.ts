@@ -1,7 +1,7 @@
 import * as type from "engine/utils/type";
 import { int } from "globals";
 import { IsJsonable } from "../../file/json";
-import { array, isA, number, object, optional, other, string, stringEnum } from "../../utils/type";
+import { array, boolean, isA, number, object, optional, other, string, stringEnum } from "../../utils/type";
 import { TraceType, TraceTypeType } from "./trace/trace-type";
 
 export interface FileData {
@@ -40,6 +40,7 @@ export interface Trace {
     offsetZ?: number; // for pointer/transport
     targetPosition?: string; // for send
     color?: string; // for render
+    curved?: boolean // for render
 }
 export interface Prop {
     id: string;
@@ -83,6 +84,7 @@ export function instanceOfFileData(thing: unknown): thing is FileData {
             offsetZ: optional(number),
             targetPosition: optional(string),
             color: optional(string),
+            curved: optional(boolean),
         })),
         props: array(object({
             id: string,

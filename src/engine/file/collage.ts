@@ -1,6 +1,6 @@
 import { IsJsonable } from "./json";
 import { Trace } from "../world/level/level-file-data";
-import { isA, object, string, array, number, stringEnum } from "../utils/type";
+import { isA, object, string, array, number, stringEnum, optional, boolean } from "../utils/type";
 import { int } from "globals";
 import { game_seconds } from "engine/time/timeline";
 import * as type from "engine/utils/type"
@@ -101,14 +101,15 @@ export function instanceOfCollage(thing: unknown): thing is Collage {
                 vertices: string,
                 z: number,
                 height: number,
-                direction: string,
-                event: string,
-                level: string,
-                offsetX: number,
-                offsetY: number,
-                offsetZ: number,
-                targetPosition: string,
-                color: string,
+                direction: optional(string),
+                event: optional(string),
+                level: optional(string),
+                offsetX: optional(number),
+                offsetY: optional(number),
+                offsetZ: optional(number),
+                targetPosition: optional(string),
+                color: optional(string),
+                curved: optional(boolean),
             })),
             propPostProcessor: string,
             playerOcclusionFadeFactor: number

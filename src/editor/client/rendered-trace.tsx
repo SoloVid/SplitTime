@@ -77,14 +77,16 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     "pointer-events": acceptMouse ? "initial" : "none"
   })
 
-  const pointsS = useMemo(() => {
-    return pointsArrayS.map(point => {
+  const linePathS = useMemo(() => {
+    return pointsArrayS.map((point, i) => {
+      const op = i === 0 ? "M" : "L"
       if(point !== null) {
         const y = point.y - trace.z
-        return point.x + "," + y
+        return `${op} ${point.x} ${y}`
       } else if(pointsArrayS.length > 0 && pointsArrayS[0] !== null) {
-        const y = pointsArrayS[0].y - trace.z
-        return pointsArrayS[0].x + "," + y
+        // const y = pointsArrayS[0].y - trace.z
+        // return `${op} ${pointsArrayS[0].x} ${y}`
+        return "Z"
       }
       return ""
     }).join(" ")
@@ -157,55 +159,14 @@ export default function RenderedTrace(props: RenderedTraceProps) {
         bzCurves2.push(getCurveAt(0))
       }
       return bzCurves2
-
-      const bzCurves: {
-        control1: Coordinates2D,
-        control2: Coordinates2D,
-        target: Coordinates2D,
-      }[] = []
-
-      let m = 0
-      let dx1 = 0
-      let dy1 = 0
-
-      let preP = closedCircuit ? points[points.length - 1] : points[0]
-      for (let i = 1; i < points.length; i++) {
-        const curP = points[i]
-        const nexP = closedCircuit ? points[(i + 1) % points.length] : points[i + 1]
-        let dx2: number
-        let dy2: number
-        if (nexP) {
-          function slope(a: Coordinates2D, b: Coordinates2D) {
-            return (b.y-a.y)/(b.x-a.x);
-          }
-          m = slope(preP, nexP)
-          dx2 = (nexP.x - curP.x) * -f
-          dy2 = dx2 * m * t
-        } else {
-          dx2 = 0
-          dy2 = 0
-        }
-        console.log(`1: ${preP.x} - ${dx1}, ${preP.y} - ${dy1}`)
-        console.log(`2: ${curP.x} + ${dx2}, ${curP.y} + ${dy2}`)
-        bzCurves.push({
-          control1: { x: preP.x - dx1, y: preP.y - dy1 },
-          control2: { x: curP.x + dx2, y: curP.y + dy2 },
-          target: { x: curP.x, y: curP.y },
-        })
-        dx1 = dx2
-        dy1 = dy2
-        preP = curP
-      }
-
-      return bzCurves
     }
     const defPoints = pointsArrayS.filter(p => p !== null) as Coordinates2D[]
     const fp = defPoints[0]
     const curves = bzCurve(defPoints, { closedCircuit: true })
-    console.log(curves)
     const curveStrings = curves.map(c => `C ${c.control1.x} ${c.control1.y}, ${c.control2.x}, ${c.control2.y}, ${c.target.x} ${c.target.y}`)
     return `M ${fp.x} ${fp.y} ${curveStrings.join(" ")}` 
   }, [pointsArrayS, trace])
+  const pathD = trace.curved ? curvePathS : linePathS
   const pointsShadowS = useMemo(() => {
     const pointsArray2D = pointsArrayS
     const pointsArray3D = pointsArray2D.map(point => {
@@ -343,19 +304,19 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       </pattern>}
     </defs>
     {/* Base outline and fill */}
-    {metadata.displayed && <polyline
+    {metadata.displayed && <path
       style={mousableStyle}
       onDblClick={preventDefault}
       onMouseDown={onlyLeft((e) => track(e, undefined))}
       onMouseMove={() => toggleHighlight(true)}
       onMouseLeave={() => toggleHighlight(false)}
-      points={pointsS}
+      d={pathD}
       stroke={traceStroke}
+      stroke-width={1.5}
       fill={traceFill}
     />}
     {/* Curved outline */}
-    {/* <path d="M 10 10 C 20 20, 40 20, 50 10" stroke="orange" fill="transparent"/> */}
-    <path d={curvePathS} stroke="orange" fill="transparent"/>
+    {/* <path d={curvePathS} stroke="orange" stroke-width={2} fill="blue"/> */}
     {/* Points/vertices */}
     {metadata.displayed && vertices.map((vertex) => (
     <circle
