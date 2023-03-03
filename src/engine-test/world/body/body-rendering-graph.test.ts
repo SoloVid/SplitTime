@@ -22,6 +22,7 @@ function sortingTest(description: string, define: (go: (options: SortingTestOpti
     for (const inputPerm of perms) {
       const inputRefOrder = inputPerm.map(b => b.ref).join(",")
       levelTracesTests.scenario(`${description} (input order ${inputRefOrder})`, t => {
+        // console.log(`start perm ${inputRefOrder}`)
         const graph = new BodyRenderingGraph()
         graph.notifyNewFrame()
         for (const b of inputPerm) {
@@ -33,6 +34,7 @@ function sortingTest(description: string, define: (go: (options: SortingTestOpti
           walkedOrder.push(node.body)
         })
         const actualRefOrder = walkedOrder.map(b => b.ref).join(",")
+        // console.log(`end perm`)
         t.assertEqual(expectedRefOrder, actualRefOrder, "Order should match")
       })
     }
@@ -70,7 +72,17 @@ function makeDrawable(): GraphDrawable {
   }
 }
 
-// From https://stackoverflow.com/a/20871714/4639640
+function makeLargeDrawable(): GraphDrawable {
+  return {
+    getCanvasRequirements(): CanvasRequirements {
+      return new CanvasRequirements(
+        Rect.make(-4 * cubit, -4 * cubit, 8 * cubit, 8 * cubit)
+      )
+    }
+  }
+}
+
+// Adapted from https://stackoverflow.com/a/20871714/4639640
 const permute = <T>(inputArr: readonly T[]): readonly (readonly T[])[] => {
   let result: T[][] = [];
 
@@ -136,4 +148,76 @@ sortingTest("Overlapping bodies should sort by y", go => {
     inputBodies: [top, front],
     expectedOrdering: [top, front]
   })
+})
+
+sortingTest("Non-overlapping bodies should not create cycle", go => {
+  // In this scenario, backTop clearly needs to be rendered after backBottom
+  // since they are stacked.
+  // However, backTop and front are both arguably "in front" of the other.
+  // They don't really need to be ordered in this scenario.
+  const backTop = makeGraphBody({ y: -2 * cubit, z: cubit })
+  const backBottom = makeGraphBody({ y: -2 * cubit, z: 0 })
+  const front = makeGraphBody({ y: 0, z: 0,
+    drawables: [makeLargeDrawable()]
+  })
+  go({
+    inputBodies: [backTop, backBottom, front],
+    expectedOrdering: [backBottom, backTop, front]
+  })
+})
+
+levelTracesTests.scenario("Graph should function properly over multiple iterations", t => {
+  // These positions are listed in order from back to front.
+  const positions = [
+    // This position should trigger a "soft before" ordering.
+    { y: 0, z: 2 * cubit, drawables: [makeLargeDrawable()] },
+    { y: cubit * 1, z: 0, drawables: [makeDrawable()] },
+    { y: cubit * 2, z: 0, drawables: [makeDrawable()] },
+  ]
+  const bodies = [
+    makeGraphBody({}),
+    makeGraphBody({}),
+    makeGraphBody({}),
+  ]
+  // console.log(`Bodies: ${JSON.stringify(bodies.map(b => b.ref))}`)
+
+  const graph = new BodyRenderingGraph()
+
+  function checkOrder(expectedOrdering: readonly GraphBody[]) {
+    graph.notifyNewFrame()
+
+    for (const b of bodies) {
+      graph.feedBody(b)
+    }
+    
+    graph.rebuildGraph()
+    const walkedOrder: GraphBody[] = []
+    graph.walk((node) => {
+      walkedOrder.push(node.body)
+    })
+    const expectedRefOrder = expectedOrdering.map(b => b.ref).join(",")
+    const actualRefOrder = walkedOrder.map(b => b.ref).join(",")
+    t.assertEqual(expectedRefOrder, actualRefOrder, "Order should match")
+  }
+
+  // Go through everything a multiple times.
+  for (let round = 0; round < 4; round++) {
+    // Permute the order.
+    // `bodyOrder` is an array of indexes into `bodies`,
+    // with the sequence representing the draw order.
+    // [2, 0, 1] indicates that the render order should be bodies[2], bodies[0], bodies[1].
+    for (const bodyOrder of permute([0, 1, 2])) {
+      // console.log(`bodyOrder ${JSON.stringify(bodyOrder)} (${JSON.stringify(bodyOrder.map(i => bodies[i].ref))})`)
+      // "Move" each body to a new position per the current permutation.
+      bodyOrder.forEach((bodyIndex, positionIndex) => {
+        Object.assign(bodies[bodyIndex], positions[positionIndex])
+        const b = bodies[bodyIndex]
+        // console.log(`body ${b.ref} now at ${b.x}, ${b.y}, ${b.z}`)
+      })
+      checkOrder(
+        // The order of the bodies should match the order of the position indexes.
+        bodyOrder.map(i => bodies[i]),
+      )
+    }
+  }
 })

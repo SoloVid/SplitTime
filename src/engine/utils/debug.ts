@@ -6,6 +6,7 @@ export const defaultGroup: Record<string, unknown> = {}
 export let ENABLED = true; // Master switch
 export let groupDisplayed: unknown = defaultGroup;
 export let DRAW_TRACES = false;
+export let DRAW_BODY_RENDER_ORDER_DEBUGGING = false;
 let debugDiv: HTMLElement | null = null;
 const debugInfo: Map<unknown, {
     [key: string]: DebugValue;

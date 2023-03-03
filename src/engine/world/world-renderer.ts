@@ -33,6 +33,7 @@ export class WorldRenderer {
     private readonly SCREEN_WIDTH: int;
     private readonly SCREEN_HEIGHT: int;
     private readonly buffer: DrawingBoard;
+    private readonly debugDrawingBoard: DrawingBoard;
     private readonly snapshot: DrawingBoard;
     private readonly bodyRenderer: Renderer;
     private readonly weatherRenderer: WeatherRenderer;
@@ -54,6 +55,7 @@ export class WorldRenderer {
         this.SCREEN_WIDTH = this.camera.SCREEN_WIDTH;
         this.SCREEN_HEIGHT = this.camera.SCREEN_HEIGHT;
         this.buffer = makeAssetDrawingBoard(this.assets, this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
+        this.debugDrawingBoard = makeAssetDrawingBoard(this.assets, this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
         this.snapshot = makeAssetDrawingBoard(this.assets, this.SCREEN_WIDTH, this.SCREEN_HEIGHT)
         this.bodyRenderer = new Renderer(this.camera);
         this.weatherRenderer = new WeatherRenderer(this.camera);
@@ -63,9 +65,10 @@ export class WorldRenderer {
             this.see.raw.context.drawImage(this.snapshot.raw.element, 0, 0);
             return;
         }
+        this.debugDrawingBoard.raw.context.clearRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         const currentLevel = this.levelManager.getCurrent();
         const screen = this.camera.getScreenCoordinates();
-        this.bodyRenderer.notifyNewFrame(screen, this.snapshot);
+        this.bodyRenderer.notifyNewFrame(screen, this.snapshot, this.debugDrawingBoard);
         var bodies = currentLevel.getBodies();
         var playerBody = this.playerBodyGetter();
         for (var iBody = 0; iBody < bodies.length; iBody++) {
@@ -126,6 +129,7 @@ export class WorldRenderer {
         this.buffer.raw.context.fillRect(0, 0, this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         //Save screen into snapshot
         this.see.raw.context.drawImage(this.buffer.raw.element, 0, 0);
+        this.see.raw.context.drawImage(this.debugDrawingBoard.raw.element, 0, 0);
         // reset global alpha
         this.buffer.raw.context.globalAlpha = 1;
         for (const body of bodies) {

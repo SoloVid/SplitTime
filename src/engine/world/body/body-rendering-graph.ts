@@ -130,6 +130,7 @@ export class BodyRenderingGraph {
                     this._nodes[i] = null
                 } else {
                     node.before = []
+                    node.softBefore = []
                 }
             }
         }
@@ -214,12 +215,19 @@ function determineOrdering(a: GraphBody, b: GraphBody): ordering {
         return aSmaller ? ordering.softBBehindA : ordering.softABehindB
     }
 
-    if (isAbove(a, b) || isInFront(a, b)) {
+    const aAboveB = isAbove(a, b)
+    const aBeforeB = isInFront(a, b)
+    const bAboveA = isAbove(b, a)
+    const bBeforeA = isInFront(b, a)
+
+    if ((aAboveB && !bBeforeA) || (aBeforeB && !bAboveA)) {
         //if a is completely above or in front
+        // console.log(`${b.ref} is behind ${a.ref}`)
         return ordering.bBehindA
     }
-    if (isAbove(b, a) || isInFront(b, a)) {
+    if ((bAboveA && !aBeforeB) || (bBeforeA && !aAboveB)) {
         //if b is completely above or in front
+        // console.log(`${a.ref} is behind ${b.ref}`)
         return ordering.aBehindB
     }
     if (a.shouldRenderInFrontCustom) {
@@ -238,7 +246,12 @@ function determineOrdering(a: GraphBody, b: GraphBody): ordering {
     // If neither body is clearly above or in front,
     // go with the one whose base front is farther forward on the y axis.
     // This is a soft ordering because it might conflict with well-defined orderings.
-    return isFurtherForward(a, b) ? ordering.softBBehindA : ordering.softABehindB
+    if (isFurtherForward(a, b)) {
+        // console.log(`${b.ref} is softly behind ${a.ref}`)
+        return ordering.softBBehindA
+    }
+    // console.log(`${a.ref} is softly behind ${b.ref}`)
+    return ordering.softABehindB
 }
 
 /**

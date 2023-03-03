@@ -1,5 +1,5 @@
 import { BodyRenderingGraph, GraphBodyNode } from "./body-rendering-graph";
-import { ENABLED } from "../../utils/debug";
+import { DRAW_BODY_RENDER_ORDER_DEBUGGING, ENABLED } from "../../utils/debug";
 import { error } from "../../utils/logger";
 import { Drawable } from "./render/drawable";
 import { Body } from "engine/world/body/body"
@@ -7,6 +7,7 @@ import { DrawingBoard } from "../../ui/viewport/drawing-board";
 import { Camera } from "engine/ui/viewport/camera";
 import { approachValue } from "engine/utils/misc";
 import { assert } from "globals";
+import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
 
 export class Renderer {
     private readonly graph = new BodyRenderingGraph();
@@ -19,13 +20,15 @@ export class Renderer {
         y: number;
     } | null = null;
     private drawingBoard: DrawingBoard | null = null;
+    private debugDrawingBoard: DrawingBoard | null = null;
     constructor(private readonly camera: Camera) { }
     notifyNewFrame(screen: {
         x: number;
         y: number;
-    }, drawingBoard: DrawingBoard) {
+    }, drawingBoard: DrawingBoard, debugDrawingBoard: DrawingBoard | null) {
         this.screen = screen;
         this.drawingBoard = drawingBoard;
+        this.debugDrawingBoard = debugDrawingBoard;
         this.graph.notifyNewFrame();
     }
     /**
@@ -77,13 +80,15 @@ export class Renderer {
     }
     render() {
         this.graph.rebuildGraph();
+        let drawIndex = 0
         this.graph.walk(graphNode => {
             const node = this._getBodyNode(graphNode);
             for (const graphNodeBehind of graphNode.before) {
                 const nodeBehind = this._getBodyNode(graphNodeBehind);
                 this._fadeOccludingSprite(node, nodeBehind);
             }
-            this.drawBodyTo(node);
+            drawIndex++
+            this.drawBodyTo(node, drawIndex);
         });
     }
     private isBodyOnScreen(body: Body): boolean {
@@ -149,12 +154,12 @@ export class Renderer {
             }
         }
     }
-    drawBodyTo(node: BodyNode) {
+    private drawBodyTo(node: BodyNode, drawIndex: number) {
         for (const drawable of node.body.drawables) {
-            this.drawBodyDrawable(node, drawable);
+            this.drawBodyDrawable(node, drawable, drawIndex);
         }
     }
-    private drawBodyDrawable(node: BodyNode, drawable: Drawable): void {
+    private drawBodyDrawable(node: BodyNode, drawable: Drawable, drawIndex: number): void {
         //FTODO: revisit
         if (!this.drawingBoard || !this.screen) {
             return;
@@ -173,8 +178,43 @@ export class Renderer {
         node.targetOpacity = 1;
         // Reset transform
         this.drawingBoard.raw.context.setTransform(1, 0, 0, 1, 0, 0);
+
+        if (DRAW_BODY_RENDER_ORDER_DEBUGGING && this.debugDrawingBoard) {
+            const dctx = this.debugDrawingBoard.raw.context
+            dctx.translate(Math.round(-this.screen.x), Math.round(-this.screen.y));
+            dctx.strokeStyle = "red"
+            dctx.lineWidth = 2
+            const da = node.graphNode.drawArea
+            if (da) {
+                dctx.strokeRect(da.x, da.y, da.width, da.height)
+            }
+            dctx.translate(Math.round(translateOriginTarget.x), Math.round(translateOriginTarget.y - translateOriginTarget.z));
+            drawDebugText(dctx, [
+                `Ref: ${node.body.ref}`,
+                `Before: ${JSON.stringify(node.graphNode.before.map(n => n.body.ref))}`,
+                `Draw Index: ${drawIndex}`,
+            ])
+            dctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
     }
 }
+
+function drawDebugText(ctx: GenericCanvasRenderingContext2D, lines: readonly string[]) {
+    const lineHeight = 8
+    ctx.font = `${lineHeight}px Arial`
+    ctx.fillStyle = "white"
+    ctx.strokeStyle = "black"
+    ctx.lineWidth = 2
+    const height = lines.length * lineHeight
+    for (let i = 0; i < lines.length; i++) {
+        const text = lines[i]
+        const width = ctx.measureText(text).width
+        const y = -height + lineHeight + (i * lineHeight)
+        ctx.strokeText(text, Math.round(-width / 2), y)
+        ctx.fillText(text, Math.round(-width / 2), y)
+    }
+}
+
 class BodyNode {
     isPlayer: boolean = false;
     opacity: number = 1;
