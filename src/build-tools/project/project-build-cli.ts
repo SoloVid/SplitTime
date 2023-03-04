@@ -63,6 +63,9 @@ async function runUnsafe() {
         // `${buildLogsDirectory}/**`,
         "dist/**",
       ],
+      // Renames don't work on Windows while chokidar is watching.
+      // https://github.com/paulmillr/chokidar/issues/1031
+      usePolling: process.platform === "win32",
     }).on("all", (event, path) => changeDetectedBuild(path))
     chokidar.watch("node_modules/splittime/lib", {
       ignoreInitial: true,

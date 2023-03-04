@@ -1,14 +1,16 @@
 import { assert } from "api"
 import { keycode } from "api/controls"
 import { json } from "api/file"
-import { debug } from "api/system"
+import { debug, error } from "api/system"
 import { Collage as FileCollage, instanceOfCollage } from "engine/file/collage"
 import { Immutable } from "engine/utils/immutable"
 import { Pledge } from "engine/utils/pledge"
-import { instanceOfFileData } from "engine/world/level/level-file-data"
+import { instanceOfFileData as instanceOfLevelFileData } from "engine/world/level/level-file-data"
 import { useEffect, useState } from "preact/hooks"
+import swal from "sweetalert"
+import CodeEditor from "./code/code-editor"
 import CollageEditor from "./collage/collage-editor"
-import { exportJson, importLevel, updatePageTitle } from "./editor-functions"
+import { exportJson, updatePageTitle } from "./editor-functions"
 import FileBrowser from "./file-browser"
 import { FileLevel } from "./file-types"
 import { CheckboxInput, NumberInput } from "./input"
@@ -16,39 +18,42 @@ import LevelEditor from "./level/level-editor"
 import { globalEditorPreferences } from "./preferences"
 import { ServerLiaison } from "./server-liaison"
 import { Followable, GlobalEditorShared } from "./shared-types"
+import { showError } from "./utils/prompt"
+
+export type EditorType = "level" | "collage" | "code"
+
+export function detectEditorTypes(fileContents: string): readonly EditorType[] {
+  try {
+    const parsed = JSON.parse(fileContents)
+    if (instanceOfLevelFileData(parsed)) {
+      return ["level", "code"]
+    }
+    if (instanceOfCollage(parsed)) {
+      return ["collage", "code"]
+    }
+  } catch (e) {
+    // Do nothing.
+  }
+  return ["code"]
+}
 
 type FileBrowserReturnListener = {f: (filePath: string) => void}
 
 type EditorProps = {
+  readonly editorType: EditorType
   readonly server: ServerLiaison
-  readonly filePath: string | null
-  readonly setFilePath: (newFilePath: string) => void
+  readonly filePath: string
+  readonly setFilePath: (newFilePath: string, editorType: EditorType) => void
+  readonly initialFileContents: string
 }
 
-export default function Editor({ server, filePath, setFilePath }: EditorProps) {
-  const [loadingFile, setLoadingFile] = useState(true)
-  useEffect(() => {
-    if (filePath === null) {
-      setLoadingFile(false)
-      return
-    }
-    setLoadingFile(true)
-    server.api.projectFiles.readFile.fetch(
-      server.withProject({ filePath }))
-    .then((response) => {
-      setLoadingFile(false)
-      const contents = atob(response.base64Contents)
-      try {
-        importString(contents)
-      } catch (e: unknown) {
-        alert("Editing this file type is not supported. Is it possible your data is corrupted?")
-      }
-    }, (e) => {
-      setLoadingFile(false)
-      window.alert("Failed to open file (see console error)")
-      console.error(e)
-    })
-  }, [server, filePath])
+export default function Editor({
+  editorType,
+  server,
+  filePath,
+  setFilePath,
+  initialFileContents,
+}: EditorProps) {
   const [preferences, setPreferences] = globalEditorPreferences.use(filePath)
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
@@ -73,13 +78,13 @@ export default function Editor({ server, filePath, setFilePath }: EditorProps) {
   const [fileBrowserStartFileName, setFileBrowserStartFileName] = useState("")
   const [fileBrowserTitle, setFileBrowserTitle] = useState("Select File")
   const [showFileBrowser, setShowFileBrowser] = useState(false)
-  const [showNewDialog, setShowNewDialog] = useState(false)
   const [mouse, setMouse] = useState({
     x: 0,
     y: 0,
     isDown: false
   })
   const [ctrlDown, setCtrlDown] = useState(false)
+  const [code, setCode] = useState<Immutable<string> | null>(null)
   const [collage, setCollage] = useState<Immutable<FileCollage> | null>(null)
   const [level, setLevel] = useState<FileLevel | null>(null)
   const [triggerSettings, setTriggerSettings] = useState<{ f: () => void }>({ f: () => {} })
@@ -101,75 +106,40 @@ export default function Editor({ server, filePath, setFilePath }: EditorProps) {
     },
   }
 
-  function createCollage() {
-    setShowNewDialog(false)
-    if (collage) {
-      if (!confirm("Are you sure you want to clear the current collage and create a new one?")) {
-        return
-      }
+  useEffect(() => {
+    setCode(null)
+    setLevel(null)
+    setCollage(null)
+
+    if (editorType === "code") {
+      setCode(initialFileContents)
+      return
     }
 
-    setCollage({
-      image: "",
-      frames: [],
-      montages: [],
-      defaultMontageId: ""
-    })
-
-    updatePageTitle("collage untitled")
-  }
-
-  function createLevel() {
-    setShowNewDialog(false)
-    if (level && level.groups.length > 0) {
-      if (!confirm("Are you sure you want to clear the current level and create a new one?")) {
-        return
-      }
+    const fileObject = JSON.parse(initialFileContents)
+    if (editorType === "level") {
+      setLevel(fileObject)
+    } else if (editorType === "collage") {
+      setCollage(fileObject)
+    } else {
+      throw new Error("Unrecognized editor type")
     }
-
-    setLevel({
-      type: "action",
-      region: "",
-      width: 640,
-      height: 480,
-      background: "",
-      backgroundOffsetX: 0,
-      backgroundOffsetY: 0,
-      groups: [],
-      traces: [],
-      props: [],
-      positions: [],
-    })
-    updatePageTitle("level untitled")
-  }
+  }, [editorType, initialFileContents])
 
   function editSettings(): void {
     triggerSettings.f()
   }
 
   function exportString(): json {
-    if (level) {
+    if (editorType === "code" && code) {
+      return code.replace(/\r\n/g, "\n")
+    } else if (editorType === "level" && level) {
       return exportJson(level)
-    } else if (collage) {
+    } else if (editorType === "collage" && collage) {
       return exportJson(collage)
     } else {
       throw new Error("What are you trying to export?")
     }
-  }
-
-  function importString(file: json): void {
-    setLevel(null)
-    setCollage(null)
-    // Promise.resolve().then(() => {
-    const fileObject = JSON.parse(file)
-    if (instanceOfFileData(fileObject)) {
-      setLevel(importLevel(file))
-    } else if (instanceOfCollage(fileObject)) {
-      setCollage(fileObject)
-    } else {
-      throw new Error("Unrecognized file type")
-    }
-    // })
   }
 
   function moveFollowers(dx: number, dy: number, fallbackToPrevious: boolean = true): void {
@@ -221,6 +191,13 @@ export default function Editor({ server, filePath, setFilePath }: EditorProps) {
   }
 
   function handleKeyDown(event: KeyboardEvent): void {
+    if (event.which === keycode.S) {
+      if (event.ctrlKey || ctrlDown) {
+        doSave(filePath)
+      }
+      event.preventDefault()
+    }
+
     // TODO: resolve types
     const element = event.target as any
     switch (element.tagName.toLowerCase()) {
@@ -286,32 +263,30 @@ export default function Editor({ server, filePath, setFilePath }: EditorProps) {
     setFileBrowserReturnListener(null)
   }
 
-  function openFileOpen(): void {
-    setFileBrowserReturnListener({ f: async newFilePath => {
-      setFilePath(newFilePath)
-    } })
-    setFileBrowserTitle("Open File")
-    setFileBrowserConfirmActionText("Open")
-    setFileBrowserRoot("")
-    setFileBrowserStartDirectory("")
-    setFileBrowserShowTextBox(false)
-    setShowFileBrowser(true)
+  async function doSave(savePath: string) {
+    try {
+      const fileContents = exportString()
+      await server.api.projectFiles.writeFile.fetch(
+        server.withProject({ filePath: savePath, base64Contents: btoa(fileContents), allowOverwrite: true })
+      )
+      await swal({
+        title: "Saved!",
+        timer: 200,
+        buttons: false as any,
+      })
+    } catch (e) {
+      error(e)
+      showError("Error saving file")
+    }
   }
 
   function openFileSave(): void {
-    let preloadDirectory = ""
-    let preloadFileName = ""
-    if (filePath !== null) {
-      const lastSlash = filePath.lastIndexOf("/")
-      preloadDirectory = filePath.substring(0, lastSlash)
-      preloadFileName = filePath.substring(lastSlash + 1)
-    }
+    const lastSlash = filePath.lastIndexOf("/")
+    const preloadDirectory = filePath.substring(0, lastSlash)
+    const preloadFileName = filePath.substring(lastSlash + 1)
     setFileBrowserReturnListener({ f: async newFilePath => {
-      const fileContents = exportString()
-      await server.api.projectFiles.writeFile.fetch(
-        server.withProject({ filePath: newFilePath, base64Contents: btoa(fileContents) })
-      )
-      setFilePath(newFilePath)
+      doSave(newFilePath)
+      setFilePath(newFilePath, editorType)
     } })
     setFileBrowserTitle("Save File As")
     setFileBrowserConfirmActionText("Save")
@@ -351,58 +326,40 @@ export default function Editor({ server, filePath, setFilePath }: EditorProps) {
     style="display: flex; flex-flow: column; height: 100vh;"
   >
     <div className="menu-bar">
-      {(!loadingFile) && <>
-      {(!level && !collage) && <>
-        <a onClick={() => setShowNewDialog(true)}>New</a>
-        <a onClick={openFileOpen}>Open</a>
-      </>}
-      {(level || collage) && <>
-        <a onClick={openFileSave}>Save</a>
-        <a onClick={editSettings}>Edit Settings</a>
+      <a onClick={openFileSave}>Save</a>
+      <a onClick={editSettings}>Edit Settings</a>
+      <label className="margin-right">
+        Grid:
+        <CheckboxInput value={preferences.gridEnabled} onChange={(b) => setPreferences((p) => ({...p, gridEnabled: b}))} />
+      </label>
+      {preferences.gridEnabled && <>
         <label className="margin-right">
-          Grid:
-          <CheckboxInput value={preferences.gridEnabled} onChange={(b) => setPreferences((p) => ({...p, gridEnabled: b}))} />
+          x:
+          <NumberInput
+            value={gridCell.x}
+            onChange={(x) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, x: x}}))}
+            style="width: 48px;"
+          />
         </label>
-        {preferences.gridEnabled && <>
-          <label className="margin-right">
-            x:
-            <NumberInput
-              value={gridCell.x}
-              onChange={(x) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, x: x}}))}
-              style="width: 48px;"
-            />
-          </label>
-          <label className="margin-right">
-            y:
-            <NumberInput
-              value={gridCell.y}
-              onChange={(y) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, y: y}}))}
-              style="width: 48px;"
-            />
-          </label>
-        </>}
         <label className="margin-right">
-            Zoom:
-            <NumberInput
-              step={10}
-              value={preferences.zoom}
-              onChange={(z) => setPreferences((p) => ({...p, zoom: z}))}
-              style="width: 48px;"
-            />%
+          y:
+          <NumberInput
+            value={gridCell.y}
+            onChange={(y) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, y: y}}))}
+            style="width: 48px;"
+          />
         </label>
       </>}
-      </>}
+      <label className="margin-right">
+          Zoom:
+          <NumberInput
+            step={10}
+            value={preferences.zoom}
+            onChange={(z) => setPreferences((p) => ({...p, zoom: z}))}
+            style="width: 48px;"
+          />%
+      </label>
     </div>
-    {showNewDialog && <div className="modal-backdrop">
-      <div className="modal-body">
-        <p><strong>What do you want to create?</strong></p>
-        <div>
-          <a className="btn" onClick={createLevel}>New Level</a>
-          <a className="btn" onClick={createCollage}>New Collage</a>
-          <a className="btn" onClick={() => setShowNewDialog(false)}>Cancel</a>
-        </div>
-      </div>
-    </div>}
     {showFileBrowser && <div className="modal-backdrop">
       <div className="modal-body">
         <FileBrowser
@@ -417,6 +374,13 @@ export default function Editor({ server, filePath, setFilePath }: EditorProps) {
           />
       </div>
     </div>}
+    {!!code && <CodeEditor
+      key={filePath}
+      editorGlobalStuff={globalEditorStuff}
+      code={code}
+      setCode={setCode}
+      style="flex-grow: 1; overflow: hidden;"
+    />}
     {!!collage && <CollageEditor
       key={filePath}
       editorGlobalStuff={globalEditorStuff}
@@ -426,7 +390,7 @@ export default function Editor({ server, filePath, setFilePath }: EditorProps) {
     />}
     { !!level && <LevelEditor
       key={filePath}
-      id={filePath ?? "unknown"}
+      id={filePath}
       editorGlobalStuff={globalEditorStuff}
       level={level}
       setLevel={setLevel}

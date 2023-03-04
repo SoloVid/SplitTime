@@ -239,7 +239,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
 
   return <div
     ref={$el}
-    className="level-area"
+    className="level-area transparency-checkerboard-background"
     style={`position: relative; width: ${containerWidth}px; height: ${containerHeight}px; overflow: hidden`}
     onMouseMove={handleMouseMove}
     onMouseUp={handleMouseUp}

@@ -24,7 +24,11 @@ export class ProjectFileTsApi implements Server {
         { base64Contents: string }
     >
     writeFile: TsApiEndpoint<
-        WithProject<{ filePath: string, base64Contents: string }>,
+        WithProject<{ filePath: string, base64Contents: string, allowOverwrite: boolean }>,
+        null
+    >
+    moveFile: TsApiEndpoint<
+        WithProject<{ oldFilePath: string, newFilePath: string, allowOverwrite: boolean }>,
         null
     >
     deleteFile: TsApiEndpoint<
@@ -40,6 +44,7 @@ export class ProjectFileTsApi implements Server {
         this.directoryListing = a.endpoint()
         this.readFile = a.endpoint()
         this.writeFile = a.endpoint()
+        this.moveFile = a.endpoint()
         this.deleteFile = a.endpoint()
     }
 

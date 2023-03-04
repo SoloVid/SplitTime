@@ -1,4 +1,4 @@
-import { readdir, readFile, stat, unlink, writeFile } from "node:fs/promises"
+import { access, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { FileEntry, ProjectFileTsApi } from "./api/project-file-ts-api"
 import { Config } from "./config"
@@ -39,13 +39,38 @@ export class ProjectFileTsApiBacking {
         this.api.writeFile.serve(async request => {
             const path = this.pathHelper.getFilePath(request.projectId, request.data.filePath)
             const contents = Buffer.from(request.data.base64Contents, "base64")
+            if (!request.data.allowOverwrite) {
+                if (await fileExists(path)) {
+                    throw new Error(`Write blocked because file already exists: ${path}`)
+                }
+            }
             await writeFile(path, contents)
+            return null
+        })
+        this.api.moveFile.serve(async request => {
+            const oldPath = this.pathHelper.getFilePath(request.projectId, request.data.oldFilePath)
+            const newPath = this.pathHelper.getFilePath(request.projectId, request.data.newFilePath)
+            if (!request.data.allowOverwrite) {
+                if (await fileExists(newPath)) {
+                    throw new Error(`Rename blocked because file already exists: ${newPath}`)
+                }
+            }
+            await rename(oldPath, newPath)
             return null
         })
         this.api.deleteFile.serve(async request => {
             const path = this.pathHelper.getFilePath(request.projectId, request.data.filePath)
-            await unlink(path)
+            await rm(path, { recursive: true, force: true })
             return null
         })
+    }
+}
+
+async function fileExists(path: string): Promise<boolean> {
+    try {
+        await access(path)
+        return true
+    } catch (e) {
+        return false
     }
 }

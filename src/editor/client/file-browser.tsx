@@ -1,9 +1,13 @@
 import { FileEntry } from "editor/server/api/project-file-ts-api"
 import { formatBytes } from "engine/utils/misc"
 import { useEffect, useState } from "preact/hooks"
+import swal from "sweetalert"
+import { newCollage } from "./collage/new-collage"
 import { StringInput } from "./input"
-import { makeClassNames } from "./preact-help"
+import { newLevel } from "./level/new-level"
+import { makeClassNames, onlyLeft } from "./preact-help"
 import { ServerLiaison } from "./server-liaison"
+import { prompt, warningConfirmation } from "./utils/prompt"
 
 type FileBrowserProps = {
   readonly confirmActionText: string
@@ -69,6 +73,90 @@ export default function FileBrowser(props: FileBrowserProps) {
     changeDirectory(backTo, true)
     setStack(newStack)
     e.preventDefault()
+  }
+
+  async function confirmOverwriteFile(fileName: string) {
+    if (filesInDirectory.some(f => f.name === fileName)) {
+      return await warningConfirmation(`${fileName} already exists. Are you sure you want to overwrite it?`, "Overwrite File?")
+    }
+    return null
+  }
+
+  async function newFile() {
+    const newFileType = await swal({
+      title: "New File",
+      text: "What type of file do you want to create?",
+      buttons: {
+        text: true,
+        level: true,
+        collage: true,
+        cancel: true,
+      }
+    })
+    const newFileContents = (() => {
+      if (newFileType === "text") {
+        return ""
+      }
+      if (newFileType === "level") {
+        return JSON.stringify(newLevel, null, 2)
+      }
+      if (newFileType === "collage") {
+        return JSON.stringify(newCollage, null, 2)
+      }
+      return null
+    })()
+
+    if (newFileContents === null) {
+      return
+    }
+
+    const newFileName = await prompt("New File Name?")
+    if (newFileName === null) {
+      return
+    }
+    const confirm = await confirmOverwriteFile(newFileName)
+    if (confirm === false) {
+      return
+    }
+    await server.api.projectFiles.writeFile.fetch(server.withProject({
+      filePath: `${currentDirectory}/${newFileName}`,
+      base64Contents: btoa(newFileContents),
+      allowOverwrite: confirm === true,
+    }))
+    await refreshDirectory()
+  }
+
+  async function renameFile(fileName: string) {
+    const newFileName = await prompt("New File Name?")
+    if (newFileName === null) {
+      return
+    }
+    const confirm = await confirmOverwriteFile(newFileName)
+    if (confirm === false) {
+      return
+    }
+    await server.api.projectFiles.moveFile.fetch(server.withProject({
+      oldFilePath: `${currentDirectory}/${fileName}`,
+      newFilePath: `${currentDirectory}/${newFileName}`,
+      allowOverwrite: confirm === true,
+    }))
+    await refreshDirectory()
+  }
+
+  async function deleteFile(fileName: string) {
+    const filePath = `${currentDirectory}/${fileName}`
+    const confirmed = await warningConfirmation(`Are you sure you want to delete ${filePath}?`, "Delete File?")
+    if (!confirmed) {
+      return
+    }
+    await server.api.projectFiles.deleteFile.fetch(server.withProject({
+      filePath: filePath,
+    }))
+    await refreshDirectory()
+  }
+
+  async function refreshDirectory() {
+    await changeDirectory(currentDirectory, true)
   }
 
   async function changeDirectory(directoryFullPath: string, skipPushStack: boolean = false): Promise<void> {
@@ -141,11 +229,18 @@ export default function FileBrowser(props: FileBrowserProps) {
 
   function formatDate(ms: number) {
     const d = new Date(ms)
-    return (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear() + " " + d.getHours() + ":" + d.getMinutes()
+    return (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear() + " " + ("" + d.getHours()).padStart(2, "0") + ":" + ("" + d.getMinutes()).padStart(2, "0")
   }
 
-  return <div>
-  <h4>{ title }</h4>
+  return <div className="file-browser">
+    <div className="tool-bar" style="display: flex; flex-direction: row; align-items: baseline; justify-content: space-between;">
+      <h4>{ title }</h4>
+      <div>
+        <a onClick={onlyLeft(refreshDirectory, true)} title="Refresh" aria-label="Refresh file list">
+          <i className="fas fa-fw fa-sync pointer" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
   <div style="border: 1px solid black; padding: 4px; margin-bottom: 5px;">
     <em>{ projectDirectory() }<strong>{ currentDirectory || "/" }</strong></em>
   </div>
@@ -156,6 +251,8 @@ export default function FileBrowser(props: FileBrowserProps) {
         <th>Name</th>
         <th>Date modified</th>
         <th style="text-align: right">Size</th>
+        <th></th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -170,6 +267,8 @@ export default function FileBrowser(props: FileBrowserProps) {
         <td><em>Back</em></td>
         <td></td>
         <td></td>
+        <td></td>
+        <td></td>
       </tr>}
       {filesInDirectory.map((file) => (
       <tr
@@ -179,8 +278,8 @@ export default function FileBrowser(props: FileBrowserProps) {
         className={makeClassNames({ pointer: true, active: file.name === selectedFileName })}
       >
         <td>
-          {file.type === 'file' && <i className="fas fa-fw fa-file"></i>}
-          {file.type === 'directory' && <i className="fas fa-fw fa-folder"></i>}
+          {file.type === 'file' && <i className="fas fa-fw fa-file" aria-hidden="true" title="file"></i>}
+          {file.type === 'directory' && <i className="fas fa-fw fa-folder" aria-hidden="true" title="directory"></i>}
         </td>
         <td>{ file.name }</td>
         <td>{ formatDate(file.timeModified) }</td>
@@ -189,8 +288,32 @@ export default function FileBrowser(props: FileBrowserProps) {
             { formatBytes(file.size) }
           </span>}
         </td>
+        <td style="padding: 0; width: 24px;">
+          <a onClick={() => renameFile(file.name)} title="Rename" aria-label="Rename file">
+            <i className="fas fa-fw fa-magic pointer" aria-hidden="true"></i>
+          </a>
+        </td>
+        <td style="padding: 0; width: 24px;">
+          <a onClick={() => deleteFile(file.name)} title="Delete" aria-label="Delete file">
+            <i className="fas fa-fw fa-trash pointer" aria-hidden="true"></i>
+          </a>
+        </td>
       </tr>
       ))}
+      <tr
+        onDblClick={onlyLeft(newFile, true)}
+        onMouseDown={onMouseDown}
+        className="pointer"
+      >
+        <td>
+          <i className="fas fa-fw fa-plus"></i>
+        </td>
+        <td><em>New...</em></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
     </tbody>
   </table>
   <br/>

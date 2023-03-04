@@ -99,11 +99,6 @@ export function exportLevel(levelObject: EditorLevel): FileData {
   }
 }
 
-export function importLevel(levelText: string): FileLevel {
-  const levelFile = JSON.parse(levelText) as FileData
-  return levelFile
-}
-
 export function getGroupById(level: Immutable<EditorLevel>, groupId: string): FileGroup {
   for (const group of level.groups) {
     if (group.obj.id === groupId) {
