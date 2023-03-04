@@ -66,7 +66,7 @@ export class ProjectFileTsApiBacking {
     }
 }
 
-async function fileExists(path: string): Promise<boolean> {
+export async function fileExists(path: string): Promise<boolean> {
     try {
         await access(path)
         return true

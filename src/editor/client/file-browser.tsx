@@ -1,13 +1,18 @@
+import Dropzone from "dropzone"
 import { FileEntry } from "editor/server/api/project-file-ts-api"
+import { uploadEndpoint } from "editor/server/constants"
 import { formatBytes } from "engine/utils/misc"
-import { useEffect, useState } from "preact/hooks"
+import { useCallback, useEffect, useRef, useState } from "preact/hooks"
 import swal from "sweetalert"
 import { newCollage } from "./collage/new-collage"
 import { StringInput } from "./input"
 import { newLevel } from "./level/new-level"
+import Modal from "./modal"
 import { makeClassNames, onlyLeft } from "./preact-help"
 import { ServerLiaison } from "./server-liaison"
 import { prompt, warningConfirmation } from "./utils/prompt"
+
+Dropzone.autoDiscover = false
 
 type FileBrowserProps = {
   readonly confirmActionText: string
@@ -16,6 +21,7 @@ type FileBrowserProps = {
   readonly onFileSelected: (file: string) => void
   readonly rootDirectory: string
   readonly server: ServerLiaison
+  readonly showNew?: boolean
   readonly showTextBox: boolean
   readonly title: string
 }
@@ -28,6 +34,7 @@ export default function FileBrowser(props: FileBrowserProps) {
     onFileSelected,
     rootDirectory,
     server,
+    showNew,
     showTextBox,
     title,
   } = props
@@ -56,6 +63,24 @@ export default function FileBrowser(props: FileBrowserProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [stack, setStack] = useState<readonly string[]>(initialStack)
   const [selectedFileName, setSelectedFileName] = useState(initialFileName || "")
+
+  const [showUploadBox, setShowUploadBox] = useState(false)
+  const uploadFormRef = useCallback((node: HTMLFormElement | null) => {
+    if (node === null) {
+      return
+    }
+    const options: Dropzone.DropzoneOptions = {
+      headers: {
+        "X-Directory-Path": JSON.stringify(currentDirectory),
+        "X-Project-Id": JSON.stringify(server.projectId),
+      }
+    }
+    const dz = new Dropzone(node, options)
+    dz.on("success", file => {
+      refreshDirectory()
+      // console.log(`File added: ${file.name}`)
+    })
+  }, [currentDirectory, server.projectId])
 
   function projectDirectory(): string {
     return server.projectId
@@ -233,9 +258,15 @@ export default function FileBrowser(props: FileBrowserProps) {
   }
 
   return <div className="file-browser">
+    {showUploadBox && <Modal close={() => setShowUploadBox(false)}>
+        <form ref={uploadFormRef} action={uploadEndpoint} method="post" encType="multipart/form-data" class="dropzone"></form>
+    </Modal>}
     <div className="tool-bar" style="display: flex; flex-direction: row; align-items: baseline; justify-content: space-between;">
       <h4>{ title }</h4>
       <div>
+        <a onClick={onlyLeft(() => setShowUploadBox(true), true)} title="Upload" aria-label="Upload file to this directory">
+          <i className="fas fa-fw fa-upload pointer" aria-hidden="true"></i>
+        </a>
         <a onClick={onlyLeft(refreshDirectory, true)} title="Refresh" aria-label="Refresh file list">
           <i className="fas fa-fw fa-sync pointer" aria-hidden="true"></i>
         </a>
@@ -300,7 +331,7 @@ export default function FileBrowser(props: FileBrowserProps) {
         </td>
       </tr>
       ))}
-      <tr
+      {showNew && <tr
         onDblClick={onlyLeft(newFile, true)}
         onMouseDown={onMouseDown}
         className="pointer"
@@ -313,7 +344,7 @@ export default function FileBrowser(props: FileBrowserProps) {
         <td></td>
         <td></td>
         <td></td>
-      </tr>
+      </tr>}
     </tbody>
   </table>
   <br/>

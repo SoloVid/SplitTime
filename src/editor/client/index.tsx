@@ -31,9 +31,9 @@ const initialFilePath: string | null = urlMatch[2] ?? null
 
 Promise.resolve().then(() => exerciseApi())
 
-// window.onbeforeunload = function() {
-//     return true;
-// };
+window.onbeforeunload = function() {
+    return true;
+};
 
 function App() {
   const server = new ServerLiaison("")

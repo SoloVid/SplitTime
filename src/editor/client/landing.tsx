@@ -8,9 +8,6 @@ import { showError } from "./utils/prompt";
 
 type LandingProps = {
   readonly server: ServerLiaison
-  // readonly filePath: string | null
-  // readonly setFilePath: (newFilePath: string) => void
-  // readonly openEditor: (editorType: EditorType, filePath: string, fileContents: string) => void
   readonly openEditor: (filePath: string) => PromiseLike<void>
 }
 
@@ -19,19 +16,6 @@ export default function Landing({
   openEditor,
 }: LandingProps) {
 
-
-  // async function openFile(path: string) {
-  //   setLoadingFile(true)
-  //   const file = await server.api.projectFiles.readFile.fetch(server.withProject({ filePath: path }))
-  //   const fileContents = atob(file.base64Contents)
-  //   const possibleEditorTypes = detectEditorTypes(fileContents)
-  //   if (possibleEditorTypes.length === 0) {
-  //     showError("Unable to find an appropriate editor for this file")
-  //     return
-  //   }
-  //   openEditor(possibleEditorTypes[0], path, fileContents)
-  // }
-
   return <>
     <FileBrowser
           confirmActionText="Open"
@@ -39,6 +23,7 @@ export default function Landing({
           initialFileName=""
           rootDirectory=""
           server={server}
+          showNew={true}
           showTextBox={false}
           title={"Select File"}
           onFileSelected={openEditor}
