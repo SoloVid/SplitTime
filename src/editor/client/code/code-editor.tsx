@@ -13,7 +13,7 @@ export default function CodeEditor(props: CollageEditorProps) {
   return <MultilineStringInput
     value={props.code}
     onChange={newValue => props.setCode(o => newValue)}
-    style={`font-family: monospace;${props.style}`}
+    style={`font-family: monospace; overflow: auto; resize: none; ${props.style}`}
   >
   </MultilineStringInput>
 }

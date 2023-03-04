@@ -12,6 +12,7 @@ import { updatePageTitle } from "./editor-functions";
 import Landing from "./landing";
 import { showError } from "./utils/prompt";
 import { error } from "api/system";
+import { prefixRawProjectFiles } from "editor/server/constants";
 
 const editSlug = "edit"
 const url = window.location.pathname
@@ -30,10 +31,6 @@ if (![null, "level", "collage", "code"].includes(initialEditorType)) {
 const initialFilePath: string | null = urlMatch[2] ?? null
 
 Promise.resolve().then(() => exerciseApi())
-
-window.onbeforeunload = function() {
-    return true;
-};
 
 function App() {
   const server = new ServerLiaison("")
@@ -69,6 +66,10 @@ function App() {
     try {
       setLoadingFile(true)
       const file = await server.api.projectFiles.readFile.fetch(server.withProject({ filePath: newFilePath }))
+      if (file.isBinaryFile) {
+        window.location.href = `/${prefixRawProjectFiles}${newFilePath}`
+        return
+      }
       const fileContents = atob(file.base64Contents)
       const newEditorType = (() => {
         if (explicitEditorType) {
@@ -101,11 +102,6 @@ function App() {
   if (editorType === null || filePath === null || fileContents === null) {
     return <Landing
       server={server}
-      // openEditor={(editorType, filePath, fileContents) => {
-      //   setEditorType(editorType)
-      //   setFilePathAndPageStuff(filePath)
-      //   setFileContents(fileContents)
-      // }}
       openEditor={(filePath) => openFile(filePath, null)}
     ></Landing>
   }

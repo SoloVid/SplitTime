@@ -6,7 +6,7 @@ import { readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { ApiServer } from "./api-server"
 import { Config } from "./config"
-import { prefixEdit, prefixEngine, prefixPlay, prefixStatic, prefixTest, uploadEndpoint } from "./constants"
+import { prefixEdit, prefixEngine, prefixPlay, prefixRawProjectFiles, prefixStatic, prefixTest, uploadEndpoint } from "./constants"
 import { ensurePosixPath } from "./path-helper"
 import multer from "multer"
 import { fileExists } from "./project-file-ts-api-backing"
@@ -17,6 +17,8 @@ export function runServer(port: int, config: Config): void {
     const app = express()
 
     const root = require("find-root")(__dirname)
+    // TODO: This will definitely have to get tightened up if sharing a server.
+    app.use(`/${prefixRawProjectFiles}`, express.static(config.projectDirectory))
     app.use(`/${prefixPlay}`, express.static(path.join(config.projectDirectory, distDirectory)))
     app.use(`/${prefixStatic}`, express.static(path.join(root, staticPath)))
     app.use(`/${prefixEngine}`, express.static(root))

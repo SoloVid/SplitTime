@@ -54,6 +54,12 @@ export default function Editor({
   setFilePath,
   initialFileContents,
 }: EditorProps) {
+  useEffect(() => {
+    window.onbeforeunload = function() {
+      return true;
+    }
+  }, [])
+
   const [preferences, setPreferences] = globalEditorPreferences.use(filePath)
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
@@ -280,6 +286,10 @@ export default function Editor({
     }
   }
 
+  function openMainEdit(): void {
+    window.open(`/edit`)
+  }
+
   function openFileSave(): void {
     const lastSlash = filePath.lastIndexOf("/")
     const preloadDirectory = filePath.substring(0, lastSlash)
@@ -326,39 +336,42 @@ export default function Editor({
     style="display: flex; flex-flow: column; height: 100vh;"
   >
     <div className="menu-bar">
+      <a onClick={openMainEdit}>Menu</a>
       <a onClick={openFileSave}>Save</a>
-      <a onClick={editSettings}>Edit Settings</a>
-      <label className="margin-right">
-        Grid:
-        <CheckboxInput value={preferences.gridEnabled} onChange={(b) => setPreferences((p) => ({...p, gridEnabled: b}))} />
-      </label>
-      {preferences.gridEnabled && <>
+      {(collage || level) && <>
+        <a onClick={editSettings}>Edit Settings</a>
         <label className="margin-right">
-          x:
-          <NumberInput
-            value={gridCell.x}
-            onChange={(x) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, x: x}}))}
-            style="width: 48px;"
-          />
+          Grid:
+          <CheckboxInput value={preferences.gridEnabled} onChange={(b) => setPreferences((p) => ({...p, gridEnabled: b}))} />
         </label>
+        {preferences.gridEnabled && <>
+          <label className="margin-right">
+            x:
+            <NumberInput
+              value={gridCell.x}
+              onChange={(x) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, x: x}}))}
+              style="width: 48px;"
+            />
+          </label>
+          <label className="margin-right">
+            y:
+            <NumberInput
+              value={gridCell.y}
+              onChange={(y) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, y: y}}))}
+              style="width: 48px;"
+            />
+          </label>
+        </>}
         <label className="margin-right">
-          y:
-          <NumberInput
-            value={gridCell.y}
-            onChange={(y) => setPreferences((p) => ({...p, gridCell: {...p.gridCell, y: y}}))}
-            style="width: 48px;"
-          />
+            Zoom:
+            <NumberInput
+              step={10}
+              value={preferences.zoom}
+              onChange={(z) => setPreferences((p) => ({...p, zoom: z}))}
+              style="width: 48px;"
+            />%
         </label>
       </>}
-      <label className="margin-right">
-          Zoom:
-          <NumberInput
-            step={10}
-            value={preferences.zoom}
-            onChange={(z) => setPreferences((p) => ({...p, zoom: z}))}
-            style="width: 48px;"
-          />%
-      </label>
     </div>
     {showFileBrowser && <div className="modal-backdrop">
       <div className="modal-body">
@@ -379,7 +392,7 @@ export default function Editor({
       editorGlobalStuff={globalEditorStuff}
       code={code}
       setCode={setCode}
-      style="flex-grow: 1; overflow: hidden;"
+      style="flex-grow: 1;"
     />}
     {!!collage && <CollageEditor
       key={filePath}

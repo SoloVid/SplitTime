@@ -21,7 +21,7 @@ export class ProjectFileTsApi implements Server {
     >
     readFile: TsApiEndpoint<
         WithProject<{ filePath: string }>,
-        { base64Contents: string }
+        { base64Contents: string, isBinaryFile: false } | { base64Contents: string | null, isBinaryFile: true }
     >
     writeFile: TsApiEndpoint<
         WithProject<{ filePath: string, base64Contents: string, allowOverwrite: boolean }>,

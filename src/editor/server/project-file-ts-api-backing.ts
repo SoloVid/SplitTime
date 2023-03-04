@@ -1,3 +1,4 @@
+import { isBinaryFile } from "isbinaryfile"
 import { access, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { FileEntry, ProjectFileTsApi } from "./api/project-file-ts-api"
@@ -31,9 +32,20 @@ export class ProjectFileTsApiBacking {
         })
         this.api.readFile.serve(async request => {
             const path = this.pathHelper.getFilePath(request.projectId, request.data.filePath)
-            const result = await readFile(path)
+            const isBinary = await isBinaryFile(path)
+            const base64Contents = await (async () => {
+                if (isBinary) {
+                    const s = await stat(path)
+                    if (s.size > 1 * 1024 * 1024) {
+                        return null
+                    }
+                }
+                const contents = await readFile(path)
+                return contents.toString("base64")
+            })()
             return {
-                base64Contents: result.toString("base64")
+                isBinaryFile: isBinary,
+                base64Contents: base64Contents,
             }
         })
         this.api.writeFile.serve(async request => {
