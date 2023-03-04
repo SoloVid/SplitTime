@@ -82,6 +82,7 @@ export default function ConsoleDrawer({ state, setState }: ConsoleDrawerProps) {
       onMouseDown={onlyLeft(trackResize, true)}
     ></div>
     <div className="toolbar">
+      <small><em>F12 for full DevTools (desktop)</em></small>
       <span
         className="icon-button"
         title="Close console drawer"

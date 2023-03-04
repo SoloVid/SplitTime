@@ -2,16 +2,31 @@
 <html lang="en">
   <head>
     <script>
-      window.__EDITOR_CONSTANT__ = true;
+      window.__PLAYER_CONSTANT__ = true;
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Play</title>
     <link href="/engine/node_modules/@fortawesome/fontawesome-free/css/all.css" rel="stylesheet">
     <link href="/static/player-style.css" rel="stylesheet">
+    <style>
+      html, body, .full-screen {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>
     <script src="/engine/lib/editor-player.js"></script>
+    <div id="game-view" class="full-screen"></div>
+    <!-- TODO: cache-bust this -->
+    <script src="{gameScript}"></script>
+    <script>
+        window.launchGame("game-view")
+    </script>
   </body>
 </html>

@@ -3,10 +3,20 @@
   box-sizing: border-box;
 }
 
-html, body {
-  padding: 0;
+html, body, .full-screen {
   margin: 0;
+  padding: 0;
   width: 100%;
+  height: 100%;
+  background-color: black;
+}
+
+#app {
+  height: 0;
+}
+
+#game-window {
+  object-position: top;
 }
 
 .status-popup-container {
@@ -55,6 +65,7 @@ html, body {
   display: flex;
   justify-content: end;
   background-color: lightgray;
+  gap: 8px;
 }
 .console-drawer .content {
   overflow-y: auto;

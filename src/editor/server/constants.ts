@@ -1,5 +1,5 @@
-export const prefixRun = "run"
-export const prefixEdit = "edit"
 export const prefixPlay = "play"
+export const prefixEdit = "edit"
+export const prefixTest = "test"
 export const prefixStatic = "static"
 export const prefixEngine = "engine"

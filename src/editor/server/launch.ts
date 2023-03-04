@@ -1,10 +1,12 @@
-import { __NODE__ } from "environment"
-import type { int } from "globals"
-import { Config } from "./config"
-import { prefixRun, prefixStatic, prefixEngine, prefixEdit, prefixPlay } from "./constants"
+import { distDirectory, distGameJsFileName } from "build-tools/project/constants"
 import express from "express"
-import path = require("path")
+import type { int } from "globals"
+import { readFile } from "node:fs/promises"
+import path from "node:path"
 import { ApiServer } from "./api-server"
+import { Config } from "./config"
+import { prefixEdit, prefixEngine, prefixPlay, prefixStatic, prefixTest } from "./constants"
+import { ensurePosixPath } from "./path-helper"
 
 export const staticPath = "static"
 
@@ -12,7 +14,7 @@ export function runServer(port: int, config: Config): void {
     const app = express()
 
     const root = require("find-root")(__dirname)
-    app.use(`/${prefixRun}`, express.static(config.sourceDirectory))
+    app.use(`/${prefixPlay}`, express.static(path.join(config.projectDirectory, distDirectory)))
     app.use(`/${prefixStatic}`, express.static(path.join(root, staticPath)))
     app.use(`/${prefixEngine}`, express.static(root))
 
@@ -24,8 +26,11 @@ export function runServer(port: int, config: Config): void {
         res.sendFile(path.join(root, staticPath, "editor.html"))
     })
 
-    app.get([`/${prefixPlay}`, `/${prefixPlay}/*`], async (req, res) => {
-        res.sendFile(path.join(root, staticPath, "player.html"))
+    const gameScriptPath = `/${prefixPlay}/${ensurePosixPath(distGameJsFileName)}`
+    app.get([`/${prefixTest}`, `/${prefixTest}/*`], async (req, res) => {
+        const playerHtml = await readFile(path.join(root, staticPath, "player.template.html"), "utf-8")
+        const customizedPlayerHtml = playerHtml.replace(/\{gameScript\}/g, gameScriptPath)
+        res.send(customizedPlayerHtml)
     })
 
     const apiServer = new ApiServer(config)

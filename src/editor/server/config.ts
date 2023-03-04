@@ -1,5 +1,5 @@
 export interface Config {
-    sourceDirectory: string
+    projectDirectory: string
     // distDirectory: string
     // isSingleProject: boolean
 }

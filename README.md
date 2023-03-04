@@ -87,8 +87,6 @@ npx splittime dev
 While the server is running, you may access files in your browser at [localhost:8080](http://localhost:8080).
 You'll be able to play-test your game at [localhost:8080/run](http://localhost:8080/run).
 
-<!--
-TODO: This section is out of date. Update or remove.
 ### Testing
 
 To run tests in ``src/engine-test/``:
@@ -96,6 +94,8 @@ To run tests in ``src/engine-test/``:
 npm test
 ```
 
+<!--
+TODO: This section is out of date. Update or remove.
 Alternatively, you can run these tests in the browser at [localhost:8080/test-runner.html](http://localhost:8080/test-runner.html) through the development server after building the engine.
 -->
 
@@ -123,7 +123,19 @@ The directories within each project should be
 
 Within the game code, all resources should be referenced relative to their asset type directory as specified in the enumeration above.
 
-The launch point of the game should be some HTML file (probably ``index.html``) in the project home directory. This file should include ``<script src="dist/game.js"></script>`` and later call ``G.launch();`` as defined somewhere in the game's source files.
+The launch point of the game should be provided via call to `exposeLaunchPoint()` somewhere in the game's source files:
+
+```ts
+import { exposeLaunchPoint, load } from "splittime"
+
+exposeLaunchPoint(async (attachId) => {
+  ...
+  view.attach(attachId)
+  await load(perspective, ASSETS)
+  main.start()
+  ...
+})
+```
 
 Note that all TS files in ``src/`` will be included within ``dist/game.js``.
 

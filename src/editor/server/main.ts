@@ -16,10 +16,10 @@ try {
         return null
     }, null as null | number) ?? 8080
     // const sourceDirectory = process.argv[3] || "."
-    const sourceDirectory = "."
+    const projectDirectory = "."
 
     runServer(port, {
-        sourceDirectory
+        projectDirectory: projectDirectory
     })
 } catch (e: unknown) {
     console.error(e)

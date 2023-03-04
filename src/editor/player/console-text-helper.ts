@@ -9,7 +9,7 @@ export function unknownToString(arg: unknown): string {
     return arg
   }
   if (arg instanceof Error) {
-    return arg.message
+    return `${arg.name}: ${arg.message}`
   }
   return stringify(arg, null, 2)
 }

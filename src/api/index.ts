@@ -1,6 +1,8 @@
 export { Assets } from "engine/assets/assets"
+export { load } from "engine/assets/load"
 export { GameLoop } from "engine/game-loop"
 export { Collage } from "engine/graphics/collage"
+export { exposeLaunchPoint } from "engine/launch"
 export { type direction_t } from "engine/math/direction"
 export { Perspective } from "engine/perspective"
 export { Body } from "engine/world/body/body"
@@ -10,4 +12,4 @@ export { Coordinates2D, Coordinates3D, copyLocation, type ILevelLocation2 } from
 export { Position } from "engine/world/level/position"
 export { World } from "engine/world/world"
 export { assert, type int } from "globals"
-export { load } from "engine/assets/load"
+

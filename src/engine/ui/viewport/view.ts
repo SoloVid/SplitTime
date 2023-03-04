@@ -17,7 +17,7 @@ export class View {
         this.seeB = this.see.raw;
         if (this.seeB.element instanceof HTMLCanvasElement) {
             this.seeB.element.setAttribute("id", "game-window");
-            this.seeB.element.setAttribute("style", "display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);");
+            this.seeB.element.setAttribute("style", "display: block; width: 100%; height: 100%; object-fit: contain;");
         }
         this.seeC = this.seeB.context;
         this.see.raw.context.font = "20px Arial";

@@ -6,8 +6,9 @@ import { getErrorString } from "../common/error-helper"
 import { join, writeFile } from "../common/file-helper"
 import { makeTaskFactory } from "../common/task"
 import { AlreadyPrintedError } from "./already-printed-error"
+import { generateProjectHtml } from "./build-html"
 import { compileTypescript } from "./compile-typescript"
-import { buildIdFile, buildLogsDirectory, buildStatusFile } from "./constants"
+import { buildIdFile, buildLogsDirectory, buildStatusFile, distGameJsFile } from "./constants"
 import { runEsbuild } from "./esbuild"
 import { everythingEntryPointFile, generateImportEverything } from "./generate-import-everything"
 import { generateProjectJson } from "./generate-project-json"
@@ -19,8 +20,6 @@ type Options = {
     projectPath: string,
     checkTypes: boolean,
 }
-
-export const buildOutputFile = "dist/game.js"
 
 export async function buildProject({
         projectPath,
@@ -59,8 +58,9 @@ export async function buildProject({
         const compile = task("build TS", () => runEsbuild(
             join(projectPath, everythingEntryPointFile),
             join(projectPath, tsconfigLocation),
-            join(projectPath, buildOutputFile)
+            join(projectPath, distGameJsFile)
         ), projectJson, generateEntryPoint, tsconfig)
+        const html = task("generate HTML", () => generateProjectHtml(projectPath))
         if (checkTypes) {
             Promise.all([sync, compile]).then(async () => {
                 criticalBuildDone = true
@@ -72,9 +72,10 @@ export async function buildProject({
         }
         await Promise.all([
             tsconfig,
-            compile,
             projectJson,
+            compile,
             sync,
+            html,
             checkTypesPromise,
         ])
 

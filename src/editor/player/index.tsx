@@ -8,13 +8,25 @@ import { makeBuildStatusWatcher } from "./build-status-watcher";
 import BuildStatusPopup from "./build-status-popup";
 import ConsoleDrawer from "./console-drawer";
 import { ConsoleEntry, PlayerState } from "./player-state";
-import { LogListener, registerLogListener, unregisterLogListener } from "api/system";
-import { logArgsToHtmlString } from "./console-text-helper";
+import { debug, error, LogListener, registerLogListener, unregisterLogListener } from "api/system";
+import { logArgsToHtmlString, unknownToString } from "./console-text-helper";
 
-const slug = "edit"
-const url = window.location.href
-// Expecting URL of form /edit/path/to/file.ext
-const initialFilePath = url.substring(url.indexOf(slug) + slug.length)
+// The event listeners in the Preact code won't register synchronously
+// so they aren't ready soon enough.
+const startupErrors: unknown[] = []
+const startupErrorListener = (e: ErrorEvent) => {
+  startupErrors.push(e.error)
+  e.preventDefault()
+}
+window.addEventListener("error", startupErrorListener)
+// If the app fails to start up for some reason, we don't want to lose the errors.
+setTimeout(() => {
+  if (startupErrors.length > 0) {
+    for (const e of startupErrors) {
+      error(e)
+    }
+  }
+}, 500)
 
 Promise.resolve().then(() => exerciseApi())
 
@@ -67,6 +79,27 @@ function App() {
     registerLogListener(listener)
     return () => unregisterLogListener(listener)
   }, [playerState.popup.isVisible, playerState.popup.messageType])
+
+  useEffect(() => {
+    const listener = (e: ErrorEvent | PromiseRejectionEvent) => {
+      if ("reason" in e) {
+        addConsoleEntry({ entryType: "error", text: unknownToString(e.reason) })
+      } else {
+        addConsoleEntry({ entryType: "error", text: unknownToString(e.error) })
+      }
+    }
+    window.addEventListener("error", listener)
+    window.addEventListener("unhandledrejection", listener)
+    for (const e of startupErrors) {
+      error(e)
+    }
+    startupErrors.length = 0
+    window.removeEventListener("error", startupErrorListener)
+    return () => {
+      window.removeEventListener("unhandledrejection", listener)
+      window.removeEventListener("error", listener)
+    }
+  })
 
   useEffect(() => {
     const watcher = makeBuildStatusWatcher({
