@@ -2,6 +2,7 @@ import type { Collage } from "engine/file/collage"
 import type { FileData } from "engine/world/level/level-file-data"
 import type { int } from "globals"
 import { WithProject } from "../api-wrappings"
+import { BuildStatus, KnownBuildStatus } from "../build-status"
 import type { Response, Server } from "../server-lite"
 import { TsApiEndpoint } from "../ts-api-endpoint"
 import { TsApiHelper } from "../ts-api-helper"
@@ -11,8 +12,8 @@ export class EditorTsApi implements Server<unknown, unknown> {
     private static readonly url = "/editor/ts-api"
 
     projectFiles: ProjectFileTsApi
-    test1: TsApiEndpoint<string, string>
-    test2: TsApiEndpoint<int, { one: number, two: string }>
+    test1: TsApiEndpoint<"yo", "Here: yo">
+    test2: TsApiEndpoint<0, { one: 1, two: 2 }>
     levelJson: TsApiEndpoint<
         WithProject<{ levelId: string }>,
         FileData
@@ -25,6 +26,10 @@ export class EditorTsApi implements Server<unknown, unknown> {
         WithProject<{ imageId: string }>,
         { webPath: string, timeModifiedString: string }
     >
+    buildStatus: TsApiEndpoint<
+        WithProject<KnownBuildStatus>,
+        BuildStatus
+    >
 
     private helper: TsApiHelper
 
@@ -36,6 +41,7 @@ export class EditorTsApi implements Server<unknown, unknown> {
         this.levelJson = a.endpoint()
         this.collageJson = a.endpoint()
         this.imageInfo = a.endpoint()
+        this.buildStatus = a.endpoint()
     }
 
     async handle(url: string, body: unknown): Promise<Response<unknown>> {

@@ -12,4 +12,5 @@ declare module "sync-directory" {
     ): void
 
     export = syncDirectory
+    export const async = syncDirectory
 }

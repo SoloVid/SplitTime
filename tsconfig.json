@@ -24,6 +24,8 @@
     "./src/build-tools/**/*.ts",
     "./src/editor/client/**/*.ts",
     "./src/editor/client/**/*.tsx",
+    "./src/editor/player/**/*.ts",
+    "./src/editor/player/**/*.tsx",
     "./src/editor/server/**/*.ts",
     "./src/engine/**/*.ts",
     "./src/engine-test/**/*.ts",

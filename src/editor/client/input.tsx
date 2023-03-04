@@ -32,7 +32,8 @@ export function MultilineStringInput(props: InputProps<string, HTMLTextAreaEleme
       onChange(newValue)
     }}
     {...otherProps}
-  >{value}</textarea>
+    value={value}
+  ></textarea>
 }
 
 export function NumberInput(props: InputProps<number>) {

@@ -4,7 +4,7 @@ import * as fsOrig from "fs"
 const fs = fsOrig.promises
 
 export function join(...args: string[]): string {
-    return slash(path.join.apply(path, args))
+    return slash(path.join(...args))
 }
 
 export function relative(from: string, to: string): string {

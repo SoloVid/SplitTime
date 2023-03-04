@@ -4,6 +4,7 @@ import { getBuildToolsBuilder } from "./build-tools-builder"
 import type { Builder } from "./builder"
 import { getCheckTypesBuilder } from "./check-types-builder"
 import { getEditorClientBuilder } from "./editor-client-builder"
+import { getEditorPlayerBuilder } from "./editor-player-builder"
 import { getEditorServerBuilder } from "./editor-server-builder"
 import { getEngineBuilder } from "./engine-builder"
 import { getRunTestsBuilder } from "./run-tests-builder"
@@ -110,6 +111,7 @@ Options:
   }
   if (buildEditorClient) {
     builders.push(await getEditorClientBuilder())
+    builders.push(await getEditorPlayerBuilder())
   }
   if (buildEditorServer) {
     builders.push(await getEditorServerBuilder())

@@ -1,6 +1,7 @@
 import { debounce } from "build-tools/common/debounce"
 import chokidar from "chokidar"
 import { buildProject } from "./build-project"
+import { buildDirectory, buildLogsDirectory, generatedDirectory } from "./constants"
 
 void run()
 
@@ -57,7 +58,9 @@ async function runUnsafe() {
       ignored: [
         ".*/**",
         "node_modules/**",
-        "build/generated/**",
+        `${buildDirectory}/**`,
+        // `${generatedDirectory}/**`,
+        // `${buildLogsDirectory}/**`,
         "dist/**",
       ],
     }).on("all", (event, path) => changeDetectedBuild(path))

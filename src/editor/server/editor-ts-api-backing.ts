@@ -3,6 +3,7 @@ import { Collage } from "engine/file/collage"
 import { FileData } from "engine/world/level/level-file-data"
 import { readFile, stat } from "node:fs/promises"
 import { EditorTsApi } from "./api/editor-ts-api"
+import { getBuildStatus } from "./build-status"
 import { Config } from "./config"
 import { PathHelper } from "./path-helper"
 import { ProjectFileTsApiBacking } from "./project-file-ts-api-backing"
@@ -15,11 +16,11 @@ export class EditorTsApiBacking {
     constructor(private readonly config: Config) {
         this.pathHelper = new PathHelper(config)
         this.projectFiles = new ProjectFileTsApiBacking(this.api.projectFiles, config)
-        this.api.test1.serve(request => "Here's your string! " + request)
+        this.api.test1.serve(request => `Here: ${request}`)
         this.api.test2.serve(request => {
             return {
-                one: request + 7,
-                two: "himom"
+                one: (request + 1) as 1,
+                two: (request + 2) as 2,
             }
         })
         this.api.levelJson.serve(async request => {
@@ -41,6 +42,9 @@ export class EditorTsApiBacking {
                 webPath: this.pathHelper.toProjectWebPath(path),
                 timeModifiedString: "" + stats.mtimeMs
             }
+        })
+        this.api.buildStatus.serve(async request => {
+            return await getBuildStatus(request.projectId, request.data, { pathHelper: this.pathHelper })
         })
     }
 }

@@ -1,0 +1,106 @@
+* {
+  font-family: Sans-Serif;
+  box-sizing: border-box;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.status-popup-container {
+  width:100%;
+  display: flex;
+  justify-content: center;
+}
+.status-popup {
+  padding: 10px;
+  margin: 5px;
+  font-weight: bold;
+  position: fixed;
+  display: flex;
+}
+.status-popup.info {
+  background-color: lightskyblue;
+  border: 2px solid darkblue;
+}
+.status-popup.success {
+  background-color: lightgreen;
+  border: 2px solid darkgreen;
+}
+.status-popup.error {
+  background-color: lightcoral;
+  border: 2px solid red;
+}
+.status-popup .icon-button {
+  padding-left: 8px;
+}
+
+.console-drawer {
+  background-color: azure;
+  /* border: 2px solid gray; */
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+.console-drawer .resizer {
+  cursor: n-resize;
+  height: 1px;
+  border: 2px solid gray;
+}
+.console-drawer .toolbar {
+  display: flex;
+  justify-content: end;
+  background-color: lightgray;
+}
+.console-drawer .content {
+  overflow-y: auto;
+  display: flex;
+  /* This flips the order, but it makes the bottom of the scroll sticky instead of top. */
+  flex-direction: column-reverse;
+}
+.console-drawer .entry {
+  padding: 4px 16px;
+  border-bottom: 1px solid lightgray;
+  /* font-size: smaller; */
+  font-family: monospace;
+}
+.console-drawer .entry.prompt {
+  display: flex;
+  padding-left: 0;
+}
+.console-drawer .entry.prompt::before {
+  content: '>';
+  padding: 4px;
+  width: 8px;
+  color: skyblue;
+  font-weight: bold;
+}
+.console-drawer .entry.prompt textarea {
+  border: none;
+  background: none;
+  resize: none;
+  width: 100%;
+}
+.console-drawer .entry.error {
+  background-color: rgb(255, 230, 230);
+  color: red;
+}
+.console-drawer .entry.warning {
+  background-color: lightgoldenrodyellow;
+  color: brown;
+}
+.console-drawer .entry * {
+  font-family: monospace;
+}
+.console-drawer .entry pre {
+  margin: 0;
+  padding: 0;
+}
+
+.icon-button {
+  cursor: pointer;
+}

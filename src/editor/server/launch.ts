@@ -1,7 +1,7 @@
 import { __NODE__ } from "environment"
 import type { int } from "globals"
 import { Config } from "./config"
-import { prefixRun, prefixStatic, prefixEngine, prefixEdit } from "./constants"
+import { prefixRun, prefixStatic, prefixEngine, prefixEdit, prefixPlay } from "./constants"
 import express from "express"
 import path = require("path")
 import { ApiServer } from "./api-server"
@@ -22,6 +22,10 @@ export function runServer(port: int, config: Config): void {
 
     app.get([`/${prefixEdit}`, `/${prefixEdit}/*`], async (req, res) => {
         res.sendFile(path.join(root, staticPath, "editor.html"))
+    })
+
+    app.get([`/${prefixPlay}`, `/${prefixPlay}/*`], async (req, res) => {
+        res.sendFile(path.join(root, staticPath, "player.html"))
     })
 
     const apiServer = new ApiServer(config)
