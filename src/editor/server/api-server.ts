@@ -5,7 +5,7 @@ import type { Response, Server } from "./server-lite"
 
 export class ApiServer implements Server {
     private readonly editorTsApiBacking
-    private readonly apis: Server[]
+    private readonly apis: readonly Server[]
 
     constructor(config: Config) {
         this.editorTsApiBacking = new EditorTsApiBacking(config)

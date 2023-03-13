@@ -22,6 +22,7 @@ type FileBrowserProps = {
   readonly rootDirectory: string
   readonly server: ServerLiaison
   readonly showNew?: boolean
+  readonly hideCancel?: boolean
   readonly showTextBox: boolean
   readonly title: string
 }
@@ -35,6 +36,7 @@ export default function FileBrowser(props: FileBrowserProps) {
     rootDirectory,
     server,
     showNew,
+    hideCancel,
     showTextBox,
     title,
   } = props
@@ -357,7 +359,7 @@ export default function FileBrowser(props: FileBrowserProps) {
   <br/>
   <div className="right">
     {selectedFileName !== '' && <a className="btn" onClick={onClickConfirm}>{ confirmActionText }</a>}
-    <a className="btn" onClick={() => selectFile('')}>Cancel</a>
+    {!hideCancel && <a className="btn" onClick={() => selectFile('')}>Cancel</a>}
   </div>
   </div>
 }

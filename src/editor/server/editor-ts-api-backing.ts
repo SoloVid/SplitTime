@@ -5,17 +5,20 @@ import { readFile, stat } from "node:fs/promises"
 import { EditorTsApi } from "./api/editor-ts-api"
 import { getBuildStatus } from "./build-status"
 import { Config } from "./config"
+import { GitTsApiBacking } from "./git-ts-api-backing"
 import { PathHelper } from "./path-helper"
 import { ProjectFileTsApiBacking } from "./project-file-ts-api-backing"
 
 export class EditorTsApiBacking {
     public readonly api = new EditorTsApi()
     private readonly projectFiles: ProjectFileTsApiBacking
+    private readonly git: GitTsApiBacking
     private readonly pathHelper: PathHelper
 
     constructor(private readonly config: Config) {
         this.pathHelper = new PathHelper(config)
         this.projectFiles = new ProjectFileTsApiBacking(this.api.projectFiles, config)
+        this.git = new GitTsApiBacking(this.api.git, config)
         this.api.test1.serve(request => `Here: ${request}`)
         this.api.test2.serve(request => {
             return {

@@ -6,12 +6,14 @@ import { BuildStatus, KnownBuildStatus } from "../build-status"
 import type { Response, Server } from "../server-lite"
 import { TsApiEndpoint } from "../ts-api-endpoint"
 import { TsApiHelper } from "../ts-api-helper"
+import { GitTsApi } from "./git-ts-api"
 import { ProjectFileTsApi } from "./project-file-ts-api"
 
 export class EditorTsApi implements Server<unknown, unknown> {
     private static readonly url = "/editor/ts-api"
 
     projectFiles: ProjectFileTsApi
+    git: GitTsApi
     test1: TsApiEndpoint<"yo", "Here: yo">
     test2: TsApiEndpoint<0, { one: 1, two: 2 }>
     levelJson: TsApiEndpoint<
@@ -36,6 +38,7 @@ export class EditorTsApi implements Server<unknown, unknown> {
     constructor() {
         const a = this.helper = new TsApiHelper(EditorTsApi.url)
         this.projectFiles = new ProjectFileTsApi(EditorTsApi.url)
+        this.git = new GitTsApi(EditorTsApi.url)
         this.test1 = a.endpoint()
         this.test2 = a.endpoint()
         this.levelJson = a.endpoint()
@@ -49,6 +52,14 @@ export class EditorTsApi implements Server<unknown, unknown> {
         if (myResponse !== null) {
             return myResponse
         }
-        return await this.projectFiles.handle(url, body)
+        const projectFilesResponse = await this.projectFiles.handle(url, body)
+        if (projectFilesResponse !== null) {
+            return projectFilesResponse
+        }
+        const gitResponse = await this.git.handle(url, body)
+        if (gitResponse !== null) {
+            return gitResponse
+        }
+        return null
     }
 }

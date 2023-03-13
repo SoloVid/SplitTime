@@ -33,19 +33,20 @@ export class ProjectFileTsApiBacking {
         this.api.readFile.serve(async request => {
             const path = this.pathHelper.getFilePath(request.projectId, request.data.filePath)
             const isBinary = await isBinaryFile(path)
-            const base64Contents = await (async () => {
-                if (isBinary) {
-                    const s = await stat(path)
-                    if (s.size > 1 * 1024 * 1024) {
-                        return null
+            if (isBinary) {
+                const s = await stat(path)
+                if (s.size > 1 * 1024 * 1024) {
+                    return {
+                        isBinaryFile: true,
+                        base64Contents: null,
                     }
                 }
-                const contents = await readFile(path)
-                return contents.toString("base64")
-            })()
+            }
+
+            const contents = await readFile(path)
             return {
                 isBinaryFile: isBinary,
-                base64Contents: base64Contents,
+                base64Contents: contents.toString("base64"),
             }
         })
         this.api.writeFile.serve(async request => {

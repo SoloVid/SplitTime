@@ -52,6 +52,7 @@
     "@types/node": "^16.11.64",
     "@types/offscreencanvas": "^2019.6.3",
     "ansicolor": "^1.1.100",
+    "diff2html": "^3.4.31",
     "dropzone": "~5.7.6",
     "esbuild-register": "^3.3.3",
     "howler": "~2.1.3",
