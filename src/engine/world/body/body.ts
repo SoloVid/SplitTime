@@ -52,7 +52,8 @@ export class Body {
      */
     dir: direction_t = 3
 
-    GRAVITY = -1280
+    // GRAVITY = -1280
+    GRAVITY = -1820
     // For gravity etc., auto-applied z-axis motion in pixels per second
     zVelocity = 0
     /** 0-1, how much zVelocity should reflect on impact with ground. */

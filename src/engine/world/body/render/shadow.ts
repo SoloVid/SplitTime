@@ -19,7 +19,7 @@ export class Shadow implements Drawable {
         this.shadowBody.depth = body.depth;
         this.shadowBody.height = 0;
         this.minRadius = 4;
-        this.maxRadius = Math.max(this.shadowBody.width, this.shadowBody.depth);
+        this.maxRadius = Math.min(Math.max(this.shadowBody.width, this.shadowBody.depth), Math.min(this.shadowBody.width, this.shadowBody.depth) + 4);
         this.radius = this.maxRadius;
     }
     opacityModifier: number = 1;

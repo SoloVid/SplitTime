@@ -29,4 +29,7 @@ export class PlayerParty {
             this.playerManager.updatePlayerPerspective();
         });
     }
+    getAll(): readonly PlayerAgent[] {
+        return this.available
+    }
 }

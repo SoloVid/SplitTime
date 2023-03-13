@@ -27,8 +27,8 @@ const CONFIG = {
     TEXT_OUTLINE_COLOR: "#000000",
     TEXT_OUTLINE_WIDTH: 5,
     TEXT_COLOR: "#FFFFFF",
-    FONT_SIZE: 18,
-    FONT: "Verdana",
+    FONT_SIZE: 16,
+    FONT: "'Aclonica', Verdana, sans-serif",
     SPEAKER_NAMES_ENABLED: false
 }
 export const Configuration = CONFIG
