@@ -10,7 +10,7 @@ export class World {
         const levelMap = gameData.levels;
         for (const levelFilePath in levelMap) {
             const levelData = levelMap[levelFilePath];
-            const levelId = levelFilePath.replace(/\.json$/, "");
+            const levelId = levelFilePath.replace(/\.lvl\.yml$/, "");
             const level = new Level(levelId, levelData);
             this.levelMap[levelId] = level;
         }

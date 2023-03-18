@@ -12,10 +12,8 @@ export interface CompiledGameData {
     collages: {
         [collageFilePath: string]: Collage;
     };
-    musicFiles: readonly string[];
+    audioFiles: readonly string[];
     imageFiles: readonly string[];
-    preloadedImageFiles: readonly string[];
-    soundEffectFiles: readonly string[];
 }
 export function load(perspective: Perspective, ASSETS: Assets): PromiseLike<void> {
     const loadingScreen = new LoadingScreen(perspective.view);
@@ -28,16 +26,20 @@ export function load(perspective: Perspective, ASSETS: Assets): PromiseLike<void
         loadingScreen.show(Math.round((itemsLoaded / promiseCollection.length) * 100));
     }
     // G.ASSETS = new splitTime.Assets(splitTime.getScriptDirectory(), masterData)
-    for (const preloadedImageFileName of masterData.preloadedImageFiles) {
-        promiseCollection.push(ASSETS.images
-            .load("preloaded/" + preloadedImageFileName, preloadedImageFileName, true)
-            .then(incrementAndUpdateLoading));
-    }
-    for (const musicFileName of masterData.musicFiles) {
-        ASSETS.audio.registerMusic(musicFileName);
-    }
-    for (const soundFxFile of masterData.soundEffectFiles) {
-        ASSETS.audio.registerSoundEffect(soundFxFile);
+    // for (const preloadedImageFileName of masterData.preloadedImageFiles) {
+    //     promiseCollection.push(ASSETS.images
+    //         .load("preloaded/" + preloadedImageFileName, preloadedImageFileName, true)
+    //         .then(incrementAndUpdateLoading));
+    // }
+    // for (const musicFileName of masterData.musicFiles) {
+    //     ASSETS.audio.registerMusic(musicFileName);
+    // }
+    // for (const soundFxFile of masterData.soundEffectFiles) {
+    //     ASSETS.audio.registerSoundEffect(soundFxFile);
+    // }
+    for (const audioFile of masterData.audioFiles) {
+        ASSETS.audio.registerMusic(audioFile)
+        ASSETS.audio.registerSoundEffect(audioFile)
     }
     for (const collageFilePath in masterData.collages) {
         const collageData = masterData.collages[collageFilePath];
@@ -46,7 +48,7 @@ export function load(perspective: Perspective, ASSETS: Assets): PromiseLike<void
     for (const levelFilePath in masterData.levels) {
         const levelData = masterData.levels[levelFilePath];
         assert(instanceOfFileData(levelData), "\"" + levelFilePath + "\" is an invalid level");
-        var levelName = levelFilePath.replace(/\.json$/, "");
+        var levelName = levelFilePath.replace(/\.lvl\.yml$/, "");
         var level = perspective.world.getLevel(levelName);
         promiseCollection.push(level.load(perspective.world, levelData, ASSETS).then(incrementAndUpdateLoading));
     }

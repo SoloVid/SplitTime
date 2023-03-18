@@ -101,27 +101,23 @@ Alternatively, you can run these tests in the browser at [localhost:8080/test-ru
 
 ### Cleaning
 
-To get a clean build, delete the ``lib`` (engine) or ``build`` (game project)
+To get a clean build, delete the ``lib`` (engine) or ``.build`` (game project)
 directory, and run your desired build.
 
 ## Project Structure
 Projects are individual games that reside in separate directories within ``projects/``.
 All of the files specific to your game are to be located within this directory.
 
-The directories within each project should be
+Here's a little bit about different files within each project:
 
-- ``src/`` for all TypeScript files which will be compiled into one file with engine code (now needs to be taken care of at project level)
-- ``build/`` for build-generated files
-    - ``tsjs/`` for ``tsc`` output
-- ``audio/``
-    - ``music/`` for music (looping)
-    - ``fx/`` for sound effects (non-looping)
-- ``collage/`` for collage files
-- ``images/`` for image assets
-    - ``preloaded/`` for image assets that will be loaded into memory at engine startup
-- ``levels/`` for level files
+- ``*.ts*`` - TypeScript files which will be compiled into one file with engine code
+- ``.build/`` - build-generated files
+- ``*.mp3`` - music (looping) and sound effects (non-looping)
+- ``*.png``/``*.jpg`` - image assets
+- ``*.clg.yml`` - collage files
+- ``*.lvl.yml`` - level files
 
-Within the game code, all resources should be referenced relative to their asset type directory as specified in the enumeration above.
+Within the game code, all resources should be referenced relative to the project root directory.
 
 The launch point of the game should be provided via call to `exposeLaunchPoint()` somewhere in the game's source files:
 
@@ -137,13 +133,16 @@ exposeLaunchPoint(async (attachId) => {
 })
 ```
 
-Note that all TS files in ``src/`` will be included within ``dist/game.js``.
+Note that all TS files will be included within ``dist/game.js``.
 
 ## Distribution
 All files in a project's home ``dist/`` directory should be served in the production environment.
 
 ## Editing Collages/Levels
-Level files should be saved in a project's ``levels/`` directory, but levels are edited via the SplitTime development server.
-After building the project and starting the development server, launch [localhost:8080/edit](http://localhost:8080/edit) in your browser, and provide the name of your project's directory.
+Level files should be saved with the file extension ``.lvl.yml``.
+Collage files should be saved with the file extension ``.clg.yml``.
+Both of these types can be edited via the SplitTime development server.
+
+After building the project and starting the development server, launch [localhost:8080](http://localhost:8080) in your browser to open the development environment.
 
 Since this document is not meant to be an authoritative source for the editor's interface, we'll assume you can figure out how to use it from that point.

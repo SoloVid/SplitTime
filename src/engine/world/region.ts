@@ -2,6 +2,7 @@ import { Assets } from "engine/assets/assets";
 import { Timeline, game_seconds } from "engine/time/timeline";
 import { Level } from "./level/level";
 import { World } from "./world";
+import { debug } from "engine/utils/logger"
 
 // A region is a logical unit of levels that are loaded together and share a common timeline
 export class Region {
@@ -33,12 +34,12 @@ export class Region {
             this.levels[iLevel].notifyTimeAdvance(delta, absoluteTime);
         }
     }
-    loadForPlay(world: World, assets: Assets): PromiseLike<void> {
+    async loadForPlay(world: World, assets: Assets): Promise<void> {
         var promises = [];
         for (var i = 0; i < this.levels.length; i++) {
             promises.push(this.levels[i].loadForPlay(world, assets));
         }
-        return Promise.all(promises).then();
+        await Promise.all(promises);
     }
     unloadLevels(assets: Assets) {
         for (var i = 0; i < this.levels.length; i++) {

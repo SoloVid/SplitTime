@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises"
 import { dirname } from "node:path"
 import { CompilerOptions } from "typescript"
 import { join, relative, writeFile } from "../common/file-helper"
+import { generatedDirectory } from "./constants"
 
 export async function writeTsconfig(projectPath: string): Promise<void> {
   const file = join(projectPath, tsconfigLocation)
@@ -48,13 +49,16 @@ async function getUserTsconfig(projectPath: string): Promise<Tsconfig | null> {
   }
 }
 
-export const tsconfigLocation = "build/generated/tsconfig.json"
+export const tsconfigLocation = join(generatedDirectory, "tsconfig.json")
 function makeDefaultTsconfig(): Required<Tsconfig> {
   return {
       extends: "splittime/tsconfig.project.json",
       compilerOptions: {},
       include: [
-          "../../src/**/*.ts"
+          "../../**/*.ts"
+      ],
+      exclude: [
+          "../../node_modules/**/*.ts"
       ]
   }
 }
@@ -63,4 +67,5 @@ export interface Tsconfig {
   extends?: string
   compilerOptions?: CompilerOptions
   include?: string[]
+  exclude?: string[]
 }

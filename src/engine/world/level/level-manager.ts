@@ -1,4 +1,5 @@
 import { Assets } from "engine/assets/assets";
+import { debug, error } from "engine/utils/logger";
 import { World } from "../world";
 import { Level } from "./level";
 
@@ -38,7 +39,8 @@ export class LevelManager {
             this.transitionInProgress = true;
             return this.fullRegionTransition(level).then(() => {
                 this.transitionInProgress = false;
-            }, () => {
+            }, (e) => {
+                error(e)
                 this.transitionInProgress = false;
             });
         }

@@ -1,4 +1,3 @@
-import { IMAGE_DIR } from "engine/assets/assets"
 import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
 import { GenericObjectProperties, ObjectProperties } from "../field-options"
@@ -16,7 +15,6 @@ const levelFieldObject = {
   height: {},
   background: {
     isFile: true,
-    fileBrowserRoot: IMAGE_DIR
   },
   backgroundOffsetX: {},
   backgroundOffsetY: {}

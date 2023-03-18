@@ -1,15 +1,15 @@
-import { CellGrid } from "./cell-grid";
-import { Traces2 } from "./level-traces2";
-import { FileData } from "./level-file-data";
-import { Body } from "engine/world/body/body"
 import { Assets } from "engine/assets/assets";
 import { game_seconds } from "engine/time/timeline";
 import { Canvas } from "engine/ui/viewport/canvas";
+import { Body } from "engine/world/body/body";
 import { int } from "globals";
 import { Region } from "../region";
 import { WeatherSettings } from "../weather-settings";
 import { World } from "../world";
+import { CellGrid } from "./cell-grid";
+import { FileData } from "./level-file-data";
 import { LevelLoader } from "./level-loader";
+import { Traces2 } from "./level-traces2";
 import { Position } from "./position";
 
 type EventCallback = ((triggeringBody: Body) => void) | ((triggeringBody: Body, eventId: string) => void);

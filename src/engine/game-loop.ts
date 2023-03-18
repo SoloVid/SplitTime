@@ -1,7 +1,7 @@
 import { Perspective } from "./perspective";
 import { FrameNotified } from "./time/frame-notified";
-import { setDebugValue, ENABLED, renderCanvas, defaultGroup } from "./utils/debug";
-import { warn, error } from "./utils/logger";
+import { defaultGroup, ENABLED, renderCanvas, setDebugValue } from "./utils/debug";
+import { error, warn } from "./utils/logger";
 
 function mainGameLoop(gameLoop: GameLoop, timeStamp: number) {
     const timeStampDelta = timeStamp - gameLoop.lastTimeStamp;

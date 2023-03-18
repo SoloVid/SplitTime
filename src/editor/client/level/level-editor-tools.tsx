@@ -1,4 +1,3 @@
-import { COLLAGE_DIR } from "engine/assets/assets"
 import { makeCollageFromFile } from "engine/graphics/collage"
 import { TraceTypeType } from "engine/world/level/trace/trace-type"
 import { useEffect, useState } from "preact/hooks"
@@ -70,9 +69,9 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
   const mode = levelEditorShared.mode
 
   async function launchCollageFileBrowser(): Promise<void> {
-    const filePath = await editorGlobalStuff.openFileSelect(COLLAGE_DIR)
-    const prefixRegex = new RegExp("^/?" + COLLAGE_DIR + "/?")
-    const suffixRegex = /\.json$/
+    const filePath = await editorGlobalStuff.openFileSelect("")
+    const prefixRegex = /^\//
+    const suffixRegex = /\.clg\.yml$/
     const collageId = filePath.replace(prefixRegex, "").replace(suffixRegex, "")
     levelEditorShared.selectCollage(collageId)
   }

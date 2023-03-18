@@ -7,7 +7,7 @@ export class CollageManager {
     constructor(gameData: CompiledGameData) {
         for (const collageFilePath in gameData.collages) {
             const collageData = gameData.collages[collageFilePath];
-            const collageId = collageFilePath.replace(/\.json$/, "");
+            const collageId = collageFilePath.replace(/\.clg\.yml$/, "");
             this.collageMap[collageId] = makeCollageFromFile(collageData);
         }
     }

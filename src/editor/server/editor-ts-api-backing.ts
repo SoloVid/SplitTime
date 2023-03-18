@@ -1,4 +1,3 @@
-import { COLLAGE_DIR, IMAGE_DIR, LEVEL_DIR } from "engine/assets/assets"
 import { Collage } from "engine/file/collage"
 import { FileData } from "engine/world/level/level-file-data"
 import { readFile, stat } from "node:fs/promises"
@@ -8,6 +7,7 @@ import { Config } from "./config"
 import { GitTsApiBacking } from "./git-ts-api-backing"
 import { PathHelper } from "./path-helper"
 import { ProjectFileTsApiBacking } from "./project-file-ts-api-backing"
+import YAML from "yaml"
 
 export class EditorTsApiBacking {
     public readonly api = new EditorTsApi()
@@ -27,19 +27,19 @@ export class EditorTsApiBacking {
             }
         })
         this.api.levelJson.serve(async request => {
-            const fileName = request.data.levelId + ".json"
-            const path = this.pathHelper.getFilePath(request.projectId, LEVEL_DIR, fileName)
+            const fileName = request.data.levelId + ".lvl.yml"
+            const path = this.pathHelper.getFilePath(request.projectId, fileName)
             const result = await readFile(path)
-            return JSON.parse(result.toString()) as FileData
+            return YAML.parse(result.toString()) as FileData
         })
         this.api.collageJson.serve(async request => {
-            const fileName = request.data.collageId + ".json"
-            const path = this.pathHelper.getFilePath(request.projectId, COLLAGE_DIR, fileName)
+            const fileName = request.data.collageId + ".clg.yml"
+            const path = this.pathHelper.getFilePath(request.projectId, fileName)
             const result = await readFile(path)
-            return JSON.parse(result.toString()) as Collage
+            return YAML.parse(result.toString()) as Collage
         })
         this.api.imageInfo.serve(async request => {
-            const path = this.pathHelper.getFilePath(request.projectId, IMAGE_DIR, request.data.imageId)
+            const path = this.pathHelper.getFilePath(request.projectId, request.data.imageId)
             const stats = await stat(path)
             return {
                 webPath: this.pathHelper.toProjectWebPath(path),

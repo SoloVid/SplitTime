@@ -1,4 +1,3 @@
-import { IMAGE_DIR } from "engine/assets/assets"
 import { BodySpec, Collage, Frame, Montage, MontageFrame } from "engine/file/collage"
 import { Immutable } from "engine/utils/immutable"
 import { Trace as FileTrace, Trace } from "engine/world/level/level-file-data"
@@ -14,7 +13,6 @@ import { MontageWrapper } from "./montage-wrapper"
 const collageFieldObject = {
   image: {
     isFile: true,
-    fileBrowserRoot: IMAGE_DIR
   },
   defaultMontageId: {}
 } as const
