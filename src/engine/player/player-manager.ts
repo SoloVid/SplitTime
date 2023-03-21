@@ -39,7 +39,8 @@ export class PlayerManager {
             return;
         }
         this.perspective.playerBody = this.getActiveBody();
-        this.perspective.camera.setFocusPoint(new InFrontOfBody(this.perspective.playerBody, Math.min(this.perspective.view.width, this.perspective.view.height) / 4));
+        this.perspective.camera.setFocusPoint(this.perspective.playerBody);
+        // this.perspective.camera.setFocusPoint(new InFrontOfBody(this.perspective.playerBody, Math.min(this.perspective.view.width, this.perspective.view.height) / 4));
     }
     get controlsLocked(): boolean {
         return this._controlsLocked;
