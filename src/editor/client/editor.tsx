@@ -200,8 +200,8 @@ export default function Editor({
     if (event.which === keycode.S) {
       if (event.ctrlKey || ctrlDown) {
         doSave(filePath)
+        event.preventDefault()
       }
-      event.preventDefault()
     }
 
     // TODO: resolve types
