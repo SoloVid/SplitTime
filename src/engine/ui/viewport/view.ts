@@ -17,7 +17,17 @@ export class View {
         this.seeB = this.see.raw;
         if (this.seeB.element instanceof HTMLCanvasElement) {
             this.seeB.element.setAttribute("id", "game-window");
-            this.seeB.element.setAttribute("style", "display: block; width: 100%; height: 100%; object-fit: contain;");
+            this.seeB.element.setAttribute("style", `
+                display: block;
+                image-rendering:optimizeSpeed;             /* Legal fallback */
+                image-rendering:-moz-crisp-edges;          /* Firefox        */
+                image-rendering:-o-crisp-edges;            /* Opera          */
+                image-rendering:-webkit-optimize-contrast; /* Safari         */
+                image-rendering:optimize-contrast;         /* CSS3 Proposed  */
+                image-rendering:crisp-edges;               /* CSS4 Proposed  */
+                image-rendering:pixelated;                 /* CSS4 Proposed  */
+                -ms-interpolation-mode:nearest-neighbor;   /* IE8+           */
+            `);
         }
         this.seeC = this.seeB.context;
         this.see.raw.context.font = "20px Arial";
@@ -30,7 +40,7 @@ export class View {
      *                       If unspecified, parent element will be document.body
      * @param {string} [additionalCanvasClass] CSS class string to apply to game canvas element (e.g. for stretching)
      */
-    attach(parentId: string, additionalCanvasClass?: string) {
+    attach(parentId: string, options: AttachOptions = {}) {
         var parent = document.body;
         if (parentId) {
             const foundParent = document.getElementById(parentId);
@@ -41,13 +51,43 @@ export class View {
             }
             parent = foundParent;
         }
-        assert(this.seeB.element instanceof HTMLCanvasElement, "View#attach requires an HTML canvas");
-        if (additionalCanvasClass) {
-            this.seeB.element.setAttribute("class", additionalCanvasClass);
+        const el = this.seeB.element
+        assert(el instanceof HTMLCanvasElement, "View#attach requires an HTML canvas");
+        if (options.additionalCanvasClass) {
+            el.setAttribute("class", options.additionalCanvasClass);
         }
-        parent.appendChild(this.seeB.element);
+        parent.appendChild(el);
         if (ENABLED) {
             attachDebug(parent);
         }
+        if (options.stretchMode === "multiple" || !options.stretchMode) {
+            const resizeObserver = new ResizeObserver((entries) => {
+                const box = entries[0].contentBoxSize[0]
+                // We factor in devicePixelRatio because we don't want the browser/device to automatically do any scaling for us.
+                const width = box.inlineSize * window.devicePixelRatio
+                const height = box.blockSize * window.devicePixelRatio
+                const multipleUnrounded = Math.min(width / this.seeB.width, height / this.seeB.height)
+                const multiple = multipleUnrounded <= 0 ? 1 : (multipleUnrounded < 1 ? multipleUnrounded : Math.floor(multipleUnrounded))
+                el.style.width = `${this.seeB.width * multiple / window.devicePixelRatio}px`
+                el.style.height = `${this.seeB.height * multiple / window.devicePixelRatio}px`
+            })
+            resizeObserver.observe(parent)
+            window.addEventListener("keydown", (e) => {
+                // If user explicitly tries to zoom in or out,
+                // stop auto-resizing.
+                if ((e.key === "=" || e.key === "-") && e.ctrlKey) {
+                    resizeObserver.unobserve(parent)
+                }
+            })
+        } else {
+            el.style.width = "100%"
+            el.style.height = "100%"
+            el.style.objectFit = "contain"
+        }
     }
+}
+
+export type AttachOptions = {
+    additionalCanvasClass?: string
+    stretchMode?: "multiple" | "contain"
 }

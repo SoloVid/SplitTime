@@ -93,7 +93,7 @@ export class Camera {
         screen.y = Math.round(screen.y);
         return screen;
     }
-    CAMERA_MIN_MOVE = 2;
+    CAMERA_MIN_MOVE = 8;
     SCREEN_LAZY_FACTOR = 0.5;
     private getScreenMoveSpeed(dx: number) {
         var MAX_STEP = 100;

@@ -82,6 +82,11 @@ function App() {
 
   useEffect(() => {
     const listener = (e: ErrorEvent | PromiseRejectionEvent) => {
+      if (e instanceof ErrorEvent && e.message.includes("ResizeObserver loop limit exceeded")) {
+        // Ignore this error. It regularly comes up when opening dev tools but doesn't trigger console error.
+        // See https://stackoverflow.com/a/50387233/4639640
+        return
+      }
       if ("reason" in e) {
         addConsoleEntry({ entryType: "error", text: unknownToString(e.reason) })
       } else {
