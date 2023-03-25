@@ -31,6 +31,7 @@ export default function Landing({
           showNew={true}
           hideCancel={true}
           showTextBox={false}
+          showUpload={true}
           title={"Select File"}
           onFileSelected={openEditor}
       />
