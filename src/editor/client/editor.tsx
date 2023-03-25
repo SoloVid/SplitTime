@@ -286,10 +286,6 @@ export default function Editor({
     }
   }
 
-  function openMainEdit(): void {
-    window.open(`/edit`)
-  }
-
   function openFileSave(): void {
     const lastSlash = filePath.lastIndexOf("/")
     const preloadDirectory = filePath.substring(0, lastSlash)
@@ -336,7 +332,7 @@ export default function Editor({
     style="display: flex; flex-flow: column; height: 100vh;"
   >
     <div className="menu-bar">
-      <a onClick={openMainEdit}>Menu</a>
+      <a href="/edit" target="_blank">Menu</a>
       <a onClick={openFileSave}>Save</a>
       {(collage || level) && <>
         <a onClick={editSettings}>Edit Settings</a>
@@ -396,6 +392,7 @@ export default function Editor({
     />}
     {!!collage && <CollageEditor
       key={filePath}
+      id={filePath}
       editorGlobalStuff={globalEditorStuff}
       collage={collage}
       setCollage={setCollage}

@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <title>Dev Landing</title>
     <link rel="stylesheet" href="/static/editor-style.css">
     <!-- Adapted from https://www.w3schools.com/howto/howto_css_coming_soon.asp -->
     <style>
@@ -74,23 +75,13 @@
             <!-- <p>Logo</p> -->
         </div>
         <div class="middle">
-            <h1>SplitTime Engine</h1>
+            <h1>SplitTime Development</h1>
             <hr />
             <br />
             <div>
-                <script>
-                    function openProjectPage(prefix) {
-                        window.location = prefix
-                        // var projectName = window.prompt("Project directory name:");
-                        // if (projectName !== undefined) {
-                        //     window.location = "/" + prefix + "/" + projectName;
-                        // }
-                    }
-                </script>
-                <a class="btn" onclick="openProjectPage('play')" title="Play production-built version of game.">Play</a>
-                <a class="btn" onclick="openProjectPage('edit')">Edit</a>
-                <a class="btn" onclick="openProjectPage('test')" title="Test dev build of game.">Test</a>
-                <!-- <a class="btn" href="/static/test-runner.html">Test Engine</a> -->
+                <a class="btn" href="/play" title="Play production-built version of game.">Play</a>
+                <a class="btn" href="/edit">Edit</a>
+                <a class="btn" href="/test" title="Test dev build of game.">Test</a>
             </div>
         </div>
         <div class="bottomleft">

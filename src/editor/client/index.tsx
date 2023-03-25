@@ -7,7 +7,7 @@ import SvgPatterns from "./svg-patterns";
 import { exerciseApi } from "./test";
 import TestComponent from "./test-component";
 import { TimeProvider } from "./time-context";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { updatePageTitle } from "./editor-functions";
 import Landing from "./landing";
 import { showError } from "./utils/prompt";
@@ -15,50 +15,64 @@ import { error } from "api/system";
 import { prefixRawProjectFiles } from "editor/server/constants";
 
 const editSlug = "edit"
-const url = window.location.pathname
-// Expecting URL of form /edit/path/to/file.ext
-const urlPattern = /^\/edit(?:\/(?:([^/]+)(\/.+))?)?$/
-const urlMatch = urlPattern.exec(url)
-if (urlMatch === null) {
-  showError(`URL ${url} didn't match expected pattern`)
-  throw new Error(`URL ${url} didn't match expected pattern`)
-}
-const initialEditorType: EditorType | null = (urlMatch[1] as EditorType) ?? null
-if (![null, "level", "collage", "code"].includes(initialEditorType)) {
-  showError(`Unknown editor type: ${initialEditorType}`)
-  throw new Error(`Unknown editor type: ${initialEditorType}`)
-}
-const initialFilePath: string | null = urlMatch[2] ?? null
 
 Promise.resolve().then(() => exerciseApi())
 
 function App() {
   const server = new ServerLiaison("")
 
-  const [loadingFile, setLoadingFile] = useState(false)
-  const [editorType, setEditorType] = useState<EditorType | null>(initialEditorType)
-  const [filePath, setFilePathDirect] = useState(initialFilePath)
+  const [loadingFile, setLoadingFile] = useState(true)
+  const [editorType, setEditorType] = useState<EditorType | null>(null)
+  const [filePath, setFilePathDirect] = useState<string | null>(null)
   const [fileContents, setFileContents] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (filePath) {
-      openFile(filePath, editorType)
+  function initFromUrl() {
+    const url = window.location.pathname
+    // Expecting URL of form /edit/editor-type/path/to/file.ext
+    const urlPattern = /^\/edit(?:\/(?:([^/]+)(\/.+))?)?$/
+    const urlMatch = urlPattern.exec(url)
+    if (urlMatch === null) {
+      showError(`URL ${url} didn't match expected pattern`)
+      throw new Error(`URL ${url} didn't match expected pattern`)
     }
+    const initialEditorType: EditorType | null = (urlMatch[1] as EditorType) ?? null
+    setEditorType(initialEditorType)
+
+    if (![null, "level", "collage", "code"].includes(initialEditorType)) {
+      showError(`Unknown editor type: ${initialEditorType}`)
+      throw new Error(`Unknown editor type: ${initialEditorType}`)
+    }
+    const initialFilePath: string | null = urlMatch[2] ?? null
+    setFilePathDirect(initialFilePath)
+
+    if (initialFilePath) {
+      openFile(initialFilePath, initialEditorType)
+    } else {
+      setLoadingFile(false)
+    }
+  }
+
+  useEffect(() => {
+    initFromUrl()
   }, [])
 
   useEffect(() => {
     if (filePath !== null) {
       updatePageTitle(filePath)
+    } else {
+      updatePageTitle("Editor v2")
     }
   }, [filePath])
-
 
   function setFilePathAndPageStuff(newFilePath: string, newEditorType: EditorType) {
     setEditorType(newEditorType)
     setFilePathDirect(newFilePath)
     const newUrl = `/${editSlug}/${newEditorType}${newFilePath}`
     if (newUrl !== window.location.pathname) {
-      window.history.pushState(null, "", newUrl)
+      window.location.href = newUrl
+      // We would use pushState() here, but that doesn't provide us
+      // with browser confirmation on back button.
+      // window.history.pushState(null, "", newUrl)
     }
   }
 
@@ -78,8 +92,7 @@ function App() {
         const possibleEditorTypes = detectEditorTypes(fileContents)
         if (possibleEditorTypes.length === 0) {
           showError("Unable to find an appropriate editor for this file")
-          // TODO: Remove when "text" is an actual EditorType
-          return "text" as EditorType
+          return "code"
         }
         return possibleEditorTypes[0]
       })()
