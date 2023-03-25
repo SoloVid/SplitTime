@@ -64,7 +64,7 @@ export default function MontageFrame(props: MontageFrameProps) {
     bodyFrontRectRelative.y * scale,
     bodyFrontRectRelative.width * scale,
     bodyFrontRectRelative.height * scale,
-  ), [bodyFrontRectRelative])
+  ), [bodyFrontRectRelative, scale])
 
   const frame = useMemo(() => {
     const montageIndex = collageViewHelper.collage.montages.indexOf(montage)
@@ -108,7 +108,7 @@ export default function MontageFrame(props: MontageFrameProps) {
       outline: highlight ? "4px solid red" : "none"
     }
     return makeStyleString(styleMap)
-  }, [frameTargetBox, highlight])
+  }, [frameTargetBoxS, highlight])
 
   const inputs = useMemo(() => {
     const basicRelMouse = getRelativeMouse(editorInputs, $el.current)
@@ -134,14 +134,14 @@ export default function MontageFrame(props: MontageFrameProps) {
       "pointer-events": "none"
     }
     return makeStyleString(styleMap)
-  }, [frameTargetBoxS])
+  }, [frameTargetBoxS, EDITOR_PADDING])
 
   const svgTransform = useMemo(() => {
     // Note that the frameTargetBox coordinates are typically negative
     const x = EDITOR_PADDING - frameTargetBoxS.x
     const y = EDITOR_PADDING - frameTargetBoxS.y
     return "translate(" + x + " " + y + ")"
-  }, [frameTargetBoxS])
+  }, [frameTargetBoxS, EDITOR_PADDING])
 
   const projectImages = useContext(imageContext)
   const imgSrc = projectImages.imgSrc(collageViewHelper.collage.image)

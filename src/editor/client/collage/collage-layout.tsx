@@ -125,7 +125,7 @@ export default function CollageLayout(props: CollageLayoutProps) {
 
   return <div
     ref={$el}
-    style="position: relative; cursor: crosshair; display: inline-block;"
+    style="position: absolute; cursor: crosshair; display: inline-block;"
     class="transparency-checkerboard-background"
     onMouseDown={onlyRight(startNewFrame, true)}
     onContextMenu={preventDefault}

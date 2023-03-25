@@ -66,6 +66,16 @@ export const globalEditorPreferences = makePreferences<{
   zoom: 100,
 })
 
+export const collageEditorPreferences = makePreferences<{
+  readonly leftMenuWidth: number
+  readonly middlePercent: number
+  readonly topPercent: number
+}>("editor-prefs:collage:", {
+  leftMenuWidth: 128,
+  middlePercent: 70,
+  topPercent: 70,
+})
+
 export const levelEditorPreferences = makePreferences<{
   readonly leftMenuWidth: number
   readonly rightMenuWidth: number

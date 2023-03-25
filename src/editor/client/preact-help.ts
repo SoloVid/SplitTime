@@ -17,7 +17,7 @@ export function makeClassNames(classMap: Record<string, boolean>) {
 export function makeStyleString(styleMap: Record<string, string>) {
   return Object.entries(styleMap)
     .map(([key, value]) => `${key}:${value}`)
-    .join(";")
+    .join(";") + ";"
 }
 
 export type TaggedImmutableSetter<T> = (tag: string | null, transform: (before: Immutable<T>) => Immutable<T>) => void

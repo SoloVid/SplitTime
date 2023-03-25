@@ -1,12 +1,15 @@
+import { constrain } from "api/math"
 import { Collage } from "engine/file/collage"
 import { type Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useEffect, useRef, useState } from "preact/hooks"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter, makeStyleString, onlyLeft } from "../preact-help"
+import { collageEditorPreferences } from "../preferences"
 import PropertiesPane from "../properties"
 import { GlobalEditorShared, UserInputs } from "../shared-types"
 import { collageTraceOptions } from "../trace-options"
 import { updateImmutableObject } from "../utils/immutable-helper"
+import Resizer from "../utils/resizer"
 import { makeSharedStuff } from "./collage-editor-shared"
 import CollageLayout from "./collage-layout"
 import CollageShowcase from "./collage-showcase"
@@ -15,6 +18,7 @@ import { getObjectProperties } from "./properties-stuffs"
 import { EDITOR_PADDING } from "./shared-types"
 
 type CollageEditorProps = {
+  readonly id: string
   readonly editorGlobalStuff: GlobalEditorShared
   readonly collage: Immutable<Collage>
   readonly style: string
@@ -23,6 +27,7 @@ type CollageEditorProps = {
 
 export default function CollageEditor(props: CollageEditorProps) {
   const {
+    id,
     collage,
     editorGlobalStuff,
     style,
@@ -30,7 +35,10 @@ export default function CollageEditor(props: CollageEditorProps) {
   } = props
   const editorInputs = editorGlobalStuff.userInputs
 
+  const [collageEditorPrefs, setCollageEditorPrefs] = collageEditorPreferences.use(id)
+
   const $el = useRef<null | HTMLDivElement>(null)
+  const $graphicalEditorsContainer = useRef<null | HTMLDivElement>(null)
 
   const [expandTraceOptions, setExpandTraceOptions] = useState(false)
 
@@ -67,16 +75,16 @@ export default function CollageEditor(props: CollageEditorProps) {
   }
 
   function editorWidth(): number {
-    if (!$el.current) {
-      return 0
+    if (!$graphicalEditorsContainer.current) {
+      return 1
     }
-    return $el.current.clientWidth
+    return $graphicalEditorsContainer.current.clientWidth
   }
   function editorHeight(): number {
-    if (!$el.current) {
-      return 0
+    if (!$graphicalEditorsContainer.current) {
+      return 1
     }
-    return $el.current.clientHeight
+    return $graphicalEditorsContainer.current.clientHeight
   }
 
   useEffect(() => {
@@ -99,58 +107,126 @@ export default function CollageEditor(props: CollageEditorProps) {
     })
   }, [sharedStuff.propertiesPath])
 
-  return <div ref={$el} className="collage-editor" style={`overflow-y: auto;${style}`}>
-    <div class="top-row" style="display: flex; flex-flow: row; height: 50%;">
-      <div class="menu">
-        <div class="trace-type-options">
-          {collageTraceOptions.map((traceOption) => (
-            (expandTraceOptions || sharedStuff.traceTypeSelected === traceOption.type) && <div
-              key={traceOption.type}
-              className="option"
-              style={`color: white; background-color: ${traceOption.color};`}
-              onClick={() => {
-                setExpandTraceOptions(false)
-                sharedStuff.setTraceTypeSelected(traceOption.type)
-              }}
-              title={traceOption.help}
-            >
-              {sharedStuff.traceTypeSelected === traceOption.type && ">> "}
-              { traceOption.type }
-            </div>
-          ))}
-          {!expandTraceOptions && <div
+  const leftMenuWidth = collageEditorPrefs.leftMenuWidth
+  function onLeftMenuResize({ dx }: { dx: number }) {
+    setCollageEditorPrefs((before) => ({
+      ...before,
+      leftMenuWidth: before.leftMenuWidth + dx,
+    }))
+  }
+
+  const middlePercent = collageEditorPrefs.middlePercent
+  function onMiddleResize({ dx }: { dx: number }) {
+    const dxPercent = 100 * dx / editorWidth()
+    setCollageEditorPrefs((before) => ({
+      ...before,
+      middlePercent: constrain(before.middlePercent + dxPercent, 10, 90),
+    }))
+  }
+
+  const topPercent = collageEditorPrefs.topPercent
+  function onVerticalResize({ dy }: { dy: number }) {
+    const dyPercent = 100 * dy / editorHeight()
+    setCollageEditorPrefs((before) => ({
+      ...before,
+      topPercent: constrain(before.topPercent + dyPercent, 10, 90),
+    }))
+  }
+
+  return <div ref={$el} className="collage-editor" style={makeStyleString({
+    "overflow-y": "auto",
+    "display": "flex",
+    "flex-direction": "row",
+  }) + style}>
+    <div class="menu" style={makeStyleString({
+      "width": `${leftMenuWidth}px`,
+      "flex": `0 0 ${leftMenuWidth}px`,
+    })}>
+      <div class="trace-type-options">
+        {collageTraceOptions.map((traceOption) => (
+          (expandTraceOptions || sharedStuff.traceTypeSelected === traceOption.type) && <div
+            key={traceOption.type}
             className="option"
-            style={`color: black; background-color: white;`}
-            onClick={() => setExpandTraceOptions(true)}
+            style={`color: white; background-color: ${traceOption.color};`}
+            onClick={() => {
+              setExpandTraceOptions(false)
+              sharedStuff.setTraceTypeSelected(traceOption.type)
+            }}
+            title={traceOption.help}
           >
-            other types
-          </div>}
+            {sharedStuff.traceTypeSelected === traceOption.type && ">> "}
+            { traceOption.type }
+          </div>
+        ))}
+        {!expandTraceOptions && <div
+          className="option"
+          style={`color: black; background-color: white;`}
+          onClick={() => setExpandTraceOptions(true)}
+        >
+          other types
+        </div>}
+      </div>
+      <hr/>
+      {!!sharedStuff.propertiesPath && <PropertiesPane
+        editorGlobalStuff={editorGlobalStuff}
+        spec={getObjectProperties(collage, sharedStuff.setCollage, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))}
+      />}
+    </div>
+    <Resizer
+      resizeType="vertical"
+      onResize={onLeftMenuResize}
+    ></Resizer>
+    <div class="graphical-editors-container" ref={$graphicalEditorsContainer} style={makeStyleString({
+      "flex": "1",
+    })}>
+      <div class="top-row" style={makeStyleString({
+        "display": "flex",
+        "flex-direction": "row",
+        "height": `${topPercent}%`,
+      })}>
+        <div class="collage-layout-container" style={makeStyleString({
+          "width": `${middlePercent}%`,
+          "flex": `${middlePercent}`,
+          "height": "100%",
+          "overflow": "auto",
+          "position": "relative",
+        })}>
+          <CollageLayout
+            collageEditorShared={sharedStuff}
+          />
         </div>
-        <hr/>
-        {!!sharedStuff.propertiesPath && <PropertiesPane
-          editorGlobalStuff={editorGlobalStuff}
-          spec={getObjectProperties(collage, sharedStuff.setCollage, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))}
+        <Resizer
+          resizeType="vertical"
+          onResize={onMiddleResize}
+        ></Resizer>
+        <div class="collage-showcase-container" style={makeStyleString({
+          "width": `${Math.floor(100 - middlePercent)}%`,
+          "flex": `${Math.floor(100 - middlePercent)}`,
+          "height": "100%",
+          "overflow-x": "hidden",
+          "overflow-y": "auto",
+        })}>
+          <CollageShowcase
+            style="flex: 1;"
+            collageEditHelper={sharedStuff}
+            collageViewHelper={sharedStuff}
+          />
+        </div>
+      </div>
+      <Resizer
+        resizeType="horizontal"
+        onResize={onVerticalResize}
+      ></Resizer>
+      <div style={makeStyleString({
+        "overflow": "auto",
+        "height": `${Math.floor(100 - topPercent)}%`,
+      })}>
+        {!!sharedStuff.selectedMontage && sharedStuff.selectedMontageIndex !== null && <MontageEditor
+          collageEditorShared={sharedStuff}
+          montageIndex={sharedStuff.selectedMontageIndex}
+          montage={sharedStuff.selectedMontage}
         />}
       </div>
-      <div class="collage-layout-container" style="flex-grow: 1; height: 100%; overflow: auto">
-        <CollageLayout
-          collageEditorShared={sharedStuff}
-        />
-      </div>
-      <div class="collage-showcase-container" style="flex-grow: 1; overflow: auto;">
-        <CollageShowcase
-          style="flex-grow: 1;"
-          collageEditHelper={sharedStuff}
-          collageViewHelper={sharedStuff}
-        />
-      </div>
-    </div>
-    <div style="overflow: auto; height: 50%;">
-      {!!sharedStuff.selectedMontage && sharedStuff.selectedMontageIndex !== null && <MontageEditor
-        collageEditorShared={sharedStuff}
-        montageIndex={sharedStuff.selectedMontageIndex}
-        montage={sharedStuff.selectedMontage}
-      />}
     </div>
 
     <div id="info-pane" style="padding: 2px;position:fixed;bottom:0;">
