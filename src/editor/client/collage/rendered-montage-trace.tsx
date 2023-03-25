@@ -16,6 +16,7 @@ type RenderedMontageTraceProps = {
   montageIndex: number
   montage: Montage
   montageFrame: MontageFrame
+  scale: number
   traceIndex: number
   trace: Trace
   transform: string
@@ -28,12 +29,11 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     montageIndex,
     montage,
     montageFrame,
+    scale,
     traceIndex,
     trace,
     transform,
   } = props
-
-  const scale = collageViewHelper.globalStuff.scale
 
   const [metadata, setMetadata] = useState(new EditorMetadata())
   const tracker: IRenderedTraceTracker = {

@@ -98,7 +98,7 @@ export default function Editor({
   const globalEditorStuff: GlobalEditorShared = {
     gridEnabled: preferences.gridEnabled,
     gridCell,
-    scale: preferences.zoom / 100,
+    get scale() { return preferences.zoom / 100 / window.devicePixelRatio },
     server,
     userInputs: {
       mouse,

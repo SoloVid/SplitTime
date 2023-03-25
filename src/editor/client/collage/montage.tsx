@@ -13,6 +13,8 @@ type MontageProps = {
   collageViewHelper: SharedStuffViewOnly
   montageIndex: number
   montage: FileMontage
+  maxWidth: number
+  maxHeight: number
 }
 
 export default function Montage(props: MontageProps) {
@@ -21,9 +23,9 @@ export default function Montage(props: MontageProps) {
     collageViewHelper,
     montageIndex,
     montage,
+    maxWidth,
+    maxHeight,
   } = props
-
-  const scale = collageViewHelper.globalStuff.scale
 
   const time = useContext(Time)
 
@@ -33,6 +35,24 @@ export default function Montage(props: MontageProps) {
     const dir = montage.direction === "" ? undefined : montage.direction
     return collageViewHelper.realCollage.getMontage(montage.id, dir)
   }, [montage, collageViewHelper.realCollage])
+
+  const overallArea = useMemo(() => {
+    if (montage.frames.length === 0) {
+      // FTODO: Consider calculating these values better
+      return Rect.make(0, 0, 16, 16)
+    }
+    return realMontage.getOverallArea()
+  }, [montage, realMontage])
+
+  const editorScale = collageViewHelper.globalStuff.scale
+
+  const desiredWidth = overallArea.width * editorScale
+  const desiredHeight = overallArea.height * editorScale
+
+  const bestWidth = Math.min(maxWidth, desiredWidth)
+  const bestHeight = Math.min(maxHeight, desiredHeight)
+
+  const scale = Math.min(bestWidth / overallArea.width, bestHeight / overallArea.height)
 
   const currentFrame = useMemo(() => {
     if (realMontage.frames.length === 0) {
@@ -47,19 +67,12 @@ export default function Montage(props: MontageProps) {
     }
   }, [realMontage, time, montage.frames])
 
-  const overallArea = useMemo(() => {
-    if (montage.frames.length === 0) {
-      // FTODO: Consider calculating these values better
-      return Rect.make(0, 0, 16, 16)
-    }
-    return realMontage.getOverallArea()
-  }, [montage, realMontage])
   const overallAreaS = useMemo(() => Rect.make(
     overallArea.x * scale,
     overallArea.y * scale,
     overallArea.width * scale,
     overallArea.height * scale,
-  ), [overallArea])
+  ), [overallArea, scale])
 
   const containerStyle = useMemo(() => {
     const styleMap = {
@@ -80,7 +93,7 @@ export default function Montage(props: MontageProps) {
       top: (targetBoxS.y - overallAreaS.y) + 'px'
     }
     return makeStyleString(styleMap)
-  }, [currentFrame, overallArea])
+  }, [currentFrame, overallAreaS, scale])
 
   function setActiveMontage(event: MouseEvent): void {
     const alsoSetProperties = !(event as PropertiesEvent).propertiesPanelSet
@@ -96,6 +109,7 @@ export default function Montage(props: MontageProps) {
 
   return <div
     onMouseDown={(e) => { if (e.button === 0) setActiveMontage(e) }}
+    style="position: relative;"
   >
     <div
       style={containerStyle}
@@ -119,6 +133,7 @@ export default function Montage(props: MontageProps) {
           montage={montage}
           montageFrameIndex={currentFrame.index}
           montageFrame={currentFrame.fileFrame}
+          scale={scale}
         />
       </div>}
     </div>

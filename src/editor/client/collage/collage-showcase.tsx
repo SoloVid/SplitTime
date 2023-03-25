@@ -9,18 +9,23 @@ type CollageShowcaseProps = {
   style?: string
   collageEditHelper?: SharedStuff | undefined
   collageViewHelper: SharedStuffViewOnly
+  $container: HTMLDivElement
 }
 
 export default function CollageShowcase(props: CollageShowcaseProps) {
   const {
     collageEditHelper,
     collageViewHelper,
+    $container,
   } = props
 
   const collage = collageViewHelper.collage
   const scale = collageViewHelper.globalStuff.scale
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
-  const maxMontageWidth = $el.current.offsetWidth
+  // const maxMontageWidth = $el.current.offsetWidth
+  // const maxMontageHeight = $el.current.offsetHeight
+  const maxMontageWidth = $container.offsetWidth
+  const maxMontageHeight = $container.offsetHeight
 
   const widestMontageWidth = useMemo(() => {
     const width = collageViewHelper.realCollage.montages.reduce((maxWidth, m) => {
@@ -29,18 +34,21 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
     }, 0)
     return Math.min(Math.max(width, 16), maxMontageWidth)
   }, [collageViewHelper, maxMontageWidth])
-  const widestMontageWidthS = widestMontageWidth * scale
+
+  const cellWidth = Math.min(widestMontageWidth * scale, maxMontageWidth)
 
   const gridStyle = useMemo(() => {
     const styleMap = {
-      display: "grid",
-      "grid-template-columns": "repeat(auto-fill, minmax(" + widestMontageWidthS + "px, 1fr))",
+      "position": "absolute",
+      "width": "100%",
+      "display": "grid",
+      "grid-template-columns": "repeat(auto-fill, minmax(" + (cellWidth) + "px, 1fr))",
       "grid-gap": "0.5rem",
       "align-items": "center",
       "justify-items": "center"
     }
     return makeStyleString(styleMap)
-  }, [widestMontageWidthS])
+  }, [cellWidth])
 
   function createNewMontage(): void {
     const collageHelper = new CollageHelper(collage)
@@ -61,6 +69,8 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
         collageViewHelper={collageViewHelper}
         montageIndex={i}
         montage={m}
+        maxWidth={maxMontageWidth}
+        maxHeight={maxMontageHeight}
       />
     ))}
     {collageEditHelper && <div

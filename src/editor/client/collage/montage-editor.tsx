@@ -33,7 +33,9 @@ export default function MontageEditor(props: MontageEditorProps) {
 
   const gridStyle = useMemo(() => {
     return {
-      display: "grid",
+      "position": "absolute",
+      "width": "100%",
+      "display": "grid",
       "grid-template-columns": "repeat(auto-fill, minmax(" + widestFrameWidthS + "px, 1fr))",
       "grid-gap": "0.5rem"
     }
@@ -63,6 +65,7 @@ return <div class="standard-margin standard-padding transparency-checkerboard-ba
         montage={montage}
         montageFrameIndex={iFrame}
         montageFrame={frame}
+        scale={scale}
       />
     </div>
   ))}

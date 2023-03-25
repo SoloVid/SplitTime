@@ -49,7 +49,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
 
   const hasClose = pointsArray.length > 0 && pointsArray[pointsArray.length - 1] === null
   const height = trace.height
-  
+
   const pointsArrayS = useMemo(() => pointsArray.map(
     p => p === null ? null : { x: p.x * scale, y: p.y * scale}
   ), [pointsArray, scale])
@@ -81,7 +81,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     return pointsArrayS.map((point, i) => {
       const op = i === 0 ? "M" : "L"
       if(point !== null) {
-        const y = point.y - trace.z
+        const y = point.y - (trace.z * scale)
         return `${op} ${point.x} ${y}`
       } else if(pointsArrayS.length > 0 && pointsArrayS[0] !== null) {
         // const y = pointsArrayS[0].y - trace.z
@@ -90,7 +90,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       }
       return ""
     }).join(" ")
-  }, [pointsArrayS, trace])
+  }, [pointsArrayS, trace, scale])
   const curvePathS = useMemo(() => {
     type BzCurveOptions = {
       /** true if closed polygon; false if dangling line termination */
@@ -176,7 +176,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       const point3D = {
         x: point.x,
         y: point.y,
-        z: trace.z + trace.height
+        z: (trace.z + trace.height) * scale
       }
       return point3D
     })
@@ -191,19 +191,19 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       }
       return pointsStr
     }, "")
-  }, [pointsArrayS, trace])
+  }, [pointsArrayS, trace, scale])
   const pointsStairsSlopeS = useMemo(() => {
-    const pointsArray2D = pointsArrayS
+    const pointsArray2D = pointsArray
     let pointsArray3D: (Coordinates3D)[] = []
     if(trace.type === TraceType.STAIRS && !!trace.direction && pointsArray2D.length >= 3) {
       const officialTrace = TraceSpec.fromRaw(trace)
-      pointsArray3D = calculateStairsPlane(officialTrace, pointsArray2D)
+      pointsArray3D = calculateStairsPlane(officialTrace, pointsArray2D).map(p => ({x: p.x * scale, y: p.y * scale, z: p.z * scale}))
     }
     return pointsArray3D.reduce(function(pointsStr, point) {
       const y = point.y - point.z
       return pointsStr + " " + point.x + "," + y
     }, "")
-  }, [pointsArrayS, trace])
+  }, [pointsArray, trace, scale])
 
   const otherLevelDisplayed = (trace.type === TraceType.POINTER ||
     trace.type === TraceType.TRANSPORT) && metadata.highlighted
@@ -280,8 +280,8 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       {/* Window to linked level FTODO: change to showing more than just background */}
       {otherLevelDisplayed && otherLevel && <pattern
         id={'img-' + uid}
-        x={-(trace.offsetX ?? 0)}
-        y={-(trace.offsetY ?? 0) + (trace.offsetZ ?? 0)}
+        x={-(trace.offsetX ?? 0) * scale}
+        y={(-(trace.offsetY ?? 0) + (trace.offsetZ ?? 0)) * scale}
         width={otherLevel.width + 1000}
         height={otherLevel.height + 1000}
         patternUnits="userSpaceOnUse"
@@ -296,8 +296,8 @@ export default function RenderedTrace(props: RenderedTraceProps) {
         <image
           x={otherLevel.backgroundOffsetX}
           y={otherLevel.backgroundOffsetY}
-          width={otherLevelImgDim.x}
-          height={otherLevelImgDim.y}
+          width={otherLevelImgDim.x * scale}
+          height={otherLevelImgDim.y * scale}
           preserveAspectRatio="none"
           href={otherLevelImgSrc}
         />

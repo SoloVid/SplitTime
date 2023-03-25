@@ -39,6 +39,7 @@ export default function CollageEditor(props: CollageEditorProps) {
 
   const $el = useRef<null | HTMLDivElement>(null)
   const $graphicalEditorsContainer = useRef<null | HTMLDivElement>(null)
+  const $showcaseContainer = useRef<HTMLDivElement>(document.createElement("div"))
 
   const [expandTraceOptions, setExpandTraceOptions] = useState(false)
 
@@ -199,17 +200,19 @@ export default function CollageEditor(props: CollageEditorProps) {
           resizeType="vertical"
           onResize={onMiddleResize}
         ></Resizer>
-        <div class="collage-showcase-container" style={makeStyleString({
+        <div class="collage-showcase-container" ref={$showcaseContainer} style={makeStyleString({
           "width": `${Math.floor(100 - middlePercent)}%`,
           "flex": `${Math.floor(100 - middlePercent)}`,
           "height": "100%",
           "overflow-x": "hidden",
           "overflow-y": "auto",
+          "position": "relative",
         })}>
           <CollageShowcase
             style="flex: 1;"
             collageEditHelper={sharedStuff}
             collageViewHelper={sharedStuff}
+            $container={$showcaseContainer.current}
           />
         </div>
       </div>
@@ -220,6 +223,7 @@ export default function CollageEditor(props: CollageEditorProps) {
       <div style={makeStyleString({
         "overflow": "auto",
         "height": `${Math.floor(100 - topPercent)}%`,
+        "position": "relative",
       })}>
         {!!sharedStuff.selectedMontage && sharedStuff.selectedMontageIndex !== null && <MontageEditor
           collageEditorShared={sharedStuff}

@@ -1,9 +1,9 @@
 import { makeCollageFromFile } from "engine/graphics/collage"
 import { TraceTypeType } from "engine/world/level/trace/trace-type"
-import { useEffect, useState } from "preact/hooks"
+import { useEffect, useRef, useState } from "preact/hooks"
 import { SharedStuffViewOnly as CollageSharedStuff } from "../collage/collage-editor-shared"
 import CollageShowcase from "../collage/collage-showcase"
-import { makeClassNames, onlyLeft } from "../preact-help"
+import { makeClassNames, makeStyleString, onlyLeft } from "../preact-help"
 import { GlobalEditorShared } from "../shared-types"
 import { traceOptions } from "../trace-options"
 import { SharedStuff } from "./level-editor-shared"
@@ -49,7 +49,7 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
       return makeCollageFromFile(collage, true)
     },
     globalStuff: {
-      scale: 1,
+      get scale() { return levelEditorShared.globalStuff.scale },
       server: levelEditorShared.globalStuff.server,
       userInputs: levelEditorShared.globalStuff.userInputs,
     },
@@ -67,6 +67,8 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
 
   const level = levelEditorShared.level
   const mode = levelEditorShared.mode
+
+  const $collageShowcaseContainer = useRef<HTMLDivElement>(document.createElement("div"))
 
   async function launchCollageFileBrowser(): Promise<void> {
     const filePath = await editorGlobalStuff.openFileSelect("")
@@ -126,10 +128,20 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
         readonly={true}
         className="block pointer"
       />
-      {collageViewHelper !== null && <CollageShowcase
-        collageViewHelper={collageViewHelper}
-        style="padding: 5px;"
-      />}
+      {collageViewHelper !== null && <div class="collage-showcase-container"
+        ref={$collageShowcaseContainer}
+        style={makeStyleString({
+          "position": "relative",
+          "height": `${window.innerHeight / 2}px`,
+          "overflow": "auto",
+        })}
+      >
+        <CollageShowcase
+          collageViewHelper={collageViewHelper}
+          style="padding: 5px;"
+          $container={$collageShowcaseContainer.current}
+        />
+      </div>}
     </div>}
   </div>
 }

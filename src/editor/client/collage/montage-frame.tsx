@@ -25,6 +25,7 @@ type MontageFrameProps = {
   montage: Immutable<FileMontage>
   montageFrameIndex: number
   montageFrame: Immutable<FileMontageFrame>
+  scale: number
 }
 
 export default function MontageFrame(props: MontageFrameProps) {
@@ -37,13 +38,14 @@ export default function MontageFrame(props: MontageFrameProps) {
     montage,
     montageFrameIndex,
     montageFrame,
+    scale,
   } = props
 
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
 
   const body = montage.body
   const editorInputs = collageViewHelper.globalStuff.userInputs
-  const scale = collageViewHelper.globalStuff.scale
+  // const scale = collageViewHelper.globalStuff.scale
 
   const bodyS: BodySpec = {
     width: body.width * scale,
@@ -326,6 +328,7 @@ export default function MontageFrame(props: MontageFrameProps) {
           montage={montage}
           montageFrame={montageFrame}
           // metadata={{}}
+          scale={scale}
           traceIndex={i}
           trace={trace}
           transform={svgTransform}
