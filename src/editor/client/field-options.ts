@@ -7,6 +7,7 @@ export interface FieldOptions {
   readonly title?: string
   readonly isFile?: boolean
   readonly fileBrowserRoot?: string
+  readonly fileBrowserFilter?: RegExp
 }
 
 export interface ObjectProperties<T extends unknown, Path extends readonly (string | number)[]> {

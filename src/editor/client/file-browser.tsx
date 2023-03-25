@@ -21,7 +21,9 @@ type FileBrowserProps = {
   readonly onFileSelected: (file: string) => void
   readonly rootDirectory: string
   readonly server: ServerLiaison
+  readonly filter?: RegExp
   readonly showNew?: boolean
+  readonly showUpload?: boolean
   readonly hideCancel?: boolean
   readonly showTextBox: boolean
   readonly title: string
@@ -35,7 +37,9 @@ export default function FileBrowser(props: FileBrowserProps) {
     onFileSelected,
     rootDirectory,
     server,
+    filter,
     showNew,
+    showUpload,
     hideCancel,
     showTextBox,
     title,
@@ -259,6 +263,27 @@ export default function FileBrowser(props: FileBrowserProps) {
     return (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear() + " " + ("" + d.getHours()).padStart(2, "0") + ":" + ("" + d.getMinutes()).padStart(2, "0")
   }
 
+  function getFileIcon(file: string) {
+    if (/\.lvl\.yml$/.test(file)) {
+      return "fa-map-marked-alt"
+    }
+    if (/\.clg\.yml$/.test(file)) {
+      return "fa-images"
+    }
+    return "fa-file"
+  }
+
+  function shouldShowFile(entry: FileEntry) {
+    if (entry.type === "directory") {
+      return true
+    }
+    const full = entry.parentPath + entry.name
+    if (!filter || filter.test(full)) {
+      return true
+    }
+    return false
+  }
+
   return <div className="file-browser">
     {showUploadBox && <Modal close={() => setShowUploadBox(false)}>
         <form ref={uploadFormRef} action={uploadEndpoint} method="post" encType="multipart/form-data" class="dropzone"></form>
@@ -266,9 +291,9 @@ export default function FileBrowser(props: FileBrowserProps) {
     <div className="tool-bar" style="display: flex; flex-direction: row; align-items: baseline; justify-content: space-between;">
       <h4>{ title }</h4>
       <div>
-        <a onClick={onlyLeft(() => setShowUploadBox(true), true)} title="Upload" aria-label="Upload file to this directory">
+        {showUpload && <a onClick={onlyLeft(() => setShowUploadBox(true), true)} title="Upload" aria-label="Upload file to this directory">
           <i className="fas fa-fw fa-upload pointer" aria-hidden="true"></i>
-        </a>
+        </a>}
         <a onClick={onlyLeft(refreshDirectory, true)} title="Refresh" aria-label="Refresh file list">
           <i className="fas fa-fw fa-sync pointer" aria-hidden="true"></i>
         </a>
@@ -303,7 +328,7 @@ export default function FileBrowser(props: FileBrowserProps) {
         <td></td>
         <td></td>
       </tr>}
-      {filesInDirectory.map((file) => (
+      {filesInDirectory.filter(shouldShowFile).map((file) => (
       <tr
         onClick={(e) => { if (e.button === 0) setSelectedFileName(file.name) }}
         onDblClick={(e) => { if (e.button === 0) selectFile(file.name); e.preventDefault() }}
@@ -311,7 +336,7 @@ export default function FileBrowser(props: FileBrowserProps) {
         className={makeClassNames({ pointer: true, active: file.name === selectedFileName })}
       >
         <td>
-          {file.type === 'file' && <i className="fas fa-fw fa-file" aria-hidden="true" title="file"></i>}
+          {file.type === 'file' && <i className={`fas fa-fw ${getFileIcon(file.name)}`} aria-hidden="true" title="file"></i>}
           {file.type === 'directory' && <i className="fas fa-fw fa-folder" aria-hidden="true" title="directory"></i>}
         </td>
         <td>{ file.name }</td>

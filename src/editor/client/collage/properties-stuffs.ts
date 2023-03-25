@@ -13,6 +13,7 @@ import { MontageWrapper } from "./montage-wrapper"
 const collageFieldObject = {
   image: {
     isFile: true,
+    fileBrowserFilter: /\.clg\.yml$/,
   },
   defaultMontageId: {}
 } as const

@@ -43,7 +43,7 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
       "width": "100%",
       "display": "grid",
       "grid-template-columns": "repeat(auto-fill, minmax(" + (cellWidth) + "px, 1fr))",
-      "grid-gap": "0.5rem",
+      "grid-gap": "4px",
       "align-items": "center",
       "justify-items": "center"
     }

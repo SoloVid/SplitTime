@@ -83,6 +83,7 @@ export default function Editor({
   const [fileBrowserStartDirectory, setFileBrowserStartDirectory] = useState("")
   const [fileBrowserStartFileName, setFileBrowserStartFileName] = useState("")
   const [fileBrowserTitle, setFileBrowserTitle] = useState("Select File")
+  const [fileBrowserFilter, setFileBrowserFilter] = useState<undefined | RegExp>(undefined)
   const [showFileBrowser, setShowFileBrowser] = useState(false)
   const [mouse, setMouse] = useState({
     x: 0,
@@ -287,6 +288,7 @@ export default function Editor({
   }
 
   function openFileSave(): void {
+    const filter = level !== null ? /\.lvl\.yml$/ : (collage !== null ? /\.clg\.yml$/ : undefined)
     const lastSlash = filePath.lastIndexOf("/")
     const preloadDirectory = filePath.substring(0, lastSlash)
     const preloadFileName = filePath.substring(lastSlash + 1)
@@ -299,11 +301,12 @@ export default function Editor({
     setFileBrowserRoot("")
     setFileBrowserStartDirectory(preloadDirectory)
     setFileBrowserShowTextBox(true)
+    setFileBrowserFilter(filter)
     setFileBrowserStartFileName(preloadFileName)
     setShowFileBrowser(true)
   }
 
-  function openFileSelect(rootDirectory: string): PromiseLike<string> {
+  function openFileSelect(rootDirectory: string, filter?: RegExp): PromiseLike<string> {
     const pledge = new Pledge()
     setFileBrowserReturnListener({f: newFilePath => pledge.resolve(newFilePath)})
     setFileBrowserTitle("Select File")
@@ -311,6 +314,7 @@ export default function Editor({
     setFileBrowserRoot(rootDirectory)
     setFileBrowserStartDirectory(rootDirectory)
     setFileBrowserShowTextBox(false)
+    setFileBrowserFilter(filter)
     setShowFileBrowser(true)
     return pledge
   }
@@ -377,6 +381,8 @@ export default function Editor({
               initialFileName={fileBrowserStartFileName}
               rootDirectory={fileBrowserRoot}
               server={server}
+              filter={fileBrowserFilter}
+              showUpload={false}
               showTextBox={fileBrowserShowTextBox}
               title={fileBrowserTitle}
               onFileSelected={onServerFileSelected}

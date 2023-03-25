@@ -22,7 +22,7 @@ export interface GlobalEditorShared {
   readonly server: ServerLiaison
   /** Note: Mouse values NOT scaled by zoom. */
   readonly userInputs: UserInputs
-  openFileSelect(rootDirectory: string): PromiseLike<string>
+  openFileSelect(rootDirectory: string, filter?: RegExp): PromiseLike<string>
   setFollowers(newFollowers: Followable[]): void
   setOnDelete(callback: () => void): void
   setOnSettings(callback: () => void): void

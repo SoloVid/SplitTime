@@ -129,7 +129,7 @@ function SingleProperty(props: SinglePropertyProps) {
 
   async function launchFileBrowser(): Promise<void> {
     const root = fieldOptions.fileBrowserRoot || ""
-    const filePath = await editorGlobalStuff.openFileSelect(root)
+    const filePath = await editorGlobalStuff.openFileSelect(root, fieldOptions.fileBrowserFilter)
     const prefixRegex = new RegExp("^/?" + root + "/?")
     setValue(filePath.replace(prefixRegex, ""))
   }
