@@ -14,7 +14,7 @@ export class Cache<T> {
     private setCacheObject: ImmutableSetter<UnderlyingCacheObject<T>>
 
     constructor(
-        private readonly getCallback: (id: string) => (T | PromiseLike<T>),
+        private readonly getCallback: (id: string, previous: Immutable<T> | null) => (Immutable<T> | PromiseLike<Immutable<T>>),
         cacheObject: Immutable<UnderlyingCacheObject<T>>,
         setCacheObject: ImmutableSetter<UnderlyingCacheObject<T>>,
         private readonly cacheLife: number = DEFAULT_CACHE_LIFE,
@@ -76,11 +76,13 @@ export class Cache<T> {
     async load(id: string): Promise<void> {
         const cacheEntry = this.cacheObject[id]
         try {
-            const data = await this.getCallback(id)
-            this.updateCacheEntry(id, {
-                data: data as Immutable<T>,
-                failed: false
-            })
+            const data = await this.getCallback(id, cacheEntry.data)
+            if (data !== cacheEntry.data) {
+                this.updateCacheEntry(id, {
+                    data: data,
+                    failed: false
+                })
+            }
         } catch (e: unknown) {
             warn("Failed to load item \"" + cacheEntry + "\" for cache", e)
             this.updateCacheEntry(id, {failed: true})

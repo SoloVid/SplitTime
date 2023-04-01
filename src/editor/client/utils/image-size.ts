@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 
 type State = {
   imgSrc: string | null
@@ -34,11 +34,13 @@ export function useImageSize(imgSrc: string | null) {
 
 export function useScaledImageSize(imgSrc: string | null, scale: number) {
   const imageSize = useImageSize(imgSrc)
-  if (imageSize === null) {
-    return null
-  }
-  return {
-    width: Math.round(imageSize.width * scale),
-    height: Math.round(imageSize.height * scale),
-  }
+  return useMemo(() => {
+    if (imageSize === null) {
+      return null
+    }
+    return {
+      width: Math.round(imageSize.width * scale),
+      height: Math.round(imageSize.height * scale),
+    }
+  }, [imageSize, scale])
 }

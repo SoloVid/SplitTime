@@ -1,12 +1,12 @@
 import { Collage as FileCollage } from "engine/file/collage"
 import { Collage, makeCollageFromFile } from "engine/graphics/collage"
-import { CanvasRequirements } from "engine/world/body/render/drawable"
-import { ServerLiaison } from "../server-liaison"
-import { Cache, UnderlyingCacheObject } from "../cache"
 import { Immutable } from "engine/utils/immutable"
 import { GraphDrawable } from "engine/world/body/body-rendering-graph"
-import { ImmutableSetter } from "../preact-help"
+import { CanvasRequirements } from "engine/world/body/render/drawable"
 import { useMemo, useState } from "preact/hooks"
+import { Cache, UnderlyingCacheObject } from "../cache"
+import { ImmutableSetter } from "../preact-help"
+import { ServerLiaison } from "../server-liaison"
 
 export function useCollageManager(server: ServerLiaison) {
   const [cacheObject, setCacheObject] = useState<Immutable<UnderlyingCacheObject<CollageInfo>>>({})
@@ -22,12 +22,15 @@ export class CollageManager {
     cacheObject: Immutable<UnderlyingCacheObject<CollageInfo>>,
     setCacheObject: ImmutableSetter<UnderlyingCacheObject<CollageInfo>>,
   ) {
-    this.cache = new Cache(async collageId => {
+    this.cache = new Cache(async (collageId, previous) => {
       const c = await this.server.api.collageJson.fetch(this.server.withProject({ collageId }))
+      if (previous !== null && JSON.stringify(c) === JSON.stringify(previous)) {
+        return previous
+      }
       return {
         collageFile: c,
         realCollage: makeCollageFromFile(c, true)
-      }
+      } as const
     }, cacheObject, setCacheObject)
     this.cache.cacheLifeRandomFactor = 5
   }

@@ -17,10 +17,14 @@ export function useProjectImages(server: ServerLiaison) {
     const [cacheObject, setCacheObject] = useState<UnderlyingCacheObject<string>>({})
     const imageSrcCache = useMemo(() => {
         const cache = new Cache(
-            async fileName => {
+            async (fileName, previous) => {
                 try {
                     const info = await server.api.imageInfo.fetch(server.withProject({ imageId: fileName }))
-                    return info.webPath + "?" + info.timeModifiedString
+                    const newValue = info.webPath + "?" + info.timeModifiedString
+                    if (newValue === previous) {
+                        return previous
+                    }
+                    return newValue
                 } catch (e: unknown) {
                     return getPlaceholderImage()
                 }

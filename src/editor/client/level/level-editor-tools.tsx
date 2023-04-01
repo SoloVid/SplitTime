@@ -1,6 +1,6 @@
-import { makeCollageFromFile } from "engine/graphics/collage"
+import { Collage, makeCollageFromFile } from "engine/graphics/collage"
 import { TraceTypeType } from "engine/world/level/trace/trace-type"
-import { useEffect, useRef, useState } from "preact/hooks"
+import { useEffect, useMemo, useRef, useState } from "preact/hooks"
 import { SharedStuffViewOnly as CollageSharedStuff } from "../collage/collage-editor-shared"
 import CollageShowcase from "../collage/collage-showcase"
 import { makeClassNames, makeStyleString, onlyLeft } from "../preact-help"
@@ -8,6 +8,7 @@ import { GlobalEditorShared } from "../shared-types"
 import { traceOptions } from "../trace-options"
 import { SharedStuff } from "./level-editor-shared"
 import { Mode, POSITION_ICON, PROP_ICON, TRACE_ICON } from "./shared-types"
+import { Immutable } from "engine/utils/immutable"
 
 type LevelEditorToolsProps = {
   editorGlobalStuff: GlobalEditorShared
@@ -17,8 +18,17 @@ type LevelEditorToolsProps = {
 function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuff | null {
   const [montageIndex, setMontageIndexInternal] = useState<number | null>(null)
 
+  const collageId = levelEditorShared.selectedCollageId
   const collage = levelEditorShared.selectedCollage
-  if (collage === null) {
+  if (collageId === null || collage === null) {
+    return null
+  }
+
+  const realCollage = useMemo<Immutable<Collage> | null>(() => {
+    return levelEditorShared.collageManager.getRealCollage(collageId)
+  }, [collageId, levelEditorShared.collageManager])
+
+  if (realCollage === null) {
     return null
   }
 
@@ -52,9 +62,7 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
       }
       return collage.montages[montageIndex]
     },
-    get realCollage() {
-      return makeCollageFromFile(collage, true)
-    },
+    realCollage,
     globalStuff: {
       get scale() { return levelEditorShared.globalStuff.scale },
       server: levelEditorShared.globalStuff.server,
