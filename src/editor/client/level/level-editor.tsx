@@ -12,6 +12,7 @@ import LevelEditorTools from "./level-editor-tools"
 import LevelGraphicalEditor from "./level-graphical-editor"
 import LevelTree from "./level-tree"
 import { getObjectProperties } from "./properties-stuffs"
+import { useSetIntervalWhenActive } from "../utils/use-set-interval-when-active"
 
 type LevelEditorProps = {
   id: string
@@ -71,20 +72,17 @@ export default function LevelEditor(props: LevelEditorProps) {
   function hiddenIndexes(list: readonly { metadata: { displayed: boolean }}[]) {
     return list.map((e, i) => [e, i] as const).filter(([e, i]) => !e.metadata.displayed).map(([e, i]) => i)
   }
-  useEffect(() => {
-    const handle = setInterval(() => {
-      const collapsedGroups = editorLevel.groups.filter(g => g.metadata.collapsed).map(g => g.obj.id)
-      const hidden = {
-        traces: hiddenIndexes(editorLevel.traces),
-        props: hiddenIndexes(editorLevel.props),
-        positions: hiddenIndexes(editorLevel.positions),
-      }
-      if (JSON.stringify(collapsedGroups) !== JSON.stringify(levelEditorPrefs.collapsedGroups) || JSON.stringify(hidden) !== JSON.stringify(levelEditorPrefs.hidden)) {
-        setLevelEditorPrefs((before) => ({...before, collapsedGroups, hidden}))
-      }
-    }, 1000)
-    return () => clearInterval(handle)
-  }, [editorLevel])
+  useSetIntervalWhenActive(() => {
+    const collapsedGroups = editorLevel.groups.filter(g => g.metadata.collapsed).map(g => g.obj.id)
+    const hidden = {
+      traces: hiddenIndexes(editorLevel.traces),
+      props: hiddenIndexes(editorLevel.props),
+      positions: hiddenIndexes(editorLevel.positions),
+    }
+    if (JSON.stringify(collapsedGroups) !== JSON.stringify(levelEditorPrefs.collapsedGroups) || JSON.stringify(hidden) !== JSON.stringify(levelEditorPrefs.hidden)) {
+      setLevelEditorPrefs((before) => ({...before, collapsedGroups, hidden}))
+    }
+  }, 100, [editorLevel])
 
   useEffect(() => {
     editorGlobalStuff.setOnDelete(() => {

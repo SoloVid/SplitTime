@@ -1,7 +1,7 @@
 import { BodySpec } from "engine/file/collage"
 import { Collage } from "engine/graphics/collage"
 import { Frame } from "engine/graphics/frame"
-import { makeMontage } from "engine/graphics/montage"
+import { Montage, frameMissingPlaceholder, makeMontage } from "engine/graphics/montage"
 import { Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
@@ -30,11 +30,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   } = props
   const scale = levelEditorShared.globalStuff.scale
   const p = entity.obj
-  const metadata = entity.metadata
   const time = useContext(Time)
-  const level = levelEditorShared.level
-  const updateP = makeImmutableObjectSetterUpdater(entity.setObj)
-  const updateMetadata = makeImmutableObjectSetterUpdater(entity.setMetadata)
 
   const collage = useMemo<Immutable<Collage> | typeof NOT_READY | typeof NOT_AVAILABLE>(() => {
     if (p.collage === "" || p.montage === "") {
@@ -72,12 +68,60 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
       return tempMontage
     }
   }, [collage, p.montage, p.dir])
-  
-  const body = montage.bodySpec
 
-  const frame = useMemo(() => {
-    return montage.getFrameAt(time)
+  const frameIndex = useMemo(() => {
+    return montage.getFrameIndexAt(time)
   }, [montage, time])
+
+  const projectImages = useContext(imageContext)
+  const imgSrc = useMemo(() => {
+    const c = collage
+    if (c === NOT_READY) {
+      return ""
+    }
+    if (c === NOT_AVAILABLE) {
+      return getPlaceholderImage()
+    }
+    return projectImages.imgSrc(c.image)
+  }, [collage, projectImages])
+  const scaledSize = useScaledImageSize(imgSrc, scale)
+
+  const frameElements = useMemo(() => {
+    const coalescedFrames = montage.frames.length > 0 ? montage.frames : [frameMissingPlaceholder]
+    return coalescedFrames.map(f => <RenderedPropositionAtFrame
+      levelEditorShared={levelEditorShared}
+      entity={entity}
+      montage={montage}
+      frame={f}
+      imgSrc={imgSrc}
+      scaledSize={scaledSize}
+    ></RenderedPropositionAtFrame>)
+    }, [montage, levelEditorShared, entity, imgSrc, scaledSize])
+
+  return frameElements[frameIndex ?? 0]
+}
+
+type MoreProps = {
+  montage: Montage
+  frame: Frame
+  imgSrc: string
+  scaledSize: ReturnType<typeof useScaledImageSize>
+}
+
+function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps) {
+  const {
+    levelEditorShared,
+    entity,
+    montage,
+    frame,
+    imgSrc,
+    scaledSize,
+  } = props
+  const scale = levelEditorShared.globalStuff.scale
+  const p = entity.obj
+  const metadata = entity.metadata
+  const level = levelEditorShared.level
+  const body = montage.bodySpec
 
   const framePosition = useMemo(() => {
     const box = frame.getTargetBox(body)
@@ -100,28 +144,16 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
     })
   }, [p, metadata, framePosition, frame, level, levelEditorShared.activeGroup, scale])
 
-  const projectImages = useContext(imageContext)
-  const imgSrc = useMemo(() => {
-    const c = collage
-    if (c === NOT_READY) {
-      return ""
-    }
-    if (c === NOT_AVAILABLE) {
-      return getPlaceholderImage()
-    }
-    return projectImages.imgSrc(c.image)
-  }, [collage, projectImages])
-  const scaledSize = useScaledImageSize(imgSrc, scale)
-
-  const imgStyleString = scaledSize ? makeStyleString({
+  const imgStyleString = useMemo(() => scaledSize ? makeStyleString({
     position: "absolute",
     left: `${-frame.box.x * scale}px`,
     top: `${-frame.box.y * scale}px`,
     width: scaledSize.width + "px",
     height: scaledSize.height + "px",
-  }) : { display: "none" }
+  }) : { display: "none" }, [scaledSize, frame.box, scale])
 
   function toggleHighlight(highlight: boolean): void {
+    const updateMetadata = makeImmutableObjectSetterUpdater(entity.setMetadata)
     if(levelEditorShared.shouldDragBePrevented()) {
       updateMetadata({highlighted: false})
       return
@@ -130,6 +162,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   }
 
   function track(): void {
+    const updateP = makeImmutableObjectSetterUpdater(entity.setObj)
     if(levelEditorShared.shouldDragBePrevented()) {
       return
     }
@@ -154,7 +187,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   return <>{metadata.displayed && <div
     className={`draggable ${entity.type}`}
     onDblClick={preventDefault}
-    onMouseDown={onlyLeft(track)}
+    onMouseDown={onlyLeft(track, true)}
     onMouseMove={() => toggleHighlight(true)}
     onMouseLeave={() => toggleHighlight(false)}
     style={containerMaskStyleString}

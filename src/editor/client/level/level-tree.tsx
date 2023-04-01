@@ -1,6 +1,7 @@
 import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
 import { SelectInput } from "../input"
 import { onlyLeft } from "../preact-help"
+import { levelEditorPreferences } from "../preferences"
 import { SharedStuff } from "./level-editor-shared"
 import MenuGroup from "./menu-group"
 
@@ -14,6 +15,7 @@ export default function LevelTree(props: LevelTreeProps) {
   } = props
 
   const level = levelEditorShared.level
+  const prefs = levelEditorPreferences.use(levelEditorShared.id)
 
   function createGroup(): void {
     let defaultHeight = DEFAULT_GROUP_HEIGHT

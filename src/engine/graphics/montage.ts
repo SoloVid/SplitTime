@@ -46,19 +46,28 @@ export function makeMontage(
             }, 0);
         },
 
-        getFrameAt(timeThrough: game_seconds): Frame {
+        getFrameIndexAt(timeThrough: game_seconds): int | null {
             const timeWithin = timeThrough % this.getDuration();
             let countingThrough = 0;
-            for (const frame of this.frames) {
+            for (let i = 0; i < this.frames.length; i++) {
+                const frame = this.frames[i]
                 countingThrough += frame.duration;
                 if (countingThrough > timeWithin) {
-                    return frame;
+                    return i;
                 }
             }
             if (!options.suppressErrors) {
                 error("Frame not found (impossible unless 0 frames?)");
             }
-            return frameMissingPlaceholder
+            return null
+        },
+
+        getFrameAt(timeThrough: game_seconds): Frame {
+            const frameIndex = this.getFrameIndexAt(timeThrough)
+            if (frameIndex === null) {
+                return frameMissingPlaceholder
+            }
+            return this.frames[frameIndex]
         },
 
         /**
@@ -77,7 +86,7 @@ export function makeMontage(
  */
 export type Montage = Readonly<ReturnType<typeof makeMontage>>
 
-const frameMissingPlaceholder = new Frame(
+export const frameMissingPlaceholder = new Frame(
     Rect.make(0, 0, 32, 32),
     { x: 0, y: 0 },
     1.0,

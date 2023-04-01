@@ -7,6 +7,7 @@ import { GridSnapMover } from "../grid-snap-mover"
 import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
 import { EditorTraceEntity } from "./extended-level-format"
 import { SharedStuff } from "./level-editor-shared"
+import { useJsonableMemo } from "../utils/use-jsonable-memo"
 
 type RenderedLevelTraceProps = {
   levelEditorShared: SharedStuff
@@ -33,7 +34,7 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     return inGroup(level, activeGroup?.obj.id ?? "", trace.obj)
   }, [level, activeGroup, trace])
 
-  const pointsArray = useMemo(() => {
+  const pointsArray = useJsonableMemo(() => {
     return safeExtractTraceArray(level, trace.obj.vertices)
   }, [level, trace.obj.vertices])
 
