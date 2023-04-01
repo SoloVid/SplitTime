@@ -1,3 +1,6 @@
+import { error } from "engine/utils/logger";
+import { getErrorPlaceholderImageUrl } from "./placeholder-image";
+
 export type ImageRef = {
     load: () => Promise<HTMLImageElement>
     get: () => HTMLImageElement
@@ -19,14 +22,23 @@ export class Images {
         }
         var promise = new Promise<HTMLImageElement>(resolve => {
             function onLoad() {
+            }
+            const loadingImage = new Image();
+            loadingImage.addEventListener("load", () => {
                 if (loadingImage.complete) {
                     loadingImage.removeEventListener("load", onLoad);
                     resolve(loadingImage);
                 }
+            });
+            loadingImage.addEventListener("error", (e) => {
+                error(`Error loading image ${relativePath}:`, e)
+                loadingImage.src = getErrorPlaceholderImageUrl("Error loading image")
+            })
+            if (/^[a-z]+:/.test(relativePath)) {
+                loadingImage.src = relativePath
+            } else {
+                loadingImage.src = this.root + "/" + relativePath;
             }
-            const loadingImage = new Image();
-            loadingImage.addEventListener("load", onLoad);
-            loadingImage.src = this.root + "/" + relativePath;
             this.map[relativePath] = loadingImage;
             if (alias) {
                 this.map[alias] = loadingImage;

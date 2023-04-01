@@ -1,4 +1,4 @@
-import { RegisterCallbacks } from "engine/utils/register-callbacks";
+import { CopingMechanism, RegisterCallbacks } from "engine/utils/register-callbacks";
 
 export class Bank {
     private onNewCallbacks: RegisterCallbacks = new RegisterCallbacks();
@@ -16,11 +16,10 @@ export class Bank {
     onLoad(callback: () => void) {
         this.onLoadCallbacks.register(callback);
     }
-    loadNew(): Promise<void> {
+    async loadNew(): Promise<void> {
         // TODO: implement
-        this.onNewCallbacks.run();
-        this.onLoadCallbacks.run();
-        return Promise.resolve();
+        this.onNewCallbacks.run(undefined, CopingMechanism.LOG);
+        this.onLoadCallbacks.run(undefined, CopingMechanism.LOG);
     }
     load(fileName: string) {
         // TODO: implement

@@ -1,7 +1,7 @@
 import { BodySpec } from "engine/file/collage"
 import { Collage } from "engine/graphics/collage"
 import { Frame } from "engine/graphics/frame"
-import { Montage } from "engine/graphics/montage"
+import { makeMontage } from "engine/graphics/montage"
 import { Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
@@ -59,7 +59,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
       depth: 32,
       height: 32
     }
-    const tempMontage = new Montage("", null, [tempFrame], tempBodySpec, [], "", 0)
+    const tempMontage = makeMontage("", null, [tempFrame], tempBodySpec, [], "", 0)
     if (collage === NOT_READY || collage == NOT_AVAILABLE) {
       return tempMontage
     }

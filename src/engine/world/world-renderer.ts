@@ -156,9 +156,10 @@ export class WorldRenderer {
     }
     private drawBackground(drawingBoard: DrawingBoard, screen: Coordinates2D, currentLevel: Level): void {
         const backShift = this.getBackShift(screen);
-        if (currentLevel.getBackgroundImage()) {
+        const back = currentLevel.getBackgroundImage()
+        if (back) {
             drawingBoard.drawImage(
-                currentLevel.getBackgroundImage(),
+                back,
                 {
                     x: backShift.x,
                     y: backShift.y,

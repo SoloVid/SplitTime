@@ -78,11 +78,8 @@ export class Level {
         }
         return this._levelTraces;
     }
-    getBackgroundImage(): string {
-        if (!this.background) {
-            throw new Error("Background image for level " + this.id + " is not set");
-        }
-        return this.background;
+    getBackgroundImage(): string | null {
+        return this.background ?? null;
     }
     getDebugTraceCanvas(): Canvas {
         return this.getLevelTraces().getDebugTraceCanvas();

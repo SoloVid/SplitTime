@@ -1,7 +1,7 @@
 export { Assets } from "engine/assets/assets"
 export { load } from "engine/assets/load"
 export { GameLoop } from "engine/game-loop"
-export { Collage } from "engine/graphics/collage"
+export { type Collage } from "engine/graphics/collage"
 export { exposeLaunchPoint } from "engine/launch"
 export { type direction_t } from "engine/math/direction"
 export { Perspective } from "engine/perspective"

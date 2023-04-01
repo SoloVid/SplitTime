@@ -102,7 +102,7 @@ export class Sprite implements Drawable {
             //Only update on frame tick
             while (this._time >= this._timeFrameStarted + currentFrameDuration) {
                 this._timeFrameStarted = this._timeFrameStarted + currentFrameDuration;
-                this.frame = (this.frame + 1) % montage.frames.length;
+                this.frame = montage.frames.length === 0 ? 0 : (this.frame + 1) % montage.frames.length;
                 currentFrameDuration = this.getCurrentFrame().duration;
             }
         }

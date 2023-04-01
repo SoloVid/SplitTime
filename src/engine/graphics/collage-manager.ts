@@ -1,5 +1,7 @@
 import { CompiledGameData } from "engine/assets/load";
-import { Collage, makeCollageFromFile } from "./collage";
+import { getErrorPlaceholderImageUrl } from "engine/assets/placeholder-image";
+import { error } from "engine/utils/logger";
+import { Collage, makeCollage, makeCollageFromFile } from "./collage";
 export class CollageManager {
     private readonly collageMap: {
         [collageFilePath: string]: Collage;
@@ -13,8 +15,16 @@ export class CollageManager {
     }
     get(collageId: string): Readonly<Collage> {
         if (!(collageId in this.collageMap)) {
-            throw new Error("Collage " + collageId + " not found");
+            error("Collage " + collageId + " not found");
+            return collageMissingPlaceholder
         }
         return this.collageMap[collageId];
     }
 }
+
+const collageMissingPlaceholder = makeCollage(
+    getErrorPlaceholderImageUrl("collage missing"),
+    [],
+    "",
+    { allowErrors: true, suppressErrors: true, },
+)

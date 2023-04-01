@@ -148,6 +148,9 @@ export class LevelLoader {
         }
     }
     async loadAssets(world: World, ASSETS: Assets): Promise<void> {
+        if (!this.level.background) {
+            return
+        }
         await ASSETS.images.load(this.level.background);
     }
     async loadForPlay(world: World, ASSETS: Assets): Promise<void> {
