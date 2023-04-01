@@ -71,9 +71,9 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
   const $collageShowcaseContainer = useRef<HTMLDivElement>(document.createElement("div"))
 
   async function launchCollageFileBrowser(): Promise<void> {
-    const filePath = await editorGlobalStuff.openFileSelect("")
-    const prefixRegex = /^\//
     const suffixRegex = /\.clg\.yml$/
+    const filePath = await editorGlobalStuff.openFileSelect("", suffixRegex)
+    const prefixRegex = /^\//
     const collageId = filePath.replace(prefixRegex, "").replace(suffixRegex, "")
     levelEditorShared.selectCollage(collageId)
   }
