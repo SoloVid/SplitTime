@@ -1,8 +1,8 @@
 import { debug } from "engine/utils/logger"
 import { useState } from "preact/hooks"
 import { CheckboxInput } from "../input"
-import { makeClassNames, onlyLeft, preventDefault } from "../preact-help"
-import { EditorEntity, EditorGroupEntity, EditorPositionEntity, EditorPropEntity, EditorTraceEntity } from "./extended-level-format"
+import { ImmutableSetter, makeClassNames, onlyLeft, preventDefault } from "../preact-help"
+import { EditorEntity, EditorGroupEntity, EditorPositionEntity, EditorPropEntity, EditorTraceEntity, GraphicalEditorEntity } from "./extended-level-format"
 import { GroupDisplayHelper } from "./group-display-helper"
 import { SharedStuff } from "./level-editor-shared"
 import { POSITION_ICON, PROP_ICON, TRACE_ICON } from "./shared-types"
@@ -19,7 +19,12 @@ export default function MenuGroup({
 }: MenuGroupProps) {
   const level = levelEditorShared.level
 
-  const [collapsed, setCollapsed] = useState(true)
+  const collapsed = group?.metadata.collapsed ?? true
+  const setCollapsed: ImmutableSetter<boolean> = (modify) => {
+    if (group) {
+      group.setMetadata((before) => ({...before, collapsed: modify(before.collapsed)}))
+    }
+  }
   const displayHelper = new GroupDisplayHelper(
     level,
     group
@@ -59,7 +64,7 @@ export default function MenuGroup({
     editEntity: (entity: T) => void
     titlePrefix: string
   }
-  function makeEntityTreeItem<T extends EditorEntity>(o: EntityTreeItemOptions<T>) {
+  function makeEntityTreeItem<T extends GraphicalEditorEntity>(o: EntityTreeItemOptions<T>) {
     return <div className={o.className}
       onMouseEnter={() => o.entity.setMetadata(before => ({...before, highlighted: true}))}
       onMouseLeave={() => o.entity.setMetadata(before => ({...before, highlighted: false}))}
@@ -84,11 +89,11 @@ export default function MenuGroup({
         {collapsed && <i className="fas fa-caret-right"></i>}
         {!collapsed && <i className="fas fa-caret-down"></i>}
       </span>
-      <input type="checkbox"
+      {displayHelper.realChildCount > 0 && <input type="checkbox"
         checked={displayHelper.allDisplayed}
         onClick={onlyLeft(toggleAllDisplayed)}
-      />
-      <span className={makeClassNames({ highlighted: (levelEditorShared.activeGroup ?? null) === (group ?? null) })}>
+      />}
+      <span className={makeClassNames({ highlighted: (levelEditorShared.activeGroup ?? null) === group })}>
         {!!group && <>
           <strong onClick={edit} className="pointer">
             <span>{group.obj.id || "Untitled Group"}</span>

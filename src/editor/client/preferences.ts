@@ -1,6 +1,7 @@
 import { Immutable } from "engine/utils/immutable"
 import { int } from "globals"
 import { useEffect, useState } from "preact/hooks"
+import { Mode } from "./level/shared-types"
 import { ImmutableSetter } from "./preact-help"
 
 const defaultGlobalId = "DEFAULT"
@@ -34,10 +35,14 @@ function makePreferences<T extends object>(prefix: string, defaultPreferences: I
   }
 
   function usePreferences(id: string | null): [Immutable<T>, ImmutableSetter<T>] {
-    const [prefsInMemory, setPrefsInMemory] = useState(() => defaultPreferences)
+    const [prefsInMemory, setPrefsInMemory] = useState(() => getPreferences(id))
+    const [storedId, setStoredId] = useState(id)
     useEffect(() => {
-      setPrefsInMemory(getPreferences(id))
-    }, [id])
+      if (id !== storedId) {
+        setPrefsInMemory(getPreferences(id))
+        setStoredId(id)
+      }
+    }, [id, storedId])
     const setPrefs: ImmutableSetter<T> = (transform) => {
       setPrefsInMemory((before) => {
         const after = transform(before)
@@ -79,7 +84,33 @@ export const collageEditorPreferences = makePreferences<{
 export const levelEditorPreferences = makePreferences<{
   readonly leftMenuWidth: number
   readonly rightMenuWidth: number
+  readonly mode: Mode
+  readonly collageSelected: string | null
+  readonly montageSelected: string | null
+  readonly montageDirectionSelected: string | null
+  readonly scroll: { x: number, y: number }
+  readonly activeGroup: string | null
+  readonly collapsedGroups: readonly string[]
+  readonly hidden: {
+    readonly traces: readonly number[]
+    readonly props: readonly number[]
+    readonly positions: readonly number[]
+  }
 }>("editor-prefs:level:", {
   leftMenuWidth: 128,
   rightMenuWidth: 128,
+  mode: "trace",
+  collageSelected: null,
+  montageSelected: null,
+  montageDirectionSelected: null,
+  scroll: { x: 0, y: 0 },
+  activeGroup: null,
+  collapsedGroups: [],
+  hidden: {
+    traces: [],
+    props: [],
+    positions: [],
+  },
 })
+
+export type LevelEditorPreferences = ReturnType<(typeof levelEditorPreferences)["use"]>[0]

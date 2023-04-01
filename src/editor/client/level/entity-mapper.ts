@@ -1,13 +1,16 @@
 import { Immutable } from "engine/utils/immutable"
 import { ImmutableSetter, TaggedImmutableSetter } from "../preact-help"
+import { LevelEditorPreferences } from "../preferences"
 import { EditorMetadata } from "../shared-types"
-import { EditorEntity, EditorLevel } from "./extended-level-format"
+import { EditorEntity, EditorGroupEntity, EditorLevel, GraphicalEditorEntity } from "./extended-level-format"
+import { FileGroup } from "../file-types"
+import { generateUID } from "engine/utils/misc"
 
 type ImmutableTransform<T> = (before: Immutable<T>) => Immutable<T>
 
 export function makeEditorEntitySetMethods<T extends EditorEntity>(
   setLevel: TaggedImmutableSetter<EditorLevel>,
-  metadata: EditorMetadata,
+  metadata: T["metadata"],
   type: T["type"],
 ): Pick<T, "setObj" | "setMetadata"> {
   const key: T["keyInLevel"] = `${type}s`
@@ -40,9 +43,9 @@ export function makeEditorEntitySetMethods<T extends EditorEntity>(
         }
       }, tag)
     }),
-    setMetadata: ((transform: ImmutableTransform<EditorMetadata>, tag?: string) => {
+    setMetadata: ((transform: ImmutableTransform<T["metadata"]>, tag?: string) => {
       updateEntity((entityBefore) => {
-        const metadataAfter = transform(entityBefore.metadata)
+        const metadataAfter = transform(entityBefore.metadata as Immutable<T["metadata"]>)
         return {
           ...entityBefore,
           metadata: metadataAfter,
@@ -53,12 +56,41 @@ export function makeEditorEntitySetMethods<T extends EditorEntity>(
   return methods as unknown as Pick<T, "setObj" | "setMetadata">
 }
 
-export function makeEditorEntityFromFileObject<T extends EditorEntity>(
+export function makeEditorGroupEntityFromFileObject(
+  setLevel: TaggedImmutableSetter<EditorLevel>,
+  e: Immutable<FileGroup>,
+  prefs?: LevelEditorPreferences,
+): EditorGroupEntity {
+  const metadataInitial = {
+    editorId: generateUID(),
+    collapsed: prefs ? prefs.collapsedGroups.includes(e.id) : true,
+  }
+  const setMethods = makeEditorEntitySetMethods(setLevel, metadataInitial, "group")
+  const entity = {
+    type: "group",
+    keyInLevel: `groups`,
+    obj: e,
+    metadata: metadataInitial,
+    ...setMethods,
+  }
+  return entity as unknown as EditorGroupEntity
+}
+
+type ExtraEntityMapperOptions = {
+  index?: number
+  prefs?: LevelEditorPreferences
+}
+
+export function makeEditorEntityFromFileObject<T extends GraphicalEditorEntity>(
   setLevel: TaggedImmutableSetter<EditorLevel>,
   e: T["obj"],
   type: T["type"],
+  { index, prefs }: ExtraEntityMapperOptions = {},
 ): T {
-  const metadataInitial = new EditorMetadata()
+  const metadataInitial = {
+    ...new EditorMetadata(),
+    displayed: (prefs && typeof index === "number") ? !prefs.hidden[`${type}s`].includes(index) : true,
+  }
   const setMethods = makeEditorEntitySetMethods(setLevel, metadataInitial, type)
   const entity = {
     type: type,

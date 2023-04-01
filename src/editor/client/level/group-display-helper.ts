@@ -13,6 +13,10 @@ export class GroupDisplayHelper {
     return this.group?.obj.id || ""
   }
 
+  get realChildCount(): number {
+    return this.memoized("realChildCount", () => this.traces.length + this.props.length + this.positions.length + this.subGroupHelpers.reduce((soFar, sgh) => soFar + sgh.realChildCount, 0))
+  }
+
   get subGroups(): readonly EditorGroupEntity[] {
     return this.memoized("subGroups", () => this.level.groups.filter(group => checkGroupMatch(this.level, this.groupId, group.obj.parent)))
   }

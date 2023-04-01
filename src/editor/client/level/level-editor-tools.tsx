@@ -35,7 +35,14 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
     levelEditorShared.setSelectedMontageDirection(m.direction)
   }
 
-  useEffect(() => selectMontage(null), [collage])
+  useEffect(() => {
+    const index = collage.montages.findIndex(m => m.id === levelEditorShared.selectedMontage && m.direction === levelEditorShared.selectedMontageDirection)
+    if (index < 0) {
+      selectMontage(null)
+    } else {
+      setMontageIndexInternal(index)
+    }
+  }, [collage])
 
   return {
     collage,
@@ -128,20 +135,22 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
         readonly={true}
         className="block pointer"
       />
-      {collageViewHelper !== null && <div class="collage-showcase-container"
+      {collageViewHelper !== null && <div style={makeStyleString({
+        "position": "relative",
+        "height": `${window.innerHeight / 2}px`,
+        "overflow-x": "hidden",
+        "overflow-y": "scroll",
+      })}><div class="collage-showcase-container"
         ref={$collageShowcaseContainer}
         style={makeStyleString({
-          "position": "relative",
-          "height": `${window.innerHeight / 2}px`,
-          "overflow": "auto",
+          "height": "100%",
         })}
       >
         <CollageShowcase
           collageViewHelper={collageViewHelper}
-          style="padding: 5px;"
           $container={$collageShowcaseContainer.current}
         />
-      </div>}
+      </div></div>}
     </div>}
   </div>
 }

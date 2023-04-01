@@ -2,8 +2,7 @@ import { Immutable } from "engine/utils/immutable"
 import { TraceType } from "engine/world/level/trace/trace-type"
 import { useState } from "preact/hooks"
 import { useCollageJson } from "../collage/use-collage"
-import { FileLevel, FileTrace } from "../file-types"
-import { ImmutableSetter } from "../preact-help"
+import { levelEditorPreferences } from "../preferences"
 import { Followable, GlobalEditorShared } from "../shared-types"
 import { BasePath } from "../utils/immutable-helper"
 import { useCollageManager } from "./collage-manager"
@@ -13,21 +12,21 @@ import { Mode } from "./shared-types"
 type MakeSharedStuffOptions = {
   globalStuff: GlobalEditorShared
   level: Immutable<EditorLevel>
+  id: string
 }
 
 export function useSharedStuff(options: MakeSharedStuffOptions) {
   const {
     globalStuff,
     level,
+    id,
   } = options
 
+  const [preferences, setPreferences] = levelEditorPreferences.use(id)
+
   const collageManager = useCollageManager(globalStuff.server)
-  const [activeGroup, setActiveGroup] = useState<Immutable<EditorGroupEntity> | null>(level.groups.length > 0 ? level.groups[0] : null)
-  const [mode, setMode] = useState<Mode>("trace")
-  const [selectedCollageId, setSelectedCollageId] = useState<string | null>(null)
-  const [selectedCollage] = useCollageJson(globalStuff.server, selectedCollageId)
-  const [selectedMontage, setSelectedMontage] = useState<string | null>(null)
-  const [selectedMontageDirection, setSelectedMontageDirection] = useState<string | null>(null)
+  const [activeGroup, setActiveGroupInternal] = useState<Immutable<EditorGroupEntity> | null>(level.groups.find(g => g.obj.id === preferences.activeGroup) ?? (level.groups.length > 0 ? level.groups[0] : null))
+  const [selectedCollage] = useCollageJson(globalStuff.server, preferences.collageSelected)
   const [selectedTraceType, setSelectedTraceType] = useState<(typeof TraceType)[keyof typeof TraceType]>(TraceType.SOLID)
   const [pathInProgress, setPathInProgress] = useState<Immutable<EditorTraceEntity> | null>(null)
   const [info, setInfo] = useState<Record<string, string | number>>({})
@@ -36,25 +35,48 @@ export function useSharedStuff(options: MakeSharedStuffOptions) {
   return {
     globalStuff,
     level,
+    id,
     collageManager,
-    activeGroup, setActiveGroup,
-    mode, setMode,
-    selectedCollage, selectedCollageId,
-    selectedMontage, setSelectedMontage,
-    selectedMontageDirection, setSelectedMontageDirection,
+    activeGroup,
+    mode: preferences.mode,
+    selectedCollage, selectedCollageId: preferences.collageSelected,
+    selectedMontage: preferences.montageSelected,
+    selectedMontageDirection: preferences.montageDirectionSelected,
     selectedTraceType, setSelectedTraceType,
     pathInProgress, setPathInProgress,
     info, setInfo,
     propertiesPath,
+
+    setMode(newMode: Mode) {
+      setPreferences((before) => ({
+        ...before,
+        mode: newMode,
+      }))
+    },
 
     shouldDragBePrevented(): boolean {
       return globalStuff.userInputs.mouse.isDown || pathInProgress !== null
     },
 
     selectCollage(collageId: string) {
-      setSelectedCollageId(collageId)
-      setSelectedMontage(null)
-      setSelectedMontageDirection(null)
+      setPreferences((before) => ({
+        ...before,
+        collageSelected: collageId,
+      }))
+      this.setSelectedMontage(null)
+      this.setSelectedMontageDirection(null)
+    },
+
+    setSelectedMontage(newMontage: string | null) {
+      setPreferences((before) => ({...before, montageSelected: newMontage}))
+    },
+    setSelectedMontageDirection(newMontageDirection: string | null) {
+      setPreferences((before) => ({...before, montageDirectionSelected: newMontageDirection}))
+    },
+
+    setActiveGroup(newGroup: Immutable<EditorGroupEntity> | null) {
+      setPreferences((before) => ({...before, activeGroup: newGroup === null ? null : newGroup.obj.id}))
+      setActiveGroupInternal(newGroup)
     },
 
     follow(follower: Followable): void {

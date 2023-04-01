@@ -1,4 +1,4 @@
-import { Coordinates2D, int } from "api"
+import { assert, Coordinates2D, int } from "api"
 import { FileData, IsJsonable, json, Position as FilePosition, Prop as FileProp, Trace as FileTrace } from "api/file"
 import { BodySpec } from "engine/file/collage"
 import { Canvas } from "engine/ui/viewport/canvas"
@@ -173,14 +173,16 @@ export function findClosestPosition(levelObject: Immutable<EditorLevel>, x: numb
 export const PLACEHOLDER_WIDTH = 64
 function makePlaceholderImage(): string {
   const tempCanvas = new Canvas(PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH)
-  const ctx = tempCanvas.element.getContext("2d")
+  const el = tempCanvas.element
+  assert(el instanceof HTMLCanvasElement, "Canvas element should be HTML (not offscreen)")
+  const ctx = el.getContext("2d")
   if (!ctx) {
     throw new Error("Failed to get context for placeholder image")
   }
 
   ctx.fillStyle = "#CD96CD"
   ctx.fillRect(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH)
-  return (tempCanvas.element as HTMLCanvasElement).toDataURL()
+  return el.toDataURL()
 }
 
 let placeholderImageUrl: string | null = null

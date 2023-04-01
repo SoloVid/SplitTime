@@ -53,7 +53,11 @@ export class EditorMetadata {
   readonly displayed: boolean = true
   readonly editorId: string = generateUID()
   readonly highlighted: boolean = false
-  readonly locked: boolean = false
+}
+
+export type EditorGroupMetadata = {
+  readonly editorId: string
+  readonly collapsed: boolean
 }
 
 export function withMetadata<TypeString, T>(type: TypeString, obj: T): ObjectWithEditorMetadata<TypeString, T> {

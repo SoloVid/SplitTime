@@ -29,14 +29,15 @@ export default function LevelEditor(props: LevelEditorProps) {
     setLevel: setFileLevel,
   } = props
 
-  const [editorLevel, setEditorLevel] = useEditorLevel(fileLevel, setFileLevel)
+  const [levelEditorPrefs, setLevelEditorPrefs] = levelEditorPreferences.use(id)
+
+  const [editorLevel, setEditorLevel] = useEditorLevel(fileLevel, setFileLevel, levelEditorPrefs)
 
   const sharedStuff = useSharedStuff({
     globalStuff: editorGlobalStuff,
     level: editorLevel,
+    id: id,
   })
-
-  const [levelEditorPrefs, setLevelEditorPrefs] = levelEditorPreferences.use(id)
 
   const $el = useRef<HTMLDivElement>(null)
   const $leftMenu = useRef<HTMLDivElement>(null)
@@ -48,6 +49,42 @@ export default function LevelEditor(props: LevelEditorProps) {
       sharedStuff.setPropertiesPanel(editorLevel)
     })
   }, [])
+
+  useEffect(() => {
+    if (!$graphicalEditorContainer.current) {
+      return
+    }
+    const el = $graphicalEditorContainer.current
+    const listener = (e: Event) => {
+      setLevelEditorPrefs((before) => ({...before, scroll: {x: el.scrollLeft, y: el.scrollTop}}))
+    }
+    el.addEventListener("scroll", listener)
+    return () => el.removeEventListener("scroll", listener)
+  })
+  useEffect(() => {
+    if ($graphicalEditorContainer.current) {
+      $graphicalEditorContainer.current.scrollLeft = levelEditorPrefs.scroll.x
+      $graphicalEditorContainer.current.scrollTop = levelEditorPrefs.scroll.y
+    }
+  }, [$graphicalEditorContainer.current])
+
+  function hiddenIndexes(list: readonly { metadata: { displayed: boolean }}[]) {
+    return list.map((e, i) => [e, i] as const).filter(([e, i]) => !e.metadata.displayed).map(([e, i]) => i)
+  }
+  useEffect(() => {
+    const handle = setInterval(() => {
+      const collapsedGroups = editorLevel.groups.filter(g => g.metadata.collapsed).map(g => g.obj.id)
+      const hidden = {
+        traces: hiddenIndexes(editorLevel.traces),
+        props: hiddenIndexes(editorLevel.props),
+        positions: hiddenIndexes(editorLevel.positions),
+      }
+      if (JSON.stringify(collapsedGroups) !== JSON.stringify(levelEditorPrefs.collapsedGroups) || JSON.stringify(hidden) !== JSON.stringify(levelEditorPrefs.hidden)) {
+        setLevelEditorPrefs((before) => ({...before, collapsedGroups, hidden}))
+      }
+    }, 1000)
+    return () => clearInterval(handle)
+  }, [editorLevel])
 
   useEffect(() => {
     editorGlobalStuff.setOnDelete(() => {
