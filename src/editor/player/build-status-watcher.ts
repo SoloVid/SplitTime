@@ -29,6 +29,8 @@ export function makeBuildStatusWatcher({
   return {
     async update() {
       try {
+        const lastLastBuildId = lastBuildId
+        const lastLastStatus = lastStatus
         const buildStatus = await serverLiaison.api.buildStatus.fetch(serverLiaison.withProject({
           lastBuildId: lastBuildId ?? undefined,
           knownErrorLogs: knownErrorLogs,
@@ -63,8 +65,9 @@ export function makeBuildStatusWatcher({
             setPopup({ isVisible: true, messageType: "success", htmlContent: `New build ready! ${refreshPageHtml}` })
           } else if (lastStatus === "succeeded" && !firstRun) {
             debug(`Build ${buildStatus.buildId} succeeded`)
-            // addConsoleEntry({ entryType: "info", text: `Build ${buildStatus.buildId} succeeded` })
-            setPopup({ isVisible: true, messageType: "success", htmlContent: `New build ready! ${refreshPageHtml}` })
+            if (lastLastBuildId !== lastBuildId || lastLastStatus !== "built-but-testing") {
+              setPopup({ isVisible: true, messageType: "success", htmlContent: `New build ready! ${refreshPageHtml}` })
+            }
           }
         }
       } catch (e) {
