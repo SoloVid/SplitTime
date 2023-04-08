@@ -1,5 +1,4 @@
-import { DEBUG } from "compiler-defines";
-import { assert } from "globals";
+import { error } from "engine/utils/logger";
 import { SpriteBody } from "./body/sprite-body";
 import { Prop } from "./level/level-file-data";
 
@@ -23,7 +22,9 @@ export class PropPostProcessor {
      * @param processor callback to process prop after creation
      */
     register(processorId: string, processor: Processor): void {
-        assert(!(processorId in this.processorMap), "Processor \"" + processorId + "\" already registered");
+        if (processorId in this.processorMap) {
+            error("Processor \"" + processorId + "\" already registered")
+        }
         this.processorMap[processorId] = processor;
     }
     /**
@@ -31,8 +32,9 @@ export class PropPostProcessor {
      * This method is for engine use only and should not be called by game code.
      */
     process(processorId: string, newProp: SpriteBody, rawProp: Prop): void {
-        if (DEBUG) {
-            assert(processorId in this.processorMap, "Processor \"" + processorId + "\" not registered");
+        if (!(processorId in this.processorMap)) {
+            error("Processor \"" + processorId + "\" not registered");
+            return
         }
         this.processorMap[processorId](newProp, rawProp);
     }

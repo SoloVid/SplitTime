@@ -3,7 +3,7 @@ import { Color } from "../../../light/color";
 import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
 
 export class SpotLight implements Light {
-    constructor(public intensity: number = 0, public radius: number = 150) { }
+    constructor(public intensity: number = 0, public radius: number = 64) { }
     color: Color = new Color(255, 255, 255);
     applyLighting(ctx: GenericCanvasRenderingContext2D, intensityModifier: number): void {
         if (intensityModifier > 0 && this.intensity > 0) {

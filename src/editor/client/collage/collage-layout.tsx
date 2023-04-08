@@ -84,10 +84,10 @@ export default function CollageLayout(props: CollageLayoutProps) {
 
   function startNewFrame(): void {
     let frameIndex = collage.frames.length
-    let frameId = "Frame " + frameIndex
+    let frameId = "f" + frameIndex
     while (collage.frames.some(f => f.id === frameId)) {
       frameIndex++
-      frameId = "Frame " + frameIndex
+      frameId = "f" + frameIndex
     }
     const gridCell = collageEditorShared.globalStuff.gridCell
     const newFrame: Frame = {

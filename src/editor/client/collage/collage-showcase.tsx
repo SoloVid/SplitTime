@@ -9,7 +9,7 @@ type CollageShowcaseProps = {
   style?: string
   collageEditHelper?: SharedStuff | undefined
   collageViewHelper: SharedStuffViewOnly
-  $container: HTMLDivElement
+  $container: HTMLDivElement | null
 }
 
 export default function CollageShowcase(props: CollageShowcaseProps) {
@@ -24,8 +24,8 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
   // const maxMontageWidth = $el.current.offsetWidth
   // const maxMontageHeight = $el.current.offsetHeight
-  const maxMontageWidth = $container.offsetWidth
-  const maxMontageHeight = $container.offsetHeight
+  const maxMontageWidth = $container ? $container.offsetWidth : 64
+  const maxMontageHeight = $container ? $container.offsetHeight : 64
 
   const widestMontageWidth = useMemo(() => {
     const width = collageViewHelper.realCollage.montages.reduce((maxWidth, m) => {

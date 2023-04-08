@@ -3,7 +3,7 @@ import { Collage } from "engine/graphics/collage";
 import { game_seconds } from "engine/time/timeline";
 import { GenericCanvasRenderingContext2D } from "engine/ui/viewport/canvas";
 import { DrawingBoard } from "engine/ui/viewport/drawing-board";
-import { Coordinates3D } from "engine/world/level/level-location";
+import { Coordinates2D, Coordinates3D } from "engine/world/level/level-location";
 import { int } from "globals";
 import { BodySpec } from "../../../file/collage";
 import { Frame } from "../../../graphics/frame";
@@ -22,8 +22,8 @@ export class Sprite implements Drawable {
     }
     static DEFAULT_STANCE = "__DEFAULT_STANCE__";
     private autoReset: boolean = true;
-    omniDir = false;
     rotate = 0;
+    rotationOffset: Coordinates2D = { x: 0, y: 0 };
     opacityModifier = 1;
     playerOcclusionFadeFactor = 0;
     private stance: string | null = null;
@@ -60,7 +60,9 @@ export class Sprite implements Drawable {
     }
     draw(drawingBoard: DrawingBoard) {
         drawingBoard.withRawCanvasContext((ctx) => {
+            ctx.translate(this.rotationOffset.x, this.rotationOffset.y)
             ctx.rotate(this.rotate);
+            ctx.translate(-this.rotationOffset.x, -this.rotationOffset.y)
             this._drawSimple(drawingBoard, ctx);
             //ctx.rotate(-this.rotate);
             this.rotate = 0;
@@ -122,7 +124,6 @@ export class Sprite implements Drawable {
             height: this.body.height
         };
         var clone = new Sprite(newBody, this.collage);
-        clone.omniDir = this.omniDir;
         clone.rotate = this.rotate;
         clone.opacityModifier = this.opacityModifier;
         clone.playerOcclusionFadeFactor = this.playerOcclusionFadeFactor;

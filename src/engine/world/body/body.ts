@@ -1,14 +1,15 @@
-import { Mover } from "./collisions/body-mover";
-import { Drawable } from "./render/drawable";
-import { GraphBody } from "./body-rendering-graph";
 import { direction_t } from "engine/math/direction";
 import { game_seconds, instanceOfTimeNotified, TimeNotified } from "engine/time/timeline";
+import { error } from "engine/utils/logger";
 import { Pledge } from "engine/utils/pledge";
-import { RegisterCallbacks, CallbackResult } from "engine/utils/register-callbacks";
+import { CallbackResult, RegisterCallbacks } from "engine/utils/register-callbacks";
 import { assert, int } from "globals";
 import { Level } from "../level/level";
 import { ILevelLocation2 } from "../level/level-location";
+import { GraphBody } from "./body-rendering-graph";
+import { Mover } from "./collisions/body-mover";
 import { CollisionMask, defaultCollisionMask } from "./collisions/collision-calculator";
+import { Drawable } from "./render/drawable";
 
 var nextRef = 10 //reserve first 10
 
@@ -84,10 +85,12 @@ export class Body {
     }
     set width(val: int) {
         if (!Number.isInteger(val)) {
-            throw new Error("Width must be an integer")
+            error("Width must be an integer")
+            val = Math.round(val)
         }
         if (val % 2 !== 0) {
-            throw new Error("Width must be a multiple of 2")
+            error("Width must be a multiple of 2")
+            val = val - (val % 2)
         }
         this._width = val
         this._resortInBodyOrganizer()
@@ -97,10 +100,12 @@ export class Body {
     }
     set depth(val: int) {
         if (!Number.isInteger(val)) {
-            throw new Error("Depth must be an integer")
+            error("Depth must be an integer")
+            val = Math.round(val)
         }
         if (val % 2 !== 0) {
-            throw new Error("Depth must be a multiple of 2")
+            error("Depth must be a multiple of 2")
+            val = val - (val % 2)
         }
         this._depth = val
         this._resortInBodyOrganizer()

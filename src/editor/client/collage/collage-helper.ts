@@ -7,10 +7,10 @@ export class CollageHelper {
 
     newMontage(): Montage {
         let montageIndex = this.collage.montages.length
-        let montageId = "Montage " + montageIndex
+        let montageId = "montage-" + montageIndex
         while (this.collage.frames.some(m => m.id === montageId)) {
             montageIndex++
-            montageId = "Montage " + montageIndex
+            montageId = "montage-" + montageIndex
         }
         let bodySpec = {
             width: defaultBodySpec.width,

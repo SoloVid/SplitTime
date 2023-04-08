@@ -40,7 +40,7 @@ export class ParticleSlash implements IAbility {
         const particles = new ParticleEmitter(slashBody, p => {
             p.position.x += randomRanged(-5, 5);
             p.position.y += randomRanged(-5, 5);
-            p.radius = 6;
+            p.radius = Math.round(this.radius / 4);
             p.color = new Color(100, 220, 255, 0.5);
             p.lightRadius = p.radius;
             p.lightIntensity = 0.05;
