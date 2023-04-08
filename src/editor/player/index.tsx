@@ -27,6 +27,13 @@ setTimeout(() => {
     }
   }
 }, 500)
+const startupLogs: ConsoleEntry[] = []
+const startupLogListener: LogListener = {
+  onDebug: (...args) => startupLogs.push({ entryType: "info", text: logArgsToHtmlString(args) }),
+  onWarn: (...args) => startupLogs.push({ entryType: "warning", text: logArgsToHtmlString(args) }),
+  onError: (...args) => startupLogs.push({ entryType: "error", text: logArgsToHtmlString(args) }),
+}
+registerLogListener(startupLogListener)
 
 Promise.resolve().then(() => exerciseApi())
 
@@ -47,15 +54,26 @@ function App() {
   })
 
   function addConsoleEntry(entry: ConsoleEntry) {
-    setPlayerState(old => ({
-      ...old,
-      consoleDrawer: {
-        ...old.consoleDrawer,
-        // We're putting these in reverse order because we're using
-        // `flex-direction: column-reverse` in the CSS (for UX reasons).
-        entries: [entry, ...old.consoleDrawer.entries],
+    setPlayerState(old => {
+      let newEntries = [entry, ...old.consoleDrawer.entries]
+      for (let i = 0; i < 100; i++) {
+        if (newEntries.length > 500) {
+          let first
+          [first, ...newEntries] = newEntries
+        } else {
+          break
+        }
       }
-    }))
+      return {
+        ...old,
+        consoleDrawer: {
+          ...old.consoleDrawer,
+          // We're putting these in reverse order because we're using
+          // `flex-direction: column-reverse` in the CSS (for UX reasons).
+          entries: [entry, ...old.consoleDrawer.entries],
+        }
+      }
+    })
   }
 
   useEffect(() => {
@@ -105,6 +123,14 @@ function App() {
       window.removeEventListener("error", listener)
     }
   })
+
+  useEffect(() => {
+    for (const e of startupLogs) {
+      addConsoleEntry(e)
+    }
+    startupLogs.length = 0
+    unregisterLogListener(startupLogListener)
+  }, [])
 
   useEffect(() => {
     const watcher = makeBuildStatusWatcher({

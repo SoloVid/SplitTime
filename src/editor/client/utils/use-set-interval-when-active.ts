@@ -1,6 +1,6 @@
 import { Inputs, useEffect, useState } from "preact/hooks"
 
-export const inactivityMs = 1000
+export const inactivityMs = 5000
 
 export function useSetIntervalWhenActive(callback: () => void, ms: number, inputs: Inputs) {
   const [lastMouse, setLastMouse] = useState(0)

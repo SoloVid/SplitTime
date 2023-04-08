@@ -2,6 +2,8 @@
 // export const warn = console.warn.bind(console);
 // export const error = console.error.bind(console);
 
+import { generateUID } from "./misc"
+
 export type LogListener = {
   onDebug?: (...args: readonly unknown[]) => void
   onWarn?: (...args: readonly unknown[]) => void
@@ -9,12 +11,13 @@ export type LogListener = {
 }
 
 type LoggerState = {
+  id: string
   listeners: LogListener[]
 }
 
 const maybeWindow = typeof window !== "undefined" ? window as unknown as { _loggerState?: LoggerState } : undefined
 
-const loggerState: LoggerState = maybeWindow?._loggerState ?? { listeners: [] }
+const loggerState: LoggerState = maybeWindow?._loggerState ?? { id: generateUID(), listeners: [] }
 if (maybeWindow) {
   maybeWindow._loggerState = loggerState
 }
@@ -44,6 +47,6 @@ export function registerLogListener(listener: LogListener) {
 export function unregisterLogListener(listener: LogListener) {
   const index = loggerState.listeners.indexOf(listener)
   if (index >= 0) {
-    loggerState.listeners.splice(index)
+    loggerState.listeners.splice(index, 1)
   }
 }
