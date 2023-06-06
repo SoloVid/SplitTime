@@ -21,12 +21,14 @@ export interface FileData {
 let testFileDataJsonable: IsJsonable<FileData, false, true> = {} as FileData;
 export interface Group {
     id: string;
+    name: string;
     parent: string;
     defaultZ: number;
     defaultHeight: number;
 }
 export interface Trace {
     id: string;
+    name: string;
     group: string;
     type: TraceTypeType;
     vertices: string;
@@ -44,6 +46,7 @@ export interface Trace {
 }
 export interface Prop {
     id: string;
+    name: string;
     group: string;
     collage: string;
     montage: string;
@@ -65,12 +68,14 @@ export function instanceOfFileData(thing: unknown): thing is FileData {
         backgroundOffsetY: type.int,
         groups: array(object({
             id: string,
+            name: string,
             parent: string,
             defaultZ: number,
             defaultHeight: number
         })),
         traces: array(object({
             id: string,
+            name: string,
             group: string,
             type: stringEnum(Object.values(TraceType)),
             vertices: string,
@@ -88,6 +93,7 @@ export function instanceOfFileData(thing: unknown): thing is FileData {
         })),
         props: array(object({
             id: string,
+            name: string,
             group: string,
             collage: string,
             montage: string,
@@ -98,6 +104,7 @@ export function instanceOfFileData(thing: unknown): thing is FileData {
         })),
         positions: array(object({
             id: string,
+            name: string,
             group: string,
             collage: string,
             montage: string,

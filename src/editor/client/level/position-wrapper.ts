@@ -11,13 +11,13 @@ export function onPositionDelete(setLevel: ImmutableSetter<EditorLevel>, positio
     return {
       ...before,
       traces: before.traces.map(t => {
-        let newVertices = t.obj.vertices
+        let newVertices = t.vertices
         while (newVertices.indexOf(posVertex) >= 0) {
           newVertices = newVertices.replace(posVertex, coordsVertex)
         }
         return {
           ...t,
-          obj: { ...t.obj, vertices: newVertices },
+          vertices: newVertices,
         }
       })
     }
@@ -32,13 +32,13 @@ export function onPositionIdUpdate(setLevel: ImmutableSetter<EditorLevel>, oldId
     return {
       ...before,
       traces: before.traces.map(t => {
-        let newVertices = t.obj.vertices
+        let newVertices = t.vertices
         while (newVertices.indexOf(oldVertex) >= 0) {
           newVertices = newVertices.replace(oldVertex, newVertex)
         }
         return {
           ...t,
-          obj: { ...t.obj, vertices: newVertices },
+          vertices: newVertices,
         }
       })
     }

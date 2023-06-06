@@ -1,91 +1,116 @@
-import { checkGroupMatch, inGroup } from "../editor-functions"
-import { EditorGroupEntity, EditorLevel, EditorPositionEntity, EditorPropEntity, EditorTraceEntity } from "./extended-level-format"
+import { Immutable } from "engine/utils/immutable"
+import { EditorGroup, EditorLevel, EditorPosition, EditorProp, EditorTrace } from "./extended-level-format"
+import { LevelEditorPreferences } from "./level-preferences"
+import { ImmutableSetter } from "../preact-help"
 
-export class GroupDisplayHelper {
-  private readonly memoized = makeMemoPad()
+export type LevelTreeGroupNode = {
+  group: EditorGroup | null
+  subGroups: NonRootLevelTreeGroupNode[]
+  traces: EditorTrace[]
+  props: EditorProp[]
+  positions: EditorPosition[]
+}
+export type RootLevelTreeGroupNode = LevelTreeGroupNode & {
+  group: null
+}
+export type NonRootLevelTreeGroupNode = LevelTreeGroupNode & {
+  group: EditorGroup
+}
 
-  constructor(
-    private readonly level: EditorLevel,
-    private readonly group: EditorGroupEntity | undefined
-  ) {}
+export function makeLevelTree(level: EditorLevel): Immutable<RootLevelTreeGroupNode> {
+  const groupMap: Record<string, NonRootLevelTreeGroupNode> = {}
+  const defaultGroup: RootLevelTreeGroupNode = {
+    group: null,
+    subGroups: [],
+    traces: [],
+    props: [],
+    positions: [],
+  }
+  // groupMap[""] = defaultGroup
+  for (const g of level.groups) {
+    groupMap[g.id] = {
+      group: g,
+      subGroups: [],
+      traces: [],
+      props: [],
+      positions: [],
+    }
+  }
+  for (const g of level.groups) {
+    const parent = (g.parent in groupMap) ? groupMap[g.parent] : defaultGroup
+    parent.subGroups.push(groupMap[g.id])
+  }
+  for (const t of level.traces) {
+    const parent = (t.group in groupMap) ? groupMap[t.group] : defaultGroup
+    parent.subGroups.push(groupMap[t.group])
+  }
+  for (const p of level.props) {
+    const parent = (p.group in groupMap) ? groupMap[p.group] : defaultGroup
+    parent.subGroups.push(groupMap[p.group])
+  }
+  for (const p of level.positions) {
+    const parent = (p.group in groupMap) ? groupMap[p.group] : defaultGroup
+    parent.subGroups.push(groupMap[p.group])
+  }
+  return defaultGroup
+}
 
-  get groupId(): string {
-    return this.group?.obj.id || ""
-  }
+export type GroupMetadata = {
+  id: string
+  childCount: number
+  allChildrenDisplayed: boolean
+}
 
-  get realChildCount(): number {
-    return this.memoized("realChildCount", () => this.traces.length + this.props.length + this.positions.length + this.subGroupHelpers.reduce((soFar, sgh) => soFar + sgh.realChildCount, 0))
-  }
+type GroupMetadataTreed = GroupMetadata & {
+  subGroupMetadatas: GroupMetadataTreed[]
+}
 
-  get subGroups(): readonly EditorGroupEntity[] {
-    return this.memoized("subGroups", () => this.level.groups.filter(group => checkGroupMatch(this.level, this.groupId, group.obj.parent)))
-  }
-  get traces(): readonly EditorTraceEntity[] {
-    return this.memoized("traces", () => this.level.traces.filter(trace => inGroup(this.level, this.groupId, trace.obj)))
-  }
-  get props(): readonly EditorPropEntity[] {
-    return this.memoized("props", () => this.level.props.filter(prop => inGroup(this.level, this.groupId, prop.obj)))
-  }
-  get positions(): readonly EditorPositionEntity[] {
-    return this.memoized("positions", () => this.level.positions.filter(pos => inGroup(this.level, this.groupId, pos.obj)))
-  }
-  get allDisplayed(): boolean {
-    return this.allSubGroupsDisplayed && this.allTracesDisplayed && this.allPropsDisplayed && this.allPositionsDisplayed
-  }
-  get allSubGroupsDisplayed(): boolean {
-    return this.memoized("subGroupHelpersDisplayed", () => this.subGroupHelpers.every(g => {
-      return g.allDisplayed
-    }))
-  }
-  get allTracesDisplayed(): boolean {
-    return this.memoized("tracesDisplayed", () => this.traces.every(trace => {
-      return trace.metadata.displayed
-    }))
-  }
-  get allPropsDisplayed(): boolean {
-    return this.memoized("propsDisplayed", () => this.props.every(prop => {
-      return prop.metadata.displayed
-    }))
-  }
-  get allPositionsDisplayed(): boolean {
-    return this.memoized("positionsDisplayed", () => this.positions.every(pos => {
-      return pos.metadata.displayed
-    }))
-  }
-
-  private get subGroupHelpers(): readonly GroupDisplayHelper[] {
-    return this.memoized("subGroupHelpers", () => this.level.groups
-      .filter(group => checkGroupMatch(this.level, this.groupId, group.obj.parent))
-      .map(g => new GroupDisplayHelper(this.level, g))
-    )
-  }
-
-  private setAllDisplayed(displayed: boolean): void {
-    this.subGroupHelpers.forEach(group => {
-      group.setAllDisplayed(displayed)
-    })
-    this.traces.forEach(trace => {
-      trace.setMetadata((before) => ({...before, displayed: !before.displayed}))
-    })
-    this.props.forEach(prop => {
-      prop.setMetadata((before) => ({...before, displayed: !before.displayed}))
-    })
-    this.positions.forEach(pos => {
-      pos.setMetadata((before) => ({...before, displayed: !before.displayed}))
-    })
-  }
-  toggleAllDisplayed(): void {
-    const displayed = this.allDisplayed
-    this.setAllDisplayed(displayed)
+function getGroupMetadata(group: Immutable<LevelTreeGroupNode>, prefs: LevelEditorPreferences): GroupMetadataTreed {
+  const childCount = group.subGroups.length + group.traces.length + group.positions.length + group.props.length
+  const subGroupMetadatas = group.subGroups.map(g => getGroupMetadata(g, prefs))
+  return {
+    id: group.group?.id ?? "",
+    childCount: childCount,
+    allChildrenDisplayed: group.traces.every(t => !prefs.hidden.includes(t.id)) &&
+      group.props.every(p => !prefs.hidden.includes(p.id)) &&
+      group.positions.every(p => !prefs.hidden.includes(p.id)) &&
+      subGroupMetadatas.every(g => g.allChildrenDisplayed),
+    subGroupMetadatas: subGroupMetadatas,
   }
 }
 
-function makeMemoPad() {
-  const backing: Record<string, unknown> = {}
-  return <T>(id: string, makeIt: () => T): T => {
-    if (!(id in backing)) {
-      backing[id] = makeIt()
+function flattenMetadatas(tree: Immutable<GroupMetadataTreed>): Record<string, Immutable<GroupMetadata>> {
+  // const map = { [tree.id]: tree }
+  return tree.subGroupMetadatas.map(gm => flattenMetadatas(gm)).reduce((soFar, subMap) => {
+    return {
+      ...soFar,
+      ...subMap,
     }
-    return backing[id] as T
-  }
+  }, { [tree.id]: tree })
+  // return [tree, tree.subGroupMetadatas.map(gm => flattenMetadatas(gm))].flat(100)
+}
+
+export function getGroupsMetadataMap(root: Immutable<LevelTreeGroupNode>, prefs: LevelEditorPreferences): Record<string, Immutable<GroupMetadata>> {
+  const tree = getGroupMetadata(root, prefs)
+  return flattenMetadatas(tree)
+}
+
+function getAllChildObjectIds(node: Immutable<LevelTreeGroupNode>): readonly string[] {
+  return [
+    ...node.traces.map(e => e.id),
+    ...node.props.map(e => e.id),
+    ...node.positions.map(e => e.id),
+    ...node.subGroups.map(e => getAllChildObjectIds(e)).flat(1),
+  ]
+}
+
+export function setAllDisplayed(setPrefs: ImmutableSetter<LevelEditorPreferences>, node: Immutable<LevelTreeGroupNode>, displayed: boolean) {
+  const childIds = getAllChildObjectIds(node)
+  setPrefs((before) => {
+    const less = before.hidden.filter(id => !childIds.includes(id))
+    if (displayed) {
+      return {...before, hidden: less}
+    }
+    return {...before, hidden: [...less, ...childIds]}
+  })
 }

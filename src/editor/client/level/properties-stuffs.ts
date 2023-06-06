@@ -1,12 +1,11 @@
 import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
 import { GenericObjectProperties, ObjectProperties } from "../field-options"
-import { FileTrace } from "../file-types"
-import { ImmutableSetter, OptionalTaggedImmutableSetter } from "../preact-help"
+import { OptionalTaggedImmutableSetter } from "../preact-help"
 import { tracePropertyFields } from "../trace-properties"
-import { BasePath, getByPath } from "../utils/immutable-helper"
 import { EditorLevel } from "./extended-level-format"
 import { onGroupIdUpdate } from "./group-wrapper"
+import { LevelEditorPreferences } from "./level-preferences"
 import { onPositionDelete, onPositionIdUpdate } from "./position-wrapper"
 
 const levelFieldObject = {
@@ -53,13 +52,12 @@ const positionFields = {
 }
 type SimplifiedPosition = { [K in keyof Required<typeof positionFields>]: string | number }
 
-export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: OptionalTaggedImmutableSetter<EditorLevel>, path: BasePath, clearProperties: () => void): GenericObjectProperties {
+export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: OptionalTaggedImmutableSetter<EditorLevel>, prefsProperties: Exclude<LevelEditorPreferences["propertiesPanel"], null>, clearProperties: () => void): GenericObjectProperties {
   const baseOnDelete = () => {
     clearProperties()
   }
-  const baseProperties: Partial<GenericObjectProperties> = {
+  const baseBaseProperties = {
     topLevelThing: level,
-    pathToImportantThing: path,
     // TODO: More type safety?
     setTopLevelThing: setLevel as any,
     onDelete: baseOnDelete,
@@ -67,11 +65,12 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
       // Do nothing by default.
     },
     allowDelete: true,
-  }
-  if (path.length === 0) {
+  } as const
+  if (prefsProperties === "level") {
     const properties: ObjectProperties<SimplifiedLevel, []> = {
       // TODO: More type safety?
-      ...baseProperties as any,
+      ...baseBaseProperties as any,
+      pathToImportantThing: [],
       title: "Level Properties",
       fields: levelFieldObject,
       allowDelete: false,
@@ -79,9 +78,18 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
     // TODO: More type safety?
     return properties as any
   }
+  const keyInLevel = `${prefsProperties.type}s` as const
+  const indexInArray = level[keyInLevel].findIndex(e => e.id === prefsProperties.id)
+  const path = [keyInLevel, indexInArray] as const
+  const baseProperties = {
+    ...baseBaseProperties,
+    pathToImportantThing: path,
+  } as const
+  const testBasePropertiesType: Partial<GenericObjectProperties> = baseProperties
+  void testBasePropertiesType
   if (path[0] === "groups") {
-    assert(path.length == 3, `Unexpected path within groups: ${JSON.stringify(path)}`)
-    const properties: ObjectProperties<EditorLevel, ["groups", number, "obj"]> = {
+    assert(path.length == 2, `Unexpected path within groups: ${JSON.stringify(path)}`)
+    const properties: ObjectProperties<EditorLevel, ["groups", number]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Group Properties",
@@ -97,8 +105,8 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
     return properties as any
   }
   if (path[0] === "props") {
-    assert(path.length == 3, `Unexpected path within props: ${JSON.stringify(path)}`)
-    const properties: ObjectProperties<EditorLevel, ["props", number, "obj"]> = {
+    assert(path.length == 2, `Unexpected path within props: ${JSON.stringify(path)}`)
+    const properties: ObjectProperties<EditorLevel, ["props", number]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Prop Properties",
@@ -109,8 +117,8 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
     return properties as any
   }
   if (path[0] === "positions") {
-    assert(path.length == 3, `Unexpected path within positions: ${JSON.stringify(path)}`)
-    const properties: ObjectProperties<EditorLevel, ["positions", number, "obj"]> = {
+    assert(path.length == 2, `Unexpected path within positions: ${JSON.stringify(path)}`)
+    const properties: ObjectProperties<EditorLevel, ["positions", number]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Position Properties",
@@ -130,8 +138,8 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
     return properties as any
   }
   if (path[0] === "traces") {
-    assert(path.length === 3, `Unexpected path within traces: ${JSON.stringify(path)}`)
-    const properties: ObjectProperties<EditorLevel, ["traces", number, "obj"]> = {
+    assert(path.length === 2, `Unexpected path within traces: ${JSON.stringify(path)}`)
+    const properties: ObjectProperties<EditorLevel, ["traces", number]> = {
       // TODO: More type safety?
       ...baseProperties as any,
       title: "Trace Properties",

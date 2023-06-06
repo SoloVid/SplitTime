@@ -1,32 +1,51 @@
+import { Immutable } from "engine/utils/immutable"
+import { generateUID } from "engine/utils/misc"
 import { Coordinates2D, Coordinates3D } from "engine/world/level/level-location"
-import { TraceType } from "engine/world/level/trace/trace-type"
 import { makePositionPoint } from "engine/world/level/trace/trace-points"
-import { useMemo, useRef } from "preact/hooks"
+import { TraceType } from "engine/world/level/trace/trace-type"
+import { assert } from "globals"
+import { useContext, useMemo, useRef, useState } from "preact/hooks"
 import { createSnapMontageMover, findClosestPosition, getGroupById, makeNewTrace } from "../editor-functions"
 import GridLines from "../grid-lines"
+import { InfoPaneContext } from "../info-pane"
 import { ImmutableSetter, makeStyleString, preventDefault } from "../preact-help"
-import { UserInputs } from "../shared-types"
-import LevelBackground from "./level-background"
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
+import { GlobalEditorShared } from "../shared-types"
+import { UserInputsContext } from "../user-inputs"
+import { CollageManagerContext } from "./collage-manager"
 import { useEntityBodies } from "./entity-body-manager"
 import { useSortedEntities } from "./entity-sort-helper"
-import { SharedStuff } from "./level-editor-shared"
+import { EditorLevel, EditorPosition, EditorProp, EditorTrace } from "./extended-level-format"
+import LevelBackground from "./level-background"
+import { LevelEditorPreferencesContext } from "./level-preferences"
 import RenderedLevelTrace from "./rendered-level-trace"
 import RenderedProposition from "./rendered-proposition"
 import { EDITOR_PADDING } from "./shared-types"
 
 type LevelGraphicalEditorProps = {
-  levelEditorShared: SharedStuff
+  globalStuff: GlobalEditorShared
+  level: Immutable<EditorLevel>
+  setLevel: ImmutableSetter<EditorLevel>
+  scale: number
 }
 
 export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   const {
-    levelEditorShared,
+    globalStuff,
+    level, setLevel,
+    scale,
   } = props
 
-  const scale = levelEditorShared.globalStuff.scale
-  const editorInputs = levelEditorShared.globalStuff.userInputs
+  const [globalPrefs, setGlobalPrefs] = useContext(GlobalEditorPreferencesContext)
+  const [levelPrefs, setLevelPrefs] = useContext(LevelEditorPreferencesContext)
+  const editorInputs = useContext(UserInputsContext)
+  assert(editorInputs !== null, "editorInputs should not be null")
+  const collageManager = useContext(CollageManagerContext)
+  const [infoPane, setInfoPane] = useContext(InfoPaneContext)
+
+  const [pathInProgress, setPathInProgress] = useState<Immutable<EditorTrace> | null>(null)
+
   const editorPadding = EDITOR_PADDING
-  const level = levelEditorShared.level
 
   const $el = useRef<HTMLDivElement>(null)
 
@@ -35,12 +54,12 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     () => [...level.props, ...level.positions, ...level.traces],
     [level.props, level.positions, level.traces]
   )
-  const entityBodies = useEntityBodies(level, levelEditorShared.collageManager, allEntities)
+  const entityBodies = useEntityBodies(level, collageManager, allEntities)
   const allEntitiesSorted = useSortedEntities(allEntities, entityBodies)
   // This is the workaround if the sorting hangs up the UI too much.
   // const allEntitiesSorted = allEntities
 
-  const inputs = useMemo<UserInputs>(() => {
+  const inputs = useMemo(() => {
     let position = {
       x: 0,
       y: 0
@@ -65,7 +84,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
 
   const containerWidth = (level.width * scale) + 2*EDITOR_PADDING
   const addedHeight = useMemo(() => {
-    return level.groups.length > 0 ? level.groups[level.groups.length - 1].obj.defaultZ : 0
+    return level.groups.length > 0 ? level.groups[level.groups.length - 1].defaultZ : 0
   }, [level.groups])
   const containerHeight = ((level.height + addedHeight) * scale) + 2*EDITOR_PADDING
 
@@ -78,12 +97,12 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   const traceTransform = "translate(" + EDITOR_PADDING + "," + EDITOR_PADDING + ")"
 
   const scaledGridCell = {
-    x: Math.round(levelEditorShared.globalStuff.gridCell.x * scale),
-    y: Math.round(levelEditorShared.globalStuff.gridCell.y * scale),
+    x: Math.round(globalPrefs.gridCell.x * scale),
+    y: Math.round(globalPrefs.gridCell.y * scale),
   }
 
   function getActiveFileGroup() {
-    return getGroupById(level, levelEditorShared.activeGroup?.obj.id ?? "")
+    return getGroupById(level, levelPrefs.activeGroup ?? "")
   }
 
   function getBestEntityLocation(): Coordinates3D {
@@ -92,8 +111,9 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     var x = inputs.mouse.x
     var y = inputs.mouse.y + z
     
-    const mId = levelEditorShared.selectedMontage
-    const m = levelEditorShared.selectedCollage?.montages.find((m) => m.id === mId)
+    const mId = levelPrefs.montageSelected
+    const selectedCollage = levelPrefs.collageSelected ? collageManager.getCollage(levelPrefs.collageSelected) : null
+    const m = selectedCollage?.montages.find((m) => m.id === mId)
     if (!m) {
       return new Coordinates3D(x, y, z)
     }
@@ -101,7 +121,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     const start = new Coordinates2D(-LARGE_NUMBER, -LARGE_NUMBER)
     const dx = x - start.x
     const dy = y - start.y
-    const snappedMover = createSnapMontageMover(levelEditorShared.globalStuff.gridCell, m.body, start)
+    const snappedMover = createSnapMontageMover(globalPrefs.gridCell, m.body, start)
     snappedMover.applyDelta(dx, dy)
     const snapped = snappedMover.getSnappedDelta()
     snapped.x += start.x
@@ -114,46 +134,50 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     const loc = getBestEntityLocation()
 
     let pIndex = level.positions.length
-    let pId = "Position " + pIndex
-    while (level.positions.some(m => m.obj.id === pId)) {
+    let name = "Position " + pIndex
+    while (level.positions.some(p => p.name === name)) {
       pIndex++
-      pId = "Position " + pIndex
+      name = "Position " + pIndex
     }
-    const newThing = {
-      id: pId,
+    const newThing: EditorPosition = {
+      id: generateUID(),
+      name: name,
       group: group.id,
-      collage: levelEditorShared.selectedCollageId ?? "",
-      montage: levelEditorShared.selectedMontage ?? "",
+      collage: levelPrefs.collageSelected ?? "",
+      montage: levelPrefs.montageSelected ?? "",
       x: loc.x,
       y: loc.y,
       z: loc.z,
-      dir: levelEditorShared.selectedMontageDirection ?? "",
+      dir: levelPrefs.montageDirectionSelected ?? "",
     }
 
-    const newEntity = levelEditorShared.level.addPosition(newThing)
+    setLevel((before) => ({...before, positions: [...before.positions, newThing]}))
+    setLevelPrefs((before) => ({...before, propertiesPanel: {type: "position", id: newThing.id}}))
     // TODO: Lookup will fail because state hasn't propagated?
-    levelEditorShared.setPropertiesPanel(newEntity)
+    // levelEditorShared.setPropertiesPanel(newEntity)
   }
   
   function createProp() {
     const group = getActiveFileGroup()
     const loc = getBestEntityLocation()
     
-    const newThing = {
+    const newThing: EditorProp = {
+      id: generateUID(),
       // FTODO: Generate ID from montage name
-      id: "",
+      name: "",
       group: group.id,
-      collage: levelEditorShared.selectedCollageId ?? "",
-      montage: levelEditorShared.selectedMontage ?? "",
+      collage: levelPrefs.collageSelected ?? "",
+      montage: levelPrefs.montageSelected ?? "",
       x: loc.x,
       y: loc.y,
       z: loc.z,
-      dir: levelEditorShared.selectedMontageDirection ?? "",
+      dir: levelPrefs.montageDirectionSelected ?? "",
     }
 
-    const newEntity = levelEditorShared.level.addProp(newThing)
+    setLevel((before) => ({...before, props: [...before.props, newThing]}))
+    setLevelPrefs((before) => ({...before, propertiesPanel: {type: "prop", id: newThing.id}}))
     // TODO: Lookup will fail because state hasn't propagated?
-    levelEditorShared.setPropertiesPanel(newEntity)
+    // levelEditorShared.setPropertiesPanel(newEntity)
   }
 
   function handleMouseUp(event: MouseEvent): void {
@@ -163,8 +187,8 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     const x = inputs.mouse.x
     const isLeftClick = event.button === 0
     const isRightClick = event.button === 2
-    const gridCell = levelEditorShared.globalStuff.gridCell
-    if(levelEditorShared.mode === "trace") {
+    const gridCell = globalPrefs.gridCell
+    if(levelPrefs.mode === "trace") {
       const snappedX = Math.round(x / gridCell.x) * gridCell.x
       const snappedY = Math.round(yInGroup / gridCell.y) * gridCell.y
       var literalPoint = "(" +
@@ -172,16 +196,21 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         Math.floor(snappedY) + ")"
       var closestPosition = findClosestPosition(level, inputs.mouse.x, yInGroup)
       var positionPoint = closestPosition ? makePositionPoint(closestPosition.obj.id) : ""
-      const pathInProgress = levelEditorShared.pathInProgress
       function addPathInProgressVertex(newVertex: string) {
-        pathInProgress?.setObj((before) => ({
-          ...before,
-          vertices: before.vertices + " " + newVertex,
-        }))
+        setPathInProgress((before) => {
+          if (before === null) {
+            // FTODO: Handle this better?
+            return null
+          }
+          return {
+            ...before,
+            vertices: before.vertices + " " + newVertex,
+          }
+        })
       }
       if(isLeftClick) {
         if(pathInProgress) {
-          if(levelEditorShared.selectedTraceType == "path" && inputs.ctrlDown) {
+          if(levelPrefs.traceType == "path" && inputs.ctrlDown) {
             addPathInProgressVertex(positionPoint)
           } else {
             addPathInProgressVertex(literalPoint)
@@ -189,21 +218,22 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         }
       } else if(isRightClick) {
         if(!pathInProgress) {
-          const trace = makeNewTrace(level, getActiveFileGroup().id, levelEditorShared.selectedTraceType)
+          const trace = makeNewTrace(level, getActiveFileGroup().id, levelPrefs.traceType)
           
-          if(levelEditorShared.selectedTraceType == TraceType.PATH && !inputs.ctrlDown) {
+          if(levelPrefs.traceType == TraceType.PATH && !inputs.ctrlDown) {
             trace.vertices = positionPoint
           } else {
             trace.vertices = literalPoint
           }
 
-          const newEntity = levelEditorShared.level.addTrace(trace)
+          setLevel((before) => ({...before, traces: [...before.traces, trace]}))
+          setLevelPrefs((before) => ({...before, propertiesPanel: {type: "trace", id: trace.id}}))
           // TODO: Lookup will fail because state hasn't propagated?
-          levelEditorShared.setPropertiesPanel(newEntity)
-          levelEditorShared.setPathInProgress(newEntity)
+          // levelEditorShared.setPropertiesPanel(newEntity)
+          setPathInProgress(trace)
         } else {
           if(!inputs.ctrlDown) {
-            if(pathInProgress.obj.type == TraceType.PATH) {
+            if(pathInProgress.type == TraceType.PATH) {
               if(closestPosition) {
                 addPathInProgressVertex(positionPoint)
               }
@@ -212,14 +242,14 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
               addPathInProgressVertex("(close)")
             }
           }
-          levelEditorShared.setPathInProgress(null)
+          setPathInProgress(null)
         }
       }
-    } else if(levelEditorShared.mode === "position") {
+    } else if(levelPrefs.mode === "position") {
       if(isRightClick) {
         createPosition()
       }
-    } else if(levelEditorShared.mode === "prop") {
+    } else if(levelPrefs.mode === "prop") {
       if(isRightClick) {
         createProp()
       }
@@ -229,12 +259,12 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   function handleMouseMove(event: MouseEvent): void {
     const group = getActiveFileGroup()
     const groupZ = group ? group.defaultZ : 0
-    levelEditorShared.setInfo({
-      ...levelEditorShared.info,
+    setInfoPane((before) => ({
+      ...before,
       x: inputs.mouse.x,
       y: inputs.mouse.y + groupZ,
       z: groupZ,
-    })
+    }))
   }
 
   return <div
@@ -251,10 +281,10 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
 
     {allEntitiesSorted.map((entity) => (
     <div
-      key={entity.metadata.editorId}
+      key={entity.id}
       className="entity"
     >
-      {(entity.type === "prop" || entity.type === "position") && <div
+      {!("vertices" in entity) && <div
         className="proposition-container"
         style={levelOffsetStyle}
       >
@@ -263,7 +293,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
           entity={entity}
         />
       </div>}
-      {entity.type === "trace" && <svg
+      {"vertices" in entity && <svg
         style={`position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;`}
         className="trace-svg"
       >
@@ -276,7 +306,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     </div>
     ))}
 
-    {levelEditorShared.globalStuff.gridEnabled && <GridLines
+    {globalPrefs.gridEnabled && <GridLines
       gridCell={scaledGridCell}
       origin={{x: editorPadding, y: editorPadding}}
     />}

@@ -2,17 +2,16 @@ import { getDefaultTopLeft } from "engine/graphics/frame"
 import { Montage } from "engine/graphics/montage"
 import { calculateTotalArea, Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
-import { Body } from "engine/world/body/body"
 import { GraphBody } from "engine/world/body/body-rendering-graph"
 import { CanvasRequirements } from "engine/world/body/render/drawable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useMemo, useState } from "preact/hooks"
 import { defaultBodySpec } from "../collage/collage-helper"
 import { PLACEHOLDER_WIDTH, safeExtractTraceArray } from "../editor-functions"
-import { FileLevel, FilePosition, FileProp, FileTrace } from "../file-types"
+import { FilePosition, FileProp, FileTrace } from "../file-types"
 import { useArrayMemo } from "../utils/use-array-memo"
-import { CollageManager } from "./collage-manager"
-import { EditorLevel, GraphicalEditorEntity } from "./extended-level-format"
+import { type CollageManager } from "./collage-manager"
+import { EditorLevel, EditorPosition, EditorProp, EditorTrace } from "./extended-level-format"
 
 // From https://stackoverflow.com/a/43001581/4639640
 type Writeable<T> = { -readonly [P in keyof T]: T[P] }
@@ -24,7 +23,7 @@ let nextRef = 1
 export function useEntityBodies(
   level: EditorLevel,
   collageManager: CollageManager,
-  allEntities: readonly Immutable<GraphicalEditorEntity>[],
+  allEntities: readonly Immutable<EditorTrace | EditorProp | EditorPosition>[],
 ) {
   const [placeholderDrawable] = useState(() => {
     const topLeft = getDefaultTopLeft(defaultBodySpec, Rect.make(0, 0, PLACEHOLDER_WIDTH, PLACEHOLDER_WIDTH))
@@ -54,14 +53,14 @@ export function useEntityBodies(
   // it hung up the UI, so I've removed it for now.
   // const [editorIdToBody, setEditorIdToBody] = useState<Immutable<{ [editorId: string]: GraphBody }>>({})
 
-  function makeBodyForEntity(editorEntity: Immutable<GraphicalEditorEntity>): Immutable<EditorGraphBody> | null {
+  function makeBodyForEntity(editorEntity: Immutable<EditorTrace | EditorProp | EditorPosition>): Immutable<EditorGraphBody> | null {
     const body = makeWriteableBody()
-    if (editorEntity.type === "trace") {
-      if (!applyTrace(body, editorEntity.obj)) {
+    if ("vertices" in editorEntity) {
+      if (!applyTrace(body, editorEntity)) {
         return null
       }
     } else {
-      const p = editorEntity.obj
+      const p = editorEntity
       body.x = p.x
       body.y = p.y
       body.z = p.z
@@ -79,7 +78,7 @@ export function useEntityBodies(
     }
     return {
       ...body,
-      editorId: editorEntity.metadata.editorId,
+      editorId: editorEntity.id,
     }
   }
 
@@ -150,7 +149,7 @@ export function useEntityBodies(
 
   const entityBodies = useArrayMemo(
     allEntities,
-    ["metadata", "editorId"] as const,
+    ["id"] as const,
     makeBodyForEntity,
     [collageManager],
   )

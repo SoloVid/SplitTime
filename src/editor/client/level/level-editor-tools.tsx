@@ -1,58 +1,69 @@
-import { Collage, makeCollageFromFile } from "engine/graphics/collage"
+import { Collage } from "engine/graphics/collage"
+import { Immutable } from "engine/utils/immutable"
 import { TraceTypeType } from "engine/world/level/trace/trace-type"
-import { useEffect, useMemo, useRef, useState } from "preact/hooks"
+import { useContext, useEffect, useMemo, useRef, useState } from "preact/hooks"
 import { SharedStuffViewOnly as CollageSharedStuff } from "../collage/collage-editor-shared"
 import CollageShowcase from "../collage/collage-showcase"
 import { makeClassNames, makeStyleString, onlyLeft } from "../preact-help"
+import { ServerLiaison } from "../server-liaison"
 import { GlobalEditorShared } from "../shared-types"
 import { traceOptions } from "../trace-options"
-import { SharedStuff } from "./level-editor-shared"
+import { UserInputsContext } from "../user-inputs"
+import { CollageManagerContext } from "./collage-manager"
+import { EditorLevel } from "./extended-level-format"
+import { LevelEditorPreferencesContext } from "./level-preferences"
 import { Mode, POSITION_ICON, PROP_ICON, TRACE_ICON } from "./shared-types"
-import { Immutable } from "engine/utils/immutable"
 
 type LevelEditorToolsProps = {
   editorGlobalStuff: GlobalEditorShared
-  levelEditorShared: SharedStuff
+  level: EditorLevel
+  scale: number
+  server: ServerLiaison
 }
 
-function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuff | null {
+function useCollageViewHelper(props: LevelEditorToolsProps): CollageSharedStuff | null {
   const [montageIndex, setMontageIndexInternal] = useState<number | null>(null)
 
-  const collageId = levelEditorShared.selectedCollageId
-  const collage = levelEditorShared.selectedCollage
-  if (collageId === null || collage === null) {
-    return null
-  }
+  const [prefs, setPrefs] = useContext(LevelEditorPreferencesContext)
+  const collageManager = useContext(CollageManagerContext)
+  const userInputs = useContext(UserInputsContext)
+
+  const collageId = prefs.collageSelected
+  const collage = collageId === null ? null : collageManager.getCollage(collageId)
 
   const realCollage = useMemo<Immutable<Collage> | null>(() => {
-    return levelEditorShared.collageManager.getRealCollage(collageId)
-  }, [collageId, levelEditorShared.collageManager])
-
-  if (realCollage === null) {
-    return null
-  }
+    if (collageId === null) {
+      return null
+    }
+    return collageManager.getRealCollage(collageId)
+  }, [collageId, collageManager])
 
   const selectMontage = (montageIndex: number | null) => {
     setMontageIndexInternal(montageIndex)
-    if (montageIndex === null) {
-      levelEditorShared.setSelectedMontage(null)
-      levelEditorShared.setSelectedMontageDirection(null)
+    if (montageIndex === null || collage === null) {
+      setPrefs((before) => ({...before, montageSelected: null, montageDirectionSelected: null}))
       return
     }
 
     const m = collage.montages[montageIndex]
-    levelEditorShared.setSelectedMontage(m.id)
-    levelEditorShared.setSelectedMontageDirection(m.direction)
+    setPrefs((before) => ({...before, montageSelected: m.id, montageDirectionSelected: m.direction}))
   }
 
   useEffect(() => {
-    const index = collage.montages.findIndex(m => m.id === levelEditorShared.selectedMontage && m.direction === levelEditorShared.selectedMontageDirection)
+    if (collage === null) {
+      return
+    }
+    const index = collage.montages.findIndex(m => m.id === prefs.montageSelected && m.direction === prefs.montageDirectionSelected)
     if (index < 0) {
       selectMontage(null)
     } else {
       setMontageIndexInternal(index)
     }
   }, [collage])
+
+  if (collage === null || realCollage === null) {
+    return null
+  }
 
   return {
     collage,
@@ -64,9 +75,9 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
     },
     realCollage,
     globalStuff: {
-      get scale() { return levelEditorShared.globalStuff.scale },
-      server: levelEditorShared.globalStuff.server,
-      userInputs: levelEditorShared.globalStuff.userInputs,
+      get scale() { return props.scale },
+      server: props.server,
+      userInputs: userInputs,
     },
     selectMontage,
   }
@@ -75,13 +86,13 @@ function useCollageViewHelper(levelEditorShared: SharedStuff): CollageSharedStuf
 export default function LevelEditorTools(props: LevelEditorToolsProps) {
   const {
     editorGlobalStuff,
-    levelEditorShared,
+    level
   } = props
 
-  const collageViewHelper = useCollageViewHelper(levelEditorShared)
+  const collageViewHelper = useCollageViewHelper(props)
+  const [prefs, setPrefs] = useContext(LevelEditorPreferencesContext)
 
-  const level = levelEditorShared.level
-  const mode = levelEditorShared.mode
+  const mode = prefs.mode
 
   const $collageShowcaseContainer = useRef<HTMLDivElement>(document.createElement("div"))
 
@@ -90,14 +101,13 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
     const filePath = await editorGlobalStuff.openFileSelect("", suffixRegex)
     const prefixRegex = /^\//
     const collageId = filePath.replace(prefixRegex, "").replace(suffixRegex, "")
-    levelEditorShared.selectCollage(collageId)
+    setPrefs((before) => ({...before, collageSelected: collageId}))
   }
   function selectModeOption(mode: Mode): void {
-    levelEditorShared.setMode(mode)
+    setPrefs((before) => ({...before, mode: mode}))
   }
   function selectTraceOption(type: TraceTypeType): void {
-    levelEditorShared.setMode("trace")
-    levelEditorShared.setSelectedTraceType(type)
+    setPrefs((before) => ({...before, mode: "trace", traceType: type}))
   }
 
   return <div>
@@ -130,14 +140,14 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
           onClick={() => selectTraceOption(traceOption.type)}
           title={traceOption.help}
         >
-            {levelEditorShared.selectedTraceType === traceOption.type && ">> "}
+            {prefs.traceType === traceOption.type && ">> "}
           { traceOption.type }
         </div>
       ))}
     </div>}
     {(mode === 'prop' || mode === 'position') && <div className="collage-tool">
       <input
-        value={levelEditorShared.selectedCollageId ?? ""}
+        value={prefs.collageSelected ?? ""}
         onDblClick={onlyLeft(launchCollageFileBrowser)}
         placeholder="Select a collage..."
         readonly={true}
@@ -156,6 +166,7 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
       >
         <CollageShowcase
           collageViewHelper={collageViewHelper}
+          scale={props.scale}
           $container={$collageShowcaseContainer.current}
         />
       </div></div>}

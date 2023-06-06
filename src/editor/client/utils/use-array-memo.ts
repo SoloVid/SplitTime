@@ -1,13 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
-import { EditorPropEntity } from "../level/extended-level-format";
 import { getByPath } from "./immutable-helper";
 
 type SubKeyPaths<T, Key extends (keyof T)> = Key extends string ? (readonly [Key] | readonly [Key, ...KeyPaths<T[Key]>]) : never
 type KeyPaths<T> = T extends Record<string, unknown>
   ? (SubKeyPaths<T, keyof T>)
   : never
-
-type A = KeyPaths<EditorPropEntity>
 
 export function useArrayMemo<Input, Output, KeyField extends (keyof Input) | KeyPaths<Input> | null>(
   inputArray: readonly Input[],

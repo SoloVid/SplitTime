@@ -9,14 +9,16 @@ import { useContext, useEffect, useMemo, useState } from "preact/hooks"
 import { getPlaceholderImage, PLACEHOLDER_WIDTH, safeGetColor } from "./editor-functions"
 import { ImmutableSetter, makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "./preact-help"
 import { imageContext, ServerLiaison } from "./server-liaison"
-import { EditorMetadata } from "./shared-types"
 import { TRACE_GROUND_COLOR, TRACE_GROUND_HIGHLIGHT_COLOR } from "./trace-options"
 import { assert } from "globals"
 
 type RenderedTraceProps = {
   acceptMouse: boolean
-  metadata: Immutable<EditorMetadata>
-  setMetadata?: ImmutableSetter<EditorMetadata>
+  displayed: boolean
+  highlighted: boolean
+  setHighlighted?: (highlight: boolean) => void
+  // metadata: Immutable<EditorMetadata>
+  // setMetadata?: ImmutableSetter<EditorMetadata>
   pointsArray: (Readonly<Coordinates2D> | null)[]
   scale?: number
   server: ServerLiaison
@@ -33,8 +35,11 @@ export interface IRenderedTraceTracker {
 export default function RenderedTrace(props: RenderedTraceProps) {
   const {
     acceptMouse,
-    metadata,
-    setMetadata,
+    displayed,
+    highlighted,
+    setHighlighted,
+    // metadata,
+    // setMetadata,
     pointsArray,
     scale = 1,
     server,
@@ -43,7 +48,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     tracker,
     transform,
   } = props
-  const updateMetadata = setMetadata ? makeImmutableObjectSetterUpdater(setMetadata) : undefined
+  // const updateMetadata = setMetadata ? makeImmutableObjectSetterUpdater(setMetadata) : undefined
 
   const [uid] = useState(generateUID())
 
@@ -206,7 +211,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
   }, [pointsArray, trace, scale])
 
   const otherLevelDisplayed = (trace.type === TraceType.POINTER ||
-    trace.type === TraceType.TRANSPORT) && metadata.highlighted
+    trace.type === TraceType.TRANSPORT) && highlighted
 
   function useOtherLevel(s: ServerLiaison, levelId: string | undefined) {
     const [levelJson, setLevelJson] = useState<FileData | null>(null)
@@ -249,12 +254,12 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     if (otherLevelDisplayed && otherLevelImgSrc) {
       return "url(#img-" + uid + ")"
     }
-    return safeGetColor(trace, metadata)
-  }, [hasClose, otherLevelDisplayed, otherLevelImgSrc, uid, trace, metadata])
+    return safeGetColor(trace, highlighted)
+  }, [hasClose, otherLevelDisplayed, otherLevelImgSrc, uid, trace, highlighted])
   const traceStroke = useMemo(() => {
-    return hasClose ? "black" : safeGetColor(trace, metadata)
-  }, [hasClose, trace, metadata])
-  const traceShadowFill = metadata.highlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR
+    return hasClose ? "black" : safeGetColor(trace, highlighted)
+  }, [hasClose, trace, highlighted])
+  const traceShadowFill = highlighted ? TRACE_GROUND_HIGHLIGHT_COLOR : TRACE_GROUND_COLOR
   const traceShadowStroke = "black"
   const traceShadowDisplayed = hasClose && height > 0
 
@@ -265,14 +270,14 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     tracker.track(event, point)
   }
   function toggleHighlight(highlight: boolean): void {
-    if (!updateMetadata) {
+    if (!setHighlighted) {
       return
     }
     if(shouldDragBePrevented) {
-      updateMetadata({highlighted: false})
+      setHighlighted(false)
       return
     }
-    updateMetadata({highlighted: highlight})
+    setHighlighted(highlight)
   }
 
   return <g transform={transform}>
@@ -304,7 +309,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
       </pattern>}
     </defs>
     {/* Base outline and fill */}
-    {metadata.displayed && <path
+    {displayed && <path
       style={mousableStyle}
       onDblClick={preventDefault}
       onMouseDown={onlyLeft((e) => track(e, undefined))}
@@ -318,7 +323,7 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     {/* Curved outline */}
     {/* <path d={curvePathS} stroke="orange" stroke-width={2} fill="blue"/> */}
     {/* Points/vertices */}
-    {metadata.displayed && vertices.map((vertex) => (
+    {displayed && vertices.map((vertex) => (
     <circle
       style={mousableStyle}
       className="hoverable"
@@ -329,20 +334,20 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     />
     ))}
     {/* Outline for ramp/slope part of stairs; adds more of a 3D look */}
-    {metadata.displayed && pointsStairsSlopeS && <polyline
+    {displayed && pointsStairsSlopeS && <polyline
       points={pointsStairsSlopeS}
       stroke="red" stroke-width="5" fill="none"
       style="pointer-events: none;"
     />}
     {/* Up-arrows fill pattern on ramp/slope plus additional dashed outline on top of the previous */}
-    {metadata.displayed && pointsStairsSlopeS && <polyline
+    {displayed && pointsStairsSlopeS && <polyline
       points={pointsStairsSlopeS}
       stroke="black" stroke-width="2" stroke-dasharray="10,5"
       fill="url(#up-arrows-pattern)"
       style="pointer-events: none;"
     />}
     {/* Outline and fill for the top (z-axis/height) face area of the trace's volume */}
-    {metadata.displayed && traceShadowDisplayed && <polyline
+    {displayed && traceShadowDisplayed && <polyline
       points={pointsShadowS}
       fill={traceShadowFill}
       stroke={traceShadowStroke}

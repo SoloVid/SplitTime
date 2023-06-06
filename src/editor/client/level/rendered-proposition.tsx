@@ -6,17 +6,25 @@ import { Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useContext, useMemo } from "preact/hooks"
-import { createSnapMontageMover, getPlaceholderImage, inGroup, PLACEHOLDER_WIDTH } from "../editor-functions"
-import { makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "../preact-help"
+import { PLACEHOLDER_WIDTH, createSnapMontageMover, getPlaceholderImage } from "../editor-functions"
+import { ImmutableSetter, makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "../preact-help"
 import { imageContext } from "../server-liaison"
 import { Time } from "../time-context"
 import { useScaledImageSize } from "../utils/image-size"
-import { EditorPositionEntity, EditorPropEntity } from "./extended-level-format"
-import { SharedStuff } from "./level-editor-shared"
+import { CollageManagerContext } from "./collage-manager"
+import { EditorLevel, EditorPosition, EditorProp, ObjectMetadata } from "./extended-level-format"
+import DraggableEntity from "./draggable-entity"
+import { LevelEditorPreferencesContext } from "./level-preferences"
 
 type RenderedPropositionProps = {
-  readonly levelEditorShared: SharedStuff
-  readonly entity: Immutable<EditorPropEntity> | Immutable<EditorPositionEntity>
+  readonly level: Immutable<EditorLevel>
+  readonly entity: Immutable<EditorProp> | Immutable<EditorPosition>
+  readonly entityType: "prop" | "position"
+  readonly metadata: Immutable<ObjectMetadata>
+  readonly setMetadata: ImmutableSetter<ObjectMetadata>
+  readonly scale: number
+  readonly allowDrag: boolean
+  readonly allowInteraction: boolean
 }
 
 const NOT_READY = "NOT_READY"
@@ -25,24 +33,28 @@ const NOT_AVAILABLE = "NOT_AVAILABLE"
 /** Shared component for either prop or position */
 export default function RenderedProposition(props: RenderedPropositionProps) {
   const {
-    levelEditorShared,
     entity,
+    scale,
+    ...remainingProps
   } = props
-  const scale = levelEditorShared.globalStuff.scale
-  const p = entity.obj
+  const p = entity
   const time = useContext(Time)
+  const collageManager = useContext(CollageManagerContext)
+  const [levelPrefs] = useContext(LevelEditorPreferencesContext)
+
+  const displayed = useMemo(() => !levelPrefs.hidden.includes(entity.id), [levelPrefs.hidden])
 
   const collage = useMemo<Immutable<Collage> | typeof NOT_READY | typeof NOT_AVAILABLE>(() => {
     if (p.collage === "" || p.montage === "") {
       return NOT_AVAILABLE
     }
     try {
-      const c = levelEditorShared.collageManager.getRealCollage(p.collage)
+      const c = collageManager.getRealCollage(p.collage)
       return c || NOT_READY
     } catch (e: unknown) {
       return NOT_AVAILABLE
     }
-  }, [p.collage, levelEditorShared.collageManager])
+  }, [p.collage, collageManager])
 
   const montage = useMemo(() => {
     const tempFrame = new Frame(
@@ -89,19 +101,22 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   const frameElements = useMemo(() => {
     const coalescedFrames = montage.frames.length > 0 ? montage.frames : [frameMissingPlaceholder]
     return coalescedFrames.map(f => <RenderedPropositionAtFrame
-      levelEditorShared={levelEditorShared}
       entity={entity}
+      displayed={displayed}
       montage={montage}
       frame={f}
       imgSrc={imgSrc}
+      scale={scale}
       scaledSize={scaledSize}
+      {...remainingProps}
     ></RenderedPropositionAtFrame>)
-    }, [montage, levelEditorShared, entity, imgSrc, scaledSize])
+  }, [montage, entity, displayed, imgSrc, scale, scaledSize, ...Object.values(remainingProps)])
 
   return frameElements[frameIndex ?? 0]
 }
 
 type MoreProps = {
+  displayed: boolean
   montage: Montage
   frame: Frame
   imgSrc: string
@@ -110,17 +125,21 @@ type MoreProps = {
 
 function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps) {
   const {
-    levelEditorShared,
+    level,
     entity,
+    entityType,
+    metadata,
+    setMetadata,
+    allowDrag,
+    allowInteraction,
+    displayed,
     montage,
     frame,
     imgSrc,
+    scale,
     scaledSize,
   } = props
-  const scale = levelEditorShared.globalStuff.scale
-  const p = entity.obj
-  const metadata = entity.metadata
-  const level = levelEditorShared.level
+  const p = entity
   const body = montage.bodySpec
 
   const framePosition = useMemo(() => {
@@ -132,17 +151,18 @@ function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps)
 
   const containerMaskStyleString = useMemo(() => {
     return makeStyleString({
-      outline: metadata.highlighted ? "2px solid yellow" : "",
-      backgroundColor: metadata.highlighted ? "yellow" : "initial",
+      outline: metadata.mouseOver ? "2px solid yellow" : "",
+      backgroundColor: metadata.mouseOver ? "yellow" : "initial",
       position: 'absolute',
       overflow: 'hidden',
       left: (framePosition.x * scale) + 'px',
       top: (framePosition.y * scale) + 'px',
       width: (frame.box.width * scale) + 'px',
       height: (frame.box.height * scale) + 'px',
-      "pointer-events": inGroup(level, levelEditorShared.activeGroup?.obj.id ?? "", p) ? "initial" : "none"
+      "pointer-events": allowInteraction ? "initial" : "none"
     })
-  }, [p, metadata, framePosition, frame, level, levelEditorShared.activeGroup, scale])
+    // TODO: allowInteraction = inGroup(level, levelEditorShared.activeGroup?.obj.id ?? "", p)
+  }, [p, metadata, framePosition, frame, level, allowInteraction, scale])
 
   const imgStyleString = useMemo(() => scaledSize ? makeStyleString({
     position: "absolute",
@@ -153,48 +173,27 @@ function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps)
   }) : { display: "none" }, [scaledSize, frame.box, scale])
 
   function toggleHighlight(highlight: boolean): void {
-    const updateMetadata = makeImmutableObjectSetterUpdater(entity.setMetadata)
-    if(levelEditorShared.shouldDragBePrevented()) {
-      updateMetadata({highlighted: false})
-      return
-    }
-    updateMetadata({highlighted: highlight})
+    setMetadata((before) => ({...before, mouseOver: highlight}))
   }
 
-  function track(): void {
-    const updateP = makeImmutableObjectSetterUpdater(entity.setObj)
-    if(levelEditorShared.shouldDragBePrevented()) {
-      return
-    }
-    const snappedMover = createSnapMontageMover(levelEditorShared.globalStuff.gridCell, montage.bodySpec, p)
-    const originalX = entity.obj.x
-    const originalY = entity.obj.y
-    levelEditorShared.follow({
-      shift: (dx, dy) => {
-        const dxScaled = dx / scale
-        const dyScaled = dy / scale
-        snappedMover.applyDelta(dxScaled, dyScaled)
-        const snappedDelta = snappedMover.getSnappedDelta()
-        updateP((before) => ({
-          x: originalX + snappedDelta.x,
-          y: originalY + snappedDelta.y,
-        }))
-      }
-    })
-    levelEditorShared.setPropertiesPanel(entity)
-  }
-
-  return <>{metadata.displayed && <div
-    className={`draggable ${entity.type}`}
+  return <>{displayed && <div
+    className={`${entityType}`}
     onDblClick={preventDefault}
-    onMouseDown={onlyLeft(track, true)}
     onMouseMove={() => toggleHighlight(true)}
     onMouseLeave={() => toggleHighlight(false)}
     style={containerMaskStyleString}
   >
-    <img
-      src={imgSrc}
-      style={imgStyleString}
-    />
+    <DraggableEntity
+      type={entityType}
+      entity={entity}
+      bodySpec={montage.bodySpec}
+      scale={scale}
+      preventDrag={!allowDrag}
+    >
+      <img
+        src={imgSrc}
+        style={imgStyleString}
+      />
+    </DraggableEntity>
   </div>}</>
 }

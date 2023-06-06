@@ -15,7 +15,7 @@ export async function getEngineBuilder(): Promise<Builder> {
     bundle: true,
     splitting: true,
     format: "esm",
-    minify: true,
+    // minify: true,
     sourcemap: true,
     outdir: join(rootDir, "lib", "api"),
   })

@@ -1,59 +1,74 @@
+import { Immutable } from "engine/utils/immutable"
 import { debug } from "engine/utils/logger"
-import { useState } from "preact/hooks"
+import { useContext } from "preact/hooks"
 import { CheckboxInput } from "../input"
 import { ImmutableSetter, makeClassNames, onlyLeft, preventDefault } from "../preact-help"
-import { EditorEntity, EditorGroupEntity, EditorPositionEntity, EditorPropEntity, EditorTraceEntity, GraphicalEditorEntity } from "./extended-level-format"
-import { GroupDisplayHelper } from "./group-display-helper"
-import { SharedStuff } from "./level-editor-shared"
+import { useJsonableMemo } from "../utils/use-jsonable-memo"
+import { EditorLevel, EditorPosition, EditorProp, EditorTrace, ObjectMetadataMap } from "./extended-level-format"
+import { GroupMetadata, LevelTreeGroupNode, setAllDisplayed } from "./group-display-helper"
+import { LevelEditorPreferencesContext } from "./level-preferences"
+import { setActiveGroup } from "./preference-helpers"
 import { POSITION_ICON, PROP_ICON, TRACE_ICON } from "./shared-types"
 
 type MenuGroupProps = {
-  levelEditorShared: SharedStuff
+  level: Immutable<EditorLevel>
   // undefined for top level
-  group?: EditorGroupEntity | undefined
+  // group?: Immutable<EditorGroup> | undefined
+  treeNode: Immutable<LevelTreeGroupNode>
+  metadataMap: Record<string, Immutable<GroupMetadata>>
+  setObjectMetadataMap: ImmutableSetter<ObjectMetadataMap>
 }
 
 export default function MenuGroup({
-  levelEditorShared,
-  group,
+  // levelEditorShared,
+  level,
+  // group,
+  treeNode,
+  metadataMap,
+  setObjectMetadataMap,
 }: MenuGroupProps) {
-  const level = levelEditorShared.level
+  const group = treeNode.group
+  const groupId = group ? group.id : ""
+  const [prefs, setPrefs] = useContext(LevelEditorPreferencesContext)
 
-  const collapsed = group?.metadata.collapsed ?? true
+  const collapsed = prefs.collapsedGroups.includes(groupId)
   const setCollapsed: ImmutableSetter<boolean> = (modify) => {
-    if (group) {
-      group.setMetadata((before) => ({...before, collapsed: modify(before.collapsed)}))
+    if (!group) {
+      return
+    }
+    const after = modify(collapsed)
+    if (after) {
+      setPrefs((before) => ({...before, collapsedGroups: [...before.collapsedGroups, group.id]}))
+    } else {
+      setPrefs((before) => ({...before, collapsedGroups: before.collapsedGroups.filter(id => id !== group.id)}))
     }
   }
-  const displayHelper = new GroupDisplayHelper(
-    level,
-    group
-  )
 
-  const subGroups = displayHelper.subGroups
-  const traces = displayHelper.traces
-  const props = displayHelper.props
-  const positions = displayHelper.positions
+  const subGroups = treeNode.subGroups
+  const traces = treeNode.traces
+  const props = treeNode.props
+  const positions = treeNode.positions
+  const myMetadata = useJsonableMemo(() => metadataMap[groupId], [metadataMap, groupId])
 
   function edit(): void {
-    levelEditorShared.setActiveGroup(group ?? null)
+    setActiveGroup(setPrefs, groupId)
     if (!group) {
       debug("Group can't be edited because it is default")
       return
     }
-    levelEditorShared.setPropertiesPanel(group)
+    setPrefs((before) => ({...before, propertiesPanel: { type: "group", id: groupId }}))
   }
-  function editTrace(trace: EditorTraceEntity): void {
-    levelEditorShared.setPropertiesPanel(trace)
+  function editTrace(trace: EditorTrace): void {
+    setPrefs((before) => ({...before, propertiesPanel: { type: "trace", id: trace.id }}))
   }
-  function editProp(prop: EditorPropEntity): void {
-    levelEditorShared.setPropertiesPanel(prop)
+  function editProp(prop: EditorProp): void {
+    setPrefs((before) => ({...before, propertiesPanel: { type: "prop", id: prop.id }}))
   }
-  function editPosition(position: EditorPositionEntity): void {
-    levelEditorShared.setPropertiesPanel(position)
+  function editPosition(position: EditorPosition): void {
+    setPrefs((before) => ({...before, propertiesPanel: { type: "position", id: position.id }}))
   }
   function toggleAllDisplayed(): void {
-    displayHelper.toggleAllDisplayed()
+    setAllDisplayed(setPrefs, treeNode, !myMetadata.allChildrenDisplayed)
   }
 
   type EntityTreeItemOptions<T> = {
@@ -64,21 +79,26 @@ export default function MenuGroup({
     editEntity: (entity: T) => void
     titlePrefix: string
   }
-  function makeEntityTreeItem<T extends GraphicalEditorEntity>(o: EntityTreeItemOptions<T>) {
+  function makeEntityTreeItem<T extends EditorTrace | EditorProp | EditorPosition>(o: EntityTreeItemOptions<T>) {
     return <div className={o.className}
-      onMouseEnter={() => o.entity.setMetadata(before => ({...before, highlighted: true}))}
-      onMouseLeave={() => o.entity.setMetadata(before => ({...before, highlighted: false}))}
+      onMouseEnter={() => setObjectMetadataMap((before) => ({...before, [o.entity.id]: {...before[o.entity.id], mouseOver: true}}))}
+      onMouseLeave={() => setObjectMetadataMap((before) => ({...before, [o.entity.id]: {...before[o.entity.id], mouseOver: false}}))}
     >
       <i className={`fas fa-${o.icon}`}></i>
       <CheckboxInput
-        value={o.entity.metadata.displayed}
-        onChange={(newValue) => o.entity.setMetadata(before => ({...before, displayed: newValue}))}
+        value={prefs.hidden.includes(o.entity.id)}
+        onChange={(newValue) => setPrefs((before) => {
+          if (newValue) {
+            return {...before, hidden: before.hidden.filter(id => id !== o.entity.id)}
+          }
+          return {...before, hidden: [...before.hidden, o.entity.id]}
+        })}
       />
       <span onClick={onlyLeft(() => {
         o.editEntity(o.entity)
-        levelEditorShared.setActiveGroup(group ?? null)
+        setActiveGroup(setPrefs, groupId)
       })} className="pointer">
-        <span>{o.entity.obj.id || `${o.titlePrefix} ${o.index}`}</span>
+        <span>{o.entity.id || `${o.titlePrefix} ${o.index}`}</span>
       </span>
     </div>
   }
@@ -89,18 +109,15 @@ export default function MenuGroup({
         {collapsed && <i className="fas fa-caret-right"></i>}
         {!collapsed && <i className="fas fa-caret-down"></i>}
       </span>
-      {displayHelper.realChildCount > 0 && <input type="checkbox"
-        checked={displayHelper.allDisplayed}
+      {myMetadata.childCount > 0 && <input type="checkbox"
+        checked={myMetadata.allChildrenDisplayed}
         onClick={onlyLeft(toggleAllDisplayed)}
       />}
-      <span className={makeClassNames({ highlighted: (levelEditorShared.activeGroup ?? null) === group })}>
+      <span className={makeClassNames({ highlighted: (prefs.activeGroup ?? "") === groupId })}>
         {!!group && <>
           <strong onClick={edit} className="pointer">
-            <span>{group.obj.id || "Untitled Group"}</span>
+            <span>{group.name || `Untitled Group (${group.id})`}</span>
           </strong>
-        </>}
-        {!group && <>
-          <strong><em>Homeless</em></strong>
         </>}
       </span>
     </>}
@@ -110,8 +127,10 @@ export default function MenuGroup({
       </em>}
       {subGroups.map((subGroup) => (
         <MenuGroup
-          levelEditorShared={levelEditorShared}
-          group={subGroup}
+          level={level}
+          treeNode={subGroup}
+          metadataMap={metadataMap}
+          setObjectMetadataMap={setObjectMetadataMap}
         />
       ))}
       {traces.map((trace, i) => makeEntityTreeItem({

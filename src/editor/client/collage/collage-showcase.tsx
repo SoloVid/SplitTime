@@ -9,6 +9,7 @@ type CollageShowcaseProps = {
   style?: string
   collageEditHelper?: SharedStuff | undefined
   collageViewHelper: SharedStuffViewOnly
+  scale: number
   $container: HTMLDivElement | null
 }
 
@@ -16,11 +17,11 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
   const {
     collageEditHelper,
     collageViewHelper,
+    scale,
     $container,
   } = props
 
   const collage = collageViewHelper.collage
-  const scale = collageViewHelper.globalStuff.scale
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
   // const maxMontageWidth = $el.current.offsetWidth
   // const maxMontageHeight = $el.current.offsetHeight

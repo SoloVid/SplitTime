@@ -6,16 +6,16 @@ export function onGroupIdUpdate(setLevel: ImmutableSetter<EditorLevel>, oldId: s
     return {
       ...before,
       positions: before.positions.map(p => {
-        if (p.obj.group !== oldId) return p
-        return { ...p, obj: { ...p.obj, group: newId } }
+        if (p.group !== oldId) return p
+        return { ...p, group: newId }
       }),
       props: before.props.map(p => {
-        if (p.obj.group !== oldId) return p
-        return { ...p, obj: { ...p.obj, group: newId } }
+        if (p.group !== oldId) return p
+        return { ...p, group: newId }
       }),
       traces: before.traces.map(t => {
-        if (t.obj.group !== oldId) return t
-        return { ...t, obj: { ...t.obj, group: newId } }
+        if (t.group !== oldId) return t
+        return { ...t, group: newId }
       }),
     }
   })

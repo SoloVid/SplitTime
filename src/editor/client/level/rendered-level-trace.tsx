@@ -1,29 +1,43 @@
 import { Immutable } from "engine/utils/immutable"
 import { generateUID } from "engine/utils/misc"
 import { Coordinates2D, instanceOfCoordinates2D } from "engine/world/level/level-location"
-import { useMemo, useState } from "preact/hooks"
+import { useContext, useMemo, useState } from "preact/hooks"
 import { inGroup, safeExtractTraceArray } from "../editor-functions"
 import { GridSnapMover } from "../grid-snap-mover"
 import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
-import { EditorTraceEntity } from "./extended-level-format"
-import { SharedStuff } from "./level-editor-shared"
 import { useJsonableMemo } from "../utils/use-jsonable-memo"
+import { EditorLevel, EditorTrace, ObjectMetadata } from "./extended-level-format"
+import { LevelEditorPreferencesContext } from "./level-preferences"
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
+import { ImmutableSetter } from "../preact-help"
+import { LevelFollowerContext, LevelFollowerContextProvider } from "./level-follower"
+import { ServerLiaison } from "../server-liaison"
 
 type RenderedLevelTraceProps = {
-  levelEditorShared: SharedStuff
-  trace: Immutable<EditorTraceEntity>
+  level: Immutable<EditorLevel>
+  metadata: ObjectMetadata
+  scale: number
+  server: ServerLiaison
+  shouldDragBePrevented: boolean
+  trace: Immutable<EditorTrace>
   transform?: string
 }
 
 export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   const {
-    levelEditorShared,
+    level,
+    metadata,
+    scale,
+    server,
+    shouldDragBePrevented,
     trace,
   } = props
 
-  const scale = levelEditorShared.globalStuff.scale
-  const level = levelEditorShared.level
-  const activeGroup = levelEditorShared.activeGroup
+  const [globalPrefs] = useContext(GlobalEditorPreferencesContext)
+  const [levelPrefs, setLevelPrefs] = useContext(LevelEditorPreferencesContext)
+  const levelFollower = useContext(LevelFollowerContext)
+
+  const activeGroup = levelPrefs.activeGroup
 
   const tracker: IRenderedTraceTracker = {
     track: (e, p) => trackInternal(p)
@@ -31,58 +45,68 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   const [uid] = useState(generateUID())
 
   const acceptMouse = useMemo(() => {
-    return inGroup(level, activeGroup?.obj.id ?? "", trace.obj)
+    return inGroup(level, activeGroup ?? "", trace)
   }, [level, activeGroup, trace])
 
   const pointsArray = useJsonableMemo(() => {
-    return safeExtractTraceArray(level, trace.obj.vertices)
-  }, [level, trace.obj.vertices])
-
-  const shouldDragBePrevented = levelEditorShared.shouldDragBePrevented()
+    return safeExtractTraceArray(level, trace.vertices)
+  }, [level, trace.vertices])
 
   function trackInternal(point?: Coordinates2D): void {
-    if(shouldDragBePrevented) {
+    if(shouldDragBePrevented || !levelFollower) {
       return
     }
-    const originalPointString = trace.obj.vertices
+    const originalPointString = trace.vertices
     const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
-    const vertices = safeExtractTraceArray(level, trace.obj.vertices)
+    const vertices = safeExtractTraceArray(level, trace.vertices)
     const originalPoints = point ? [point] : vertices.filter(instanceOfCoordinates2D)
-    const snappedMover = new GridSnapMover(levelEditorShared.globalStuff.gridCell, originalPoints)
-    const follower = {
-      shift: (dx: number, dy: number) => {
-        const dxScaled = dx / scale
-        const dyScaled = dy / scale
-        snappedMover.applyDelta(dxScaled, dyScaled)
-        const snappedDelta = snappedMover.getSnappedDelta()
-        var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
-        if (originalPoint) {
-          regex = new RegExp("\\((" + originalPoint.x + "),\\s*(" + originalPoint.y + ")\\)", "g")
-        }
-        const newVertices = originalPointString.replace(regex, function(match, p1, p2) {
-          var newX = Number(p1) + snappedDelta.x
-          var newY = Number(p2) + snappedDelta.y
-          return "(" + newX + ", " + newY + ")"
-        })
-        trace.setObj((before) => ({
-          ...before,
-          vertices: newVertices,
-        }), `vertex:${JSON.stringify(originalPoint)}`)
+    const snappedMover = new GridSnapMover(globalPrefs.gridCell, originalPoints)
+    levelFollower.trackMoveInLevel((dx, dy, levelBefore) => {
+      const dxScaled = dx / scale
+      const dyScaled = dy / scale
+      snappedMover.applyDelta(dxScaled, dyScaled)
+      const snappedDelta = snappedMover.getSnappedDelta()
+      var regex = /\((-?[\d]+),\s*(-?[\d]+)\)/g
+      if (originalPoint) {
+        regex = new RegExp("\\((" + originalPoint.x + "),\\s*(" + originalPoint.y + ")\\)", "g")
       }
-    }
-    levelEditorShared.follow(follower)
-    levelEditorShared.setPropertiesPanel(trace)
+      const newVertices = originalPointString.replace(regex, function(match, p1, p2) {
+        var newX = Number(p1) + snappedDelta.x
+        var newY = Number(p2) + snappedDelta.y
+        return "(" + newX + ", " + newY + ")"
+      })
+      return {
+        ...levelBefore,
+        traces: levelBefore.traces.map(t => {
+          if (t.id !== trace.id) {
+            return t
+          }
+          return {
+            ...t,
+            vertices: newVertices,
+          }
+        })
+      }
+      // trace.setObj((before) => ({
+      //   ...before,
+      //   vertices: newVertices,
+      // }), `vertex:${JSON.stringify(originalPoint)}`)
+    })
+    setLevelPrefs((before) => ({...before, propertiesPanel: {type: "trace", id: trace.id}}))
   }
 
   return <RenderedTrace
     acceptMouse={acceptMouse}
-    metadata={trace.metadata}
-    setMetadata={trace.setMetadata}
+    displayed={!levelPrefs.hidden.includes(trace.id)}
+    highlighted={metadata.mouseOver}
+    // TODO: Add setHighlighted
+    // metadata={trace.metadata}
+    // setMetadata={trace.setMetadata}
     pointsArray={pointsArray}
     scale={scale}
-    server={levelEditorShared.globalStuff.server}
+    server={server}
     shouldDragBePrevented={shouldDragBePrevented}
-    trace={trace.obj}
+    trace={trace}
     tracker={tracker}
     transform={props.transform}
   />

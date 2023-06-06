@@ -54,8 +54,8 @@ export function exportJson<T>(data: IsJsonable<T, false, true>): json {
   return JSON.stringify(data, null, 2)
 }
 
-export function safeGetColor(trace: FileTrace, metadata: EditorMetadata) {
-  if(metadata.highlighted) {
+export function safeGetColor(trace: FileTrace, highlighted: boolean) {
+  if(highlighted) {
     return "rgba(255, 255, 0, 0.8)"
   }
   let type = trace.type

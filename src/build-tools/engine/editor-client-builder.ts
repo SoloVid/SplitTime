@@ -15,7 +15,7 @@ export async function getEditorClientBuilder(): Promise<Builder> {
     jsx: "automatic",
     outfile: join(rootDir, "lib", "editor-client.js"),
     sourcemap: true,
-    minify: true,
+    // minify: true,
   })
   return {
     name: "editor client build",
