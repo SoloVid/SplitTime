@@ -10,6 +10,7 @@ export function useSortedEntities(
 ) {
   const [graph] = useState(new BodyRenderingGraph())
   return useMemo(() => {
+    console.log("rebuilding graph")
     graph.notifyNewFrame()
     for (const b of bodies) {
       graph.feedBody(b)

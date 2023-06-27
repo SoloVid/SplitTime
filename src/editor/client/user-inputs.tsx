@@ -1,7 +1,7 @@
 import { keycode } from "api/controls";
 import { debug } from "api/system";
 import { createContext } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { useSetIntervalWhenActive } from "./utils/use-set-interval-when-active";
 import { Coordinates2D } from "engine/world/level/level-location";
 import { getCoords } from "./editor-functions";
@@ -54,13 +54,13 @@ export function UserInputsContextProvider({ children }: { children: any }) {
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
 
-  const setFollowers: ImmutableSetter<null | readonly Followable[]> = (transform) => {
+  const setFollowers: ImmutableSetter<null | readonly Followable[]> = useMemo(() => (transform) => {
     setFollowersInternal((before) => {
       setPreviousFollowers(before)
       const after = transform(before)
       return after
     })
-  }
+  }, [setFollowersInternal, setPreviousFollowers])
 
   const [mouse, setMouse] = useState({
     x: 0,
@@ -189,17 +189,17 @@ export function UserInputsContextProvider({ children }: { children: any }) {
     }
   })
 
-  const value: UserInputs2 = {
+  const value: UserInputs2 = useMemo(() => ({
     mouse: mouse,
     ctrlDown: ctrlDown,
     setFollowers: setFollowers
-  }
+  }), [mouse, ctrlDown, setFollowers])
 
   return <div
     onMouseMove={handleMouseMove}
     onMouseDown={handleMouseDown}
     onMouseUp={handleMouseUp}
-    style="width: 100%; height: 100%;"
+    style="flex: 1; display: flex; overflow: hidden;"
   >
     <UserInputsContext.Provider value={value}>
       {children}

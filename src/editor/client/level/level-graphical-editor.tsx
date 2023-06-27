@@ -21,6 +21,8 @@ import { LevelEditorPreferencesContext } from "./level-preferences"
 import RenderedLevelTrace from "./rendered-level-trace"
 import RenderedProposition from "./rendered-proposition"
 import { EDITOR_PADDING } from "./shared-types"
+import RenderCounter from "../utils/render-counter"
+import { useArrayMemo } from "../utils/use-array-memo"
 
 type LevelGraphicalEditorProps = {
   globalStuff: GlobalEditorShared
@@ -61,12 +63,14 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     ],
     [level.props, level.positions, level.traces]
   )
-  const entityBodies = useEntityBodies(level, collageManager, allEntities.map(e => e.e))
+  const allEntitiesJustEntities = useMemo(() => allEntities.map(e => e.e), [allEntities])
+  const entityBodies = useEntityBodies(level, collageManager, allEntitiesJustEntities)
   const allEntitiesSorted = useSortedEntities(allEntities, entityBodies)
   // This is the workaround if the sorting hangs up the UI too much.
   // const allEntitiesSorted = allEntities
 
   const inputs = useMemo(() => {
+    console.log("rebuilding inputs")
     let position = {
       x: 0,
       y: 0
@@ -274,6 +278,49 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     }))
   }
 
+  const entityDataForElements = allEntitiesSorted
+
+  const entityElements = useArrayMemo(
+    entityDataForElements,
+    ["e", "id"],
+    (entity) => (
+      <div
+        key={entity.e.id}
+        className="entity"
+      >
+        {entity.t !== "trace" && <div
+          className="proposition-container"
+          style={levelOffsetStyle}
+        >
+          <RenderedProposition
+            level={level}
+            entityType={entity.t}
+            entity={entity.e}
+            metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
+            setObjectMetadataMap={setObjectMetadataMap}
+            scale={scale}
+            allowDrag={false} // TODO: Source allowDrag value correctly.
+          />
+        </div>}
+        {entity.t === "trace" && <svg
+          style={`position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;`}
+          className="trace-svg"
+        >
+          <RenderedLevelTrace
+            level={level}
+            metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
+            scale={scale}
+            server={globalStuff.server}
+            shouldDragBePrevented={true} // TODO: Source allowDrag value correctly.
+            transform={traceTransform}
+            trace={entity.e}
+          />
+        </svg>}
+      </div>
+    ),
+    [levelOffsetStyle, level, objectMetadataMap, setObjectMetadataMap, scale, globalStuff.server, traceTransform]
+  )
+
   return <div
     ref={$el}
     className="level-area transparency-checkerboard-background"
@@ -284,43 +331,10 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     onDblClick={preventDefault}
     onDragStart={preventDefault}
   >
+    <RenderCounter debugLabel="LevelGraphicalEditor"></RenderCounter>
     <LevelBackground level={level} scale={scale} />
 
-    {allEntitiesSorted.map((entity) => (
-    <div
-      key={entity.e.id}
-      className="entity"
-    >
-      {entity.t !== "trace" && <div
-        className="proposition-container"
-        style={levelOffsetStyle}
-      >
-        <RenderedProposition
-          level={level}
-          entityType={entity.t}
-          entity={entity.e}
-          metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
-          setMetadata={(transform) => setObjectMetadataMap((before) => ({...before, [entity.e.id]: transform(before[entity.e.id] ?? blankObjectMetadata)}))}
-          scale={scale}
-          allowDrag={false} // TODO: Source allowDrag value correctly.
-        />
-      </div>}
-      {entity.t === "trace" && <svg
-        style={`position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;`}
-        className="trace-svg"
-      >
-        <RenderedLevelTrace
-          level={level}
-          metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
-          scale={scale}
-          server={globalStuff.server}
-          shouldDragBePrevented={true} // TODO: Source allowDrag value correctly.
-          transform={traceTransform}
-          trace={entity.e}
-        />
-      </svg>}
-    </div>
-    ))}
+    {entityElements}
 
     {globalPrefs.gridEnabled && <GridLines
       gridCell={scaledGridCell}

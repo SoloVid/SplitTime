@@ -9,6 +9,7 @@ import { addGroup } from "./level-mutation-helpers"
 import { LevelEditorPreferencesContext } from "./level-preferences"
 import MenuGroup from "./menu-group"
 import { setActiveGroup } from "./preference-helpers"
+import RenderCounter from "../utils/render-counter"
 
 type LevelTreeProps = {
   // levelEditorShared: SharedStuff
@@ -46,6 +47,7 @@ export default function LevelTree(props: LevelTreeProps) {
   }
 
   return <div className="level-tree">
+    <RenderCounter debugLabel="LevelTree"></RenderCounter>
     <label>
       Active Group:
       <SelectInput

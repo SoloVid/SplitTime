@@ -224,3 +224,13 @@ input.block, textarea.block, select.block {
 .margin-right {
     margin-right: 8px;
 }
+
+.render-counter {
+    position: absolute;
+    z-index: 10;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(100, 100, 100, .5);
+    color: white;
+}

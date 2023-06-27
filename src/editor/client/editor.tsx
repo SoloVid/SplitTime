@@ -18,6 +18,8 @@ import { showError } from "./utils/prompt"
 import { EditorType } from "./editor-type"
 import YAML from "yaml"
 import { UserInputsContextProvider } from "./user-inputs"
+import EditorFrame from "./editor-frame"
+import RenderCounter from "./utils/render-counter"
 
 type EditorProps = {
   readonly editorType: EditorType
@@ -118,38 +120,30 @@ export default function Editor({
     }
   }
 
-  return <div
-    className="editor"
-    style="display: flex; flex-flow: column; height: 100vh;"
+  return <EditorFrame
+    editorPreferencesId={filePath}
   >
-    <GlobalEditorPreferencesContextProvider id={filePath}>
-      <MenuBar
-        editSettings={() => {}} // TODO: Implement editSettings
-        openFileSave={() => {}} // TODO: Implement openFileSave
-      ></MenuBar>
-      <UserInputsContextProvider>
-        {/* {!!code && <CodeEditor
-          key={filePath}
-          code={code}
-          setCode={setCode}
-          style="flex-grow: 1;"
-        />}
-        {!!collage && <CollageEditor
-          key={filePath}
-          id={filePath}
-          collage={collage}
-          setCollage={setCollage}
-          style="flex-grow: 1; overflow: hidden;"
-        />} */}
-        { !!level && <LevelEditor
-          key={filePath}
-          id={filePath}
-          editorGlobalStuff={globalStuff}
-          level={level}
-          setLevel={setLevel}
-          style="flex-grow: 1; overflow: hidden;"
-        />}
-      </UserInputsContextProvider>
-    </GlobalEditorPreferencesContextProvider>
-  </div>
+    <RenderCounter debugLabel="Editor"></RenderCounter>
+    {/* {!!code && <CodeEditor
+      key={filePath}
+      code={code}
+      setCode={setCode}
+      style="flex-grow: 1;"
+    />}
+    {!!collage && <CollageEditor
+      key={filePath}
+      id={filePath}
+      collage={collage}
+      setCollage={setCollage}
+      style="flex-grow: 1; overflow: hidden;"
+    />} */}
+    { !!level && <LevelEditor
+      key={filePath}
+      id={filePath}
+      editorGlobalStuff={globalStuff}
+      level={level}
+      setLevel={setLevel}
+      style="flex-grow: 1; overflow: hidden;"
+    />}
+  </EditorFrame>
 }

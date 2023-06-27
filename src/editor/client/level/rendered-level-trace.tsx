@@ -14,8 +14,8 @@ import { LevelFollowerContext, LevelFollowerContextProvider } from "./level-foll
 import { ServerLiaison } from "../server-liaison"
 
 type RenderedLevelTraceProps = {
-  level: Immutable<EditorLevel>
   metadata: ObjectMetadata
+  level: Immutable<EditorLevel>
   scale: number
   server: ServerLiaison
   shouldDragBePrevented: boolean

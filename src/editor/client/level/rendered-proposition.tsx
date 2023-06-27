@@ -5,23 +5,24 @@ import { Montage, frameMissingPlaceholder, makeMontage } from "engine/graphics/m
 import { Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
-import { useContext, useMemo } from "preact/hooks"
+import { useContext, useEffect, useMemo } from "preact/hooks"
 import { PLACEHOLDER_WIDTH, createSnapMontageMover, getPlaceholderImage, inGroup } from "../editor-functions"
 import { ImmutableSetter, makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "../preact-help"
 import { imageContext } from "../server-liaison"
 import { Time } from "../time-context"
 import { useScaledImageSize } from "../utils/image-size"
 import { CollageManagerContext } from "./collage-manager"
-import { EditorLevel, EditorPosition, EditorProp, ObjectMetadata } from "./extended-level-format"
+import { EditorLevel, EditorPosition, EditorProp, ObjectMetadata, ObjectMetadataMap } from "./extended-level-format"
 import DraggableEntity from "./draggable-entity"
 import { LevelEditorPreferencesContext } from "./level-preferences"
+import RenderCounter from "../utils/render-counter"
 
 type RenderedPropositionProps = {
   readonly level: Immutable<EditorLevel>
   readonly entity: Immutable<EditorProp> | Immutable<EditorPosition>
   readonly entityType: "prop" | "position"
   readonly metadata: Immutable<ObjectMetadata>
-  readonly setMetadata: ImmutableSetter<ObjectMetadata>
+  readonly setObjectMetadataMap: ImmutableSetter<ObjectMetadataMap>
   readonly scale: number
   readonly allowDrag: boolean
 }
@@ -34,8 +35,11 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   const {
     level,
     entity,
+    entityType,
+    metadata,
+    setObjectMetadataMap,
     scale,
-    ...remainingProps
+    allowDrag,
   } = props
   const p = entity
   const time = useContext(Time)
@@ -101,9 +105,12 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
 
   const frameElements = useMemo(() => {
     const coalescedFrames = montage.frames.length > 0 ? montage.frames : [frameMissingPlaceholder]
+    const setMetadata: ImmutableSetter<ObjectMetadata> = (transform) => setObjectMetadataMap((before) => ({...before, [entity.id]: transform(before[entity.id] ?? metadata)}))
+    console.log("reconstructing rpafs")
     return coalescedFrames.map(f => <RenderedPropositionAtFrame
-      level={level}
       entity={entity}
+      entityType={entityType}
+      allowDrag={allowDrag}
       allowInteraction={allowInteraction}
       displayed={displayed}
       montage={montage}
@@ -111,9 +118,10 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
       imgSrc={imgSrc}
       scale={scale}
       scaledSize={scaledSize}
-      {...remainingProps}
+      metadata={metadata}
+      setMetadata={setMetadata}
     ></RenderedPropositionAtFrame>)
-  }, [montage, level, entity, allowInteraction, displayed, imgSrc, scale, scaledSize, ...Object.values(remainingProps)])
+  }, [montage, entity, entityType, metadata, setObjectMetadataMap, allowInteraction, displayed, imgSrc, scale, scaledSize])
 
   return frameElements[frameIndex ?? 0]
 }
@@ -125,11 +133,11 @@ type MoreProps = {
   readonly frame: Frame
   readonly imgSrc: string
   readonly scaledSize: ReturnType<typeof useScaledImageSize>
+  readonly setMetadata: ImmutableSetter<ObjectMetadata>
 }
 
-function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps) {
+function RenderedPropositionAtFrame(props: Omit<RenderedPropositionProps, "level" | "setObjectMetadataMap"> & MoreProps) {
   const {
-    level,
     entity,
     entityType,
     metadata,
@@ -166,7 +174,7 @@ function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps)
       "pointer-events": allowInteraction ? "initial" : "none"
     })
     // TODO: allowInteraction = inGroup(level, levelEditorShared.activeGroup?.obj.id ?? "", p)
-  }, [p, metadata, framePosition, frame, level, allowInteraction, scale])
+  }, [p, metadata, framePosition, frame, allowInteraction, scale])
 
   const imgStyleString = useMemo(() => scaledSize ? makeStyleString({
     position: "absolute",
@@ -194,6 +202,7 @@ function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps)
       scale={scale}
       preventDrag={!allowDrag}
     >
+      <RenderCounter></RenderCounter>
       <img
         src={imgSrc}
         style={imgStyleString}
