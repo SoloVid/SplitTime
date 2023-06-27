@@ -5,7 +5,7 @@ import { makePositionPoint } from "engine/world/level/trace/trace-points"
 import { TraceType } from "engine/world/level/trace/trace-type"
 import { assert } from "globals"
 import { useContext, useMemo, useRef, useState } from "preact/hooks"
-import { createSnapMontageMover, findClosestPosition, getGroupById, makeNewTrace } from "../editor-functions"
+import { createSnapMontageMover, findClosestPosition, getGroupById, getPositionMap, makeNewTrace } from "../editor-functions"
 import GridLines from "../grid-lines"
 import { InfoPaneContext } from "../info-pane"
 import { ImmutableSetter, makeStyleString, preventDefault } from "../preact-help"
@@ -23,6 +23,7 @@ import RenderedProposition from "./rendered-proposition"
 import { EDITOR_PADDING } from "./shared-types"
 import RenderCounter from "../utils/render-counter"
 import { useArrayMemo } from "../utils/use-array-memo"
+import { useJsonableMemo } from "../utils/use-jsonable-memo"
 
 type LevelGraphicalEditorProps = {
   globalStuff: GlobalEditorShared
@@ -278,47 +279,65 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     }))
   }
 
-  const entityDataForElements = allEntitiesSorted
+  const positionMap = useJsonableMemo(() => getPositionMap(level), [level])
+  const entityDataForElements = useArrayMemo(
+    allEntitiesSorted,
+    ["e", "id"],
+    (data) => ({
+      ...data,
+      groupExists: level.groups.some(g => g.id === data.e.group),
+      metadata: objectMetadataMap[data.e.id] ?? blankObjectMetadata,
+      positionMap,
+    }),
+    [level, objectMetadataMap, positionMap],
+    {
+      useDeepCompare: true,
+    },
+  )
 
   const entityElements = useArrayMemo(
     entityDataForElements,
     ["e", "id"],
-    (entity) => (
+    (data) => (
       <div
-        key={entity.e.id}
+        key={data.e.id}
         className="entity"
       >
-        {entity.t !== "trace" && <div
+        {data.t !== "trace" && <div
           className="proposition-container"
           style={levelOffsetStyle}
         >
           <RenderedProposition
-            level={level}
-            entityType={entity.t}
-            entity={entity.e}
-            metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
+            entityType={data.t}
+            entity={data.e}
+            groupExists={data.groupExists}
+            metadata={data.metadata}
             setObjectMetadataMap={setObjectMetadataMap}
             scale={scale}
             allowDrag={false} // TODO: Source allowDrag value correctly.
           />
         </div>}
-        {entity.t === "trace" && <svg
+        {data.t === "trace" && <svg
           style={`position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;`}
           className="trace-svg"
         >
           <RenderedLevelTrace
-            level={level}
-            metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
+            groupExists={data.groupExists}
+            metadata={data.metadata}
+            positionMap={data.positionMap}
             scale={scale}
             server={globalStuff.server}
             shouldDragBePrevented={true} // TODO: Source allowDrag value correctly.
             transform={traceTransform}
-            trace={entity.e}
+            trace={data.e}
           />
         </svg>}
       </div>
     ),
-    [levelOffsetStyle, level, objectMetadataMap, setObjectMetadataMap, scale, globalStuff.server, traceTransform]
+    [levelOffsetStyle, setObjectMetadataMap, scale, globalStuff.server, traceTransform],
+    {
+      useDeepCompare: true,
+    },
   )
 
   return <div

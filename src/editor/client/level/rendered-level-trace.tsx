@@ -2,20 +2,20 @@ import { Immutable } from "engine/utils/immutable"
 import { generateUID } from "engine/utils/misc"
 import { Coordinates2D, instanceOfCoordinates2D } from "engine/world/level/level-location"
 import { useContext, useMemo, useState } from "preact/hooks"
-import { inGroup, safeExtractTraceArray } from "../editor-functions"
+import { getPositionMap, safeExtractTraceArray, safeExtractTraceArray2 } from "../editor-functions"
 import { GridSnapMover } from "../grid-snap-mover"
-import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
-import { useJsonableMemo } from "../utils/use-jsonable-memo"
-import { EditorLevel, EditorTrace, ObjectMetadata } from "./extended-level-format"
-import { LevelEditorPreferencesContext } from "./level-preferences"
 import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
-import { ImmutableSetter } from "../preact-help"
-import { LevelFollowerContext, LevelFollowerContextProvider } from "./level-follower"
+import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
 import { ServerLiaison } from "../server-liaison"
+import { useJsonableMemo } from "../utils/use-jsonable-memo"
+import { EditorTrace, ObjectMetadata } from "./extended-level-format"
+import { LevelFollowerContext } from "./level-follower"
+import { LevelEditorPreferencesContext } from "./level-preferences"
 
 type RenderedLevelTraceProps = {
+  groupExists: boolean
   metadata: ObjectMetadata
-  level: Immutable<EditorLevel>
+  positionMap: ReturnType<typeof getPositionMap>
   scale: number
   server: ServerLiaison
   shouldDragBePrevented: boolean
@@ -25,8 +25,9 @@ type RenderedLevelTraceProps = {
 
 export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   const {
-    level,
+    groupExists,
     metadata,
+    positionMap,
     scale,
     server,
     shouldDragBePrevented,
@@ -44,13 +45,14 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   }
   const [uid] = useState(generateUID())
 
-  const acceptMouse = useMemo(() => {
-    return inGroup(level, activeGroup ?? "", trace)
-  }, [level, activeGroup, trace])
+  const acceptMouse = useMemo(
+    () => groupExists ? activeGroup === trace.group : !activeGroup,
+    [groupExists, activeGroup, trace]
+  )
 
   const pointsArray = useJsonableMemo(() => {
-    return safeExtractTraceArray(level, trace.vertices)
-  }, [level, trace.vertices])
+    return safeExtractTraceArray2(positionMap, trace.vertices)
+  }, [positionMap, trace.vertices])
 
   function trackInternal(point?: Coordinates2D): void {
     if(shouldDragBePrevented || !levelFollower) {
@@ -58,7 +60,7 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     }
     const originalPointString = trace.vertices
     const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
-    const vertices = safeExtractTraceArray(level, trace.vertices)
+    const vertices = pointsArray
     const originalPoints = point ? [point] : vertices.filter(instanceOfCoordinates2D)
     const snappedMover = new GridSnapMover(globalPrefs.gridCell, originalPoints)
     levelFollower.trackMoveInLevel((dx, dy, levelBefore) => {

@@ -142,8 +142,12 @@ export function safeExtractTraceArray(levelObject: Immutable<EditorLevel>, trace
   const pointSpecs = interpretPointString(traceStr)
   return convertPositions(pointSpecs, getPositionMap(levelObject))
 }
+export function safeExtractTraceArray2(positionMap: ReturnType<typeof getPositionMap>, traceStr: string): (Readonly<Coordinates2D> | null)[] {
+  const pointSpecs = interpretPointString(traceStr)
+  return convertPositions(pointSpecs, positionMap)
+}
 
-function getPositionMap(levelObject: Immutable<EditorLevel>): { [id: string]: Readonly<Coordinates2D> } {
+export function getPositionMap(levelObject: Immutable<EditorLevel>): { [id: string]: Readonly<Coordinates2D> } {
   const positionMap: { [id: string]: Readonly<Coordinates2D> } = {}
   for(const p of levelObject.positions) {
     positionMap[p.id] = p

@@ -18,9 +18,9 @@ import { LevelEditorPreferencesContext } from "./level-preferences"
 import RenderCounter from "../utils/render-counter"
 
 type RenderedPropositionProps = {
-  readonly level: Immutable<EditorLevel>
   readonly entity: Immutable<EditorProp> | Immutable<EditorPosition>
   readonly entityType: "prop" | "position"
+  readonly groupExists: boolean
   readonly metadata: Immutable<ObjectMetadata>
   readonly setObjectMetadataMap: ImmutableSetter<ObjectMetadataMap>
   readonly scale: number
@@ -33,9 +33,9 @@ const NOT_AVAILABLE = "NOT_AVAILABLE"
 /** Shared component for either prop or position */
 export default function RenderedProposition(props: RenderedPropositionProps) {
   const {
-    level,
     entity,
     entityType,
+    groupExists,
     metadata,
     setObjectMetadataMap,
     scale,
@@ -46,7 +46,10 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   const collageManager = useContext(CollageManagerContext)
   const [levelPrefs] = useContext(LevelEditorPreferencesContext)
 
-  const allowInteraction = useMemo(() => inGroup(level, levelPrefs.activeGroup, entity), [level, levelPrefs.activeGroup, entity])
+  const allowInteraction = useMemo(
+    () => groupExists ? levelPrefs.activeGroup === entity.group : !levelPrefs.activeGroup,
+    [groupExists, levelPrefs.activeGroup, entity]
+  )
   const displayed = useMemo(() => !levelPrefs.hidden.includes(entity.id), [levelPrefs.hidden])
 
   const collage = useMemo<Immutable<Collage> | typeof NOT_READY | typeof NOT_AVAILABLE>(() => {
@@ -126,7 +129,9 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   return frameElements[frameIndex ?? 0]
 }
 
-type MoreProps = {
+type RenderedPropositionAtFrameProps = Pick<RenderedPropositionProps,
+  "entity" | "entityType" | "metadata" | "allowDrag" | "scale"
+> & {
   readonly allowInteraction: boolean
   readonly displayed: boolean
   readonly montage: Montage
@@ -136,7 +141,7 @@ type MoreProps = {
   readonly setMetadata: ImmutableSetter<ObjectMetadata>
 }
 
-function RenderedPropositionAtFrame(props: Omit<RenderedPropositionProps, "level" | "setObjectMetadataMap"> & MoreProps) {
+function RenderedPropositionAtFrame(props: RenderedPropositionAtFrameProps) {
   const {
     entity,
     entityType,
