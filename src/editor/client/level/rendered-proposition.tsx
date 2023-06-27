@@ -6,7 +6,7 @@ import { Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useContext, useMemo } from "preact/hooks"
-import { PLACEHOLDER_WIDTH, createSnapMontageMover, getPlaceholderImage } from "../editor-functions"
+import { PLACEHOLDER_WIDTH, createSnapMontageMover, getPlaceholderImage, inGroup } from "../editor-functions"
 import { ImmutableSetter, makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "../preact-help"
 import { imageContext } from "../server-liaison"
 import { Time } from "../time-context"
@@ -24,7 +24,6 @@ type RenderedPropositionProps = {
   readonly setMetadata: ImmutableSetter<ObjectMetadata>
   readonly scale: number
   readonly allowDrag: boolean
-  readonly allowInteraction: boolean
 }
 
 const NOT_READY = "NOT_READY"
@@ -33,6 +32,7 @@ const NOT_AVAILABLE = "NOT_AVAILABLE"
 /** Shared component for either prop or position */
 export default function RenderedProposition(props: RenderedPropositionProps) {
   const {
+    level,
     entity,
     scale,
     ...remainingProps
@@ -42,6 +42,7 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   const collageManager = useContext(CollageManagerContext)
   const [levelPrefs] = useContext(LevelEditorPreferencesContext)
 
+  const allowInteraction = useMemo(() => inGroup(level, levelPrefs.activeGroup, entity), [level, levelPrefs.activeGroup, entity])
   const displayed = useMemo(() => !levelPrefs.hidden.includes(entity.id), [levelPrefs.hidden])
 
   const collage = useMemo<Immutable<Collage> | typeof NOT_READY | typeof NOT_AVAILABLE>(() => {
@@ -101,7 +102,9 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
   const frameElements = useMemo(() => {
     const coalescedFrames = montage.frames.length > 0 ? montage.frames : [frameMissingPlaceholder]
     return coalescedFrames.map(f => <RenderedPropositionAtFrame
+      level={level}
       entity={entity}
+      allowInteraction={allowInteraction}
       displayed={displayed}
       montage={montage}
       frame={f}
@@ -110,17 +113,18 @@ export default function RenderedProposition(props: RenderedPropositionProps) {
       scaledSize={scaledSize}
       {...remainingProps}
     ></RenderedPropositionAtFrame>)
-  }, [montage, entity, displayed, imgSrc, scale, scaledSize, ...Object.values(remainingProps)])
+  }, [montage, level, entity, allowInteraction, displayed, imgSrc, scale, scaledSize, ...Object.values(remainingProps)])
 
   return frameElements[frameIndex ?? 0]
 }
 
 type MoreProps = {
-  displayed: boolean
-  montage: Montage
-  frame: Frame
-  imgSrc: string
-  scaledSize: ReturnType<typeof useScaledImageSize>
+  readonly allowInteraction: boolean
+  readonly displayed: boolean
+  readonly montage: Montage
+  readonly frame: Frame
+  readonly imgSrc: string
+  readonly scaledSize: ReturnType<typeof useScaledImageSize>
 }
 
 function RenderedPropositionAtFrame(props: RenderedPropositionProps & MoreProps) {

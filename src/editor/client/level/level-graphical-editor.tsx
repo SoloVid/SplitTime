@@ -15,7 +15,7 @@ import { UserInputsContext } from "../user-inputs"
 import { CollageManagerContext } from "./collage-manager"
 import { useEntityBodies } from "./entity-body-manager"
 import { useSortedEntities } from "./entity-sort-helper"
-import { EditorLevel, EditorPosition, EditorProp, EditorTrace } from "./extended-level-format"
+import { EditorLevel, EditorPosition, EditorProp, EditorTrace, ObjectMetadataMap, blankObjectMetadata } from "./extended-level-format"
 import LevelBackground from "./level-background"
 import { LevelEditorPreferencesContext } from "./level-preferences"
 import RenderedLevelTrace from "./rendered-level-trace"
@@ -26,6 +26,8 @@ type LevelGraphicalEditorProps = {
   globalStuff: GlobalEditorShared
   level: Immutable<EditorLevel>
   setLevel: ImmutableSetter<EditorLevel>
+  objectMetadataMap: Immutable<ObjectMetadataMap>
+  setObjectMetadataMap: ImmutableSetter<ObjectMetadataMap>
   scale: number
 }
 
@@ -33,6 +35,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   const {
     globalStuff,
     level, setLevel,
+    objectMetadataMap, setObjectMetadataMap,
     scale,
   } = props
 
@@ -51,10 +54,14 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
 
   // const allEntities = [...level.props, ...level.positions, ...level.traces]
   const allEntities = useMemo(
-    () => [...level.props, ...level.positions, ...level.traces],
+    () => [
+      ...level.props.map(e => ({t: "prop", e} as const)),
+      ...level.positions.map(e => ({t: "position", e} as const)),
+      ...level.traces.map(e => ({t: "trace", e} as const)),
+    ],
     [level.props, level.positions, level.traces]
   )
-  const entityBodies = useEntityBodies(level, collageManager, allEntities)
+  const entityBodies = useEntityBodies(level, collageManager, allEntities.map(e => e.e))
   const allEntitiesSorted = useSortedEntities(allEntities, entityBodies)
   // This is the workaround if the sorting hangs up the UI too much.
   // const allEntitiesSorted = allEntities
@@ -195,7 +202,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         Math.floor(snappedX) + ", " +
         Math.floor(snappedY) + ")"
       var closestPosition = findClosestPosition(level, inputs.mouse.x, yInGroup)
-      var positionPoint = closestPosition ? makePositionPoint(closestPosition.obj.id) : ""
+      var positionPoint = closestPosition ? makePositionPoint(closestPosition.id) : ""
       function addPathInProgressVertex(newVertex: string) {
         setPathInProgress((before) => {
           if (before === null) {
@@ -281,26 +288,35 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
 
     {allEntitiesSorted.map((entity) => (
     <div
-      key={entity.id}
+      key={entity.e.id}
       className="entity"
     >
-      {!("vertices" in entity) && <div
+      {entity.t !== "trace" && <div
         className="proposition-container"
         style={levelOffsetStyle}
       >
         <RenderedProposition
-          levelEditorShared={levelEditorShared}
-          entity={entity}
+          level={level}
+          entityType={entity.t}
+          entity={entity.e}
+          metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
+          setMetadata={(transform) => setObjectMetadataMap((before) => ({...before, [entity.e.id]: transform(before[entity.e.id] ?? blankObjectMetadata)}))}
+          scale={scale}
+          allowDrag={false} // TODO: Source allowDrag value correctly.
         />
       </div>}
-      {"vertices" in entity && <svg
+      {entity.t === "trace" && <svg
         style={`position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;`}
         className="trace-svg"
       >
         <RenderedLevelTrace
+          level={level}
+          metadata={objectMetadataMap[entity.e.id] ?? blankObjectMetadata}
+          scale={scale}
+          server={globalStuff.server}
+          shouldDragBePrevented={true} // TODO: Source allowDrag value correctly.
           transform={traceTransform}
-          levelEditorShared={levelEditorShared}
-          trace={entity}
+          trace={entity.e}
         />
       </svg>}
     </div>

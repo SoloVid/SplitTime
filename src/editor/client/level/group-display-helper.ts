@@ -42,15 +42,15 @@ export function makeLevelTree(level: EditorLevel): Immutable<RootLevelTreeGroupN
   }
   for (const t of level.traces) {
     const parent = (t.group in groupMap) ? groupMap[t.group] : defaultGroup
-    parent.subGroups.push(groupMap[t.group])
+    parent.traces.push(t)
   }
   for (const p of level.props) {
     const parent = (p.group in groupMap) ? groupMap[p.group] : defaultGroup
-    parent.subGroups.push(groupMap[p.group])
+    parent.props.push(p)
   }
   for (const p of level.positions) {
     const parent = (p.group in groupMap) ? groupMap[p.group] : defaultGroup
-    parent.subGroups.push(groupMap[p.group])
+    parent.positions.push(p)
   }
   return defaultGroup
 }
@@ -67,6 +67,7 @@ type GroupMetadataTreed = GroupMetadata & {
 
 function getGroupMetadata(group: Immutable<LevelTreeGroupNode>, prefs: LevelEditorPreferences): GroupMetadataTreed {
   const childCount = group.subGroups.length + group.traces.length + group.positions.length + group.props.length
+  // console.log(group, group.subGroups)
   const subGroupMetadatas = group.subGroups.map(g => getGroupMetadata(g, prefs))
   return {
     id: group.group?.id ?? "",

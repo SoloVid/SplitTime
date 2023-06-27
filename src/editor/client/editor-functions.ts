@@ -4,13 +4,10 @@ import { BodySpec } from "engine/file/collage"
 import { Canvas } from "engine/ui/viewport/canvas"
 import { Immutable } from "engine/utils/immutable"
 import { Group as FileGroup } from "engine/world/level/level-file-data"
-import { makeTrace } from "engine/world/level/level-file-data-helpers"
 import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
-import { FileLevel } from "./file-types"
 import { GridSnapMover } from "./grid-snap-mover"
-import { EditorLevel, EditorPositionEntity } from "./level/extended-level-format"
-import { EditorMetadata } from "./shared-types"
+import { EditorLevel, EditorPosition } from "./level/extended-level-format"
 import { traceOptions } from "./trace-options"
 import { makeDefaultTrace } from "./trace-properties"
 
@@ -92,21 +89,22 @@ export function exportLevel(levelObject: EditorLevel): FileData {
     background: levelObject.background,
     backgroundOffsetX: levelObject.backgroundOffsetX,
     backgroundOffsetY: levelObject.backgroundOffsetY,
-    groups: levelObject.groups.map(g => g.obj),
-    traces: levelObject.traces.map(t => t.obj),
-    props: levelObject.props.map(p => p.obj),
-    positions: levelObject.positions.map(p => p.obj)
+    groups: levelObject.groups.map(g => g),
+    traces: levelObject.traces.map(t => t),
+    props: levelObject.props.map(p => p),
+    positions: levelObject.positions.map(p => p)
   }
 }
 
 export function getGroupById(level: Immutable<EditorLevel>, groupId: string): FileGroup {
   for (const group of level.groups) {
-    if (group.obj.id === groupId) {
-      return group.obj
+    if (group.id === groupId) {
+      return group
     }
   }
   return {
     id: "",
+    name: "",
     parent: "",
     defaultZ: 0,
     defaultHeight: DEFAULT_GROUP_HEIGHT
@@ -114,12 +112,12 @@ export function getGroupById(level: Immutable<EditorLevel>, groupId: string): Fi
 }
 
 type FileThing = FileTrace | FileProp | FilePosition
-export function inGroup(level: EditorLevel, group: string, obj: FileThing): boolean {
+export function inGroup(level: EditorLevel, group: string | null, obj: FileThing): boolean {
   return checkGroupMatch(level, group, obj.group)
 }
-export function checkGroupMatch(level: EditorLevel, realGroup: string, testGroup: string): boolean {
-  if (realGroup === "") {
-    return level.groups.every(g => g.obj.id !== testGroup)
+export function checkGroupMatch(level: EditorLevel, realGroup: string | null, testGroup: string): boolean {
+  if (realGroup === "" || realGroup === null) {
+    return level.groups.every(g => g.id !== testGroup)
   }
   return realGroup === testGroup
 }
@@ -148,18 +146,18 @@ export function safeExtractTraceArray(levelObject: Immutable<EditorLevel>, trace
 function getPositionMap(levelObject: Immutable<EditorLevel>): { [id: string]: Readonly<Coordinates2D> } {
   const positionMap: { [id: string]: Readonly<Coordinates2D> } = {}
   for(const p of levelObject.positions) {
-    positionMap[p.obj.id] = p.obj
+    positionMap[p.id] = p
   }
   return positionMap
 }
 
-export function findClosestPosition(levelObject: Immutable<EditorLevel>, x: number, y: number): EditorPositionEntity | null {
+export function findClosestPosition(levelObject: Immutable<EditorLevel>, x: number, y: number): EditorPosition | null {
   let closestDistance = Number.MAX_SAFE_INTEGER
-  let closestPosition: EditorPositionEntity | null = null
+  let closestPosition: EditorPosition | null = null
 
   levelObject.positions.forEach(pos => {
-    const dx = pos.obj.x - x
-    const dy = pos.obj.y - y
+    const dx = pos.x - x
+    const dy = pos.y - y
     const dist = Math.sqrt((dx * dx) + (dy * dy))
     if(dist < closestDistance) {
       closestDistance = dist

@@ -1,14 +1,14 @@
 import { json } from "api/file"
 import { error } from "api/system"
-import { Collage as FileCollage, instanceOfCollage } from "engine/file/collage"
+// import { Collage as FileCollage, instanceOfCollage } from "engine/file/collage"
 import { Immutable } from "engine/utils/immutable"
 import { instanceOfFileData as instanceOfLevelFileData } from "engine/world/level/level-file-data"
 import { useEffect, useState } from "preact/hooks"
 import swal from "sweetalert"
-import CodeEditor from "./code/code-editor"
-import CollageEditor from "./collage/collage-editor"
+// import CodeEditor from "./code/code-editor"
+// import CollageEditor from "./collage/collage-editor"
 import { exportJson } from "./editor-functions"
-import { FileLevel } from "./file-types"
+import { FileCollage, FileLevel } from "./file-types"
 import LevelEditor from "./level/level-editor"
 import MenuBar from "./menu-bar"
 import { GlobalEditorPreferencesContextProvider, globalEditorPreferences } from "./preferences/global-preferences"
@@ -16,7 +16,8 @@ import { ServerLiaison } from "./server-liaison"
 import { GlobalEditorShared } from "./shared-types"
 import { showError } from "./utils/prompt"
 import { EditorType } from "./editor-type"
-
+import YAML from "yaml"
+import { UserInputsContextProvider } from "./user-inputs"
 
 type EditorProps = {
   readonly editorType: EditorType
@@ -50,6 +51,20 @@ export default function Editor({
   const [level, setLevel] = useState<FileLevel | null>(null)
   // const [triggerSettings, setTriggerSettings] = useState<{ f: () => void }>({ f: () => {} })
 
+  const globalStuff: GlobalEditorShared = {
+    server: server,
+    openFileSelect: async function (rootDirectory: string, filter?: RegExp | undefined) {
+      console.warn("openFileSelect() not implemented.")
+      return ""
+    },
+    setOnDelete: function (callback: () => void): void {
+      console.warn("setOnDelete() not implemented.")
+    },
+    setOnSettings: function (callback: () => void): void {
+      console.warn("setOnSettings() not implemented.")
+    }
+  }
+
   useEffect(() => {
     setCode(null)
     setLevel(null)
@@ -60,7 +75,7 @@ export default function Editor({
       return
     }
 
-    const fileObject = JSON.parse(initialFileContents)
+    const fileObject = YAML.parse(initialFileContents)
     if (editorType === "level") {
       setLevel(fileObject)
     } else if (editorType === "collage") {
@@ -108,27 +123,33 @@ export default function Editor({
     style="display: flex; flex-flow: column; height: 100vh;"
   >
     <GlobalEditorPreferencesContextProvider id={filePath}>
-      <MenuBar></MenuBar>
-      {!!code && <CodeEditor
-        key={filePath}
-        code={code}
-        setCode={setCode}
-        style="flex-grow: 1;"
-      />}
-      {!!collage && <CollageEditor
-        key={filePath}
-        id={filePath}
-        collage={collage}
-        setCollage={setCollage}
-        style="flex-grow: 1; overflow: hidden;"
-      />}
-      { !!level && <LevelEditor
-        key={filePath}
-        id={filePath}
-        level={level}
-        setLevel={setLevel}
-        style="flex-grow: 1; overflow: hidden;"
-      />}
+      <MenuBar
+        editSettings={() => {}} // TODO: Implement editSettings
+        openFileSave={() => {}} // TODO: Implement openFileSave
+      ></MenuBar>
+      <UserInputsContextProvider>
+        {/* {!!code && <CodeEditor
+          key={filePath}
+          code={code}
+          setCode={setCode}
+          style="flex-grow: 1;"
+        />}
+        {!!collage && <CollageEditor
+          key={filePath}
+          id={filePath}
+          collage={collage}
+          setCollage={setCollage}
+          style="flex-grow: 1; overflow: hidden;"
+        />} */}
+        { !!level && <LevelEditor
+          key={filePath}
+          id={filePath}
+          editorGlobalStuff={globalStuff}
+          level={level}
+          setLevel={setLevel}
+          style="flex-grow: 1; overflow: hidden;"
+        />}
+      </UserInputsContextProvider>
     </GlobalEditorPreferencesContextProvider>
   </div>
 }

@@ -5,6 +5,7 @@ import sharp from "sharp"
 import { forNotIgnoredFiles } from "../common/walk-files"
 import YAML from "yaml"
 import { generateUID } from "engine/utils/misc"
+import { FileLevel } from "editor/client/file-types"
 
 void run()
 
@@ -55,39 +56,45 @@ async function modifyFile(oldPath: string, oldRelPath: string): Promise<void> {
   // const newContents = await image.resize(Math.round(metadata.width * scale), Math.round(metadata.height * scale)).toBuffer()
 
   const oldContents = await readFile(oldPath, "utf-8")
-  const f = YAML.parse(oldContents)
+  const f = YAML.parse(oldContents) as FileLevel
   for (const g of f.groups) {
-    // const oldId = g.id
-    // g.name = oldId
-    // const newId = generateUID()
-    // g.id = newId
+    const oldId = g.id
+    g.name = oldId
+    const newId = generateUID()
+    g.id = newId
     for (const o of f.groups) {
-      if (o.parent === g.name) {
-        o.parent = g.id
+      if (o.parent === oldId) {
+        o.parent = newId
       }
     }
-    // for (const t of f.traces) {
-    //   t.group = newId
-    // }
-    // for (const p of f.props) {
-    //   p.group = newId
-    // }
-    // for (const p of f.positions) {
-    //   p.group = newId
-    // }
+    for (const t of f.traces) {
+      if (t.group === oldId) {
+        t.group = newId
+      }
+    }
+    for (const p of f.props) {
+      if (p.group === oldId) {
+        p.group = newId
+      }
+    }
+    for (const p of f.positions) {
+      if (p.group === oldId) {
+        p.group = newId
+      }
+    }
   }
-  // for (const t of f.traces) {
-  //   t.name = t.id
-  //   t.id = generateUID()
-  // }
-  // for (const t of f.props) {
-  //   t.name = t.id
-  //   t.id = generateUID()
-  // }
-  // for (const t of f.positions) {
-  //   t.name = t.id
-  //   t.id = generateUID()
-  // }
+  for (const t of f.traces) {
+    t.name = t.id
+    t.id = generateUID()
+  }
+  for (const t of f.props) {
+    t.name = t.id
+    t.id = generateUID()
+  }
+  for (const t of f.positions) {
+    t.name = t.id
+    t.id = generateUID()
+  }
   // for (const f of f.frames) {
   //   const oldId = f.id
   //   const newId = generateUID()

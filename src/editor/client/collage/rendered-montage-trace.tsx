@@ -6,7 +6,6 @@ import { convertPositions, interpretPointString } from "engine/world/level/trace
 import { useMemo, useState } from "preact/hooks"
 import { GridSnapMover } from "../grid-snap-mover"
 import RenderedTrace, { IRenderedTraceTracker } from "../rendered-trace"
-import { EditorMetadata } from "../shared-types"
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { PropertiesEvent } from "./shared-types"
 

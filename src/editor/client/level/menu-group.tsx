@@ -98,7 +98,7 @@ export default function MenuGroup({
         o.editEntity(o.entity)
         setActiveGroup(setPrefs, groupId)
       })} className="pointer">
-        <span>{o.entity.id || `${o.titlePrefix} ${o.index}`}</span>
+        <span>{o.entity.name || `${o.titlePrefix} ${o.index}`}</span>
       </span>
     </div>
   }

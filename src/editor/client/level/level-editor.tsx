@@ -148,7 +148,12 @@ export function LevelEditorInner(props: LevelEditorProps) {
 
       <div className="graphical-editor-container" ref={$graphicalEditorContainer} style="flex-grow: 1; overflow: auto;">
         <LevelGraphicalEditor
-          levelEditorShared={sharedStuff}
+          globalStuff={editorGlobalStuff}
+          level={level}
+          setLevel={setLevel}
+          objectMetadataMap={objectMetadataMap}
+          setObjectMetadataMap={setObjectMetadataMap}
+          scale={scale}
         />
       </div>
 

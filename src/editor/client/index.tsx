@@ -1,7 +1,7 @@
 import "preact/debug";
 
 import { render } from "preact";
-import Editor, { detectEditorTypes, EditorType } from "./editor";
+import Editor from "./editor";
 import { ProjectImagesProvider, ServerLiaison } from "./server-liaison";
 import SvgPatterns from "./svg-patterns";
 import { exerciseApi } from "./test";
@@ -13,6 +13,7 @@ import Landing from "./landing";
 import { showError } from "./utils/prompt";
 import { error } from "api/system";
 import { prefixRawProjectFiles } from "editor/server/constants";
+import { EditorType, detectEditorTypes } from "./editor-type";
 
 const editSlug = "edit"
 
