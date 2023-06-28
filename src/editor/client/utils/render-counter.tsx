@@ -4,38 +4,39 @@ type Props = {
   debugLabel?: string
 }
 
-const n = 3
+const n = 4
+const interval = 500
 
 export default function RenderCounter({ debugLabel }: Props) {
   const [arbitraryStateForChange, setArbitraryStateForChange] = useState<number>(0)
-  const rendersThisSec = useRef<number>(0)
-  const rendersLastNSec = useRef<readonly (number | null)[]>([])
+  const rendersThisInterval = useRef<number>(0)
+  const rendersLastNIntervals = useRef<readonly (number | null)[]>([])
 
-  rendersThisSec.current++
+  rendersThisInterval.current++
 
   useEffect(() => {
-    rendersLastNSec.current = (new Array(n)).fill(null)
+    rendersLastNIntervals.current = (new Array(n)).fill(null)
   }, [])
 
   useEffect(() => {
     const handle = setInterval(() => {
-      const [oldest, ...rest] = rendersLastNSec.current
-      rendersLastNSec.current = [...rest, rendersThisSec.current]
+      const [oldest, ...rest] = rendersLastNIntervals.current
+      rendersLastNIntervals.current = [...rest, rendersThisInterval.current]
       // Don't count the direct next render.
-      rendersThisSec.current = -1
+      rendersThisInterval.current = -1
 
       // Force a re-render.
       setArbitraryStateForChange(Math.random())
-    }, 1000)
+    }, interval)
     return (() => clearInterval(handle))
   }, [])
 
-  const averageDenominator = useMemo(() => rendersLastNSec.current.filter(e => e !== null).length, [rendersLastNSec.current])
+  const averageDenominator = useMemo(() => rendersLastNIntervals.current.filter(e => e !== null).length, [rendersLastNIntervals.current])
   const averageFramesPerSecond = useMemo(
-    () => rendersLastNSec.current.reduce(
+    () => rendersLastNIntervals.current.reduce(
       (soFar: number, count) => count === null ? soFar : soFar + count, 0
-    ) / averageDenominator || 1,
-    [rendersLastNSec.current]
+    ) / (averageDenominator || 1) * 1000 / interval,
+    [rendersLastNIntervals.current]
   )
 
   return <div className="render-counter">

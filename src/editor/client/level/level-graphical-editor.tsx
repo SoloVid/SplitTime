@@ -24,6 +24,8 @@ import { EDITOR_PADDING } from "./shared-types"
 import RenderCounter from "../utils/render-counter"
 import { useArrayMemo } from "../utils/use-array-memo"
 import { useJsonableMemo } from "../utils/use-jsonable-memo"
+import { LevelFollowerContextProvider } from "./level-follower"
+import { coalescePreferencesGridCell } from "../preferences/grid"
 
 type LevelGraphicalEditorProps = {
   globalStuff: GlobalEditorShared
@@ -71,7 +73,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   // const allEntitiesSorted = allEntities
 
   const inputs = useMemo(() => {
-    console.log("rebuilding inputs")
+    // console.log("rebuilding inputs")
     let position = {
       x: 0,
       y: 0
@@ -93,6 +95,8 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
       ctrlDown: editorInputs.ctrlDown
     }
   }, [$el.current, editorInputs])
+
+  const shouldDragBePrevented = inputs.mouse.isDown || pathInProgress !== null
 
   const containerWidth = (level.width * scale) + 2*EDITOR_PADDING
   const addedHeight = useMemo(() => {
@@ -133,7 +137,8 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     const start = new Coordinates2D(-LARGE_NUMBER, -LARGE_NUMBER)
     const dx = x - start.x
     const dy = y - start.y
-    const snappedMover = createSnapMontageMover(globalPrefs.gridCell, m.body, start)
+    const gridCell = coalescePreferencesGridCell(globalPrefs)
+    const snappedMover = createSnapMontageMover(gridCell, m.body, start)
     snappedMover.applyDelta(dx, dy)
     const snapped = snappedMover.getSnappedDelta()
     snapped.x += start.x
@@ -199,7 +204,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     const x = inputs.mouse.x
     const isLeftClick = event.button === 0
     const isRightClick = event.button === 2
-    const gridCell = globalPrefs.gridCell
+    const gridCell = coalescePreferencesGridCell(globalPrefs)
     if(levelPrefs.mode === "trace") {
       const snappedX = Math.round(x / gridCell.x) * gridCell.x
       const snappedY = Math.round(yInGroup / gridCell.y) * gridCell.y
@@ -288,8 +293,9 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
       groupExists: level.groups.some(g => g.id === data.e.group),
       metadata: objectMetadataMap[data.e.id] ?? blankObjectMetadata,
       positionMap,
+      shouldDragBePrevented,
     }),
-    [level, objectMetadataMap, positionMap],
+    [level, objectMetadataMap, positionMap, shouldDragBePrevented],
     {
       useDeepCompare: true,
     },
@@ -314,7 +320,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
             metadata={data.metadata}
             setObjectMetadataMap={setObjectMetadataMap}
             scale={scale}
-            allowDrag={false} // TODO: Source allowDrag value correctly.
+            allowDrag={!data.shouldDragBePrevented}
           />
         </div>}
         {data.t === "trace" && <svg
@@ -327,7 +333,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
             positionMap={data.positionMap}
             scale={scale}
             server={globalStuff.server}
-            shouldDragBePrevented={true} // TODO: Source allowDrag value correctly.
+            shouldDragBePrevented={data.shouldDragBePrevented}
             transform={traceTransform}
             trace={data.e}
           />
@@ -340,7 +346,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     },
   )
 
-  return <div
+  return <LevelFollowerContextProvider setLevel={setLevel}><div
     ref={$el}
     className="level-area transparency-checkerboard-background"
     style={`position: relative; width: ${containerWidth}px; height: ${containerHeight}px; overflow: hidden`}
@@ -359,5 +365,5 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
       gridCell={scaledGridCell}
       origin={{x: editorPadding, y: editorPadding}}
     />}
-  </div>
+  </div></LevelFollowerContextProvider>
 }

@@ -1,11 +1,16 @@
 import { keycode } from "api/controls";
 import { debug } from "api/system";
 import { createContext } from "preact";
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useContext, useEffect, useMemo, useState } from "preact/hooks";
 import { useSetIntervalWhenActive } from "./utils/use-set-interval-when-active";
 import { Coordinates2D } from "engine/world/level/level-location";
 import { getCoords } from "./editor-functions";
 import { ImmutableSetter } from "./preact-help";
+import { useKeyListener } from "./utils/use-key-listener";
+import { GlobalEditorShared } from "./shared-types";
+import { GlobalEditorPreferencesContext } from "./preferences/global-preferences";
+import { convertZoomToScale } from "./preferences/scale";
+import { coalescePreferencesGridCell } from "./preferences/grid";
 
 export interface Followable {
   shift(dx: number, dy: number): void
@@ -42,7 +47,12 @@ export type UserInputs2 = {
 
 export const UserInputsContext = createContext<UserInputs2 | null>(null)
 
-export function UserInputsContextProvider({ children }: { children: any }) {
+type UserInputsContextProviderProps = {
+  children: any
+}
+
+export function UserInputsContextProvider({ children }: UserInputsContextProviderProps) {
+  const [globalPrefs, setGlobalPrefs] = useContext(GlobalEditorPreferencesContext)
   const [time, setTime] = useState(0)
 
   const TIME_INTERVAL = 50;
@@ -55,6 +65,7 @@ export function UserInputsContextProvider({ children }: { children: any }) {
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
 
   const setFollowers: ImmutableSetter<null | readonly Followable[]> = useMemo(() => (transform) => {
+    console.log("setFollowers()")
     setFollowersInternal((before) => {
       setPreviousFollowers(before)
       const after = transform(before)
@@ -78,6 +89,7 @@ export function UserInputsContextProvider({ children }: { children: any }) {
       toMove = []
     }
     for (const t of toMove) {
+      console.log("moving thing")
       t.shift(dx, dy)
     }
   }
@@ -113,9 +125,12 @@ export function UserInputsContextProvider({ children }: { children: any }) {
       isDown: false
     })
     if (followers !== null) {
-      setFollowers(null)
+      setFollowers(() => null)
     }
   }
+
+  const gridCell = coalescePreferencesGridCell(globalPrefs)
+  const scale = convertZoomToScale(globalPrefs.zoom)
 
   function handleKeyDown(event: KeyboardEvent): void {
     if (event.which === keycode.S) {
@@ -139,21 +154,17 @@ export function UserInputsContextProvider({ children }: { children: any }) {
       case keycode.DEL:
         onDeleteCallback.f()
         break;
-      case keycode.CTRL:
-      case keycode.SHIFT:
-        setCtrlDown(true)
-        break
       case keycode.LEFT:
-        moveFollowers(-gridCell.x * globalEditorStuff.scale, 0)
+        moveFollowers(-gridCell.x * scale, 0)
         break
       case keycode.UP:
-        moveFollowers(0, -gridCell.y * globalEditorStuff.scale)
+        moveFollowers(0, -gridCell.y * scale)
         break
       case keycode.RIGHT:
-        moveFollowers(gridCell.x * globalEditorStuff.scale, 0)
+        moveFollowers(gridCell.x * scale, 0)
         break
       case keycode.DOWN:
-        moveFollowers(0, gridCell.y * globalEditorStuff.scale)
+        moveFollowers(0, gridCell.y * scale)
         break
       default:
         specialKey = false
@@ -165,13 +176,8 @@ export function UserInputsContextProvider({ children }: { children: any }) {
   }
 
   function handleKeyUp(event: KeyboardEvent): void {
-    if (event.which == keycode.SHIFT || event.which === keycode.CTRL) {
-      setCtrlDown(false)
-    } else if (event.which == keycode.ESC) {
-      if (level !== null) {
-        debug("export of level JSON:")
-        debug(level)
-      } else if (collage !== null) {
+    if (event.which == keycode.ESC) {
+      if (collage !== null) {
         debug("export of collage JSON:")
         debug(collage)
       } else {
@@ -179,6 +185,18 @@ export function UserInputsContextProvider({ children }: { children: any }) {
       }
     }
   }
+
+  useKeyListener("keydown", (event) => {
+    if (event.which == keycode.SHIFT || event.which === keycode.CTRL) {
+      setCtrlDown(true)
+    }
+  })
+
+  useKeyListener("keyup", (event) => {
+    if (event.which == keycode.SHIFT || event.which === keycode.CTRL) {
+      setCtrlDown(false)
+    }
+  })
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)

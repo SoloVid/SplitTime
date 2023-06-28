@@ -1,4 +1,4 @@
-import { useContext } from "preact/hooks";
+import { useContext, useMemo } from "preact/hooks";
 import { UserInputsContext } from "../user-inputs";
 import { ImmutableSetter } from "../preact-help";
 import { EditorLevel } from "./extended-level-format";
@@ -22,7 +22,7 @@ function useLevelFollower({
     return () => {}
   }
 
-  return (transform) => {
+  return useMemo(() => (transform) => {
     userInputs.setFollowers((followersBefore) => [{
       shift: (dx, dy) => {
         setLevel((levelBefore) => {
@@ -30,7 +30,7 @@ function useLevelFollower({
         })
       }
     }])
-  }
+  }, [userInputs.setFollowers, setLevel])
 }
 
 export const LevelFollowerContext = createContext<LevelFollower | null>(null)

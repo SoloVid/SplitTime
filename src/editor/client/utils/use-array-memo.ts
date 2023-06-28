@@ -1,7 +1,6 @@
+import fastDeepEqual from "fast-deep-equal/es6";
 import { useEffect, useState } from "preact/hooks";
 import { getByPath } from "./immutable-helper";
-import { getFingerprint } from "./fingerprint";
-import fastDeepEqual from "fast-deep-equal/es6"
 
 type SubKeyPaths<T, Key extends (keyof T)> = Key extends string ? (readonly [Key] | readonly [Key, ...KeyPaths<T[Key]>]) : never
 type KeyPaths<T> = T extends Record<string, unknown>

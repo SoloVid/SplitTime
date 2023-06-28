@@ -11,6 +11,7 @@ import { useJsonableMemo } from "../utils/use-jsonable-memo"
 import { EditorTrace, ObjectMetadata } from "./extended-level-format"
 import { LevelFollowerContext } from "./level-follower"
 import { LevelEditorPreferencesContext } from "./level-preferences"
+import { coalescePreferencesGridCell } from "../preferences/grid"
 
 type RenderedLevelTraceProps = {
   groupExists: boolean
@@ -62,7 +63,8 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
     const vertices = pointsArray
     const originalPoints = point ? [point] : vertices.filter(instanceOfCoordinates2D)
-    const snappedMover = new GridSnapMover(globalPrefs.gridCell, originalPoints)
+    const gridCell = coalescePreferencesGridCell(globalPrefs)
+    const snappedMover = new GridSnapMover(gridCell, originalPoints)
     levelFollower.trackMoveInLevel((dx, dy, levelBefore) => {
       const dxScaled = dx / scale
       const dyScaled = dy / scale

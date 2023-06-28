@@ -1,5 +1,5 @@
 import { Immutable } from "engine/utils/immutable"
-import { useContext, useEffect, useRef, useState } from "preact/hooks"
+import { useContext, useEffect, useMemo, useRef, useState } from "preact/hooks"
 import { FileLevel } from "../file-types"
 import InfoPaneFrame from "../info-pane"
 import { ImmutableSetter } from "../preact-help"
@@ -17,6 +17,9 @@ import { getObjectProperties } from "./properties-stuffs"
 import { newLevel } from "./new-level"
 import { convertZoomToScale } from "../preferences/scale"
 import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
+import { useKeyListener } from "../utils/use-key-listener"
+import { debug } from "engine/utils/logger"
+import { keycode } from "api/controls"
 
 type LevelEditorProps = {
   id: string
@@ -52,13 +55,13 @@ export function LevelEditorInner(props: LevelEditorProps) {
   const [levelEditorPrefs, setLevelEditorPrefs] = useContext(LevelEditorPreferencesContext)
 
   const [level, setLevelInner] = useState<EditorLevel>(fileLevel ?? newLevel)
-  const setLevel: ImmutableSetter<EditorLevel> = (transform) => {
+  const setLevel: ImmutableSetter<EditorLevel> = useMemo(() => (transform) => {
     setLevelInner((before) => {
       const after = transform(before)
       setFileLevel(() => after)
       return after
     })
-  }
+  }, [setFileLevel, setLevelInner])
 
   const [objectMetadataMap, setObjectMetadataMap] = useState<ObjectMetadataMap>({})
 
@@ -108,6 +111,13 @@ export function LevelEditorInner(props: LevelEditorProps) {
       setLevelEditorPrefs((before) => ({...before, propertiesPanel: null}))
     })
   }, [levelEditorPrefs.propertiesPanel, setLevelEditorPrefs, level, setLevel])
+
+  useKeyListener("keyup", (event) => {
+    if (event.which == keycode.ESC) {
+      debug("export of level JSON:")
+      debug(level)
+    }
+  })
 
   const MIN_MENU_WIDTH = 32
   function onLeftMenuResize({ dx }: { dx: number }): void {

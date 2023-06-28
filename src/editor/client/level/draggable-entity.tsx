@@ -8,6 +8,7 @@ import { LevelFollowerContext } from "./level-follower"
 import { LevelEditorPreferences, LevelEditorPreferencesContext } from "./level-preferences"
 import { UserInputs2 } from "../user-inputs"
 import { Immutable } from "engine/utils/immutable"
+import { coalescePreferencesGridCell } from "../preferences/grid"
 
 export type DraggableEntityProps = {
   children: any
@@ -32,10 +33,13 @@ export default function DraggableEntity({
   const levelFollower = useContext(LevelFollowerContext)
 
   function track(): void {
+    console.log("track?")
     if(preventDrag || !levelFollower) {
+      console.log("nope", preventDrag, levelFollower)
       return
     }
-    const snappedMover = createSnapMontageMover(globalPrefs.gridCell, bodySpec, entity)
+    const gridCell = coalescePreferencesGridCell(globalPrefs)
+    const snappedMover = createSnapMontageMover(gridCell, bodySpec, entity)
     const originalX = entity.x
     const originalY = entity.y
     levelFollower.trackMoveInLevel((dx, dy, levelBefore) => {
@@ -45,15 +49,18 @@ export default function DraggableEntity({
       const snappedDelta = snappedMover.getSnappedDelta()
       return {
         ...levelBefore,
-        [`${type}s`]: levelBefore[`${type}s`].filter((e) => {
+        [`${type}s`]: levelBefore[`${type}s`].map((e, i) => {
           if (e.id !== entity.id) {
             return e
           }
-          return {
+          console.log("found modification point", i)
+          const newThing = {
             ...e,
             x: originalX + snappedDelta.x,
             y: originalY + snappedDelta.y,
           }
+          console.log("now", newThing)
+          return newThing
         })
       }
     })
