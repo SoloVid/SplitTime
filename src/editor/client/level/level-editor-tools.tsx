@@ -13,9 +13,9 @@ import { CollageManagerContext } from "./collage-manager"
 import { EditorLevel } from "./extended-level-format"
 import { LevelEditorPreferencesContext } from "./level-preferences"
 import { Mode, POSITION_ICON, PROP_ICON, TRACE_ICON } from "./shared-types"
+import { FilePopupContext } from "../file-popup"
 
 type LevelEditorToolsProps = {
-  editorGlobalStuff: GlobalEditorShared
   level: EditorLevel
   scale: number
   server: ServerLiaison
@@ -29,10 +29,10 @@ function useCollageViewHelper(props: LevelEditorToolsProps): CollageSharedStuff 
   const userInputs = useContext(UserInputsContext)
 
   const collageId = prefs.collageSelected
-  const collage = collageId === null ? null : collageManager.getCollage(collageId)
+  const collage = !collageId ? null : collageManager.getCollage(collageId)
 
   const realCollage = useMemo<Immutable<Collage> | null>(() => {
-    if (collageId === null) {
+    if (!collageId) {
       return null
     }
     return collageManager.getRealCollage(collageId)
@@ -85,12 +85,12 @@ function useCollageViewHelper(props: LevelEditorToolsProps): CollageSharedStuff 
 
 export default function LevelEditorTools(props: LevelEditorToolsProps) {
   const {
-    editorGlobalStuff,
     level
   } = props
 
   const collageViewHelper = useCollageViewHelper(props)
   const [prefs, setPrefs] = useContext(LevelEditorPreferencesContext)
+  const filePopupControls = useContext(FilePopupContext)
 
   const mode = prefs.mode
 
@@ -98,9 +98,11 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
 
   async function launchCollageFileBrowser(): Promise<void> {
     const suffixRegex = /\.clg\.yml$/
-    const filePath = await editorGlobalStuff.openFileSelect("", suffixRegex)
+    const filePath = await filePopupControls.showFileSelectPopup({
+      filter: suffixRegex,
+    })
     const prefixRegex = /^\//
-    const collageId = filePath.replace(prefixRegex, "").replace(suffixRegex, "")
+    const collageId = filePath === "" ? null : filePath.replace(prefixRegex, "").replace(suffixRegex, "")
     setPrefs((before) => ({...before, collageSelected: collageId}))
   }
   function selectModeOption(mode: Mode): void {

@@ -1,11 +1,12 @@
 import { assert, Coordinates2D, int } from "api"
-import { FileData, IsJsonable, json, Position as FilePosition, Prop as FileProp, Trace as FileTrace } from "api/file"
+import { FileData, Position as FilePosition, Prop as FileProp, Trace as FileTrace, IsJsonable, json } from "api/file"
 import { BodySpec } from "engine/file/collage"
 import { Canvas } from "engine/ui/viewport/canvas"
 import { Immutable } from "engine/utils/immutable"
 import { Group as FileGroup } from "engine/world/level/level-file-data"
-import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
+import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
+import YAML from "yaml"
 import { GridSnapMover } from "./grid-snap-mover"
 import { EditorLevel, EditorPosition } from "./level/extended-level-format"
 import { traceOptions } from "./trace-options"
@@ -47,8 +48,16 @@ export function getCoords(elem: HTMLElement): { top: int, left: int } {
   return { top: Math.round(top), left: Math.round(left) }
 }
 
+/**
+ * @deprecated Switch to using YAML instead.
+ * @see {@link exportYaml}
+ */
 export function exportJson<T>(data: IsJsonable<T, false, true>): json {
   return JSON.stringify(data, null, 2)
+}
+
+export function exportYaml<T>(data: IsJsonable<T, false, true>): json {
+  return YAML.stringify(data)
 }
 
 export function safeGetColor(trace: FileTrace, highlighted: boolean) {

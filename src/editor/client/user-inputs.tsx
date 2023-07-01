@@ -133,13 +133,6 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
   const scale = convertZoomToScale(globalPrefs.zoom)
 
   function handleKeyDown(event: KeyboardEvent): void {
-    if (event.which === keycode.S) {
-      if (event.ctrlKey || ctrlDown) {
-        doSave(filePath)
-        event.preventDefault()
-      }
-    }
-
     // TODO: resolve types
     const element = event.target as any
     switch (element.tagName.toLowerCase()) {
@@ -151,9 +144,6 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
 
     var specialKey = true
     switch (event.which) {
-      case keycode.DEL:
-        onDeleteCallback.f()
-        break;
       case keycode.LEFT:
         moveFollowers(-gridCell.x * scale, 0)
         break
@@ -223,4 +213,15 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
       {children}
     </UserInputsContext.Provider>
   </div>
+}
+
+export function useOnSave(onSave: () => void) {
+  useKeyListener("keydown", (event) => {
+    if (event.which === keycode.S) {
+      if (event.ctrlKey || event.metaKey) {
+        onSave()
+        event.preventDefault()
+      }
+    }
+  })
 }

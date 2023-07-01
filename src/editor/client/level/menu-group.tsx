@@ -86,7 +86,7 @@ export default function MenuGroup({
     >
       <i className={`fas fa-${o.icon}`}></i>
       <CheckboxInput
-        value={prefs.hidden.includes(o.entity.id)}
+        value={!prefs.hidden.includes(o.entity.id)}
         onChange={(newValue) => setPrefs((before) => {
           if (newValue) {
             return {...before, hidden: before.hidden.filter(id => id !== o.entity.id)}

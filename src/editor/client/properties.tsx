@@ -1,16 +1,15 @@
-import { useMemo, useState } from "preact/hooks"
-import { FieldOptions, GenericObjectProperties, ObjectProperties } from "./field-options"
+import { useContext, useMemo, useState } from "preact/hooks"
+import { FieldOptions, GenericObjectProperties } from "./field-options"
+import { FilePopupContext } from "./file-popup"
 import { CheckboxInput, MultilineStringInput, NumberInput, StringInput } from "./input"
-import { GlobalEditorShared } from "./shared-types"
 import { getByPath, updateImmutableObject } from "./utils/immutable-helper"
 
 type PropertiesPanelProps = {
-  readonly editorGlobalStuff: SinglePropertyProps["editorGlobalStuff"]
   readonly spec: GenericObjectProperties
 }
 
 export default function PropertiesPane(props: PropertiesPanelProps) {
-  const { editorGlobalStuff, spec } = props
+  const { spec } = props
   function updateField(fieldKey: string, newValue: string | number, oldValue: string | number) {
     updateImmutableObject(
       spec.setTopLevelThing,
@@ -49,7 +48,6 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
     {listForRender.map((p) => (
     <SingleProperty
       key={spec.title + p.key}
-      editorGlobalStuff={editorGlobalStuff}
       value={p.value}
       fieldKey={p.key}
       fieldOptions={p.fieldOptions}
@@ -61,7 +59,6 @@ export default function PropertiesPane(props: PropertiesPanelProps) {
 }
 
 type SinglePropertyProps = {
-  readonly editorGlobalStuff: Pick<GlobalEditorShared, "openFileSelect">
   readonly value: string | number | boolean
   readonly fieldKey: string
   readonly fieldOptions: FieldOptions
@@ -70,13 +67,13 @@ type SinglePropertyProps = {
 
 function SingleProperty(props: SinglePropertyProps) {
   const {
-    editorGlobalStuff,
     value,
     fieldKey,
     fieldOptions,
     setField,
   } = props
 
+  const filePopupControls = useContext(FilePopupContext)
   const [isTempEmpty, setIsTempEmpty] = useState(false)
 
   const rawValue = useMemo(() => {
@@ -129,7 +126,10 @@ function SingleProperty(props: SinglePropertyProps) {
 
   async function launchFileBrowser(): Promise<void> {
     const root = fieldOptions.fileBrowserRoot || ""
-    const filePath = await editorGlobalStuff.openFileSelect(root, fieldOptions.fileBrowserFilter)
+    const filePath = await filePopupControls.showFileSelectPopup({
+      root: root,
+      filter: fieldOptions.fileBrowserFilter,
+    })
     const prefixRegex = new RegExp("^/?" + root + "/?")
     setValue(filePath.replace(prefixRegex, ""))
   }

@@ -22,11 +22,6 @@ export type LevelEditorPreferences = {
   readonly activeGroup: string | null
   readonly collapsedGroups: readonly string[]
   readonly hidden: readonly string[]
-  // readonly hidden: {
-  //   readonly traces: readonly string[]
-  //   readonly props: readonly string[]
-  //   readonly positions: readonly string[]
-  // }
 }
 
 const defaultPreferences: LevelEditorPreferences = {
@@ -45,11 +40,6 @@ const defaultPreferences: LevelEditorPreferences = {
   activeGroup: null,
   collapsedGroups: [],
   hidden: [],
-  // hidden: {
-  //   traces: [],
-  //   props: [],
-  //   positions: [],
-  // },
 }
 
 export const levelEditorPreferences = makePreferences<LevelEditorPreferences>("editor-prefs:level:", defaultPreferences)

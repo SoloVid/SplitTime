@@ -21,7 +21,10 @@ const levelFieldObject = {
 type SimplifiedLevel = { [K in keyof typeof levelFieldObject]: string | number }
 
 const groupFields = {
-  id: {},
+  id: {
+    readonly: true
+  },
+  name: {},
   parent: {},
   defaultZ: {},
   defaultHeight: {}
@@ -29,7 +32,10 @@ const groupFields = {
 type SimplifiedGroup = { [K in keyof Required<typeof groupFields>]: string | number }
 
 const propFields = {
-  id: {},
+  id: {
+    readonly: true
+  },
+  name: {},
   group: {},
   collage: {},
   montage: {},
@@ -41,7 +47,10 @@ const propFields = {
 type SimplifiedProp = { [K in keyof Required<typeof propFields>]: string | number }
 
 const positionFields = {
-  id: {},
+  id: {
+    readonly: true
+  },
+  name: {},
   group: {},
   collage: {},
   montage: {},

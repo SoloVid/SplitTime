@@ -5,6 +5,7 @@ import { debug } from "engine/utils/logger"
 import { useEffect, useState } from "preact/hooks"
 import { exportJson } from "./editor-functions"
 import { ImmutableSetter, TaggedImmutableSetter } from "./preact-help"
+import { useKeyListener } from "./utils/use-key-listener"
 
 type Options<Hydrated, Dehydrated> = {
   // value: Hydrated
@@ -36,12 +37,7 @@ export function useUndoStackState<Hydrated, Dehydrated>(
     }
   })
 
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown)
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  })
+  useKeyListener("keydown", handleKeyDown)
 
   function handleKeyDown(event: KeyboardEvent): void {
     // TODO: resolve types

@@ -3,7 +3,7 @@ import { error } from "api/system"
 // import { Collage as FileCollage, instanceOfCollage } from "engine/file/collage"
 import { Immutable } from "engine/utils/immutable"
 import { instanceOfFileData as instanceOfLevelFileData } from "engine/world/level/level-file-data"
-import { useEffect, useState } from "preact/hooks"
+import { useContext, useEffect, useState } from "preact/hooks"
 import swal from "sweetalert"
 // import CodeEditor from "./code/code-editor"
 // import CollageEditor from "./collage/collage-editor"
@@ -11,7 +11,7 @@ import { exportJson } from "./editor-functions"
 import { FileCollage, FileLevel } from "./file-types"
 import LevelEditor from "./level/level-editor"
 import MenuBar from "./menu-bar"
-import { GlobalEditorPreferencesContextProvider, globalEditorPreferences } from "./preferences/global-preferences"
+import { GlobalEditorPreferencesContext, GlobalEditorPreferencesContextProvider, globalEditorPreferences } from "./preferences/global-preferences"
 import { ServerLiaison } from "./server-liaison"
 import { GlobalEditorShared } from "./shared-types"
 import { showError } from "./utils/prompt"
@@ -20,6 +20,7 @@ import YAML from "yaml"
 import { UserInputsContextProvider } from "./user-inputs"
 import EditorFrame from "./editor-frame"
 import RenderCounter from "./utils/render-counter"
+import { FilePopupContext } from "./file-popup"
 
 type EditorProps = {
   readonly editorType: EditorType
@@ -42,29 +43,50 @@ export default function Editor({
     }
   }, [])
 
-  // const [onDeleteCallback, setOnDeleteCallback] = useState<{f: () => void}>({f:() => { }})
+  return <EditorFrame
+    editorPreferencesId={filePath}
+    server={server}
+  >
+    <RenderCounter debugLabel="Editor"></RenderCounter>
+    <EditorContent
+      editorType={editorType}
+      server={server}
+      filePath={filePath}
+      setFilePath={setFilePath}
+      initialFileContents={initialFileContents}
+    ></EditorContent>
+  </EditorFrame>
+}
 
-  // function setOnDelete(callback: () => void): void {
-  //   setOnDeleteCallback({ f: callback })
-  // }
+type EditorContentProps = {
+  readonly editorType: EditorType
+  readonly server: ServerLiaison
+  readonly filePath: string
+  readonly setFilePath: (newFilePath: string, editorType: EditorType) => void
+  readonly initialFileContents: string
+}
+
+export type SaveOptions = {
+  filter?: RegExp
+  nonInteractive?: boolean
+}
+export type DoSave = (contents: string, options?: SaveOptions) => void
+
+function EditorContent({
+  editorType,
+  server,
+  filePath,
+  setFilePath,
+  initialFileContents,
+}: EditorContentProps) {
+  const [globalPrefs, setGlobalPrefs] = useContext(GlobalEditorPreferencesContext)
 
   const [code, setCode] = useState<Immutable<string> | null>(null)
   const [collage, setCollage] = useState<Immutable<FileCollage> | null>(null)
   const [level, setLevel] = useState<FileLevel | null>(null)
-  // const [triggerSettings, setTriggerSettings] = useState<{ f: () => void }>({ f: () => {} })
 
   const globalStuff: GlobalEditorShared = {
     server: server,
-    openFileSelect: async function (rootDirectory: string, filter?: RegExp | undefined) {
-      console.warn("openFileSelect() not implemented.")
-      return ""
-    },
-    setOnDelete: function (callback: () => void): void {
-      console.warn("setOnDelete() not implemented.")
-    },
-    setOnSettings: function (callback: () => void): void {
-      console.warn("setOnSettings() not implemented.")
-    }
   }
 
   useEffect(() => {
@@ -87,10 +109,6 @@ export default function Editor({
     }
   }, [editorType, initialFileContents])
 
-  // function editSettings(): void {
-  //   triggerSettings.f()
-  // }
-
   function exportString(): json {
     if (editorType === "code" && code) {
       return code.replace(/\r\n/g, "\n")
@@ -103,11 +121,11 @@ export default function Editor({
     }
   }
 
-  async function doSave(savePath: string) {
+  async function doSave(contents: string, savePath: string) {
     try {
-      const fileContents = exportString()
+      // const fileContents = exportString()
       await server.api.projectFiles.writeFile.fetch(
-        server.withProject({ filePath: savePath, base64Contents: btoa(fileContents), allowOverwrite: true })
+        server.withProject({ filePath: savePath, base64Contents: btoa(contents), allowOverwrite: true })
       )
       await swal({
         title: "Saved!",
@@ -120,10 +138,41 @@ export default function Editor({
     }
   }
 
-  return <EditorFrame
-    editorPreferencesId={filePath}
-  >
-    <RenderCounter debugLabel="Editor"></RenderCounter>
+  const filePopupControls = useContext(FilePopupContext)
+  function openFileSave(contents: string, options: SaveOptions = {}): void {
+    // const filter = level !== null ? /\.lvl\.yml$/ : (collage !== null ? /\.clg\.yml$/ : undefined)
+    getSaveFilePath(options).then((newFilePath) => {
+      doSave(contents, newFilePath)
+      setFilePath(newFilePath, editorType)
+    }, (e) => {
+      // TODO: Handle error better
+      console.error(e)
+    })
+  }
+  async function getSaveFilePath(options: SaveOptions) {
+    if (options.nonInteractive) {
+      return filePath
+    }
+
+    const lastSlash = filePath.lastIndexOf("/")
+    const preloadDirectory = filePath.substring(0, lastSlash)
+    const preloadFileName = filePath.substring(lastSlash + 1)
+    return await filePopupControls.showFileSelectPopup({
+      title: "Save File As",
+      confirmActionText: "Save",
+      root: "",
+      startDirectory: preloadDirectory,
+      showTextBox: true,
+      filter: options.filter,
+      startFileName: preloadFileName,
+    })
+  }
+
+  return <>
+    {/* <MenuBar
+      editSettings={() => setGlobalPrefs((before) => ({...before, propertiesPath: []}))}
+      openFileSave={openFileSave}
+    ></MenuBar> */}
     {/* {!!code && <CodeEditor
       key={filePath}
       code={code}
@@ -141,9 +190,10 @@ export default function Editor({
       key={filePath}
       id={filePath}
       editorGlobalStuff={globalStuff}
+      doSave={openFileSave}
       level={level}
       setLevel={setLevel}
       style="flex-grow: 1; overflow: hidden;"
     />}
-  </EditorFrame>
+  </>
 }

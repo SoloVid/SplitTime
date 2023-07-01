@@ -1,8 +1,9 @@
 import { createContext } from "preact";
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { ImmutableSetter } from "./preact-help";
 import FileBrowser from "./file-browser";
 import { assert } from "globals";
+import { ServerLiaison } from "./server-liaison";
 
 type FileBrowserReturnListener = {f: (filePath: string) => void}
 
@@ -33,19 +34,18 @@ export function useFilePopupState() {
 }
 
 type FilePopupControls = {
-  readonly showFileSelectPopup: (settings: Partial<Omit<FilePopupState, "show">>) => PromiseLike<string>
+  readonly showFileSelectPopup: (settings: Partial<Omit<FilePopupState, "show" | "returnListener">>) => PromiseLike<string>
   // readonly openFileSave: () => void
   // readonly openFileSelect: (rootDirectory: string, filter?: RegExp) => PromiseLike<string>
 }
 
 export function useFilePopupControls(): FilePopupControls {
   const [state, setState] = useFilePopupState()
-  return {
+  return useMemo<FilePopupControls>(() => ({
     async showFileSelectPopup(settings) {
       const returnedPath = await new Promise<string>((resolve) => {
         setState(before => ({
           ...before,
-          returnListener: {f: newFilePath => resolve(newFilePath)},
           title: "Select File",
           confirmActionText: "Select",
           root: "",
@@ -53,12 +53,13 @@ export function useFilePopupControls(): FilePopupControls {
           showTextBox: false,
           filter: undefined,
           ...settings,
+          returnListener: {f: newFilePath => resolve(newFilePath)},
           show: true,
         }))
       })
       return returnedPath
     },
-  }
+  }), [setState])
 }
 
 export const FilePopupContext = createContext<FilePopupControls>({
@@ -68,30 +69,37 @@ export const FilePopupContext = createContext<FilePopupControls>({
 })
 
 type Props = {
-  state: FilePopupState
-  setState: ImmutableSetter<FilePopupState>
+  // state: FilePopupState
+  // setState: ImmutableSetter<FilePopupState>
   children: any
+  server: ServerLiaison
 }
 
-export function FilePopupContextProvider({state, setState, children}: Props) {
-  function openFileSave(): void {
-    const filter = level !== null ? /\.lvl\.yml$/ : (collage !== null ? /\.clg\.yml$/ : undefined)
-    const lastSlash = filePath.lastIndexOf("/")
-    const preloadDirectory = filePath.substring(0, lastSlash)
-    const preloadFileName = filePath.substring(lastSlash + 1)
-    setFileBrowserReturnListener({ f: async newFilePath => {
-      doSave(newFilePath)
-      setFilePath(newFilePath, editorType)
-    } })
-    setFileBrowserTitle("Save File As")
-    setFileBrowserConfirmActionText("Save")
-    setFileBrowserRoot("")
-    setFileBrowserStartDirectory(preloadDirectory)
-    setFileBrowserShowTextBox(true)
-    setFileBrowserFilter(filter)
-    setFileBrowserStartFileName(preloadFileName)
-    setShowFileBrowser(true)
-  }
+export function FilePopupContextProvider({children, server}: Props) {
+  const [state, setState] = useFilePopupState()
+  // const popupControls = useFilePopupControls()
+
+  // function openFileSave(): void {
+  //   const filter = level !== null ? /\.lvl\.yml$/ : (collage !== null ? /\.clg\.yml$/ : undefined)
+  //   const lastSlash = filePath.lastIndexOf("/")
+  //   const preloadDirectory = filePath.substring(0, lastSlash)
+  //   const preloadFileName = filePath.substring(lastSlash + 1)
+  //   setState((before) => ({
+  //     ...before,
+  //     show: true,
+  //     returnListener: { f: async newFilePath => {
+  //       doSave(newFilePath)
+  //       setFilePath(newFilePath, editorType)
+  //     } },
+  //     title: "Save File As",
+  //     confirmActionText: "Save",
+  //     root: "",
+  //     startDirectory: preloadDirectory,
+  //     showTextBox: true,
+  //     filter: filter,
+  //     startFileName: preloadFileName,
+  //   }))
+  // }
 
   // function openFileSelect(rootDirectory: string, filter?: RegExp): PromiseLike<string> {
   //   return new Promise((resolve) => {
@@ -124,7 +132,33 @@ export function FilePopupContextProvider({state, setState, children}: Props) {
     listener.f(newFilePath)
   }
 
-return <>
+  const value = useMemo<FilePopupControls>(() => {
+    return {
+      showFileSelectPopup: (settings) => {
+        return new Promise((resolve) => {
+          setState((before) => ({
+            // ...before,
+            // show: true,
+            // returnListener: {f: newFilePath => resolve(newFilePath)},
+            // ...settings,
+
+            ...before,
+            title: "Select File",
+            confirmActionText: "Select",
+            root: "",
+            startDirectory: "",
+            showTextBox: false,
+            filter: undefined,
+            ...settings,
+            returnListener: {f: newFilePath => resolve(newFilePath)},
+            show: true,
+          }))
+        })
+      }
+    }
+  }, [setState])
+
+  return <FilePopupContext.Provider value={value}>
     {state.show && <div className="modal-backdrop">
       <div className="modal-body">
         <FileBrowser
@@ -142,5 +176,5 @@ return <>
       </div>
     </div>}
     {children}
-  </>
+  </FilePopupContext.Provider>
 }

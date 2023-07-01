@@ -24,6 +24,11 @@ canvas, img {
     -ms-interpolation-mode:nearest-neighbor;   /* IE8+           */
 }
 
+input:read-only {
+    background: rgba(200, 200, 200, 0.5);
+    outline: none;
+}
+
 .left { float: left; }
 .right { float: right; }
 .center {
@@ -227,7 +232,7 @@ input.block, textarea.block, select.block {
 
 .render-counter {
     position: absolute;
-    z-index: 10;
+    z-index: 1;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);

@@ -1,10 +1,12 @@
-import { createContext } from "preact"
-import { makePreferences } from "./preferences"
 import { int } from "globals"
+import { createContext } from "preact"
+import { BasePath } from "../utils/immutable-helper"
+import { makePreferences } from "./preferences"
 
 export type GlobalEditorPreferences = {
   readonly gridEnabled: boolean
   readonly gridCell: { readonly x: int, readonly y: int }
+  // readonly propertiesPath: null | BasePath
   readonly zoom: number
 }
 
@@ -14,6 +16,7 @@ const defaultPreferences: GlobalEditorPreferences = {
     x: 32,
     y: 32,
   },
+  // propertiesPath: null,
   zoom: 100,
 }
 

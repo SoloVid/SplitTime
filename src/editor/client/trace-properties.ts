@@ -2,6 +2,7 @@ import { Trace } from "api/file"
 import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { FieldOptions, ObjectProperties } from "./field-options"
 import { FileTrace } from "./file-types"
+import { generateUID } from "engine/utils/misc"
 
 interface TraceFieldOptions {
     id: FieldOptions
@@ -22,7 +23,10 @@ interface TraceFieldOptions {
 type SimplifiedTrace = { [K in keyof Required<TraceFieldOptions>]: string | number }
 
 export const tracePropertyFields = {
-    id: {},
+    id: {
+        readonly: true
+    },
+    name: {},
     group: {},
     type: {
         readonly: true
@@ -43,7 +47,8 @@ export const tracePropertyFields = {
 
 export function makeDefaultTrace(traceType: TraceTypeType): FileTrace {
     const trace: FileTrace = {
-        id: "",
+        id: generateUID(),
+        name: "",
         group: "",
         type: traceType,
         vertices: "",
