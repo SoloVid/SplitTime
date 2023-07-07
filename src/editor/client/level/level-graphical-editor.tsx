@@ -5,30 +5,30 @@ import { makePositionPoint } from "engine/world/level/trace/trace-points"
 import { TraceType } from "engine/world/level/trace/trace-type"
 import { assert } from "globals"
 import { useContext, useMemo, useRef, useState } from "preact/hooks"
+import GridLines from "../common/grid-lines"
+import { InfoPaneContext } from "../common/info-pane"
+import { ServerLiaison } from "../common/server-liaison"
+import { UserInputsContext } from "../common/user-inputs"
 import { createSnapMontageMover, findClosestPosition, getGroupById, getPositionMap, makeNewTrace } from "../editor-functions"
-import GridLines from "../grid-lines"
-import { InfoPaneContext } from "../info-pane"
-import { ImmutableSetter, makeStyleString, preventDefault } from "../preact-help"
 import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
-import { GlobalEditorShared } from "../shared-types"
-import { UserInputsContext } from "../user-inputs"
+import { coalescePreferencesGridCell } from "../preferences/grid"
+import { ImmutableSetter, makeStyleString, preventDefault } from "../utils/preact-help"
+import RenderCounter from "../utils/render-counter"
+import { useArrayMemo } from "../utils/use-array-memo"
+import { useJsonableMemo } from "../utils/use-jsonable-memo"
 import { CollageManagerContext } from "./collage-manager"
 import { useEntityBodies } from "./entity-body-manager"
 import { useSortedEntities } from "./entity-sort-helper"
 import { EditorLevel, EditorPosition, EditorProp, EditorTrace, ObjectMetadataMap, blankObjectMetadata } from "./extended-level-format"
 import LevelBackground from "./level-background"
+import { LevelFollowerContextProvider } from "./level-follower"
 import { LevelEditorPreferencesContext } from "./level-preferences"
 import RenderedLevelTrace from "./rendered-level-trace"
 import RenderedProposition from "./rendered-proposition"
 import { EDITOR_PADDING } from "./shared-types"
-import RenderCounter from "../utils/render-counter"
-import { useArrayMemo } from "../utils/use-array-memo"
-import { useJsonableMemo } from "../utils/use-jsonable-memo"
-import { LevelFollowerContextProvider } from "./level-follower"
-import { coalescePreferencesGridCell } from "../preferences/grid"
 
 type LevelGraphicalEditorProps = {
-  globalStuff: GlobalEditorShared
+  server: ServerLiaison
   level: Immutable<EditorLevel>
   setLevel: ImmutableSetter<EditorLevel>
   objectMetadataMap: Immutable<ObjectMetadataMap>
@@ -38,7 +38,7 @@ type LevelGraphicalEditorProps = {
 
 export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   const {
-    globalStuff,
+    server,
     level, setLevel,
     objectMetadataMap, setObjectMetadataMap,
     scale,
@@ -332,7 +332,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
             metadata={data.metadata}
             positionMap={data.positionMap}
             scale={scale}
-            server={globalStuff.server}
+            server={server}
             shouldDragBePrevented={data.shouldDragBePrevented}
             transform={traceTransform}
             trace={data.e}
@@ -340,7 +340,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         </svg>}
       </div>
     ),
-    [levelOffsetStyle, setObjectMetadataMap, scale, globalStuff.server, traceTransform],
+    [levelOffsetStyle, setObjectMetadataMap, scale, server, traceTransform],
     {
       useDeepCompare: true,
     },

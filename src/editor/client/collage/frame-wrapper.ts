@@ -1,7 +1,7 @@
 import { int } from "api"
 import { Collage, Frame } from "engine/file/collage"
 import { Immutable } from "engine/utils/immutable"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 
 export class FrameWrapper implements Frame {
 

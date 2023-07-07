@@ -2,10 +2,10 @@ import { instanceOfCollage } from "engine/file/collage";
 import { instanceOfFileData as instanceOfLevelFileData } from "engine/world/level/level-file-data";
 import { useEffect, useState } from "preact/hooks";
 import { EditorType } from "./editor";
-import FileBrowser from "./file-browser";
+import FileBrowser from "./file-browser/file-browser";
 import GitPanel from "./git-panel";
-import { onlyLeft } from "./preact-help";
-import { ServerLiaison } from "./server-liaison";
+import { onlyLeft } from "./utils/preact-help";
+import { ServerLiaison } from "./common/server-liaison";
 import { showError } from "./utils/prompt";
 
 type LandingProps = {

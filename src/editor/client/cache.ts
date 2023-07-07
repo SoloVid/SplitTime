@@ -1,7 +1,7 @@
 import { randomRangedInt } from "api/math"
 import { warn } from "api/system"
 import { Immutable } from "engine/utils/immutable"
-import { ImmutableSetter } from "./preact-help"
+import { ImmutableSetter } from "./utils/preact-help"
 
 export type UnderlyingCacheObject<T> = { [id: string]: CacheEntry<T> }
 

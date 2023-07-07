@@ -1,4 +1,4 @@
-import PixelSizingControls from "./pixel-sizing-controls"
+import PixelSizingControls from "../pixel-sizing-controls"
 
 export type MenuBarProps = {
   editSettings: () => void

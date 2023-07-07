@@ -3,9 +3,9 @@ import { IsJsonable } from "engine/file/json"
 import { Immutable } from "engine/utils/immutable"
 import { debug } from "engine/utils/logger"
 import { useEffect, useState } from "preact/hooks"
-import { exportJson } from "./editor-functions"
+import { exportJson } from "../editor-functions"
 import { ImmutableSetter, TaggedImmutableSetter } from "./preact-help"
-import { useKeyListener } from "./utils/use-key-listener"
+import { useKeyListener } from "./use-key-listener"
 
 type Options<Hydrated, Dehydrated> = {
   // value: Hydrated

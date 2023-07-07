@@ -1,5 +1,5 @@
 import { useRef } from "preact/hooks"
-import { onlyLeft } from "./preact-help"
+import { onlyLeft } from "../utils/preact-help"
 
 type ModalProps = {
   children: any

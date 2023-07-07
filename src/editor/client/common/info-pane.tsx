@@ -1,5 +1,5 @@
 import { createContext } from "preact"
-import { ImmutableSetter } from "./preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 import { useState } from "preact/hooks"
 
 export const InfoPaneContext = createContext<[Record<string, string | number>, ImmutableSetter<Record<string, string | number>>]>([{}, () => undefined])

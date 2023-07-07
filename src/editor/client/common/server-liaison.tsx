@@ -2,8 +2,8 @@ import { WithProject } from "editor/server/api-wrappings"
 import { EditorTsApi } from "editor/server/api/editor-ts-api"
 import { createContext } from "preact"
 import { useMemo, useState } from "preact/hooks"
-import { Cache, UnderlyingCacheObject } from "./cache"
-import { getPlaceholderImage } from "./editor-functions"
+import { Cache, UnderlyingCacheObject } from "../cache"
+import { getPlaceholderImage } from "../editor-functions"
 
 type ImageContext = {
     imgSrc: (fileName: string) => string

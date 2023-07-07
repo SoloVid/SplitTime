@@ -1,7 +1,7 @@
 import { Collage, MontageFrame } from "engine/file/collage"
 import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 import { SimplifiedMontageFrame } from "./properties-stuffs"
 
 function findMontageFrame(mf: Immutable<MontageFrame>, collage: Immutable<Collage>) {

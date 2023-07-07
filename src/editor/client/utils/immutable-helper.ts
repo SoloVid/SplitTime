@@ -1,7 +1,7 @@
 import { rethrowError } from "engine/utils/error";
 import { Immutable } from "engine/utils/immutable";
 import { assert } from "globals";
-import { ImmutableSetter, OptionalTaggedImmutableSetter } from "../preact-help";
+import { ImmutableSetter, OptionalTaggedImmutableSetter } from "./preact-help";
 
 type DebugNever<Message extends string, ExtraData = never> = [never, Message, ExtraData]
 type AssertExtends<T, Extends, Message extends String> = T extends Extends ? T : never

@@ -10,17 +10,16 @@ import swal from "sweetalert"
 import { exportJson } from "./editor-functions"
 import { FileCollage, FileLevel } from "./file-types"
 import LevelEditor from "./level/level-editor"
-import MenuBar from "./menu-bar"
+import MenuBar from "./common/menu-bar"
 import { GlobalEditorPreferencesContext, GlobalEditorPreferencesContextProvider, globalEditorPreferences } from "./preferences/global-preferences"
-import { ServerLiaison } from "./server-liaison"
-import { GlobalEditorShared } from "./shared-types"
+import { ServerLiaison } from "./common/server-liaison"
 import { showError } from "./utils/prompt"
 import { EditorType } from "./editor-type"
 import YAML from "yaml"
-import { UserInputsContextProvider } from "./user-inputs"
+import { UserInputsContextProvider } from "./common/user-inputs"
 import EditorFrame from "./editor-frame"
 import RenderCounter from "./utils/render-counter"
-import { FilePopupContext } from "./file-popup"
+import { FilePopupContext } from "./file-browser/file-popup"
 
 type EditorProps = {
   readonly editorType: EditorType
@@ -84,10 +83,6 @@ function EditorContent({
   const [code, setCode] = useState<Immutable<string> | null>(null)
   const [collage, setCollage] = useState<Immutable<FileCollage> | null>(null)
   const [level, setLevel] = useState<FileLevel | null>(null)
-
-  const globalStuff: GlobalEditorShared = {
-    server: server,
-  }
 
   useEffect(() => {
     setCode(null)
@@ -189,7 +184,7 @@ function EditorContent({
     { !!level && <LevelEditor
       key={filePath}
       id={filePath}
-      editorGlobalStuff={globalStuff}
+      server={server}
       doSave={openFileSave}
       level={level}
       setLevel={setLevel}

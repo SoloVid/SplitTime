@@ -1,5 +1,5 @@
 import { useContext } from "preact/hooks"
-import { CheckboxInput, NumberInput } from "./input"
+import { CheckboxInput, NumberInput } from "./common/input"
 import { GlobalEditorPreferencesContext } from "./preferences/global-preferences"
 
 export default function PixelSizingControls() {

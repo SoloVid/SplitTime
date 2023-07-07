@@ -1,8 +1,8 @@
-import { FilePopupContextProvider } from "./file-popup"
-import MenuBar from "./menu-bar"
+import { FilePopupContextProvider } from "./file-browser/file-popup"
+import MenuBar from "./common/menu-bar"
 import { GlobalEditorPreferencesContextProvider } from "./preferences/global-preferences"
-import { ServerLiaison } from "./server-liaison"
-import { UserInputsContextProvider } from "./user-inputs"
+import { ServerLiaison } from "./common/server-liaison"
+import { UserInputsContextProvider } from "./common/user-inputs"
 
 type Props = {
   children: any

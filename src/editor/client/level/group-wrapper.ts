@@ -1,4 +1,4 @@
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 import { EditorLevel } from "./extended-level-format"
 
 export function onGroupIdUpdate(setLevel: ImmutableSetter<EditorLevel>, oldId: string, newId: string) {

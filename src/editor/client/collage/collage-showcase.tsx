@@ -1,6 +1,6 @@
 import { assert } from "globals"
 import { useMemo, useRef } from "preact/hooks"
-import { makeStyleString } from "../preact-help"
+import { makeStyleString } from "../utils/preact-help"
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { CollageHelper } from "./collage-helper"
 import Montage from "./montage"

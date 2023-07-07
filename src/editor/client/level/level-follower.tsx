@@ -1,6 +1,6 @@
 import { useContext, useMemo } from "preact/hooks";
-import { UserInputsContext } from "../user-inputs";
-import { ImmutableSetter } from "../preact-help";
+import { UserInputsContext } from "../common/user-inputs";
+import { ImmutableSetter } from "../utils/preact-help";
 import { EditorLevel } from "./extended-level-format";
 import { Immutable } from "engine/utils/immutable";
 import { createContext } from "preact";

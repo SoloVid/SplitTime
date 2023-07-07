@@ -2,8 +2,8 @@
 
 import { render } from "preact";
 import Editor from "./editor";
-import { ProjectImagesProvider, ServerLiaison } from "./server-liaison";
-import SvgPatterns from "./svg-patterns";
+import { ProjectImagesProvider, ServerLiaison } from "./common/server-liaison";
+import SvgPatterns from "./common/svg-patterns";
 import { exerciseApi } from "./test";
 import TestComponent from "./test-component";
 import { TimeProvider } from "./time-context";

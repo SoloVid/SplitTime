@@ -1,7 +1,7 @@
 import { Trace } from "api/file"
 import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
-import { FieldOptions, ObjectProperties } from "./field-options"
-import { FileTrace } from "./file-types"
+import { FieldOptions, ObjectProperties } from "../field-options"
+import { FileTrace } from "../file-types"
 import { generateUID } from "engine/utils/misc"
 
 interface TraceFieldOptions {

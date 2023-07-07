@@ -1,6 +1,6 @@
 import { useContext, useMemo } from "preact/hooks"
-import { makeStyleString } from "../preact-help"
-import { imageContext } from "../server-liaison"
+import { makeStyleString } from "../utils/preact-help"
+import { imageContext } from "../common/server-liaison"
 import { useScaledImageSize } from "../utils/image-size"
 import { EditorLevel } from "./extended-level-format"
 import { EDITOR_PADDING } from "./shared-types"

@@ -1,8 +1,8 @@
 import { useContext, useMemo, useState } from "preact/hooks"
-import { FieldOptions, GenericObjectProperties } from "./field-options"
-import { FilePopupContext } from "./file-popup"
+import { FieldOptions, GenericObjectProperties } from "../field-options"
+import { FilePopupContext } from "../file-browser/file-popup"
 import { CheckboxInput, MultilineStringInput, NumberInput, StringInput } from "./input"
-import { getByPath, updateImmutableObject } from "./utils/immutable-helper"
+import { getByPath, updateImmutableObject } from "../utils/immutable-helper"
 
 type PropertiesPanelProps = {
   readonly spec: GenericObjectProperties

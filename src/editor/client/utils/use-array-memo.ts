@@ -3,7 +3,7 @@ import { useEffect, useState } from "preact/hooks";
 import { getByPath } from "./immutable-helper";
 
 type SubKeyPaths<T, Key extends (keyof T)> = Key extends string ? (readonly [Key] | readonly [Key, ...KeyPaths<T[Key]>]) : never
-type KeyPaths<T> = T extends Record<string, unknown>
+export type KeyPaths<T> = T extends Record<string, unknown>
   ? (SubKeyPaths<T, keyof T>)
   : never
 
@@ -11,7 +11,7 @@ type Options = {
   useDeepCompare?: boolean
 }
 
-export function useArrayMemo<Input, Output, KeyField extends (keyof Input) | KeyPaths<Input> | null>(
+export function useArrayMemo<Input, Output, KeyField extends (keyof Input) | readonly string[]>(
   inputArray: readonly Input[],
   keyField: KeyField,
   map: (input: Input, index: number) => Output,

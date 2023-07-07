@@ -1,7 +1,7 @@
 import { debug, error, warn } from "api/system"
 import { Status } from "build-tools/project/status"
 import { useEffect, useState } from "preact/hooks"
-import type { ServerLiaison } from "../client/server-liaison"
+import type { ServerLiaison } from "../client/common/server-liaison"
 import { ConsoleEntry, PopupState } from "./player-state"
 
 type Options = {

@@ -2,7 +2,7 @@ import "preact/debug";
 
 import { render } from "preact";
 import { exerciseApi } from "../client/test";
-import { ServerLiaison } from "../client/server-liaison";
+import { ServerLiaison } from "../client/common/server-liaison";
 import { useEffect, useState } from "preact/hooks";
 import { makeBuildStatusWatcher } from "./build-status-watcher";
 import BuildStatusPopup from "./build-status-popup";

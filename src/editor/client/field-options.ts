@@ -1,5 +1,5 @@
 import { Immutable } from "engine/utils/immutable"
-import { OptionalTaggedImmutableSetter } from "./preact-help"
+import { OptionalTaggedImmutableSetter } from "./utils/preact-help"
 import { Drilled } from "./utils/immutable-helper"
 
 export interface FieldOptions {

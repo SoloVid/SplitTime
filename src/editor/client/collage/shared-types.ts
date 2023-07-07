@@ -5,7 +5,7 @@ import { game_seconds } from "engine/time/timeline"
 import { Trace as FileTrace } from "engine/world/level/level-file-data"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { ObjectProperties } from "../field-options"
-import { ServerLiaison } from "../server-liaison"
+import { ServerLiaison } from "../common/server-liaison"
 import { Followable } from "../shared-types"
 
 export const EDITOR_PADDING = 32

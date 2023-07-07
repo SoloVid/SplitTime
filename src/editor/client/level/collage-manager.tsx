@@ -6,8 +6,8 @@ import { CanvasRequirements } from "engine/world/body/render/drawable"
 import { createContext } from "preact"
 import { useMemo, useState } from "preact/hooks"
 import { Cache, UnderlyingCacheObject } from "../cache"
-import { ImmutableSetter } from "../preact-help"
-import { ServerLiaison } from "../server-liaison"
+import { ImmutableSetter } from "../utils/preact-help"
+import { ServerLiaison } from "../common/server-liaison"
 
 export function useCollageManager(server: ServerLiaison) {
   const [cacheObject, setCacheObject] = useState<Immutable<UnderlyingCacheObject<CollageInfo>>>({})

@@ -2,16 +2,18 @@ import { keycode } from "api/controls"
 import { Immutable } from "engine/utils/immutable"
 import { debug } from "engine/utils/logger"
 import { useContext, useEffect, useMemo, useRef, useState } from "preact/hooks"
+import InfoPaneFrame from "../common/info-pane"
+import MenuBar from "../common/menu-bar"
+import PropertiesPane from "../common/properties"
+import { ServerLiaison } from "../common/server-liaison"
+import { useOnSave } from "../common/user-inputs"
+import { DoSave } from "../editor"
 import { exportYaml } from "../editor-functions"
 import { FileLevel } from "../file-types"
-import InfoPaneFrame from "../info-pane"
-import MenuBar from "../menu-bar"
-import { ImmutableSetter } from "../preact-help"
 import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
 import { convertZoomToScale } from "../preferences/scale"
-import PropertiesPane from "../properties"
-import { GlobalEditorShared } from "../shared-types"
 import { updateImmutableObject } from "../utils/immutable-helper"
+import { ImmutableSetter } from "../utils/preact-help"
 import Resizer from "../utils/resizer"
 import { useKeyListener } from "../utils/use-key-listener"
 import { CollageManagerContextProvider } from "./collage-manager"
@@ -21,14 +23,11 @@ import LevelGraphicalEditor from "./level-graphical-editor"
 import { LevelEditorPreferencesContext, LevelEditorPreferencesContextProvider } from "./level-preferences"
 import LevelTree from "./level-tree"
 import { newLevel } from "./new-level"
-import { PropertiesContextProvider } from "./properties-context"
 import { getObjectProperties } from "./properties-stuffs"
-import { useOnSave } from "../user-inputs"
-import { DoSave } from "../editor"
 
 type LevelEditorProps = {
   id: string
-  editorGlobalStuff: GlobalEditorShared
+  server: ServerLiaison
   doSave: DoSave
   level: Immutable<FileLevel>
   setLevel: ImmutableSetter<FileLevel | null>
@@ -41,7 +40,7 @@ export default function LevelEditor(props: LevelEditorProps) {
   >
     <LevelEditorInner
       id={props.id}
-      editorGlobalStuff={props.editorGlobalStuff}
+      server={props.server}
       doSave={props.doSave}
       level={props.level}
       setLevel={props.setLevel}
@@ -53,7 +52,7 @@ export default function LevelEditor(props: LevelEditorProps) {
 export function LevelEditorInner(props: LevelEditorProps) {
   const {
     id,
-    editorGlobalStuff,
+    server,
     doSave,
     level: fileLevel,
     setLevel: setFileLevel,
@@ -158,13 +157,13 @@ export function LevelEditorInner(props: LevelEditorProps) {
         openFileSave={() => doSave(exportYaml(level), { filter: /\.lvl\.yml$/ })}
       ></MenuBar>
       <InfoPaneFrame>
-        <CollageManagerContextProvider server={editorGlobalStuff.server}>
+        <CollageManagerContextProvider server={server}>
           <div className="content" style="flex-grow: 1; overflow: hidden; display: flex;">
             <div ref={$leftMenu} class="menu" style={`flex-shrink: 0; width: ${levelEditorPrefs.leftMenuWidth}px;`}>
               <LevelEditorTools
                 level={level}
                 scale={scale}
-                server={editorGlobalStuff.server}
+                server={server}
               />
               <hr/>
               {!!levelEditorPrefs.propertiesPanel && <PropertiesPane
@@ -178,7 +177,7 @@ export function LevelEditorInner(props: LevelEditorProps) {
 
             <div className="graphical-editor-container" ref={$graphicalEditorContainer} style="flex-grow: 1; overflow: auto;">
               <LevelGraphicalEditor
-                globalStuff={editorGlobalStuff}
+                server={server}
                 level={level}
                 setLevel={setLevel}
                 objectMetadataMap={objectMetadataMap}

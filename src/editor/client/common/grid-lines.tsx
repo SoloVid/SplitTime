@@ -3,7 +3,7 @@ import { Immutable } from "engine/utils/immutable"
 import { generateUID } from "engine/utils/misc"
 import { Coordinates2D } from "engine/world/level/level-location"
 import { useMemo, useState } from "preact/hooks"
-import { makeStyleString } from "./preact-help"
+import { makeStyleString } from "../utils/preact-help"
 
 type GridLinesProps = {
   gridCell: Immutable<Coordinates2D>

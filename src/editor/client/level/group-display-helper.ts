@@ -1,7 +1,7 @@
 import { Immutable } from "engine/utils/immutable"
 import { EditorGroup, EditorLevel, EditorPosition, EditorProp, EditorTrace } from "./extended-level-format"
 import { LevelEditorPreferences } from "./level-preferences"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 
 export type LevelTreeGroupNode = {
   group: EditorGroup | null

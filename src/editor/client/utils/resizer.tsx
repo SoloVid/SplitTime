@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks"
-import { onlyLeft } from "../preact-help"
+import { onlyLeft } from "./preact-help"
 
 export type ResizerProps = {
   resizeType: "horizontal" | "vertical"

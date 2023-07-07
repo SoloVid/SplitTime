@@ -1,7 +1,7 @@
 import { direction_t, int } from "api"
 import { Collage, Frame, Montage } from "engine/file/collage"
 import { Immutable } from "engine/utils/immutable"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 import { type SimplifiedMontage } from "./properties-stuffs"
 
 export class MontageWrapper implements SimplifiedMontage {

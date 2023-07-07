@@ -1,6 +1,6 @@
 import { makePositionPoint } from "engine/world/level/trace/trace-points"
 import { FilePosition } from "../file-types"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 import { EditorLevel } from "./extended-level-format"
 
 export function onPositionDelete(setLevel: ImmutableSetter<EditorLevel>, position: FilePosition) {

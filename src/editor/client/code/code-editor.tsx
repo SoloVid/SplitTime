@@ -1,5 +1,5 @@
-import { MultilineStringInput } from "../input"
-import { ImmutableSetter } from "../preact-help"
+import { MultilineStringInput } from "../common/input"
+import { ImmutableSetter } from "../utils/preact-help"
 import { GlobalEditorShared } from "../shared-types"
 
 type CollageEditorProps = {

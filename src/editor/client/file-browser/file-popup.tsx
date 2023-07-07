@@ -1,9 +1,9 @@
 import { createContext } from "preact";
 import { useMemo, useState } from "preact/hooks";
-import { ImmutableSetter } from "./preact-help";
+import { ImmutableSetter } from "../utils/preact-help";
 import FileBrowser from "./file-browser";
 import { assert } from "globals";
-import { ServerLiaison } from "./server-liaison";
+import { ServerLiaison } from "../common/server-liaison";
 
 type FileBrowserReturnListener = {f: (filePath: string) => void}
 

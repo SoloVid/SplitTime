@@ -1,6 +1,6 @@
 import { Immutable } from "engine/utils/immutable"
 import { useEffect, useState } from "preact/hooks"
-import { ImmutableSetter } from "../preact-help"
+import { ImmutableSetter } from "../utils/preact-help"
 
 const defaultGlobalId = "DEFAULT"
 

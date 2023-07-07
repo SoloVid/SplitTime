@@ -1,4 +1,4 @@
-import { ImmutableSetter } from "../preact-help";
+import { ImmutableSetter } from "../utils/preact-help";
 import { LevelEditorPreferences } from "./level-preferences";
 
 export function setActiveGroup(setPrefs: ImmutableSetter<LevelEditorPreferences>, groupId: string) {

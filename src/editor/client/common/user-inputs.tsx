@@ -2,15 +2,15 @@ import { keycode } from "api/controls";
 import { debug } from "api/system";
 import { createContext } from "preact";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
-import { useSetIntervalWhenActive } from "./utils/use-set-interval-when-active";
+import { useSetIntervalWhenActive } from "../utils/use-set-interval-when-active";
 import { Coordinates2D } from "engine/world/level/level-location";
-import { getCoords } from "./editor-functions";
-import { ImmutableSetter } from "./preact-help";
-import { useKeyListener } from "./utils/use-key-listener";
-import { GlobalEditorShared } from "./shared-types";
-import { GlobalEditorPreferencesContext } from "./preferences/global-preferences";
-import { convertZoomToScale } from "./preferences/scale";
-import { coalescePreferencesGridCell } from "./preferences/grid";
+import { getCoords } from "../editor-functions";
+import { ImmutableSetter } from "../utils/preact-help";
+import { useKeyListener } from "../utils/use-key-listener";
+import { GlobalEditorShared } from "../shared-types";
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences";
+import { convertZoomToScale } from "../preferences/scale";
+import { coalescePreferencesGridCell } from "../preferences/grid";
 
 export interface Followable {
   shift(dx: number, dy: number): void

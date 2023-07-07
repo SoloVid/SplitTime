@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks"
-import { ServerLiaison } from "./server-liaison"
+import { ServerLiaison } from "./common/server-liaison"
 import { Diff2HtmlUI, Diff2HtmlUIConfig } from 'diff2html/lib/ui/js/diff2html-ui-slim.js';
 import { unknownToString } from "editor/player/console-text-helper";
 

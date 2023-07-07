@@ -1,4 +1,4 @@
-import { onlyLeft } from "../client/preact-help"
+import { onlyLeft } from "../client/utils/preact-help"
 import { PopupState } from "./player-state"
 
 type BuildStatusPopupProps = {

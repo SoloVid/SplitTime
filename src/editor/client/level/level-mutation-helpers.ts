@@ -1,4 +1,4 @@
-import { ImmutableSetter } from "../preact-help";
+import { ImmutableSetter } from "../utils/preact-help";
 import { EditorGroup, EditorLevel } from "./extended-level-format";
 
 export function addGroup(setLevel: ImmutableSetter<EditorLevel>, group: EditorGroup) {

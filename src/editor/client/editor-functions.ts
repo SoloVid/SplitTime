@@ -7,10 +7,10 @@ import { Group as FileGroup } from "engine/world/level/level-file-data"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
 import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import YAML from "yaml"
-import { GridSnapMover } from "./grid-snap-mover"
+import { GridSnapMover } from "./utils/grid-snap-mover"
 import { EditorLevel, EditorPosition } from "./level/extended-level-format"
-import { traceOptions } from "./trace-options"
-import { makeDefaultTrace } from "./trace-properties"
+import { traceOptions } from "./common/trace-options"
+import { makeDefaultTrace } from "./common/trace-properties"
 
 export function updatePageTitle(title: string) {
   document.title = title
