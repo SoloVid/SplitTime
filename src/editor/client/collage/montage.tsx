@@ -1,12 +1,14 @@
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { Montage as FileMontage } from "engine/file/collage"
 import { getPlaceholderImage } from "../editor-functions"
-import { useContext, useMemo } from "preact/hooks"
+import { useContext, useEffect, useMemo } from "preact/hooks"
 import { makeStyleString } from "../utils/preact-help"
 import { PropertiesEvent } from "./shared-types"
 import { Rect } from "engine/math/rect"
 import MontageFrame from "./montage-frame"
 import { Time } from "../time-context"
+import { useJsonableMemo } from "../utils/use-jsonable-memo"
+import RenderCounter from "../utils/render-counter"
 
 type MontageProps = {
   collageEditHelper: SharedStuff | undefined
@@ -31,20 +33,29 @@ export default function Montage(props: MontageProps) {
 
   const placeholderImgSrc = getPlaceholderImage()
 
+  debugField("montage", montage)
+  debugField("collageViewHelper.realCollage", collageViewHelper.realCollage)
+
   const realMontage = useMemo(() => {
     const dir = montage.direction === "" ? undefined : montage.direction
     return collageViewHelper.realCollage.getMontage(montage.id, dir)
   }, [montage, collageViewHelper.realCollage])
 
-  const overallArea = useMemo(() => {
+  const overallArea = useJsonableMemo(() => {
     if (montage.frames.length === 0) {
       // FTODO: Consider calculating these values better
       return Rect.make(0, 0, 16, 16)
     }
-    return realMontage.getOverallArea()
+    const rect = realMontage.getOverallArea()
+    return {
+      width: rect.width,
+      height: rect.height,
+      x: rect.x,
+      y: rect.y,
+    }
   }, [montage, realMontage])
 
-  const editorScale = collageViewHelper.globalStuff.scale
+  const editorScale = collageViewHelper.scale
 
   const desiredWidth = overallArea.width * editorScale
   const desiredHeight = overallArea.height * editorScale
@@ -53,19 +64,6 @@ export default function Montage(props: MontageProps) {
   const bestHeight = Math.min(maxHeight, desiredHeight)
 
   const scale = Math.min(bestWidth / overallArea.width, bestHeight / overallArea.height)
-
-  const currentFrame = useMemo(() => {
-    if (realMontage.frames.length === 0) {
-      return null
-    }
-    const realFrame = realMontage.getFrameAt(time)
-    const frameIndex = realMontage.frames.indexOf(realFrame)
-    return {
-      index: frameIndex,
-      fileFrame: montage.frames[frameIndex],
-      targetBox: realFrame.getTargetBox(realMontage.bodySpec),
-    }
-  }, [realMontage, time, montage.frames])
 
   const overallAreaS = useMemo(() => Rect.make(
     overallArea.x * scale,
@@ -84,16 +82,6 @@ export default function Montage(props: MontageProps) {
     return makeStyleString(styleMap)
   }, [overallAreaS, montage, collageViewHelper.selectedMontage])
 
-  const frameDivStyle = useMemo(() => {
-    const targetBox = currentFrame ? currentFrame.targetBox : { x: 16, y: 16 }
-    const targetBoxS = { x: targetBox.x * scale, y: targetBox.y * scale }
-    const styleMap = {
-      position: 'absolute',
-      left: (targetBoxS.x - overallAreaS.x) + 'px',
-      top: (targetBoxS.y - overallAreaS.y) + 'px'
-    }
-    return makeStyleString(styleMap)
-  }, [currentFrame, overallAreaS, scale])
 
   function setActiveMontage(event: MouseEvent): void {
     const alsoSetProperties = !(event as PropertiesEvent).propertiesPanelSet
@@ -107,21 +95,42 @@ export default function Montage(props: MontageProps) {
     }
   }
 
-  return <div
-    onMouseDown={(e) => { if (e.button === 0) setActiveMontage(e) }}
-    style="position: relative;"
-  >
-    <div
-      style={containerStyle}
-      class="transparency-checkerboard-background"
-      title={montage.id + ' (' + montage.direction + ')'}
-    >
-      {!currentFrame && <div
-        style="overflow: hidden; width: 100%; height: 100%;"
-      >
-        <img src={placeholderImgSrc}/>
-      </div>}
-      {currentFrame && <div
+  function debugField(field: string, value: unknown) {
+    useEffect(() => {
+      console.log(`${field} changed`)
+    }, [value])
+  }
+  
+  debugField("realMontage", realMontage)
+  debugField("montage.frames", montage.frames)
+  debugField("collageEditHelper", collageEditHelper)
+  debugField("collageViewHelper", collageViewHelper)
+  debugField("montageIndex", montageIndex)
+  debugField("montage", montage)
+  debugField("overallAreaS", overallAreaS)
+  debugField("scale", scale)
+
+  const montageFrameElements = useMemo(() => {
+    if (realMontage.frames.length === 0) {
+      return []
+    }
+    return realMontage.frames.map((realFrame, frameIndex) => {
+      const data = {
+        index: frameIndex,
+        fileFrame: montage.frames[frameIndex],
+        targetBox: realFrame.getTargetBox(realMontage.bodySpec),
+      }
+
+      const targetBox = data.targetBox
+      const targetBoxS = { x: targetBox.x * scale, y: targetBox.y * scale }
+      const styleMap = {
+        position: 'absolute',
+        left: (targetBoxS.x - overallAreaS.x) + 'px',
+        top: (targetBoxS.y - overallAreaS.y) + 'px'
+      }
+      const frameDivStyle = makeStyleString(styleMap)
+
+      const element = <div
         style={frameDivStyle}
       >
         <MontageFrame
@@ -131,11 +140,36 @@ export default function Montage(props: MontageProps) {
           highlight={false}
           montageIndex={montageIndex}
           montage={montage}
-          montageFrameIndex={currentFrame.index}
-          montageFrame={currentFrame.fileFrame}
+          montageFrameIndex={data.index}
+          montageFrame={data.fileFrame}
           scale={scale}
         />
-      </div>}
+      </div>
+      return element
+    })
+  }, [realMontage, montage.frames, collageEditHelper, collageViewHelper, montageIndex, montage, overallAreaS, scale])
+
+  const frameIndex = useMemo(() => {
+    return realMontage.getFrameIndexAt(time)
+  }, [realMontage, time])
+
+  const currentFrameElement = frameIndex === null ? <div
+      style="overflow: hidden; width: 100%; height: 100%;"
+    >
+      <img src={placeholderImgSrc}/>
+    </div> : montageFrameElements[frameIndex]
+
+  return <div
+    onMouseDown={(e) => { if (e.button === 0) setActiveMontage(e) }}
+    style="position: relative;"
+  >
+    <div
+      style={containerStyle}
+      class="transparency-checkerboard-background"
+      title={montage.id + ' (' + montage.direction + ')'}
+    >
+      <RenderCounter offsetY={-36} debugLabel="montage"></RenderCounter>
+      {currentFrameElement}
     </div>
   </div>
 }

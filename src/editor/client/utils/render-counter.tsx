@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks"
+import { makeStyleString } from "./preact-help"
 
 type Props = {
   debugLabel?: string
+  offsetY?: number
 }
 
 const n = 4
 const interval = 500
 
-export default function RenderCounter({ debugLabel }: Props) {
+export default function RenderCounter({ debugLabel, offsetY }: Props) {
   const [arbitraryStateForChange, setArbitraryStateForChange] = useState<number>(0)
   const rendersThisInterval = useRef<number>(0)
   const rendersLastNIntervals = useRef<readonly (number | null)[]>([])
@@ -39,7 +41,9 @@ export default function RenderCounter({ debugLabel }: Props) {
     [rendersLastNIntervals.current]
   )
 
-  return <div className="render-counter">
+  return <div className="render-counter" style={makeStyleString({
+    "transform": `translate(-50%, calc(-50% + (${offsetY ?? 0}px)))`
+  })}>
     {debugLabel && <div>{debugLabel}</div>}
     {averageFramesPerSecond.toFixed(1)}/s
   </div>

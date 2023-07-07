@@ -1,20 +1,21 @@
-import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { BodySpec, Montage as FileMontage, MontageFrame as FileMontageFrame } from "engine/file/collage"
-import { useContext, useMemo, useRef } from "preact/hooks"
 import { Rect } from "engine/math/rect"
-import { makeStyleString } from "../utils/preact-help"
-import { EDITOR_PADDING, PropertiesEvent } from "./shared-types"
+import { Immutable } from "engine/utils/immutable"
 import { Trace as FileTrace } from "engine/world/level/level-file-data"
 import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { assert } from "globals"
-import { Immutable } from "engine/utils/immutable"
-import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
-import RenderedMontageTrace from "./rendered-montage-trace"
+import { useContext, useMemo, useRef } from "preact/hooks"
 import { imageContext } from "../common/server-liaison"
-// import { getRelativeMouse } from "../shared-types"
-import { useScaledImageDimensions } from "../utils/scaled-image"
-import { useScaledImageSize } from "../utils/image-size"
+import { UserInputsContext, getRelativeMouse } from "../common/user-inputs"
+import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
 import { GridSnapMover } from "../utils/grid-snap-mover"
+import { useScaledImageSize } from "../utils/image-size"
+import { makeStyleString } from "../utils/preact-help"
+import { SharedStuff, SharedStuffViewOnly } from "./collage-editor-shared"
+import RenderedMontageTrace from "./rendered-montage-trace"
+import { EDITOR_PADDING, PropertiesEvent } from "./shared-types"
+import { InfoPaneContext } from "../common/info-pane"
+import RenderCounter from "../utils/render-counter"
 
 type MontageFrameProps = {
   collageEditHelper: SharedStuff | undefined
@@ -27,6 +28,8 @@ type MontageFrameProps = {
   montageFrame: Immutable<FileMontageFrame>
   scale: number
 }
+
+const strokeWidth = 2
 
 export default function MontageFrame(props: MontageFrameProps) {
   const {
@@ -44,14 +47,30 @@ export default function MontageFrame(props: MontageFrameProps) {
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
 
   const body = montage.body
-  const editorInputs = collageViewHelper.globalStuff.userInputs
+  const editorInputs = useContext(UserInputsContext)
   // const scale = collageViewHelper.globalStuff.scale
+  const [info, setInfo] = useContext(InfoPaneContext)
 
   const bodyS: BodySpec = {
     width: body.width * scale,
     depth: body.depth * scale,
     height: body.height * scale,
   }
+
+  const bodyBackRectRelative = useMemo(() => {
+    return Rect.make(
+      -body.width / 2,
+      body.depth / 2 - body.height - body.depth,
+      body.width,
+      body.height
+    )
+  }, [body])
+  const bodyBackRectRelativeS = useMemo(() => Rect.make(
+    bodyBackRectRelative.x * scale,
+    bodyBackRectRelative.y * scale,
+    bodyBackRectRelative.width * scale,
+    bodyBackRectRelative.height * scale,
+  ), [bodyBackRectRelative, scale])
 
   const bodyFrontRectRelative = useMemo(() => {
     return Rect.make(
@@ -113,6 +132,13 @@ export default function MontageFrame(props: MontageFrameProps) {
   }, [frameTargetBoxS, highlight])
 
   const inputs = useMemo(() => {
+    if (editorInputs === null) {
+      return {
+        mouse: { x: 0, y: 0, isDown: false },
+        ctrlDown: false,
+      }
+    }
+
     const basicRelMouse = getRelativeMouse(editorInputs, $el.current)
     const mouse = {
       x: Math.round((basicRelMouse.x / scale) + frameTargetBox.x),
@@ -213,6 +239,7 @@ export default function MontageFrame(props: MontageFrameProps) {
     }
     const t = {
       id: "",
+      name: "",
       group: "",
       type: type,
       vertices: "",
@@ -287,18 +314,22 @@ export default function MontageFrame(props: MontageFrameProps) {
   }
 
   function handleMouseMove(event: MouseEvent): void {
-    collageEditHelper?.setInfo((before) => ({
-      ...before,
-      x: inputs.mouse.x,
-      ["y-z"]: inputs.mouse.y,
-    }))
+    if (collageEditHelper) {
+      setInfo((before) => ({
+        ...before,
+        x: inputs.mouse.x,
+        ["y-z"]: inputs.mouse.y,
+      }))
+    }
   }
 
   function handleMouseOut(event: MouseEvent): void {
-    collageEditHelper?.setInfo((before) => {
-      const { x, ["y-z"]: y, ...restBefore } = before
-      return restBefore
-    })
+    if (collageEditHelper) {
+      setInfo((before) => {
+        const { x, ["y-z"]: y, ...restBefore } = before
+        return restBefore
+      })
+    }
   }
 
   return <div style="position: relative;"
@@ -311,6 +342,7 @@ export default function MontageFrame(props: MontageFrameProps) {
     <div
       style={imageDivStyle}
     >
+      <RenderCounter debugLabel="frame"></RenderCounter>
       <img
         src={imgSrc}
         width={scaledImageSize?.width}
@@ -334,17 +366,27 @@ export default function MontageFrame(props: MontageFrameProps) {
           transform={svgTransform}
         />
       ))}
+      {/* Back */}
+      <rect
+        transform={svgTransform}
+        x={bodyBackRectRelativeS.x}
+        y={bodyBackRectRelativeS.y}
+        width={bodyBackRectRelativeS.width}
+        height={bodyBackRectRelativeS.height}
+        fill="rgba(100, 100, 100, 0.5)"
+        stroke="none"
+      />
       {/* Base */}
       <rect
         transform={svgTransform}
-        x={bodyFrontRectRelativeS.x}
-        y={bodyFrontRectRelativeS.y + bodyS.height - bodyS.depth}
-        width={bodyS.width}
-        height={bodyS.depth}
-        stroke="red"
-        stroke-width="2"
+        x={bodyFrontRectRelativeS.x + strokeWidth / 2}
+        y={bodyFrontRectRelativeS.y + bodyS.height - bodyS.depth + strokeWidth / 2}
+        width={Math.max(0, bodyS.width - strokeWidth)}
+        height={Math.max(0, bodyS.depth - strokeWidth)}
+        fill="url(#diagonal-hatch)"
+        stroke="black"
+        stroke-width={strokeWidth}
         stroke-dasharray="2,1"
-        fill="none"
       />
       {/* Front */}
       <rect
@@ -356,10 +398,8 @@ export default function MontageFrame(props: MontageFrameProps) {
         y={bodyFrontRectRelativeS.y}
         width={bodyFrontRectRelativeS.width}
         height={bodyFrontRectRelativeS.height}
-        fill="url(#diagonal-hatch)"
-        stroke="red"
-        stroke-width="2"
-        stroke-dasharray="2,1"
+        fill="rgba(255, 0, 0, 0.5)"
+        stroke="none"
       />
       {/* Top */}
       <rect
@@ -367,13 +407,13 @@ export default function MontageFrame(props: MontageFrameProps) {
         style="pointer-events: initial; cursor: grab;"
         onMouseDown={(e) => { if (e.button === 0) trackBody(e) }}
         onDblClick={editBody}
-        x={bodyFrontRectRelativeS.x}
-        y={bodyFrontRectRelativeS.y - bodyS.depth}
-        width={bodyS.width}
-        height={bodyS.depth}
+        x={bodyFrontRectRelativeS.x + strokeWidth / 2}
+        y={bodyFrontRectRelativeS.y - bodyS.depth + strokeWidth / 2}
+        width={Math.max(0, bodyS.width - strokeWidth)}
+        height={Math.max(0, bodyS.depth - strokeWidth)}
         fill="url(#diagonal-hatch)"
         stroke="red"
-        stroke-width="2"
+        stroke-width={strokeWidth}
         stroke-dasharray="2,1"
       />
     </svg>}

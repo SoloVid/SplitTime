@@ -6,7 +6,7 @@ import { instanceOfFileData as instanceOfLevelFileData } from "engine/world/leve
 import { useContext, useEffect, useState } from "preact/hooks"
 import swal from "sweetalert"
 // import CodeEditor from "./code/code-editor"
-// import CollageEditor from "./collage/collage-editor"
+import CollageEditor from "./collage/collage-editor"
 import { exportJson } from "./editor-functions"
 import { FileCollage, FileLevel } from "./file-types"
 import LevelEditor from "./level/level-editor"
@@ -173,22 +173,24 @@ function EditorContent({
       code={code}
       setCode={setCode}
       style="flex-grow: 1;"
-    />}
+    />} */}
     {!!collage && <CollageEditor
       key={filePath}
       id={filePath}
       collage={collage}
+      doSave={openFileSave}
+      server={server}
       setCollage={setCollage}
-      style="flex-grow: 1; overflow: hidden;"
-    />} */}
+      style="flex: 1; overflow: hidden;"
+    />}
     { !!level && <LevelEditor
       key={filePath}
       id={filePath}
-      server={server}
       doSave={openFileSave}
+      server={server}
       level={level}
       setLevel={setLevel}
-      style="flex-grow: 1; overflow: hidden;"
+      style="flex: 1; overflow: hidden;"
     />}
   </>
 }

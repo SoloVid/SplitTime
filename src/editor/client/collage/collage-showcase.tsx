@@ -9,7 +9,6 @@ type CollageShowcaseProps = {
   style?: string
   collageEditHelper?: SharedStuff | undefined
   collageViewHelper: SharedStuffViewOnly
-  scale: number
   $container: HTMLDivElement | null
 }
 
@@ -17,7 +16,6 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
   const {
     collageEditHelper,
     collageViewHelper,
-    scale,
     $container,
   } = props
 
@@ -36,7 +34,7 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
     return Math.min(Math.max(width, 16), maxMontageWidth)
   }, [collageViewHelper, maxMontageWidth])
 
-  const cellWidth = Math.min(widestMontageWidth * scale, maxMontageWidth)
+  const cellWidth = Math.min(widestMontageWidth * collageViewHelper.scale, maxMontageWidth)
 
   const gridStyle = useMemo(() => {
     const styleMap = {

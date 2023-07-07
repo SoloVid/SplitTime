@@ -21,6 +21,7 @@ export default function InfoPaneFrame({ children }: InfoPaneProps) {
 
 function InfoPane(props: { info: Record<string, string | number> }) {
   return <div id="info-pane" style="padding: 2px;">
+    <span>&nbsp;</span>
     {Object.entries(props.info).map(([name, value]) => (
       <span key={name} className="info-key-value">
         {name}: {value}

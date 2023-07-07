@@ -25,7 +25,6 @@ function useCollageViewHelper(props: LevelEditorToolsProps): CollageSharedStuff 
 
   const [prefs, setPrefs] = useContext(LevelEditorPreferencesContext)
   const collageManager = useContext(CollageManagerContext)
-  const userInputs = useContext(UserInputsContext)
 
   const collageId = prefs.collageSelected
   const collage = !collageId ? null : collageManager.getCollage(collageId)
@@ -73,11 +72,8 @@ function useCollageViewHelper(props: LevelEditorToolsProps): CollageSharedStuff 
       return collage.montages[montageIndex]
     },
     realCollage,
-    globalStuff: {
-      get scale() { return props.scale },
-      server: props.server,
-      userInputs: userInputs,
-    },
+    get scale() { return props.scale },
+    server: props.server,
     selectMontage,
   }
 }
@@ -167,7 +163,6 @@ export default function LevelEditorTools(props: LevelEditorToolsProps) {
       >
         <CollageShowcase
           collageViewHelper={collageViewHelper}
-          scale={props.scale}
           $container={$collageShowcaseContainer.current}
         />
       </div></div>}

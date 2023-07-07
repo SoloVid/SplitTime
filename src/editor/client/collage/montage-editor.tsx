@@ -18,7 +18,7 @@ export default function MontageEditor(props: MontageEditorProps) {
   } = props
 
   const collage = collageEditorShared.collage
-  const scale = collageEditorShared.globalStuff.scale
+  const scale = collageEditorShared.scale
 
   const selectedFrameId = collageEditorShared.selectedFrame === null ? null : collageEditorShared.selectedFrame.id
 

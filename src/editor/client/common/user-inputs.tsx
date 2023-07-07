@@ -1,16 +1,14 @@
 import { keycode } from "api/controls";
-import { debug } from "api/system";
+import { Coordinates2D } from "engine/world/level/level-location";
 import { createContext } from "preact";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
-import { useSetIntervalWhenActive } from "../utils/use-set-interval-when-active";
-import { Coordinates2D } from "engine/world/level/level-location";
 import { getCoords } from "../editor-functions";
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences";
+import { coalescePreferencesGridCell } from "../preferences/grid";
+import { convertZoomToScale } from "../preferences/scale";
 import { ImmutableSetter } from "../utils/preact-help";
 import { useKeyListener } from "../utils/use-key-listener";
-import { GlobalEditorShared } from "../shared-types";
-import { GlobalEditorPreferencesContext } from "../preferences/global-preferences";
-import { convertZoomToScale } from "../preferences/scale";
-import { coalescePreferencesGridCell } from "../preferences/grid";
+import { useSetIntervalWhenActive } from "../utils/use-set-interval-when-active";
 
 export interface Followable {
   shift(dx: number, dy: number): void
@@ -166,14 +164,7 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
   }
 
   function handleKeyUp(event: KeyboardEvent): void {
-    if (event.which == keycode.ESC) {
-      if (collage !== null) {
-        debug("export of collage JSON:")
-        debug(collage)
-      } else {
-        debug("nothing to export")
-      }
-    }
+    // Do nothing
   }
 
   useKeyListener("keydown", (event) => {

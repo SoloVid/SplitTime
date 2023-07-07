@@ -1,35 +1,37 @@
 import { Coordinates2D } from "api"
 import { Trace as FileTrace } from "api/file"
-import { Collage, Frame, Montage, MontageFrame } from "engine/file/collage"
+import { Collage, Frame, Montage } from "engine/file/collage"
 import { Collage as RealCollage, makeCollageFromFile } from "engine/graphics/collage"
 import { Immutable } from "engine/utils/immutable"
-import { useState } from "preact/hooks"
-import { ObjectProperties } from "../field-options"
-import { FileFrame } from "../file-types"
-import { GridSnapMover } from "../utils/grid-snap-mover"
-import { ImmutableSetter } from "../utils/preact-help"
-import { Followable, GlobalEditorShared } from "../shared-types"
-import { BasePath } from "../utils/immutable-helper"
-import { FrameWrapper } from "./frame-wrapper"
-import { MontageFrameWrapper } from "./montage-frame-wrapper"
-import { MontageWrapper } from "./montage-wrapper"
 import { TraceType } from "engine/world/level/trace/trace-type"
-// import { getCollagePropertiesStuff, getFramePropertiesStuff, getMontageFramePropertiesStuff, getMontagePropertiesStuff } from "./properties-stuffs"
+import { useContext, useMemo, useState } from "preact/hooks"
+import { ServerLiaison } from "../common/server-liaison"
+import { Followable, UserInputsContext } from "../common/user-inputs"
+import { FileFrame } from "../file-types"
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
+import { convertZoomToScale } from "../preferences/scale"
+import { GridSnapMover } from "../utils/grid-snap-mover"
+import { BasePath } from "../utils/immutable-helper"
+import { ImmutableSetter } from "../utils/preact-help"
 import { MIN_FRAME_LEN } from "./shared-types"
 
 type MakeSharedStuffOptions = {
-  readonly globalStuff: GlobalEditorShared,
-  readonly collage: Immutable<Collage>,
+  readonly server: ServerLiaison
+  readonly collage: Immutable<Collage>
   readonly setCollageNull: ImmutableSetter<Collage | null>
 }
 
-export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSharedStuffOptions) {
-  const [info, setInfo] = useState<Record<string, string | number>>({})
+export function makeSharedStuff({ server, collage, setCollageNull }: MakeSharedStuffOptions) {
+  const userInputs = useContext(UserInputsContext)
+  const [globalPrefs, setGlobalPrefs] = useContext(GlobalEditorPreferencesContext) 
   const [propertiesPath, setPropertiesPath] = useState<BasePath | null>([])
   const [traceInProgress, setTraceInProgress] = useState<FileTrace | null>(null)
   const [traceTypeSelected, setTraceTypeSelected] = useState<(typeof TraceType)[keyof typeof TraceType]>(TraceType.SOLID)
   const [selectedFrameIndex, setSelectedFrameIndex] = useState<number | null>(null)
   const [selectedMontageIndex, setSelectedMontageIndex] = useState<number | null>(null)
+  const realCollage = useMemo(() => makeCollageFromFile(collage, true), [collage])
+
+  const scale = convertZoomToScale(globalPrefs.zoom)
 
   const setCollage: ImmutableSetter<Collage> = (transform => {
     setCollageNull(before => {
@@ -41,20 +43,17 @@ export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSh
   })
 
   return {
-    globalStuff, collage, setCollage,
-    info, setInfo,
-    setInfoField(field: string, value: string) {
-      setInfo({...info, [field]: value})
-    },
+    scale, server, collage, setCollage,
     propertiesPath, setPropertiesPath,
     traceInProgress, setTraceInProgress,
     traceTypeSelected, setTraceTypeSelected,
     selectedFrameIndex, //setSelectedFrameIndex,
     selectedMontageIndex, //setSelectedMontageIndex,
 
-    get realCollage(): RealCollage {
-      return makeCollageFromFile(collage, true)
-    },
+    realCollage,
+    // get realCollage(): RealCollage {
+    //   return makeCollageFromFile(collage, true)
+    // },
 
     get selectedFrame(): Frame | null {
       if (selectedFrameIndex !== null) {
@@ -71,7 +70,9 @@ export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSh
     },
 
     follow(follower: Followable): void {
-      globalStuff.setFollowers([follower])
+      if (userInputs !== null) {
+        userInputs.setFollowers(() => [follower])
+      }
     },
   
     selectMontage(montageIndex: number, andProperties: boolean = true): void {
@@ -125,11 +126,11 @@ export function makeSharedStuff({ globalStuff, collage, setCollageNull }: MakeSh
       }
   
       // const MIN_FRAME_LEN = 4
-      const snappedMover = new GridSnapMover(globalStuff.gridCell, originalPoints)
+      const snappedMover = new GridSnapMover(globalPrefs.gridCell, originalPoints)
       const follower = {
         shift: (dx: number, dy: number) => {
-          const dxScaled = dx / globalStuff.scale
-          const dyScaled = dy / globalStuff.scale
+          const dxScaled = dx / scale
+          const dyScaled = dy / scale
           snappedMover.applyDelta(dxScaled, dyScaled)
           const snappedDelta = snappedMover.getSnappedDelta()
           setCollage((before) => {
@@ -183,5 +184,6 @@ export type SharedStuffViewOnly = Pick<SharedStuff,
   "collage" |
   "realCollage" |
   "selectedMontage" |
-  "selectMontage"
-> & { globalStuff: Pick<GlobalEditorShared, "scale" | "server" | "userInputs">}
+  "selectMontage" |
+  "server"
+> & { scale: number }

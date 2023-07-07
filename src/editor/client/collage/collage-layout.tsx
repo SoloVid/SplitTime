@@ -1,14 +1,15 @@
 import { Frame } from "engine/file/collage"
 import { useContext, useMemo, useRef } from "preact/hooks"
 import GridLines from "../common/grid-lines"
-import { onlyRight, preventDefault } from "../utils/preact-help"
 import { imageContext } from "../common/server-liaison"
-import { getRelativeMouse, UserInputs } from "../shared-types"
+import { UserInputsContext, getRelativeMouse } from "../common/user-inputs"
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
 import { useScaledImageSize } from "../utils/image-size"
-import { useScaledImageDimensions } from "../utils/scaled-image"
+import { onlyRight, preventDefault } from "../utils/preact-help"
 import { SharedStuff } from "./collage-editor-shared"
 import FrameRectangle from "./frame-rectangle"
 import { EDITOR_PADDING, MIN_FRAME_LEN } from "./shared-types"
+import { InfoPaneContext } from "../common/info-pane"
 
 type CollageLayoutProps = {
   collageEditorShared: SharedStuff
@@ -19,14 +20,20 @@ export default function CollageLayout(props: CollageLayoutProps) {
     collageEditorShared
   } = props
 
+  const [globalPrefs] = useContext(GlobalEditorPreferencesContext)
+  const editorInputs = useContext(UserInputsContext)
+  const [info, setInfo] = useContext(InfoPaneContext)
+
   const collage = collageEditorShared.collage
-  const scale = collageEditorShared.globalStuff.scale
+  const scale = collageEditorShared.scale
 
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
   // const $image = useRef<HTMLImageElement | null>(null)
 
-  const editorInputs = collageEditorShared.globalStuff.userInputs
   const mouse = useMemo(() => {
+    if (editorInputs === null) {
+      return { x: 0, y: 0 }
+    }
     const mouseRaw = getRelativeMouse(editorInputs, $el.current)
     return {
       x: Math.round((mouseRaw.x - EDITOR_PADDING) / scale),
@@ -43,8 +50,8 @@ export default function CollageLayout(props: CollageLayoutProps) {
   const containerHeight = height + 2*EDITOR_PADDING
 
   const scaledGridCell = {
-    x: Math.round(collageEditorShared.globalStuff.gridCell.x * scale),
-    y: Math.round(collageEditorShared.globalStuff.gridCell.y * scale),
+    x: Math.round(globalPrefs.gridCell.x * scale),
+    y: Math.round(globalPrefs.gridCell.y * scale),
   }
 
   const framesSorted = useMemo(() => {
@@ -89,7 +96,7 @@ export default function CollageLayout(props: CollageLayoutProps) {
       frameIndex++
       frameId = "f" + frameIndex
     }
-    const gridCell = collageEditorShared.globalStuff.gridCell
+    const gridCell = globalPrefs.gridCell
     const newFrame: Frame = {
       id: frameId,
       x: Math.round((mouse.x) / gridCell.x) * gridCell.x,
@@ -109,7 +116,7 @@ export default function CollageLayout(props: CollageLayoutProps) {
   }
 
   function handleMouseMove(event: MouseEvent): void {
-    collageEditorShared.setInfo((before) => ({
+    setInfo((before) => ({
       ...before,
       x: mouse.x,
       y: mouse.y,
@@ -117,7 +124,7 @@ export default function CollageLayout(props: CollageLayoutProps) {
   }
 
   function handleMouseOut(event: MouseEvent): void {
-    collageEditorShared.setInfo((before) => {
+    setInfo((before) => {
       const { x, y, ...restBefore } = before
       return restBefore
     })
@@ -155,7 +162,7 @@ export default function CollageLayout(props: CollageLayoutProps) {
         />
       ))}
     </svg>
-    {collageEditorShared.globalStuff.gridEnabled && <GridLines
+    {globalPrefs.gridEnabled && <GridLines
       gridCell={scaledGridCell}
       origin={{x: EDITOR_PADDING, y: EDITOR_PADDING}}
     />}

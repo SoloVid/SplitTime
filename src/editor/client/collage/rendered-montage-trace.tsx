@@ -3,11 +3,12 @@ import { generateUID } from "engine/utils/misc"
 import { Trace } from "engine/world/level/level-file-data"
 import { Coordinates2D, instanceOfCoordinates2D } from "engine/world/level/level-location"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
-import { useMemo, useState } from "preact/hooks"
+import { useContext, useMemo, useState } from "preact/hooks"
 import { GridSnapMover } from "../utils/grid-snap-mover"
 import RenderedTrace, { IRenderedTraceTracker } from "../common/rendered-trace"
 import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { PropertiesEvent } from "./shared-types"
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
 
 type RenderedMontageTraceProps = {
   collageEditHelper: SharedStuff
@@ -34,7 +35,10 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     transform,
   } = props
 
-  const [metadata, setMetadata] = useState(new EditorMetadata())
+  const [globalPrefs] = useContext(GlobalEditorPreferencesContext)
+
+  // const [isDisplayed, setIsDisplayed] = useState<boolean>(true)
+  // const [isHighlighted, setIsHighlighted] = useState<boolean>(false)
   const tracker: IRenderedTraceTracker = {
     track: (e, p) => {
       trackInternal(p)
@@ -58,7 +62,7 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
     const vertices = pointsArray
     const originalPoints = point ? [point] : vertices.filter(instanceOfCoordinates2D)
-    const snappedMover = new GridSnapMover(collageEditHelper.globalStuff.gridCell, originalPoints)
+    const snappedMover = new GridSnapMover(globalPrefs.gridCell, originalPoints)
     const follower = {
       shift: (dx: number, dy: number) => {
         const dxScaled = dx / scale
@@ -82,10 +86,11 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
 
   return <RenderedTrace
     acceptMouse={acceptMouse}
-    metadata={metadata}
+    displayed={true}
+    highlighted={false}
     pointsArray={pointsArray}
     scale={scale}
-    server={collageViewHelper.globalStuff.server}
+    server={collageViewHelper.server}
     shouldDragBePrevented={shouldDragBePrevented}
     trace={trace}
     tracker={tracker}
