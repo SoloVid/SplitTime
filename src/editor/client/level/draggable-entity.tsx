@@ -33,9 +33,7 @@ export default function DraggableEntity({
   const levelFollower = useContext(LevelFollowerContext)
 
   function track(): void {
-    console.log("track?")
     if(preventDrag || !levelFollower) {
-      console.log("nope", preventDrag, levelFollower)
       return
     }
     const gridCell = coalescePreferencesGridCell(globalPrefs)
@@ -53,13 +51,11 @@ export default function DraggableEntity({
           if (e.id !== entity.id) {
             return e
           }
-          console.log("found modification point", i)
           const newThing = {
             ...e,
             x: originalX + snappedDelta.x,
             y: originalY + snappedDelta.y,
           }
-          console.log("now", newThing)
           return newThing
         })
       }

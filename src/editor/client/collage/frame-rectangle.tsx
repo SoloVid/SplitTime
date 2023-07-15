@@ -1,28 +1,37 @@
 import { Frame } from "engine/file/collage"
 import { Rect } from "engine/math/rect"
 import { Coordinates2D } from "engine/world/level/level-location"
-import { useMemo } from "preact/hooks"
-import { SharedStuff } from "./collage-editor-shared"
+import { useContext, useMemo } from "preact/hooks"
+import { FileCollage } from "../file-types"
+import { ImmutableSetter } from "../utils/preact-help"
 import { CollageHelper } from "./collage-helper"
+import { CollageEditorPreferencesContext } from "./collage-preferences"
+import { TrackFrameFunction } from "./track-frame"
+import { UserInputsContext } from "../common/user-inputs"
+import { CollageEditorControls } from "./collage-editor-shared"
 
 type FrameRectangleProps = {
-  collageEditorShared: SharedStuff
-  frameIndex: number
+  collage: FileCollage
+  controls: Pick<CollageEditorControls, "trackFrame">
   frame: Frame
   offset: Coordinates2D
   scale?: number
+  setCollage: ImmutableSetter<FileCollage>
 }
 
 export default function FrameRectangle(props: FrameRectangleProps) {
   const {
-    collageEditorShared,
-    frameIndex,
+    collage,
+    controls,
     frame,
     offset,
     scale = 1,
+    setCollage,
   } = props
 
-  const collage = collageEditorShared.collage
+  const userInputs = useContext(UserInputsContext)
+  const [collagePrefs] = useContext(CollageEditorPreferencesContext)
+
   const frameS = {
     x: Math.round(frame.x * scale),
     y: Math.round(frame.y * scale),
@@ -40,7 +49,7 @@ export default function FrameRectangle(props: FrameRectangleProps) {
     )
   }, [frameS])
 
-  const isSelected = collageEditorShared.selectedFrame === frame
+  const isSelected = collagePrefs.frameSelected === frame.id
 
   const traceFill = isSelected ? "rgba(255, 255, 0, 0.5)" : "none"
   const traceStroke = isSelected ? "red" : "black"
@@ -58,20 +67,26 @@ export default function FrameRectangle(props: FrameRectangleProps) {
   }, [frame])
 
   function track(point?: Coordinates2D): void {
-    collageEditorShared.trackFrame(frameIndex, frame, point)
+    if (userInputs === null) {
+      return
+    }
+    controls.trackFrame(userInputs, frame, point)
   }
 
   function addToMontage(): void {
-    const montageIndex = collageEditorShared.selectedMontageIndex
-    if (montageIndex === null) {
+    if (collagePrefs.montageSelected === null) {
+      return
+    }
+    const montage = collage.montages.find((m) => m.id === collagePrefs.montageSelected)
+    if (!montage) {
       return
     }
     const collageHelper = new CollageHelper(collage)
-    const newMontageFrame = collageHelper.newMontageFrame(collage.montages[montageIndex], frame)
-    collageEditorShared.setCollage((before) => ({
+    const newMontageFrame = collageHelper.newMontageFrame(montage, frame)
+    setCollage((before) => ({
       ...before,
-      montages: before.montages.map((m, i) => {
-        if (i !== montageIndex) {
+      montages: before.montages.map((m) => {
+        if (m.id !== collagePrefs.montageSelected) {
           return m
         }
         return {

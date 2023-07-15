@@ -17,6 +17,7 @@ export interface Collage {
 }
 // Expect compiler error here if Collage is not jsonable
 let testCollageJsonable: IsJsonable<Collage, false, true> = {} as Collage;
+void testCollageJsonable
 /**
  * Component of {@link Collage}, specifically used in JSON file format.
  * Specific rectangle within the collage image.
@@ -24,7 +25,10 @@ let testCollageJsonable: IsJsonable<Collage, false, true> = {} as Collage;
  * Unlike {@link splitTime.collage.Frame}, a single Frame may be used by multiple {@link Montage}s.
  */
 export interface Frame {
+    /** UUID for editor */
     id: string;
+    /** Name for engine references */
+    name: string;
     x: int;
     y: int;
     width: int;
@@ -35,7 +39,10 @@ export interface Frame {
  * Sequence of {@link Frame}s, with associated geometry.
  */
 export interface Montage {
+    /** UUID for editor */
     id: string;
+    /** Name for engine references */
+    name: string;
     direction: string;
     frames: readonly MontageFrame[];
     body: BodySpec;
@@ -56,8 +63,10 @@ export interface Montage {
  * This type is more similar to {@link splitTime.collage.Frame} than {@link Frame} is.
  */
 export interface MontageFrame {
-    /** Reference to a {@link Frame} object within this {@link Collage#frames} */
-    frameId: string;
+    /** UUID for editor */
+    id: string;
+    /** Reference to a {@link Frame} object (by "name") within this {@link Collage#frames} */
+    frame: string;
     offsetX: int;
     offsetY: int;
     duration: game_seconds;
@@ -75,6 +84,7 @@ export function instanceOfCollage(thing: unknown): thing is Collage {
         image: string,
         frames: array(object({
             id: string,
+            name: string,
             x: type.int,
             y: type.int,
             width: type.int,
@@ -82,9 +92,11 @@ export function instanceOfCollage(thing: unknown): thing is Collage {
         })),
         montages: array(object({
             id: string,
+            name: string,
             direction: string,
             frames: array(object({
-                frameId: string,
+                id: string,
+                frame: string,
                 offsetX: type.int,
                 offsetY: type.int,
                 duration: number
@@ -96,6 +108,7 @@ export function instanceOfCollage(thing: unknown): thing is Collage {
             }),
             traces: array(object({
                 id: string,
+                name: string,
                 group: string,
                 type: stringEnum(Object.values(TraceType)),
                 vertices: string,

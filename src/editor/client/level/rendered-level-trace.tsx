@@ -8,14 +8,16 @@ import { GlobalEditorPreferencesContext } from "../preferences/global-preference
 import RenderedTrace, { IRenderedTraceTracker } from "../common/rendered-trace"
 import { ServerLiaison } from "../common/server-liaison"
 import { useJsonableMemo } from "../utils/use-jsonable-memo"
-import { EditorTrace, ObjectMetadata } from "./extended-level-format"
+import { EditorTrace, ObjectMetadata, ObjectMetadataMap } from "./extended-level-format"
 import { LevelFollowerContext } from "./level-follower"
 import { LevelEditorPreferencesContext } from "./level-preferences"
 import { coalescePreferencesGridCell } from "../preferences/grid"
+import { ImmutableSetter } from "../utils/preact-help"
 
 type RenderedLevelTraceProps = {
   groupExists: boolean
   metadata: ObjectMetadata
+  setObjectMetadataMap?: ImmutableSetter<ObjectMetadataMap>
   positionMap: ReturnType<typeof getPositionMap>
   scale: number
   server: ServerLiaison
@@ -28,6 +30,7 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
   const {
     groupExists,
     metadata,
+    setObjectMetadataMap,
     positionMap,
     scale,
     server,
@@ -99,13 +102,26 @@ export default function RenderedLevelTrace(props: RenderedLevelTraceProps) {
     setLevelPrefs((before) => ({...before, propertiesPanel: {type: "trace", id: trace.id}}))
   }
 
+  const setHighlighted = useMemo(() => {
+    if (!setObjectMetadataMap) {
+      return undefined
+    }
+    return (highlight: boolean) => {
+      setObjectMetadataMap((before) => ({
+        ...before,
+        [trace.id]: {
+          ...(before[trace.id] ?? {}),
+          mouseOver: highlight,
+        }
+      }))
+    }
+  }, [setObjectMetadataMap])
+
   return <RenderedTrace
     acceptMouse={acceptMouse}
     displayed={!levelPrefs.hidden.includes(trace.id)}
     highlighted={metadata.mouseOver}
-    // TODO: Add setHighlighted
-    // metadata={trace.metadata}
-    // setMetadata={trace.setMetadata}
+    setHighlighted={setHighlighted}
     pointsArray={pointsArray}
     scale={scale}
     server={server}

@@ -102,6 +102,9 @@ export function LevelEditorInner(props: LevelEditorProps) {
       return
     }
     const propertiesStuff = getObjectProperties(level, setLevel, levelEditorPrefs.propertiesPanel, () => setLevelEditorPrefs((before) => ({...before, propertiesPanel: null})))
+    if (propertiesStuff === null) {
+      return
+    }
     if (!propertiesStuff.allowDelete) {
       return
     }
@@ -150,6 +153,8 @@ export function LevelEditorInner(props: LevelEditorProps) {
     }))
   }
 
+  const objectPropertiesSpec = !!levelEditorPrefs.propertiesPanel ? getObjectProperties(level, setLevel, levelEditorPrefs.propertiesPanel, () => setLevelEditorPrefs((before) => ({...before, propertiesPanel: null}))) : null
+
   return <>
     <div ref={$el} className="level-editor" style={`display: flex; flex-flow: column; ${props.style}`}>
       <MenuBar
@@ -166,8 +171,8 @@ export function LevelEditorInner(props: LevelEditorProps) {
                 server={server}
               />
               <hr/>
-              {!!levelEditorPrefs.propertiesPanel && <PropertiesPane
-                spec={getObjectProperties(level, setLevel, levelEditorPrefs.propertiesPanel, () => setLevelEditorPrefs((before) => ({...before, propertiesPanel: null})))}
+              {!!objectPropertiesSpec && <PropertiesPane
+                spec={objectPropertiesSpec}
               />}
             </div>
             <Resizer

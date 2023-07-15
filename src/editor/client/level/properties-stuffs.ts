@@ -1,10 +1,9 @@
 import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
+import { tracePropertyFields } from "../common/trace-properties"
 import { GenericObjectProperties, ObjectProperties } from "../field-options"
 import { OptionalTaggedImmutableSetter } from "../utils/preact-help"
-import { tracePropertyFields } from "../common/trace-properties"
 import { EditorLevel } from "./extended-level-format"
-import { onGroupIdUpdate } from "./group-wrapper"
 import { LevelEditorPreferences } from "./level-preferences"
 import { onPositionDelete, onPositionIdUpdate } from "./position-wrapper"
 
@@ -61,7 +60,7 @@ const positionFields = {
 }
 type SimplifiedPosition = { [K in keyof Required<typeof positionFields>]: string | number }
 
-export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: OptionalTaggedImmutableSetter<EditorLevel>, prefsProperties: Exclude<LevelEditorPreferences["propertiesPanel"], null>, clearProperties: () => void): GenericObjectProperties {
+export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: OptionalTaggedImmutableSetter<EditorLevel>, prefsProperties: Exclude<LevelEditorPreferences["propertiesPanel"], null>, clearProperties: () => void): GenericObjectProperties | null {
   const baseOnDelete = () => {
     clearProperties()
   }
@@ -89,6 +88,9 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
   }
   const keyInLevel = `${prefsProperties.type}s` as const
   const indexInArray = level[keyInLevel].findIndex(e => e.id === prefsProperties.id)
+  if (indexInArray < 0) {
+    return null
+  }
   const path = [keyInLevel, indexInArray] as const
   const baseProperties = {
     ...baseBaseProperties,
@@ -104,11 +106,6 @@ export function getObjectProperties(level: Immutable<EditorLevel>, setLevel: Opt
       title: "Group Properties",
       fields: groupFields,
       pathToDeleteThing: [path[0], path[1]],
-      onUpdate: (field, newValue, oldValue) => {
-        if (field === "id") {
-          onGroupIdUpdate(setLevel, oldValue as string, newValue as string)
-        }
-      },
     }
     // TODO: More type safety?
     return properties as any

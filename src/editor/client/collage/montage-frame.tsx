@@ -1,47 +1,52 @@
 import { BodySpec, Montage as FileMontage, MontageFrame as FileMontageFrame } from "engine/file/collage"
+import { Collage as RealCollage } from "engine/graphics/collage"
 import { Rect } from "engine/math/rect"
 import { Immutable } from "engine/utils/immutable"
 import { Trace as FileTrace } from "engine/world/level/level-file-data"
 import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { assert } from "globals"
 import { useContext, useMemo, useRef } from "preact/hooks"
+import { InfoPaneContext } from "../common/info-pane"
 import { imageContext } from "../common/server-liaison"
 import { UserInputsContext, getRelativeMouse } from "../common/user-inputs"
 import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
+import { FileCollage } from "../file-types"
 import { GridSnapMover } from "../utils/grid-snap-mover"
 import { useScaledImageSize } from "../utils/image-size"
-import { makeStyleString } from "../utils/preact-help"
-import { SharedStuff, SharedStuffViewOnly } from "./collage-editor-shared"
+import { ImmutableSetter, makeStyleString } from "../utils/preact-help"
+import RenderCounter from "../utils/render-counter"
+import { CollageEditorPreferencesContext } from "./collage-preferences"
 import RenderedMontageTrace from "./rendered-montage-trace"
 import { EDITOR_PADDING, PropertiesEvent } from "./shared-types"
-import { InfoPaneContext } from "../common/info-pane"
-import RenderCounter from "../utils/render-counter"
+import { findTraceInCollage, updateTraceInCollage } from "./find-trace"
 
 type MontageFrameProps = {
-  collageEditHelper: SharedStuff | undefined
-  collageViewHelper: SharedStuffViewOnly
+  collage: FileCollage
   editAffectsAllFrames: boolean
   highlight: boolean
-  montageIndex: number
   montage: Immutable<FileMontage>
-  montageFrameIndex: number
   montageFrame: Immutable<FileMontageFrame>
+  realCollage: RealCollage
   scale: number
+  setCollage?: ImmutableSetter<FileCollage>
+  traceIdInProgress?: string
+  setTraceIdInProgress?: (id: string | null) => void
 }
 
 const strokeWidth = 2
 
 export default function MontageFrame(props: MontageFrameProps) {
   const {
-    collageEditHelper,
-    collageViewHelper,
+    collage,
     editAffectsAllFrames,
     highlight,
-    montageIndex,
     montage,
-    montageFrameIndex,
     montageFrame,
+    realCollage,
     scale,
+    setCollage,
+    traceIdInProgress,
+    setTraceIdInProgress,
   } = props
 
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
@@ -50,6 +55,7 @@ export default function MontageFrame(props: MontageFrameProps) {
   const editorInputs = useContext(UserInputsContext)
   // const scale = collageViewHelper.globalStuff.scale
   const [info, setInfo] = useContext(InfoPaneContext)
+  const [collagePrefs, setCollagePrefs] = useContext(CollageEditorPreferencesContext)
 
   const bodyS: BodySpec = {
     width: body.width * scale,
@@ -88,14 +94,14 @@ export default function MontageFrame(props: MontageFrameProps) {
   ), [bodyFrontRectRelative, scale])
 
   const frame = useMemo(() => {
-    const montageIndex = collageViewHelper.collage.montages.indexOf(montage)
+    const montageIndex = collage.montages.indexOf(montage)
     const montageFrameIndex = montage.frames.indexOf(montageFrame)
-    return collageViewHelper.realCollage.montages[montageIndex].frames[montageFrameIndex]
+    return realCollage.montages[montageIndex].frames[montageFrameIndex]
   }, [
-    collageViewHelper.collage.montages,
+    collage.montages,
     montage,
     montageFrame,
-    collageViewHelper.realCollage.montages,
+    realCollage.montages,
   ])
 
   const frameBoxS = useMemo(() => {
@@ -172,7 +178,7 @@ export default function MontageFrame(props: MontageFrameProps) {
   }, [frameTargetBoxS, EDITOR_PADDING])
 
   const projectImages = useContext(imageContext)
-  const imgSrc = projectImages.imgSrc(collageViewHelper.collage.image)
+  const imgSrc = projectImages.imgSrc(collage.image)
   const scaledImageSize = useScaledImageSize(imgSrc, scale)
 
   function markEventAsPropertiesSet(event: MouseEvent): void {
@@ -182,37 +188,43 @@ export default function MontageFrame(props: MontageFrameProps) {
   }
 
   function editBody(event: MouseEvent): void {
-    assert(!!collageEditHelper, "editBody() must be called with edit helper")
-    collageEditHelper.setPropertiesPath(["montages", montageIndex, "body"])
+    assert(!!setTraceIdInProgress, "editBody() must be called with setTraceIdInProgress")
+    setCollagePrefs((before) => ({
+      ...before,
+      propertiesPanel: {
+        type: "body",
+        id: montage.id,
+      },
+    }))
     markEventAsPropertiesSet(event)
     event.preventDefault()
-    collageEditHelper.setTraceInProgress(null)
+    setTraceIdInProgress(null)
   }
 
   function trackBody(event: MouseEvent): void {
-    assert(!!collageEditHelper, "trackBody() must be called with edit helper")
-    if (collageEditHelper.traceInProgress) {
+    assert(!!setCollage, "trackBody() must be called with setCollage")
+    if (traceIdInProgress) {
       return
     }
     const original = { x: montageFrame.offsetX, y: montageFrame.offsetY }
     const originals = montage.frames.map(mf => ({ x: mf.offsetX, y: mf.offsetY }))
     const snappedMover = new GridSnapMover({ x: 1, y: 1 }, [original])
-    collageEditHelper.follow({
+    editorInputs?.setFollowers(() => [{
       shift(dx: number, dy: number) {
         const dxScaled = dx / scale
         const dyScaled = dy / scale
         snappedMover.applyDelta(dxScaled, dyScaled)
         const snappedDelta = snappedMover.getSnappedDelta()
-        collageEditHelper.setCollage((before) => ({
+        setCollage((before) => ({
           ...before,
-          montages: before.montages.map((m, i) => {
-            if (i !== montageIndex) {
+          montages: before.montages.map((m) => {
+            if (m.id !== montage.id) {
               return m
             }
             return {
               ...m,
               frames: m.frames.map((mf, j) => {
-                if (!editAffectsAllFrames && j !== montageFrameIndex) {
+                if (!editAffectsAllFrames && mf.id !== montageFrame.id) {
                   return mf
                 }
                 return {
@@ -225,7 +237,7 @@ export default function MontageFrame(props: MontageFrameProps) {
           })
         }))
       }
-    })
+    }])
     event.preventDefault()
   }
 
@@ -254,10 +266,10 @@ export default function MontageFrame(props: MontageFrameProps) {
       targetPosition: "",
       color: "",
     }
-    collageEditHelper?.setCollage((before) => ({
+    setCollage?.((before) => ({
       ...before,
       montages: before.montages.map((m, i) => {
-        if (i !== montageIndex) {
+        if (m.id !== montage.id) {
           return m
         }
         return {
@@ -270,10 +282,9 @@ export default function MontageFrame(props: MontageFrameProps) {
   }
 
   function handleMouseUp(event: MouseEvent): void {
-    const helper = collageEditHelper || null
     // FTODO: Allow editing from animated montage
     // Right now, there are some issues with position for montages in showcase
-    if (helper === null || editAffectsAllFrames) {
+    if (!setTraceIdInProgress || !setCollage || editAffectsAllFrames) {
       return
     }
 
@@ -288,33 +299,44 @@ export default function MontageFrame(props: MontageFrameProps) {
     const literalPoint = "(" +
       Math.floor(snappedX) + ", " +
       Math.floor(snappedY) + ")"
-    const traceInProgress = helper.traceInProgress
-    const traceType = helper.traceTypeSelected
+    const traceInProgress = traceIdInProgress ? findTraceInCollage(collage, traceIdInProgress) : null
+    const traceType = collagePrefs.traceType
     if(isLeftClick) {
       if(traceInProgress) {
-        traceInProgress.vertices = traceInProgress.vertices + " " + literalPoint
+        updateTraceInCollage(setCollage, traceInProgress.id, (before) => ({
+          ...before,
+          vertices: before.vertices + " " + literalPoint,
+        }))
         markEventAsPropertiesSet(event)
       }
     } else if(isRightClick) {
       if(!traceInProgress) {
         const trace = addNewTrace(montage, traceType)
-        const newTraceIndex = montage.traces.length
         trace.vertices = literalPoint
-        helper.setTraceInProgress(trace)
-        helper.setPropertiesPath(["montages", montageIndex, "traces", newTraceIndex])
+        setTraceIdInProgress(trace.id)
+        setCollagePrefs((before) => ({
+          ...before,
+          propertiesPanel: {
+            type: "trace",
+            id: trace.id,
+          },
+        }))
         markEventAsPropertiesSet(event)
       } else {
         if(!inputs.ctrlDown) {
-          traceInProgress.vertices = traceInProgress.vertices + " (close)"
+          updateTraceInCollage(setCollage, traceInProgress.id, (before) => ({
+            ...before,
+            vertices: before.vertices + " (close)",
+          }))
         }
-        helper.setTraceInProgress(null)
+        setTraceIdInProgress(null)
         markEventAsPropertiesSet(event)
       }
     }
   }
 
   function handleMouseMove(event: MouseEvent): void {
-    if (collageEditHelper) {
+    if (setCollage) {
       setInfo((before) => ({
         ...before,
         x: inputs.mouse.x,
@@ -324,7 +346,7 @@ export default function MontageFrame(props: MontageFrameProps) {
   }
 
   function handleMouseOut(event: MouseEvent): void {
-    if (collageEditHelper) {
+    if (setCollage) {
       setInfo((before) => {
         const { x, ["y-z"]: y, ...restBefore } = before
         return restBefore
@@ -351,15 +373,12 @@ export default function MontageFrame(props: MontageFrameProps) {
         style={`position: absolute; left: ${-frameBoxS.x}px; top: ${-frameBoxS.y}px`}
       />
     </div>
-    {collageEditHelper && <svg style={svgStyle}>
+    {setCollage && <svg style={svgStyle}>
       {montage.traces.map((trace, i) => (
         <RenderedMontageTrace
-          collageEditHelper={collageEditHelper}
-          collageViewHelper={collageViewHelper}
-          montageIndex={montageIndex}
+          collage={collage}
           montage={montage}
           montageFrame={montageFrame}
-          // metadata={{}}
           scale={scale}
           traceIndex={i}
           trace={trace}

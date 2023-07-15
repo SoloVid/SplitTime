@@ -4,16 +4,16 @@ import { Trace } from "engine/world/level/level-file-data"
 import { Coordinates2D, instanceOfCoordinates2D } from "engine/world/level/level-location"
 import { convertPositions, interpretPointString } from "engine/world/level/trace/trace-points"
 import { useContext, useMemo, useState } from "preact/hooks"
-import { GridSnapMover } from "../utils/grid-snap-mover"
 import RenderedTrace, { IRenderedTraceTracker } from "../common/rendered-trace"
-import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
-import { PropertiesEvent } from "./shared-types"
+import { UserInputsContext } from "../common/user-inputs"
+import { FileCollage } from "../file-types"
 import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
+import { GridSnapMover } from "../utils/grid-snap-mover"
+import { CollageEditorPreferencesContext } from "./collage-preferences"
+import { PropertiesEvent } from "./shared-types"
 
 type RenderedMontageTraceProps = {
-  collageEditHelper: SharedStuff
-  collageViewHelper: SharedStuffViewOnly
-  montageIndex: number
+  collage: FileCollage
   montage: Montage
   montageFrame: MontageFrame
   scale: number
@@ -24,21 +24,18 @@ type RenderedMontageTraceProps = {
 
 export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
   const {
-    collageEditHelper,
-    collageViewHelper,
-    montageIndex,
+    collage,
     montage,
     montageFrame,
     scale,
-    traceIndex,
     trace,
     transform,
   } = props
 
   const [globalPrefs] = useContext(GlobalEditorPreferencesContext)
+  const [collagePrefs, setCollagePrefs] = useContext(CollageEditorPreferencesContext)
+  const userInputs = useContext(UserInputsContext)
 
-  // const [isDisplayed, setIsDisplayed] = useState<boolean>(true)
-  // const [isHighlighted, setIsHighlighted] = useState<boolean>(false)
   const tracker: IRenderedTraceTracker = {
     track: (e, p) => {
       trackInternal(p)
@@ -80,8 +77,14 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
         })
       }
     }
-    collageEditHelper.follow(follower)
-    collageEditHelper.setPropertiesPath(["montages", montageIndex, "traces", traceIndex])
+    userInputs?.setFollowers(() => [follower])
+    setCollagePrefs((before) => ({
+      ...before,
+      propertiesPanel: {
+        type: "trace",
+        id: trace.id,
+      },
+    }))
   }
 
   return <RenderedTrace
@@ -90,7 +93,6 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     highlighted={false}
     pointsArray={pointsArray}
     scale={scale}
-    server={collageViewHelper.server}
     shouldDragBePrevented={shouldDragBePrevented}
     trace={trace}
     tracker={tracker}

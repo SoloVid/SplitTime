@@ -3,7 +3,7 @@ import { constrain } from "api/math"
 import { Collage } from "engine/file/collage"
 import { type Immutable } from "engine/utils/immutable"
 import { debug } from "engine/utils/logger"
-import { useRef, useState } from "preact/hooks"
+import { useContext, useMemo, useRef, useState } from "preact/hooks"
 import MenuBar from "../common/menu-bar"
 import PropertiesPane from "../common/properties"
 import { ServerLiaison } from "../common/server-liaison"
@@ -15,13 +15,16 @@ import { updateImmutableObject } from "../utils/immutable-helper"
 import { ImmutableSetter, makeStyleString } from "../utils/preact-help"
 import Resizer from "../utils/resizer"
 import { useKeyListener } from "../utils/use-key-listener"
-import { makeSharedStuff } from "./collage-editor-shared"
+import { makeSharedStuff, useCollageEditorControls } from "./collage-editor-shared"
 import CollageLayout from "./collage-layout"
-import { collageEditorPreferences } from "./collage-preferences"
+import { CollageEditorPreferencesContext, CollageEditorPreferencesContextProvider, collageEditorPreferences } from "./collage-preferences"
 import CollageShowcase from "./collage-showcase"
 import MontageEditor from "./montage-editor"
 import { getObjectProperties } from "./properties-stuffs"
 import InfoPaneFrame from "../common/info-pane"
+import { convertZoomToScale } from "../preferences/scale"
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
+import { makeCollageFromFile } from "engine/graphics/collage"
 
 type CollageEditorProps = {
   readonly id: string
@@ -29,10 +32,25 @@ type CollageEditorProps = {
   readonly doSave: DoSave
   readonly server: ServerLiaison
   readonly style: string
-  readonly setCollage: ImmutableSetter<Collage | null>
+  readonly setCollage: ImmutableSetter<Collage>
 }
 
 export default function CollageEditor(props: CollageEditorProps) {
+  return <CollageEditorPreferencesContextProvider
+    id={props.id}
+  >
+    <CollageEditorInner
+      id={props.id}
+      collage={props.collage}
+      server={props.server}
+      doSave={props.doSave}
+      setCollage={props.setCollage}
+      style={props.style}
+    />
+  </CollageEditorPreferencesContextProvider>
+}
+
+function CollageEditorInner(props: CollageEditorProps) {
   const {
     id,
     collage,
@@ -41,19 +59,27 @@ export default function CollageEditor(props: CollageEditorProps) {
     style,
     setCollage,
   } = props
-  const [collageEditorPrefs, setCollageEditorPrefs] = collageEditorPreferences.use(id)
+  const [globalPrefs] = useContext(GlobalEditorPreferencesContext)
+  const [collageEditorPrefs, setCollageEditorPrefs] = useContext(CollageEditorPreferencesContext)
 
   const $el = useRef<null | HTMLDivElement>(null)
   const $graphicalEditorsContainer = useRef<null | HTMLDivElement>(null)
   const $showcaseContainer = useRef<HTMLDivElement>(document.createElement("div"))
 
-  const [expandTraceOptions, setExpandTraceOptions] = useState(false)
+  const scale = convertZoomToScale(globalPrefs.zoom)
 
-  const sharedStuff = makeSharedStuff({
-    collage: collage,
-    setCollageNull: setCollage,
-    server: server,
+  const [expandTraceOptions, setExpandTraceOptions] = useState(false)
+  const [traceIdInProgress, setTraceIdInProgress] = useState<string | null>(null)
+
+  const collageEditorControls = useCollageEditorControls({
+    globalPrefs,
+    setCollage,
+    setCollagePrefs: setCollageEditorPrefs,
+    setTraceIdInProgress: setTraceIdInProgress,
   })
+
+  const realCollage = useMemo(() => makeCollageFromFile(collage, true), [collage])
+  const editingMontage = collage.montages.find(m => m.id === collageEditorPrefs.montageSelected) ?? null
 
   function editorWidth(): number {
     if (!$graphicalEditorsContainer.current) {
@@ -69,15 +95,23 @@ export default function CollageEditor(props: CollageEditorProps) {
   }
 
   const onDelete = () => {
-  if (sharedStuff.propertiesPath === null || sharedStuff.propertiesPath.length === 0) {
+    if (collageEditorPrefs.propertiesPanel === null || collageEditorPrefs.propertiesPanel === "collage") {
       return
     }
-    const propertiesStuff = getObjectProperties(collage, sharedStuff.setCollage, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))
+    const propertiesStuff = getObjectProperties(collage, setCollage, collageEditorPrefs.propertiesPanel, () => undefined)
+    if (propertiesStuff === null) {
+      return
+    }
     if (!propertiesStuff.allowDelete) {
       return
     }
-    updateImmutableObject(sharedStuff.setCollage, propertiesStuff.pathToDeleteThing ?? sharedStuff.propertiesPath, undefined)
-    sharedStuff.setPropertiesPath(null)
+    if (propertiesStuff.pathToDeleteThing) {
+      updateImmutableObject(setCollage, propertiesStuff.pathToDeleteThing, undefined)
+    }
+    setCollageEditorPrefs((before) => ({
+      ...before,
+      propertiesPanel: null,
+    }))
   }
 
   useOnSave(() => {
@@ -130,13 +164,15 @@ export default function CollageEditor(props: CollageEditorProps) {
     }))
   }
 
+  const objectPropertiesSpec = !!collageEditorPrefs.propertiesPanel ? getObjectProperties(collage, setCollage, collageEditorPrefs.propertiesPanel, () => setCollageEditorPrefs((before) => ({...before, propertiesPanel: null}))) : null
+
   return <div ref={$el} className="collage-editor" style={makeStyleString({
     "overflow": "hidden",
     "display": "flex",
     "flex-direction": "column",
   }) + style}>
     <MenuBar
-      editSettings={() => sharedStuff.setPropertiesPath([])}
+      editSettings={() => setCollageEditorPrefs((before) => ({...before, propertiesPanel: "collage",}))}
       openFileSave={() => doSave(exportYaml(collage), { filter: /\.clg\.yml$/ })}
     ></MenuBar>
     <InfoPaneFrame>
@@ -152,17 +188,20 @@ export default function CollageEditor(props: CollageEditorProps) {
         })}>
           <div class="trace-type-options">
             {collageTraceOptions.map((traceOption) => (
-              (expandTraceOptions || sharedStuff.traceTypeSelected === traceOption.type) && <div
+              (expandTraceOptions || collageEditorPrefs.traceType === traceOption.type) && <div
                 key={traceOption.type}
                 className="option"
                 style={`color: white; background-color: ${traceOption.color};`}
                 onClick={() => {
                   setExpandTraceOptions(false)
-                  sharedStuff.setTraceTypeSelected(traceOption.type)
+                  setCollageEditorPrefs((before) => ({
+                    ...before,
+                    traceType: traceOption.type,
+                  }))
                 }}
                 title={traceOption.help}
               >
-                {sharedStuff.traceTypeSelected === traceOption.type && ">> "}
+                {collageEditorPrefs.traceType === traceOption.type && ">> "}
                 { traceOption.type }
               </div>
             ))}
@@ -175,8 +214,8 @@ export default function CollageEditor(props: CollageEditorProps) {
             </div>}
           </div>
           <hr/>
-          {!!sharedStuff.propertiesPath && <PropertiesPane
-            spec={getObjectProperties(collage, sharedStuff.setCollage, sharedStuff.propertiesPath, () => sharedStuff.setPropertiesPath(null))}
+          {!!objectPropertiesSpec && <PropertiesPane
+            spec={objectPropertiesSpec}
           />}
         </div>
         <Resizer
@@ -199,7 +238,10 @@ export default function CollageEditor(props: CollageEditorProps) {
               "position": "relative",
             })}>
               <CollageLayout
-                collageEditorShared={sharedStuff}
+                collage={collage}
+                controls={collageEditorControls}
+                scale={scale}
+                setCollage={setCollage}
               />
             </div>
             <Resizer
@@ -216,9 +258,11 @@ export default function CollageEditor(props: CollageEditorProps) {
             })}>
               <CollageShowcase
                 style="flex: 1;"
-                collageEditHelper={sharedStuff}
-                collageViewHelper={sharedStuff}
                 $container={$showcaseContainer.current}
+                collage={collage}
+                controls={collageEditorControls}
+                realCollage={realCollage}
+                scale={scale}
               />
             </div>
           </div>
@@ -231,10 +275,13 @@ export default function CollageEditor(props: CollageEditorProps) {
             "height": `${Math.floor(100 - topPercent)}%`,
             "position": "relative",
           })}>
-            {!!sharedStuff.selectedMontage && sharedStuff.selectedMontageIndex !== null && <MontageEditor
-              collageEditorShared={sharedStuff}
-              montageIndex={sharedStuff.selectedMontageIndex}
-              montage={sharedStuff.selectedMontage}
+            {!!editingMontage && <MontageEditor
+              collage={collage}
+              controls={collageEditorControls}
+              montage={editingMontage}
+              realCollage={realCollage}
+              scale={scale}
+              traceIdInProgress={traceIdInProgress}
             />}
           </div>
         </div>

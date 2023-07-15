@@ -51,7 +51,22 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
   const collageManager = useContext(CollageManagerContext)
   const [infoPane, setInfoPane] = useContext(InfoPaneContext)
 
-  const [pathInProgress, setPathInProgress] = useState<Immutable<EditorTrace> | null>(null)
+  const [pathIdInProgress, setPathIdInProgress] = useState<string | null>(null)
+  const setTraceInProgress = useMemo<ImmutableSetter<EditorTrace>>(() => {
+    return (transform) => {
+      setLevel((levelBefore) => {
+        return {
+          ...levelBefore,
+          traces: levelBefore.traces.map((traceBefore) => {
+            if (traceBefore.id !== pathIdInProgress) {
+              return traceBefore
+            }
+            return transform(traceBefore)
+          })
+        }
+      })
+    }
+  }, [pathIdInProgress, setLevel])
 
   const editorPadding = EDITOR_PADDING
 
@@ -96,7 +111,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
     }
   }, [$el.current, editorInputs])
 
-  const shouldDragBePrevented = inputs.mouse.isDown || pathInProgress !== null
+  const shouldDragBePrevented = inputs.mouse.isDown || pathIdInProgress !== null
 
   const containerWidth = (level.width * scale) + 2*EDITOR_PADDING
   const addedHeight = useMemo(() => {
@@ -214,11 +229,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
       var closestPosition = findClosestPosition(level, inputs.mouse.x, yInGroup)
       var positionPoint = closestPosition ? makePositionPoint(closestPosition.id) : ""
       function addPathInProgressVertex(newVertex: string) {
-        setPathInProgress((before) => {
-          if (before === null) {
-            // FTODO: Handle this better?
-            return null
-          }
+        setTraceInProgress((before) => {
           return {
             ...before,
             vertices: before.vertices + " " + newVertex,
@@ -226,7 +237,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
         })
       }
       if(isLeftClick) {
-        if(pathInProgress) {
+        if(pathIdInProgress) {
           if(levelPrefs.traceType == "path" && inputs.ctrlDown) {
             addPathInProgressVertex(positionPoint)
           } else {
@@ -234,7 +245,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
           }
         }
       } else if(isRightClick) {
-        if(!pathInProgress) {
+        if(!pathIdInProgress) {
           const trace = makeNewTrace(level, getActiveFileGroup().id, levelPrefs.traceType)
           
           if(levelPrefs.traceType == TraceType.PATH && !inputs.ctrlDown) {
@@ -247,9 +258,10 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
           setLevelPrefs((before) => ({...before, propertiesPanel: {type: "trace", id: trace.id}}))
           // TODO: Lookup will fail because state hasn't propagated?
           // levelEditorShared.setPropertiesPanel(newEntity)
-          setPathInProgress(trace)
+          setPathIdInProgress(trace.id)
         } else {
-          if(!inputs.ctrlDown) {
+          const pathInProgress = level.traces.find((t) => t.id === pathIdInProgress)
+          if(pathInProgress && !inputs.ctrlDown) {
             if(pathInProgress.type == TraceType.PATH) {
               if(closestPosition) {
                 addPathInProgressVertex(positionPoint)
@@ -259,7 +271,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
               addPathInProgressVertex("(close)")
             }
           }
-          setPathInProgress(null)
+          setPathIdInProgress(null)
         }
       }
     } else if(levelPrefs.mode === "position") {
@@ -330,6 +342,7 @@ export default function LevelGraphicalEditor(props: LevelGraphicalEditorProps) {
           <RenderedLevelTrace
             groupExists={data.groupExists}
             metadata={data.metadata}
+            setObjectMetadataMap={setObjectMetadataMap}
             positionMap={data.positionMap}
             scale={scale}
             server={server}

@@ -63,7 +63,6 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
 
   const setFollowers: ImmutableSetter<null | readonly Followable[]> = useMemo(() => (transform) => {
-    console.log("setFollowers()")
     setFollowersInternal((before) => {
       setPreviousFollowers(before)
       const after = transform(before)
@@ -87,7 +86,6 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
       toMove = []
     }
     for (const t of toMove) {
-      console.log("moving thing")
       t.shift(dx, dy)
     }
   }

@@ -1,30 +1,49 @@
-import { Montage, MontageFrame as FileMontageFrame } from "engine/file/collage"
-import { useMemo } from "preact/hooks"
-import { SharedStuff } from "./collage-editor-shared"
+import { Montage } from "engine/file/collage"
+import { useContext, useMemo } from "preact/hooks"
+import { FileCollage, FileMontageFrame } from "../file-types"
+import { CollageEditorPreferencesContext } from "./collage-preferences"
 import MontageFrame from "./montage-frame"
 import { PropertiesEvent } from "./shared-types"
+import { CollageEditorControls } from "./collage-editor-shared"
+import { Collage as RealCollage } from "engine/graphics/collage"
 
 type MontageEditorProps = {
-  collageEditorShared: SharedStuff
-  montageIndex: number
+  collage: FileCollage
+  controls: Pick<CollageEditorControls, "selectMontageFrame">
   montage: Montage
+  realCollage: RealCollage
+  scale: number
+  traceIdInProgress: string | null
 }
 
 export default function MontageEditor(props: MontageEditorProps) {
   const {
-    collageEditorShared,
-    montageIndex,
+    collage,
+    controls,
     montage,
+    realCollage,
+    scale,
+    traceIdInProgress,
   } = props
 
-  const collage = collageEditorShared.collage
-  const scale = collageEditorShared.scale
+  const [collagePrefs, setCollagePrefs] = useContext(CollageEditorPreferencesContext)
 
-  const selectedFrameId = collageEditorShared.selectedFrame === null ? null : collageEditorShared.selectedFrame.id
+  const selectedFrameId = collagePrefs.frameSelected
+  const selectedFrame = useMemo(() => {
+    if (!selectedFrameId) {
+      return null
+    }
+    for (const f of collage.frames) {
+      if (selectedFrameId === f.id) {
+        return f
+      }
+    }
+    return null
+  }, [])
 
   const widestFrameWidth = useMemo(() => {
     return montage.frames
-      .map(mf => collage.frames.find(f => mf.frameId === f.id))
+      .map(mf => collage.frames.find(f => mf.frame === f.name))
       .reduce((maxWidth, f) => {
         return Math.max(maxWidth, f?.width ?? 0)
       }, 0)
@@ -41,30 +60,28 @@ export default function MontageEditor(props: MontageEditorProps) {
     }
   }, [widestFrameWidthS])
 
-  function selectFrame(montageFrameIndex: number, event: MouseEvent): void {
-    if (collageEditorShared.traceInProgress) {
+  function selectFrame(montageFrame: FileMontageFrame, event: MouseEvent): void {
+    if (traceIdInProgress) {
       return
     }
-    collageEditorShared.selectMontageFrame(montageIndex, montageFrameIndex, !(event as PropertiesEvent).propertiesPanelSet)
+    controls.selectMontageFrame(collage, montageFrame, (event as PropertiesEvent).propertiesPanelSet)
   }
 
 return <div class="standard-margin standard-padding transparency-checkerboard-background" style={gridStyle}>
   {montage.frames.length === 0 && <div>
     Double-click a frame to add it to this montage.
   </div>}
-  {montage.frames.map((frame, iFrame) => (
+  {montage.frames.map((mf) => (
     <div
-      onMouseDown={(e) => { if (e.button === 0) selectFrame(iFrame, e) }}
+      onMouseDown={(e) => { if (e.button === 0) selectFrame(mf, e) }}
     >
       <MontageFrame
-        collageEditHelper={collageEditorShared}
-        collageViewHelper={collageEditorShared}
+        collage={collage}
         editAffectsAllFrames={false}
-        highlight={frame.frameId === selectedFrameId}
-        montageIndex={montageIndex}
+        highlight={mf.frame === selectedFrame?.name}
         montage={montage}
-        montageFrameIndex={iFrame}
-        montageFrame={frame}
+        montageFrame={mf}
+        realCollage={realCollage}
         scale={scale}
       />
     </div>

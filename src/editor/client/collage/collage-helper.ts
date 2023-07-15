@@ -1,4 +1,5 @@
 import { Collage, Frame, Montage, MontageFrame } from "engine/file/collage"
+import { generateUID } from "engine/utils/misc"
 
 export class CollageHelper {
     constructor(
@@ -29,6 +30,7 @@ export class CollageHelper {
         }
         return {
             id: montageId,
+            name: montageId,
             direction: "",
             frames: [],
             body: bodySpec,
@@ -41,7 +43,8 @@ export class CollageHelper {
     newMontageFrame(montage: Montage, frame: Frame): MontageFrame {
         const template = this.getBestMatchMontageFrame(montage, frame)
         return {
-            frameId: frame.id,
+            id: generateUID(),
+            frame: frame.name,
             offsetX: template.offsetX,
             offsetY: template.offsetY,
             duration: template.duration
@@ -72,7 +75,7 @@ export class CollageHelper {
 
     private getBestMatchMontageFrameWithinMontage(montage: Montage, frame: Frame): MontageFrame | null {
         for (const mf of montage.frames.slice().reverse()) {
-            if (mf.frameId === frame.id) {
+            if (mf.frame === frame.name) {
                 return mf
             }
         }
@@ -87,7 +90,8 @@ export const defaultBodySpec = {
 }
 
 const defaultMontageFrame = {
-    frameId: "",
+    id: "",
+    frame: "",
     offsetX: 0,
     offsetY: 0,
     duration: 0.2

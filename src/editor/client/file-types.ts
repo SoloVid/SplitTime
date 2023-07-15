@@ -1,5 +1,5 @@
-import { Collage as FileCollage, Frame as FileFrame, Montage as FileMontage } from "engine/file/collage"
-import { FileData as FileLevel, Group as FileGroup, Position as FilePosition, Prop as FileProp, Trace as FileTrace } from "engine/world/level/level-file-data"
+import { Collage as FileCollage, Frame as FileFrame, Montage as FileMontage, MontageFrame as FileMontageFrame } from "engine/file/collage"
+import { Group as FileGroup, FileData as FileLevel, Position as FilePosition, Prop as FileProp, Trace as FileTrace } from "engine/world/level/level-file-data"
 
 export type {
   FileCollage,
@@ -7,9 +7,10 @@ export type {
   FileGroup,
   FileLevel,
   FileMontage,
+  FileMontageFrame,
   FilePosition,
   FileProp,
-  FileTrace,
+  FileTrace
 }
 
 export const defaultFileGroup = {

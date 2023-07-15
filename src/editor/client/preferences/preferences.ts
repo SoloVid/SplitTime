@@ -1,5 +1,5 @@
 import { Immutable } from "engine/utils/immutable"
-import { useEffect, useState } from "preact/hooks"
+import { useEffect, useMemo, useState } from "preact/hooks"
 import { ImmutableSetter } from "../utils/preact-help"
 
 const defaultGlobalId = "DEFAULT"
@@ -41,13 +41,13 @@ export function makePreferences<T extends object>(prefix: string, defaultPrefere
         setStoredId(id)
       }
     }, [id, storedId])
-    const setPrefs: ImmutableSetter<T> = (transform) => {
+    const setPrefs = useMemo<ImmutableSetter<T>>(() => (transform) => {
       setPrefsInMemory((before) => {
         const after = transform(before)
         setPreferences(id, after)
         return after
       })
-    }
+    }, [id, setPrefsInMemory, setPreferences])
     return [prefsInMemory, setPrefs]
   }
 

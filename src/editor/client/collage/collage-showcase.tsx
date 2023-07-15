@@ -1,40 +1,53 @@
+import { Collage } from "engine/file/collage"
+import { Collage as RealCollage } from "engine/graphics/collage"
+import { makeCollageFromFile } from "engine/graphics/collage"
+import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
-import { useMemo, useRef } from "preact/hooks"
-import { makeStyleString } from "../utils/preact-help"
-import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
+import { useContext, useMemo, useRef } from "preact/hooks"
+import { ImmutableSetter, makeStyleString } from "../utils/preact-help"
 import { CollageHelper } from "./collage-helper"
 import Montage from "./montage"
+import { CollageEditorPreferencesContext } from "./collage-preferences"
+import { CollageEditorControls } from "./collage-editor-shared"
 
 type CollageShowcaseProps = {
   style?: string
-  collageEditHelper?: SharedStuff | undefined
-  collageViewHelper: SharedStuffViewOnly
   $container: HTMLDivElement | null
+  collage: Immutable<Collage>
+  controls: Pick<CollageEditorControls, "selectMontage">
+  realCollage: RealCollage
+  scale: number
+  setCollage?: ImmutableSetter<Collage>
 }
 
 export default function CollageShowcase(props: CollageShowcaseProps) {
   const {
-    collageEditHelper,
-    collageViewHelper,
     $container,
+    collage,
+    controls,
+    realCollage,
+    scale,
+    setCollage,
   } = props
 
-  const collage = collageViewHelper.collage
+  const [collagePrefs, setCollagePrefs] = useContext(CollageEditorPreferencesContext)
+
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
+
   // const maxMontageWidth = $el.current.offsetWidth
   // const maxMontageHeight = $el.current.offsetHeight
   const maxMontageWidth = $container ? $container.offsetWidth : 64
   const maxMontageHeight = $container ? $container.offsetHeight : 64
 
   const widestMontageWidth = useMemo(() => {
-    const width = collageViewHelper.realCollage.montages.reduce((maxWidth, m) => {
+    const width = realCollage.montages.reduce((maxWidth, m) => {
       const mWidth = m.getOverallArea().width
       return Math.max(maxWidth, mWidth)
     }, 0)
     return Math.min(Math.max(width, 16), maxMontageWidth)
-  }, [collageViewHelper, maxMontageWidth])
+  }, [realCollage, maxMontageWidth])
 
-  const cellWidth = Math.min(widestMontageWidth * collageViewHelper.scale, maxMontageWidth)
+  const cellWidth = Math.min(widestMontageWidth * scale, maxMontageWidth)
 
   const gridStyle = useMemo(() => {
     const styleMap = {
@@ -52,27 +65,32 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
   function createNewMontage(): void {
     const collageHelper = new CollageHelper(collage)
     const newMontage = collageHelper.newMontage()
-    const newMontageIndex = collage.montages.length
-    assert(!!collageEditHelper, "Collage editor should be defined for montage editing")
-    collageEditHelper.setCollage((before) => ({
+    assert(!!setCollage, "setCollage should be defined for montage editing")
+    setCollage((before) => ({
       ...before,
       montages: [...before.montages, newMontage]
     }))
-    collageEditHelper.selectMontage(newMontageIndex, true)
+    controls.selectMontage(newMontage)
   }
+
+  const selectedMontage = useMemo(() => {
+    return collage.montages.find(m => m.id === collagePrefs.montageSelected) ?? null
+  }, [collagePrefs.montageSelected, collage.montages])
 
   return <div ref={$el} style={`${gridStyle};${props.style ?? ""}`}>
     {collage.montages.map((m, i) => (
       <Montage
-        collageEditHelper={collageEditHelper}
-        collageViewHelper={collageViewHelper}
+        collage={collage}
         montageIndex={i}
         montage={m}
         maxWidth={maxMontageWidth}
         maxHeight={maxMontageHeight}
+        realCollage={realCollage}
+        scale={scale}
+        selectedMontage={selectedMontage}
       />
     ))}
-    {collageEditHelper && <div
+    {setCollage && <div
       onMouseDown={(e) => { if (e.button === 0) createNewMontage() }}
       title="Add montage"
       style="text-align: center; cursor: pointer;"

@@ -2,26 +2,24 @@ import { FileData, Trace } from "api/file"
 import { Immutable } from "engine/utils/immutable"
 import { generateUID } from "engine/utils/misc"
 import { Coordinates2D, Coordinates3D } from "engine/world/level/level-location"
-import { TraceType } from "engine/world/level/trace/trace-type"
 import { TraceSpec } from "engine/world/level/trace/trace-spec"
 import { calculateStairsPlane } from "engine/world/level/trace/trace-stairs-helper"
-import { useContext, useEffect, useMemo, useState } from "preact/hooks"
-import { getPlaceholderImage, PLACEHOLDER_WIDTH, safeGetColor } from "../editor-functions"
-import { ImmutableSetter, makeImmutableObjectSetterUpdater, makeStyleString, onlyLeft, preventDefault } from "../utils/preact-help"
-import { imageContext, ServerLiaison } from "./server-liaison"
-import { TRACE_GROUND_COLOR, TRACE_GROUND_HIGHLIGHT_COLOR } from "./trace-options"
+import { TraceType } from "engine/world/level/trace/trace-type"
 import { assert } from "globals"
+import { useContext, useEffect, useMemo, useState } from "preact/hooks"
+import { PLACEHOLDER_WIDTH, getPlaceholderImage, safeGetColor } from "../editor-functions"
+import { makeStyleString, onlyLeft, preventDefault } from "../utils/preact-help"
+import { ServerLiaison, imageContext } from "./server-liaison"
+import { TRACE_GROUND_COLOR, TRACE_GROUND_HIGHLIGHT_COLOR } from "./trace-options"
 
 type RenderedTraceProps = {
   acceptMouse: boolean
   displayed: boolean
   highlighted: boolean
   setHighlighted?: (highlight: boolean) => void
-  // metadata: Immutable<EditorMetadata>
-  // setMetadata?: ImmutableSetter<EditorMetadata>
   pointsArray: (Readonly<Coordinates2D> | null)[]
   scale?: number
-  server: ServerLiaison
+  server?: ServerLiaison
   shouldDragBePrevented: boolean
   trace: Immutable<Trace>
   tracker: IRenderedTraceTracker
@@ -38,8 +36,6 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     displayed,
     highlighted,
     setHighlighted,
-    // metadata,
-    // setMetadata,
     pointsArray,
     scale = 1,
     server,
@@ -48,7 +44,6 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     tracker,
     transform,
   } = props
-  // const updateMetadata = setMetadata ? makeImmutableObjectSetterUpdater(setMetadata) : undefined
 
   const [uid] = useState(generateUID())
 
@@ -213,10 +208,10 @@ export default function RenderedTrace(props: RenderedTraceProps) {
   const otherLevelDisplayed = (trace.type === TraceType.POINTER ||
     trace.type === TraceType.TRANSPORT) && highlighted
 
-  function useOtherLevel(s: ServerLiaison, levelId: string | undefined) {
+  function useOtherLevel(s: ServerLiaison | undefined, levelId: string | undefined) {
     const [levelJson, setLevelJson] = useState<FileData | null>(null)
     useEffect(() => {
-      if (!levelId) {
+      if (!levelId || !s) {
         return
       }
       s.api.levelJson.fetch(s.withProject({ levelId })).then(setLevelJson)
@@ -270,7 +265,9 @@ export default function RenderedTrace(props: RenderedTraceProps) {
     tracker.track(event, point)
   }
   function toggleHighlight(highlight: boolean): void {
+    console.log("toggleHighlight")
     if (!setHighlighted) {
+      console.log("aww no")
       return
     }
     if(shouldDragBePrevented) {

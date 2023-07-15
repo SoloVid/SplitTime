@@ -1,32 +1,42 @@
-import { SharedStuffViewOnly, SharedStuff } from "./collage-editor-shared"
 import { Montage as FileMontage } from "engine/file/collage"
-import { getPlaceholderImage } from "../editor-functions"
-import { useContext, useEffect, useMemo } from "preact/hooks"
-import { makeStyleString } from "../utils/preact-help"
-import { PropertiesEvent } from "./shared-types"
+import { Collage as RealCollage } from "engine/graphics/collage"
 import { Rect } from "engine/math/rect"
-import MontageFrame from "./montage-frame"
+import { useContext, useEffect, useMemo } from "preact/hooks"
+import { getPlaceholderImage } from "../editor-functions"
+import { FileCollage } from "../file-types"
 import { Time } from "../time-context"
-import { useJsonableMemo } from "../utils/use-jsonable-memo"
+import { makeStyleString } from "../utils/preact-help"
 import RenderCounter from "../utils/render-counter"
+import { useJsonableMemo } from "../utils/use-jsonable-memo"
+import { CollageEditorControls } from "./collage-editor-shared"
+import MontageFrame from "./montage-frame"
+import { PropertiesEvent } from "./shared-types"
 
 type MontageProps = {
-  collageEditHelper: SharedStuff | undefined
-  collageViewHelper: SharedStuffViewOnly
+  collage: FileCollage
+  controls?: Pick<CollageEditorControls, "selectMontage">
   montageIndex: number
   montage: FileMontage
   maxWidth: number
   maxHeight: number
+  realCollage: RealCollage
+  scale: number
+  selectedMontage: FileMontage | null
+  traceIdInProgress?: string | null
 }
 
 export default function Montage(props: MontageProps) {
   const {
-    collageEditHelper,
-    collageViewHelper,
+    collage,
+    controls,
     montageIndex,
     montage,
     maxWidth,
     maxHeight,
+    realCollage,
+    scale: editorScale,
+    selectedMontage,
+    traceIdInProgress,
   } = props
 
   const time = useContext(Time)
@@ -34,12 +44,12 @@ export default function Montage(props: MontageProps) {
   const placeholderImgSrc = getPlaceholderImage()
 
   debugField("montage", montage)
-  debugField("collageViewHelper.realCollage", collageViewHelper.realCollage)
+  debugField("realCollage", realCollage)
 
   const realMontage = useMemo(() => {
     const dir = montage.direction === "" ? undefined : montage.direction
-    return collageViewHelper.realCollage.getMontage(montage.id, dir)
-  }, [montage, collageViewHelper.realCollage])
+    return realCollage.getMontage(montage.id, dir)
+  }, [montage, realCollage])
 
   const overallArea = useJsonableMemo(() => {
     if (montage.frames.length === 0) {
@@ -54,8 +64,6 @@ export default function Montage(props: MontageProps) {
       y: rect.y,
     }
   }, [montage, realMontage])
-
-  const editorScale = collageViewHelper.scale
 
   const desiredWidth = overallArea.width * editorScale
   const desiredHeight = overallArea.height * editorScale
@@ -77,21 +85,16 @@ export default function Montage(props: MontageProps) {
       position: 'relative',
       width: overallAreaS.width + 'px',
       height: overallAreaS.height + 'px',
-      outline: montage === collageViewHelper.selectedMontage ? "4px solid red" : "none"
+      outline: montage === selectedMontage ? "4px solid red" : "none"
     }
     return makeStyleString(styleMap)
-  }, [overallAreaS, montage, collageViewHelper.selectedMontage])
+  }, [overallAreaS, montage, selectedMontage])
 
 
   function setActiveMontage(event: MouseEvent): void {
-    const alsoSetProperties = !(event as PropertiesEvent).propertiesPanelSet
-    if (!!collageEditHelper) {
-      if (collageEditHelper.traceInProgress) {
-        return
-      }
-      collageEditHelper.selectMontage(montageIndex, alsoSetProperties)
-    } else {
-      collageViewHelper.selectMontage(montageIndex)
+    const propertiesPanelSet = (event as PropertiesEvent).propertiesPanelSet
+    if (!traceIdInProgress && controls) {
+      controls.selectMontage(montage, propertiesPanelSet)
     }
   }
 
@@ -103,8 +106,8 @@ export default function Montage(props: MontageProps) {
   
   debugField("realMontage", realMontage)
   debugField("montage.frames", montage.frames)
-  debugField("collageEditHelper", collageEditHelper)
-  debugField("collageViewHelper", collageViewHelper)
+  debugField("collage", collage)
+  debugField("realCollage", realCollage)
   debugField("montageIndex", montageIndex)
   debugField("montage", montage)
   debugField("overallAreaS", overallAreaS)
@@ -134,20 +137,18 @@ export default function Montage(props: MontageProps) {
         style={frameDivStyle}
       >
         <MontageFrame
-          collageEditHelper={collageEditHelper}
-          collageViewHelper={collageViewHelper}
+          collage={collage}
+          realCollage={realCollage}
           editAffectsAllFrames={true}
           highlight={false}
-          montageIndex={montageIndex}
           montage={montage}
-          montageFrameIndex={data.index}
           montageFrame={data.fileFrame}
           scale={scale}
         />
       </div>
       return element
     })
-  }, [realMontage, montage.frames, collageEditHelper, collageViewHelper, montageIndex, montage, overallAreaS, scale])
+  }, [realMontage, montage.frames, collage, realCollage, montageIndex, montage, overallAreaS, scale])
 
   const frameIndex = useMemo(() => {
     return realMontage.getFrameIndexAt(time)
