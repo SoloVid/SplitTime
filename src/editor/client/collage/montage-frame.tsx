@@ -6,12 +6,9 @@ import { useContext, useMemo } from "preact/hooks"
 import { imageContext } from "../common/server-liaison"
 import { FileCollage } from "../file-types"
 import { useScaledImageSize } from "../utils/image-size"
-import { ImmutableSetter, makeStyleString, useLogValueChanged } from "../utils/preact-help"
+import { ImmutableSetter, makeStyleString } from "../utils/preact-help"
 import RenderCounter from "../utils/render-counter"
 import MontageBody from "./montage-body"
-import MontageFrameMouseTracking from "./montage-frame-mouse-tracking"
-import { MontageFrameRelativeInputsContextProvider } from "./montage-frame-relative-inputs"
-import MontageTraces from "./montage-traces"
 import MontageFrameMouseEventsHandler from "./montage-frame-mouse-events-handler"
 
 type MontageFrameProps = {
@@ -38,15 +35,7 @@ export default function MontageFrame(props: MontageFrameProps) {
     setCollage,
   } = props
 
-  // console.log("re-render montage frame")
-
   const body = montage.body
-  // useLogValueChanged("body", body)
-
-  // useLogValueChanged("collage.montages", collage.montages)
-  // useLogValueChanged("montage", montage)
-  // useLogValueChanged("montageFrame", montageFrame)
-  // useLogValueChanged("realCollage.montages", realCollage.montages)
 
   const frame = useMemo(() => {
     const montageIndex = collage.montages.indexOf(montage)
@@ -58,7 +47,6 @@ export default function MontageFrame(props: MontageFrameProps) {
     montageFrame,
     realCollage.montages,
   ])
-  // useLogValueChanged("frame", frame)
 
   const frameBoxS = useMemo(() => {
     return Rect.make(
@@ -68,12 +56,10 @@ export default function MontageFrame(props: MontageFrameProps) {
       frame.box.height * scale,
     )
   }, [frame.box, scale])
-  // useLogValueChanged("frameBoxS", frameBoxS)
 
   const frameTargetBox = useMemo(() => {
     return frame.getTargetBox(body)
   }, [frame, body])
-  // useLogValueChanged("frameTargetBox", frameTargetBox)
 
   const frameTargetBoxS = useMemo(() => {
     return Rect.make(
@@ -100,24 +86,8 @@ export default function MontageFrame(props: MontageFrameProps) {
   const imgSrc = projectImages.imgSrc(collage.image)
   const scaledImageSize = useScaledImageSize(imgSrc, scale)
 
-  // useLogValueChanged("collage", collage)
-  // useLogValueChanged("frameBoxS", frameBoxS)
-  // useLogValueChanged("imageDivStyle", imageDivStyle)
-  // useLogValueChanged("imgSrc", imgSrc)
-  // useLogValueChanged("montage", montage)
-  // useLogValueChanged("montageFrame", montageFrame)
-  // useLogValueChanged("scale", scale)
-  // useLogValueChanged("scaledImageSize", scaledImageSize)
-  // useLogValueChanged("setCollage", setCollage)
-
-  // return useMemo(() => 
   return <div className="montage-frame" style="position: relative;">
-    {/* <MontageFrameRelativeInputsContextProvider
-      frameTargetBox={frameTargetBox}
-      scale={scale}
-    > */}
     <MontageFrameMouseEventsHandler frameTargetBox={frameTargetBox} {...props}>
-      {/* <MontageFrameMouseTracking></MontageFrameMouseTracking> */}
       <div
         style={imageDivStyle}
       >
@@ -130,24 +100,9 @@ export default function MontageFrame(props: MontageFrameProps) {
           style={`position: absolute; left: ${-frameBoxS.x}px; top: ${-frameBoxS.y}px`}
         />
       </div>
-      {/* <MontageTraces
-        {...props}
-      ></MontageTraces> */}
       {setCollage && <MontageBody
         {...props}
       ></MontageBody>}
     </MontageFrameMouseEventsHandler>
-    {/* </MontageFrameRelativeInputsContextProvider> */}
   </div>
-  // , [
-  //   collage,
-  //   frameBoxS,
-  //   imageDivStyle,
-  //   imgSrc,
-  //   montage,
-  //   montageFrame,
-  //   scale,
-  //   scaledImageSize,
-  //   setCollage,
-  // ])
 }
