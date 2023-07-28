@@ -112,11 +112,11 @@ export function makeCollageFromFile(file: CollageFile, allowErrors: boolean = fa
         const dir = !fileMontage.direction ? null :
             interpret(fileMontage.direction);
         return makeMontage(fileMontage.id, dir, fileMontage.frames.map(fpf => {
-            if (!(fpf.frameId in framesRectMap)) {
-                throw new Error("Could not find frame " + fpf.frameId +
+            if (!(fpf.frame in framesRectMap)) {
+                throw new Error("Could not find frame " + fpf.frame +
                     " for montage " + fileMontage.id);
             }
-            return new Frame(framesRectMap[fpf.frameId], new Coordinates2D(fpf.offsetX, fpf.offsetY), fpf.duration);
+            return new Frame(framesRectMap[fpf.frame], new Coordinates2D(fpf.offsetX, fpf.offsetY), fpf.duration);
         }), fileMontage.body, fileMontage.traces, fileMontage.propPostProcessor, fileMontage.playerOcclusionFadeFactor);
     }), file.defaultMontageId, { allowErrors: allowErrors });
 }

@@ -44,7 +44,7 @@ export class CollageHelper {
         const template = this.getBestMatchMontageFrame(montage, frame)
         return {
             id: generateUID(),
-            frame: frame.name,
+            frame: frame.id,
             offsetX: template.offsetX,
             offsetY: template.offsetY,
             duration: template.duration
@@ -75,7 +75,7 @@ export class CollageHelper {
 
     private getBestMatchMontageFrameWithinMontage(montage: Montage, frame: Frame): MontageFrame | null {
         for (const mf of montage.frames.slice().reverse()) {
-            if (mf.frame === frame.name) {
+            if (mf.frame === frame.id) {
                 return mf
             }
         }

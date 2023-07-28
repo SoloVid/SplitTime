@@ -5,7 +5,7 @@ import { Immutable } from "engine/utils/immutable"
 import { Trace as FileTrace } from "engine/world/level/level-file-data"
 import { TraceType, TraceTypeType } from "engine/world/level/trace/trace-type"
 import { assert } from "globals"
-import { useContext, useMemo, useRef } from "preact/hooks"
+import { useContext, useEffect, useMemo, useRef } from "preact/hooks"
 import { InfoPaneContext } from "../common/info-pane"
 import { imageContext } from "../common/server-liaison"
 import { UserInputsContext, getRelativeMouse } from "../common/user-inputs"
@@ -13,7 +13,7 @@ import { DEFAULT_GROUP_HEIGHT } from "../editor-functions"
 import { FileCollage } from "../file-types"
 import { GridSnapMover } from "../utils/grid-snap-mover"
 import { useScaledImageSize } from "../utils/image-size"
-import { ImmutableSetter, makeStyleString } from "../utils/preact-help"
+import { ImmutableSetter, makeStyleString, onlyLeft } from "../utils/preact-help"
 import RenderCounter from "../utils/render-counter"
 import { CollageEditorPreferencesContext } from "./collage-preferences"
 import RenderedMontageTrace from "./rendered-montage-trace"
@@ -29,7 +29,7 @@ type MontageFrameProps = {
   realCollage: RealCollage
   scale: number
   setCollage?: ImmutableSetter<FileCollage>
-  traceIdInProgress?: string
+  traceIdInProgress?: string | null
   setTraceIdInProgress?: (id: string | null) => void
 }
 
@@ -57,11 +57,11 @@ export default function MontageFrame(props: MontageFrameProps) {
   const [info, setInfo] = useContext(InfoPaneContext)
   const [collagePrefs, setCollagePrefs] = useContext(CollageEditorPreferencesContext)
 
-  const bodyS: BodySpec = {
+  const bodyS = useMemo<BodySpec>(() => ({
     width: body.width * scale,
     depth: body.depth * scale,
     height: body.height * scale,
-  }
+  }), [body, scale])
 
   const bodyBackRectRelative = useMemo(() => {
     return Rect.make(
@@ -181,13 +181,7 @@ export default function MontageFrame(props: MontageFrameProps) {
   const imgSrc = projectImages.imgSrc(collage.image)
   const scaledImageSize = useScaledImageSize(imgSrc, scale)
 
-  function markEventAsPropertiesSet(event: MouseEvent): void {
-    // Somewhat type-unsafe way of letting upper events know they should try to set properties
-    const anyEvent = event as PropertiesEvent
-    anyEvent.propertiesPanelSet = true
-  }
-
-  function editBody(event: MouseEvent): void {
+  const editBody = useMemo(() => (event: MouseEvent): void => {
     assert(!!setTraceIdInProgress, "editBody() must be called with setTraceIdInProgress")
     setCollagePrefs((before) => ({
       ...before,
@@ -199,9 +193,9 @@ export default function MontageFrame(props: MontageFrameProps) {
     markEventAsPropertiesSet(event)
     event.preventDefault()
     setTraceIdInProgress(null)
-  }
+  }, [setCollagePrefs, setTraceIdInProgress])
 
-  function trackBody(event: MouseEvent): void {
+  const trackBody = useMemo(() => (event: MouseEvent): void => {
     assert(!!setCollage, "trackBody() must be called with setCollage")
     if (traceIdInProgress) {
       return
@@ -239,9 +233,9 @@ export default function MontageFrame(props: MontageFrameProps) {
       }
     }])
     event.preventDefault()
-  }
+  }, [editAffectsAllFrames, editorInputs?.setFollowers, montage, montageFrame, scale, setCollage, traceIdInProgress])
 
-  function addNewTrace(montage: FileMontage, type: TraceTypeType): FileTrace {
+  const addNewTrace = useMemo(() => (montage: FileMontage, type: TraceTypeType): FileTrace => {
     const z = 0
     const defaultHeight = DEFAULT_GROUP_HEIGHT
     let height = defaultHeight
@@ -279,9 +273,9 @@ export default function MontageFrame(props: MontageFrameProps) {
       }),
     }))
     return t
-  }
+  }, [setCollage])
 
-  function handleMouseUp(event: MouseEvent): void {
+  const handleMouseUp = useMemo(() => (event: MouseEvent): void => {
     // FTODO: Allow editing from animated montage
     // Right now, there are some issues with position for montages in showcase
     if (!setTraceIdInProgress || !setCollage || editAffectsAllFrames) {
@@ -333,28 +327,51 @@ export default function MontageFrame(props: MontageFrameProps) {
         markEventAsPropertiesSet(event)
       }
     }
+  }, [addNewTrace, collage, collagePrefs.traceType, editAffectsAllFrames, inputs, setCollage, setCollagePrefs, setTraceIdInProgress, traceIdInProgress])
+
+  const handleMouseMove = useMemo(() => (event: MouseEvent): void => {
+    setInfo((before) => ({
+      ...before,
+      x: inputs.mouse.x,
+      ["y-z"]: inputs.mouse.y,
+    }))
+  }, [inputs, setInfo])
+
+  const handleMouseOut = useMemo(() => (event: MouseEvent): void => {
+    setInfo((before) => {
+      const { x, ["y-z"]: y, ...restBefore } = before
+      return restBefore
+    })
+  }, [setInfo])
+
+  function debugField(field: string, value: unknown) {
+    useEffect(() => {
+      console.log(`${field} changed`)
+    }, [value])
   }
 
-  function handleMouseMove(event: MouseEvent): void {
-    if (setCollage) {
-      setInfo((before) => ({
-        ...before,
-        x: inputs.mouse.x,
-        ["y-z"]: inputs.mouse.y,
-      }))
-    }
-  }
+  // debugField("$el", $el)
+  // debugField("bodyBackRectRelativeS", bodyBackRectRelativeS)
+  // debugField("bodyFrontRectRelativeS", bodyFrontRectRelativeS)
+  // debugField("bodyS", bodyS)
+  // debugField("collage", collage)
+  // debugField("editBody", editBody)
+  // debugField("frameBoxS", frameBoxS)
+  // debugField("handleMouseMove", handleMouseMove)
+  // debugField("handleMouseOut", handleMouseOut)
+  // debugField("handleMouseUp", handleMouseUp)
+  // debugField("imageDivStyle", imageDivStyle)
+  // debugField("imgSrc", imgSrc)
+  // debugField("montage", montage)
+  // debugField("montageFrame", montageFrame)
+  // debugField("scale", scale)
+  // debugField("scaledImageSize", scaledImageSize)
+  // debugField("setCollage", setCollage)
+  // debugField("svgStyle", svgStyle)
+  // debugField("svgTransform", svgTransform)
+  // debugField("trackBody", trackBody)
 
-  function handleMouseOut(event: MouseEvent): void {
-    if (setCollage) {
-      setInfo((before) => {
-        const { x, ["y-z"]: y, ...restBefore } = before
-        return restBefore
-      })
-    }
-  }
-
-  return <div style="position: relative;"
+  return useMemo(() => <div style="position: relative;"
     ref={$el}
     onContextMenu={(e) => e.preventDefault()}
     onMouseUp={handleMouseUp}
@@ -411,7 +428,7 @@ export default function MontageFrame(props: MontageFrameProps) {
       <rect
         transform={svgTransform}
         style="pointer-events: initial; cursor: grab;"
-        onMouseDown={(e) => { if (e.button === 0) trackBody(e) }}
+        onMouseDown={onlyLeft(trackBody, true)}
         onDblClick={editBody}
         x={bodyFrontRectRelativeS.x}
         y={bodyFrontRectRelativeS.y}
@@ -424,7 +441,7 @@ export default function MontageFrame(props: MontageFrameProps) {
       <rect
         transform={svgTransform}
         style="pointer-events: initial; cursor: grab;"
-        onMouseDown={(e) => { if (e.button === 0) trackBody(e) }}
+        onMouseDown={onlyLeft(trackBody, true)}
         onDblClick={editBody}
         x={bodyFrontRectRelativeS.x + strokeWidth / 2}
         y={bodyFrontRectRelativeS.y - bodyS.depth + strokeWidth / 2}
@@ -436,5 +453,32 @@ export default function MontageFrame(props: MontageFrameProps) {
         stroke-dasharray="2,1"
       />
     </svg>}
-  </div>
+  </div>, [
+    $el,
+    bodyBackRectRelativeS,
+    bodyFrontRectRelativeS,
+    bodyS,
+    collage,
+    editBody,
+    frameBoxS,
+    handleMouseMove,
+    handleMouseOut,
+    handleMouseUp,
+    imageDivStyle,
+    imgSrc,
+    montage,
+    montageFrame,
+    scale,
+    scaledImageSize,
+    setCollage,
+    svgStyle,
+    svgTransform,
+    trackBody,
+  ])
+}
+
+function markEventAsPropertiesSet(event: MouseEvent): void {
+  // Somewhat type-unsafe way of letting upper events know they should try to set properties
+  const anyEvent = event as PropertiesEvent
+  anyEvent.propertiesPanelSet = true
 }

@@ -29,6 +29,7 @@ export function makeTrackFrameFunction({
     setCollagePrefs((before) => ({
       ...before,
       frameSelected: frame.id,
+      montageFrameSelected: null,
       propertiesPanel: {
         type: "frame",
         id: frame.id,

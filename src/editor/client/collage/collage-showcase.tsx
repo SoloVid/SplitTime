@@ -3,12 +3,14 @@ import { Collage as RealCollage } from "engine/graphics/collage"
 import { makeCollageFromFile } from "engine/graphics/collage"
 import { Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
-import { useContext, useMemo, useRef } from "preact/hooks"
+import { useContext, useEffect, useMemo, useRef, useState } from "preact/hooks"
 import { ImmutableSetter, makeStyleString } from "../utils/preact-help"
 import { CollageHelper } from "./collage-helper"
 import Montage from "./montage"
 import { CollageEditorPreferencesContext } from "./collage-preferences"
 import { CollageEditorControls } from "./collage-editor-shared"
+import { generateUID } from "engine/utils/misc"
+import RenderCounter from "../utils/render-counter"
 
 type CollageShowcaseProps = {
   style?: string
@@ -18,6 +20,8 @@ type CollageShowcaseProps = {
   realCollage: RealCollage
   scale: number
   setCollage?: ImmutableSetter<Collage>
+  setTraceIdInProgress?: (id: string | null) => void
+  traceIdInProgress?: string | null
 }
 
 export default function CollageShowcase(props: CollageShowcaseProps) {
@@ -28,24 +32,37 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
     realCollage,
     scale,
     setCollage,
+    setTraceIdInProgress,
+    traceIdInProgress,
   } = props
 
   const [collagePrefs, setCollagePrefs] = useContext(CollageEditorPreferencesContext)
+  const [arbitrary, setArbitrary] = useState<string>("")
 
   const $el = useRef<HTMLDivElement>(document.createElement("div"))
 
-  // const maxMontageWidth = $el.current.offsetWidth
-  // const maxMontageHeight = $el.current.offsetHeight
-  const maxMontageWidth = $container ? $container.offsetWidth : 64
-  const maxMontageHeight = $container ? $container.offsetHeight : 64
+  const maxMontageWidth = $container && $container.offsetWidth ? $container.offsetWidth : 64
+  const maxMontageHeight = $container && $container.offsetHeight  ? $container.offsetHeight : 64
+
+  useEffect(() => {
+    if (!$container) {
+      return
+    }
+    const observer = new ResizeObserver(() => {
+      console.log("resize")
+      setArbitrary(generateUID())
+    })
+    observer.observe($container)
+    return () => observer.disconnect()
+  }, [$container])
 
   const widestMontageWidth = useMemo(() => {
     const width = realCollage.montages.reduce((maxWidth, m) => {
       const mWidth = m.getOverallArea().width
       return Math.max(maxWidth, mWidth)
     }, 0)
-    return Math.min(Math.max(width, 16), maxMontageWidth)
-  }, [realCollage, maxMontageWidth])
+    return Math.max(width, 16)
+  }, [realCollage.montages])
 
   const cellWidth = Math.min(widestMontageWidth * scale, maxMontageWidth)
 
@@ -78,9 +95,11 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
   }, [collagePrefs.montageSelected, collage.montages])
 
   return <div ref={$el} style={`${gridStyle};${props.style ?? ""}`}>
+    <RenderCounter debugLabel="showcase"></RenderCounter>
     {collage.montages.map((m, i) => (
       <Montage
         collage={collage}
+        controls={controls}
         montageIndex={i}
         montage={m}
         maxWidth={maxMontageWidth}
@@ -88,6 +107,9 @@ export default function CollageShowcase(props: CollageShowcaseProps) {
         realCollage={realCollage}
         scale={scale}
         selectedMontage={selectedMontage}
+        setCollage={setCollage}
+        setTraceIdInProgress={setTraceIdInProgress}
+        traceIdInProgress={traceIdInProgress}
       />
     ))}
     {setCollage && <div

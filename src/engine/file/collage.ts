@@ -65,7 +65,7 @@ export interface Montage {
 export interface MontageFrame {
     /** UUID for editor */
     id: string;
-    /** Reference to a {@link Frame} object (by "name") within this {@link Collage#frames} */
+    /** Reference to a {@link Frame} object (by "id") within this {@link Collage#frames} */
     frame: string;
     offsetX: int;
     offsetY: int;

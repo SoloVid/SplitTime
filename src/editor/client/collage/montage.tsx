@@ -5,7 +5,7 @@ import { useContext, useEffect, useMemo } from "preact/hooks"
 import { getPlaceholderImage } from "../editor-functions"
 import { FileCollage } from "../file-types"
 import { Time } from "../time-context"
-import { makeStyleString } from "../utils/preact-help"
+import { ImmutableSetter, makeStyleString, onlyLeft } from "../utils/preact-help"
 import RenderCounter from "../utils/render-counter"
 import { useJsonableMemo } from "../utils/use-jsonable-memo"
 import { CollageEditorControls } from "./collage-editor-shared"
@@ -22,6 +22,8 @@ type MontageProps = {
   realCollage: RealCollage
   scale: number
   selectedMontage: FileMontage | null
+  setCollage?: ImmutableSetter<FileCollage>
+  setTraceIdInProgress?: (id: string | null) => void
   traceIdInProgress?: string | null
 }
 
@@ -36,6 +38,8 @@ export default function Montage(props: MontageProps) {
     realCollage,
     scale: editorScale,
     selectedMontage,
+    setCollage,
+    setTraceIdInProgress,
     traceIdInProgress,
   } = props
 
@@ -92,6 +96,8 @@ export default function Montage(props: MontageProps) {
 
 
   function setActiveMontage(event: MouseEvent): void {
+    console.log("setActiveMontage()")
+    console.log(traceIdInProgress, controls)
     const propertiesPanelSet = (event as PropertiesEvent).propertiesPanelSet
     if (!traceIdInProgress && controls) {
       controls.selectMontage(montage, propertiesPanelSet)
@@ -133,10 +139,12 @@ export default function Montage(props: MontageProps) {
       }
       const frameDivStyle = makeStyleString(styleMap)
 
+      console.log("Recreate MontageFrame")
       const element = <div
         style={frameDivStyle}
       >
         <MontageFrame
+          key={data.fileFrame.id}
           collage={collage}
           realCollage={realCollage}
           editAffectsAllFrames={true}
@@ -144,6 +152,9 @@ export default function Montage(props: MontageProps) {
           montage={montage}
           montageFrame={data.fileFrame}
           scale={scale}
+          setCollage={setCollage}
+          setTraceIdInProgress={setTraceIdInProgress}
+          traceIdInProgress={traceIdInProgress}
         />
       </div>
       return element
@@ -161,7 +172,7 @@ export default function Montage(props: MontageProps) {
     </div> : montageFrameElements[frameIndex]
 
   return <div
-    onMouseDown={(e) => { if (e.button === 0) setActiveMontage(e) }}
+    onMouseDown={onlyLeft(setActiveMontage, true)}
     style="position: relative;"
   >
     <div

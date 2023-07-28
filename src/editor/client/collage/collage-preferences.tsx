@@ -10,6 +10,7 @@ export type CollageEditorPreferences = {
   readonly traceType: TraceTypeType
   readonly frameSelected: string | null
   readonly montageSelected: string | null
+  readonly montageFrameSelected: string | null
   readonly propertiesPanel: "collage" | {
     readonly type: "frame" | "montage" | "body" | "montage-frame" | "trace"
     readonly id: string
@@ -23,6 +24,7 @@ const defaultPreferences: CollageEditorPreferences = {
   traceType: TraceType.SOLID,
   frameSelected: null,
   montageSelected: null,
+  montageFrameSelected: null,
   propertiesPanel: "collage",
 }
 

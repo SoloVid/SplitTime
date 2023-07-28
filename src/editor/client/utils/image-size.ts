@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
+import { useJsonableMemo } from "./use-jsonable-memo";
 
 type State = {
   imgSrc: string | null
@@ -34,7 +35,7 @@ export function useImageSize(imgSrc: string | null) {
 
 export function useScaledImageSize(imgSrc: string | null, scale: number) {
   const imageSize = useImageSize(imgSrc)
-  return useMemo(() => {
+  return useJsonableMemo(() => {
     if (imageSize === null) {
       return null
     }

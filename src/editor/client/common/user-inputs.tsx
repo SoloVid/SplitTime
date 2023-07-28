@@ -77,7 +77,7 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
   })
   const [ctrlDown, setCtrlDown] = useState(false)
 
-  function moveFollowers(dx: number, dy: number, fallbackToPrevious: boolean = true): void {
+  const moveFollowers = useMemo(() => (dx: number, dy: number, fallbackToPrevious: boolean = true): void => {
     let toMove = followers
     if (fallbackToPrevious && toMove === null) {
       toMove = previousFollowers
@@ -88,9 +88,9 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
     for (const t of toMove) {
       t.shift(dx, dy)
     }
-  }
+  }, [followers, previousFollowers])
 
-  function handleMouseMove(event: MouseEvent): void {
+  const handleMouseMove = useMemo(() => (event: MouseEvent): void => {
     setMouse((before) => {
       const newX = Math.round(event.pageX)
       const newY = Math.round(event.pageY)
@@ -106,24 +106,22 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
       }
     })
     // TODO: prevent default?
-  }
+  }, [setMouse, moveFollowers])
 
-  function handleMouseDown(event: MouseEvent): void {
+  const handleMouseDown = useMemo(() => (event: MouseEvent): void => {
     setMouse({
       ...mouse,
       isDown: true
     })
-  }
+  }, [setMouse])
 
-  function handleMouseUp(event: MouseEvent): void {
+  const handleMouseUp = useMemo(() => (event: MouseEvent): void => {
     setMouse({
       ...mouse,
       isDown: false
     })
-    if (followers !== null) {
-      setFollowers(() => null)
-    }
-  }
+    setFollowers(() => null)
+  }, [setMouse, setFollowers])
 
   const gridCell = coalescePreferencesGridCell(globalPrefs)
   const scale = convertZoomToScale(globalPrefs.zoom)
@@ -161,10 +159,6 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
     }
   }
 
-  function handleKeyUp(event: KeyboardEvent): void {
-    // Do nothing
-  }
-
   useKeyListener("keydown", (event) => {
     if (event.which == keycode.SHIFT || event.which === keycode.CTRL) {
       setCtrlDown(true)
@@ -177,14 +171,7 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
     }
   })
 
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown)
-    window.addEventListener("keyup", handleKeyUp)
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-      window.removeEventListener("keyup", handleKeyUp)
-    }
-  })
+  useKeyListener("keydown", handleKeyDown)
 
   const value: UserInputs2 = useMemo(() => ({
     mouse: mouse,

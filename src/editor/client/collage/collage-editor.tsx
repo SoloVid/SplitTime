@@ -1,9 +1,11 @@
 import { keycode } from "api/controls"
 import { constrain } from "api/math"
 import { Collage } from "engine/file/collage"
+import { makeCollageFromFile } from "engine/graphics/collage"
 import { type Immutable } from "engine/utils/immutable"
 import { debug } from "engine/utils/logger"
 import { useContext, useMemo, useRef, useState } from "preact/hooks"
+import InfoPaneFrame from "../common/info-pane"
 import MenuBar from "../common/menu-bar"
 import PropertiesPane from "../common/properties"
 import { ServerLiaison } from "../common/server-liaison"
@@ -11,20 +13,18 @@ import { collageTraceOptions } from "../common/trace-options"
 import { useOnSave } from "../common/user-inputs"
 import { DoSave } from "../editor"
 import { exportYaml } from "../editor-functions"
+import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
+import { convertZoomToScale } from "../preferences/scale"
 import { updateImmutableObject } from "../utils/immutable-helper"
 import { ImmutableSetter, makeStyleString } from "../utils/preact-help"
 import Resizer from "../utils/resizer"
 import { useKeyListener } from "../utils/use-key-listener"
-import { makeSharedStuff, useCollageEditorControls } from "./collage-editor-shared"
+import { useCollageEditorControls } from "./collage-editor-shared"
 import CollageLayout from "./collage-layout"
-import { CollageEditorPreferencesContext, CollageEditorPreferencesContextProvider, collageEditorPreferences } from "./collage-preferences"
+import { CollageEditorPreferencesContext, CollageEditorPreferencesContextProvider } from "./collage-preferences"
 import CollageShowcase from "./collage-showcase"
 import MontageEditor from "./montage-editor"
 import { getObjectProperties } from "./properties-stuffs"
-import InfoPaneFrame from "../common/info-pane"
-import { convertZoomToScale } from "../preferences/scale"
-import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
-import { makeCollageFromFile } from "engine/graphics/collage"
 
 type CollageEditorProps = {
   readonly id: string
@@ -64,7 +64,8 @@ function CollageEditorInner(props: CollageEditorProps) {
 
   const $el = useRef<null | HTMLDivElement>(null)
   const $graphicalEditorsContainer = useRef<null | HTMLDivElement>(null)
-  const $showcaseContainer = useRef<HTMLDivElement>(document.createElement("div"))
+  const [$showcaseContainer, setShowcaseContainer] = useState<HTMLDivElement | null>(null)
+  // const $showcaseContainer = useRef<HTMLDivElement>(document.createElement("div"))
 
   const scale = convertZoomToScale(globalPrefs.zoom)
 
@@ -248,7 +249,7 @@ function CollageEditorInner(props: CollageEditorProps) {
               resizeType="vertical"
               onResize={onMiddleResize}
             ></Resizer>
-            <div class="collage-showcase-container" ref={$showcaseContainer} style={makeStyleString({
+            <div class="collage-showcase-container" ref={setShowcaseContainer} style={makeStyleString({
               "width": `${Math.floor(100 - middlePercent)}%`,
               "flex": `${Math.floor(100 - middlePercent)}`,
               "height": "100%",
@@ -258,11 +259,14 @@ function CollageEditorInner(props: CollageEditorProps) {
             })}>
               <CollageShowcase
                 style="flex: 1;"
-                $container={$showcaseContainer.current}
+                $container={$showcaseContainer}
                 collage={collage}
                 controls={collageEditorControls}
                 realCollage={realCollage}
                 scale={scale}
+                setCollage={setCollage}
+                setTraceIdInProgress={setTraceIdInProgress}
+                traceIdInProgress={traceIdInProgress}
               />
             </div>
           </div>
@@ -281,6 +285,8 @@ function CollageEditorInner(props: CollageEditorProps) {
               montage={editingMontage}
               realCollage={realCollage}
               scale={scale}
+              setCollage={setCollage}
+              setTraceIdInProgress={setTraceIdInProgress}
               traceIdInProgress={traceIdInProgress}
             />}
           </div>
