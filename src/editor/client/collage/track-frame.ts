@@ -8,6 +8,7 @@ import { GridSnapMover } from "../utils/grid-snap-mover"
 import { ImmutableSetter } from "../utils/preact-help"
 import { CollageEditorPreferencesPair } from "./collage-preferences"
 import { MIN_FRAME_LEN } from "./shared-types"
+import { coalescePreferencesGridCell } from "../preferences/grid"
 
 export type TrackFrameOptions = {
   globalPrefs: GlobalEditorPreferences
@@ -55,7 +56,7 @@ export function makeTrackFrameFunction({
 
     const scale = convertZoomToScale(globalPrefs.zoom)
     // const MIN_FRAME_LEN = 4
-    const snappedMover = new GridSnapMover(globalPrefs.gridCell, originalPoints)
+    const snappedMover = new GridSnapMover(coalescePreferencesGridCell(globalPrefs), originalPoints)
     const follower = {
       shift: (dx: number, dy: number) => {
         const dxScaled = dx / scale

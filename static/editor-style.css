@@ -240,3 +240,11 @@ input.block, textarea.block, select.block {
     color: white;
     pointer-events: none;
 }
+
+.absolute-fill {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}

@@ -13,6 +13,7 @@ import FrameRectangle from "./frame-rectangle"
 import { EDITOR_PADDING, MIN_FRAME_LEN } from "./shared-types"
 import { TrackFrameFunction } from "./track-frame"
 import { CollageEditorControls } from "./collage-editor-shared"
+import { coalescePreferencesGridCell } from "../preferences/grid"
 
 type CollageLayoutProps = {
   collage: FileCollage
@@ -103,7 +104,7 @@ export default function CollageLayout(props: CollageLayoutProps) {
       frameIndex++
       frameId = "f" + frameIndex
     }
-    const gridCell = globalPrefs.gridCell
+    const gridCell = coalescePreferencesGridCell(globalPrefs)
     const newFrame: Frame = {
       id: frameId,
       name: frameId,

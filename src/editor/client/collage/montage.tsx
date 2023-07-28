@@ -5,12 +5,12 @@ import { useContext, useEffect, useMemo } from "preact/hooks"
 import { getPlaceholderImage } from "../editor-functions"
 import { FileCollage } from "../file-types"
 import { Time } from "../time-context"
-import { ImmutableSetter, makeStyleString, onlyLeft } from "../utils/preact-help"
+import { ImmutableSetter, makeStyleString, onlyLeft, useLogValueChanged } from "../utils/preact-help"
 import RenderCounter from "../utils/render-counter"
 import { useJsonableMemo } from "../utils/use-jsonable-memo"
 import { CollageEditorControls } from "./collage-editor-shared"
+import { isPropertiesPanelAlreadySetForEvent } from "./event-properties-set"
 import MontageFrame from "./montage-frame"
-import { PropertiesEvent } from "./shared-types"
 
 type MontageProps = {
   collage: FileCollage
@@ -47,8 +47,8 @@ export default function Montage(props: MontageProps) {
 
   const placeholderImgSrc = getPlaceholderImage()
 
-  debugField("montage", montage)
-  debugField("realCollage", realCollage)
+  // useLogValueChanged("montage", montage)
+  // useLogValueChanged("realCollage", realCollage)
 
   const realMontage = useMemo(() => {
     const dir = montage.direction === "" ? undefined : montage.direction
@@ -98,30 +98,28 @@ export default function Montage(props: MontageProps) {
   function setActiveMontage(event: MouseEvent): void {
     console.log("setActiveMontage()")
     console.log(traceIdInProgress, controls)
-    const propertiesPanelSet = (event as PropertiesEvent).propertiesPanelSet
+    const propertiesPanelSet = isPropertiesPanelAlreadySetForEvent(event)
     if (!traceIdInProgress && controls) {
       controls.selectMontage(montage, propertiesPanelSet)
     }
   }
 
-  function debugField(field: string, value: unknown) {
-    useEffect(() => {
-      console.log(`${field} changed`)
-    }, [value])
-  }
-  
-  debugField("realMontage", realMontage)
-  debugField("montage.frames", montage.frames)
-  debugField("collage", collage)
-  debugField("realCollage", realCollage)
-  debugField("montageIndex", montageIndex)
-  debugField("montage", montage)
-  debugField("overallAreaS", overallAreaS)
-  debugField("scale", scale)
+  // useLogValueChanged("realMontage", realMontage)
+  // useLogValueChanged("montage.frames", montage.frames)
+  // useLogValueChanged("collage", collage)
+  // useLogValueChanged("realCollage", realCollage)
+  // useLogValueChanged("montageIndex", montageIndex)
+  // useLogValueChanged("montage", montage)
+  // useLogValueChanged("overallAreaS", overallAreaS)
+  // useLogValueChanged("scale", scale)
 
   const montageFrameElements = useMemo(() => {
     if (realMontage.frames.length === 0) {
-      return []
+      return [<div
+        style="overflow: hidden; width: 100%; height: 100%;"
+      >
+        <img src={placeholderImgSrc}/>
+      </div>]
     }
     return realMontage.frames.map((realFrame, frameIndex) => {
       const data = {
@@ -139,12 +137,11 @@ export default function Montage(props: MontageProps) {
       }
       const frameDivStyle = makeStyleString(styleMap)
 
-      console.log("Recreate MontageFrame")
+      // console.log("Recreate MontageFrame")
       const element = <div
         style={frameDivStyle}
       >
         <MontageFrame
-          key={data.fileFrame.id}
           collage={collage}
           realCollage={realCollage}
           editAffectsAllFrames={true}
@@ -162,17 +159,12 @@ export default function Montage(props: MontageProps) {
   }, [realMontage, montage.frames, collage, realCollage, montageIndex, montage, overallAreaS, scale])
 
   const frameIndex = useMemo(() => {
-    return realMontage.getFrameIndexAt(time)
+    return realMontage.getFrameIndexAt(time) ?? 0
   }, [realMontage, time])
-
-  const currentFrameElement = frameIndex === null ? <div
-      style="overflow: hidden; width: 100%; height: 100%;"
-    >
-      <img src={placeholderImgSrc}/>
-    </div> : montageFrameElements[frameIndex]
 
   return <div
     onMouseDown={onlyLeft(setActiveMontage, true)}
+    className="montage"
     style="position: relative;"
   >
     <div
@@ -180,8 +172,10 @@ export default function Montage(props: MontageProps) {
       class="transparency-checkerboard-background"
       title={montage.id + ' (' + montage.direction + ')'}
     >
-      <RenderCounter offsetY={-36} debugLabel="montage"></RenderCounter>
-      {currentFrameElement}
+      {montageFrameElements.map((e, i) => <div className="absolute-fill" style={i === frameIndex ? "" : "display: none;"}>
+        <RenderCounter offsetY={-36} debugLabel="montage"></RenderCounter>
+        {montageFrameElements[i]}
+      </div>)}
     </div>
   </div>
 }

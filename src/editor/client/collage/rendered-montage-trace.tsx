@@ -10,7 +10,8 @@ import { FileCollage } from "../file-types"
 import { GlobalEditorPreferencesContext } from "../preferences/global-preferences"
 import { GridSnapMover } from "../utils/grid-snap-mover"
 import { CollageEditorPreferencesContext } from "./collage-preferences"
-import { PropertiesEvent } from "./shared-types"
+import { markEventAsPropertiesSet } from "./event-properties-set"
+import { coalescePreferencesGridCell } from "../preferences/grid"
 
 type RenderedMontageTraceProps = {
   collage: FileCollage
@@ -39,9 +40,7 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
   const tracker: IRenderedTraceTracker = {
     track: (e, p) => {
       trackInternal(p)
-      // Somewhat type-unsafe way of letting upper events know they should try to set properties
-      const anyEvent = e as PropertiesEvent
-      anyEvent.propertiesPanelSet = true
+      markEventAsPropertiesSet(e)
     }
   }
   const [uid] = useState(generateUID())
@@ -59,7 +58,7 @@ export default function RenderedMontageTrace(props: RenderedMontageTraceProps) {
     const originalPoint = point ? new Coordinates2D(point.x, point.y) : null
     const vertices = pointsArray
     const originalPoints = point ? [point] : vertices.filter(instanceOfCoordinates2D)
-    const snappedMover = new GridSnapMover(globalPrefs.gridCell, originalPoints)
+    const snappedMover = new GridSnapMover(coalescePreferencesGridCell(globalPrefs), originalPoints)
     const follower = {
       shift: (dx: number, dy: number) => {
         const dxScaled = dx / scale

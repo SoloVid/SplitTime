@@ -1,13 +1,13 @@
 import { Montage } from "engine/file/collage"
+import { Collage as RealCollage } from "engine/graphics/collage"
 import { useContext, useMemo } from "preact/hooks"
 import { FileCollage, FileMontageFrame } from "../file-types"
-import { CollageEditorPreferencesContext } from "./collage-preferences"
-import MontageFrame from "./montage-frame"
-import { PropertiesEvent } from "./shared-types"
-import { CollageEditorControls } from "./collage-editor-shared"
-import { Collage as RealCollage } from "engine/graphics/collage"
 import { ImmutableSetter, onlyLeft } from "../utils/preact-help"
 import RenderCounter from "../utils/render-counter"
+import { CollageEditorControls } from "./collage-editor-shared"
+import { CollageEditorPreferencesContext } from "./collage-preferences"
+import { isPropertiesPanelAlreadySetForEvent } from "./event-properties-set"
+import MontageFrame from "./montage-frame"
 
 type MontageEditorProps = {
   collage: FileCollage
@@ -57,7 +57,7 @@ export default function MontageEditor(props: MontageEditorProps) {
     if (traceIdInProgress) {
       return
     }
-    controls.selectMontageFrame(collage, montageFrame, (event as PropertiesEvent).propertiesPanelSet)
+    controls.selectMontageFrame(collage, montageFrame, isPropertiesPanelAlreadySetForEvent(event))
   }
 
   console.log("Rerender MontageEditor")

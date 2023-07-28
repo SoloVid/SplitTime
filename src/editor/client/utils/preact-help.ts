@@ -1,5 +1,6 @@
 import { type Immutable } from "engine/utils/immutable"
 import { assert } from "globals"
+import { useEffect } from "preact/hooks"
 
 export type InputChangeEvent<T> = {
   target: {
@@ -62,4 +63,10 @@ export function onlyRight(handler: (e: MouseEvent) => void, preventDefault: bool
       e.preventDefault()
     }
   }
+}
+
+export function useLogValueChanged(debugLabel: string, value: unknown) {
+  useEffect(() => {
+    console.log(`${debugLabel} changed`)
+  }, [value])
 }

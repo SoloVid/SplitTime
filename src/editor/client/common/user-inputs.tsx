@@ -1,14 +1,13 @@
 import { keycode } from "api/controls";
 import { Coordinates2D } from "engine/world/level/level-location";
 import { createContext } from "preact";
-import { useContext, useEffect, useMemo, useState } from "preact/hooks";
+import { useContext, useMemo, useState } from "preact/hooks";
 import { getCoords } from "../editor-functions";
 import { GlobalEditorPreferencesContext } from "../preferences/global-preferences";
 import { coalescePreferencesGridCell } from "../preferences/grid";
 import { convertZoomToScale } from "../preferences/scale";
 import { ImmutableSetter } from "../utils/preact-help";
 import { useKeyListener } from "../utils/use-key-listener";
-import { useSetIntervalWhenActive } from "../utils/use-set-interval-when-active";
 
 export interface Followable {
   shift(dx: number, dy: number): void
@@ -51,13 +50,6 @@ type UserInputsContextProviderProps = {
 
 export function UserInputsContextProvider({ children }: UserInputsContextProviderProps) {
   const [globalPrefs, setGlobalPrefs] = useContext(GlobalEditorPreferencesContext)
-  const [time, setTime] = useState(0)
-
-  const TIME_INTERVAL = 50;
-  useSetIntervalWhenActive(() => {
-    setTime((oldTime) => oldTime += TIME_INTERVAL / 1000)
-  }, TIME_INTERVAL, [])
-
 
   const [followers, setFollowersInternal] = useState<readonly Followable[] | null>(null)
   const [previousFollowers, setPreviousFollowers] = useState<readonly Followable[] | null>(null)
@@ -109,17 +101,17 @@ export function UserInputsContextProvider({ children }: UserInputsContextProvide
   }, [setMouse, moveFollowers])
 
   const handleMouseDown = useMemo(() => (event: MouseEvent): void => {
-    setMouse({
-      ...mouse,
+    setMouse((before) => ({
+      ...before,
       isDown: true
-    })
+    }))
   }, [setMouse])
 
   const handleMouseUp = useMemo(() => (event: MouseEvent): void => {
-    setMouse({
-      ...mouse,
+    setMouse((before) => ({
+      ...before,
       isDown: false
-    })
+    }))
     setFollowers(() => null)
   }, [setMouse, setFollowers])
 
